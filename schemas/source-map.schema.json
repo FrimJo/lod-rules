@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/source-map.schema.json",
+  "title": "Source map",
+  "description": "Navigational model of the rulebook: sections, page numbering, and extraction coverage.",
+  "$defs": {
+    "sectionId": {
+      "type": "string",
+      "pattern": "^section\\.[a-z0-9_]+(\\.[a-z0-9_]+)*$"
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "$ref": "#/$defs/sectionId" },
+        "title": { "type": "string", "minLength": 1 },
+        "kind": {
+          "enum": [
+            "chapter",
+            "section",
+            "subsection",
+            "appendix",
+            "table",
+            "example",
+            "optional_rule",
+            "scenario_rule"
+          ]
+        },
+        "parent": { "$ref": "#/$defs/sectionId" },
+        "printed_start_page": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/printedPage"
+        },
+        "printed_end_page": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/printedPage"
+        },
+        "pdf_start_page": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/pdfPage"
+        },
+        "pdf_end_page": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/pdfPage"
+        },
+        "external_references": {
+          "type": "array",
+          "items": { "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id" },
+          "description": "External source ids from source/manifest.yaml referenced by this section."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pdf_page"],
+      "properties": {
+        "pdf_page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "printed_page": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/printedPage"
+        },
+        "section_id": { "$ref": "#/$defs/sectionId" },
+        "notes": { "type": "string" }
+      }
+    },
+    "coverageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/sectionId" },
+        "status": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/coverageStatus"
+        },
+        "components": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "glossary": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/componentCoverageStatus"
+            },
+            "rules": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/componentCoverageStatus"
+            },
+            "tables": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/componentCoverageStatus"
+            },
+            "procedures": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/componentCoverageStatus"
+            },
+            "examples": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/componentCoverageStatus"
+            }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/section" }
+    },
+    "pages": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/page" }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sections"],
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/coverageEntry" }
+        }
+      }
+    }
+  }
+}
