@@ -1,0 +1,89 @@
+# Extraction guide
+
+## The PDF is the source of truth
+
+`source/Rulebook-2nd-printing-ENGa.pdf` is authoritative. Everything under `corpus/` is a
+compiled interpretation of it. When the two disagree, the PDF wins and the corpus is wrong.
+
+## Every fact carries provenance
+
+A structured rule without a source reference is incomplete. Each extracted object records
+at least one source reference matching `schemas/source-reference.schema.json`:
+
+```yaml
+source:
+  - document: rulebook.second_printing.eng
+    file: source/Rulebook-2nd-printing-ENGa.pdf
+    printed_page: 18
+    pdf_page: null
+    section: Game Basics
+    heading: Turn Sequence
+    extraction:
+      method: text
+      confidence: high
+      visually_verified: false
+```
+
+### printed_page is not pdf_page
+
+- `printed_page` is the label printed on the page in the book.
+- `pdf_page` is the physical 1-based page index in the PDF file.
+
+They are tracked separately and neither is derived from the other. Either may be `null`
+while still unknown. `corpus/source-map/pages.yaml` holds the mapping once Phase 1
+establishes it.
+
+## Canonical versus generated
+
+| Layer               | Location                         | Editable by hand            |
+| ------------------- | -------------------------------- | --------------------------- |
+| Source document     | `source/`                        | No (only added or replaced) |
+| Canonical corpus    | `corpus/`, `review/`             | Yes, reviewed               |
+| Schemas and tooling | `schemas/`, `scripts/`, `tests/` | Yes, reviewed               |
+| Build artifacts     | `generated/`                     | **Never**                   |
+
+`generated/` is gitignored and reproducible from canonical data by `npm run build:corpus`.
+If a generated file is wrong, fix the canonical input and rebuild. Documentation generated
+from canonical data — currently `docs/coverage-report.md` — follows the same rule.
+
+## Uncertainty is preserved, not resolved
+
+When the source is unclear:
+
+1. Preserve the original meaning as faithfully as possible.
+2. Mark the interpretation as uncertain.
+3. Add a record under `review/`.
+4. Keep every relevant source reference.
+5. Do not "fix" the rule.
+
+The corpus must be able to state that the rulebook does not define something. That is a
+valid answer, and it is better than an invented one.
+
+## External sources are recorded, never invented
+
+The rulebook defers some material to the Bestiary and the Charts Compendium, and to later
+quest books. Those are declared in `source/manifest.yaml` with `status: not_present`.
+
+Reference them as an external dependency. Never write down enemy statistics, encounter
+tables, or chart values that are not in this PDF.
+
+## Working unit
+
+Extract in small, reviewable units — one heading, one table, or a tightly related 1–4 page
+range. Validate after each change and commit independently where practical.
+
+## Visual verification
+
+PDF text extraction is not always trustworthy. Render and inspect the page when a table
+looks malformed, columns interleave, text order is suspicious, symbols are missing, a
+diagram carries rules, or footnotes appear detached. Record the result with
+`extraction.visually_verified: true`. OCR is a last resort, not a first choice.
+
+## Before finishing a change
+
+```bash
+npm run validate
+npm test
+npm run report:coverage
+npm run lint
+```
