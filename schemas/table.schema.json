@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lod-rules/schemas/table.schema.json",
-  "title": "Source-preserving pilot tables",
+  "title": "Source-preserving typed tables",
   "type": "array",
   "items": {
     "type": "object",
@@ -109,7 +109,7 @@
             "cell_types": {
               "type": "array",
               "items": {
-                "enum": ["text", "number", "dice", "marker", "range"]
+                "enum": ["text", "number", "dice", "marker", "range", "blank"]
               },
               "minItems": 1
             }
@@ -190,7 +190,7 @@
                         "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dice"
                       },
                       "meaning": {
-                        "enum": ["increase", "loss", "roll"]
+                        "enum": ["increase", "loss", "roll", "initial", "value"]
                       }
                     }
                   },
@@ -229,6 +229,19 @@
                         "type": "integer"
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed"],
+                    "properties": {
+                      "type": {
+                        "const": "blank"
+                      },
+                      "printed": {
+                        "const": ""
+                      }
+                    }
                   }
                 ]
               }
@@ -238,6 +251,13 @@
               "uniqueItems": true,
               "items": {
                 "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+              }
+            },
+            "source": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
               }
             }
           }
