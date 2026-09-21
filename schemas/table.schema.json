@@ -71,7 +71,14 @@
         "minItems": 0
       },
       "type": {
-        "enum": ["progression_table", "modifier_table", "reference_table"]
+        "enum": [
+          "progression_table",
+          "modifier_table",
+          "reference_table",
+          "lookup_table",
+          "random_table",
+          "price_table"
+        ]
       },
       "completeness": {
         "enum": ["complete", "partial"]
@@ -102,7 +109,7 @@
             "cell_types": {
               "type": "array",
               "items": {
-                "enum": ["text", "number", "dice", "marker"]
+                "enum": ["text", "number", "dice", "marker", "range"]
               },
               "minItems": 1
             }
@@ -183,7 +190,7 @@
                         "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dice"
                       },
                       "meaning": {
-                        "const": "increase"
+                        "enum": ["increase", "loss", "roll"]
                       }
                     }
                   },
@@ -202,8 +209,35 @@
                         "enum": ["no_increase", "unavailable"]
                       }
                     }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed", "min", "max"],
+                    "properties": {
+                      "type": {
+                        "const": "range"
+                      },
+                      "printed": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "min": {
+                        "type": "integer"
+                      },
+                      "max": {
+                        "type": "integer"
+                      }
+                    }
                   }
                 ]
+              }
+            },
+            "rule_refs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
               }
             }
           }
@@ -217,6 +251,9 @@
           "minLength": 1
         },
         "minItems": 0
+      },
+      "roll_domain": {
+        "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/range"
       }
     },
     "allOf": [

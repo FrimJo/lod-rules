@@ -91,6 +91,26 @@
               "minItems": 2
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "operator", "values"],
+          "properties": {
+            "type": {
+              "const": "arithmetic"
+            },
+            "operator": {
+              "enum": ["subtract", "multiply", "divide", "floor", "ceil", "abs", "min", "max"]
+            },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+              }
+            }
+          }
         }
       ]
     },
@@ -199,7 +219,17 @@
               "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
             },
             "duration": {
-              "enum": ["permanent", "check", "immediate", "first_round_of_battle"]
+              "enum": [
+                "permanent",
+                "check",
+                "immediate",
+                "first_round_of_battle",
+                "turn",
+                "battle",
+                "quest",
+                "until_dungeon_exit",
+                "while_condition"
+              ]
             }
           }
         },
@@ -352,6 +382,42 @@
               "minItems": 1
             }
           }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "table_id",
+            "key_column",
+            "key",
+            "value_column",
+            "target",
+            "on_missing_issue"
+          ],
+          "properties": {
+            "type": {
+              "const": "lookup"
+            },
+            "table_id": {
+              "type": "string"
+            },
+            "key_column": {
+              "type": "string"
+            },
+            "key": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            },
+            "value_column": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            },
+            "on_missing_issue": {
+              "type": "string"
+            }
+          }
         }
       ]
     },
@@ -384,6 +450,9 @@
           },
           "integer": {
             "const": true
+          },
+          "dice": {
+            "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dice"
           }
         }
       }
