@@ -7,11 +7,21 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 586 / 586 | 100% |
-| extracted | 1 / 586 | 0% |
-| reviewed | 0 / 586 | 0% |
+| mapped | 584 / 584 | 100% |
+| extracted | 7 / 584 | 1% |
+| reviewed | 0 / 584 | 0% |
 
-Total sections tracked: 586
+Total sections tracked: 584
+
+3 compatibility redirects are excluded from all extraction counts above and below.
+
+## Compatibility redirects
+
+| Preserved ID | Canonical section |
+| --- | --- |
+| section.appendix_ii_talents.physical_talents.table_2 | section.appendix_ii_talents.physical_talents.table |
+| section.appendix_ii_talents.combat_talents.table_2 | section.appendix_ii_talents.combat_talents.table |
+| section.appendix_ii_talents.combat_talents.table_3 | section.appendix_ii_talents.combat_talents.table |
 
 ## Nodes by kind
 
@@ -20,9 +30,9 @@ Total sections tracked: 586
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 280 |
+| subsection | 281 |
 | appendix | 5 |
-| table | 199 |
+| table | 196 |
 | example | 3 |
 | optional_rule | 1 |
 | scenario_rule | 37 |
@@ -35,15 +45,16 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 361 | 214 |
-| rules | 0 | 383 | 203 |
-| tables | 0 | 578 | 8 |
-| examples | 0 | 382 | 204 |
-| procedures | 0 | 383 | 203 |
+| glossary | 11 | 360 | 213 |
+| rules | 6 | 379 | 199 |
+| tables | 5 | 570 | 9 |
+| examples | 1 | 379 | 204 |
+| procedures | 2 | 381 | 201 |
+| entities | 2 | 579 | 3 |
 
 ## Remaining tables
 
-199 of this kind still need their contents extracted.
+193 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
@@ -58,11 +69,9 @@ None. Every node in the structural map has been mapped.
 | section.creating_your_character.table_2 | Creating your Character table 2 | 28 |
 | section.creating_your_character.table_3 | Creating your Character table 3 | 29 |
 | section.creating_your_character.table_4 | Creating your Character table 4 | 29 |
-| section.creating_your_character.alchemist.table_skills | Skills | 32 |
 | section.creating_your_character.barbarian.table_skills | Skills | 33 |
 | section.creating_your_character.ranger.table_skills | Skills | 34 |
 | section.creating_your_character.rogue.table_skills | Skills | 35 |
-| section.creating_your_character.thief.table_skills | Skills | 36 |
 | section.creating_your_character.warrior.table_skills | Skills | 37 |
 | section.creating_your_character.warrior_priest.table_skills | Skills | 38 |
 | section.creating_your_character.wizard.table_skills | Skills | 39 |
@@ -71,7 +80,6 @@ None. Every node in the structural map has been mapped.
 | section.psychology.table | Psychology table | 55 |
 | section.psychology.table_lingering_trauma_table | Lingering Trauma Table | 55 |
 | section.psychology.party_morale.table | Party Morale table | 56 |
-| section.levelling_up.table | Levelling Up table | 58 |
 | section.levelling_up.stats_and_skills_maximum.table | Stats and Skills Maximum table | 58 |
 | section.levelling_up.increasing_your_skills_and_basic_stats.table | Increasing your Skills and Basic Stats table | 59 |
 | section.levelling_up.talents_and_perks.table_talents | Talents | 60 |
@@ -132,10 +140,7 @@ None. Every node in the structural map has been mapped.
 | section.appendix_i_perks.common_perks.table | Common Perks table | 168 |
 | section.appendix_i_perks.common_perks.table_2 | Common Perks table 2 | 168 |
 | section.appendix_ii_talents.physical_talents.table | Physical Talents table | 170 |
-| section.appendix_ii_talents.physical_talents.table_2 | Physical Talents table 2 | 170 |
 | section.appendix_ii_talents.combat_talents.table | Combat Talents table | 171 |
-| section.appendix_ii_talents.combat_talents.table_2 | Combat Talents table 2 | 171 |
-| section.appendix_ii_talents.combat_talents.table_3 | Combat Talents table 3 | 171 |
 | section.appendix_ii_talents.faith_talents.table | Faith Talents table | 172 |
 | section.appendix_ii_talents.alchemist_talents.table | Alchemist Talents table | 172 |
 | section.appendix_ii_talents.common_talents.table | Common Talents table | 173 |

@@ -28,12 +28,13 @@ export interface SectionEntry {
   title: string;
   kind: SectionKind;
   parent?: string;
+  redirect_to?: string;
   printed_start_page?: number | null;
   printed_end_page?: number | null;
   external_references?: string[];
 }
 
-const COMPONENTS = ['glossary', 'rules', 'tables', 'examples', 'procedures'] as const;
+const COMPONENTS = ['glossary', 'rules', 'tables', 'examples', 'procedures', 'entities'] as const;
 type ComponentName = (typeof COMPONENTS)[number];
 
 /** A section counts toward a milestone once it has reached that stage or passed it. */
@@ -72,9 +73,10 @@ export function renderCoverageReport(
   coverage: CoverageFile,
   sections: SectionEntry[] = [],
 ): string {
-  const entries = coverage.sections ?? [];
-  const total = entries.length;
   const byId = new Map(sections.map((section) => [section.id, section]));
+  const entries = (coverage.sections ?? []).filter((entry) => !byId.get(entry.id)?.redirect_to);
+  const redirects = sections.filter((section) => section.redirect_to !== undefined);
+  const total = entries.length;
 
   const lines: string[] = [
     '# Coverage report',
@@ -94,6 +96,18 @@ export function renderCoverageReport(
   }
 
   lines.push('', `Total sections tracked: ${total}`, '');
+  if (redirects.length > 0) {
+    lines.push(
+      `${redirects.length} compatibility redirects are excluded from all extraction counts above and below.`,
+      '',
+      '## Compatibility redirects',
+      '',
+      '| Preserved ID | Canonical section |',
+      '| --- | --- |',
+      ...redirects.map((section) => `| ${section.id} | ${section.redirect_to} |`),
+      '',
+    );
+  }
 
   if (total === 0) {
     lines.push(
@@ -149,7 +163,7 @@ export function renderCoverageReport(
       const section = byId.get(entry.id);
       if (section?.kind !== kind) return false;
       const status = entry.components?.[kind === 'table' ? 'tables' : 'examples'] ?? 'not_started';
-      return status !== 'extracted' && status !== 'reviewed';
+      return status !== 'extracted' && status !== 'reviewed' && status !== 'not_applicable';
     });
     lines.push(`## ${heading}`, '');
     if (remaining.length === 0) {
@@ -172,7 +186,9 @@ export function renderCoverageReport(
   }
 
   lines.push('## Sections citing external sources', '');
-  const citing = sections.filter((section) => (section.external_references ?? []).length > 0);
+  const citing = sections.filter(
+    (section) => !section.redirect_to && (section.external_references ?? []).length > 0,
+  );
   if (citing.length === 0) {
     lines.push('None.');
   } else {
