@@ -1,8 +1,10 @@
 # Phase 2 glossary and ontology
 
 Phase 2 is extracted, not independently reviewed. The corpus contains 55 term records,
-90 reverse-index forms, and eight unresolved issues. The authoritative source is the
-second-printing English rulebook; PDF 12–24 were inspected for this scoped pass.
+90 reverse-index forms. The original glossary pass recorded eight unresolved issues;
+a subsequent source review retained all IDs and resolved five of those scoped concerns.
+The authoritative source is the second-printing English rulebook; PDF 12–24 were inspected
+for this scoped pass.
 
 ## Definitions and boundaries
 
@@ -21,8 +23,9 @@ from the glossary, without harvesting Character Basics or any later chapter.
 
 The definition field is a quotation, not an executable rule or a guarantee of completeness.
 In particular, the Skill Test threshold has a 91–00 exception in the introduction, recorded
-in issue.0005. LOS obstruction rules and the rewards for a Perfect Result remain for the
-rules phase. No rules, tables, procedures, or worked examples have been modeled here.
+in issue.0005, now resolved as an explicit exception. The Phase 3 pilot models checks and
+Perfect Result rewards; LOS obstruction mechanics remain unextracted. This document's
+extraction audit describes the original glossary pass.
 
 ## Kinds
 
@@ -60,10 +63,11 @@ schemas and integrity checks when those object types are introduced.
 - Battle and Combat remain distinct: the former measures duration, the latter is fighting.
 - Characters and Model explicitly equate living creatures in the glossary. Both headwords
   retain their own quotations and related ids. The Models section also uses the physical
-  representation sense, recorded in issue.0002. No automatic substitution is inferred.
+  representation sense. Issue.0002 is resolved by preserving these senses without automatic
+  substitution; later mechanics are not exhaustively reviewed.
 - Enemies and Monster explicitly state synonymy. Both headwords retain their quotations
-  and related ids; issue.0003 tracks the still-unreviewed scope of later usage. Their
-  separate records do not assert different game mechanics.
+  and related ids. Issue.0003 is resolved by the explicit glossary synonymy; their
+  separate records do not assert different game mechanics or imply exhaustive later review.
 - End of the Quest and Until end of (next) quest give different endpoints. Neither wins;
   both remain separate and issue.0004 records the conflict.
 - Perk requires energy to activate; Talent is always active. These stay distinct.
@@ -96,3 +100,18 @@ unextracted. Parent chapters are not promoted because a child contributed defini
 Uncertainties live in `review/ambiguities.yaml`. “Undefined” there means undefined within
 this inspected scope, not a claim about the entire rulebook. Later chapters and external
 books have not been harvested to fill gaps.
+
+## Subsequent review dispositions
+
+Six of the eleven total review issues are resolved: Character/Model senses (0002),
+Enemy/Monster synonymy (0003), automatic failure (0005), the stale turn-extraction deferral
+(0007), ZOC source location (0008), and duplicate talent-table nodes (0011). Original
+concerns and quotations are retained with separate resolution evidence.
+
+The turn procedure now exists and links to The Turn (printed 88 / PDF 89). ZOC geometry
+and movement effects are located in the existing Combat section (printed 107 / PDF 109),
+which resolves a scope limitation, not an extraction task. The glossary definition stays
+an expansion; those later mechanics remain unextracted. The five open questions concern
+non-kill battle endpoints, quest endpoints, general modifier wording, Perfect Result
+success, and advancement-allowance aggregation. Later passages cited during this review
+supply evidence only and do not broaden the Phase 2 glossary extraction.

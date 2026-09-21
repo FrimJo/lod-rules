@@ -52,7 +52,7 @@ outputs are deferred until Phase 11 (`npm run build:corpus` is currently a stub)
 If a generated file is wrong, fix the canonical input and rebuild. Documentation generated
 from canonical data — currently `docs/coverage-report.md` — follows the same rule.
 
-## Uncertainty is preserved, not resolved
+## Uncertainty and evidence-backed resolutions
 
 When the source is unclear:
 
@@ -107,8 +107,9 @@ npm run lint
 
 The scoped Phase 2 extraction is complete, with unresolved issues and no independent
 review claim. See [ontology.md](ontology.md) for source units, excerpts, exclusions, and
-classification conventions. Later objects may cite existing `term.*` ids. Rules, tables,
-procedures, and examples still require their own authorized phase.
+classification conventions. Later objects may cite existing `term.*` ids. The bounded Phase 3 rules, tables,
+procedures, entities, and fixtures are documented in [phase-3-pilot.md](phase-3-pilot.md);
+further extraction still requires its authorized phase.
 
 Terms and review issues require source references. Validation checks document membership,
 section and related ids, unique case-insensitive alias lookup, and agreement with the
@@ -116,3 +117,33 @@ canonical page map. External-book page numbers are not checked against the ruleb
 Use `review/ambiguities.yaml` for uncertainty, with an `issue.*` id, type, summary, related
 ids, source references, and `status: unresolved`. Preserve conflicting quotations there;
 never make a glossary definition silently settle a rules question.
+
+Keep issue IDs and original concerns after resolving them. A resolved issue uses
+`status: resolved` and requires `resolution: { summary, source }`; its evidence uses the
+same source-reference schema and document/file/page checks as the original concern.
+Unresolved records have no `resolution` field. Historical `issues` metadata may link to
+either status, but executable unresolved effects, usage-limit aggregation issues, and
+fixture expectations must reference an unresolved issue. Closing a review issue does not
+promote corpus objects or the pilot to independently `reviewed`.
+
+A source-map compatibility record may use `redirect_to` to preserve an erroneous duplicate
+ID. Its target must exist, be nonredirecting, and have the same kind and printed/PDF page
+span. Self-links, chains, and cycles are invalid. Keep one coverage row for every ID,
+including redirects: redirect rows stay `mapped` with all six components `not_applicable`.
+Coverage reports list redirects separately and exclude them from extraction counts and
+remaining work. New extraction uses the canonical target. A mapped heading or a repaired
+link does not claim that its mechanics have been extracted.
+
+## Phase 3 pilot conventions
+
+See [phase-3-pilot.md](phase-3-pilot.md) for scope, source evidence, and review status.
+New canonical collections and `tests/examples/` are discovered recursively and validated.
+Objects require precise source references and extraction status; all current pilot objects
+are `extracted`, not independently reviewed. Table rows inherit source provenance and add
+`source_row`; procedure steps inherit their parent's provenance unless explicitly overridden.
+
+Use typed conditions/effects for mechanics and keep source wording alongside them. Unextracted
+named dependencies may link to existing sections, but must not use nonexistent object IDs.
+Optional `entities` coverage records only audited applicability. Partial tables list their
+selected source rows and remain `extracting` in coverage. The small interpreter is test-only;
+never promote it to a game runtime or infer missing dependency behavior from its fixtures.

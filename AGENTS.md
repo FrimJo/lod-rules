@@ -7,9 +7,10 @@ into a machine-readable corpus. Treat it as a compiler: the PDF is source, YAML 
 There is no application, UI, API server, or game runtime here. Do not introduce one.
 Consumers read the corpus; they are not part of it.
 
-Phases 1 (structural map) and 2 (scoped glossary extraction) are done. Phase 2 is
-extracted, not independently reviewed; unresolved issues remain in `review/`. Next is
-Phase 3, the schema pilot, only when explicitly requested. Full plan:
+Phases 1 (structural map) and 2 (scoped glossary extraction) are done. The bounded Phase 3
+schema pilot is extracted and tested, pending independent review; see
+[docs/phase-3-pilot.md](docs/phase-3-pilot.md). Unresolved issues remain in `review/`.
+Do not start Phase 4 or bulk extraction without an explicit request. Full plan:
 [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md). Remaining work:
 [docs/coverage-report.md](docs/coverage-report.md).
 

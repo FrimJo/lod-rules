@@ -32,6 +32,7 @@ Machine-checked pattern (`schemas/common.schema.json`):
 | Table              | `table.`            | `table.character.level_progression`                |
 | State machine      | `state_machine.`    | `state_machine.battle`                             |
 | Structural section | `section.`          | `section.game_basics`                              |
+| Test fixture       | `test.`             | `test.check.equal`                                 |
 | Issue record       | `issue.`            | `issue.0042`                                       |
 
 Source documents use their own namespace in `source/manifest.yaml`, for example
