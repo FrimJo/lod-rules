@@ -12,9 +12,13 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-Phase 0 (repository bootstrap) is complete. No rules have been extracted yet — the
-structural map of the rulebook is Phase 1. See
-[LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) for the full plan.
+Phase 1 (structural map) is complete. `corpus/source-map/` now navigates all 286 pages of
+the rulebook: every physical page is mapped to its printed folio, and 582 nodes cover the
+chapters, sections, appendices, named tables, worked examples, optional rules, and
+quest-local rules. No mechanics have been extracted yet — every node is `mapped` and
+nothing is `extracted`. Phase 2 is the glossary. See
+[LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) for the full plan and
+[docs/coverage-report.md](docs/coverage-report.md) for what remains.
 
 ## Commands
 
@@ -26,6 +30,10 @@ npm test                 # schema and tooling tests
 npm run report:coverage  # regenerate docs/coverage-report.md
 npm run lint             # eslint + prettier
 npm run build:corpus     # generated/ artifacts (not implemented until Phase 11)
+
+# Dump the PDF outline and per-page text to generated/extract/ for inspection.
+# The dump seeds YAML by hand; it is never canonical.
+npx tsx scripts/extract/inspect-pdf.ts
 ```
 
 ## Layout
@@ -45,9 +53,8 @@ generated/     build artifacts — never hand-edited, gitignored
 
 Canonical data lives in `source/`, `corpus/`, and `review/`, and is edited by humans under
 review. Everything in `generated/` is reproducible build output and must never be edited by
-hand; `docs/coverage-report.md` is likewise generated from
-`corpus/source-map/coverage.yaml`. Details are in
-[docs/extraction-guide.md](docs/extraction-guide.md).
+hand; `docs/coverage-report.md` is likewise generated from `corpus/source-map/`. Details
+are in [docs/extraction-guide.md](docs/extraction-guide.md).
 
 ## Conventions
 
@@ -57,6 +64,7 @@ hand; `docs/coverage-report.md` is likewise generated from
 
 ## External sources
 
-The rulebook defers material to the Bestiary, the Charts Compendium, and later quest books.
-Those are declared in `source/manifest.yaml` as `not_present`. Their contents are referenced
-as external dependencies and are never invented here.
+The rulebook defers material to the Bestiary, the Charts Compendium, Quest Book II, and the
+Companions' Compendium. Those are declared in `source/manifest.yaml` as `not_present`. The
+sections that cite them are listed in [docs/coverage-report.md](docs/coverage-report.md).
+Their contents are referenced as external dependencies and are never invented here.

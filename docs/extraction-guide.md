@@ -30,8 +30,13 @@ source:
 - `pdf_page` is the physical 1-based page index in the PDF file.
 
 They are tracked separately and neither is derived from the other. Either may be `null`
-while still unknown. `corpus/source-map/pages.yaml` holds the mapping once Phase 1
-establishes it.
+while still unknown.
+
+`corpus/source-map/pages.yaml` holds the numbering map: one entry per physical page, with
+the folio the book prints on it. The offset is `printed = pdf - 2` from pdf page 3 onward,
+but do not compute it — look it up. Three pages carry a folio the book misprints, several
+divider and full-page-art pages print no folio at all, and pdf pages 1–2 sit ahead of the
+printed sequence entirely. Each of those pages says so in its `notes`.
 
 ## Canonical versus generated
 
@@ -61,11 +66,20 @@ valid answer, and it is better than an invented one.
 
 ## External sources are recorded, never invented
 
-The rulebook defers some material to the Bestiary and the Charts Compendium, and to later
-quest books. Those are declared in `source/manifest.yaml` with `status: not_present`.
+The rulebook defers some material to the Bestiary, the Charts Compendium, Quest Book II,
+and the Companions' Compendium. Those are declared in `source/manifest.yaml` with
+`status: not_present`, and the sections that cite them carry `external_references`.
 
 Reference them as an external dependency. Never write down enemy statistics, encounter
-tables, or chart values that are not in this PDF.
+tables, or chart values that are not in this PDF. If the PDF names a book the manifest does
+not list, add it as `not_present` rather than dropping the citation.
+
+## Cross-references inside the book
+
+A section that points elsewhere in the rulebook records the target in `see_also`, using the
+id of the section it resolves to. When a pointer cannot be bound to an id — the book cites a
+page or appendix that does not line up with anything in the map — record the original
+wording in `unresolved_references` instead. Never invent an id to make one go away.
 
 ## Working unit
 
