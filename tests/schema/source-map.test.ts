@@ -12,7 +12,14 @@ describe('sections schema', () => {
 
   it('accepts a minimal section', () => {
     expect(
-      validate([{ id: 'section.game_basics', title: 'Game Basics', printed_start_page: 17 }]),
+      validate([
+        {
+          id: 'section.game_basics',
+          title: 'Game Basics',
+          kind: 'chapter',
+          printed_start_page: 17,
+        },
+      ]),
     ).toBe(true);
   });
 
@@ -22,6 +29,7 @@ describe('sections schema', () => {
         {
           id: 'section.combat',
           title: 'Combat',
+          kind: 'chapter',
           printed_start_page: null,
           pdf_start_page: null,
         },
@@ -29,16 +37,52 @@ describe('sections schema', () => {
     ).toBe(true);
   });
 
+  it('accepts cross-references in both resolved and unresolved form', () => {
+    expect(
+      validate([
+        {
+          id: 'section.equipment',
+          title: 'Equipment',
+          kind: 'chapter',
+          see_also: ['section.appendix_iii_equipment'],
+          unresolved_references: ['the Furniture Treasure Table in Appendix III'],
+        },
+      ]),
+    ).toBe(true);
+  });
+
   it('rejects an id outside the section namespace', () => {
-    expect(validate([{ id: 'chapter.game_basics', title: 'Game Basics' }])).toBe(false);
+    expect(validate([{ id: 'chapter.game_basics', title: 'Game Basics', kind: 'chapter' }])).toBe(
+      false,
+    );
   });
 
   it('rejects a section without a title', () => {
-    expect(validate([{ id: 'section.game_basics' }])).toBe(false);
+    expect(validate([{ id: 'section.game_basics', kind: 'chapter' }])).toBe(false);
+  });
+
+  it('rejects a section without a kind', () => {
+    expect(validate([{ id: 'section.game_basics', title: 'Game Basics' }])).toBe(false);
+  });
+
+  it('rejects an unknown kind', () => {
+    expect(validate([{ id: 'section.game_basics', title: 'Game Basics', kind: 'sidebar' }])).toBe(
+      false,
+    );
+  });
+
+  it('rejects a see_also target outside the section namespace', () => {
+    expect(
+      validate([
+        { id: 'section.combat', title: 'Combat', kind: 'chapter', see_also: ['page.107'] },
+      ]),
+    ).toBe(false);
   });
 
   it('rejects unknown properties', () => {
-    expect(validate([{ id: 'section.game_basics', title: 'Game Basics', page: 17 }])).toBe(false);
+    expect(
+      validate([{ id: 'section.game_basics', title: 'Game Basics', kind: 'chapter', page: 17 }]),
+    ).toBe(false);
   });
 });
 

@@ -11,12 +11,13 @@
     "section": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title"],
+      "required": ["id", "title", "kind"],
       "properties": {
         "id": { "$ref": "#/$defs/sectionId" },
         "title": { "type": "string", "minLength": 1 },
         "kind": {
           "enum": [
+            "part",
             "chapter",
             "section",
             "subsection",
@@ -25,7 +26,8 @@
             "example",
             "optional_rule",
             "scenario_rule"
-          ]
+          ],
+          "description": "A part is one of the book's divider-page groupings, such as Party Management."
         },
         "parent": { "$ref": "#/$defs/sectionId" },
         "printed_start_page": {
@@ -44,6 +46,16 @@
           "type": "array",
           "items": { "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id" },
           "description": "External source ids from source/manifest.yaml referenced by this section."
+        },
+        "see_also": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sectionId" },
+          "description": "Internal cross-references from this section that resolve to a known section."
+        },
+        "unresolved_references": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Cross-reference text that cannot yet be bound to a section id. Never invent an id to remove one of these."
         },
         "notes": { "type": "string" }
       }
