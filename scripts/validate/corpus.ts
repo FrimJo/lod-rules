@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
+import { checkIntegrity, type CoverageEntry, type Page, type Section } from './integrity.ts';
 
 /** Canonical files loaded by the validator. `generated/` is never scanned. */
 const canonicalFiles: Array<{ path: string; schema: SchemaName }> = [
@@ -20,10 +21,12 @@ interface ManifestDocument {
   id: string;
   file: string;
   canonical: boolean;
+  pages?: number;
 }
 
 interface Manifest {
   documents: ManifestDocument[];
+  external_sources?: Array<{ id: string; status: string }>;
 }
 
 function findDuplicateIds(entries: unknown, path: string): string[] {
@@ -63,6 +66,7 @@ export function validateCorpus(): ValidationResult {
   const ajv = createAjv();
   const errors: string[] = [];
   let filesChecked = 0;
+  const loaded = new Map<SchemaName, unknown>();
 
   for (const { path, schema } of canonicalFiles) {
     const absolutePath = join(repoRoot, path);
@@ -88,14 +92,33 @@ export function validateCorpus(): ValidationResult {
       continue;
     }
 
+    loaded.set(schema, data);
+
     if (schema === 'coverage') {
       errors.push(...findDuplicateIds((data as { sections: unknown }).sections, path));
     } else if (schema !== 'manifest') {
       errors.push(...findDuplicateIds(data, path));
     } else {
       errors.push(...findDuplicateIds((data as Manifest).documents, path));
+      errors.push(...findDuplicateIds((data as Manifest).external_sources, path));
       errors.push(...checkDocumentFilesExist(data));
     }
+  }
+
+  // Cross-file checks only make sense once every file parsed and matched its schema.
+  if (loaded.size === canonicalFiles.length) {
+    const manifest = loaded.get('manifest') as Manifest;
+    const canonicalDocument = manifest.documents.find((document) => document.canonical);
+
+    errors.push(
+      ...checkIntegrity({
+        sections: loaded.get('sections') as Section[],
+        pages: loaded.get('pages') as Page[],
+        coverage: (loaded.get('coverage') as { sections: CoverageEntry[] }).sections,
+        externalSourceIds: (manifest.external_sources ?? []).map((source) => source.id),
+        documentPageCount: canonicalDocument?.pages,
+      }),
+    );
   }
 
   return { errors, filesChecked };
