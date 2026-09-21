@@ -8,20 +8,28 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 606 / 606 | 100% |
-| extracted | 12 / 606 | 2% |
+| extracted | 67 / 606 | 11% |
 | reviewed | 0 / 606 | 0% |
 
 Total sections tracked: 606
 
-3 compatibility redirects are excluded from all extraction counts above and below.
+11 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
 | Preserved ID | Canonical section |
 | --- | --- |
+| section.appendix_i_perks.combat_perks.table_2 | section.appendix_i_perks.combat_perks.table |
+| section.appendix_i_perks.common_perks.table_2 | section.appendix_i_perks.common_perks.table |
 | section.appendix_ii_talents.physical_talents.table_2 | section.appendix_ii_talents.physical_talents.table |
 | section.appendix_ii_talents.combat_talents.table_2 | section.appendix_ii_talents.combat_talents.table |
 | section.appendix_ii_talents.combat_talents.table_3 | section.appendix_ii_talents.combat_talents.table |
+| section.appendix_ii_talents.common_talents.table_2 | section.appendix_ii_talents.common_talents.table |
+| section.appendix_ii_talents.common_talents.table_3 | section.appendix_ii_talents.common_talents.table |
+| section.appendix_ii_talents.common_talents.table_4 | section.appendix_ii_talents.common_talents.table |
+| section.appendix_ii_talents.table_2 | section.appendix_ii_talents.table |
+| section.appendix_ii_talents.table_3 | section.appendix_ii_talents.table |
+| section.appendix_ii_talents.sneaky_talents.table_2 | section.appendix_ii_talents.sneaky_talents.table |
 
 ## Nodes by kind
 
@@ -30,9 +38,9 @@ Total sections tracked: 606
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 301 |
+| subsection | 306 |
 | appendix | 5 |
-| table | 197 |
+| table | 192 |
 | example | 3 |
 | optional_rule | 2 |
 | scenario_rule | 37 |
@@ -45,16 +53,16 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 381 | 214 |
-| rules | 47 | 365 | 194 |
-| tables | 14 | 562 | 30 |
-| examples | 6 | 396 | 204 |
-| procedures | 2 | 402 | 202 |
-| entities | 3 | 594 | 9 |
+| glossary | 11 | 341 | 254 |
+| rules | 92 | 323 | 191 |
+| tables | 39 | 492 | 75 |
+| examples | 6 | 356 | 244 |
+| procedures | 2 | 377 | 227 |
+| entities | 48 | 524 | 34 |
 
 ## Remaining tables
 
-186 of this kind still need their contents extracted.
+156 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
@@ -63,16 +71,6 @@ None. Every node in the structural map has been mapped.
 | section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
 | section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
 | section.creating_your_character.choosing_your_species.table | Choosing Your Species table | 27 |
-| section.creating_your_character.table | Creating your Character table | 28 |
-| section.creating_your_character.table_2 | Creating your Character table 2 | 28 |
-| section.creating_your_character.table_3 | Creating your Character table 3 | 29 |
-| section.creating_your_character.table_4 | Creating your Character table 4 | 29 |
-| section.creating_your_character.barbarian.table_skills | Skills | 33 |
-| section.creating_your_character.ranger.table_skills | Skills | 34 |
-| section.creating_your_character.rogue.table_skills | Skills | 35 |
-| section.creating_your_character.warrior.table_skills | Skills | 37 |
-| section.creating_your_character.warrior_priest.table_skills | Skills | 38 |
-| section.creating_your_character.wizard.table_skills | Skills | 39 |
 | section.equipment.coins.table | Coins table | 49 |
 | section.levelling_up.increasing_your_skills_and_basic_stats.table | Increasing your Skills and Basic Stats table | 59 |
 | section.levelling_up.talents_and_perks.table_talents | Talents | 60 |
@@ -126,26 +124,6 @@ None. Every node in the structural map has been mapped.
 | section.rangers_guild.table | Rangers’ Guild table | 154 |
 | section.the_inner_sanctum.buying_special_equipment.table | Buying Special Equipment table | 156 |
 | section.the_inner_sanctum.crusades.table | Crusades table | 157 |
-| section.appendix_i_perks.faith_perks.table | Faith Perks table | 166 |
-| section.appendix_i_perks.combat_perks.table | Combat Perks table | 167 |
-| section.appendix_i_perks.combat_perks.table_2 | Combat Perks table 2 | 167 |
-| section.appendix_i_perks.sneaky_perks.table | Sneaky Perks table | 168 |
-| section.appendix_i_perks.common_perks.table | Common Perks table | 168 |
-| section.appendix_i_perks.common_perks.table_2 | Common Perks table 2 | 168 |
-| section.appendix_ii_talents.physical_talents.table | Physical Talents table | 170 |
-| section.appendix_ii_talents.combat_talents.table | Combat Talents table | 171 |
-| section.appendix_ii_talents.faith_talents.table | Faith Talents table | 172 |
-| section.appendix_ii_talents.alchemist_talents.table | Alchemist Talents table | 172 |
-| section.appendix_ii_talents.common_talents.table | Common Talents table | 173 |
-| section.appendix_ii_talents.common_talents.table_2 | Common Talents table 2 | 173 |
-| section.appendix_ii_talents.common_talents.table_3 | Common Talents table 3 | 173 |
-| section.appendix_ii_talents.common_talents.table_4 | Common Talents table 4 | 173 |
-| section.appendix_ii_talents.table | Appendix II: Talents table | 174 |
-| section.appendix_ii_talents.table_2 | Appendix II: Talents table 2 | 174 |
-| section.appendix_ii_talents.table_3 | Appendix II: Talents table 3 | 174 |
-| section.appendix_ii_talents.sneaky_talents.table | Sneaky Talents table | 175 |
-| section.appendix_ii_talents.sneaky_talents.table_2 | Sneaky Talents table 2 | 175 |
-| section.appendix_ii_talents.mental_talents.table | Mental Talents table | 176 |
 | section.appendix_iii_equipment.weapons.table | Weapons table | 177 |
 | section.appendix_iii_equipment.armour_and_shields.table | Armour and Shields table | 178 |
 | section.appendix_iii_equipment.armour_and_shields.table_2 | Armour and Shields table 2 | 178 |
