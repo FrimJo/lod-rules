@@ -7,11 +7,11 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 582 / 582 | 100% |
-| extracted | 0 / 582 | 0% |
-| reviewed | 0 / 582 | 0% |
+| mapped | 586 / 586 | 100% |
+| extracted | 1 / 586 | 0% |
+| reviewed | 0 / 586 | 0% |
 
-Total sections tracked: 582
+Total sections tracked: 586
 
 ## Nodes by kind
 
@@ -20,7 +20,7 @@ Total sections tracked: 582
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 276 |
+| subsection | 280 |
 | appendix | 5 |
 | table | 199 |
 | example | 3 |
@@ -35,11 +35,11 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 0 | 380 | 202 |
-| rules | 0 | 380 | 202 |
-| tables | 0 | 579 | 3 |
-| examples | 0 | 383 | 199 |
-| procedures | 0 | 380 | 202 |
+| glossary | 11 | 361 | 214 |
+| rules | 0 | 383 | 203 |
+| tables | 0 | 578 | 8 |
+| examples | 0 | 382 | 204 |
+| procedures | 0 | 383 | 203 |
 
 ## Remaining tables
 
@@ -253,7 +253,7 @@ None. Every node in the structural map has been mapped.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
-| section.game_basics.gameplay_example | Gameplay Example | 20 |
+| section.game_basics.gameplay_example | Gameplay Example | 20-22 |
 | section.backgrounds.character_creation_example | Character Creation Example | 47 |
 | section.combat.combat_example | Combat Example | 122 |
 
