@@ -1,0 +1,452 @@
+- id: character.perk.gods_favourite.activation
+  name: 'God’s Favourite: activation'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'God’s Favourite: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is well attuned to the gods, and they always seem to listen to him. Once
+    again, his prayer is heard, and all problems seem smaller. Decrease the Threat Level by 1d6.
+  type: modifier
+  scope: global
+  entity_id: perk.gods_favourite
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.gods_favourite.threat
+  name: 'God’s Favourite: threat'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'God’s Favourite: threat'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is well attuned to the gods, and they always seem to listen to him. Once
+    again, his prayer is heard, and all problems seem smaller. Decrease the Threat Level by 1d6.
+  type: modifier
+  scope: global
+  entity_id: perk.gods_favourite
+  fields:
+    d6_result:
+      type: number
+      role: input
+      description: d6 result
+      integer: true
+      minimum: 1
+      maximum: 6
+    threat_level:
+      type: number
+      role: state
+      description: threat level
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: literal
+            value: -1
+          - type: field
+            name: d6_result
+      duration: immediate
+- id: character.perk.fate_forger.activation
+  name: 'Fate Forger: activation'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Fate Forger: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    By spending an Energy Point, the priest can force a reroll of the Scenario die. Used as
+    soon as the Scenario die has been rolled.
+  type: modifier
+  scope: global
+  entity_id: perk.fate_forger
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.fate_forger.reroll
+  name: 'Fate Forger: reroll'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Fate Forger: reroll'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    By spending an Energy Point, the priest can force a reroll of the Scenario die. Used as
+    soon as the Scenario die has been rolled.
+  type: modifier
+  scope: global
+  entity_id: perk.fate_forger
+  fields:
+    scenario_die_just_rolled:
+      type: boolean
+      role: input
+      description: scenario die just rolled
+    scenario_die_reroll_allowed:
+      type: boolean
+      role: output
+      description: scenario die reroll allowed
+  effects:
+    - type: set
+      target: scenario_die_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: scenario_die_just_rolled
+    right:
+      type: literal
+      value: true
+- id: character.perk.healer.activation
+  name: 'Healer: activation'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Healer: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Putting that extra effort into tending a wound can make such a difference. When
+    applying a bandage, this Perk adds +3 HP to the result. Used at the same time as the Healing
+    Skill.
+  type: modifier
+  scope: global
+  entity_id: perk.healer
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.healer.bandage
+  name: 'Healer: bandage'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Healer: bandage'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Putting that extra effort into tending a wound can make such a difference. When
+    applying a bandage, this Perk adds +3 HP to the result. Used at the same time as the Healing
+    Skill.
+  type: modifier
+  scope: global
+  entity_id: perk.healer
+  fields:
+    applying_bandage:
+      type: boolean
+      role: input
+      description: applying bandage
+    using_healing_skill:
+      type: boolean
+      role: input
+      description: using healing skill
+    healing:
+      type: number
+      role: state
+      description: healing
+  effects:
+    - type: add
+      target: healing
+      value:
+        type: literal
+        value: 3
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: applying_bandage
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: using_healing_skill
+        right:
+          type: literal
+          value: true
+- id: character.perk.my_will_be_done.activation
+  name: 'My Will Be Done: activation'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'My Will Be Done: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Using his inner strength, the priest manifests tremendous Resolve. Add +10 RES. Lasts
+    until end of next battle
+  type: modifier
+  scope: global
+  entity_id: perk.my_will_be_done
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.my_will_be_done.resolve
+  name: 'My Will Be Done: resolve'
+  section_id: section.appendix_i_perks.faith_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'My Will Be Done: resolve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Using his inner strength, the priest manifests tremendous Resolve. Add +10 RES. Lasts
+    until end of next battle
+  type: modifier
+  scope: global
+  entity_id: perk.my_will_be_done
+  fields:
+    resolve:
+      type: number
+      role: state
+      description: resolve
+    ends_at:
+      type: string
+      role: output
+      description: ends at
+  effects:
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: 10
+      duration: while_condition
+    - type: set
+      target: ends_at
+      value:
+        type: literal
+        value: end_of_next_battle

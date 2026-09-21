@@ -1,0 +1,520 @@
+- id: character.perk.call_to_action.activation
+  name: 'Call to Action: activation'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Call to Action: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero lets out a battle shout that gives another hero a chance to spring into
+    immediate action. You may use this Perk when activating the hero. Once the 2 AP has been spent,
+    you may take a hero token from the bag and activate another hero within LOS of the hero using
+    this Perk.
+  type: modifier
+  scope: global
+  entity_id: perk.call_to_action
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.call_to_action.timing
+  name: 'Call to Action: timing'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Call to Action: timing'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero lets out a battle shout that gives another hero a chance to spring into
+    immediate action. You may use this Perk when activating the hero. Once the 2 AP has been spent,
+    you may take a hero token from the bag and activate another hero within LOS of the hero using
+    this Perk.
+  type: modifier
+  scope: global
+  entity_id: perk.call_to_action
+  fields:
+    activating_hero:
+      type: boolean
+      role: input
+      description: activating hero
+    activate_after_spending_ap:
+      type: number
+      role: output
+      description: activate after spending ap
+    target_requires_los:
+      type: boolean
+      role: output
+      description: target requires los
+    take_hero_token_from_bag:
+      type: boolean
+      role: output
+      description: take hero token from bag
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: activating_hero
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: activate_after_spending_ap
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: target_requires_los
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: take_hero_token_from_bag
+      value:
+        type: literal
+        value: true
+- id: character.perk.encouragement.activation
+  name: 'Encouragement: activation'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Encouragement: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero’s encouragement strengthens the hearts of their comrades, giving them +10 on
+    an upcoming Fear or Terror Test. May be used outside of ordinary acting order whenever a fear or
+    terror test is necessary.
+  type: modifier
+  scope: global
+  entity_id: perk.encouragement
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.encouragement.bonus
+  name: 'Encouragement: bonus'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Encouragement: bonus'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero’s encouragement strengthens the hearts of their comrades, giving them +10 on
+    an upcoming Fear or Terror Test. May be used outside of ordinary acting order whenever a fear or
+    terror test is necessary.
+  type: modifier
+  scope: global
+  entity_id: perk.encouragement
+  fields:
+    test_kind:
+      type: string
+      role: input
+      description: test kind
+    check_modifier:
+      type: number
+      role: state
+      description: check modifier
+    outside_acting_order_allowed:
+      type: boolean
+      role: output
+      description: outside acting order allowed
+  effects:
+    - type: add
+      target: check_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+    - type: set
+      target: outside_acting_order_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: test_kind
+        right:
+          type: literal
+          value: fear
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: test_kind
+        right:
+          type: literal
+          value: terror
+- id: character.perk.keep_calm_and_carry_on.activation
+  name: 'Keep Calm and Carry On!: activation'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Keep Calm and Carry On!: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero’s Resolve keeps the party together. You may increase Party Morale by +2. This
+    may not increase morale above starting morale.
+  type: modifier
+  scope: global
+  entity_id: perk.keep_calm_and_carry_on
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.keep_calm_and_carry_on.morale
+  name: 'Keep Calm and Carry On!: morale'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Keep Calm and Carry On!: morale'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero’s Resolve keeps the party together. You may increase Party Morale by +2. This
+    may not increase morale above starting morale.
+  type: modifier
+  scope: global
+  entity_id: perk.keep_calm_and_carry_on
+  fields:
+    starting_morale:
+      type: number
+      role: input
+      description: starting morale
+    party_morale:
+      type: number
+      role: state
+      description: party morale
+  effects:
+    - type: set
+      target: party_morale
+      value:
+        type: arithmetic
+        operator: min
+        values:
+          - type: sum
+            values:
+              - type: field
+                name: party_morale
+              - type: literal
+                value: 2
+          - type: field
+            name: starting_morale
+- id: character.perk.rally.activation
+  name: 'Rally: activation'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Rally: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero tries to encourage a comrade to action! A hero that has failed a Fear or
+    Terror Test may immediately retake that test. May be used outside of ordinary acting order
+    whenever a fear or terror test is necessary.
+  type: modifier
+  scope: global
+  entity_id: perk.rally
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.rally.retake
+  name: 'Rally: retake'
+  section_id: section.appendix_i_perks.leader_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Rally: retake'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero tries to encourage a comrade to action! A hero that has failed a Fear or
+    Terror Test may immediately retake that test. May be used outside of ordinary acting order
+    whenever a fear or terror test is necessary.
+  type: modifier
+  scope: global
+  entity_id: perk.rally
+  fields:
+    test_kind:
+      type: string
+      role: input
+      description: test kind
+    failed:
+      type: boolean
+      role: input
+      description: failed
+    immediate_retake_allowed:
+      type: boolean
+      role: output
+      description: immediate retake allowed
+    outside_acting_order_allowed:
+      type: boolean
+      role: output
+      description: outside acting order allowed
+  effects:
+    - type: set
+      target: immediate_retake_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: outside_acting_order_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: failed
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: test_kind
+            right:
+              type: literal
+              value: fear
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: test_kind
+            right:
+              type: literal
+              value: terror

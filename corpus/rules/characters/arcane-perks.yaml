@@ -1,0 +1,618 @@
+- id: character.perk.dispel_master.activation
+  name: 'Dispel Master: activation'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Dispel Master: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard is very skilled in the art of countering enemy magic. The wizard gets +20
+    Arcane Arts when rolling to dispel when this Perk is used.
+  type: modifier
+  scope: global
+  entity_id: perk.dispel_master
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.energy_to_mana.activation
+  name: 'Energy to Mana: activation'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Energy to Mana: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard has the ability to turn energy into Mana. For each Energy Point spent, the
+    wizard gains 20 Mana. The wizard may spend any number of Energy Points.
+  type: modifier
+  scope: global
+  entity_id: perk.energy_to_mana
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy_spent:
+      type: number
+      role: input
+      description: energy spent
+      integer: true
+      minimum: 1
+    energy:
+      type: number
+      role: state
+      description: energy
+    mana:
+      type: number
+      role: state
+      description: mana
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: field
+          name: energy_spent
+    - type: add
+      target: energy
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: literal
+            value: -1
+          - type: field
+            name: energy_spent
+      duration: immediate
+    - type: add
+      target: mana
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: literal
+            value: 20
+          - type: field
+            name: energy_spent
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.inner_power.activation
+  name: 'Inner Power: activation'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Inner Power: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard increases the power of their magic missiles, causing an extra 1d6 Damage.
+    Must be declared before the spell is cast.
+  type: modifier
+  scope: global
+  entity_id: perk.inner_power
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.in_tune_with_the_magic.activation
+  name: 'In Tune with the Magic: activation'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'In Tune with the Magic: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Caster may use Focus before trying to identify a Magic Item. However, when attuning to
+    the magic in that way, their mind is open enough to risk their sanity. Works just as if casting
+    a spell but introduces miscast to the roll as well. 1 Action of Focus causes a miscast on 95-00.
+    Increase the risk by 5 for each additional action.
+  type: modifier
+  scope: global
+  entity_id: perk.in_tune_with_the_magic
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.quick_focus.activation
+  name: 'Quick Focus: activation'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Quick Focus: activation'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard has the ability of extreme Focus, increasing the chance to succeed on a
+    spell. Add +10 Arcane Arts Skill without spending an action on focus. Risk for a miscast is
+    still increased by 5. Used at the same time as casting a spell. Only lasts for that spell.
+  type: modifier
+  scope: global
+  entity_id: perk.quick_focus
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: perks used this action
+    energy:
+      type: number
+      role: state
+      description: energy
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+- id: character.perk.dispel_master.dispel
+  name: 'Dispel Master: dispel'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Dispel Master: dispel'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard is very skilled in the art of countering enemy magic. The wizard gets +20
+    Arcane Arts when rolling to dispel when this Perk is used.
+  type: modifier
+  scope: global
+  entity_id: perk.dispel_master
+  fields:
+    rolling_to_dispel:
+      type: boolean
+      role: input
+      description: rolling to dispel
+    arcane_arts_modifier:
+      type: number
+      role: state
+      description: arcane arts modifier
+  effects:
+    - type: add
+      target: arcane_arts_modifier
+      value:
+        type: literal
+        value: 20
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rolling_to_dispel
+    right:
+      type: literal
+      value: true
+- id: character.perk.inner_power.missile_damage
+  name: 'Inner Power: missile damage'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Inner Power: missile damage'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard increases the power of their magic missiles, causing an extra 1d6 Damage.
+    Must be declared before the spell is cast.
+  type: modifier
+  scope: global
+  entity_id: perk.inner_power
+  fields:
+    declared_before_cast:
+      type: boolean
+      role: input
+      description: declared before cast
+    magic_missile:
+      type: boolean
+      role: input
+      description: magic missile
+    d6_result:
+      type: number
+      role: input
+      description: d6 result
+      integer: true
+      minimum: 1
+      maximum: 6
+    damage:
+      type: number
+      role: state
+      description: damage
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: declared_before_cast
+        right:
+          type: literal
+          value: true
+    - type: add
+      target: damage
+      value:
+        type: field
+        name: d6_result
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: magic_missile
+    right:
+      type: literal
+      value: true
+- id: character.perk.in_tune_with_the_magic.identification_focus
+  name: 'In Tune with the Magic: identification focus'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'In Tune with the Magic: identification focus'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Caster may use Focus before trying to identify a Magic Item. However, when attuning to
+    the magic in that way, their mind is open enough to risk their sanity. Works just as if casting
+    a spell but introduces miscast to the roll as well. 1 Action of Focus causes a miscast on 95-00.
+    Increase the risk by 5 for each additional action.
+  type: modifier
+  scope: global
+  entity_id: perk.in_tune_with_the_magic
+  fields:
+    identifying_magic_item:
+      type: boolean
+      role: input
+      description: identifying magic item
+    focus_actions:
+      type: number
+      role: input
+      description: focus actions
+      integer: true
+      minimum: 1
+    focus_allowed:
+      type: boolean
+      role: output
+      description: focus allowed
+    miscast_min_roll:
+      type: number
+      role: output
+      description: miscast min roll
+    miscast_max_roll:
+      type: number
+      role: output
+      description: miscast max roll
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: identifying_magic_item
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: focus_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: miscast_min_roll
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 95
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: 5
+              - type: arithmetic
+                operator: subtract
+                values:
+                  - type: field
+                    name: focus_actions
+                  - type: literal
+                    value: 1
+    - type: set
+      target: miscast_max_roll
+      value:
+        type: literal
+        value: 100
+- id: character.perk.quick_focus.spell
+  name: 'Quick Focus: spell'
+  section_id: section.appendix_i_perks.arcane_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 171
+      printed_page: 169
+      heading: 'Quick Focus: spell'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard has the ability of extreme Focus, increasing the chance to succeed on a
+    spell. Add +10 Arcane Arts Skill without spending an action on focus. Risk for a miscast is
+    still increased by 5. Used at the same time as casting a spell. Only lasts for that spell.
+  type: modifier
+  scope: global
+  entity_id: perk.quick_focus
+  fields:
+    casting_spell:
+      type: boolean
+      role: input
+      description: casting spell
+    arcane_arts_modifier:
+      type: number
+      role: state
+      description: arcane arts modifier
+    miscast_risk:
+      type: number
+      role: state
+      description: miscast risk
+    focus_action_cost:
+      type: number
+      role: output
+      description: focus action cost
+  effects:
+    - type: add
+      target: arcane_arts_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+    - type: add
+      target: miscast_risk
+      value:
+        type: literal
+        value: 5
+      duration: check
+    - type: set
+      target: focus_action_cost
+      value:
+        type: literal
+        value: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: casting_spell
+    right:
+      type: literal
+      value: true
