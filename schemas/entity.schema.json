@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/entity.schema.json",
+  "title": "Pilot professions and talents",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "type",
+      "rules",
+      "tables"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "type": {
+        "enum": ["profession", "talent"]
+      },
+      "rules": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "tables": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "grants": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "label", "printed_reference"],
+          "properties": {
+            "kind": {
+              "enum": ["talent", "perk"]
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "object_id": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            },
+            "section_id": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            },
+            "printed_reference": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "minItems": 0
+      },
+      "starting_equipment": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label", "quantity", "selection"],
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "selection": {
+              "enum": ["fixed", "choice", "random"]
+            },
+            "qualifier": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "minItems": 0
+      },
+      "activation": {
+        "enum": ["passive"]
+      },
+      "category": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "const": "profession"
+            }
+          }
+        },
+        "then": {
+          "required": ["grants", "starting_equipment"],
+          "properties": {
+            "grants": {},
+            "starting_equipment": {}
+          }
+        }
+      }
+    ]
+  }
+}

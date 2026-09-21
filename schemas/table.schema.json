@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/table.schema.json",
+  "title": "Source-preserving pilot tables",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "type",
+      "completeness",
+      "columns",
+      "rows",
+      "footnotes"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "type": {
+        "enum": ["progression_table", "modifier_table", "reference_table"]
+      },
+      "completeness": {
+        "enum": ["complete", "partial"]
+      },
+      "selection": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1
+      },
+      "columns": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "label", "cell_types"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cell_types": {
+              "type": "array",
+              "items": {
+                "enum": ["text", "number", "dice", "marker"]
+              },
+              "minItems": 1
+            }
+          }
+        },
+        "minItems": 1
+      },
+      "rows": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "source_row", "cells"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "source_row": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cells": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed"],
+                    "properties": {
+                      "type": {
+                        "const": "text"
+                      },
+                      "printed": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed", "value", "meaning"],
+                    "properties": {
+                      "type": {
+                        "const": "number"
+                      },
+                      "printed": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "value": {
+                        "type": "number"
+                      },
+                      "meaning": {
+                        "enum": ["value", "increase", "modifier", "initial"]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed", "dice", "meaning"],
+                    "properties": {
+                      "type": {
+                        "const": "dice"
+                      },
+                      "printed": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "dice": {
+                        "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dice"
+                      },
+                      "meaning": {
+                        "const": "increase"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["type", "printed", "meaning"],
+                    "properties": {
+                      "type": {
+                        "const": "marker"
+                      },
+                      "printed": {
+                        "enum": ["-", "N/A"]
+                      },
+                      "meaning": {
+                        "enum": ["no_increase", "unavailable"]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "minItems": 1
+      },
+      "footnotes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "completeness": {
+              "const": "partial"
+            }
+          }
+        },
+        "then": {
+          "required": ["selection"],
+          "properties": {
+            "selection": {}
+          }
+        }
+      }
+    ]
+  }
+}

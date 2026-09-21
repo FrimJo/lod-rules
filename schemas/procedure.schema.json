@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/procedure.schema.json",
+  "title": "Ordered pilot procedures",
+  "$defs": {
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source_text", "effects"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "array",
+          "items": {
+            "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+          },
+          "minItems": 1
+        },
+        "when": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/effect"
+          },
+          "minItems": 0
+        },
+        "substeps": {
+          "type": "array",
+          "items": {
+            "$ref": "https://lod-rules/schemas/procedure.schema.json#/$defs/step"
+          },
+          "minItems": 0
+        },
+        "rule_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+          },
+          "minItems": 0
+        }
+      }
+    }
+  },
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "fields",
+      "dependencies",
+      "steps",
+      "entry_step",
+      "exit_step"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "fields": {
+        "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/fields"
+      },
+      "dependencies": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dependency"
+        },
+        "minItems": 0
+      },
+      "steps": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/procedure.schema.json#/$defs/step"
+        },
+        "minItems": 1
+      },
+      "entry_step": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "exit_step": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    }
+  }
+}

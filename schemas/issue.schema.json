@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lod-rules/schemas/issue.schema.json",
-  "title": "Unresolved source uncertainties",
+  "title": "Source uncertainties and resolutions",
   "type": "array",
   "items": {
     "type": "object",
@@ -41,8 +41,48 @@
         }
       },
       "status": {
-        "const": "unresolved"
+        "enum": ["unresolved", "resolved"]
+      },
+      "resolution": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["summary", "source"],
+        "properties": {
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "https://lod-rules/schemas/source-reference.schema.json"
+            }
+          }
+        }
       }
-    }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "resolved"
+            }
+          }
+        },
+        "then": {
+          "required": ["resolution"],
+          "properties": {
+            "resolution": {}
+          }
+        },
+        "else": {
+          "properties": {
+            "resolution": false
+          }
+        }
+      }
+    ]
   }
 }

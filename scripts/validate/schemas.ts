@@ -12,6 +12,12 @@ const schemaFiles = [
   'source-map.schema.json',
   'glossary.schema.json',
   'issue.schema.json',
+  'mechanics.schema.json',
+  'rule.schema.json',
+  'entity.schema.json',
+  'table.schema.json',
+  'procedure.schema.json',
+  'test-case.schema.json',
 ] as const;
 
 /**
@@ -27,6 +33,11 @@ export const schemaRefs = {
   terms: 'https://lod-rules/schemas/glossary.schema.json#/$defs/terms',
   aliases: 'https://lod-rules/schemas/glossary.schema.json#/$defs/aliases',
   issues: 'https://lod-rules/schemas/issue.schema.json',
+  rules: 'https://lod-rules/schemas/rule.schema.json',
+  entities: 'https://lod-rules/schemas/entity.schema.json',
+  tables: 'https://lod-rules/schemas/table.schema.json',
+  procedures: 'https://lod-rules/schemas/procedure.schema.json',
+  testCases: 'https://lod-rules/schemas/test-case.schema.json',
 } as const;
 
 export type SchemaName = keyof typeof schemaRefs;

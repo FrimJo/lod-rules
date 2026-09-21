@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/test-case.schema.json",
+  "title": "Executable pilot examples and derived boundary cases",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "kind",
+      "inputs",
+      "expected"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "kind": {
+        "enum": ["source_example", "derived_case"]
+      },
+      "rule_ids": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "procedure_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "inputs": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "type": ["string", "number", "boolean"]
+        }
+      },
+      "expected": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state", "events", "trace", "unresolved", "steps"],
+        "properties": {
+          "state": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "additionalProperties": {
+              "type": ["string", "number", "boolean"]
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "satisfied"],
+                  "properties": {
+                    "type": {
+                      "const": "require"
+                    },
+                    "satisfied": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "dependency"],
+                  "properties": {
+                    "type": {
+                      "const": "invoke"
+                    },
+                    "dependency": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "dependency"],
+                  "properties": {
+                    "type": {
+                      "const": "ignore"
+                    },
+                    "dependency": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "dependency", "range"],
+                  "properties": {
+                    "type": {
+                      "const": "replace_range"
+                    },
+                    "dependency": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "range": {
+                      "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/range"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "pool", "count"],
+                  "properties": {
+                    "type": {
+                      "const": "draw_cards"
+                    },
+                    "pool": {
+                      "enum": ["current_tier", "higher_tier"]
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "choice", "keep"],
+                  "properties": {
+                    "type": {
+                      "const": "select_card"
+                    },
+                    "choice": {
+                      "type": ["string", "number", "boolean"]
+                    },
+                    "keep": {
+                      "const": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "minItems": 0
+          },
+          "trace": {
+            "type": "array",
+            "items": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            },
+            "minItems": 0
+          },
+          "unresolved": {
+            "type": "array",
+            "items": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            },
+            "minItems": 0
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "minItems": 0
+          }
+        }
+      }
+    },
+    "oneOf": [
+      {
+        "required": ["rule_ids"],
+        "properties": {
+          "rule_ids": {}
+        }
+      },
+      {
+        "required": ["procedure_id"],
+        "properties": {
+          "procedure_id": {}
+        }
+      }
+    ]
+  }
+}

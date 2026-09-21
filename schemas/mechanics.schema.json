@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/mechanics.schema.json",
+  "title": "Bounded Phase 3 mechanical vocabulary",
+  "$defs": {
+    "source": {
+      "allOf": [
+        {
+          "$ref": "https://lod-rules/schemas/source-reference.schema.json"
+        },
+        {
+          "type": "object",
+          "required": ["file", "pdf_page", "printed_page", "heading", "extraction"],
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "printed_page": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/printedPage"
+            },
+            "pdf_page": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "extraction": {
+              "type": "object",
+              "required": ["method", "confidence", "visually_verified"],
+              "properties": {
+                "method": {
+                  "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/extractionMethod"
+                },
+                "visually_verified": {
+                  "type": "boolean"
+                },
+                "confidence": {
+                  "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/confidence"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "operand": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": {
+              "const": "literal"
+            },
+            "value": {
+              "type": ["string", "number", "boolean"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "name"],
+          "properties": {
+            "type": {
+              "const": "field"
+            },
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "values"],
+          "properties": {
+            "type": {
+              "const": "sum"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+              },
+              "minItems": 2
+            }
+          }
+        }
+      ]
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "operator", "left", "right"],
+          "properties": {
+            "type": {
+              "const": "compare"
+            },
+            "operator": {
+              "enum": ["eq", "ne", "lt", "lte", "gt", "gte"]
+            },
+            "left": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            },
+            "right": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "conditions"],
+          "properties": {
+            "type": {
+              "const": "all"
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "conditions"],
+          "properties": {
+            "type": {
+              "const": "any"
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "condition"],
+          "properties": {
+            "type": {
+              "const": "not"
+            },
+            "condition": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+            }
+          }
+        }
+      ]
+    },
+    "effect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "target", "value"],
+          "properties": {
+            "type": {
+              "const": "set"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "value": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "target", "value", "duration"],
+          "properties": {
+            "type": {
+              "const": "add"
+            },
+            "target": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "value": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            },
+            "duration": {
+              "enum": ["permanent", "check", "immediate", "first_round_of_battle"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "condition"],
+          "properties": {
+            "type": {
+              "const": "require"
+            },
+            "condition": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "issue_id"],
+          "properties": {
+            "type": {
+              "const": "unresolved"
+            },
+            "issue_id": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "dependency"],
+          "properties": {
+            "type": {
+              "const": "invoke"
+            },
+            "dependency": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "dependency"],
+          "properties": {
+            "type": {
+              "const": "ignore"
+            },
+            "dependency": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "dependency", "range"],
+          "properties": {
+            "type": {
+              "const": "replace_range"
+            },
+            "dependency": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "range": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/range"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "pool", "count"],
+          "properties": {
+            "type": {
+              "const": "draw_cards"
+            },
+            "pool": {
+              "enum": ["current_tier", "higher_tier"]
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "choice", "options", "keep"],
+          "properties": {
+            "type": {
+              "const": "select_card"
+            },
+            "choice": {
+              "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/operand"
+              },
+              "minItems": 2
+            },
+            "keep": {
+              "const": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "selection", "options"],
+          "properties": {
+            "type": {
+              "const": "choice"
+            },
+            "selection": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "effects"],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "when": {
+                    "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+                  },
+                  "effects": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/effect"
+                    },
+                    "minItems": 1
+                  }
+                }
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "fields": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "role", "description"],
+        "properties": {
+          "type": {
+            "enum": ["number", "boolean", "string"]
+          },
+          "role": {
+            "enum": ["input", "output", "state"]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minimum": {
+            "type": "number"
+          },
+          "maximum": {
+            "type": "number"
+          },
+          "integer": {
+            "const": true
+          }
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "section_id": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "object_id": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "external_document": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        }
+      }
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      }
+    },
+    "dice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "sides"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sides": {
+          "type": "integer",
+          "minimum": 2
+        }
+      }
+    }
+  }
+}

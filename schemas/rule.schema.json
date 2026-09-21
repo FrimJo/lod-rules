@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/rule.schema.json",
+  "title": "Atomic pilot rules",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "type",
+      "scope",
+      "fields",
+      "effects"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "type": {
+        "enum": [
+          "calculation",
+          "constraint",
+          "modifier",
+          "choice",
+          "exception",
+          "procedure_rule",
+          "resource_change",
+          "trigger",
+          "override"
+        ]
+      },
+      "scope": {
+        "enum": ["global", "character_creation", "dungeon", "battle", "settlement"]
+      },
+      "applies_to": {
+        "enum": ["all_heroes"]
+      },
+      "fields": {
+        "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/fields"
+      },
+      "when": {
+        "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/condition"
+      },
+      "effects": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/effect"
+        },
+        "minItems": 1
+      },
+      "dependencies": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/dependency"
+        },
+        "minItems": 0
+      },
+      "overrides": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "alternatives": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label", "effects"],
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "effects": {
+              "type": "array",
+              "items": {
+                "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/effect"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        "minItems": 2
+      },
+      "uses_tables": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "term_refs": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "usage_limits": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "window", "subject"],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "window": {
+              "enum": ["between_settlement_visits"]
+            },
+            "subject": {
+              "enum": ["skill_increase", "basic_stat_increase"]
+            },
+            "aggregation_issue": {
+              "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+            }
+          }
+        },
+        "minItems": 1
+      }
+    }
+  }
+}
