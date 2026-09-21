@@ -83,6 +83,14 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
   ): void {
     for (const [key, definition] of Object.entries(fields)) {
       if (
+        definition.dice &&
+        (definition.type !== 'number' ||
+          !definition.integer ||
+          definition.minimum !== definition.dice.count ||
+          definition.maximum !== definition.dice.count * definition.dice.sides)
+      )
+        errors.push(`${owner}: dice field requires matching integer bounds ${key}`);
+      if (
         (definition.minimum !== undefined ||
           definition.maximum !== undefined ||
           definition.integer) &&
@@ -115,6 +123,21 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     function operand(value: Operand): string | undefined {
       if (value.type === 'literal') return typeof value.value;
       if (value.type === 'field') return field(value.name);
+      if (value.type === 'arithmetic') {
+        const arity = ['floor', 'ceil', 'abs'].includes(value.operator)
+          ? 1
+          : ['subtract', 'divide'].includes(value.operator)
+            ? 2
+            : undefined;
+        if (arity !== undefined && value.values.length !== arity)
+          errors.push(`${owner}: arithmetic arity mismatch`);
+        if (
+          value.operator === 'divide' &&
+          value.values[1]?.type === 'literal' &&
+          value.values[1].value === 0
+        )
+          errors.push(`${owner}: division by zero`);
+      }
       for (const item of value.values)
         if (operand(item) !== 'number') errors.push(`${owner}: sum requires numbers`);
       return 'number';
@@ -138,7 +161,39 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
         if (fields[value.target]?.role === 'input')
           errors.push(`${owner}: cannot write input ${value.target}`);
       } else if (value.type === 'require') predicate(value.condition);
-      else if (value.type === 'unresolved') openIssue(owner, value.issue_id);
+      else if (value.type === 'lookup') {
+        link(owner, value.table_id, ['tables']);
+        openIssue(owner, value.on_missing_issue);
+        const table = pilot.tables.find((t) => t.id === value.table_id);
+        const keyType = operand(value.key);
+        const targetType = field(value.target);
+        if (fields[value.target]?.role === 'input')
+          errors.push(`${owner}: cannot write input ${value.target}`);
+        const key = table?.columns.find((c) => c.id === value.key_column);
+        const output = table?.columns.find((c) => c.id === value.value_column);
+        if (!key || !output) errors.push(`${owner}: unknown lookup column`);
+        else {
+          if (
+            key.cell_types.some(
+              (t) =>
+                (t === 'number' || t === 'range'
+                  ? 'number'
+                  : t === 'text'
+                    ? 'string'
+                    : 'unsupported') !== keyType,
+            )
+          )
+            errors.push(`${owner}: lookup key type mismatch`);
+          if (
+            output.cell_types.some(
+              (t) =>
+                (t === 'number' ? 'number' : t === 'text' ? 'string' : 'unsupported') !==
+                targetType,
+            )
+          )
+            errors.push(`${owner}: lookup output type mismatch`);
+        }
+      } else if (value.type === 'unresolved') openIssue(owner, value.issue_id);
       else if (value.type === 'choice') {
         if (field(value.selection) !== 'string')
           errors.push(`${owner}: choice selection must be string`);
@@ -181,7 +236,11 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       if (target === rule.id) errors.push(`${rule.id}: self override`);
     }
     for (const target of rule.uses_tables ?? []) link(rule.id, target, ['tables']);
-    for (const target of rule.term_refs ?? []) link(rule.id, target, ['terms']);
+    for (const target of [...(rule.term_refs ?? []), ...(rule.timing_refs ?? [])])
+      link(rule.id, target, ['terms']);
+    for (const target of rule.timing_refs ?? [])
+      if (context.terms.find((t) => t.id === target)?.kind !== 'temporal_scope')
+        errors.push(`${rule.id}: timing reference must be temporal`);
     for (const limit of rule.usage_limits ?? [])
       if (limit.aggregation_issue) openIssue(rule.id, limit.aggregation_issue);
   }
@@ -218,6 +277,7 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     )
       errors.push(`${table.id}: partial selection does not match source rows`);
     for (const row of table.rows) {
+      for (const id of row.rule_refs ?? []) link(table.id, id, ['rules']);
       const columns = new Set(table.columns.map((c) => c.id));
       if (
         Object.keys(row.cells).length !== columns.size ||
@@ -232,10 +292,45 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
         }
         if (cell.type === 'number' && Number(cell.printed.replace('±', '')) !== cell.value)
           errors.push(`${table.id}/${row.id}: printed numeric value mismatch`);
-        if (cell.type === 'dice' && cell.printed !== `+${cell.dice.count}d${cell.dice.sides}`)
+        if (
+          cell.type === 'dice' &&
+          cell.printed !==
+            `${cell.meaning === 'increase' ? '+' : cell.meaning === 'loss' ? '-' : ''}${cell.dice.count}d${cell.dice.sides}`
+        )
           errors.push(`${table.id}/${row.id}: printed dice mismatch`);
+        if (
+          cell.type === 'range' &&
+          (cell.min > cell.max ||
+            ![
+              ...(cell.min === cell.max ? [String(cell.min)] : [`${cell.min}-${cell.max}`]),
+              ...(cell.min === 10 && cell.max === 10 ? ['0'] : []),
+            ].includes(cell.printed))
+        )
+          errors.push(`${table.id}/${row.id}: invalid printed range`);
         if (cell.type === 'marker' && (cell.printed === 'N/A') !== (cell.meaning === 'unavailable'))
           errors.push(`${table.id}/${row.id}: marker meaning mismatch`);
+      }
+    }
+    if (table.type === 'random_table' && !table.roll_domain)
+      errors.push(`${table.id}: random table requires roll domain`);
+    if (table.roll_domain) {
+      const rangeColumn = table.columns.filter((c) => c.cell_types.includes('range'));
+      if (rangeColumn.length !== 1 || table.roll_domain.min > table.roll_domain.max)
+        errors.push(`${table.id}: invalid random table domain`);
+      else {
+        const ranges = table.rows
+          .map((r) => r.cells[rangeColumn[0]!.id])
+          .filter((c) => c?.type === 'range')
+          .sort((a, b) => a.min - b.min);
+        if (ranges.length !== table.rows.length)
+          errors.push(`${table.id}: every random row requires a range`);
+        let next = table.roll_domain.min;
+        for (const range of ranges) {
+          if (range.min !== next) errors.push(`${table.id}: random table gap or overlap`);
+          next = range.max + 1;
+        }
+        if (next !== table.roll_domain.max + 1)
+          errors.push(`${table.id}: random table incomplete domain`);
       }
     }
   }

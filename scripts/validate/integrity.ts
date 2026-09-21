@@ -229,6 +229,7 @@ export interface SourceReference {
 }
 
 export interface Term {
+  kind?: string;
   id: string;
   name: string;
   abbreviation?: string;

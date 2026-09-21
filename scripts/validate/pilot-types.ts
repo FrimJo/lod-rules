@@ -23,7 +23,12 @@ export interface Metadata {
 export type Operand =
   | { type: 'literal'; value: Scalar }
   | { type: 'field'; name: string }
-  | { type: 'sum'; values: Operand[] };
+  | { type: 'sum'; values: Operand[] }
+  | {
+      type: 'arithmetic';
+      operator: 'subtract' | 'multiply' | 'divide' | 'floor' | 'ceil' | 'abs' | 'min' | 'max';
+      values: Operand[];
+    };
 export type Condition =
   | {
       type: 'compare';
@@ -43,9 +48,27 @@ export type Effect =
       type: 'add';
       target: string;
       value: Operand;
-      duration: 'permanent' | 'check' | 'immediate' | 'first_round_of_battle';
+      duration:
+        | 'permanent'
+        | 'check'
+        | 'immediate'
+        | 'first_round_of_battle'
+        | 'turn'
+        | 'battle'
+        | 'quest'
+        | 'until_dungeon_exit'
+        | 'while_condition';
     }
   | { type: 'require'; condition: Condition }
+  | {
+      type: 'lookup';
+      table_id: string;
+      key_column: string;
+      key: Operand;
+      value_column: string;
+      target: string;
+      on_missing_issue: string;
+    }
   | { type: 'unresolved'; issue_id: string }
   | { type: 'invoke' | 'ignore'; dependency: string }
   | { type: 'replace_range'; dependency: string; range: Range }
@@ -65,6 +88,7 @@ export type Fields = Record<
     integer?: true;
     minimum?: number;
     maximum?: number;
+    dice?: { count: number; sides: number };
   }
 >;
 export interface Dependency {
@@ -86,6 +110,10 @@ export interface Rule extends Metadata {
   alternatives?: Array<{ label: string; effects: Effect[] }>;
   uses_tables?: string[];
   term_refs?: string[];
+  timing_refs?: string[];
+  duration?: 'current_quest' | 'until_dungeon_exit' | 'while_condition';
+  optional_system?:
+    'encumbrance' | 'party_morale' | 'durability' | 'sanity' | 'scenario_and_threat';
   usage_limits?: Array<{
     count: number;
     window: 'between_settlement_visits';
@@ -101,18 +129,30 @@ export type Cell =
       value: number;
       meaning: 'value' | 'increase' | 'modifier' | 'initial';
     }
-  | { type: 'dice'; printed: string; dice: { count: number; sides: number }; meaning: 'increase' }
+  | {
+      type: 'dice';
+      printed: string;
+      dice: { count: number; sides: number };
+      meaning: 'increase' | 'loss' | 'roll';
+    }
+  | { type: 'range'; printed: string; min: number; max: number }
   | { type: 'marker'; printed: '-' | 'N/A'; meaning: 'no_increase' | 'unavailable' };
 export interface Table extends Metadata {
   type: string;
   completeness: 'complete' | 'partial';
   selection?: string[];
   columns: Array<{ id: string; label: string; cell_types: Cell['type'][] }>;
-  rows: Array<{ id: string; source_row: string; cells: Record<string, Cell> }>;
+  rows: Array<{
+    id: string;
+    source_row: string;
+    cells: Record<string, Cell>;
+    rule_refs?: string[];
+  }>;
+  roll_domain?: Range;
   footnotes: string[];
 }
 export interface Entity extends Metadata {
-  type: 'profession' | 'talent';
+  type: 'profession' | 'talent' | 'condition';
   rules: string[];
   tables: string[];
   grants?: Array<{
