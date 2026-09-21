@@ -2,12 +2,18 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { repoRoot } from '../validate/schemas.ts';
-import { renderCoverageReport, type CoverageFile } from './render-coverage.ts';
+import { renderCoverageReport, type CoverageFile, type SectionEntry } from './render-coverage.ts';
 
-const coveragePath = join(repoRoot, 'corpus', 'source-map', 'coverage.yaml');
+const sourceMap = join(repoRoot, 'corpus', 'source-map');
 const reportPath = join(repoRoot, 'docs', 'coverage-report.md');
 
-const coverage = parse(readFileSync(coveragePath, 'utf8')) as CoverageFile;
-writeFileSync(reportPath, renderCoverageReport(coverage), 'utf8');
+const coverage = parse(readFileSync(join(sourceMap, 'coverage.yaml'), 'utf8')) as CoverageFile;
+const sections = (parse(readFileSync(join(sourceMap, 'sections.yaml'), 'utf8')) ??
+  []) as SectionEntry[];
 
-console.log(`Wrote docs/coverage-report.md (${coverage.sections?.length ?? 0} section(s)).`);
+writeFileSync(reportPath, renderCoverageReport(coverage, sections), 'utf8');
+
+console.log(
+  `Wrote docs/coverage-report.md (${coverage.sections?.length ?? 0} coverage row(s), ` +
+    `${sections.length} section(s)).`,
+);

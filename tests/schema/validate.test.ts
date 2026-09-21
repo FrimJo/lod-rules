@@ -3,7 +3,7 @@ import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { renderCoverageReport } from '../../scripts/reports/render-coverage.ts';
 
 describe('corpus validation', () => {
-  it('passes with no extracted corpus data', () => {
+  it('passes against the committed source map', () => {
     const { errors, filesChecked } = validateCorpus();
     expect(errors).toEqual([]);
     expect(filesChecked).toBe(4);
@@ -28,5 +28,68 @@ describe('coverage report', () => {
     expect(report).toContain('| extracted | 1 / 2 | 50% |');
     expect(report).toContain('| reviewed | 1 / 2 | 50% |');
     expect(report).toContain('- section.combat');
+  });
+
+  it('counts nodes by kind from the section tree', () => {
+    const report = renderCoverageReport(
+      {
+        sections: [
+          { id: 'section.combat', status: 'mapped' },
+          { id: 'section.combat.hit_table', status: 'mapped' },
+        ],
+      },
+      [
+        { id: 'section.combat', title: 'Combat', kind: 'chapter' },
+        { id: 'section.combat.hit_table', title: 'Hit table', kind: 'table' },
+      ],
+    );
+    expect(report).toContain('| chapter | 1 |');
+    expect(report).toContain('| table | 1 |');
+  });
+
+  it('lists tables and examples whose contents are still unextracted', () => {
+    const report = renderCoverageReport(
+      {
+        sections: [
+          {
+            id: 'section.combat.hit_table',
+            status: 'mapped',
+            components: { tables: 'mapped' },
+          },
+          {
+            id: 'section.combat.worked_example',
+            status: 'mapped',
+            components: { examples: 'extracted' },
+          },
+        ],
+      },
+      [
+        {
+          id: 'section.combat.hit_table',
+          title: 'Hit table',
+          kind: 'table',
+          printed_start_page: 110,
+          printed_end_page: 111,
+        },
+        { id: 'section.combat.worked_example', title: 'Combat example', kind: 'example' },
+      ],
+    );
+    expect(report).toContain('| section.combat.hit_table | Hit table | 110-111 |');
+    expect(report).not.toContain('| section.combat.worked_example |');
+  });
+
+  it('lists the sections that cite external sources', () => {
+    const report = renderCoverageReport(
+      { sections: [{ id: 'section.combat', status: 'mapped' }] },
+      [
+        {
+          id: 'section.combat',
+          title: 'Combat',
+          kind: 'chapter',
+          external_references: ['bestiary'],
+        },
+      ],
+    );
+    expect(report).toContain('| section.combat | bestiary |');
   });
 });
