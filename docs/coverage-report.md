@@ -7,11 +7,11 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 584 / 584 | 100% |
-| extracted | 7 / 584 | 1% |
-| reviewed | 0 / 584 | 0% |
+| mapped | 606 / 606 | 100% |
+| extracted | 12 / 606 | 2% |
+| reviewed | 0 / 606 | 0% |
 
-Total sections tracked: 584
+Total sections tracked: 606
 
 3 compatibility redirects are excluded from all extraction counts above and below.
 
@@ -30,11 +30,11 @@ Total sections tracked: 584
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 281 |
+| subsection | 301 |
 | appendix | 5 |
-| table | 196 |
+| table | 197 |
 | example | 3 |
-| optional_rule | 1 |
+| optional_rule | 2 |
 | scenario_rule | 37 |
 
 ## Unprocessed sections
@@ -45,26 +45,24 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 360 | 213 |
-| rules | 6 | 379 | 199 |
-| tables | 5 | 570 | 9 |
-| examples | 1 | 379 | 204 |
-| procedures | 2 | 381 | 201 |
-| entities | 2 | 579 | 3 |
+| glossary | 11 | 381 | 214 |
+| rules | 47 | 365 | 194 |
+| tables | 14 | 562 | 30 |
+| examples | 6 | 396 | 204 |
+| procedures | 2 | 402 | 202 |
+| entities | 3 | 594 | 9 |
 
 ## Remaining tables
 
-193 of this kind still need their contents extracted.
+186 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
 | section.front_matter.index_of_art.table | Index of Art table | 9 |
 | section.buying_an_estate.ghostly_events_table | Ghostly Events Table | 160 |
-| section.appendix_iii_equipment.general_equipment.sell_and_repair_table | Sell and Repair Table | 184 |
 | section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
 | section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
 | section.creating_your_character.choosing_your_species.table | Choosing Your Species table | 27 |
-| section.creating_your_character.choosing_your_species.table_2 | Choosing Your Species table 2 | 27 |
 | section.creating_your_character.table | Creating your Character table | 28 |
 | section.creating_your_character.table_2 | Creating your Character table 2 | 28 |
 | section.creating_your_character.table_3 | Creating your Character table 3 | 29 |
@@ -76,11 +74,6 @@ None. Every node in the structural map has been mapped.
 | section.creating_your_character.warrior_priest.table_skills | Skills | 38 |
 | section.creating_your_character.wizard.table_skills | Skills | 39 |
 | section.equipment.coins.table | Coins table | 49 |
-| section.psychology.sanity.table | Sanity table | 53 |
-| section.psychology.table | Psychology table | 55 |
-| section.psychology.table_lingering_trauma_table | Lingering Trauma Table | 55 |
-| section.psychology.party_morale.table | Party Morale table | 56 |
-| section.levelling_up.stats_and_skills_maximum.table | Stats and Skills Maximum table | 58 |
 | section.levelling_up.increasing_your_skills_and_basic_stats.table | Increasing your Skills and Basic Stats table | 59 |
 | section.levelling_up.talents_and_perks.table_talents | Talents | 60 |
 | section.levelling_up.talents_and_perks.table_perks | Perks | 60 |
@@ -289,3 +282,4 @@ None. Every node in the structural map has been mapped.
 | section.settlements.caelkirk | companions_compendium |
 | section.settlements.freyfell | companions_compendium |
 | section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance | bestiary |
+| section.psychology.table | bestiary |

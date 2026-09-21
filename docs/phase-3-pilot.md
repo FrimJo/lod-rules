@@ -1,5 +1,9 @@
 # Phase 3 schema pilot
 
+This is the historical Phase 3 snapshot. Phases 0–3 are complete; current core-mechanics
+coverage and additive tooling changes are documented in [Phase 4](phase-4-core-mechanics.md).
+The counts and exclusions below describe the pilot, not the current corpus.
+
 The bounded pilot is extracted and tested, not independently reviewed. It contains 26 atomic
 rules, eight entities (two professions and six talents), five tables (three complete and two
 partial), two procedures, and 74 executable YAML fixtures. One fixture transcribes a book

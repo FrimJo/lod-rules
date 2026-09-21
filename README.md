@@ -12,20 +12,22 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-Phases 1 (structural map) and 2 (scoped glossary extraction) are complete. The bounded
-Phase 3 schema pilot is extracted and tested, pending independent review. It contains 26 rules,
-eight entities, five tables, two procedures, and 74 executable YAML fixtures. The source map
-covers all 286 pages with 584 canonical nodes and three compatibility redirects; the glossary
-retains 55 terms and 90 lookup forms.
-Eleven review records preserve original concerns: six are resolved with evidence and five
-remain unresolved. Duplicate talent-table IDs are retained as compatibility redirects.
-Bulk extraction has not begun.
+Phases 0–3 are complete. Phase 4 reusable core mechanics are extracted and tested;
+independent review remains distinct from extraction status. The corpus now contains 204 rules,
+17 entities, 14 tables, two procedures, and 321 executable YAML fixtures. The source map covers
+all 286 pages with 606 canonical nodes and three compatibility redirects. The glossary contains
+68 terms and 110 lookup forms.
 
-See [docs/phase-3-pilot.md](docs/phase-3-pilot.md) for the pilot audit and review handoff,
+The 26 review records retain all original concerns: six are resolved and 20 remain unresolved.
+Undefined boundaries and conflicting passages produce explicit unresolved results. Larger
+chapters retain partial coverage, and no newly extracted record is marked independently reviewed.
+
+See [docs/phase-4-core-mechanics.md](docs/phase-4-core-mechanics.md) for the 21-area audit,
+[docs/phase-3-pilot.md](docs/phase-3-pilot.md) for the historical pilot audit,
 [docs/ontology.md](docs/ontology.md) for the Phase 2 boundary,
 [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) for the full plan, and
-[docs/coverage-report.md](docs/coverage-report.md) for remaining coverage. Phase 4 requires
-an explicit request.
+[docs/coverage-report.md](docs/coverage-report.md) for remaining coverage.
+Phase 5 entity catalogues and Phase 6 full procedures remain deferred.
 
 ## Commands
 
