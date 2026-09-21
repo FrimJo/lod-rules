@@ -1,0 +1,182 @@
+- id: character.species.dwarf.bow_restriction
+  name: Dwarf bow restriction
+  section_id: section.creating_your_character.dwarf
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 30
+      printed_page: 28
+      heading: Dwarf bow restriction
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Due to their height, Dwarf characters cannot use Longbows or Elven bows.
+  type: constraint
+  scope: global
+  fields:
+    weapon:
+      type: string
+      role: input
+      description: 'Supplied weapon name: longbow, elven_bow, or another weapon.'
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: longbow
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: elven_bow
+- id: character.species.halfling.bow_restriction
+  name: Halfling bow restriction
+  section_id: section.creating_your_character.halfling
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 31
+      printed_page: 29
+      heading: Halfling bow restriction
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Due to their height, Halfling characters cannot use Longbows or Elven bows.
+  type: constraint
+  scope: global
+  fields:
+    weapon:
+      type: string
+      role: input
+      description: 'Supplied weapon name: longbow, elven_bow, or another weapon.'
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: longbow
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: elven_bow
+- id: character.species.halfling.initial_luck
+  name: Halfling initial Luck
+  section_id: section.creating_your_character.halfling
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 31
+      printed_page: 29
+      heading: Halfling initial Luck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Lucky (Starts with 1 Point of Luck).
+  type: calculation
+  scope: character_creation
+  fields:
+    luck:
+      type: number
+      role: state
+      description: Initial Luck for a Halfling.
+  effects:
+    - type: set
+      target: luck
+      value:
+        type: literal
+        value: 1
+- id: character.species.halfling.cooking_gear
+  name: Halfling Cooking gear offer
+  section_id: section.creating_your_character.halfling
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 31
+      printed_page: 29
+      heading: Halfling Cooking gear offer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A Halfling may purchase Cooking gear for 50 c before start of the game.
+  type: choice
+  scope: character_creation
+  fields:
+    purchase:
+      type: string
+      role: input
+      description: buy or decline; offered only before the start of the game.
+    coins:
+      type: number
+      role: state
+      description: Coins available for the optional purchase.
+    cooking_gear:
+      type: boolean
+      role: state
+      description: Whether the Halfling possesses Cooking gear.
+  effects:
+    - type: choice
+      selection: purchase
+      options:
+        - id: buy
+          effects:
+            - type: require
+              condition:
+                type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: literal
+                  value: 50
+            - type: add
+              target: coins
+              value:
+                type: literal
+                value: -50
+              duration: immediate
+            - type: set
+              target: cooking_gear
+              value:
+                type: literal
+                value: true
+        - id: decline
+          effects:
+            - type: set
+              target: cooking_gear
+              value:
+                type: field
+                name: cooking_gear
