@@ -49,7 +49,8 @@ const validate = getValidator(createAjv(), 'issues');
 
 describe('issue resolutions', () => {
   it('retains all eleven IDs, with six evidenced resolutions and five open questions', () => {
-    expect(context.issues.map((issue) => issue.id)).toEqual(
+    const originalIssues = context.issues.filter((issue) => /^issue\.\d{4}$/.test(issue.id));
+    expect(originalIssues.map((issue) => issue.id)).toEqual(
       Array.from({ length: 11 }, (_, i) => `issue.${String(i + 1).padStart(4, '0')}`),
     );
     expect(

@@ -29,6 +29,49 @@ export function evaluateOperand(operand: Operand, state: State): Scalar {
     }
     case 'sum':
       return operand.values.reduce((sum, value) => sum + number(evaluateOperand(value, state)), 0);
+    case 'arithmetic': {
+      const values = operand.values.map((v) => number(evaluateOperand(v, state)));
+      const first = values[0];
+      if (first === undefined) throw new Error('Arithmetic requires operands');
+      const arity = ['floor', 'ceil', 'abs'].includes(operand.operator)
+        ? 1
+        : ['subtract', 'divide'].includes(operand.operator)
+          ? 2
+          : undefined;
+      if (arity !== undefined && values.length !== arity)
+        throw new Error('Arithmetic arity mismatch');
+      let result: number;
+      switch (operand.operator) {
+        case 'subtract':
+          result = first - values[1]!;
+          break;
+        case 'multiply':
+          result = values.reduce((a, b) => a * b, 1);
+          break;
+        case 'divide':
+          if (values[1] === 0) throw new Error('Division by zero');
+          result = first / values[1]!;
+          break;
+        case 'floor':
+          result = Math.floor(first);
+          break;
+        case 'ceil':
+          result = Math.ceil(first);
+          break;
+        case 'abs':
+          result = Math.abs(first);
+          break;
+        case 'min':
+          result = Math.min(...values);
+          break;
+        case 'max':
+          result = Math.max(...values);
+          break;
+        default:
+          throw new Error('Unsupported arithmetic');
+      }
+      return number(result);
+    }
     default:
       throw new Error('Unsupported operand');
   }
@@ -65,7 +108,7 @@ export function evaluateCondition(condition: Condition, state: State): boolean {
       throw new Error('Unsupported condition');
   }
 }
-function apply(effects: Effect[], dependencies: Dependency[], result: Result): void {
+function apply(effects: Effect[], dependencies: Dependency[], result: Result, pilot: Pilot): void {
   const dependency = (key: string): string => {
     const found = dependencies.find((d) => d.key === key);
     if (!found) throw new Error(`Unknown dependency ${key}`);
@@ -73,6 +116,29 @@ function apply(effects: Effect[], dependencies: Dependency[], result: Result): v
   };
   for (const effect of effects) {
     switch (effect.type) {
+      case 'lookup': {
+        const table = pilot.tables.find((t) => t.id === effect.table_id);
+        if (!table) throw new Error('Unknown lookup table');
+        const key = evaluateOperand(effect.key, result.state);
+        const rows = table.rows.filter((row) => {
+          const cell = row.cells[effect.key_column];
+          return cell?.type === 'range'
+            ? typeof key === 'number' && key >= cell.min && key <= cell.max
+            : cell?.type === 'number'
+              ? key === cell.value
+              : cell?.type === 'text' && key === cell.printed;
+        });
+        if (rows.length === 0) {
+          result.unresolved.push(effect.on_missing_issue);
+          return;
+        }
+        if (rows.length !== 1) throw new Error('Ambiguous table lookup');
+        const value = rows[0]!.cells[effect.value_column];
+        if (value?.type !== 'number' && value?.type !== 'text')
+          throw new Error('Unsupported lookup value');
+        result.state[effect.target] = value.type === 'number' ? value.value : value.printed;
+        break;
+      }
       case 'set':
         result.state[effect.target] = evaluateOperand(effect.value, result.state);
         break;
@@ -81,12 +147,12 @@ function apply(effects: Effect[], dependencies: Dependency[], result: Result): v
           number(evaluateOperand({ type: 'field', name: effect.target }, result.state)) +
           number(evaluateOperand(effect.value, result.state));
         break;
-      case 'require':
-        result.events.push({
-          type: 'require',
-          satisfied: evaluateCondition(effect.condition, result.state),
-        });
+      case 'require': {
+        const satisfied = evaluateCondition(effect.condition, result.state);
+        result.events.push({ type: 'require', satisfied });
+        if (!satisfied) return;
         break;
+      }
       case 'unresolved':
         result.unresolved.push(effect.issue_id);
         return;
@@ -116,9 +182,13 @@ function apply(effects: Effect[], dependencies: Dependency[], result: Result): v
         const selected = evaluateOperand({ type: 'field', name: effect.selection }, result.state);
         const option = effect.options.find((o) => o.id === selected);
         if (!option) throw new Error(`Unknown choice ${String(selected)}`);
-        if (option.when && !evaluateCondition(option.when, result.state))
+        if (option.when && !evaluateCondition(option.when, result.state)) {
           result.events.push({ type: 'require', satisfied: false });
-        else apply(option.effects, dependencies, result);
+          return;
+        }
+        const unresolvedBefore = result.unresolved.length;
+        apply(option.effects, dependencies, result, pilot);
+        if (result.unresolved.length > unresolvedBefore) return;
         break;
       }
       default:
@@ -169,7 +239,7 @@ export function runCase(fixture: TestCase, pilot: Pilot): Result {
       result.trace.push(rule.id);
       const before = { state: { ...result.state }, events: [...result.events] };
       const unresolved = result.unresolved.length;
-      apply(rule.effects, rule.dependencies ?? [], result);
+      apply(rule.effects, rule.dependencies ?? [], result, pilot);
       if (result.unresolved.length > unresolved) {
         result.state = before.state;
         result.events = before.events;
@@ -186,7 +256,7 @@ export function runCase(fixture: TestCase, pilot: Pilot): Result {
         if (step.when && !evaluateCondition(step.when, result.state)) continue;
         result.steps.push(step.id);
         executeRules(step.rule_refs ?? []);
-        apply(step.effects, procedure?.dependencies ?? [], result);
+        apply(step.effects, procedure?.dependencies ?? [], result, pilot);
         walk(step.substeps ?? []);
       }
     }
