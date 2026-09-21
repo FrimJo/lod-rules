@@ -1,4 +1,5 @@
 import { reviewSources } from './integrity.ts';
+import { printedDiceMatches } from './dice.ts';
 import type { SourceMap, Term, Issue } from './integrity.ts';
 import type {
   Pilot,
@@ -86,8 +87,9 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
         definition.dice &&
         (definition.type !== 'number' ||
           !definition.integer ||
-          definition.minimum !== definition.dice.count ||
-          definition.maximum !== definition.dice.count * definition.dice.sides)
+          definition.minimum !== definition.dice.count + (definition.dice.modifier ?? 0) ||
+          definition.maximum !==
+            definition.dice.count * definition.dice.sides + (definition.dice.modifier ?? 0))
       )
         errors.push(`${owner}: dice field requires matching integer bounds ${key}`);
       if (
@@ -228,6 +230,14 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
   for (const rule of pilot.rules) {
     if (!/^(core|character|combat)\./.test(rule.id))
       errors.push(`${rule.id}: invalid rule namespace`);
+    if (rule.entity_id) link(rule.id, rule.entity_id, ['entities']);
+    if (rule.quest_id) {
+      link(rule.id, rule.quest_id, ['entities']);
+      if (pilot.entities.find((e) => e.id === rule.quest_id)?.type !== 'quest')
+        errors.push(`${rule.id}: quest scope requires quest entity`);
+      if (rule.scope !== 'quest' || rule.type !== 'scenario_rule')
+        errors.push(`${rule.id}: quest-local rule requires scenario_rule and quest scope`);
+    }
     mechanics(rule.id, rule.fields, rule.dependencies ?? [], rule.when, rule.effects);
     for (const alternative of rule.alternatives ?? [])
       mechanics(rule.id, rule.fields, rule.dependencies ?? [], undefined, alternative.effects);
@@ -245,13 +255,63 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       if (limit.aggregation_issue) openIssue(rule.id, limit.aggregation_issue);
   }
   for (const entity of pilot.entities) {
+    if (entity.quest_id) {
+      link(entity.id, entity.quest_id, ['entities']);
+      if (pilot.entities.find((e) => e.id === entity.quest_id)?.type !== 'quest')
+        errors.push(`${entity.id}: personal quest requires quest entity`);
+    }
     if (entity.type === 'talent' && (!entity.category || entity.activation !== 'passive'))
       errors.push(`${entity.id}: missing talent classification`);
     if (!entity.id.startsWith(`${entity.type}.`))
       errors.push(`${entity.id}: invalid entity namespace`);
     for (const id of entity.rules) link(entity.id, id, ['rules']);
     for (const id of entity.tables) link(entity.id, id, ['tables']);
-    for (const grant of entity.grants ?? []) {
+    for (const ref of entity.table_rows ?? []) {
+      link(entity.id, ref.table_id, ['tables']);
+      if (!entity.tables.includes(ref.table_id))
+        errors.push(`${entity.id}: row reference must also appear in tables`);
+      if (!pilot.tables.find((t) => t.id === ref.table_id)?.rows.some((r) => r.id === ref.row_id))
+        errors.push(`${entity.id}: unknown table row ${ref.table_id}/${ref.row_id}`);
+    }
+    if (
+      entity.initial_hit_points &&
+      !printedDiceMatches(entity.initial_hit_points.printed, entity.initial_hit_points.dice)
+    )
+      errors.push(`${entity.id}: printed hit-point dice mismatch`);
+    for (const item of entity.starting_equipment ?? []) {
+      if (item.object_id) {
+        link(entity.id, item.object_id, ['entities']);
+        if (!item.object_id.startsWith('equipment.'))
+          errors.push(`${entity.id}: starting equipment kind mismatch`);
+      }
+      if (item.section_id) link(entity.id, item.section_id, ['sections']);
+      if (item.options && item.selection !== 'choice')
+        errors.push(`${entity.id}: equipment options require choice selection`);
+      for (const option of item.options ?? []) {
+        if (option.object_id) {
+          link(entity.id, option.object_id, ['entities']);
+          if (!option.object_id.startsWith('equipment.'))
+            errors.push(`${entity.id}: equipment option kind mismatch`);
+        }
+      }
+    }
+    for (const choice of entity.grant_choices ?? []) {
+      if (choice.quantity > choice.options.length)
+        errors.push(`${entity.id}: grant choice exceeds options`);
+      unique(
+        entity.id,
+        choice.options.map((o) => o.object_id ?? o.label),
+      );
+    }
+    for (const selection of entity.starting_abilities ?? []) {
+      link(entity.id, selection.section_id, ['sections']);
+      if (selection.kind === 'perk' ? !selection.category : selection.level === undefined)
+        errors.push(`${entity.id}: starting ability requires category or level`);
+    }
+    for (const grant of [
+      ...(entity.grants ?? []),
+      ...(entity.grant_choices ?? []).flatMap((c) => c.options),
+    ]) {
       if (grant.object_id) {
         link(entity.id, grant.object_id, ['entities']);
         if (!grant.object_id.startsWith(`${grant.kind}.`))
@@ -277,6 +337,7 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     )
       errors.push(`${table.id}: partial selection does not match source rows`);
     for (const row of table.rows) {
+      if (row.source) provenance(`${table.id}/${row.id}`, row.source);
       for (const id of row.rule_refs ?? []) link(table.id, id, ['rules']);
       const columns = new Set(table.columns.map((c) => c.id));
       if (
@@ -294,8 +355,11 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
           errors.push(`${table.id}/${row.id}: printed numeric value mismatch`);
         if (
           cell.type === 'dice' &&
-          cell.printed !==
-            `${cell.meaning === 'increase' ? '+' : cell.meaning === 'loss' ? '-' : ''}${cell.dice.count}d${cell.dice.sides}`
+          !printedDiceMatches(
+            cell.printed,
+            cell.dice,
+            cell.meaning === 'increase' ? '+' : cell.meaning === 'loss' ? '-' : '',
+          )
         )
           errors.push(`${table.id}/${row.id}: printed dice mismatch`);
         if (

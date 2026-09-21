@@ -1,5 +1,10 @@
 /** Types mirror the strict pilot schemas. Read YAML only after schema validation. */
 export type Scalar = string | number | boolean;
+export interface Dice {
+  count: number;
+  sides: number;
+  modifier?: number;
+}
 export type State = Record<string, Scalar>;
 export interface PilotSource {
   document: string;
@@ -88,7 +93,7 @@ export type Fields = Record<
     integer?: true;
     minimum?: number;
     maximum?: number;
-    dice?: { count: number; sides: number };
+    dice?: Dice;
   }
 >;
 export interface Dependency {
@@ -101,6 +106,8 @@ export interface Dependency {
 export interface Rule extends Metadata {
   type: string;
   scope: string;
+  entity_id?: string;
+  quest_id?: string;
   applies_to?: 'all_heroes';
   fields: Fields;
   when?: Condition;
@@ -132,10 +139,11 @@ export type Cell =
   | {
       type: 'dice';
       printed: string;
-      dice: { count: number; sides: number };
-      meaning: 'increase' | 'loss' | 'roll';
+      dice: Dice;
+      meaning: 'increase' | 'loss' | 'roll' | 'initial' | 'value';
     }
   | { type: 'range'; printed: string; min: number; max: number }
+  | { type: 'blank'; printed: '' }
   | { type: 'marker'; printed: '-' | 'N/A'; meaning: 'no_increase' | 'unavailable' };
 export interface Table extends Metadata {
   type: string;
@@ -147,29 +155,54 @@ export interface Table extends Metadata {
     source_row: string;
     cells: Record<string, Cell>;
     rule_refs?: string[];
+    source?: PilotSource[];
   }>;
   roll_domain?: Range;
   footnotes: string[];
 }
 export interface Entity extends Metadata {
-  type: 'profession' | 'talent' | 'condition';
+  type: 'profession' | 'talent' | 'condition' | 'species' | 'background' | 'quest' | 'perk';
   rules: string[];
   tables: string[];
+  background_number?: number;
+  quest_id?: string;
+  table_rows?: Array<{ table_id: string; row_id: string }>;
+  initial_hit_points?: { printed: string; dice: Dice };
+  talent_selection?: { selection: 'random'; category_selection: 'choice'; quantity: 1 };
+  grant_choices?: Array<{ quantity: number; options: NonNullable<Entity['grants']> }>;
+  starting_abilities?: Array<{
+    kind: 'spell' | 'prayer' | 'perk';
+    selection: 'choice';
+    quantity: number;
+    level?: number;
+    category?: string;
+    section_id: string;
+    printed_reference: string;
+  }>;
   grants?: Array<{
     kind: 'talent' | 'perk';
     label: string;
     object_id?: string;
     section_id?: string;
     printed_reference: string;
+    qualifier?: string;
   }>;
   starting_equipment?: Array<{
     label: string;
     quantity: number;
     selection: 'fixed' | 'choice' | 'random';
     qualifier?: string;
+    object_id?: string;
+    section_id?: string;
+    options?: Array<{ label: string; object_id?: string }>;
   }>;
   category?: string;
-  activation?: 'passive';
+  activation?: 'passive' | 'active';
+  activation_cost?: {
+    energy: number;
+    action_points: number;
+    energy_selection?: 'fixed' | 'variable';
+  };
 }
 export interface Step {
   id: string;
