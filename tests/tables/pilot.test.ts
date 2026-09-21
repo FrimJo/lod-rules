@@ -92,10 +92,10 @@ describe('profession tables and entity features', () => {
       ['perk', 'Heroic Force of Will'],
     ]);
     expect(entity.grants?.[0]?.object_id).toBe('talent.resistance_to_poison');
-    expect(entity.grants?.[1]?.object_id).toBeUndefined();
+    expect(entity.grants?.[1]?.object_id).toBe('perk.heroic_force_of_will');
     expect(entity.see_also).toContain('section.alchemy.making_a_recipe');
   });
-  it('retains Thief quantities and leaves unextracted grants as named references', () => {
+  it('retains Thief quantities and binds extracted grants', () => {
     const entity = pilot.entities.find((e) => e.id === 'profession.thief')!;
     expect(entity.starting_equipment).toEqual([
       { label: 'Small backpack', quantity: 1, selection: 'fixed' },
@@ -107,20 +107,29 @@ describe('profession tables and entity features', () => {
       ['talent', 'Evaluate'],
       ['perk', 'Heroic Force of Will'],
     ]);
-    expect(entity.grants?.every((g) => g.object_id === undefined)).toBe(true);
+    expect(entity.grants?.map((g) => g.object_id)).toEqual([
+      'talent.evaluate',
+      'perk.heroic_force_of_will',
+    ]);
   });
-  it('retains selected talent rows in printed order without claiming complete tables', () => {
+  it('retains the original pilot talent rows when catalogues expand', () => {
     const physical = pilot.tables.find((t) => t.id === 'table.talent.physical_pilot')!;
     const combat = pilot.tables.find((t) => t.id === 'table.talent.combat_pilot')!;
-    expect(physical.rows.map((r) => r.cells.talent!.printed)).toEqual([
-      'Fast',
-      'Night Vision',
-      'Perfect Hearing',
-      'Resistance to Poison',
-      'Tank',
-    ]);
-    expect(combat.rows.map((r) => r.cells.talent!.printed)).toEqual(['Axeman']);
-    expect([physical.completeness, combat.completeness]).toEqual(['partial', 'partial']);
+    const originalPhysical = [
+      'fast',
+      'night_vision',
+      'perfect_hearing',
+      'resistance_to_poison',
+      'tank',
+    ];
+    expect(
+      physical.rows
+        .filter((r) => originalPhysical.includes(r.id))
+        .map((r) => r.cells.talent!.printed),
+    ).toEqual(['Fast', 'Night Vision', 'Perfect Hearing', 'Resistance to Poison', 'Tank']);
+    expect(
+      combat.rows.filter((r) => r.id === 'axeman').map((r) => r.cells.talent!.printed),
+    ).toEqual(['Axeman']);
     for (const table of [physical, combat])
       for (const row of table.rows) {
         const entity = pilot.entities.find((e) => e.id === `talent.${row.id}`)!;

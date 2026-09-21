@@ -230,21 +230,26 @@ const badCases: Array<[string, Mutation, string]> = [
   [
     'missing cell',
     (data) => {
-      delete data.tables[0]!.rows[0]!.cells.left_skill;
+      delete data.tables.find((t) => t.id === 'table.character.alchemist_skills')!.rows[0]!.cells
+        .left_skill;
     },
     'incorrect columns',
   ],
   [
     'extra cell',
     (data) => {
-      data.tables[0]!.rows[0]!.cells.invented = { type: 'text', printed: 'x' };
+      data.tables.find(
+        (t) => t.id === 'table.character.alchemist_skills',
+      )!.rows[0]!.cells.invented = { type: 'text', printed: 'x' };
     },
     'incorrect columns',
   ],
   [
     'wrong column type',
     (data) => {
-      data.tables[0]!.rows[0]!.cells.left_skill = {
+      data.tables.find(
+        (t) => t.id === 'table.character.alchemist_skills',
+      )!.rows[0]!.cells.left_skill = {
         type: 'number',
         printed: '1',
         value: 1,
@@ -256,7 +261,9 @@ const badCases: Array<[string, Mutation, string]> = [
   [
     'changed printed value',
     (data) => {
-      data.tables[0]!.rows[0]!.cells.left_modifier = {
+      data.tables.find(
+        (t) => t.id === 'table.character.alchemist_skills',
+      )!.rows[0]!.cells.left_modifier = {
         type: 'number',
         printed: '-5',
         value: 5,
@@ -282,7 +289,9 @@ const badCases: Array<[string, Mutation, string]> = [
   [
     'incorrect unavailable marker',
     (data) => {
-      data.tables[0]!.rows[0]!.cells.left_modifier = {
+      data.tables.find(
+        (t) => t.id === 'table.character.alchemist_skills',
+      )!.rows[0]!.cells.left_modifier = {
         type: 'marker',
         printed: 'N/A',
         meaning: 'no_increase',
@@ -293,7 +302,9 @@ const badCases: Array<[string, Mutation, string]> = [
   [
     'incomplete partial selection',
     (data) => {
-      data.tables.find((t) => t.completeness === 'partial')!.selection = [];
+      const table = data.tables.find((t) => t.id === 'table.character.alchemist_skills')!;
+      table.completeness = 'partial';
+      table.selection = [];
     },
     'partial selection',
   ],

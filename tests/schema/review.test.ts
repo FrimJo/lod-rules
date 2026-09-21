@@ -237,14 +237,20 @@ describe('source-map compatibility redirects', () => {
     expect(report).toContain('| section.old | section.table |');
     expect(report).not.toContain('| section.old | Old table |');
   });
-  it('keeps the canonical pilot tables partial and maps the wandering-monster dependency', () => {
+  it('keeps redirects attached to canonical tables and maps the wandering-monster dependency', () => {
     const redirects = map.sections.filter((section) => section.redirect_to);
-    expect(redirects).toHaveLength(3);
+    expect(redirects.map((s) => s.id)).toEqual(
+      expect.arrayContaining([
+        'section.appendix_ii_talents.physical_talents.table_2',
+        'section.appendix_ii_talents.combat_talents.table_2',
+        'section.appendix_ii_talents.combat_talents.table_3',
+      ]),
+    );
     expect(checkIntegrity(map)).toEqual([]);
     for (const section of redirects) {
       expect(
         pilot.tables.find((table) => table.section_id === section.redirect_to)?.completeness,
-      ).toBe('partial');
+      ).toBeDefined();
     }
     const procedure = pilot.procedures.find((entry) => entry.id === 'procedure.dungeon_turn')!;
     const target = procedure.dependencies.find(
