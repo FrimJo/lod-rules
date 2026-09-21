@@ -2,11 +2,23 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
-import { checkIntegrity, type CoverageEntry, type Page, type Section } from './integrity.ts';
+import {
+  checkIntegrity,
+  checkGlossaryIntegrity,
+  type CoverageEntry,
+  type Page,
+  type Section,
+  type Term,
+  type Alias,
+  type Issue,
+} from './integrity.ts';
 
 /** Canonical files loaded by the validator. `generated/` is never scanned. */
 const canonicalFiles: Array<{ path: string; schema: SchemaName }> = [
   { path: 'source/manifest.yaml', schema: 'manifest' },
+  { path: 'corpus/glossary/terms.yaml', schema: 'terms' },
+  { path: 'corpus/glossary/aliases.yaml', schema: 'aliases' },
+  { path: 'review/ambiguities.yaml', schema: 'issues' },
   { path: 'corpus/source-map/sections.yaml', schema: 'sections' },
   { path: 'corpus/source-map/pages.yaml', schema: 'pages' },
   { path: 'corpus/source-map/coverage.yaml', schema: 'coverage' },
@@ -110,14 +122,28 @@ export function validateCorpus(): ValidationResult {
     const manifest = loaded.get('manifest') as Manifest;
     const canonicalDocument = manifest.documents.find((document) => document.canonical);
 
+    const sourceMap = {
+      sections: loaded.get('sections') as Section[],
+      pages: loaded.get('pages') as Page[],
+      coverage: (loaded.get('coverage') as { sections: CoverageEntry[] }).sections,
+      externalSourceIds: (manifest.external_sources ?? []).map((source) => source.id),
+      documentPageCount: canonicalDocument?.pages,
+    };
+    errors.push(...checkIntegrity(sourceMap));
     errors.push(
-      ...checkIntegrity({
-        sections: loaded.get('sections') as Section[],
-        pages: loaded.get('pages') as Page[],
-        coverage: (loaded.get('coverage') as { sections: CoverageEntry[] }).sections,
-        externalSourceIds: (manifest.external_sources ?? []).map((source) => source.id),
-        documentPageCount: canonicalDocument?.pages,
-      }),
+      ...checkGlossaryIntegrity(
+        {
+          terms: loaded.get('terms') as Term[],
+          aliases: loaded.get('aliases') as Alias[],
+          issues: loaded.get('issues') as Issue[],
+          documentIds: [
+            ...manifest.documents.map((document) => document.id),
+            ...(manifest.external_sources ?? []).map((source) => source.id),
+          ],
+          canonicalDocumentId: canonicalDocument?.id ?? '',
+        },
+        sourceMap,
+      ),
     );
   }
 

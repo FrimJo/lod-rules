@@ -3,10 +3,10 @@ import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { renderCoverageReport } from '../../scripts/reports/render-coverage.ts';
 
 describe('corpus validation', () => {
-  it('passes against the committed source map', () => {
+  it('passes against the canonical corpus', () => {
     const { errors, filesChecked } = validateCorpus();
     expect(errors).toEqual([]);
-    expect(filesChecked).toBe(4);
+    expect(filesChecked).toBe(7);
   });
 });
 

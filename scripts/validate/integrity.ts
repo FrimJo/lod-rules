@@ -183,3 +183,116 @@ export function checkIntegrity(map: SourceMap): string[] {
     ...checkPageRanges(map.sections),
   ];
 }
+
+export interface SourceReference {
+  document: string;
+  pdf_page?: number | null;
+  printed_page?: number | null;
+}
+
+export interface Term {
+  id: string;
+  name: string;
+  abbreviation?: string;
+  aliases: string[];
+  related: string[];
+  section_id: string;
+  source: SourceReference[];
+}
+
+export interface Alias {
+  form: string;
+  term_id: string;
+}
+
+export interface Issue {
+  id: string;
+  related: string[];
+  source: SourceReference[];
+}
+
+export interface Glossary {
+  terms: Term[];
+  aliases: Alias[];
+  issues: Issue[];
+  documentIds: string[];
+  canonicalDocumentId: string;
+}
+
+/** Case is ignored for lookup; punctuation (notably AP/AP(X) and NA/N/A) is not. */
+export function checkGlossaryIntegrity(glossary: Glossary, map: SourceMap): string[] {
+  const errors: string[] = [];
+  const terms = new Map(glossary.terms.map((term) => [term.id, term]));
+  const sections = new Set(map.sections.map((section) => section.id));
+  const documents = new Set(glossary.documentIds);
+  const relatedIds = new Set([
+    ...terms.keys(),
+    ...sections,
+    ...glossary.issues.map((issue) => issue.id),
+  ]);
+  const pages = new Map(map.pages.map((page) => [page.pdf_page, page]));
+  const expected = new Map<string, string>();
+  const actual = new Map<string, string>();
+
+  for (const [label, entries] of [
+    ['terms', glossary.terms],
+    ['issues', glossary.issues],
+  ] as const) {
+    const seen = new Set<string>();
+    for (const entry of entries) {
+      if (seen.has(entry.id)) errors.push(`${label}: duplicate id "${entry.id}"`);
+      seen.add(entry.id);
+      for (const target of entry.related) {
+        if (!(label === 'terms' ? terms.has(target) : relatedIds.has(target))) {
+          errors.push(`${entry.id}: unknown related "${target}"`);
+        }
+      }
+      for (const source of entry.source) {
+        if (!documents.has(source.document)) {
+          errors.push(`${entry.id}: unknown document "${source.document}"`);
+        }
+        // The page map belongs only to the canonical rulebook, never an external book.
+        if (source.document !== glossary.canonicalDocumentId) continue;
+        if (typeof source.pdf_page === 'number') {
+          const page = pages.get(source.pdf_page);
+          if (!page) errors.push(`${entry.id}: unknown pdf page ${source.pdf_page}`);
+          else if (source.printed_page !== undefined && source.printed_page !== page.printed_page) {
+            errors.push(`${entry.id}: printed/pdf page mismatch at pdf page ${source.pdf_page}`);
+          }
+        } else if (
+          typeof source.printed_page === 'number' &&
+          !map.pages.some((page) => page.printed_page === source.printed_page)
+        ) {
+          errors.push(`${entry.id}: unknown printed page ${source.printed_page}`);
+        }
+      }
+    }
+  }
+
+  for (const term of glossary.terms) {
+    if (!sections.has(term.section_id))
+      errors.push(`${term.id}: unknown section "${term.section_id}"`);
+    const forms = [term.name, ...(term.abbreviation ? [term.abbreviation] : []), ...term.aliases];
+    if (term.abbreviation && !term.aliases.includes(term.abbreviation)) {
+      errors.push(`${term.id}: abbreviation missing from aliases`);
+    }
+    for (const form of forms) {
+      const key = form.toLowerCase();
+      const owner = expected.get(key);
+      if (owner && owner !== term.id) errors.push(`terms: conflicting alias "${form}"`);
+      expected.set(key, term.id);
+    }
+  }
+  for (const alias of glossary.aliases) {
+    const key = alias.form.toLowerCase();
+    if (actual.has(key)) errors.push(`aliases: duplicate form "${alias.form}"`);
+    actual.set(key, alias.term_id);
+    if (!terms.has(alias.term_id)) errors.push(`aliases: unknown term "${alias.term_id}"`);
+    if (expected.get(key) !== alias.term_id)
+      errors.push(`aliases: term mismatch for "${alias.form}"`);
+  }
+  for (const [form, owner] of expected) {
+    if (actual.get(form) !== owner) errors.push(`aliases: missing form "${form}" for ${owner}`);
+  }
+  return errors;
+}
