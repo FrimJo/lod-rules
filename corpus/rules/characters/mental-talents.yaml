@@ -1,0 +1,393 @@
+- id: character.talent.braveheart.fear_terror
+  name: 'Braveheart: fear terror'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Braveheart: fear terror'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is braver than most. +10 bonus on Fear and Terror Tests.
+  type: modifier
+  scope: global
+  entity_id: talent.braveheart
+  fields:
+    test_kind:
+      type: string
+      role: input
+      description: test kind
+    check_modifier:
+      type: number
+      role: state
+      description: check modifier
+  effects:
+    - type: add
+      target: check_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: test_kind
+        right:
+          type: literal
+          value: fear
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: test_kind
+        right:
+          type: literal
+          value: terror
+- id: character.talent.confident.resolve
+  name: 'Confident: resolve'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Confident: resolve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: No enemy or task is too difficult. Your hero gains a +5 bonus to the Resolve stat.
+  type: modifier
+  scope: global
+  entity_id: talent.confident
+  fields:
+    resolve:
+      type: number
+      role: state
+      description: resolve
+  effects:
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: 5
+      duration: permanent
+- id: character.talent.fearless.prerequisite
+  name: 'Fearless: prerequisite'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Fearless: prerequisite'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is completely immune to the effects of fear and treats terror as fear. This
+    talent requires that the hero already has the Braveheart Mental Talent.
+  type: modifier
+  scope: global
+  entity_id: talent.fearless
+  fields:
+    has_braveheart:
+      type: boolean
+      role: input
+      description: has braveheart
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_braveheart
+        right:
+          type: literal
+          value: true
+- id: character.talent.fearless.effects
+  name: 'Fearless: effects'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Fearless: effects'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is completely immune to the effects of fear and treats terror as fear. This
+    talent requires that the hero already has the Braveheart Mental Talent.
+  type: modifier
+  scope: global
+  entity_id: talent.fearless
+  fields:
+    immune_to_fear:
+      type: boolean
+      role: output
+      description: immune to fear
+    treat_terror_as_fear:
+      type: boolean
+      role: output
+      description: treat terror as fear
+  effects:
+    - type: set
+      target: immune_to_fear
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: treat_terror_as_fear
+      value:
+        type: literal
+        value: true
+- id: character.talent.hate.selection
+  name: 'Hate: selection'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Hate: selection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Through personal experience, or through the history of their kin, your hero has grown
+    to hate certain enemies. This hate fuels their fighting, gaining a +5 bonus to CS when attacking
+    those enemies. However, their hatred impairs their ability to parry and dodge (-5 parry/dodge)
+    when struck by those enemies. The hero may choose one enemy to hate. If your hero hates goblins
+    for instance, they hate every enemy with the word ‘Goblin’ in it. This Talent may be taken
+    several times making the hero hate different enemies.
+  type: modifier
+  scope: global
+  entity_id: talent.hate
+  fields:
+    chosen_enemy:
+      type: string
+      role: input
+      description: chosen enemy
+    repeatable_for_different_enemies:
+      type: boolean
+      role: output
+      description: repeatable for different enemies
+    match_enemy_name_word:
+      type: boolean
+      role: output
+      description: match enemy name word
+  effects:
+    - type: set
+      target: repeatable_for_different_enemies
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: match_enemy_name_word
+      value:
+        type: literal
+        value: true
+- id: character.talent.hate.attack
+  name: 'Hate: attack'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Hate: attack'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Through personal experience, or through the history of their kin, your hero has grown
+    to hate certain enemies. This hate fuels their fighting, gaining a +5 bonus to CS when attacking
+    those enemies. However, their hatred impairs their ability to parry and dodge (-5 parry/dodge)
+    when struck by those enemies. The hero may choose one enemy to hate. If your hero hates goblins
+    for instance, they hate every enemy with the word ‘Goblin’ in it. This Talent may be taken
+    several times making the hero hate different enemies.
+  type: modifier
+  scope: global
+  entity_id: talent.hate
+  fields:
+    enemy_matches_chosen_enemy:
+      type: boolean
+      role: input
+      description: enemy matches chosen enemy
+    combat_skill_modifier:
+      type: number
+      role: state
+      description: combat skill modifier
+  effects:
+    - type: add
+      target: combat_skill_modifier
+      value:
+        type: literal
+        value: 5
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_matches_chosen_enemy
+    right:
+      type: literal
+      value: true
+- id: character.talent.hate.defence
+  name: 'Hate: defence'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Hate: defence'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Through personal experience, or through the history of their kin, your hero has grown
+    to hate certain enemies. This hate fuels their fighting, gaining a +5 bonus to CS when attacking
+    those enemies. However, their hatred impairs their ability to parry and dodge (-5 parry/dodge)
+    when struck by those enemies. The hero may choose one enemy to hate. If your hero hates goblins
+    for instance, they hate every enemy with the word ‘Goblin’ in it. This Talent may be taken
+    several times making the hero hate different enemies.
+  type: modifier
+  scope: global
+  entity_id: talent.hate
+  fields:
+    struck_by_hated_enemy:
+      type: boolean
+      role: input
+      description: struck by hated enemy
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+    dodge_modifier:
+      type: number
+      role: state
+      description: dodge modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: -5
+      duration: check
+    - type: add
+      target: dodge_modifier
+      value:
+        type: literal
+        value: -5
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: struck_by_hated_enemy
+    right:
+      type: literal
+      value: true
+- id: character.talent.strong_minded.sanity
+  name: 'Strong-Minded: sanity'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Strong-Minded: sanity'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero is less affected by the horrors of the dungeons than their comrades. The hero
+    gains +1 Sanity Point.
+  type: modifier
+  scope: global
+  entity_id: talent.strong_minded
+  fields:
+    sanity_points:
+      type: number
+      role: state
+      description: sanity points
+  effects:
+    - type: add
+      target: sanity_points
+      value:
+        type: literal
+        value: 1
+      duration: permanent
+- id: character.talent.wise.reroll
+  name: 'Wise: reroll'
+  section_id: section.appendix_ii_talents.mental_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: 'Wise: reroll'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero has plenty of life experience and may re-roll a failed WIS-test.
+  type: modifier
+  scope: global
+  entity_id: talent.wise
+  fields:
+    wisdom_test_failed:
+      type: boolean
+      role: input
+      description: wisdom test failed
+    reroll_allowed:
+      type: boolean
+      role: output
+      description: reroll allowed
+  effects:
+    - type: set
+      target: reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wisdom_test_failed
+    right:
+      type: literal
+      value: true

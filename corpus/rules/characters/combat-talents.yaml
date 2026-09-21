@@ -1,0 +1,1190 @@
+- id: character.talent.bruiser.bloodlust
+  name: 'Bruiser: bloodlust'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Bruiser: bloodlust'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero excels at fighting with blunt weapons and Bloodlust is now triggered on a
+    result of 1-10 when using all kinds of hammers, flails, staffs, and morning stars.
+  type: modifier
+  scope: global
+  entity_id: talent.bruiser
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+  effects:
+    - type: replace_range
+      dependency: bloodlust
+      range:
+        min: 1
+        max: 10
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_kind
+        right:
+          type: literal
+          value: hammer
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_kind
+        right:
+          type: literal
+          value: flail
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_kind
+        right:
+          type: literal
+          value: staff
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_kind
+        right:
+          type: literal
+          value: morning_star
+  dependencies:
+    - key: bloodlust
+      label: Bloodlust
+      section_id: section.combat
+- id: character.talent.marksman.bloodlust
+  name: 'Marksman: bloodlust'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Marksman: bloodlust'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Fighting with ranged weapons comes naturally to your hero. Bloodlust is now triggered
+    on a result of 1-10 when using all kinds of ranged weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.marksman
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+  effects:
+    - type: replace_range
+      dependency: bloodlust
+      range:
+        min: 1
+        max: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_kind
+    right:
+      type: literal
+      value: ranged
+  dependencies:
+    - key: bloodlust
+      label: Bloodlust
+      section_id: section.combat
+- id: character.talent.swordsman.bloodlust
+  name: 'Swordsman: bloodlust'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Swordsman: bloodlust'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This hero is very skilled with a blade and Bloodlust is now triggered on a result of
+    1-10 when using all types of swords.
+  type: modifier
+  scope: global
+  entity_id: talent.swordsman
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+  effects:
+    - type: replace_range
+      dependency: bloodlust
+      range:
+        min: 1
+        max: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_kind
+    right:
+      type: literal
+      value: sword
+  dependencies:
+    - key: bloodlust
+      label: Bloodlust
+      section_id: section.combat
+- id: character.talent.death_lament.recover
+  name: 'Death Lament: recover'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Death Lament: recover'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'When others fall, this hero still stands, refusing to give in. Each time your hero is
+    reduced to 0 Hit Points, roll 1d6: on a result of 1-3, the hero regains 1 Hit Point.'
+  type: modifier
+  scope: global
+  entity_id: talent.death_lament
+  fields:
+    reduced_to_zero_hp:
+      type: boolean
+      role: input
+      description: reduced to zero hp
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+  effects:
+    - type: add
+      target: hit_points
+      value:
+        type: literal
+        value: 1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reduced_to_zero_hp
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 3
+- id: character.talent.disarm.eligibility
+  name: 'Disarm: eligibility'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Disarm: eligibility'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This is a special attack, using the target's DEX as a negative modifier to the attack.
+    If the attack succeeds it inflicts no damage, but causes the enemy to drop their weapon. The
+    enemy must spend their next action trying to pick it up. In order to do so, the enemy has to
+    succeed with a DEX Test. The enemy will continue until successful. If the hero’s attack fails,
+    nothing happens. This can only be used on enemies that are carrying weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.disarm
+  fields:
+    enemy_carrying_weapon:
+      type: boolean
+      role: input
+      description: enemy carrying weapon
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_carrying_weapon
+        right:
+          type: literal
+          value: true
+- id: character.talent.disarm.attack_modifier
+  name: 'Disarm: attack modifier'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Disarm: attack modifier'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This is a special attack, using the target's DEX as a negative modifier to the attack.
+    If the attack succeeds it inflicts no damage, but causes the enemy to drop their weapon. The
+    enemy must spend their next action trying to pick it up. In order to do so, the enemy has to
+    succeed with a DEX Test. The enemy will continue until successful. If the hero’s attack fails,
+    nothing happens. This can only be used on enemies that are carrying weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.disarm
+  fields:
+    target_dexterity:
+      type: number
+      role: input
+      description: target dexterity
+    attack_modifier:
+      type: number
+      role: state
+      description: attack modifier
+  effects:
+    - type: add
+      target: attack_modifier
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: literal
+            value: -1
+          - type: field
+            name: target_dexterity
+      duration: check
+- id: character.talent.disarm.successful_disarm
+  name: 'Disarm: successful disarm'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Disarm: successful disarm'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This is a special attack, using the target's DEX as a negative modifier to the attack.
+    If the attack succeeds it inflicts no damage, but causes the enemy to drop their weapon. The
+    enemy must spend their next action trying to pick it up. In order to do so, the enemy has to
+    succeed with a DEX Test. The enemy will continue until successful. If the hero’s attack fails,
+    nothing happens. This can only be used on enemies that are carrying weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.disarm
+  fields:
+    attack_succeeded:
+      type: boolean
+      role: input
+      description: attack succeeded
+    damage:
+      type: number
+      role: output
+      description: damage
+    enemy_weapon_dropped:
+      type: boolean
+      role: output
+      description: enemy weapon dropped
+    next_action_pickup:
+      type: boolean
+      role: output
+      description: next action pickup
+    repeat_pickup_until_success:
+      type: boolean
+      role: output
+      description: repeat pickup until success
+    pickup_requires_dex_test:
+      type: boolean
+      role: output
+      description: pickup requires dex test
+  effects:
+    - type: set
+      target: damage
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: enemy_weapon_dropped
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_action_pickup
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: repeat_pickup_until_success
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: pickup_requires_dex_test
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attack_succeeded
+    right:
+      type: literal
+      value: true
+- id: character.talent.dual_wield.eligibility
+  name: 'Dual Wield: eligibility'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Dual Wield: eligibility'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This talent requires a DEX of 60. Any hero with this talent may use a weapon with the
+    Dual Wield Special Rule in their offhand. The attacks are still done as usual with the main
+    weapon, but any hit will add +X DMG to the target. The X is defined in the Weapon Table.
+    Parrying with two weapons is also easier, and any parry while using two weapons has a +5
+    modifier.
+  type: modifier
+  scope: global
+  entity_id: talent.dual_wield
+  fields:
+    dexterity:
+      type: number
+      role: input
+      description: dexterity
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: dexterity
+        right:
+          type: literal
+          value: 60
+- id: character.talent.dual_wield.offhand_weapon
+  name: 'Dual Wield: offhand weapon'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Dual Wield: offhand weapon'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This talent requires a DEX of 60. Any hero with this talent may use a weapon with the
+    Dual Wield Special Rule in their offhand. The attacks are still done as usual with the main
+    weapon, but any hit will add +X DMG to the target. The X is defined in the Weapon Table.
+    Parrying with two weapons is also easier, and any parry while using two weapons has a +5
+    modifier.
+  type: modifier
+  scope: global
+  entity_id: talent.dual_wield
+  fields:
+    offhand_has_dual_wield_rule:
+      type: boolean
+      role: input
+      description: offhand has dual wield rule
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: offhand_has_dual_wield_rule
+        right:
+          type: literal
+          value: true
+- id: character.talent.dual_wield.damage
+  name: 'Dual Wield: damage'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Dual Wield: damage'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This talent requires a DEX of 60. Any hero with this talent may use a weapon with the
+    Dual Wield Special Rule in their offhand. The attacks are still done as usual with the main
+    weapon, but any hit will add +X DMG to the target. The X is defined in the Weapon Table.
+    Parrying with two weapons is also easier, and any parry while using two weapons has a +5
+    modifier.
+  type: modifier
+  scope: global
+  entity_id: talent.dual_wield
+  fields:
+    attack_hit:
+      type: boolean
+      role: input
+      description: attack hit
+    offhand_damage_bonus:
+      type: number
+      role: input
+      description: offhand damage bonus
+    damage:
+      type: number
+      role: state
+      description: damage
+    attack_uses_main_weapon:
+      type: boolean
+      role: output
+      description: attack uses main weapon
+  effects:
+    - type: set
+      target: attack_uses_main_weapon
+      value:
+        type: literal
+        value: true
+    - type: add
+      target: damage
+      value:
+        type: field
+        name: offhand_damage_bonus
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attack_hit
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: weapon_table
+      label: 'Weapon Table: Dual Wield +X'
+      section_id: section.appendix_iii_equipment.weapons
+- id: character.talent.dual_wield.parry
+  name: 'Dual Wield: parry'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Dual Wield: parry'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This talent requires a DEX of 60. Any hero with this talent may use a weapon with the
+    Dual Wield Special Rule in their offhand. The attacks are still done as usual with the main
+    weapon, but any hit will add +X DMG to the target. The X is defined in the Weapon Table.
+    Parrying with two weapons is also easier, and any parry while using two weapons has a +5
+    modifier.
+  type: modifier
+  scope: global
+  entity_id: talent.dual_wield
+  fields:
+    parrying_with_two_weapons:
+      type: boolean
+      role: input
+      description: parrying with two weapons
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: 5
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parrying_with_two_weapons
+    right:
+      type: literal
+      value: true
+- id: character.talent.fast_reload.bow_sling
+  name: 'Fast Reload: bow sling'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Fast Reload: bow sling'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Years of practice makes your hero faster than most and they can reload in the blink of
+    an eye. Bows and sling can be reloaded in the same action as shooting once per turn. Crossbows
+    can be reloaded in 1 action and fired in the next. An Arbalest can be reloaded in 2 actions, and
+    fired in the next turn.
+  type: modifier
+  scope: global
+  entity_id: talent.fast_reload
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+    used_this_turn:
+      type: boolean
+      role: input
+      description: used this turn
+    reload_with_shooting:
+      type: boolean
+      role: output
+      description: reload with shooting
+  effects:
+    - type: set
+      target: reload_with_shooting
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_kind
+            right:
+              type: literal
+              value: bow
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_kind
+            right:
+              type: literal
+              value: sling
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: used_this_turn
+        right:
+          type: literal
+          value: false
+- id: character.talent.fast_reload.crossbow
+  name: 'Fast Reload: crossbow'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Fast Reload: crossbow'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Years of practice makes your hero faster than most and they can reload in the blink of
+    an eye. Bows and sling can be reloaded in the same action as shooting once per turn. Crossbows
+    can be reloaded in 1 action and fired in the next. An Arbalest can be reloaded in 2 actions, and
+    fired in the next turn.
+  type: modifier
+  scope: global
+  entity_id: talent.fast_reload
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+    reload_actions:
+      type: number
+      role: output
+      description: reload actions
+    fire_timing:
+      type: string
+      role: output
+      description: fire timing
+  effects:
+    - type: set
+      target: reload_actions
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: fire_timing
+      value:
+        type: literal
+        value: next_action
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_kind
+    right:
+      type: literal
+      value: crossbow
+- id: character.talent.fast_reload.arbalest
+  name: 'Fast Reload: arbalest'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Fast Reload: arbalest'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Years of practice makes your hero faster than most and they can reload in the blink of
+    an eye. Bows and sling can be reloaded in the same action as shooting once per turn. Crossbows
+    can be reloaded in 1 action and fired in the next. An Arbalest can be reloaded in 2 actions, and
+    fired in the next turn.
+  type: modifier
+  scope: global
+  entity_id: talent.fast_reload
+  fields:
+    weapon_kind:
+      type: string
+      role: input
+      description: weapon kind
+    reload_actions:
+      type: number
+      role: output
+      description: reload actions
+    fire_timing:
+      type: string
+      role: output
+      description: fire timing
+  effects:
+    - type: set
+      target: reload_actions
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: fire_timing
+      value:
+        type: literal
+        value: next_turn
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_kind
+    right:
+      type: literal
+      value: arbalest
+- id: character.talent.lethal_shot.damage
+  name: 'Lethal shot: damage'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Lethal shot: damage'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero always seems to hit the perfect spot. +2DMG with all ranged weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.lethal_shot
+  fields:
+    ranged_weapon:
+      type: boolean
+      role: input
+      description: ranged weapon
+    damage_modifier:
+      type: number
+      role: state
+      description: damage modifier
+  effects:
+    - type: add
+      target: damage_modifier
+      value:
+        type: literal
+        value: 2
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ranged_weapon
+    right:
+      type: literal
+      value: true
+- id: character.talent.mighty_blow.damage
+  name: 'Mighty Blow: damage'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Mighty Blow: damage'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is an expert at finding the weak spots of the enemy. Your hero gets a +1
+    bonus on Damage Rolls with melee weapons.
+  type: modifier
+  scope: global
+  entity_id: talent.mighty_blow
+  fields:
+    melee_weapon:
+      type: boolean
+      role: input
+      description: melee weapon
+    damage_modifier:
+      type: number
+      role: state
+      description: damage modifier
+  effects:
+    - type: add
+      target: damage_modifier
+      value:
+        type: literal
+        value: 1
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: melee_weapon
+    right:
+      type: literal
+      value: true
+- id: character.talent.parry_master.parry_limit
+  name: 'Parry Master: parry limit'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Parry Master: parry limit'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is adept at protection with a weapon. If the hero is in the Parry Stance,
+    they may parry twice with a weapon during one turn.
+  type: modifier
+  scope: global
+  entity_id: talent.parry_master
+  fields:
+    in_parry_stance:
+      type: boolean
+      role: input
+      description: in parry stance
+    weapon_parries_per_turn:
+      type: number
+      role: output
+      description: weapon parries per turn
+  effects:
+    - type: set
+      target: weapon_parries_per_turn
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: in_parry_stance
+    right:
+      type: literal
+      value: true
+- id: character.talent.perfect_shot.armour
+  name: 'Perfect Shot: armour'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Perfect Shot: armour'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Identifying the weak spots in enemy armour can sometimes make the difference when
+    firing an arrow or bolt from afar. If the Damage Roll is odd, your hero ignores armour (But not
+    NA).
+  type: modifier
+  scope: global
+  entity_id: talent.perfect_shot
+  fields:
+    firing_arrow_or_bolt:
+      type: boolean
+      role: input
+      description: firing arrow or bolt
+    damage_roll_is_odd:
+      type: boolean
+      role: input
+      description: damage roll is odd
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+  effects:
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: firing_arrow_or_bolt
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_roll_is_odd
+        right:
+          type: literal
+          value: true
+- id: character.talent.riposte_master.riposte
+  name: 'Riposte Master: riposte'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Riposte Master: riposte'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When successfully parrying a strike with a weapon, the hero may automatically cause 2
+    Points of Damage to that Enemy, ignoring Armour and NA. May only be done with weapons of class 3
+    or lower.
+  type: modifier
+  scope: global
+  entity_id: talent.riposte_master
+  fields:
+    successful_weapon_parry:
+      type: boolean
+      role: input
+      description: successful weapon parry
+    weapon_class:
+      type: number
+      role: input
+      description: weapon class
+    use_riposte:
+      type: boolean
+      role: input
+      description: use riposte
+    riposte_damage:
+      type: number
+      role: output
+      description: riposte damage
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+  effects:
+    - type: set
+      target: riposte_damage
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: successful_weapon_parry
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: weapon_class
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: use_riposte
+        right:
+          type: literal
+          value: true
+- id: character.talent.sniper.aim
+  name: 'Sniper: aim'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Sniper: aim'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With practised ease, your hero cannot seem to miss when taking careful aim. The aim
+    action gives your hero a +15 modifier instead of +10.
+  type: modifier
+  scope: global
+  entity_id: talent.sniper
+  fields:
+    using_aim_action:
+      type: boolean
+      role: input
+      description: using aim action
+    aim_modifier:
+      type: number
+      role: output
+      description: aim modifier
+  effects:
+    - type: set
+      target: aim_modifier
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: using_aim_action
+    right:
+      type: literal
+      value: true
+- id: character.talent.tight_grip.weapon_strength
+  name: 'Tight Grip: weapon strength'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Tight Grip: weapon strength'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With unusually strong hands, the hero may add +10 STR when calculating what weapon
+    class they can use.
+  type: modifier
+  scope: global
+  entity_id: talent.tight_grip
+  fields:
+    calculating_weapon_class:
+      type: boolean
+      role: input
+      description: calculating weapon class
+    strength_for_weapon_class:
+      type: number
+      role: state
+      description: strength for weapon class
+  effects:
+    - type: add
+      target: strength_for_weapon_class
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: calculating_weapon_class
+    right:
+      type: literal
+      value: true
+- id: character.talent.tunnel_fighter.corridor
+  name: 'Tunnel Fighter: corridor'
+  section_id: section.appendix_ii_talents.combat_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 173
+      printed_page: 171
+      heading: 'Tunnel Fighter: corridor'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is accustomed to fighting in tight spaces. +10 CS when fighting in a corridor.
+  type: modifier
+  scope: global
+  entity_id: talent.tunnel_fighter
+  fields:
+    fighting_in_corridor:
+      type: boolean
+      role: input
+      description: fighting in corridor
+    combat_skill_modifier:
+      type: number
+      role: state
+      description: combat skill modifier
+  effects:
+    - type: add
+      target: combat_skill_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: fighting_in_corridor
+    right:
+      type: literal
+      value: true

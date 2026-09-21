@@ -1,0 +1,857 @@
+- id: character.talent.assassin.automatic_hit
+  name: 'Assassin: automatic hit'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Assassin: automatic hit'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    With uncanny precision, the hero automatically hits any target from behind with a class
+    1 or 2 weapon.
+  type: modifier
+  scope: global
+  entity_id: talent.assassin
+  fields:
+    from_behind:
+      type: boolean
+      role: input
+      description: from behind
+    weapon_class:
+      type: number
+      role: input
+      description: weapon class
+    automatic_hit:
+      type: boolean
+      role: output
+      description: automatic hit
+  effects:
+    - type: set
+      target: automatic_hit
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: from_behind
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_class
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_class
+            right:
+              type: literal
+              value: 2
+- id: character.talent.backstabber.ignore_armour
+  name: 'Backstabber: ignore armour'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Backstabber: ignore armour'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Accustomed to optimising the odds, your hero ignores enemy armour and NA when attacking
+    from behind.
+  type: modifier
+  scope: global
+  entity_id: talent.backstabber
+  fields:
+    from_behind:
+      type: boolean
+      role: input
+      description: from behind
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+  effects:
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: from_behind
+    right:
+      type: literal
+      value: true
+- id: character.talent.cutpurse.attempt
+  name: 'Cutpurse: attempt'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Cutpurse: attempt'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once per visit in a settlement, your hero may try to steal the purse from some
+    unsuspecting victim. This must be done as the first thing when entering a settlement. Roll 1d6.
+    On a result of 1-2 the hero gains 1d100 coins. On a result of 6, the attempt is detected, and
+    the hero is immediately chased out of the settlement. The hero may do nothing until the rest of
+    the party decides to leave the settlement. Rations must be used as normal, and if rations are
+    lacking, the hero becomes hungry. Foraging is allowed while waiting.
+  type: modifier
+  scope: global
+  entity_id: talent.cutpurse
+  fields:
+    first_thing_on_entry:
+      type: boolean
+      role: input
+      description: first thing on entry
+    attempts_this_visit:
+      type: number
+      role: input
+      description: attempts this visit
+    attempt_roll:
+      type: number
+      role: input
+      description: attempt roll
+      integer: true
+      minimum: 1
+      maximum: 6
+    coin_roll:
+      type: number
+      role: input
+      description: coin roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    coins:
+      type: number
+      role: state
+      description: coins
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_thing_on_entry
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: attempts_this_visit
+        right:
+          type: literal
+          value: 0
+- id: character.talent.cutpurse.success
+  name: 'Cutpurse: success'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Cutpurse: success'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once per visit in a settlement, your hero may try to steal the purse from some
+    unsuspecting victim. This must be done as the first thing when entering a settlement. Roll 1d6.
+    On a result of 1-2 the hero gains 1d100 coins. On a result of 6, the attempt is detected, and
+    the hero is immediately chased out of the settlement. The hero may do nothing until the rest of
+    the party decides to leave the settlement. Rations must be used as normal, and if rations are
+    lacking, the hero becomes hungry. Foraging is allowed while waiting.
+  type: modifier
+  scope: global
+  entity_id: talent.cutpurse
+  fields:
+    attempt_roll:
+      type: number
+      role: input
+      description: attempt roll
+    coin_roll:
+      type: number
+      role: input
+      description: coin roll
+    coins:
+      type: number
+      role: state
+      description: coins
+  effects:
+    - type: add
+      target: coins
+      value:
+        type: field
+        name: coin_roll
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: attempt_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: attempt_roll
+        right:
+          type: literal
+          value: 2
+- id: character.talent.cutpurse.detected
+  name: 'Cutpurse: detected'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Cutpurse: detected'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once per visit in a settlement, your hero may try to steal the purse from some
+    unsuspecting victim. This must be done as the first thing when entering a settlement. Roll 1d6.
+    On a result of 1-2 the hero gains 1d100 coins. On a result of 6, the attempt is detected, and
+    the hero is immediately chased out of the settlement. The hero may do nothing until the rest of
+    the party decides to leave the settlement. Rations must be used as normal, and if rations are
+    lacking, the hero becomes hungry. Foraging is allowed while waiting.
+  type: modifier
+  scope: global
+  entity_id: talent.cutpurse
+  fields:
+    attempt_roll:
+      type: number
+      role: input
+      description: attempt roll
+    chased_out:
+      type: boolean
+      role: output
+      description: chased out
+    wait_until_party_leaves:
+      type: boolean
+      role: output
+      description: wait until party leaves
+    normal_rations_required:
+      type: boolean
+      role: output
+      description: normal rations required
+    foraging_allowed:
+      type: boolean
+      role: output
+      description: foraging allowed
+  effects:
+    - type: set
+      target: chased_out
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wait_until_party_leaves
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: normal_rations_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: foraging_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attempt_roll
+    right:
+      type: literal
+      value: 6
+- id: character.talent.cutpurse.hunger
+  name: 'Cutpurse: hunger'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Cutpurse: hunger'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once per visit in a settlement, your hero may try to steal the purse from some
+    unsuspecting victim. This must be done as the first thing when entering a settlement. Roll 1d6.
+    On a result of 1-2 the hero gains 1d100 coins. On a result of 6, the attempt is detected, and
+    the hero is immediately chased out of the settlement. The hero may do nothing until the rest of
+    the party decides to leave the settlement. Rations must be used as normal, and if rations are
+    lacking, the hero becomes hungry. Foraging is allowed while waiting.
+  type: modifier
+  scope: global
+  entity_id: talent.cutpurse
+  fields:
+    chased_out:
+      type: boolean
+      role: input
+      description: chased out
+    rations_lacking:
+      type: boolean
+      role: input
+      description: rations lacking
+    hungry:
+      type: boolean
+      role: output
+      description: hungry
+  effects:
+    - type: set
+      target: hungry
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chased_out
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rations_lacking
+        right:
+          type: literal
+          value: true
+- id: character.talent.evaluate.barter
+  name: 'Evaluate: barter'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Evaluate: barter'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero has a good sense for the value of things. A successful Barter Roll will give
+    your hero +15% instead of the usual +10%.
+  type: modifier
+  scope: global
+  entity_id: talent.evaluate
+  fields:
+    barter_success:
+      type: boolean
+      role: input
+      description: barter success
+    barter_bonus_percent:
+      type: number
+      role: output
+      description: barter bonus percent
+  effects:
+    - type: set
+      target: barter_bonus_percent
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: barter_success
+    right:
+      type: literal
+      value: true
+- id: character.talent.lockpicker.reroll
+  name: 'Lockpicker: reroll'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Lockpicker: reroll'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: No lock seems to hinder this hero. The hero may re-roll a failed lockpick attempt.
+  type: modifier
+  scope: global
+  entity_id: talent.lockpicker
+  fields:
+    lockpick_failed:
+      type: boolean
+      role: input
+      description: lockpick failed
+    reroll_allowed:
+      type: boolean
+      role: output
+      description: reroll allowed
+  effects:
+    - type: set
+      target: reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: lockpick_failed
+    right:
+      type: literal
+      value: true
+- id: character.talent.mechanical_genius.disarm
+  name: 'Mechanical Genius: disarm'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Mechanical Genius: disarm'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is a master at understanding mechanical contraptions and gains +10 when
+    disarming traps.
+  type: modifier
+  scope: global
+  entity_id: talent.mechanical_genius
+  fields:
+    disarming_trap:
+      type: boolean
+      role: input
+      description: disarming trap
+    check_modifier:
+      type: number
+      role: state
+      description: check modifier
+  effects:
+    - type: add
+      target: check_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: disarming_trap
+    right:
+      type: literal
+      value: true
+- id: character.talent.nimble.dodge_limit
+  name: 'Nimble: dodge limit'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Nimble: dodge limit'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero may dodge twice per battle instead of only once.
+  type: modifier
+  scope: global
+  entity_id: talent.nimble
+  fields:
+    dodges_per_battle:
+      type: number
+      role: output
+      description: dodges per battle
+  effects:
+    - type: set
+      target: dodges_per_battle
+      value:
+        type: literal
+        value: 2
+- id: character.talent.quick_fingers.lockpick_cost
+  name: 'Quick Fingers: lockpick cost'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Quick Fingers: lockpick cost'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Accustomed to working under pressure, your hero has mastered the skill of reading a
+    lock and picking it. Picking a lock now takes 1 AP instead of 2.
+  type: modifier
+  scope: global
+  entity_id: talent.quick_fingers
+  fields:
+    picking_lock:
+      type: boolean
+      role: input
+      description: picking lock
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: picking_lock
+    right:
+      type: literal
+      value: true
+- id: character.talent.sharp_eyed.perception
+  name: 'Sharp-eyed: perception'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Sharp-eyed: perception'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero has an extreme sense for details and can easily notice anything out of the
+    ordinary. Your hero gains a +10 bonus on Perception Tests.
+  type: modifier
+  scope: global
+  entity_id: talent.sharp_eyed
+  fields:
+    perception_test:
+      type: boolean
+      role: input
+      description: perception test
+    check_modifier:
+      type: number
+      role: state
+      description: check modifier
+  effects:
+    - type: add
+      target: check_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: perception_test
+    right:
+      type: literal
+      value: true
+- id: character.talent.sense_for_gold.printed_adjustment
+  name: 'Sense for Gold: printed adjustment'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Sense for Gold: printed adjustment'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: It seems this hero can almost smell their way to treasures. When rolling on the
+    Furniture Table for treasures, the hero may subtract -1 on the roll.
+  type: modifier
+  scope: global
+  entity_id: talent.sense_for_gold
+  fields:
+    furniture_treasure_roll:
+      type: boolean
+      role: input
+      description: furniture treasure roll
+    printed_adjustment:
+      type: string
+      role: output
+      description: printed adjustment
+  effects:
+    - type: set
+      target: printed_adjustment
+      value:
+        type: literal
+        value: may subtract -1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: furniture_treasure_roll
+    right:
+      type: literal
+      value: true
+- id: character.talent.shadow_walker.movement
+  name: 'Shadow walker: movement'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Shadow walker: movement'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero seems to always blend into the shadows. Moving almost unseen, the hero
+    ignores movement restrictions due to enemy ZOC.
+  type: modifier
+  scope: global
+  entity_id: talent.shadow_walker
+  fields:
+    ignore_enemy_zoc_movement_restrictions:
+      type: boolean
+      role: output
+      description: ignore enemy zoc movement restrictions
+  effects:
+    - type: set
+      target: ignore_enemy_zoc_movement_restrictions
+      value:
+        type: literal
+        value: true
+- id: character.talent.streetwise.eligibility
+  name: 'Streetwise: eligibility'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Streetwise: eligibility'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero knows who to ask to acquire the gear they search for. Every roll this hero
+    makes for availability may be modified by -1. This Talent can only be taken by a Rogue.
+  type: modifier
+  scope: global
+  entity_id: talent.streetwise
+  fields:
+    profession:
+      type: string
+      role: input
+      description: profession
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: rogue
+- id: character.talent.streetwise.availability
+  name: 'Streetwise: availability'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Streetwise: availability'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero knows who to ask to acquire the gear they search for. Every roll this hero
+    makes for availability may be modified by -1. This Talent can only be taken by a Rogue.
+  type: modifier
+  scope: global
+  entity_id: talent.streetwise
+  fields:
+    use_optional_modifier:
+      type: boolean
+      role: input
+      description: use optional modifier
+    availability_roll:
+      type: number
+      role: state
+      description: availability roll
+  effects:
+    - type: add
+      target: availability_roll
+      value:
+        type: literal
+        value: -1
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: use_optional_modifier
+    right:
+      type: literal
+      value: true
+- id: character.talent.trapfinder.detection
+  name: 'Trapfinder: detection'
+  section_id: section.appendix_ii_talents.sneaky_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 177
+      printed_page: 175
+      heading: 'Trapfinder: detection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero is an expert at dealing with traps. Your hero gains a +10 PER bonus when
+    detecting traps. This is cumulative with Sharp-eyed.
+  type: modifier
+  scope: global
+  entity_id: talent.trapfinder
+  fields:
+    detecting_trap:
+      type: boolean
+      role: input
+      description: detecting trap
+    perception_modifier:
+      type: number
+      role: state
+      description: perception modifier
+    stacks_with_sharp_eyed:
+      type: boolean
+      role: output
+      description: stacks with sharp eyed
+  effects:
+    - type: add
+      target: perception_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+    - type: set
+      target: stacks_with_sharp_eyed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: detecting_trap
+    right:
+      type: literal
+      value: true

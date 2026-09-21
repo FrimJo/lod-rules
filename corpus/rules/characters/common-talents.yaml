@@ -1,0 +1,737 @@
+- id: character.talent.bard.instruments
+  name: 'Bard: instruments'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Bard: instruments'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero gets a +10 WIS modifier when using instruments.
+  type: modifier
+  scope: global
+  entity_id: talent.bard
+  fields:
+    using_instrument:
+      type: boolean
+      role: input
+      description: using instrument
+    wisdom_modifier:
+      type: number
+      role: state
+      description: wisdom modifier
+  effects:
+    - type: add
+      target: wisdom_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: using_instrument
+    right:
+      type: literal
+      value: true
+- id: character.talent.cartographer.exploration_deck
+  name: 'Cartographer: exploration deck'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Cartographer: exploration deck'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero is skilled at drawing maps. If the hero passes a WIS test before entering a
+    dungeon, the exploration deck is set up using 2 cards less than noted in the quest. Remove one
+    corridor and one room. No matter how many heroes uses this talent, no more than 2 cards can be
+    removed.
+  type: modifier
+  scope: global
+  entity_id: talent.cartographer
+  fields:
+    wisdom_test_passed_before_dungeon:
+      type: boolean
+      role: input
+      description: wisdom test passed before dungeon
+    corridor_cards_removed:
+      type: number
+      role: output
+      description: corridor cards removed
+    room_cards_removed:
+      type: number
+      role: output
+      description: room cards removed
+    total_cartographer_removal_limit:
+      type: number
+      role: output
+      description: total cartographer removal limit
+  effects:
+    - type: set
+      target: corridor_cards_removed
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: room_cards_removed
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: total_cartographer_removal_limit
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wisdom_test_passed_before_dungeon
+    right:
+      type: literal
+      value: true
+- id: character.talent.charming.reward_bonus
+  name: 'Charming: reward bonus'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Charming: reward bonus'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This hero seems to get along with everyone and always draws a smile from those to whom
+    he talks. Well aware of this, the party lets this hero negotiate all rewards and gains +5%
+    Reward Bonus on all quests.
+  type: modifier
+  scope: global
+  entity_id: talent.charming
+  fields:
+    quest_reward_bonus_percent:
+      type: number
+      role: output
+      description: quest reward bonus percent
+  effects:
+    - type: set
+      target: quest_reward_bonus_percent
+      value:
+        type: literal
+        value: 5
+- id: character.talent.disciplined.own_resolve
+  name: 'Disciplined: own resolve'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Disciplined: own resolve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Thanks to a military background, this hero has an increased degree of calmness under
+    pressure. This also spreads to the rest of the party. The hero gains +10 RES and the other
+    members of the party gain +5 RES as long as the hero is not knocked out. The effect on the party
+    is not cumulative if other heroes have the same talent. Furthermore, a hero with this talent
+    will not benefit from the effect of this talent from another hero.
+  type: modifier
+  scope: global
+  entity_id: talent.disciplined
+  fields:
+    resolve:
+      type: number
+      role: state
+      description: resolve
+  effects:
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: 10
+      duration: permanent
+- id: character.talent.disciplined.party_resolve
+  name: 'Disciplined: party resolve'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Disciplined: party resolve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Thanks to a military background, this hero has an increased degree of calmness under
+    pressure. This also spreads to the rest of the party. The hero gains +10 RES and the other
+    members of the party gain +5 RES as long as the hero is not knocked out. The effect on the party
+    is not cumulative if other heroes have the same talent. Furthermore, a hero with this talent
+    will not benefit from the effect of this talent from another hero.
+  type: modifier
+  scope: global
+  entity_id: talent.disciplined
+  fields:
+    source_knocked_out:
+      type: boolean
+      role: input
+      description: source knocked out
+    recipient_has_disciplined:
+      type: boolean
+      role: input
+      description: recipient has disciplined
+    disciplined_party_bonus:
+      type: number
+      role: output
+      description: disciplined party bonus
+  effects:
+    - type: set
+      target: disciplined_party_bonus
+      value:
+        type: literal
+        value: 5
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: source_knocked_out
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: recipient_has_disciplined
+        right:
+          type: literal
+          value: false
+- id: character.talent.hunter.foraging
+  name: 'Hunter: foraging'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Hunter: foraging'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero has a knack for finding wild game and knows how best to hunt them. The hero
+    gains +10 to Foraging.
+  type: modifier
+  scope: global
+  entity_id: talent.hunter
+  fields:
+    foraging:
+      type: number
+      role: state
+      description: foraging
+  effects:
+    - type: add
+      target: foraging
+      value:
+        type: literal
+        value: 10
+      duration: permanent
+- id: character.talent.lucky.luck
+  name: 'Lucky: luck'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Lucky: luck'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Some are just luckier than others. Everything seems to go your way. You gain +1 Luck Point.
+  type: modifier
+  scope: global
+  entity_id: talent.lucky
+  fields:
+    luck:
+      type: number
+      role: state
+      description: luck
+  effects:
+    - type: add
+      target: luck
+      value:
+        type: literal
+        value: 1
+      duration: permanent
+- id: character.talent.master_cook.rest_healing
+  name: 'Master Cook: rest healing'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Master Cook: rest healing'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: During a rest, the party members will regain +2 extra HP if they have rations, due to
+    your hero’s expert cooking skills. This is not cumulative if more than one hero has this Talent.
+  type: modifier
+  scope: global
+  entity_id: talent.master_cook
+  fields:
+    resting:
+      type: boolean
+      role: input
+      description: resting
+    has_rations:
+      type: boolean
+      role: input
+      description: has rations
+    master_cook_healing_bonus:
+      type: number
+      role: output
+      description: master cook healing bonus
+  effects:
+    - type: set
+      target: master_cook_healing_bonus
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: resting
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_rations
+        right:
+          type: literal
+          value: true
+- id: character.talent.natural_leader.party_morale
+  name: 'Natural Leader: party morale'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Natural Leader: party morale'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The hero’s natural ability to lead will add +2 to the Party Moral permanently. This is
+    not cumulative if more than one hero has this talent.
+  type: modifier
+  scope: global
+  entity_id: talent.natural_leader
+  fields:
+    natural_leader_party_morale_bonus:
+      type: number
+      role: output
+      description: natural leader party morale bonus
+  effects:
+    - type: set
+      target: natural_leader_party_morale_bonus
+      value:
+        type: literal
+        value: 2
+- id: character.talent.ringbearer.ring_limit
+  name: 'Ringbearer: ring limit'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Ringbearer: ring limit'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Somehow, this hero has managed to tame the effect of magic imbued items. Instead of
+    being limited to one ring, your hero can now use two rings simultaneously.
+  type: modifier
+  scope: global
+  entity_id: talent.ringbearer
+  fields:
+    simultaneous_rings:
+      type: number
+      role: output
+      description: simultaneous rings
+  effects:
+    - type: set
+      target: simultaneous_rings
+      value:
+        type: literal
+        value: 2
+- id: character.talent.survivalist.beast_ration
+  name: 'Survivalist: beast ration'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Survivalist: beast ration'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This talent lets your hero forage one ration from any monster in the Beast category (in
+    a dungeon or after a skirmish), as long as the Forage roll is successful.
+  type: modifier
+  scope: global
+  entity_id: talent.survivalist
+  fields:
+    monster_is_beast:
+      type: boolean
+      role: input
+      description: monster is beast
+    forage_succeeded:
+      type: boolean
+      role: input
+      description: forage succeeded
+    in_dungeon:
+      type: boolean
+      role: input
+      description: in dungeon
+    after_skirmish:
+      type: boolean
+      role: input
+      description: after skirmish
+    rations:
+      type: number
+      role: state
+      description: rations
+  effects:
+    - type: add
+      target: rations
+      value:
+        type: literal
+        value: 1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: monster_is_beast
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: forage_succeeded
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: after_skirmish
+            right:
+              type: literal
+              value: true
+  dependencies:
+    - key: beast
+      label: Beast category membership
+      external_document: bestiary
+- id: character.talent.swift_leader.initiative
+  name: 'Swift Leader: initiative'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Swift Leader: initiative'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The party may always add one initiative token to the bag. This is only used to increase
+    chance of activation and all heroes may still only act once per turn. This is not a cumulative
+    effect so only 1 token will be added even if more than one hero has this talent.
+  type: modifier
+  scope: global
+  entity_id: talent.swift_leader
+  fields:
+    swift_leader_extra_tokens:
+      type: number
+      role: output
+      description: swift leader extra tokens
+    hero_activations_per_turn:
+      type: number
+      role: output
+      description: hero activations per turn
+  effects:
+    - type: set
+      target: swift_leader_extra_tokens
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: hero_activations_per_turn
+      value:
+        type: literal
+        value: 1
+- id: character.talent.veteran.quick_slot
+  name: 'Veteran: quick slot'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Veteran: quick slot'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your hero’s your gear is in perfect order, making changes in equipment very easy. You
+    can use equipment from a Quick Slot without spending an Action Point (once per turn).
+  type: modifier
+  scope: global
+  entity_id: talent.veteran
+  fields:
+    using_quick_slot_equipment:
+      type: boolean
+      role: input
+      description: using quick slot equipment
+    used_this_turn:
+      type: boolean
+      role: input
+      description: used this turn
+    action_point_cost:
+      type: number
+      role: output
+      description: action point cost
+  effects:
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: using_quick_slot_equipment
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: used_this_turn
+        right:
+          type: literal
+          value: false
+- id: character.talent.pathfinder.rest_healing
+  name: 'Pathfinder: rest healing'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Pathfinder: rest healing'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero has a knack for finding good shelter during travels. All heroes get +1 HP when resting.
+  type: modifier
+  scope: global
+  entity_id: talent.pathfinder
+  fields:
+    resting:
+      type: boolean
+      role: input
+      description: resting
+    healing_per_hero:
+      type: number
+      role: state
+      description: healing per hero
+  effects:
+    - type: add
+      target: healing_per_hero
+      value:
+        type: literal
+        value: 1
+      duration: immediate
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: resting
+    right:
+      type: literal
+      value: true
+- id: character.talent.pious.eligibility
+  name: 'Pious: eligibility'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Pious: eligibility'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero has a strong connection to the Gods. The hero may use relics, even though he
+    or she is not a Warrior Priest. This talent cannot be chosen by a Warrior Priest.
+  type: modifier
+  scope: global
+  entity_id: talent.pious
+  fields:
+    profession:
+      type: string
+      role: input
+      description: profession
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: ne
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: warrior_priest
+- id: character.talent.pious.relic_use
+  name: 'Pious: relic use'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: 'Pious: relic use'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Your hero has a strong connection to the Gods. The hero may use relics, even though he
+    or she is not a Warrior Priest. This talent cannot be chosen by a Warrior Priest.
+  type: modifier
+  scope: global
+  entity_id: talent.pious
+  fields:
+    profession:
+      type: string
+      role: input
+      description: profession
+    may_use_relics:
+      type: boolean
+      role: output
+      description: may use relics
+  effects:
+    - type: set
+      target: may_use_relics
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: ne
+    left:
+      type: field
+      name: profession
+    right:
+      type: literal
+      value: warrior_priest
