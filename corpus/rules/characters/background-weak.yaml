@@ -1,0 +1,193 @@
+- id: character.background.weak.initial_vulnerability
+  name: 'Weak: initial vulnerability'
+  section_id: section.backgrounds.19_weak
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'Weak: initial vulnerability'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever rolling for contracting a disease, you suffer an -10 modifier to your CON.
+  type: modifier
+  scope: global
+  entity_id: background.weak
+  fields:
+    diseases_cured:
+      type: number
+      role: input
+      description: diseases cured
+    rolling_to_contract_disease:
+      type: boolean
+      role: input
+      description: rolling to contract disease
+    constitution_modifier:
+      type: number
+      role: state
+      description: constitution modifier
+  effects:
+    - type: add
+      target: constitution_modifier
+      value:
+        type: literal
+        value: -10
+      duration: check
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: diseases_cured
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rolling_to_contract_disease
+        right:
+          type: literal
+          value: true
+- id: character.background.weak.improved_immunity
+  name: 'Weak: improved immunity'
+  section_id: section.backgrounds.19_weak
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'Weak: improved immunity'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once you are cured of your 3rd disease, you instead get a +10 modifier to your CON when
+    rolling for disease.
+  type: modifier
+  scope: global
+  entity_id: background.weak
+  fields:
+    diseases_cured:
+      type: number
+      role: input
+      description: diseases cured
+    rolling_for_disease:
+      type: boolean
+      role: input
+      description: rolling for disease
+    constitution_modifier:
+      type: number
+      role: state
+      description: constitution modifier
+  effects:
+    - type: add
+      target: constitution_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: diseases_cured
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rolling_for_disease
+        right:
+          type: literal
+          value: true
+- id: character.background.weak.improved_cure
+  name: 'Weak: improved cure'
+  section_id: section.backgrounds.19_weak
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'Weak: improved cure'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You cure yourself on a natural CON roll of 01-10 instead of 01-05.
+  type: modifier
+  scope: global
+  entity_id: background.weak
+  fields:
+    diseases_cured:
+      type: number
+      role: input
+      description: diseases cured
+    natural_constitution_roll:
+      type: number
+      role: input
+      description: natural constitution roll
+      integer: true
+      minimum: 1
+      maximum: 100
+      dice:
+        count: 1
+        sides: 100
+    rolling_for_disease:
+      type: boolean
+      role: input
+      description: rolling for disease
+    disease_cured:
+      type: boolean
+      role: output
+      description: disease cured
+  effects:
+    - type: set
+      target: disease_cured
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: diseases_cured
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rolling_for_disease
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: natural_constitution_roll
+        right:
+          type: literal
+          value: 10

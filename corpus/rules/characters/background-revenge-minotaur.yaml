@@ -1,0 +1,151 @@
+- id: character.background.revenge_minotaur.hate
+  name: 'Revenge: hate'
+  section_id: section.backgrounds.16_revenge
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Revenge: hate'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You hate Minotaurs.
+  type: modifier
+  scope: global
+  entity_id: background.revenge_minotaur
+  fields:
+    hated_enemy:
+      type: string
+      role: output
+      description: hated enemy
+  effects:
+    - type: set
+      target: hated_enemy
+      value:
+        type: literal
+        value: Minotaurs
+    - type: invoke
+      dependency: hate
+  dependencies:
+    - key: hate
+      label: Hate Talent
+      section_id: section.appendix_ii_talents.mental_talents
+- id: character.background.revenge_minotaur.recognition
+  name: 'Revenge: recognition'
+  section_id: section.backgrounds.16_revenge
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Revenge: recognition'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every time you fight a Minotaur, roll 1d6. On a result of 1, you recognize the scar.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.revenge_minotaur
+  fields:
+    fighting_minotaur:
+      type: boolean
+      role: input
+      description: fighting minotaur
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    recognize_scar:
+      type: boolean
+      role: output
+      description: recognize scar
+  effects:
+    - type: set
+      target: recognize_scar
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fighting_minotaur
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+  quest_id: quest.background.revenge_minotaur
+- id: character.background.revenge_minotaur.reward
+  name: 'Revenge: reward'
+  section_id: section.backgrounds.16_revenge
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Revenge: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you defeat the beast, you gain an additional +.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.revenge_minotaur
+  fields:
+    recognize_scar:
+      type: boolean
+      role: input
+      description: recognize scar
+    beast_defeated:
+      type: boolean
+      role: input
+      description: beast defeated
+  effects:
+    - type: unresolved
+      issue_id: issue.phase5.minotaur_reward_missing
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: recognize_scar
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: beast_defeated
+        right:
+          type: literal
+          value: true
+  quest_id: quest.background.revenge_minotaur

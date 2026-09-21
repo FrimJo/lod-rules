@@ -1,0 +1,164 @@
+- id: character.background.the_heirloom.quest_setup
+  name: 'The Heirloom: quest setup'
+  section_id: section.backgrounds.4_the_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 43
+      printed_page: 41
+      heading: 'The Heirloom: quest setup'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Personal Quest: Find your Great Aunt’s sword. At the start of each quest, roll 1d10.
+    On a roll of 1, the dungeon you are heading to is actually the one that holds the sword. Place a
+    secondary Quest Card in the first half of the Exploration Card pile. The room after the
+    secondary Quest Card will always have enemies. Roll twice on the encounter table. One of the
+    enemies with the highest XP will carry the sword (although will not use it in battle). The fate
+    of your ancestor will never be known, but at least you will now have a chance to get that sword
+    back. The weapon is a silver shortsword that does +1 DMG and has +2 Durability. You may not sell
+    it.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_heirloom
+  fields:
+    quest_start_roll:
+      type: number
+      role: input
+      description: quest start roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    secondary_card_location:
+      type: string
+      role: output
+      description: secondary card location
+    next_room_has_enemies:
+      type: boolean
+      role: output
+      description: next room has enemies
+    encounter_rolls:
+      type: number
+      role: output
+      description: encounter rolls
+    sword_carrier_selection:
+      type: string
+      role: output
+      description: sword carrier selection
+    sword_used_by_enemy:
+      type: boolean
+      role: output
+      description: sword used by enemy
+  effects:
+    - type: set
+      target: secondary_card_location
+      value:
+        type: literal
+        value: first_half_of_exploration_pile
+    - type: set
+      target: next_room_has_enemies
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: sword_carrier_selection
+      value:
+        type: literal
+        value: one_enemy_with_highest_xp
+    - type: set
+      target: sword_used_by_enemy
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quest_start_roll
+    right:
+      type: literal
+      value: 1
+  dependencies:
+    - key: encounters
+      label: Encounter table
+      external_document: bestiary
+  quest_id: quest.background.the_heirloom
+- id: character.background.the_heirloom.sword_properties
+  name: 'The Heirloom: sword properties'
+  section_id: section.backgrounds.4_the_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 43
+      printed_page: 41
+      heading: 'The Heirloom: sword properties'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The weapon is a silver shortsword that does +1 DMG and has +2 Durability. You may not sell it.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_heirloom
+  fields:
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    material:
+      type: string
+      role: output
+      description: material
+    damage_modifier:
+      type: number
+      role: output
+      description: damage modifier
+    durability_modifier:
+      type: number
+      role: output
+      description: durability modifier
+    sale_allowed:
+      type: boolean
+      role: output
+      description: sale allowed
+  effects:
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: shortsword
+    - type: set
+      target: material
+      value:
+        type: literal
+        value: silver
+    - type: set
+      target: damage_modifier
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: durability_modifier
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: sale_allowed
+      value:
+        type: literal
+        value: false
+  quest_id: quest.background.the_heirloom

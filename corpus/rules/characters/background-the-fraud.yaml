@@ -1,0 +1,245 @@
+- id: character.background.the_fraud.wizard_reroll
+  name: 'The Fraud: wizard reroll'
+  section_id: section.backgrounds.11_the_fraud
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'The Fraud: wizard reroll'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Not applicable for wizards. reroll if you are a wizard.
+  type: modifier
+  scope: global
+  entity_id: background.the_fraud
+  fields:
+    wizard:
+      type: boolean
+      role: input
+      description: wizard
+    reroll_background:
+      type: boolean
+      role: output
+      description: reroll background
+  effects:
+    - type: set
+      target: reroll_background
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wizard
+    right:
+      type: literal
+      value: true
+- id: character.background.the_fraud.initial_penalties
+  name: 'The Fraud: initial penalties'
+  section_id: section.backgrounds.11_the_fraud
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'The Fraud: initial penalties'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Deduct -10 from CS, RS, and Dodge since you have neither formal training nor
+    experience. Your RES is also reduced with -10 (temporarily, see below).
+  type: modifier
+  scope: global
+  entity_id: background.the_fraud
+  fields:
+    wizard:
+      type: boolean
+      role: input
+      description: wizard
+    combat_skill:
+      type: number
+      role: state
+      description: combat skill
+    ranged_skill:
+      type: number
+      role: state
+      description: ranged skill
+    dodge:
+      type: number
+      role: state
+      description: dodge
+    resolve:
+      type: number
+      role: state
+      description: resolve
+  effects:
+    - type: add
+      target: combat_skill
+      value:
+        type: literal
+        value: -10
+      duration: permanent
+    - type: add
+      target: ranged_skill
+      value:
+        type: literal
+        value: -10
+      duration: permanent
+    - type: add
+      target: dodge
+      value:
+        type: literal
+        value: -10
+      duration: permanent
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: -10
+      duration: while_condition
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wizard
+    right:
+      type: literal
+      value: false
+- id: character.background.the_fraud.reward
+  name: 'The Fraud: reward'
+  section_id: section.backgrounds.11_the_fraud
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'The Fraud: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 46
+      printed_page: 44
+      heading: 'The Fraud: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once you have improved CS, RS, and Dodge with +10 you can finally believe that you are
+    more than empty words. Once this is achieved, you regain your RES and may increase it with
+    another +10. You also gain an additional 1500XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_fraud
+  fields:
+    cs_improvement:
+      type: number
+      role: input
+      description: cs improvement
+    rs_improvement:
+      type: number
+      role: input
+      description: rs improvement
+    dodge_improvement:
+      type: number
+      role: input
+      description: dodge improvement
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    extra_resolve:
+      type: string
+      role: input
+      description: extra resolve
+    resolve:
+      type: number
+      role: state
+      description: resolve
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: 10
+      duration: immediate
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
+    - type: choice
+      selection: extra_resolve
+      options:
+        - id: accept
+          effects:
+            - type: add
+              target: resolve
+              value:
+                type: literal
+                value: 10
+              duration: permanent
+        - id: decline
+          effects:
+            - type: set
+              target: resolve
+              value:
+                type: field
+                name: resolve
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: cs_improvement
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: rs_improvement
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: dodge_improvement
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_fraud

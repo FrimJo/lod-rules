@@ -1,0 +1,117 @@
+- id: character.background.the_noble.initial_coins
+  name: 'The Noble: initial coins'
+  section_id: section.backgrounds.12_the_noble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 46
+      printed_page: 44
+      heading: 'The Noble: initial coins'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You start with 400 c instead of the normal 150 c.
+  type: modifier
+  scope: character_creation
+  entity_id: background.the_noble
+  fields:
+    coins:
+      type: number
+      role: state
+      description: coins
+  effects:
+    - type: set
+      target: coins
+      value:
+        type: literal
+        value: 400
+- id: character.background.the_noble.low_money_resolve
+  name: 'The Noble: low money resolve'
+  section_id: section.backgrounds.12_the_noble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 46
+      printed_page: 44
+      heading: 'The Noble: low money resolve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you ever drop below 150 c, your resolve is reduced with -20 until you have enough
+    money again (150 c).
+  type: modifier
+  scope: global
+  entity_id: background.the_noble
+  fields:
+    coins:
+      type: number
+      role: input
+      description: coins
+    noble_resolve_modifier:
+      type: number
+      role: output
+      description: noble resolve modifier
+  effects:
+    - type: set
+      target: noble_resolve_modifier
+      value:
+        type: literal
+        value: -20
+  when:
+    type: compare
+    operator: lt
+    left:
+      type: field
+      name: coins
+    right:
+      type: literal
+      value: 150
+- id: character.background.the_noble.money_restored
+  name: 'The Noble: money restored'
+  section_id: section.backgrounds.12_the_noble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 46
+      printed_page: 44
+      heading: 'The Noble: money restored'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your resolve is reduced with -20 until you have enough money again (150 c).
+  type: modifier
+  scope: global
+  entity_id: background.the_noble
+  fields:
+    coins:
+      type: number
+      role: input
+      description: coins
+    noble_resolve_modifier:
+      type: number
+      role: output
+      description: noble resolve modifier
+  effects:
+    - type: set
+      target: noble_resolve_modifier
+      value:
+        type: literal
+        value: 0
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: coins
+    right:
+      type: literal
+      value: 150

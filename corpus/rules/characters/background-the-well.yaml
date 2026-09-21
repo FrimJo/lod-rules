@@ -1,0 +1,120 @@
+- id: character.background.the_well.initial_trait
+  name: 'The Well: initial trait'
+  section_id: section.backgrounds.2_the_well
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 42
+      printed_page: 40
+      heading: 'The Well: initial trait'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You suffer from extreme claustrophobia. This is not curable at the asylum.
+  type: modifier
+  scope: global
+  entity_id: background.the_well
+  fields:
+    claustrophobia:
+      type: boolean
+      role: output
+      description: claustrophobia
+    asylum_curable:
+      type: boolean
+      role: output
+      description: asylum curable
+  effects:
+    - type: set
+      target: claustrophobia
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: asylum_curable
+      value:
+        type: literal
+        value: false
+  dependencies:
+    - key: claustrophobia
+      label: Claustrophobia
+      section_id: section.psychology
+- id: character.background.the_well.cure_and_reward
+  name: 'The Well: cure and reward'
+  section_id: section.backgrounds.2_the_well
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 42
+      printed_page: 40
+      heading: 'The Well: cure and reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Personal Trait and Quest: You suffer from extreme claustrophobia. (See ‘Psychology’
+    Chapter). This is not curable at the asylum. Instead, you must face your fears. Once you have
+    fought and survived 5 battles in a corridor, your condition is finally cured. Such is the effect
+    of beating this trauma that you actually turn it into a strength. You gain the Tunnel Fighter
+    Talent.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_well
+  fields:
+    corridor_battles_fought_and_survived:
+      type: number
+      role: input
+      description: corridor battles fought and survived
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    claustrophobia:
+      type: boolean
+      role: state
+      description: claustrophobia
+    tunnel_fighter:
+      type: boolean
+      role: output
+      description: tunnel fighter
+  effects:
+    - type: set
+      target: claustrophobia
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: tunnel_fighter
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: tunnel_fighter
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: corridor_battles_fought_and_survived
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: tunnel_fighter
+      label: Tunnel Fighter Talent
+      section_id: section.appendix_ii_talents.combat_talents
+  quest_id: quest.background.the_well

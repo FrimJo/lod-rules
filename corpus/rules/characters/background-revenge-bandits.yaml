@@ -1,0 +1,110 @@
+- id: character.background.revenge_bandits.hate
+  name: 'Revenge: hate'
+  section_id: section.backgrounds.7_revenge
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'Revenge: hate'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You hate all enemies from the ‘Bandits and Brigands’ faction.
+  type: modifier
+  scope: global
+  entity_id: background.revenge_bandits
+  fields:
+    hated_faction:
+      type: string
+      role: output
+      description: hated faction
+  effects:
+    - type: set
+      target: hated_faction
+      value:
+        type: literal
+        value: Bandits and Brigands
+    - type: invoke
+      dependency: hate
+  dependencies:
+    - key: hate
+      label: Hate Talent
+      section_id: section.appendix_ii_talents.mental_talents
+- id: character.background.revenge_bandits.kill_reward
+  name: 'Revenge: kill reward'
+  section_id: section.backgrounds.7_revenge
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'Revenge: kill reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For every 5 enemies from that section where you deliver the killing blow, you gain an
+    additional 250 XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.revenge_bandits
+  fields:
+    qualifying_killing_blows:
+      type: number
+      role: input
+      description: qualifying killing blows
+    previously_rewarded_groups:
+      type: number
+      role: input
+      description: previously rewarded groups
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: qualifying_killing_blows
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: xp
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: arithmetic
+            operator: max
+            values:
+              - type: literal
+                value: 0
+              - type: arithmetic
+                operator: subtract
+                values:
+                  - type: arithmetic
+                    operator: floor
+                    values:
+                      - type: arithmetic
+                        operator: divide
+                        values:
+                          - type: field
+                            name: qualifying_killing_blows
+                          - type: literal
+                            value: 5
+                  - type: field
+                    name: previously_rewarded_groups
+          - type: literal
+            value: 250
+      duration: immediate
+  quest_id: quest.background.revenge_bandits

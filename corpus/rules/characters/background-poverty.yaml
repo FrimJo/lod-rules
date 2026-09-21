@@ -1,0 +1,243 @@
+- id: character.background.poverty.coin_reserve
+  name: 'Poverty: coin reserve'
+  section_id: section.backgrounds.9_poverty
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Poverty: coin reserve'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You may never make a purchase, or lend out money, that would leave you with less than 10 c.
+  type: modifier
+  scope: global
+  entity_id: background.poverty
+  fields:
+    coins_after_purchase_or_loan:
+      type: number
+      role: input
+      description: coins after purchase or loan
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: coins_after_purchase_or_loan
+        right:
+          type: literal
+          value: 10
+- id: character.background.poverty.home_selection
+  name: 'Poverty: home selection'
+  section_id: section.backgrounds.9_poverty
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Poverty: home selection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Randomise which village (not Silver City) in which you were born and raised. If you are
+    a dwarf, randomise between the two Dwarven settlements.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.poverty
+  fields:
+    dwarf:
+      type: boolean
+      role: input
+      description: dwarf
+    selection_method:
+      type: string
+      role: output
+      description: selection method
+    home_pool:
+      type: string
+      role: output
+      description: home pool
+  effects:
+    - type: set
+      target: selection_method
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: home_pool
+      value:
+        type: literal
+        value: villages_except_silver_city
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dwarf
+    right:
+      type: literal
+      value: false
+  quest_id: quest.background.poverty
+- id: character.background.poverty.dwarf_home_selection
+  name: 'Poverty: dwarf home selection'
+  section_id: section.backgrounds.9_poverty
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Poverty: dwarf home selection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you are a dwarf, randomise between the two Dwarven settlements.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.poverty
+  fields:
+    dwarf:
+      type: boolean
+      role: input
+      description: dwarf
+    selection_method:
+      type: string
+      role: output
+      description: selection method
+    home_pool:
+      type: string
+      role: output
+      description: home pool
+  effects:
+    - type: set
+      target: selection_method
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: home_pool
+      value:
+        type: literal
+        value: two_dwarven_settlements
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dwarf
+    right:
+      type: literal
+      value: true
+  quest_id: quest.background.poverty
+- id: character.background.poverty.family_gift
+  name: 'Poverty: family gift'
+  section_id: section.backgrounds.9_poverty
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Poverty: family gift'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Accumulate 1000 c for your family. Pay them a visit and hand over the money. This can
+    be done by spending one Point of Movement in that village, and it will grant you 2000 XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.poverty
+  fields:
+    at_family_village:
+      type: boolean
+      role: input
+      description: at family village
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    coins:
+      type: number
+      role: state
+      description: coins
+    movement_points:
+      type: number
+      role: state
+      description: movement points
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: coins
+        right:
+          type: literal
+          value: 1000
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: movement_points
+        right:
+          type: literal
+          value: 1
+    - type: add
+      target: coins
+      value:
+        type: literal
+        value: -1000
+      duration: immediate
+    - type: add
+      target: movement_points
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 2000
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_family_village
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.poverty

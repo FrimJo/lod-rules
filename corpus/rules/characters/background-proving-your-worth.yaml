@@ -1,0 +1,274 @@
+- id: character.background.proving_your_worth.qualifying_kill
+  name: 'Proving Your Worth: qualifying kill'
+  section_id: section.backgrounds.10_proving_your_worth
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Proving Your Worth: qualifying kill'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Kill an enemy that gives you 450 XP or more. You do not need to strike the final blow,
+    as long as your party makes the kill.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.proving_your_worth
+  fields:
+    enemy_xp:
+      type: number
+      role: input
+      description: enemy xp
+    party_made_kill:
+      type: boolean
+      role: input
+      description: party made kill
+    qualified:
+      type: boolean
+      role: output
+      description: qualified
+  effects:
+    - type: set
+      target: qualified
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: enemy_xp
+        right:
+          type: literal
+          value: 450
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: party_made_kill
+        right:
+          type: literal
+          value: true
+  quest_id: quest.background.proving_your_worth
+- id: character.background.proving_your_worth.home_selection
+  name: 'Proving Your Worth: home selection'
+  section_id: section.backgrounds.10_proving_your_worth
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Proving Your Worth: home selection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Randomise which village (not Silver City) you were born and raised in. If you are a
+    dwarf, randomise between the two Dwarven settlements.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.proving_your_worth
+  fields:
+    dwarf:
+      type: boolean
+      role: input
+      description: dwarf
+    selection_method:
+      type: string
+      role: output
+      description: selection method
+    home_pool:
+      type: string
+      role: output
+      description: home pool
+  effects:
+    - type: set
+      target: selection_method
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: home_pool
+      value:
+        type: literal
+        value: villages_except_silver_city
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dwarf
+    right:
+      type: literal
+      value: false
+  quest_id: quest.background.proving_your_worth
+- id: character.background.proving_your_worth.dwarf_home_selection
+  name: 'Proving Your Worth: dwarf home selection'
+  section_id: section.backgrounds.10_proving_your_worth
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Proving Your Worth: dwarf home selection'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you are a dwarf, randomise between the two Dwarven settlements.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.proving_your_worth
+  fields:
+    dwarf:
+      type: boolean
+      role: input
+      description: dwarf
+    selection_method:
+      type: string
+      role: output
+      description: selection method
+    home_pool:
+      type: string
+      role: output
+      description: home pool
+  effects:
+    - type: set
+      target: selection_method
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: home_pool
+      value:
+        type: literal
+        value: two_dwarven_settlements
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dwarf
+    right:
+      type: literal
+      value: true
+  quest_id: quest.background.proving_your_worth
+- id: character.background.proving_your_worth.claim_armour
+  name: 'Proving Your Worth: claim armour'
+  section_id: section.backgrounds.10_proving_your_worth
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 45
+      printed_page: 43
+      heading: 'Proving Your Worth: claim armour'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 46
+      printed_page: 44
+      heading: 'Proving Your Worth: claim armour'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Return to your father to claim the armour. Gaining the armour can be done by simply
+    spending one Point of Movement in that location. This is the Armour of the Father as described
+    in the ‘Legendary Items’ chapter.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.proving_your_worth
+  fields:
+    qualified:
+      type: boolean
+      role: input
+      description: qualified
+    at_family_village:
+      type: boolean
+      role: input
+      description: at family village
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    movement_points:
+      type: number
+      role: state
+      description: movement points
+    armour_of_the_father:
+      type: boolean
+      role: output
+      description: armour of the father
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: movement_points
+        right:
+          type: literal
+          value: 1
+    - type: add
+      target: movement_points
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: armour_of_the_father
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: armour
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: qualified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_family_village
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: armour
+      label: Armour of the Father
+      section_id: section.appendix_v_treasures.legendary_items.armour_of_the_father
+  quest_id: quest.background.proving_your_worth

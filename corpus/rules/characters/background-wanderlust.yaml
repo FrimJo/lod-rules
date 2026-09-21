@@ -1,0 +1,71 @@
+- id: character.background.wanderlust.reward
+  name: 'Wanderlust: reward'
+  section_id: section.backgrounds.1_wanderlust
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 42
+      printed_page: 40
+      heading: 'Wanderlust: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Personal Quest: Visit all settlements on the map (A total of 11). Once done, you gain 1500 XP.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.wanderlust
+  fields:
+    all_map_settlements_visited:
+      type: boolean
+      role: input
+      description: all map settlements visited
+    distinct_settlements_visited:
+      type: number
+      role: input
+      description: distinct settlements visited
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_map_settlements_visited
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: distinct_settlements_visited
+        right:
+          type: literal
+          value: 11
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.wanderlust

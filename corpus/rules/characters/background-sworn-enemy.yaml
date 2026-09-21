@@ -1,0 +1,152 @@
+- id: character.background.sworn_enemy.bandit_encounter
+  name: 'Sworn Enemy: bandit encounter'
+  section_id: section.backgrounds.13_sworn_enemy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Sworn Enemy: bandit encounter'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Personal Quest: Whenever you end up in battle with bandits, roll 1d10. On a result of
+    10, add one Bandit Leader to the encounter. This bandit has both the Hate special rule against
+    the entire party, as well as Frenzy. Once the bandit is killed, you have rid your family of this
+    sworn enemy, and you gain an extra 500 XP.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.sworn_enemy
+  fields:
+    battle_with_bandits:
+      type: boolean
+      role: input
+      description: battle with bandits
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    additional_bandit_leaders:
+      type: number
+      role: output
+      description: additional bandit leaders
+    leader_hates_party:
+      type: boolean
+      role: output
+      description: leader hates party
+    leader_frenzy:
+      type: boolean
+      role: output
+      description: leader frenzy
+  effects:
+    - type: set
+      target: additional_bandit_leaders
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: leader_hates_party
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: leader_frenzy
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: leader
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: battle_with_bandits
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 10
+  dependencies:
+    - key: leader
+      label: Bandit Leader with Hate against the entire party and Frenzy
+      external_document: bestiary
+  quest_id: quest.background.sworn_enemy
+- id: character.background.sworn_enemy.reward
+  name: 'Sworn Enemy: reward'
+  section_id: section.backgrounds.13_sworn_enemy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Sworn Enemy: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the bandit is killed, you have rid your family of this sworn enemy, and you gain
+    an extra 500 XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.sworn_enemy
+  fields:
+    sworn_enemy_killed:
+      type: boolean
+      role: input
+      description: sworn enemy killed
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 500
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sworn_enemy_killed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.sworn_enemy

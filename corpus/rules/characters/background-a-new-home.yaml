@@ -1,0 +1,65 @@
+- id: character.background.a_new_home.reward
+  name: 'A new home: reward'
+  section_id: section.backgrounds.17_a_new_home
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'A new home: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Personal Quest: Even though the adventuring lifestyle suits you much better than you
+    had expected, you still yearn for a place to call your own. Once you have acquired the
+    Bergmeister Estate, you gain 1500 XP.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.a_new_home
+  fields:
+    bergmeister_estate_acquired:
+      type: boolean
+      role: input
+      description: bergmeister estate acquired
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: bergmeister_estate_acquired
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: estate
+      label: Bergmeister Estate
+      section_id: section.buying_an_estate
+  quest_id: quest.background.a_new_home

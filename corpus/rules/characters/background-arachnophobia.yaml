@@ -1,0 +1,170 @@
+- id: character.background.arachnophobia.initial_trait
+  name: 'Arachnophobia: initial trait'
+  section_id: section.backgrounds.5_arachnophobia
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 43
+      printed_page: 41
+      heading: 'Arachnophobia: initial trait'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You suffer from extreme arachnophobia. This is not curable at the asylum.
+  type: modifier
+  scope: global
+  entity_id: background.arachnophobia
+  fields:
+    arachnophobia:
+      type: boolean
+      role: output
+      description: arachnophobia
+    asylum_curable:
+      type: boolean
+      role: output
+      description: asylum curable
+  effects:
+    - type: set
+      target: arachnophobia
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: asylum_curable
+      value:
+        type: literal
+        value: false
+  dependencies:
+    - key: arachnophobia
+      label: Arachnophobia
+      section_id: section.psychology
+- id: character.background.arachnophobia.cure
+  name: 'Arachnophobia: cure'
+  section_id: section.backgrounds.5_arachnophobia
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 43
+      printed_page: 41
+      heading: 'Arachnophobia: cure'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Personal Trait and Quest: You suffer from extreme arachnophobia. (See ‘Psychology’
+    Chapter). This is not curable at the asylum. Instead, you must face your fears. Once you have
+    fought and survived 3 battles with spiders, your condition is finally cured. Such is the effect
+    of beating this trauma that you actually turn it into a strength. You gain +10 CS whenever
+    trying to hit a spider.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.arachnophobia
+  fields:
+    spider_battles_fought_and_survived:
+      type: number
+      role: input
+      description: spider battles fought and survived
+    arachnophobia:
+      type: boolean
+      role: state
+      description: arachnophobia
+    spider_bonus_earned:
+      type: boolean
+      role: output
+      description: spider bonus earned
+  effects:
+    - type: set
+      target: arachnophobia
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: spider_bonus_earned
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: spider_battles_fought_and_survived
+    right:
+      type: literal
+      value: 3
+  quest_id: quest.background.arachnophobia
+- id: character.background.arachnophobia.spider_attack_bonus
+  name: 'Arachnophobia: spider attack bonus'
+  section_id: section.backgrounds.5_arachnophobia
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 43
+      printed_page: 41
+      heading: 'Arachnophobia: spider attack bonus'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You gain +10 CS whenever trying to hit a spider.
+  type: modifier
+  scope: global
+  entity_id: background.arachnophobia
+  fields:
+    spider_bonus_earned:
+      type: boolean
+      role: input
+      description: spider bonus earned
+    target_is_spider:
+      type: boolean
+      role: input
+      description: target is spider
+    trying_to_hit:
+      type: boolean
+      role: input
+      description: trying to hit
+    combat_skill_modifier:
+      type: number
+      role: state
+      description: combat skill modifier
+  effects:
+    - type: add
+      target: combat_skill_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: spider_bonus_earned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_is_spider
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: trying_to_hit
+        right:
+          type: literal
+          value: true

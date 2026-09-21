@@ -1,0 +1,74 @@
+- id: character.background.troll_slayer.reward
+  name: 'Troll Slayer: reward'
+  section_id: section.backgrounds.15_troll_slayer
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'Troll Slayer: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Personal Quest: You must slay a troll. To rightfully claim the title of Troll Slayer,
+    you must land the killing blow on a troll (of any kind). If you achieve this, you have both
+    honoured your lineage and gained a further +1000 XP.'
+  type: scenario_rule
+  scope: quest
+  entity_id: background.troll_slayer
+  fields:
+    target_is_troll:
+      type: boolean
+      role: input
+      description: target is troll
+    delivered_killing_blow:
+      type: boolean
+      role: input
+      description: delivered killing blow
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1000
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_is_troll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: delivered_killing_blow
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.troll_slayer

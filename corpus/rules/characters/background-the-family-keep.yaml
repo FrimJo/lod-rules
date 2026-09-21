@@ -1,0 +1,169 @@
+- id: character.background.the_family_keep.location
+  name: 'The Family Keep: location'
+  section_id: section.backgrounds.14_the_family_keep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'The Family Keep: location'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Randomize one quest location on the map using the white numbers to situate the ruins of
+    your Keep.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_family_keep
+  fields:
+    location_selection:
+      type: string
+      role: output
+      description: location selection
+    location_pool:
+      type: string
+      role: output
+      description: location pool
+  effects:
+    - type: set
+      target: location_selection
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: location_pool
+      value:
+        type: literal
+        value: map_quest_locations_white_numbers
+  quest_id: quest.background.the_family_keep
+- id: character.background.the_family_keep.dedicated_visit
+  name: 'The Family Keep: dedicated visit'
+  section_id: section.backgrounds.14_the_family_keep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'The Family Keep: dedicated visit'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you go there specifically for this purpose, use the generic Dungeon Generator to
+    create the dungeon.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_family_keep
+  fields:
+    dedicated_keep_visit:
+      type: boolean
+      role: input
+      description: dedicated keep visit
+  effects:
+    - type: invoke
+      dependency: generator
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dedicated_keep_visit
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: generator
+      label: generic Dungeon Generator
+      section_id: section.into_the_dungeons
+  quest_id: quest.background.the_family_keep
+- id: character.background.the_family_keep.reward
+  name: 'The Family Keep: reward'
+  section_id: section.backgrounds.14_the_family_keep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 47
+      printed_page: 45
+      heading: 'The Family Keep: reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Every tile must be placed on the table and all enemies must be killed. Once the dungeon
+    is cleared, you gain 1500 XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_family_keep
+  fields:
+    at_family_keep:
+      type: boolean
+      role: input
+      description: at family keep
+    all_tiles_placed:
+      type: boolean
+      role: input
+      description: all tiles placed
+    all_enemies_killed:
+      type: boolean
+      role: input
+      description: all enemies killed
+    reward_already_received:
+      type: boolean
+      role: input
+      description: reward already received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_family_keep
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_tiles_placed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_enemies_killed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_family_keep

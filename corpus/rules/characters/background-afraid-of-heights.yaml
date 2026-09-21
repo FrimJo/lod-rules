@@ -1,0 +1,120 @@
+- id: character.background.afraid_of_heights.fear_bonus
+  name: 'Afraid of Heights: fear bonus'
+  section_id: section.backgrounds.20_afraid_of_heights
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'Afraid of Heights: fear bonus'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever you take a Fear Test (but not a Terror Test), you gain a +10 modifier on your RES.
+  type: modifier
+  scope: global
+  entity_id: background.afraid_of_heights
+  fields:
+    test_kind:
+      type: string
+      role: input
+      description: test kind
+    resolve_modifier:
+      type: number
+      role: state
+      description: resolve modifier
+  effects:
+    - type: add
+      target: resolve_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: test_kind
+    right:
+      type: literal
+      value: fear
+- id: character.background.afraid_of_heights.bridge_penalties
+  name: 'Afraid of Heights: bridge penalties'
+  section_id: section.backgrounds.20_afraid_of_heights
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 48
+      printed_page: 46
+      heading: 'Afraid of Heights: bridge penalties'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever you are on a bridge your resolve is halved (RDD) and your CS and RS suffer a
+    -20 modifier.
+  type: modifier
+  scope: global
+  entity_id: background.afraid_of_heights
+  fields:
+    on_bridge:
+      type: boolean
+      role: input
+      description: on bridge
+    resolve_before_bridge:
+      type: number
+      role: input
+      description: resolve before bridge
+    combat_skill_modifier:
+      type: number
+      role: state
+      description: combat skill modifier
+    ranged_skill_modifier:
+      type: number
+      role: state
+      description: ranged skill modifier
+    bridge_resolve:
+      type: number
+      role: output
+      description: bridge resolve
+  effects:
+    - type: set
+      target: bridge_resolve
+      value:
+        type: arithmetic
+        operator: floor
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: resolve_before_bridge
+              - type: literal
+                value: 2
+    - type: add
+      target: combat_skill_modifier
+      value:
+        type: literal
+        value: -20
+      duration: while_condition
+    - type: add
+      target: ranged_skill_modifier
+      value:
+        type: literal
+        value: -20
+      duration: while_condition
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: on_bridge
+    right:
+      type: literal
+      value: true

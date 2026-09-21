@@ -1,0 +1,578 @@
+- id: character.background.the_lost_brother.quest_setup
+  name: 'The Lost Brother: quest setup'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: quest setup'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At the start of each quest, roll 1d10. On a roll of 1, the dungeon you are heading to
+    is the one in which you will find your brother. Place a secondary Quest Card in the pile not
+    containing the Quest Room. The tile you enter next will contain your brother.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    quest_start_roll:
+      type: number
+      role: input
+      description: quest start roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    secondary_card_location:
+      type: string
+      role: output
+      description: secondary card location
+    brother_on_next_tile:
+      type: boolean
+      role: output
+      description: brother on next tile
+  effects:
+    - type: set
+      target: secondary_card_location
+      value:
+        type: literal
+        value: pile_without_quest_room
+    - type: set
+      target: brother_on_next_tile
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quest_start_roll
+    right:
+      type: literal
+      value: 1
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.discovery
+  name: 'The Lost Brother: discovery'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: discovery'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once you enter the room, roll 1d100, adding the number of dungeons you have entered. If
+    the result is 60 or higher, you are too late. If the result is lower than 60, your brother is
+    alive, but badly wounded.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 100
+      dice:
+        count: 1
+        sides: 100
+    dungeons_entered:
+      type: number
+      role: input
+      description: dungeons entered
+    result:
+      type: number
+      role: output
+      description: result
+    brother_alive:
+      type: boolean
+      role: output
+      description: brother alive
+  effects:
+    - type: set
+      target: result
+      value:
+        type: sum
+        values:
+          - type: field
+            name: roll
+          - type: field
+            name: dungeons_entered
+    - type: set
+      target: brother_alive
+      value:
+        type: literal
+        value: false
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.surviving_brother
+  name: 'The Lost Brother: surviving brother'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: surviving brother'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the result is lower than 60, your brother is alive, but badly wounded. Place him on
+    the tile and you may move him just like the other heroes. Use the civilian Monster Card to
+    represent him.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    result:
+      type: number
+      role: input
+      description: result
+    brother_alive:
+      type: boolean
+      role: state
+      description: brother alive
+    brother_wounded:
+      type: boolean
+      role: output
+      description: brother wounded
+    movement_like_heroes:
+      type: boolean
+      role: output
+      description: movement like heroes
+  effects:
+    - type: set
+      target: brother_alive
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: brother_wounded
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: movement_like_heroes
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: civilian
+  when:
+    type: compare
+    operator: lt
+    left:
+      type: field
+      name: result
+    right:
+      type: literal
+      value: 60
+  dependencies:
+    - key: civilian
+      label: civilian Monster Card
+      external_document: bestiary
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.death_consequences
+  name: 'The Lost Brother: death consequences'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: death consequences'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In both cases you lose 3 Points of Sanity, but gain 250 XP.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    brother_dead:
+      type: boolean
+      role: input
+      description: brother dead
+    death_consequences_received:
+      type: boolean
+      role: input
+      description: death consequences received
+    sanity:
+      type: number
+      role: state
+      description: sanity
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: sanity
+      value:
+        type: literal
+        value: -3
+      duration: immediate
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 250
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: brother_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: death_consequences_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.carrying_restrictions
+  name: 'The Lost Brother: carrying restrictions'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: carrying restrictions'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If you choose to bury him, you must carry him through the dungeon (of course letting go
+    of him when danger approaches). You cannot carry anything else you find (you may not search for
+    treasures, or carry anything your comrades find).
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    burying_brother:
+      type: boolean
+      role: input
+      description: burying brother
+    danger_approaches:
+      type: boolean
+      role: input
+      description: danger approaches
+    must_carry_body:
+      type: boolean
+      role: output
+      description: must carry body
+    search_treasure_allowed:
+      type: boolean
+      role: output
+      description: search treasure allowed
+    carry_found_items_allowed:
+      type: boolean
+      role: output
+      description: carry found items allowed
+  effects:
+    - type: set
+      target: must_carry_body
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: search_treasure_allowed
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: carry_found_items_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: burying_brother
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: danger_approaches
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.bury_outside
+  name: 'The Lost Brother: bury outside'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: bury outside'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once outside, you have a short ceremony and lay him to rest in a nearby meadow. You
+    gain +10 RES permanently.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    buried_brother_outside:
+      type: boolean
+      role: input
+      description: buried brother outside
+    burial_reward_received:
+      type: boolean
+      role: input
+      description: burial reward received
+    resolve:
+      type: number
+      role: state
+      description: resolve
+  effects:
+    - type: add
+      target: resolve
+      value:
+        type: literal
+        value: 10
+      duration: permanent
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: buried_brother_outside
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: burial_reward_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.rescue_reward
+  name: 'The Lost Brother: rescue reward'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: rescue reward'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If your brother makes it out alive, he will accompany you to the next settlement where
+    you will part ways. You gain 1500 XP once you reach the settlement.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    brother_alive:
+      type: boolean
+      role: input
+      description: brother alive
+    reached_next_settlement:
+      type: boolean
+      role: input
+      description: reached next settlement
+    rescue_reward_received:
+      type: boolean
+      role: input
+      description: rescue reward received
+    xp:
+      type: number
+      role: state
+      description: xp
+  effects:
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: brother_alive
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reached_next_settlement
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rescue_reward_received
+        right:
+          type: literal
+          value: false
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.death_after_rescue
+  name: 'The Lost Brother: death after rescue'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: death after rescue'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If he dies during the dungeon crawl, revert to ‘result higher than 60’. If he dies in a
+    skirmish, you do not need to carry him further, but the end result is the same.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    died_in_dungeon:
+      type: boolean
+      role: input
+      description: died in dungeon
+    died_in_skirmish:
+      type: boolean
+      role: input
+      description: died in skirmish
+    apply_death_result:
+      type: boolean
+      role: output
+      description: apply death result
+  effects:
+    - type: set
+      target: apply_death_result
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: died_in_dungeon
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: died_in_skirmish
+        right:
+          type: literal
+          value: true
+  quest_id: quest.background.the_lost_brother
+- id: character.background.the_lost_brother.skirmish_body_exception
+  name: 'The Lost Brother: skirmish body exception'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      heading: 'The Lost Brother: skirmish body exception'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If he dies in a skirmish, you do not need to carry him further, but the end result is the same.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    died_in_skirmish:
+      type: boolean
+      role: input
+      description: died in skirmish
+    must_carry_body:
+      type: boolean
+      role: output
+      description: must carry body
+  effects:
+    - type: set
+      target: must_carry_body
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: died_in_skirmish
+    right:
+      type: literal
+      value: true
+  quest_id: quest.background.the_lost_brother
