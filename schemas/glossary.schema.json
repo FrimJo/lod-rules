@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/glossary.schema.json",
+  "title": "Glossary terms and reverse alias index",
+  "$defs": {
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "definition",
+          "aliases",
+          "mechanically_significant",
+          "related",
+          "section_id",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "allOf": [
+              {
+                "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+              },
+              {
+                "type": "string",
+                "pattern": "^term\\."
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "resource",
+              "stat",
+              "skill",
+              "temporal_scope",
+              "spatial_concept",
+              "action_type",
+              "damage_type",
+              "item_property",
+              "spell_property",
+              "rule_keyword",
+              "concept"
+            ]
+          },
+          "abbreviation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "mechanically_significant": {
+            "type": "boolean"
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^term\\."
+                }
+              ]
+            },
+            "uniqueItems": true
+          },
+          "section_id": {
+            "allOf": [
+              {
+                "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+              },
+              {
+                "type": "string",
+                "pattern": "^section\\."
+              }
+            ]
+          },
+          "source": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "https://lod-rules/schemas/source-reference.schema.json"
+            }
+          }
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["form", "term_id"],
+        "properties": {
+          "form": {
+            "type": "string",
+            "minLength": 1
+          },
+          "term_id": {
+            "allOf": [
+              {
+                "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+              },
+              {
+                "type": "string",
+                "pattern": "^term\\."
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

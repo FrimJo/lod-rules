@@ -10,6 +10,8 @@ const schemaFiles = [
   'source-reference.schema.json',
   'manifest.schema.json',
   'source-map.schema.json',
+  'glossary.schema.json',
+  'issue.schema.json',
 ] as const;
 
 /**
@@ -22,6 +24,9 @@ export const schemaRefs = {
   sections: 'https://lod-rules/schemas/source-map.schema.json#/$defs/sections',
   pages: 'https://lod-rules/schemas/source-map.schema.json#/$defs/pages',
   coverage: 'https://lod-rules/schemas/source-map.schema.json#/$defs/coverage',
+  terms: 'https://lod-rules/schemas/glossary.schema.json#/$defs/terms',
+  aliases: 'https://lod-rules/schemas/glossary.schema.json#/$defs/aliases',
+  issues: 'https://lod-rules/schemas/issue.schema.json',
 } as const;
 
 export type SchemaName = keyof typeof schemaRefs;

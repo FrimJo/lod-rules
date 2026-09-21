@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/issue.schema.json",
+  "title": "Unresolved source uncertainties",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "type", "summary", "related", "source", "status"],
+    "properties": {
+      "id": {
+        "allOf": [
+          {
+            "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+          },
+          {
+            "type": "string",
+            "pattern": "^issue\\."
+          }
+        ]
+      },
+      "type": {
+        "enum": ["ambiguity", "conflicting", "possible_typo", "rulebook_undefined"]
+      },
+      "summary": {
+        "type": "string",
+        "minLength": 1
+      },
+      "related": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "uniqueItems": true
+      },
+      "source": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "$ref": "https://lod-rules/schemas/source-reference.schema.json"
+        }
+      },
+      "status": {
+        "const": "unresolved"
+      }
+    }
+  }
+}
