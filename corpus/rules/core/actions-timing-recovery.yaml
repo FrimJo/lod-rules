@@ -1,0 +1,1427 @@
+- id: core.action_points.allocation
+  name: action points allocation
+  section_id: section.game_basics.action_points_ap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Action Points (AP)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Everything done inside a dungeon or on a skirmish battle map is performed by
+    spending Action Points. This is true for both heroes and enemies. All models have 2 AP.
+  type: calculation
+  scope: global
+  fields:
+    mode:
+      type: string
+      role: input
+      description: mode
+    action_points:
+      type: number
+      role: state
+      description: action points
+  effects:
+    - type: set
+      target: action_points
+      value:
+        type: literal
+        value: 2
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: mode
+        right:
+          type: literal
+          value: dungeon
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: mode
+        right:
+          type: literal
+          value: skirmish
+  term_refs:
+    - term.action_points
+  timing_refs:
+    - term.turn
+- id: core.action_points.spend
+  name: action points spend
+  section_id: section.into_the_dungeons.the_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Turn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Each hero has two Action Points (AP) to spend on actions. They may be used in any
+    combination, such as two Standard Attacks, or one move and one attack.
+  type: calculation
+  scope: global
+  fields:
+    action_points:
+      type: number
+      role: state
+      description: action points
+    action_cost:
+      type: number
+      role: input
+      description: action cost
+  effects:
+    - type: add
+      target: action_points
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: action_cost
+          - type: literal
+            value: -1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: action_cost
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: action_cost
+        right:
+          type: field
+          name: action_points
+  timing_refs:
+    - term.hero_activation
+- id: core.turn.action_order
+  name: turn action order
+  section_id: section.into_the_dungeons.the_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Turn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Each action must be completed before starting another. One hero must complete their
+    actions before another can act.
+  type: constraint
+  scope: global
+  fields:
+    previous_action_complete:
+      type: boolean
+      role: input
+      description: previous action complete
+    previous_hero_complete:
+      type: boolean
+      role: input
+      description: previous hero complete
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: previous_action_complete
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: previous_hero_complete
+            right:
+              type: literal
+              value: true
+  timing_refs:
+    - term.turn
+    - term.hero_activation
+- id: core.turn.hero_order
+  name: turn hero order
+  section_id: section.into_the_dungeons.the_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Turn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The players may choose in which order to act with the heroes as long as there are
+    no enemies on the table.
+  type: calculation
+  scope: global
+  fields:
+    enemies_present:
+      type: boolean
+      role: input
+      description: enemies present
+    player_chooses_order:
+      type: boolean
+      role: state
+      description: player chooses order
+  effects:
+    - type: set
+      target: player_chooses_order
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemies_present
+    right:
+      type: literal
+      value: false
+- id: core.turn.enemy_order
+  name: turn enemy order
+  section_id: section.into_the_dungeons.the_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Turn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Enemies act in the same way as heroes using 2 AP. They will act in such an order as
+    to avoid blocking each other as much as possible.
+  type: constraint
+  scope: global
+  fields:
+    avoids_blocking_as_much_as_possible:
+      type: boolean
+      role: input
+      description: avoids blocking as much as possible
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: avoids_blocking_as_much_as_possible
+        right:
+          type: literal
+          value: true
+- id: core.turn.enemies_placed
+  name: turn enemies placed
+  section_id: section.into_the_dungeons.the_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Turn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If enemies are placed on the table, all remaining actions for the heroes are lost
+    and a new turn starts.
+  type: calculation
+  scope: global
+  fields:
+    enemies_placed:
+      type: boolean
+      role: input
+      description: enemies placed
+    heroes_remaining_actions:
+      type: number
+      role: state
+      description: heroes remaining actions
+    new_turn:
+      type: boolean
+      role: state
+      description: new turn
+  effects:
+    - type: set
+      target: heroes_remaining_actions
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: new_turn
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemies_placed
+    right:
+      type: literal
+      value: true
+  timing_refs:
+    - term.turn
+- id: core.battle.end
+  name: battle end
+  section_id: section.combat.end_of_battle
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: End of Battle
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once all enemies are dead, you continue the turn with the actions your heroes have remaining.
+  type: calculation
+  scope: global
+  fields:
+    all_enemies_dead:
+      type: boolean
+      role: input
+      description: all enemies dead
+    remaining_actions:
+      type: number
+      role: input
+      description: remaining actions
+    available_actions:
+      type: number
+      role: state
+      description: available actions
+    continue_turn:
+      type: boolean
+      role: state
+      description: continue turn
+  effects:
+    - type: set
+      target: available_actions
+      value:
+        type: field
+        name: remaining_actions
+    - type: set
+      target: continue_turn
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_enemies_dead
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.0001
+  timing_refs:
+    - term.battle
+    - term.turn
+- id: core.battle.nonkill_end_uncertain
+  name: battle nonkill end uncertain
+  section_id: section.combat.end_of_battle
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: End of Battle
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once all enemies are dead, you continue the turn with the actions your heroes have remaining.
+  type: calculation
+  scope: global
+  fields:
+    encounter_ended_without_all_dead:
+      type: boolean
+      role: input
+      description: encounter ended without all dead
+  effects:
+    - type: unresolved
+      issue_id: issue.0001
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: encounter_ended_without_all_dead
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.0001
+- id: core.quest.end_uncertain
+  name: quest end uncertain
+  section_id: section.introduction.abbreviations_and_terminology
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 14
+      pdf_page: 16
+      heading: Abbreviations and Terminology
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 15
+      pdf_page: 17
+      heading: Until end of (next) quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'End of the Quest: This is the moment when you get your reward for a finished
+    quest. Until end of (next) quest: the modifier will last until the heroes return to the city
+    after a quest, but before beginning any activities in the city.'
+  type: calculation
+  scope: global
+  fields:
+    reward_and_return_do_not_coincide:
+      type: boolean
+      role: input
+      description: reward and return do not coincide
+  effects:
+    - type: unresolved
+      issue_id: issue.0004
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: reward_and_return_do_not_coincide
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.0004
+  timing_refs:
+    - term.end_of_the_quest
+    - term.until_end_of_next_quest
+- id: core.quest.reward
+  name: quest reward
+  section_id: section.settlements.collect_your_reward
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 142
+      pdf_page: 144
+      heading: Collect Your Reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the party is back after a finished quest the party will first receive their
+    reward, if any was promised. This can only be done in the settlement where you accepted the
+    quest.
+  type: calculation
+  scope: global
+  fields:
+    finished_quest:
+      type: boolean
+      role: input
+      description: finished quest
+    reward_promised:
+      type: boolean
+      role: input
+      description: reward promised
+    same_settlement:
+      type: boolean
+      role: input
+      description: same settlement
+    collect_reward_first:
+      type: boolean
+      role: state
+      description: collect reward first
+  effects:
+    - type: set
+      target: collect_reward_first
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: finished_quest
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_promised
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: same_settlement
+        right:
+          type: literal
+          value: true
+  timing_refs:
+    - term.end_of_the_quest
+- id: core.quest.location
+  name: quest location
+  section_id: section.embarking_on_your_first_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 57
+      pdf_page: 59
+      heading: Embarking on your First Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If it is in Silver City, you must be in the city to start that quest. Random
+    location quests may be started from any settlement, including Silver City.
+  type: constraint
+  scope: global
+  fields:
+    quest_in_silver_city:
+      type: boolean
+      role: input
+      description: Quest is specifically located in Silver City, not a random-location quest.
+    in_silver_city:
+      type: boolean
+      role: input
+      description: Party is in Silver City.
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_silver_city
+        right:
+          type: literal
+          value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quest_in_silver_city
+    right:
+      type: literal
+      value: true
+- id: core.quest.travel
+  name: quest travel
+  section_id: section.embarking_on_your_first_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 57
+      pdf_page: 59
+      heading: Embarking on your First Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If you choose a quest that takes place in your start settlement, you can head
+    straight to the ‘Entering the Dungeon’ chapter. If the quest takes place outside of the
+    settlement, your heroes will need to travel for a couple of days to reach their Quest Site.
+  type: calculation
+  scope: global
+  fields:
+    outside_settlement:
+      type: boolean
+      role: input
+      description: outside settlement
+    travel_required:
+      type: boolean
+      role: state
+      description: travel required
+  effects:
+    - type: set
+      target: travel_required
+      value:
+        type: field
+        name: outside_settlement
+- id: character.luck.settlement_reset
+  name: luck settlement reset
+  section_id: section.character_basics.the_character.luck_l
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 24
+      pdf_page: 26
+      heading: Luck (L)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Luck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Luck is reset once the hero is back in a settlement. Any luck rolls used while in
+    the settlement will not be replenished until the hero returns to a settlement once more.
+  type: calculation
+  scope: global
+  fields:
+    new_settlement_arrival:
+      type: boolean
+      role: input
+      description: new settlement arrival
+    luck_maximum:
+      type: number
+      role: input
+      description: luck maximum
+    luck:
+      type: number
+      role: state
+      description: luck
+  effects:
+    - type: set
+      target: luck
+      value:
+        type: field
+        name: luck_maximum
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: new_settlement_arrival
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.settlement_recovery
+  timing_refs:
+    - term.settlement_visit
+- id: character.energy.quest_return
+  name: energy quest return
+  section_id: section.character_basics.the_character.energy_e
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 24
+      pdf_page: 26
+      heading: Energy (E)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Lost energy is regained once back from a quest, or while resting during a quest.
+    There are also potions that can help replenish your energy levels.
+  type: calculation
+  scope: global
+  fields:
+    returned_from_quest:
+      type: boolean
+      role: input
+      description: returned from quest
+    energy_maximum:
+      type: number
+      role: input
+      description: energy maximum
+    energy:
+      type: number
+      role: state
+      description: energy
+  effects:
+    - type: set
+      target: energy
+      value:
+        type: field
+        name: energy_maximum
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: returned_from_quest
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.settlement_recovery
+- id: character.recovery.short_rest_energy
+  name: recovery short rest energy
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Roll 1d6 per Energy Point and a result of 1-3 will replenish that Energy Point.
+  type: calculation
+  scope: global
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: rest completed
+    point_is_lost:
+      type: boolean
+      role: input
+      description: point is lost
+    die:
+      type: number
+      role: input
+      description: die
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    energy:
+      type: number
+      role: state
+      description: energy
+  effects:
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: 1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rest_completed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: point_is_lost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: die
+        right:
+          type: literal
+          value: 3
+- id: character.recovery.short_rest_mana
+  name: recovery short rest mana
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and
+    possibly some energy.
+  type: calculation
+  scope: global
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: rest completed
+    mana_maximum:
+      type: number
+      role: input
+      description: mana maximum
+    mana:
+      type: number
+      role: state
+      description: mana
+  effects:
+    - type: set
+      target: mana
+      value:
+        type: field
+        name: mana_maximum
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rest_completed
+    right:
+      type: literal
+      value: true
+- id: character.recovery.short_rest_hp
+  name: recovery short rest hp
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and
+    possibly some energy.
+  type: calculation
+  scope: global
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: rest completed
+    die:
+      type: number
+      role: input
+      description: die
+      integer: true
+      minimum: 1
+      maximum: 6
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+  effects:
+    - type: add
+      target: hit_points
+      value:
+        type: field
+        name: die
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rest_completed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: sum
+          values:
+            - type: field
+              name: hit_points
+            - type: field
+              name: die
+        right:
+          type: field
+          name: maximum_hp
+  issues:
+    - issue.phase4.recovery_bounds
+- id: character.recovery.hp_overflow
+  name: recovery hp overflow
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Increase HP by 1d6 for each character (this may vary with equipment and talents).
+  type: calculation
+  scope: global
+  fields:
+    recovery:
+      type: number
+      role: input
+      description: recovery
+    hit_points:
+      type: number
+      role: input
+      description: hit points
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.recovery_bounds
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: sum
+      values:
+        - type: field
+          name: hit_points
+        - type: field
+          name: recovery
+    right:
+      type: field
+      name: maximum_hp
+  issues:
+    - issue.phase4.recovery_bounds
+- id: character.recovery.inn_resources
+  name: recovery inn resources
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Mana, Luck and energy are automatically restored, and each hero regains 2d6 HP per
+    night. Once luck has been restored, any use of luck after this will not be restored until
+    the next visit to a settlement.
+  type: calculation
+  scope: settlement
+  fields:
+    paid_lodging:
+      type: boolean
+      role: input
+      description: paid lodging
+    mana_maximum:
+      type: number
+      role: input
+      description: mana maximum
+    energy_maximum:
+      type: number
+      role: input
+      description: energy maximum
+    mana:
+      type: number
+      role: state
+      description: mana
+    energy:
+      type: number
+      role: state
+      description: energy
+  effects:
+    - type: set
+      target: mana
+      value:
+        type: field
+        name: mana_maximum
+    - type: set
+      target: energy
+      value:
+        type: field
+        name: energy_maximum
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: paid_lodging
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.settlement_recovery
+- id: character.recovery.inn_hp
+  name: recovery inn hp
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Each hero regains 2d6 HP per night.
+  type: calculation
+  scope: settlement
+  fields:
+    paid_lodging:
+      type: boolean
+      role: input
+      description: paid lodging
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 2
+      maximum: 12
+      dice:
+        count: 2
+        sides: 6
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+  effects:
+    - type: add
+      target: hit_points
+      value:
+        type: field
+        name: roll
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: paid_lodging
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: sum
+          values:
+            - type: field
+              name: hit_points
+            - type: field
+              name: roll
+        right:
+          type: field
+          name: maximum_hp
+  issues:
+    - issue.phase4.recovery_bounds
+- id: character.recovery.unaffordable
+  name: recovery unaffordable
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as
+    you sleep in the inn’s stable instead. You will then need to leave the settlement in the
+    morning, either on a quest or to travel to another settlement.
+  type: calculation
+  scope: settlement
+  fields:
+    cannot_afford:
+      type: boolean
+      role: input
+      description: cannot afford
+    must_leave_next_morning:
+      type: boolean
+      role: state
+      description: must leave next morning
+  effects:
+    - type: set
+      target: must_leave_next_morning
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: cannot_afford
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.recovery_bounds
+    - issue.phase4.settlement_recovery
+- id: character.recovery.half_uncertain
+  name: recovery half uncertain
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as
+    you sleep in the inn’s stable instead.
+  type: calculation
+  scope: settlement
+  fields:
+    cannot_afford:
+      type: boolean
+      role: input
+      description: cannot afford
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.recovery_bounds
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: cannot_afford
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.recovery_bounds
+- id: character.recovery.settlement_overlap
+  name: recovery settlement overlap
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Mana, Luck and energy are automatically restored.
+  type: calculation
+  scope: global
+  fields:
+    arrival_and_lodging_overlap:
+      type: boolean
+      role: input
+      description: arrival and lodging overlap
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.settlement_recovery
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: arrival_and_lodging_overlap
+    right:
+      type: literal
+      value: true
+  overrides:
+    - character.luck.settlement_reset
+    - character.energy.quest_return
+    - character.recovery.inn_resources
+    - character.recovery.inn_luck
+  issues:
+    - issue.phase4.settlement_recovery
+- id: core.optional.encumbrance
+  name: optional encumbrance
+  section_id: section.game_basics.complexity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'If the complexity of the game feels daunting, players may consider ignoring the
+    rules for the following (in this order): Encumbrance; Party Morale; Durability; Sanity;
+    Scenario die and Threat level.'
+  type: definition
+  scope: global
+  fields:
+    suggested_removal_order:
+      type: number
+      role: state
+      description: suggested removal order
+    may_omit:
+      type: boolean
+      role: state
+      description: may omit
+  effects:
+    - type: set
+      target: suggested_removal_order
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: may_omit
+      value:
+        type: literal
+        value: true
+  optional_system: encumbrance
+- id: core.optional.party_morale
+  name: optional party morale
+  section_id: section.game_basics.complexity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'If the complexity of the game feels daunting, players may consider ignoring the
+    rules for the following (in this order): Encumbrance; Party Morale; Durability; Sanity;
+    Scenario die and Threat level.'
+  type: definition
+  scope: global
+  fields:
+    suggested_removal_order:
+      type: number
+      role: state
+      description: suggested removal order
+    may_omit:
+      type: boolean
+      role: state
+      description: may omit
+  effects:
+    - type: set
+      target: suggested_removal_order
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: may_omit
+      value:
+        type: literal
+        value: true
+  optional_system: party_morale
+- id: core.optional.durability
+  name: optional durability
+  section_id: section.game_basics.complexity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'If the complexity of the game feels daunting, players may consider ignoring the
+    rules for the following (in this order): Encumbrance; Party Morale; Durability; Sanity;
+    Scenario die and Threat level.'
+  type: definition
+  scope: global
+  fields:
+    suggested_removal_order:
+      type: number
+      role: state
+      description: suggested removal order
+    may_omit:
+      type: boolean
+      role: state
+      description: may omit
+  effects:
+    - type: set
+      target: suggested_removal_order
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: may_omit
+      value:
+        type: literal
+        value: true
+  optional_system: durability
+- id: core.optional.sanity
+  name: optional sanity
+  section_id: section.game_basics.complexity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'If the complexity of the game feels daunting, players may consider ignoring the
+    rules for the following (in this order): Encumbrance; Party Morale; Durability; Sanity;
+    Scenario die and Threat level.'
+  type: definition
+  scope: global
+  fields:
+    suggested_removal_order:
+      type: number
+      role: state
+      description: suggested removal order
+    may_omit:
+      type: boolean
+      role: state
+      description: may omit
+  effects:
+    - type: set
+      target: suggested_removal_order
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: may_omit
+      value:
+        type: literal
+        value: true
+  optional_system: sanity
+- id: core.optional.scenario_and_threat
+  name: optional scenario and threat
+  section_id: section.game_basics.complexity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'If the complexity of the game feels daunting, players may consider ignoring the
+    rules for the following (in this order): Encumbrance; Party Morale; Durability; Sanity;
+    Scenario die and Threat level.'
+  type: definition
+  scope: global
+  fields:
+    suggested_removal_order:
+      type: number
+      role: state
+      description: suggested removal order
+    may_omit:
+      type: boolean
+      role: state
+      description: may omit
+  effects:
+    - type: set
+      target: suggested_removal_order
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: may_omit
+      value:
+        type: literal
+        value: true
+  optional_system: scenario_and_threat
+  unresolved_references:
+    - Wandering monsters and light sources will have to be house ruled if Threat level is
+      removed.

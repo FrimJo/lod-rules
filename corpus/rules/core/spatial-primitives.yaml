@@ -1,0 +1,1176 @@
+- id: core.spatial.adjacent
+  name: spatial adjacent
+  section_id: section.game_basics.the_tiles.adjacent
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Adjacent
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Basically, all 8 squares surrounding square A are adjacent to square A.
+  type: definition
+  scope: global
+  fields:
+    dx:
+      type: number
+      role: input
+      description: dx
+      integer: true
+    dy:
+      type: number
+      role: input
+      description: dy
+      integer: true
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: arithmetic
+              operator: abs
+              values:
+                - type: field
+                  name: dx
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: arithmetic
+              operator: abs
+              values:
+                - type: field
+                  name: dy
+            right:
+              type: literal
+              value: 1
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: dx
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: dy
+                right:
+                  type: literal
+                  value: 0
+  term_refs:
+    - term.adjacent
+- id: core.model.footprint
+  name: model footprint
+  section_id: section.game_basics.models
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Models
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model with the Large Special Rule (such as a Troll) should be large enough to
+    occupy 4 squares. All other models should fit within 1 square.
+  type: calculation
+  scope: global
+  fields:
+    large:
+      type: boolean
+      role: input
+      description: large
+    squares:
+      type: number
+      role: state
+      description: squares
+    size_choice:
+      type: string
+      role: input
+      description: Select the printed Large or other model branch.
+  effects:
+    - type: choice
+      selection: size_choice
+      options:
+        - id: large
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: large
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: squares
+              value:
+                type: literal
+                value: 4
+        - id: other
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: large
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: set
+              target: squares
+              value:
+                type: literal
+                value: 1
+- id: core.los.trace
+  name: los trace
+  section_id: section.game_basics.line_of_sight_los
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Line of Sight (LOS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: LOS is traced from the centre of the viewer’s square to the centre of the target
+    square. In the case of objects, it is the actual graphic that counts, not the square itself.
+  type: definition
+  scope: global
+  fields:
+    origin:
+      type: string
+      role: state
+      description: origin
+    destination:
+      type: string
+      role: state
+      description: destination
+    obstacle_geometry:
+      type: string
+      role: state
+      description: obstacle geometry
+  effects:
+    - type: set
+      target: origin
+      value:
+        type: literal
+        value: square_centre
+    - type: set
+      target: destination
+      value:
+        type: literal
+        value: square_centre
+    - type: set
+      target: obstacle_geometry
+      value:
+        type: literal
+        value: actual_graphic
+- id: core.los.blocked
+  name: los blocked
+  section_id: section.game_basics.line_of_sight_los
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Line of Sight (LOS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the line drawn between these two points crosses another model or some kind of
+    obstacle, it means that the LOS is obstructed. Any LOS passing through the black outline of
+    a tile is blocked.
+  type: calculation
+  scope: global
+  fields:
+    crosses_black_outline:
+      type: boolean
+      role: input
+      description: crosses black outline
+    crosses_model:
+      type: boolean
+      role: input
+      description: crosses model
+    crosses_object_art:
+      type: boolean
+      role: input
+      description: crosses object art
+    los_result:
+      type: string
+      role: state
+      description: los result
+  effects:
+    - type: set
+      target: los_result
+      value:
+        type: literal
+        value: blocked
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: crosses_black_outline
+    right:
+      type: literal
+      value: true
+  term_refs:
+    - term.line_of_sight
+- id: core.los.obstructed
+  name: los obstructed
+  section_id: section.game_basics.line_of_sight_los
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Line of Sight (LOS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the line drawn between these two points crosses another model or some kind of
+    obstacle, it means that the LOS is obstructed. Any LOS passing through the black outline of
+    a tile is blocked.
+  type: calculation
+  scope: global
+  fields:
+    crosses_black_outline:
+      type: boolean
+      role: input
+      description: crosses black outline
+    crosses_model:
+      type: boolean
+      role: input
+      description: crosses model
+    crosses_object_art:
+      type: boolean
+      role: input
+      description: crosses object art
+    los_result:
+      type: string
+      role: state
+      description: los result
+  effects:
+    - type: set
+      target: los_result
+      value:
+        type: literal
+        value: obstructed
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: crosses_black_outline
+        right:
+          type: literal
+          value: false
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crosses_model
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crosses_object_art
+            right:
+              type: literal
+              value: true
+  term_refs:
+    - term.line_of_sight
+- id: core.los.clear
+  name: los clear
+  section_id: section.game_basics.line_of_sight_los
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Line of Sight (LOS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the line drawn between these two points crosses another model or some kind of
+    obstacle, it means that the LOS is obstructed. Any LOS passing through the black outline of
+    a tile is blocked.
+  type: calculation
+  scope: global
+  fields:
+    crosses_black_outline:
+      type: boolean
+      role: input
+      description: crosses black outline
+    crosses_model:
+      type: boolean
+      role: input
+      description: crosses model
+    crosses_object_art:
+      type: boolean
+      role: input
+      description: crosses object art
+    los_result:
+      type: string
+      role: state
+      description: los result
+  effects:
+    - type: set
+      target: los_result
+      value:
+        type: literal
+        value: clear
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: crosses_black_outline
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: crosses_model
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: crosses_object_art
+        right:
+          type: literal
+          value: false
+  term_refs:
+    - term.line_of_sight
+- id: core.movement.wall
+  name: movement wall
+  section_id: section.game_basics.the_tiles.objects_on_the_tiles
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Objects on the Tiles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model may never pass through a wall unless there is a doorway placed there.
+  type: constraint
+  scope: global
+  fields:
+    crosses_wall:
+      type: boolean
+      role: input
+      description: crosses wall
+    doorway:
+      type: boolean
+      role: input
+      description: doorway
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crosses_wall
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: doorway
+            right:
+              type: literal
+              value: true
+- id: core.movement.distance
+  name: movement distance
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model can move up to its allotted movement in straight lines, or diagonally.
+  type: constraint
+  scope: global
+  fields:
+    movement_spent:
+      type: number
+      role: input
+      description: movement spent
+    allotted_movement:
+      type: number
+      role: input
+      description: allotted movement
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: movement_spent
+        right:
+          type: field
+          name: allotted_movement
+- id: core.movement.facing
+  name: movement facing
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model (enemy or hero) must be facing one of the sides in a square. Changing
+    facing is a free action.
+  type: constraint
+  scope: global
+  fields:
+    faces_square_side:
+      type: boolean
+      role: input
+      description: faces square side
+    action_cost:
+      type: number
+      role: state
+      description: action cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: faces_square_side
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 0
+- id: core.movement.diagonal_models
+  name: movement diagonal models
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: It may only move between two other models diagonally if both are friendly. A Large
+    or X-Large model can never pass diagonally between other models.
+  type: constraint
+  scope: global
+  fields:
+    between_two_models:
+      type: boolean
+      role: input
+      description: between two models
+    both_friendly:
+      type: boolean
+      role: input
+      description: both friendly
+    large_or_xlarge:
+      type: boolean
+      role: input
+      description: large or xlarge
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: between_two_models
+            right:
+              type: literal
+              value: false
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: both_friendly
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: large_or_xlarge
+                right:
+                  type: literal
+                  value: false
+- id: core.movement.occupied
+  name: movement occupied
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model may never move straight through a square occupied by another model unless
+    it has a special rule allowing this.
+  type: constraint
+  scope: global
+  fields:
+    occupied:
+      type: boolean
+      role: input
+      description: occupied
+    explicit_permission:
+      type: boolean
+      role: input
+      description: explicit permission
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: occupied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: explicit_permission
+            right:
+              type: literal
+              value: true
+- id: core.movement.diagonal_border
+  name: movement diagonal border
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A model may never move diagonally past the black border of a tile or a door post.
+  type: constraint
+  scope: global
+  fields:
+    diagonal:
+      type: boolean
+      role: input
+      description: diagonal
+    touches_black_border:
+      type: boolean
+      role: input
+      description: touches black border
+    passes_doorpost:
+      type: boolean
+      role: input
+      description: passes doorpost
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagonal
+            right:
+              type: literal
+              value: false
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: touches_black_border
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: passes_doorpost
+                right:
+                  type: literal
+                  value: false
+- id: core.movement.furniture
+  name: movement furniture
+  section_id: section.into_the_dungeons.obstacles.climbing_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Furniture
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model may try to cross a piece of furniture by paying one extra movement point.
+    This will place the model on top of the furniture, and movement may then continue as usual.
+  type: calculation
+  scope: global
+  fields:
+    extra_movement_cost:
+      type: number
+      role: state
+      description: extra movement cost
+    on_furniture:
+      type: boolean
+      role: state
+      description: on furniture
+  effects:
+    - type: set
+      target: extra_movement_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: on_furniture
+      value:
+        type: literal
+        value: true
+- id: core.movement.pit.up_without_rope
+  name: pit up without rope
+  section_id: section.into_the_dungeons.obstacles.climbing_pits
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
+    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
+    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
+    there is no need of a DEX Test. It takes 1 AP.'
+  type: calculation
+  scope: global
+  fields:
+    rope_available:
+      type: boolean
+      role: input
+      description: rope available
+    climbing_down:
+      type: boolean
+      role: input
+      description: climbing down
+    action_cost:
+      type: number
+      role: state
+      description: action cost
+    dex_test_required:
+      type: boolean
+      role: state
+      description: dex test required
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: climbing_down
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rope_available
+        right:
+          type: literal
+          value: false
+- id: core.movement.pit.up_with_rope
+  name: pit up with rope
+  section_id: section.into_the_dungeons.obstacles.climbing_pits
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
+    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
+    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
+    there is no need of a DEX Test. It takes 1 AP.'
+  type: calculation
+  scope: global
+  fields:
+    rope_available:
+      type: boolean
+      role: input
+      description: rope available
+    climbing_down:
+      type: boolean
+      role: input
+      description: climbing down
+    action_cost:
+      type: number
+      role: state
+      description: action cost
+    dex_test_required:
+      type: boolean
+      role: state
+      description: dex test required
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: climbing_down
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rope_available
+        right:
+          type: literal
+          value: true
+- id: core.movement.pit.down
+  name: pit down
+  section_id: section.into_the_dungeons.obstacles.climbing_pits
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
+    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
+    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
+    there is no need of a DEX Test. It takes 1 AP.'
+  type: calculation
+  scope: global
+  fields:
+    rope_available:
+      type: boolean
+      role: input
+      description: rope available
+    climbing_down:
+      type: boolean
+      role: input
+      description: climbing down
+    action_cost:
+      type: number
+      role: state
+      description: action cost
+    dex_test_required:
+      type: boolean
+      role: state
+      description: dex test required
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: climbing_down
+    right:
+      type: literal
+      value: true
+- id: core.movement.pit_failure
+  name: movement pit failure
+  section_id: section.into_the_dungeons.obstacles.climbing_pits
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the test fails, the hero falls into the pit taking damage as outlined on the
+    exploration or trap card.
+  type: calculation
+  scope: global
+  fields:
+    test_failed:
+      type: boolean
+      role: input
+      description: test failed
+    falls:
+      type: boolean
+      role: state
+      description: falls
+  effects:
+    - type: set
+      target: falls
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: pit_damage
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: test_failed
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: pit_damage
+      label: Damage on the exploration or trap card
+  unresolved_references:
+    - Damage as outlined on the exploration or trap card.
+- id: core.obstacle.half_square
+  name: obstacle half square
+  section_id: section.into_the_dungeons.obstacles.rule_of_fifty_percent
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 92
+      pdf_page: 94
+      heading: The rule of 50%
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Sometimes an object will affect movement if it occupies more than 50% of a square.
+    However, the art of the entire torture rack will affect LOS.
+  type: calculation
+  scope: global
+  fields:
+    uses_half_square_rule:
+      type: boolean
+      role: input
+      description: uses half square rule
+    occupied_fraction:
+      type: number
+      role: input
+      description: occupied fraction
+    movement_affected:
+      type: boolean
+      role: state
+      description: movement affected
+  effects:
+    - type: set
+      target: movement_affected
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: uses_half_square_rule
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: occupied_fraction
+        right:
+          type: literal
+          value: 0.5
+- id: core.movement.zone_of_control
+  name: movement zone of control
+  section_id: section.combat.zone_of_control_zoc
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: Zone of Control (ZOC)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model’s ZOC includes any squares directly to its side, diagonally in front, and
+    in front of it. A model’s moving from one ZOC square to another ZOC square must use 2 Points
+    of Movement in every square.
+  type: calculation
+  scope: global
+  fields:
+    from_zoc:
+      type: boolean
+      role: input
+      description: from zoc
+    to_zoc:
+      type: boolean
+      role: input
+      description: to zoc
+    movement_cost:
+      type: number
+      role: state
+      description: movement cost
+  effects:
+    - type: set
+      target: movement_cost
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: from_zoc
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: to_zoc
+        right:
+          type: literal
+          value: true
+  term_refs:
+    - term.zone_of_control
+- id: core.spatial.zone_of_control
+  name: spatial zone of control
+  section_id: section.combat.zone_of_control_zoc
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: Zone of Control (ZOC)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A model’s ZOC includes any squares directly to its side, diagonally in front, and
+    in front of it.
+  type: definition
+  scope: global
+  fields:
+    relative_forward:
+      type: number
+      role: input
+      description: relative forward
+      integer: true
+    relative_side:
+      type: number
+      role: input
+      description: relative side
+      integer: true
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: arithmetic
+              operator: abs
+              values:
+                - type: field
+                  name: relative_side
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: relative_forward
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: relative_forward
+            right:
+              type: literal
+              value: 1
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: relative_forward
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: relative_side
+                right:
+                  type: literal
+                  value: 0

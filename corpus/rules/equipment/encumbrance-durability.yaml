@@ -1,0 +1,1640 @@
+- id: character.encumbrance.penalty
+  name: encumbrance penalty
+  section_id: section.equipment.encumbrance
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Encumbrance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the total encumbrance exceeds the STR of your character, all skills and stats are at -10.
+  type: calculation
+  scope: global
+  fields:
+    encumbrance:
+      type: number
+      role: input
+      description: encumbrance
+    strength:
+      type: number
+      role: input
+      description: strength
+    skill_stat_modifier:
+      type: number
+      role: state
+      description: skill stat modifier
+  effects:
+    - type: set
+      target: skill_stat_modifier
+      value:
+        type: literal
+        value: -10
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: field
+      name: encumbrance
+    right:
+      type: field
+      name: strength
+  optional_system: encumbrance
+- id: character.encumbrance.limit
+  name: encumbrance limit
+  section_id: section.equipment.encumbrance
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Encumbrance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Your character can never carry more than STR+15 points of encumbrance.
+  type: constraint
+  scope: global
+  fields:
+    encumbrance:
+      type: number
+      role: input
+      description: encumbrance
+    strength:
+      type: number
+      role: input
+      description: strength
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: encumbrance
+        right:
+          type: sum
+          values:
+            - type: field
+              name: strength
+            - type: literal
+              value: 15
+  optional_system: encumbrance
+- id: character.equipment.quick_slots
+  name: equipment quick slots
+  section_id: section.equipment.carrying_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Carrying Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Each hero has 3 Quick Slots as standard. You may place any item except armour in a
+    Quick Slot.
+  type: calculation
+  scope: global
+  fields:
+    quick_slots:
+      type: number
+      role: state
+      description: quick slots
+    item_is_armour:
+      type: boolean
+      role: input
+      description: item is armour
+  effects:
+    - type: set
+      target: quick_slots
+      value:
+        type: literal
+        value: 3
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_is_armour
+        right:
+          type: literal
+          value: false
+- id: character.equipment.hands
+  name: equipment hands
+  section_id: section.equipment.hands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Hands
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Objects held in the hands of a hero are always at the ready.
+  type: calculation
+  scope: global
+  fields:
+    ready:
+      type: boolean
+      role: state
+      description: ready
+  effects:
+    - type: set
+      target: ready
+      value:
+        type: literal
+        value: true
+- id: character.equipment.quick_access
+  name: equipment quick access
+  section_id: section.equipment.carrying_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Carrying Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Accessing these items is quick, and can also be done during battle. However,
+    equipment in the Quick Slots can be damaged during battle.
+  type: calculation
+  scope: global
+  fields:
+    battle_accessible:
+      type: boolean
+      role: state
+      description: battle accessible
+    battle_damage_exposed:
+      type: boolean
+      role: state
+      description: battle damage exposed
+  effects:
+    - type: set
+      target: battle_accessible
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: battle_damage_exposed
+      value:
+        type: literal
+        value: true
+- id: character.equipment.backpack
+  name: equipment backpack
+  section_id: section.equipment.backpack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Backpack
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Equipment placed in a Backpack cannot be accessed during battle, but on the other
+    hand, this equipment cannot be damaged during the fight either.
+  type: calculation
+  scope: global
+  fields:
+    battle_accessible:
+      type: boolean
+      role: state
+      description: battle accessible
+    battle_damage_exposed:
+      type: boolean
+      role: state
+      description: battle damage exposed
+  effects:
+    - type: set
+      target: battle_accessible
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: battle_damage_exposed
+      value:
+        type: literal
+        value: false
+- id: character.equipment.stacked_armour
+  name: equipment stacked armour
+  section_id: section.equipment.stacking_armour
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Stacking armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Stacking armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Some armour has the ‘Stackable’ special rule. Two pieces of different tiers may be
+    used on top of each other, with the higher tier worn as the outer layer. The DEF value is
+    then added together. The outer armour is the only one that loses Durability.
+  type: calculation
+  scope: global
+  fields:
+    stackable:
+      type: boolean
+      role: input
+      description: stackable
+    outer_tier:
+      type: number
+      role: input
+      description: outer tier
+    inner_tier:
+      type: number
+      role: input
+      description: inner tier
+    outer_def:
+      type: number
+      role: input
+      description: outer def
+    inner_def:
+      type: number
+      role: input
+      description: inner def
+    defence:
+      type: number
+      role: state
+      description: defence
+    damaged_layer:
+      type: string
+      role: state
+      description: damaged layer
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stackable
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: outer_tier
+            right:
+              type: field
+              name: inner_tier
+    - type: set
+      target: defence
+      value:
+        type: sum
+        values:
+          - type: field
+            name: outer_def
+          - type: field
+            name: inner_def
+    - type: set
+      target: damaged_layer
+      value:
+        type: literal
+        value: outer
+- id: character.durability.standard
+  name: durability standard
+  section_id: section.equipment.weapon_durability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 49
+      pdf_page: 51
+      heading: Durability (weapons)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Durability (armour and shields)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: All weapons have a Durability of 6, unless otherwise noted.
+  type: calculation
+  scope: global
+  fields:
+    otherwise_noted:
+      type: boolean
+      role: input
+      description: otherwise noted
+    maximum_durability:
+      type: number
+      role: state
+      description: maximum durability
+    weapon_armour_or_shield:
+      type: boolean
+      role: input
+      description: The item is a weapon, armour, or shield.
+  effects:
+    - type: set
+      target: maximum_durability
+      value:
+        type: literal
+        value: 6
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_armour_or_shield
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: otherwise_noted
+        right:
+          type: literal
+          value: false
+  optional_system: durability
+- id: character.durability.gear_marker
+  name: durability gear marker
+  section_id: section.equipment.general_equipment_durability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Durability (general equipment)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'Some items simply have: ‘–’ noted in the table. This indicates that durability is
+    not applicable to that kind of gear.'
+  type: calculation
+  scope: global
+  fields:
+    dash_marker:
+      type: boolean
+      role: input
+      description: dash marker
+    durability_applicable:
+      type: boolean
+      role: state
+      description: durability applicable
+  effects:
+    - type: set
+      target: durability_applicable
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dash_marker
+    right:
+      type: literal
+      value: true
+  optional_system: durability
+- id: character.durability.armour_damage
+  name: durability armour damage
+  section_id: section.equipment.armour_and_shield_durability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Durability (armour and shields)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Whenever a piece of armour or a shield fails to absorb all DMG, it loses a Point of
+    Durability. When using one armour on top of another, only the top layer is damaged.
+  type: calculation
+  scope: global
+  fields:
+    fails_to_absorb_all:
+      type: boolean
+      role: input
+      description: fails to absorb all
+    inner_layer:
+      type: boolean
+      role: input
+      description: inner layer
+    durability:
+      type: number
+      role: state
+      description: durability
+  effects:
+    - type: add
+      target: durability
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fails_to_absorb_all
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: inner_layer
+        right:
+          type: literal
+          value: false
+  optional_system: durability
+- id: character.durability.broken
+  name: durability broken
+  section_id: section.equipment.weapon_durability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 49
+      pdf_page: 51
+      heading: Durability (weapons)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 50
+      pdf_page: 52
+      heading: Durability (armour, shields, general equipment)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If a weapon ever reaches 0 Durability, it is broken beyond repair.
+  type: calculation
+  scope: global
+  fields:
+    durability:
+      type: number
+      role: input
+      description: durability
+    broken:
+      type: boolean
+      role: state
+      description: broken
+    repairable:
+      type: boolean
+      role: state
+      description: repairable
+  effects:
+    - type: set
+      target: broken
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: repairable
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: durability
+    right:
+      type: literal
+      value: 0
+  optional_system: durability
+- id: character.durability.fumble
+  name: durability fumble
+  section_id: section.combat.fumble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 110
+      pdf_page: 112
+      heading: Fumble
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A hero rolling 100 when attacking or parrying damages his weapon or shield. Deduct
+    1 point of durability.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    attacking_or_parrying:
+      type: boolean
+      role: input
+      description: attacking or parrying
+    durability:
+      type: number
+      role: state
+      description: durability
+  effects:
+    - type: add
+      target: durability
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 100
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attacking_or_parrying
+        right:
+          type: literal
+          value: true
+  optional_system: durability
+- id: character.durability.weapon_parry
+  name: durability weapon parry
+  section_id: section.combat.parry_with_a_weapon
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 118
+      pdf_page: 120
+      heading: Parry with a Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: However, if you roll 95-00 you not only fail, but the weapon also takes 1 Point of Damage.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    durability:
+      type: number
+      role: state
+      description: durability
+  effects:
+    - type: add
+      target: durability
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: roll
+    right:
+      type: literal
+      value: 95
+  optional_system: durability
+- id: character.durability.overlap_uncertain
+  name: durability overlap uncertain
+  section_id: section.combat.parry_with_a_weapon
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 118
+      pdf_page: 120
+      heading: Parry with a Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If you roll 95-00 you not only fail, but the weapon also takes 1 Point of Damage.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    weapon_parry:
+      type: boolean
+      role: input
+      description: weapon parry
+    magic_weapon_attack:
+      type: boolean
+      role: input
+      description: magic weapon attack
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.durability_overlap
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 100
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_parry
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_weapon_attack
+            right:
+              type: literal
+              value: true
+  overrides:
+    - character.durability.fumble
+    - character.durability.weapon_parry
+  issues:
+    - issue.phase4.durability_overlap
+  optional_system: durability
+- id: character.durability.quick_slot_hit
+  name: durability quick slot hit
+  section_id: section.combat.quick_slots_and_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Quick Slots and Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Any hit to the torso may damage your equipment. Roll 1d10 to determine if any of
+    the Quick Slots have been struck. A roll higher than the number of slots available will have
+    no effect. Any item in that slot will lose 1 Point of Durability.
+  type: calculation
+  scope: global
+  fields:
+    torso_hit:
+      type: boolean
+      role: input
+      description: torso hit
+    roll:
+      type: number
+      role: input
+      description: roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    slot_count:
+      type: number
+      role: input
+      description: slot count
+    slot_has_item:
+      type: boolean
+      role: input
+      description: slot has item
+    durability_applicable:
+      type: boolean
+      role: input
+      description: durability applicable
+    magic_other_item:
+      type: boolean
+      role: input
+      description: magic other item
+    durability:
+      type: number
+      role: state
+      description: durability
+  effects:
+    - type: add
+      target: durability
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: torso_hit
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: slot_count
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: slot_has_item
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: durability_applicable
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magic_other_item
+        right:
+          type: literal
+          value: false
+  optional_system: durability
+- id: character.durability.potion_hit
+  name: durability potion hit
+  section_id: section.combat.quick_slots_and_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Quick Slots and Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If a potion with any liquid designed to cause damage is struck, that damage will
+    instead be inflicted on the hero.
+  type: calculation
+  scope: global
+  fields:
+    damaging_potion_struck:
+      type: boolean
+      role: input
+      description: damaging potion struck
+  effects:
+    - type: invoke
+      dependency: potion_damage
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: damaging_potion_struck
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: potion_damage
+      label: Damage from the struck potion
+      section_id: section.alchemy
+  optional_system: durability
+- id: character.durability.magic
+  name: durability magic
+  section_id: section.magic_items.durability_of_magic_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Durability of Magic Items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Weapons, armour, and shields have 8 Points of Durability instead of the ordinary 6
+    points. Other Magic Objects kept in your Quick Slots does not take damage at all.
+  type: calculation
+  scope: global
+  fields:
+    weapon_armour_or_shield:
+      type: boolean
+      role: input
+      description: weapon armour or shield
+    maximum_durability:
+      type: number
+      role: state
+      description: maximum durability
+    magical:
+      type: boolean
+      role: input
+      description: The item is magical.
+  effects:
+    - type: set
+      target: maximum_durability
+      value:
+        type: literal
+        value: 8
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magical
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_armour_or_shield
+        right:
+          type: literal
+          value: true
+  optional_system: durability
+  overrides:
+    - character.durability.standard
+- id: character.durability.magic_gear
+  name: durability magic gear
+  section_id: section.magic_items.durability_of_magic_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Durability of Magic Items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Other Magic Objects kept in your Quick Slots does not take damage at all.
+  type: calculation
+  scope: global
+  fields:
+    weapon_armour_or_shield:
+      type: boolean
+      role: input
+      description: weapon armour or shield
+    quick_slot_damage_allowed:
+      type: boolean
+      role: state
+      description: quick slot damage allowed
+    magical:
+      type: boolean
+      role: input
+      description: The item is magical.
+  effects:
+    - type: set
+      target: quick_slot_damage_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magical
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_armour_or_shield
+        right:
+          type: literal
+          value: false
+  optional_system: durability
+- id: character.durability.dissipation
+  name: durability dissipation
+  section_id: section.magic_items.dissipating_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Dissipating Magic
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Whenever you roll 00 when attacking with a magic weapon, the power is suddenly
+    gone, turning the weapon into an ordinary weapon. This includes the durability, which
+    immediately drops to a maximum of 6.
+  type: calculation
+  scope: global
+  fields:
+    attack_roll:
+      type: number
+      role: input
+      description: attack roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    magical:
+      type: boolean
+      role: state
+      description: magical
+    maximum_durability:
+      type: number
+      role: state
+      description: maximum durability
+  effects:
+    - type: set
+      target: magical
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: maximum_durability
+      value:
+        type: literal
+        value: 6
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attack_roll
+    right:
+      type: literal
+      value: 100
+  issues:
+    - issue.phase4.magic_breakage
+    - issue.phase4.durability_overlap
+  optional_system: durability
+- id: character.durability.magic_repair_uncertain
+  name: durability magic repair uncertain
+  section_id: section.magic_items.dissipating_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Dissipating Magic
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the item is broken, it must first be repaired to at least 1 Point of Durability.
+  type: calculation
+  scope: global
+  fields:
+    broken_magic_item:
+      type: boolean
+      role: input
+      description: broken magic item
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.magic_breakage
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: broken_magic_item
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.magic_breakage
+  optional_system: durability
+- id: character.durability.broken_magic_lost
+  name: durability broken magic lost
+  section_id: section.magic_items.dissipating_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Dissipating Magic
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If a magic weapon or armour breaks, the structural integrity that kept the magic in
+    check has failed, and the magic is gone.
+  type: calculation
+  scope: global
+  fields:
+    broken:
+      type: boolean
+      role: input
+      description: broken
+    magical:
+      type: boolean
+      role: state
+      description: magical
+  effects:
+    - type: set
+      target: magical
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: broken
+    right:
+      type: literal
+      value: true
+  optional_system: durability
+- id: character.durability.repair_price
+  name: durability repair price
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: To pay for the repair of an item, look up the price under the ‘Repair’ column. This
+    is the cost to repair one point of durability.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    per_point_cost:
+      type: number
+      role: state
+      description: per point cost
+    points_to_repair:
+      type: number
+      role: input
+      description: points to repair
+      minimum: 0
+      integer: true
+    cost:
+      type: number
+      role: state
+      description: cost
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_5_or_repair
+      target: per_point_cost
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: set
+      target: cost
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: per_point_cost
+          - type: field
+            name: points_to_repair
+  uses_tables:
+    - table.equipment.sell_and_repair
+  optional_system: durability
+- id: character.equipment.sell_eligibility
+  name: equipment sell eligibility
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: You cannot sell the item that has lost all its durability. Items worth less than 10
+    c cannot be sold.
+  type: constraint
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    all_durability_lost:
+      type: boolean
+      role: input
+      description: all durability lost
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: price
+            right:
+              type: literal
+              value: 10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_durability_lost
+            right:
+              type: literal
+              value: false
+- id: character.equipment.sell_price_0
+  name: equipment sell price 0
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_0
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.sell_price_1
+  name: equipment sell price 1
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_1
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.sell_price_2
+  name: equipment sell price 2
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_2
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.sell_price_3
+  name: equipment sell price 3
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_3
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.sell_price_4
+  name: equipment sell price 4
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_4
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.sell_price_5
+  name: equipment sell price 5
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The intersecting square is how much you receive for selling an item.
+  type: calculation
+  scope: global
+  fields:
+    price:
+      type: number
+      role: input
+      description: price
+    sell_price:
+      type: number
+      role: state
+      description: sell price
+  effects:
+    - type: lookup
+      table_id: table.equipment.sell_and_repair
+      key_column: price
+      key:
+        type: field
+        name: price
+      value_column: lost_5_or_repair
+      target: sell_price
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.combine_price_rows
+  name: equipment combine price rows
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 184
+      pdf_page: 186
+      heading: Sell and Repair Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If, when selling or repairing, your item is worth more than 500 c, simply add
+    several rows together until you get the correct value.
+  type: calculation
+  scope: global
+  fields:
+    item_price:
+      type: number
+      role: input
+      description: item price
+    accumulated_price:
+      type: number
+      role: state
+      description: accumulated price
+    row_price:
+      type: number
+      role: input
+      description: row price
+    accumulated_cost:
+      type: number
+      role: state
+      description: accumulated cost
+    row_cost:
+      type: number
+      role: input
+      description: row cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gt
+        left:
+          type: field
+          name: item_price
+        right:
+          type: literal
+          value: 500
+    - type: add
+      target: accumulated_price
+      value:
+        type: field
+        name: row_price
+      duration: immediate
+    - type: add
+      target: accumulated_cost
+      value:
+        type: field
+        name: row_cost
+      duration: immediate
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: accumulated_price
+        right:
+          type: field
+          name: item_price
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.durability.repair_location
+  name: durability repair location
+  section_id: section.settlements.repair_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Repair Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: This can be done while shopping or selling at the General Store for gear, and at
+    the Blacksmith for weapons and armour.
+  type: constraint
+  scope: settlement
+  fields:
+    weapons_or_armour:
+      type: boolean
+      role: input
+      description: weapons or armour
+    location:
+      type: string
+      role: input
+      description: location
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapons_or_armour
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: location
+                right:
+                  type: literal
+                  value: Blacksmith
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapons_or_armour
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: location
+                right:
+                  type: literal
+                  value: General Store
+  optional_system: durability

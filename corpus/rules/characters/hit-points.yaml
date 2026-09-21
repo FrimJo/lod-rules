@@ -1,0 +1,716 @@
+- id: combat.damage.basic
+  name: damage basic
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Damage taken = Wpn DMG + DB – NA - Armour
+  type: calculation
+  scope: global
+  fields:
+    weapon_damage:
+      type: number
+      role: input
+      description: weapon damage
+    damage_bonus:
+      type: number
+      role: input
+      description: damage bonus
+    natural_armour:
+      type: number
+      role: input
+      description: natural armour
+    armour:
+      type: number
+      role: input
+      description: armour
+    damage_taken:
+      type: number
+      role: state
+      description: damage taken
+  effects:
+    - type: set
+      target: damage_taken
+      value: &a1
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: sum
+            values:
+              - type: field
+                name: weapon_damage
+              - type: field
+                name: damage_bonus
+          - type: sum
+            values:
+              - type: field
+                name: natural_armour
+              - type: field
+                name: armour
+  when:
+    type: compare
+    operator: gte
+    left: *a1
+    right:
+      type: literal
+      value: 0
+- id: combat.damage.negative_uncertain
+  name: damage negative uncertain
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Subtract the target’s Natural Armour and any other armour. This is the number of
+    Hit Points to subtract from the target.
+  type: calculation
+  scope: global
+  fields:
+    weapon_damage:
+      type: number
+      role: input
+      description: weapon damage
+    damage_bonus:
+      type: number
+      role: input
+      description: damage bonus
+    natural_armour:
+      type: number
+      role: input
+      description: natural armour
+    armour:
+      type: number
+      role: input
+      description: armour
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.damage_floor
+  when:
+    type: compare
+    operator: lt
+    left: *a1
+    right:
+      type: literal
+      value: 0
+  issues:
+    - issue.phase4.damage_floor
+- id: character.hit_points.loss
+  name: hit points loss
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: This is the number of Hit Points to subtract from the target.
+  type: calculation
+  scope: global
+  fields:
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    damage_taken:
+      type: number
+      role: input
+      description: damage taken
+      integer: true
+      minimum: 0
+  effects:
+    - type: add
+      target: hit_points
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: damage_taken
+          - type: literal
+            value: -1
+      duration: immediate
+- id: combat.enemy.zero_hp
+  name: enemy zero hp
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: An enemy dies when it is reduced to 0 Hit Points.
+  type: calculation
+  scope: global
+  fields:
+    hit_points:
+      type: number
+      role: input
+      description: hit points
+    dead:
+      type: boolean
+      role: state
+      description: dead
+  effects:
+    - type: set
+      target: dead
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hit_points
+    right:
+      type: literal
+      value: 0
+- id: character.hit_points.wounded
+  name: hit points wounded
+  section_id: section.combat.wounded
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Wounded
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A hero or enemy that loses 50% of their HP (RDU) is considered to be wounded. As
+    long as that condition is met, they may only use 1 Action Point per turn.
+  type: calculation
+  scope: global
+  fields:
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+    hit_points:
+      type: number
+      role: input
+      description: hit points
+    action_points:
+      type: number
+      role: state
+      description: action points
+  effects:
+    - type: set
+      target: action_points
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: arithmetic
+      operator: subtract
+      values:
+        - type: field
+          name: maximum_hp
+        - type: field
+          name: hit_points
+    right:
+      type: arithmetic
+      operator: ceil
+      values:
+        - type: arithmetic
+          operator: divide
+          values:
+            - type: field
+              name: maximum_hp
+            - type: literal
+              value: 2
+  term_refs:
+    - term.hit_points
+    - term.action_points
+  overrides:
+    - core.action_points.allocation
+- id: character.hit_points.zero
+  name: hit points zero
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When the heroes reach 0 Hit Points, they are knocked down and start bleeding out.
+    They are unable to do anything.
+  type: calculation
+  scope: global
+  fields:
+    hit_points:
+      type: number
+      role: input
+      description: hit points
+    knocked_down:
+      type: boolean
+      role: state
+      description: knocked down
+    bleeding_out:
+      type: boolean
+      role: state
+      description: bleeding out
+    can_act:
+      type: boolean
+      role: state
+      description: can act
+  effects:
+    - type: set
+      target: knocked_down
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bleeding_out
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: can_act
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hit_points
+    right:
+      type: literal
+      value: 0
+- id: character.hit_points.rescue
+  name: hit points rescue
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: 'To get back on their feet during the fight they will need: A Healing Spell from a
+    companion. A Healing Potion in one of the ready slots (they may drink it themselves). A
+    Healing Potion from a companion standing adjacent (who has the potion in a ready slot).'
+  type: constraint
+  scope: global
+  fields:
+    companion_healing_spell:
+      type: boolean
+      role: input
+      description: companion healing spell
+    own_ready_potion:
+      type: boolean
+      role: input
+      description: own ready potion
+    adjacent_companion_ready_potion:
+      type: boolean
+      role: input
+      description: adjacent companion ready potion
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: companion_healing_spell
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: own_ready_potion
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent_companion_ready_potion
+            right:
+              type: literal
+              value: true
+- id: character.hit_points.after_battle_bandage
+  name: hit points after battle bandage
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once the battle is over, and there are companions left standing, one of these may
+    apply a bandage to a fallen friend. Bandages can never be applied by a knocked-out hero.
+  type: constraint
+  scope: global
+  fields:
+    battle_over:
+      type: boolean
+      role: input
+      description: battle over
+    standing_companion:
+      type: boolean
+      role: input
+      description: standing companion
+    healer_knocked_out:
+      type: boolean
+      role: input
+      description: healer knocked out
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: battle_over
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: standing_companion
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: healer_knocked_out
+            right:
+              type: literal
+              value: false
+- id: character.hit_points.party_loss
+  name: hit points party loss
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If all heroes are bleeding out at the same time, the quest is lost and the heroes die.
+  type: calculation
+  scope: global
+  fields:
+    all_bleeding_out:
+      type: boolean
+      role: input
+      description: all bleeding out
+    quest_lost:
+      type: boolean
+      role: state
+      description: quest lost
+    heroes_die:
+      type: boolean
+      role: state
+      description: heroes die
+  effects:
+    - type: set
+      target: quest_lost
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: heroes_die
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_bleeding_out
+    right:
+      type: literal
+      value: true
+- id: character.hit_points.no_rescue
+  name: hit points no rescue
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If there are still heroes standing, but they have no means to help the one bleeding
+    out, that hero will die.
+  type: calculation
+  scope: global
+  fields:
+    standing_companion:
+      type: boolean
+      role: input
+      description: standing companion
+    means_to_help:
+      type: boolean
+      role: input
+      description: means to help
+    dead:
+      type: boolean
+      role: state
+      description: dead
+  effects:
+    - type: set
+      target: dead
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: standing_companion
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: means_to_help
+        right:
+          type: literal
+          value: false
+- id: character.hit_points.permanent_injury
+  name: hit points permanent injury
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A hero that reaches 0 Hit Points also suffers 1d4 permanent reduction of a basic
+    stat or HP. Randomize which one.
+  type: calculation
+  scope: global
+  fields:
+    loss:
+      type: number
+      role: input
+      description: loss
+      integer: true
+      minimum: 1
+      maximum: 4
+      dice:
+        count: 1
+        sides: 4
+    selected_value:
+      type: number
+      role: state
+      description:
+        Selected basic stat or maximum Hit Points, before permanent injury. The source does
+        not specify the random target-selection method.
+  effects:
+    - type: add
+      target: selected_value
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: loss
+          - type: literal
+            value: -1
+      duration: permanent
+  unresolved_references:
+    - 'Randomize which one: the source does not prescribe the selection dice or distribution.'
+  issues:
+    - issue.phase4.zero_and_negative
+- id: character.hit_points.bleeding_time
+  name: hit points bleeding time
+  section_id: section.combat.bleeding_out.advanced_rule
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Advanced Rule
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If questing seems too easy, you can apply a time limitation for bleeding out. A
+    suitable time would be 1d6+1 turns before the hero dies.
+  type: calculation
+  scope: global
+  fields:
+    advanced_rule_enabled:
+      type: boolean
+      role: input
+      description: advanced rule enabled
+    die:
+      type: number
+      role: input
+      description: die
+      integer: true
+      minimum: 1
+      maximum: 6
+    turns:
+      type: number
+      role: state
+      description: turns
+  effects:
+    - type: set
+      target: turns
+      value:
+        type: sum
+        values:
+          - type: field
+            name: die
+          - type: literal
+            value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: advanced_rule_enabled
+    right:
+      type: literal
+      value: true
+- id: character.death.replacement
+  name: death replacement
+  section_id: section.combat.bleeding_out
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 120
+      pdf_page: 122
+      heading: Bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A dead hero is permanently removed from the game. The players may choose to add a
+    new level 1 hero to the party the next time the enter a settlement.
+  type: calculation
+  scope: global
+  fields:
+    dead:
+      type: boolean
+      role: input
+      description: dead
+    next_settlement_visit:
+      type: boolean
+      role: input
+      description: next settlement visit
+    replacement_level:
+      type: number
+      role: state
+      description: replacement level
+  effects:
+    - type: set
+      target: replacement_level
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: next_settlement_visit
+        right:
+          type: literal
+          value: true

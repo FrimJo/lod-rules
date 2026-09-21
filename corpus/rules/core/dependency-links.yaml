@@ -1,0 +1,73 @@
+- id: core.turn.psychology
+  name: turn psychology
+  section_id: section.game_basics.turn_sequence
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Turn Sequence
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Check for changes in Sanity and Party Morale.
+  type: procedure_rule
+  scope: dungeon
+  fields: {}
+  effects:
+    - type: invoke
+      dependency: sanity_changes
+    - type: invoke
+      dependency: morale_changes
+  dependencies:
+    - key: sanity_changes
+      label: Check applicable Sanity changes
+      object_id: table.psychology.sanity_losses
+      section_id: section.psychology.sanity
+    - key: morale_changes
+      label: Check applicable Party Morale changes
+      object_id: table.psychology.morale_adjustments
+      section_id: section.psychology.party_morale
+  timing_refs:
+    - term.turn
+- id: character.condition.arachnophobia_other_encounters
+  name: condition arachnophobia other encounters
+  section_id: section.psychology.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 55
+      pdf_page: 57
+      heading: Psychology table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The hero finds all kinds of spiders terrifying. Treat all encounters as causing Terror.
+  type: calculation
+  scope: global
+  fields:
+    spider_encounter:
+      type: boolean
+      role: input
+      description: spider encounter
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.arachnophobia_scope
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: spider_encounter
+    right:
+      type: literal
+      value: false
+  issues:
+    - issue.phase4.arachnophobia_scope
+  optional_system: sanity

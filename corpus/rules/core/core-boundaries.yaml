@@ -1,0 +1,439 @@
+- id: character.sanity.indulgence_cap_uncertain
+  name: sanity indulgence cap uncertain
+  section_id: section.psychology.sanity.reducing_insanity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 53
+      pdf_page: 55
+      heading: Reducing Insanity, or Increasing Sanity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: This will cost the hero 1d3*100 coins but will improve Sanity by 1d6.
+  type: calculation
+  scope: global
+  fields:
+    sanity:
+      type: number
+      role: input
+      description: sanity
+    recovery_die:
+      type: number
+      role: input
+      description: recovery die
+      integer: true
+      minimum: 1
+      maximum: 6
+    current_conditions:
+      type: number
+      role: input
+      description: current conditions
+      integer: true
+      minimum: 0
+      maximum: 9
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.sanity_maximum
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_conditions
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: gt
+        left:
+          type: sum
+          values:
+            - type: field
+              name: sanity
+            - type: field
+              name: recovery_die
+        right:
+          type: literal
+          value: 8
+  issues:
+    - issue.phase4.sanity_maximum
+  optional_system: sanity
+- id: character.condition.trauma_expiry
+  name: condition trauma expiry
+  section_id: section.psychology.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 55
+      pdf_page: 57
+      heading: Psychology table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once triggered, it will last until you leave the dungeon.
+  type: calculation
+  scope: global
+  fields:
+    leaves_dungeon:
+      type: boolean
+      role: input
+      description: leaves dungeon
+    trauma_resolve_modifier:
+      type: number
+      role: state
+      description: trauma resolve modifier
+    trauma_combat_skill_modifier:
+      type: number
+      role: state
+      description: trauma combat skill modifier
+    active_until_dungeon_exit:
+      type: boolean
+      role: state
+      description: Whether the current Lingering Trauma trigger remains active.
+  effects:
+    - type: set
+      target: trauma_resolve_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: trauma_combat_skill_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: active_until_dungeon_exit
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: leaves_dungeon
+    right:
+      type: literal
+      value: true
+  timing_refs:
+    - term.dungeon_departure
+  optional_system: sanity
+- id: character.mana.fractional_pool_uncertain
+  name: mana fractional pool uncertain
+  section_id: section.creating_your_character.mana
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 27
+      pdf_page: 29
+      heading: Mana
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Mana is only used by wizards, and the starting mana is equal to the wizard’s WISx1,5.
+  type: calculation
+  scope: global
+  fields:
+    wis:
+      type: number
+      role: input
+      description: wis
+    wizard:
+      type: boolean
+      role: input
+      description: The character is a wizard.
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.mana_rounding
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wizard
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: ne
+        left:
+          type: arithmetic
+          operator: multiply
+          values:
+            - type: field
+              name: wis
+            - type: literal
+              value: 1.5
+        right:
+          type: arithmetic
+          operator: floor
+          values:
+            - type: arithmetic
+              operator: multiply
+              values:
+                - type: field
+                  name: wis
+                - type: literal
+                  value: 1.5
+  issues:
+    - issue.phase4.mana_rounding
+- id: character.recovery.inn_luck
+  name: recovery inn luck
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once luck has been restored, any use of luck after this will not be restored until
+    the next visit to a settlement.
+  type: calculation
+  scope: settlement
+  fields:
+    paid_lodging:
+      type: boolean
+      role: input
+      description: paid lodging
+    first_restore_this_visit:
+      type: boolean
+      role: input
+      description: first restore this visit
+    luck_maximum:
+      type: number
+      role: input
+      description: luck maximum
+    luck:
+      type: number
+      role: state
+      description: luck
+  effects:
+    - type: set
+      target: luck
+      value:
+        type: field
+        name: luck_maximum
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: paid_lodging
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_restore_this_visit
+        right:
+          type: literal
+          value: true
+  timing_refs:
+    - term.settlement_visit
+  issues:
+    - issue.phase4.settlement_recovery
+- id: character.recovery.stable_hp
+  name: recovery stable hp
+  section_id: section.settlements.rest_and_recuperation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as
+    you sleep in the inn’s stable instead.
+  type: calculation
+  scope: settlement
+  fields:
+    cannot_afford:
+      type: boolean
+      role: input
+      description: cannot afford
+    die:
+      type: number
+      role: input
+      description: die
+      integer: true
+      minimum: 1
+      maximum: 6
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+  effects:
+    - type: add
+      target: hit_points
+      value:
+        type: field
+        name: die
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: cannot_afford
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: sum
+          values:
+            - type: field
+              name: hit_points
+            - type: field
+              name: die
+        right:
+          type: field
+          name: maximum_hp
+  issues:
+    - issue.phase4.recovery_bounds
+- id: core.movement.pit_exit
+  name: movement pit exit
+  section_id: section.into_the_dungeons.obstacles.climbing_pits
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Place the hero anywhere adjacent to the pit.
+  type: calculation
+  scope: global
+  fields:
+    climbing_up_succeeded:
+      type: boolean
+      role: input
+      description: climbing up succeeded
+    destination:
+      type: string
+      role: state
+      description: destination
+  effects:
+    - type: set
+      target: destination
+      value:
+        type: literal
+        value: any_square_adjacent_to_pit
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: climbing_up_succeeded
+    right:
+      type: literal
+      value: true
+- id: core.action_points.move
+  name: action points move
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: Different Combat Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: '1 AP: Move.'
+  type: calculation
+  scope: global
+  fields:
+    action_cost:
+      type: number
+      role: state
+      description: action cost
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+- id: character.encumbrance.feedback_uncertain
+  name: encumbrance feedback uncertain
+  section_id: section.equipment.encumbrance
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Encumbrance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If the total encumbrance exceeds the STR of your character, all skills and stats
+    are at -10. Your character can never carry more than STR+15 points of encumbrance.
+  type: calculation
+  scope: global
+  fields:
+    recalculating_from_encumbrance_penalty:
+      type: boolean
+      role: input
+      description: recalculating from encumbrance penalty
+  effects:
+    - type: unresolved
+      issue_id: issue.phase4.encumbrance_feedback
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: recalculating_from_encumbrance_penalty
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.phase4.encumbrance_feedback
+  optional_system: encumbrance

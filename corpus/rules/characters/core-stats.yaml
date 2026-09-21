@@ -1,0 +1,824 @@
+- id: character.skill.stat_independence
+  name: skill stat independence
+  section_id: section.character_basics.the_character.skills
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Skills
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: However, once play commences, basic stats and skills are no longer connected.
+    Increasing a basic stat will not increase the skill.
+  type: calculation
+  scope: global
+  fields:
+    skill:
+      type: number
+      role: input
+      description: skill
+    basic_stat_increase:
+      type: number
+      role: input
+      description: basic stat increase
+    skill_after:
+      type: number
+      role: state
+      description: skill after
+  effects:
+    - type: set
+      target: skill_after
+      value:
+        type: field
+        name: skill
+- id: character.skill.known
+  name: skill known
+  section_id: section.character_basics.the_character.skills
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Skills
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: All heroes know all skills (except Arcane Arts and Battle Prayers).
+  type: calculation
+  scope: global
+  fields:
+    skill_name:
+      type: string
+      role: input
+      description: skill name
+    known:
+      type: boolean
+      role: state
+      description: known
+  effects:
+    - type: set
+      target: known
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: skill_name
+        right:
+          type: literal
+          value: Arcane Art
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: skill_name
+        right:
+          type: literal
+          value: Battle Prayers
+- id: character.skill.base_stat
+  name: skill base stat
+  section_id: section.character_basics.the_character.skills_list
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 26
+      pdf_page: 28
+      heading: Skills List
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The base stat for the skill is written in parenthesis.
+  type: calculation
+  scope: global
+  fields:
+    skill_name:
+      type: string
+      role: input
+      description: skill name
+    base_stat:
+      type: string
+      role: state
+      description: base stat
+  effects:
+    - type: lookup
+      table_id: table.character.skill_bases
+      key_column: skill
+      key:
+        type: field
+        name: skill_name
+      value_column: base_stat
+      target: base_stat
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.character.skill_bases
+- id: character.damage_bonus.lookup
+  name: damage bonus lookup
+  section_id: section.creating_your_character.damage_bonus_and_natural_armour
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 27
+      pdf_page: 29
+      heading: Damage Bonus and Natural Armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If your character has high STR or CON, there is a chance that he or she gains a
+    Bonus to add to their character.
+  type: calculation
+  scope: global
+  fields:
+    stat:
+      type: number
+      role: input
+      description: stat
+    bonus:
+      type: number
+      role: state
+      description: bonus
+  effects:
+    - type: lookup
+      table_id: table.character.damage_bonus
+      key_column: stat
+      key:
+        type: field
+        name: stat
+      value_column: bonus
+      target: bonus
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.character.damage_bonus
+  issues:
+    - issue.phase4.lookup_domain
+- id: character.natural_armour.lookup
+  name: natural armour lookup
+  section_id: section.creating_your_character.damage_bonus_and_natural_armour
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 27
+      pdf_page: 29
+      heading: Damage Bonus and Natural Armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: If your character has high STR or CON, there is a chance that he or she gains a
+    Bonus to add to their character.
+  type: calculation
+  scope: global
+  fields:
+    stat:
+      type: number
+      role: input
+      description: stat
+    bonus:
+      type: number
+      role: state
+      description: bonus
+  effects:
+    - type: lookup
+      table_id: table.character.natural_armour
+      key_column: stat
+      key:
+        type: field
+        name: stat
+      value_column: bonus
+      target: bonus
+      on_missing_issue: issue.phase4.lookup_domain
+  uses_tables:
+    - table.character.natural_armour
+  issues:
+    - issue.phase4.lookup_domain
+- id: character.stat.maximum_str
+  name: stat maximum str
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: There is a maximum value for each stat depending on their race.
+  type: calculation
+  scope: global
+  fields:
+    race:
+      type: string
+      role: input
+      description: race
+    value:
+      type: number
+      role: input
+      description: value
+    maximum:
+      type: number
+      role: state
+      description: maximum
+  effects:
+    - type: lookup
+      table_id: table.character.stat_maxima
+      key_column: race
+      key:
+        type: field
+        name: race
+      value_column: str
+      target: maximum
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: value
+        right:
+          type: field
+          name: maximum
+  uses_tables:
+    - table.character.stat_maxima
+- id: character.stat.maximum_dex
+  name: stat maximum dex
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: There is a maximum value for each stat depending on their race.
+  type: calculation
+  scope: global
+  fields:
+    race:
+      type: string
+      role: input
+      description: race
+    value:
+      type: number
+      role: input
+      description: value
+    maximum:
+      type: number
+      role: state
+      description: maximum
+  effects:
+    - type: lookup
+      table_id: table.character.stat_maxima
+      key_column: race
+      key:
+        type: field
+        name: race
+      value_column: dex
+      target: maximum
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: value
+        right:
+          type: field
+          name: maximum
+  uses_tables:
+    - table.character.stat_maxima
+- id: character.stat.maximum_wis
+  name: stat maximum wis
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: There is a maximum value for each stat depending on their race.
+  type: calculation
+  scope: global
+  fields:
+    race:
+      type: string
+      role: input
+      description: race
+    value:
+      type: number
+      role: input
+      description: value
+    maximum:
+      type: number
+      role: state
+      description: maximum
+  effects:
+    - type: lookup
+      table_id: table.character.stat_maxima
+      key_column: race
+      key:
+        type: field
+        name: race
+      value_column: wis
+      target: maximum
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: value
+        right:
+          type: field
+          name: maximum
+  uses_tables:
+    - table.character.stat_maxima
+- id: character.stat.maximum_res
+  name: stat maximum res
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: There is a maximum value for each stat depending on their race.
+  type: calculation
+  scope: global
+  fields:
+    race:
+      type: string
+      role: input
+      description: race
+    value:
+      type: number
+      role: input
+      description: value
+    maximum:
+      type: number
+      role: state
+      description: maximum
+  effects:
+    - type: lookup
+      table_id: table.character.stat_maxima
+      key_column: race
+      key:
+        type: field
+        name: race
+      value_column: res
+      target: maximum
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: value
+        right:
+          type: field
+          name: maximum
+  uses_tables:
+    - table.character.stat_maxima
+- id: character.stat.maximum_con
+  name: stat maximum con
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: There is a maximum value for each stat depending on their race.
+  type: calculation
+  scope: global
+  fields:
+    race:
+      type: string
+      role: input
+      description: race
+    value:
+      type: number
+      role: input
+      description: value
+    maximum:
+      type: number
+      role: state
+      description: maximum
+  effects:
+    - type: lookup
+      table_id: table.character.stat_maxima
+      key_column: race
+      key:
+        type: field
+        name: race
+      value_column: con
+      target: maximum
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: value
+        right:
+          type: field
+          name: maximum
+  uses_tables:
+    - table.character.stat_maxima
+- id: character.mana.initial
+  name: mana initial
+  section_id: section.creating_your_character.mana
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 27
+      pdf_page: 29
+      heading: Mana
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Mana is only used by wizards, and the starting mana is equal to the wizard’s WISx1,5.
+  type: calculation
+  scope: global
+  fields:
+    wis:
+      type: number
+      role: input
+      description: wis
+    mana:
+      type: number
+      role: state
+      description: mana
+    wizard:
+      type: boolean
+      role: input
+      description: The character is a wizard.
+  effects:
+    - type: set
+      target: mana
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: wis
+          - type: literal
+            value: 1.5
+  issues:
+    - issue.phase4.mana_rounding
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wizard
+    right:
+      type: literal
+      value: true
+- id: character.energy.initial
+  name: energy initial
+  section_id: section.character_basics.the_character.energy_e
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 24
+      pdf_page: 26
+      heading: Energy (E)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Each hero has a pool of 1 Energy at the start, unless otherwise stated.
+  type: calculation
+  scope: global
+  fields:
+    otherwise_stated:
+      type: boolean
+      role: input
+      description: otherwise stated
+    energy:
+      type: number
+      role: state
+      description: energy
+  effects:
+    - type: set
+      target: energy
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: otherwise_stated
+    right:
+      type: literal
+      value: false
+  term_refs:
+    - term.energy
+- id: character.energy.perk
+  name: energy perk
+  section_id: section.character_basics.the_character.perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Perks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Perks can be used at the cost of energy during a hero’s activation.
+  type: calculation
+  scope: global
+  fields:
+    during_own_activation:
+      type: boolean
+      role: input
+      description: during own activation
+    energy:
+      type: number
+      role: state
+      description: energy
+    perk_cost:
+      type: number
+      role: input
+      description: perk cost
+  effects:
+    - type: add
+      target: energy
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: perk_cost
+          - type: literal
+            value: -1
+      duration: immediate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: during_own_activation
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: field
+          name: perk_cost
+  term_refs:
+    - term.energy
+    - term.perk
+- id: character.talent.passive
+  name: talent passive
+  section_id: section.character_basics.the_character.talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Talents
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Talents are passive boosts to your character, and do not require any energy to activate.
+  type: calculation
+  scope: global
+  fields:
+    energy_cost:
+      type: number
+      role: state
+      description: energy cost
+  effects:
+    - type: set
+      target: energy_cost
+      value:
+        type: literal
+        value: 0
+  term_refs:
+    - term.talent
+- id: character.luck.reroll
+  name: luck reroll
+  section_id: section.character_basics.the_character.luck_l
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 24
+      pdf_page: 26
+      heading: Luck (L)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A hero can use one Luck Point to reroll a dice roll that directly affects them. A
+    reroll can never be rerolled. Regardless of outcome, the new roll must be accepted.
+  type: calculation
+  scope: global
+  fields:
+    directly_affects_hero:
+      type: boolean
+      role: input
+      description: directly affects hero
+    already_rerolled:
+      type: boolean
+      role: input
+      description: already rerolled
+    luck:
+      type: number
+      role: state
+      description: luck
+    new_roll:
+      type: number
+      role: input
+      description: new roll
+    accepted_roll:
+      type: number
+      role: state
+      description: accepted roll
+  effects:
+    - type: add
+      target: luck
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: accepted_roll
+      value:
+        type: field
+        name: new_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: directly_affects_hero
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_rerolled
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: luck
+        right:
+          type: literal
+          value: 1
+- id: character.movement.initial
+  name: movement initial
+  section_id: section.character_basics.the_character.movement_m
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Movement (M)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: This is how many squares your character can move during one action. All heroes
+    start with movement of 4, and this is rarely changed.
+  type: calculation
+  scope: character_creation
+  fields:
+    movement:
+      type: number
+      role: state
+      description: movement
+  effects:
+    - type: set
+      target: movement
+      value:
+        type: literal
+        value: 4
+  term_refs:
+    - term.movement
+- id: character.luck.initial
+  name: luck initial
+  section_id: section.creating_your_character.final_touches
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 31
+      pdf_page: 33
+      heading: Final Touches
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: All non-halfling heroes start the game with 0 Luck.
+  type: calculation
+  scope: character_creation
+  fields:
+    halfling:
+      type: boolean
+      role: input
+      description: halfling
+    luck:
+      type: number
+      role: state
+      description: luck
+  effects:
+    - type: set
+      target: luck
+      value:
+        type: literal
+        value: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: halfling
+    right:
+      type: literal
+      value: false
