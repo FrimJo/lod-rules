@@ -373,8 +373,7 @@ return normalized results.
 
 ## Jev
 
-Obtain TypeSafe credentials from the runtime environment or the
-repository's existing secret/configuration mechanism.
+Obtain TypeSafe credentials from the runtime environment as TYPESAFE_API_KEY.
 
 Do not:
 
