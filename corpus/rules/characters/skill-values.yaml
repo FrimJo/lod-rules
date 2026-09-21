@@ -1,0 +1,86 @@
+- id: character.skill.natural_maximum
+  name: Natural skill maximum
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The natural value of a skill can never exceed 80, including talents that give an
+    unconditioned bonus of the value.
+  type: constraint
+  scope: global
+  fields:
+    natural_skill:
+      type: number
+      role: input
+      description: natural skill
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: natural_skill
+        right:
+          type: literal
+          value: 80
+- id: character.skill.conditional_value
+  name: Conditional bonuses can exceed the natural maximum
+  section_id: section.levelling_up.stats_and_skills_maximum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Temporary boosts like perks, combat modifiers, magic items or talents that gives a
+    conditioned bonus can still increase the odds to succeed over 80 but remember that a roll of
+    91-00 is always a failure.
+  type: calculation
+  scope: global
+  fields:
+    natural_skill:
+      type: number
+      role: input
+      description: natural skill
+    temporary_bonus:
+      type: number
+      role: input
+      description: temporary bonus
+    conditional_bonus:
+      type: number
+      role: input
+      description: conditional bonus
+    effective_value:
+      type: number
+      role: output
+      description: effective value
+  effects:
+    - type: set
+      target: effective_value
+      value:
+        type: sum
+        values:
+          - type: field
+            name: natural_skill
+          - type: field
+            name: temporary_bonus
+          - type: field
+            name: conditional_bonus
+  see_also:
+    - section.introduction.dice_rolling_and_skill_checks

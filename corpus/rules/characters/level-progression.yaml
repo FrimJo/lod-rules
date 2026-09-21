@@ -1,0 +1,106 @@
+- id: character.level.experience
+  name: Equal experience for all heroes
+  section_id: section.levelling_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Levelling Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes gain experience by killing enemies. All heroes gain the same amount of
+    experience, regardless of who makes the killing blow. As the heroes gain experience, they will
+    level up. Once you obtain enough experience, you may level up when you are back in a settlement.
+  type: resource_change
+  scope: global
+  fields:
+    enemy_killed:
+      type: boolean
+      role: input
+      description: enemy killed
+    experience_award:
+      type: number
+      role: input
+      description: Award amount is supplied by the calling mechanic, not defined on this page.
+    experience:
+      type: number
+      role: state
+      description: experience
+  effects:
+    - type: add
+      target: experience
+      value:
+        type: field
+        name: experience_award
+      duration: immediate
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_killed
+    right:
+      type: literal
+      value: true
+  applies_to: all_heroes
+- id: character.level.eligibility
+  name: Level-up eligibility
+  section_id: section.levelling_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Levelling Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes gain experience by killing enemies. All heroes gain the same amount of
+    experience, regardless of who makes the killing blow. As the heroes gain experience, they will
+    level up. Once you obtain enough experience, you may level up when you are back in a settlement.
+  type: constraint
+  scope: settlement
+  fields:
+    experience:
+      type: number
+      role: input
+      description: experience
+    required_experience:
+      type: number
+      role: input
+      description: XP requirement from the selected progression row.
+    in_settlement:
+      type: boolean
+      role: input
+      description: in settlement
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: experience
+            right:
+              type: field
+              name: required_experience
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_settlement
+            right:
+              type: literal
+              value: true
+  uses_tables:
+    - table.character.level_progression

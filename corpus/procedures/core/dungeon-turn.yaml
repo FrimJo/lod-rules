@@ -1,0 +1,132 @@
+- id: procedure.dungeon_turn
+  name: Dungeon turn sequence
+  section_id: section.game_basics.turn_sequence
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Turn Sequence
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    The sequence of steps in a turn is as follows:
+    1. Roll the Scenario die.
+       a. Make a Threat Roll if necessary.
+       b. Remove torches and lanterns if they go out.
+    2. Act with all heroes and monsters based on their initiative.
+    3. Move Wandering Monsters.
+    4. Increase Threat if a battle is won.
+    5. Check for changes in Sanity and Party Morale.
+    All of these terms are explained in detail later in the rules.
+  fields:
+    threat_roll_necessary:
+      type: boolean
+      role: input
+      description: threat roll necessary
+    lights_went_out:
+      type: boolean
+      role: input
+      description: lights went out
+    battle_won:
+      type: boolean
+      role: input
+      description: Caller-supplied battle victory; this procedure does not infer battle endpoints (issue.0001).
+  dependencies:
+    - key: scenario_die
+      label: Roll the Scenario die
+      section_id: section.into_the_dungeons.the_scenario_die
+    - key: threat_roll
+      label: Make a Threat Roll
+      section_id: section.into_the_dungeons.the_threat_level
+    - key: remove_lights
+      label: Remove torches and lanterns if they go out
+      section_id: section.appendix_iii_equipment.general_equipment.light_sources
+    - key: activations
+      label: Act with all heroes and monsters based on their initiative
+      section_id: section.into_the_dungeons.initiative
+    - key: wandering_monsters
+      label: Move Wandering Monsters
+      section_id: section.into_the_dungeons.wandering_monsters
+    - key: increase_threat
+      label: Increase Threat if a battle is won
+      section_id: section.into_the_dungeons.the_threat_level
+    - key: psychology
+      label: Check for changes in Sanity and Party Morale
+      section_id: section.psychology
+  steps:
+    - id: scenario
+      source_text: Roll the Scenario die.
+      effects:
+        - type: invoke
+          dependency: scenario_die
+      substeps:
+        - id: threat_roll
+          source_text: Make a Threat Roll if necessary.
+          effects:
+            - type: invoke
+              dependency: threat_roll
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: threat_roll_necessary
+            right:
+              type: literal
+              value: true
+        - id: lights
+          source_text: Remove torches and lanterns if they go out.
+          effects:
+            - type: invoke
+              dependency: remove_lights
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: lights_went_out
+            right:
+              type: literal
+              value: true
+    - id: activations
+      source_text: Act with all heroes and monsters based on their initiative.
+      effects:
+        - type: invoke
+          dependency: activations
+    - id: wandering_monsters
+      source_text: Move Wandering Monsters.
+      effects:
+        - type: invoke
+          dependency: wandering_monsters
+    - id: post_battle
+      source_text: Increase Threat if a battle is won.
+      effects:
+        - type: invoke
+          dependency: increase_threat
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: battle_won
+        right:
+          type: literal
+          value: true
+    - id: psychology
+      source_text: Check for changes in Sanity and Party Morale.
+      effects:
+        - type: invoke
+          dependency: psychology
+  entry_step: scenario
+  exit_step: psychology
+  issues:
+    - issue.0007
+    - issue.0001
+  see_also:
+    - section.into_the_dungeons.the_turn
+    - section.into_the_dungeons.wandering_monsters

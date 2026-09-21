@@ -1,0 +1,727 @@
+- id: core.check.standard
+  name: Standard check failure
+  section_id: section.game_basics.skill_and_stat_checks.success_and_failure
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Success and Failure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any result equal to or lower than the stat or Skill Level is considered a success.
+    Anything above that is considered a failure.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: Normalized percentile result, 1–100; printed 00 denotes 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    effective_value:
+      type: number
+      role: input
+      description: Value after any independently established modifiers.
+    outcome:
+      type: string
+      role: output
+      description: Success or failure; Perfect Result is a separate property.
+  effects:
+    - type: set
+      target: outcome
+      value:
+        type: literal
+        value: failure
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: effective_value
+  issues:
+    - issue.0005
+  term_refs:
+    - term.skill_test
+    - term.percentile_dice
+- id: core.check.success
+  name: Standard check success
+  section_id: section.game_basics.skill_and_stat_checks.success_and_failure
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Success and Failure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any result equal to or lower than the stat or Skill Level is considered a success.
+    Anything above that is considered a failure.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: Normalized percentile result, 1–100; printed 00 denotes 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    effective_value:
+      type: number
+      role: input
+      description: Value after any independently established modifiers.
+    outcome:
+      type: string
+      role: output
+      description: Success or failure; Perfect Result is a separate property.
+  effects:
+    - type: set
+      target: outcome
+      value:
+        type: literal
+        value: success
+  when:
+    type: compare
+    operator: lte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: effective_value
+  issues:
+    - issue.0005
+  term_refs:
+    - term.skill_test
+    - term.percentile_dice
+- id: core.check.automatic_failure
+  name: Automatic failure
+  section_id: section.introduction.dice_rolling_and_skill_checks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 16
+      pdf_page: 18
+      heading: Dice Rolling and Skill Checks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A roll of 91-00 is always a failure, no matter what your skill level or modifiers are.
+  type: exception
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: Normalized percentile result, 1–100; printed 00 denotes 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    effective_value:
+      type: number
+      role: input
+      description: Value after any independently established modifiers.
+    outcome:
+      type: string
+      role: output
+      description: Success or failure; Perfect Result is a separate property.
+  effects:
+    - type: set
+      target: outcome
+      value:
+        type: literal
+        value: failure
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: roll
+    right:
+      type: literal
+      value: 91
+  overrides:
+    - core.check.standard
+    - core.check.success
+  issues:
+    - issue.0005
+  term_refs:
+    - term.skill_test
+    - term.percentile_dice
+- id: core.check.modifier
+  name: Unresolved modifier application
+  section_id: section.introduction.dice_rolling_and_skill_checks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 16
+      pdf_page: 18
+      heading: Dice Rolling and Skill Checks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Sometimes you will be asked to add a modifier to the roll (for instance +10). This is
+    then added to the skill level before rolling.
+  type: calculation
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    skill_value:
+      type: number
+      role: input
+      description: skill value
+    modifier:
+      type: number
+      role: input
+      description: modifier
+    effective_value:
+      type: number
+      role: output
+      description: effective value
+    modified_roll:
+      type: number
+      role: output
+      description: modified roll
+  effects:
+    - type: unresolved
+      issue_id: issue.0006
+  issues:
+    - issue.0006
+  alternatives:
+    - label: Add to the roll
+      effects:
+        - type: set
+          target: modified_roll
+          value:
+            type: sum
+            values:
+              - type: field
+                name: roll
+              - type: field
+                name: modifier
+    - label: Add to the skill level
+      effects:
+        - type: set
+          target: effective_value
+          value:
+            type: sum
+            values:
+              - type: field
+                name: skill_value
+              - type: field
+                name: modifier
+  term_refs:
+    - term.modifier
+- id: core.check.perfect_result
+  name: Perfect Result range
+  section_id: section.game_basics.skill_and_stat_checks.perfect_result
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Perfect Result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Whenever you roll 01-05 on any check, you have made a perfect roll. Whenever you make a perfect
+    roll, you may choose between these three options:
+
+    - Regain one lost point of energy.
+
+    - If this was a Skill Check, increase the permanent skill value by +1 (limited to once between
+    each settlement visit).
+
+    - If this was a basic stat check, increase that basic stat permanently by +1 (limited to once
+    between each settlement visit). This will NOT raise the skills related to that basic stat.
+  type: trigger
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    perfect:
+      type: boolean
+      role: output
+      description: perfect
+  effects:
+    - type: set
+      target: perfect
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5
+  issues:
+    - issue.0009
+  term_refs:
+    - term.perfect_result
+    - term.skill
+    - term.stat
+- id: core.check.perfect_rewards
+  name: Perfect Result reward choice
+  section_id: section.game_basics.skill_and_stat_checks.perfect_result
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Perfect Result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Whenever you roll 01-05 on any check, you have made a perfect roll. Whenever you make a perfect
+    roll, you may choose between these three options:
+
+    - Regain one lost point of energy.
+
+    - If this was a Skill Check, increase the permanent skill value by +1 (limited to once between
+    each settlement visit).
+
+    - If this was a basic stat check, increase that basic stat permanently by +1 (limited to once
+    between each settlement visit). This will NOT raise the skills related to that basic stat.
+  type: choice
+  scope: global
+  fields:
+    perfect:
+      type: boolean
+      role: input
+      description: perfect
+    reward:
+      type: string
+      role: input
+      description: reward
+    check_kind:
+      type: string
+      role: input
+      description: check kind
+    energy:
+      type: number
+      role: state
+      description: energy
+    lost_energy:
+      type: number
+      role: input
+      description: lost energy
+    skill_value:
+      type: number
+      role: state
+      description: skill value
+    basic_stat:
+      type: number
+      role: state
+      description: basic stat
+    skill_reward_used:
+      type: boolean
+      role: state
+      description: skill reward used
+    stat_reward_used:
+      type: boolean
+      role: state
+      description: stat reward used
+    quota_scope_uncertain:
+      type: boolean
+      role: input
+      description:
+        'Supplied review context: advancement allowance across attributes is unresolved; not a
+        printed game flag.'
+  effects:
+    - type: choice
+      selection: reward
+      options:
+        - id: energy
+          when:
+            type: compare
+            operator: gt
+            left:
+              type: field
+              name: lost_energy
+            right:
+              type: literal
+              value: 0
+          effects:
+            - type: add
+              target: energy
+              value:
+                type: literal
+                value: 1
+              duration: immediate
+        - id: skill
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: check_kind
+                right:
+                  type: literal
+                  value: skill
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill_reward_used
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: add
+              target: skill_value
+              value:
+                type: literal
+                value: 1
+              duration: permanent
+            - type: set
+              target: skill_reward_used
+              value:
+                type: literal
+                value: true
+        - id: basic_stat
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: check_kind
+                right:
+                  type: literal
+                  value: basic_stat
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stat_reward_used
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: add
+              target: basic_stat
+              value:
+                type: literal
+                value: 1
+              duration: permanent
+            - type: set
+              target: stat_reward_used
+              value:
+                type: literal
+                value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: perfect
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward
+            right:
+              type: literal
+              value: energy
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quota_scope_uncertain
+            right:
+              type: literal
+              value: false
+  issues:
+    - issue.0010
+  usage_limits:
+    - count: 1
+      window: between_settlement_visits
+      subject: skill_increase
+      aggregation_issue: issue.0010
+    - count: 1
+      window: between_settlement_visits
+      subject: basic_stat_increase
+      aggregation_issue: issue.0010
+  term_refs:
+    - term.perfect_result
+    - term.skill
+    - term.stat
+- id: core.check.perfect_quota_uncertain
+  name: Unresolved Perfect Result allowance scope
+  section_id: section.game_basics.skill_and_stat_checks.perfect_result
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Perfect Result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Whenever you roll 01-05 on any check, you have made a perfect roll. Whenever you make a perfect
+    roll, you may choose between these three options:
+
+    - Regain one lost point of energy.
+
+    - If this was a Skill Check, increase the permanent skill value by +1 (limited to once between
+    each settlement visit).
+
+    - If this was a basic stat check, increase that basic stat permanently by +1 (limited to once
+    between each settlement visit). This will NOT raise the skills related to that basic stat.
+  type: constraint
+  scope: global
+  fields:
+    perfect:
+      type: boolean
+      role: input
+      description: perfect
+    quota_scope_uncertain:
+      type: boolean
+      role: input
+      description:
+        'Supplied review context: advancement allowance across attributes is unresolved; not a
+        printed game flag.'
+    reward:
+      type: string
+      role: input
+      description: Selected Perfect Result reward.
+  effects:
+    - type: unresolved
+      issue_id: issue.0010
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: perfect
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quota_scope_uncertain
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward
+            right:
+              type: literal
+              value: skill
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward
+            right:
+              type: literal
+              value: basic_stat
+  overrides:
+    - core.check.perfect_rewards
+  issues:
+    - issue.0010
+  term_refs:
+    - term.perfect_result
+    - term.skill
+    - term.stat
+- id: core.check.perfect_success_uncertain
+  name: Perfect Result below the success threshold
+  section_id: section.game_basics.skill_and_stat_checks.perfect_result
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Perfect Result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Whenever you roll 01-05 on any check, you have made a perfect roll. Whenever you make a perfect
+    roll, you may choose between these three options:
+
+    - Regain one lost point of energy.
+
+    - If this was a Skill Check, increase the permanent skill value by +1 (limited to once between
+    each settlement visit).
+
+    - If this was a basic stat check, increase that basic stat permanently by +1 (limited to once
+    between each settlement visit). This will NOT raise the skills related to that basic stat.
+  type: exception
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: Normalized percentile result, 1–100; printed 00 denotes 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    effective_value:
+      type: number
+      role: input
+      description: Value after any independently established modifiers.
+    outcome:
+      type: string
+      role: output
+      description: Success or failure; Perfect Result is a separate property.
+  effects:
+    - type: unresolved
+      issue_id: issue.0009
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: effective_value
+  overrides:
+    - core.check.standard
+  issues:
+    - issue.0009
+  term_refs:
+    - term.perfect_result
+    - term.skill
+    - term.stat
+- id: core.check.failure_instruction
+  name: Follow the instruction after or on failure
+  section_id: section.game_basics.skill_and_stat_checks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 18
+      pdf_page: 20
+      heading: Skill and Stat Checks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Throughout this book and any accessories, you will sometimes see these checks
+    abbreviated as ‘RES or…’. That would mean that the hero should test Resolve (RES), and if that
+    test fails, you follow the instructions after ‘or…’.
+  type: procedure_rule
+  scope: global
+  fields:
+    outcome:
+      type: string
+      role: input
+      description: outcome
+  effects:
+    - type: invoke
+      dependency: following_instruction
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: outcome
+    right:
+      type: literal
+      value: failure
+  dependencies:
+    - key: following_instruction
+      label: The instructions after “or…” in the calling rule
+  term_refs:
+    - term.skill_test
+    - term.percentile_dice

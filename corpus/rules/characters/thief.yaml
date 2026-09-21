@@ -1,0 +1,202 @@
+- id: character.profession.thief.equipment_limits
+  name: Thief equipment limits
+  section_id: section.creating_your_character.thief
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 36
+      pdf_page: 38
+      heading: Limitations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A Thief may never use armour heavier than Tier 3 or weapons heavier than Class 2.
+  type: constraint
+  scope: global
+  fields:
+    armour_tier:
+      type: number
+      role: input
+      description: armour tier
+    weapon_class:
+      type: number
+      role: input
+      description: weapon class
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: armour_tier
+            right:
+              type: literal
+              value: 3
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: weapon_class
+            right:
+              type: literal
+              value: 2
+- id: character.profession.thief.treasure_choice
+  name: Thief Treasure Card choice
+  section_id: section.creating_your_character.thief
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 36
+      pdf_page: 38
+      heading: Special
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever it is time to draw a Treasure Card, a thief may always draw two cards and
+    choose which one to keep. If the card drawn indicates that you should draw a new Treasure Card
+    from a higher tier of treasures, the Thief may only draw one card from that pile.
+  type: procedure_rule
+  scope: global
+  fields:
+    treasure_draw_requested:
+      type: boolean
+      role: input
+      description: treasure draw requested
+    use_thief_option:
+      type: boolean
+      role: input
+      description: use thief option
+    higher_tier_draw:
+      type: boolean
+      role: input
+      description: higher tier draw
+    chosen_card:
+      type: string
+      role: input
+      description: chosen card
+    drawn_card_one:
+      type: string
+      role: input
+      description: First card supplied by the caller from the current-tier draw.
+    drawn_card_two:
+      type: string
+      role: input
+      description: Second card supplied by the caller from the current-tier draw.
+  effects:
+    - type: draw_cards
+      pool: current_tier
+      count: 2
+    - type: select_card
+      choice:
+        type: field
+        name: chosen_card
+      keep: 1
+      options:
+        - type: field
+          name: drawn_card_one
+        - type: field
+          name: drawn_card_two
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: treasure_draw_requested
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: use_thief_option
+        right:
+          type: literal
+          value: true
+  see_also:
+    - section.treasure
+  unresolved_references:
+    - The general Treasure Card procedure is outside the pilot.
+- id: character.profession.thief.higher_tier
+  name: Thief higher-tier exception
+  section_id: section.creating_your_character.thief
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 36
+      pdf_page: 38
+      heading: Special
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever it is time to draw a Treasure Card, a thief may always draw two cards and
+    choose which one to keep. If the card drawn indicates that you should draw a new Treasure Card
+    from a higher tier of treasures, the Thief may only draw one card from that pile.
+  type: exception
+  scope: global
+  fields:
+    treasure_draw_requested:
+      type: boolean
+      role: input
+      description: treasure draw requested
+    use_thief_option:
+      type: boolean
+      role: input
+      description: use thief option
+    higher_tier_draw:
+      type: boolean
+      role: input
+      description: higher tier draw
+    chosen_card:
+      type: string
+      role: input
+      description: chosen card
+    drawn_card_one:
+      type: string
+      role: input
+      description: First card supplied by the caller from the current-tier draw.
+    drawn_card_two:
+      type: string
+      role: input
+      description: Second card supplied by the caller from the current-tier draw.
+  effects:
+    - type: draw_cards
+      pool: higher_tier
+      count: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: treasure_draw_requested
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: higher_tier_draw
+        right:
+          type: literal
+          value: true
+  overrides:
+    - character.profession.thief.treasure_choice
+  see_also:
+    - section.treasure
