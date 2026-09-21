@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { discoverPilotFiles } from '../../scripts/validate/pilot-files.ts';
 import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { renderCoverageReport } from '../../scripts/reports/render-coverage.ts';
 
@@ -6,7 +7,7 @@ describe('corpus validation', () => {
   it('passes against the canonical corpus', () => {
     const { errors, filesChecked } = validateCorpus();
     expect(errors).toEqual([]);
-    expect(filesChecked).toBe(7);
+    expect(filesChecked).toBe(7 + discoverPilotFiles().length);
   });
 });
 

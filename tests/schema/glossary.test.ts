@@ -32,7 +32,14 @@ function fixture(): Glossary {
       { form: 'Action Points', term_id: term.id },
       { form: 'AP', term_id: term.id },
     ],
-    issues: [{ id: 'issue.0001', related: [term.id, 'section.glossary'], source: [source] }],
+    issues: [
+      {
+        status: 'unresolved',
+        id: 'issue.0001',
+        related: [term.id, 'section.glossary'],
+        source: [source],
+      },
+    ],
     documentIds: ['rulebook', 'bestiary'],
     canonicalDocumentId: 'rulebook',
   });
