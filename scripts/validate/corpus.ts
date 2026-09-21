@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
+import { discoverPilotFiles, emptyPilot } from './pilot-files.ts';
+import { checkPilotIntegrity } from './pilot.ts';
 import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
 import {
   checkIntegrity,
@@ -79,8 +81,11 @@ export function validateCorpus(): ValidationResult {
   const errors: string[] = [];
   let filesChecked = 0;
   const loaded = new Map<SchemaName, unknown>();
+  const pilot = emptyPilot();
+  const pilotFiles = discoverPilotFiles();
+  let validFiles = 0;
 
-  for (const { path, schema } of canonicalFiles) {
+  for (const { path, schema } of [...canonicalFiles, ...pilotFiles]) {
     const absolutePath = join(repoRoot, path);
 
     if (!existsSync(absolutePath)) {
@@ -104,7 +109,10 @@ export function validateCorpus(): ValidationResult {
       continue;
     }
 
-    loaded.set(schema, data);
+    validFiles += 1;
+    if (schema in pilot) {
+      (pilot[schema as keyof typeof pilot] as unknown[]).push(...(data as unknown[]));
+    } else loaded.set(schema, data);
 
     if (schema === 'coverage') {
       errors.push(...findDuplicateIds((data as { sections: unknown }).sections, path));
@@ -118,7 +126,7 @@ export function validateCorpus(): ValidationResult {
   }
 
   // Cross-file checks only make sense once every file parsed and matched its schema.
-  if (loaded.size === canonicalFiles.length) {
+  if (validFiles === canonicalFiles.length + pilotFiles.length) {
     const manifest = loaded.get('manifest') as Manifest;
     const canonicalDocument = manifest.documents.find((document) => document.canonical);
 
@@ -141,9 +149,21 @@ export function validateCorpus(): ValidationResult {
             ...(manifest.external_sources ?? []).map((source) => source.id),
           ],
           canonicalDocumentId: canonicalDocument?.id ?? '',
+          additionalRelatedIds: Object.values(pilot).flatMap((entries: Array<{ id: string }>) =>
+            entries.map((entry) => entry.id),
+          ),
         },
         sourceMap,
       ),
+    );
+    errors.push(
+      ...checkPilotIntegrity(pilot, {
+        map: sourceMap,
+        terms: loaded.get('terms') as Term[],
+        issues: loaded.get('issues') as Issue[],
+        documents: manifest.documents,
+        externalIds: sourceMap.externalSourceIds,
+      }),
     );
   }
 

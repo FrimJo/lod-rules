@@ -11,6 +11,7 @@ export interface Section {
   title: string;
   kind: string;
   parent?: string;
+  redirect_to?: string;
   printed_start_page?: number | null;
   printed_end_page?: number | null;
   pdf_start_page?: number | null;
@@ -174,9 +175,45 @@ function checkPageRanges(sections: Section[]): string[] {
   return errors;
 }
 
+/** Redirects retain stable IDs but carry no independent extraction work. */
+function checkRedirects(map: SourceMap): string[] {
+  const errors: string[] = [];
+  const sections = new Map(map.sections.map((section) => [section.id, section]));
+  const coverage = new Map(map.coverage.map((entry) => [entry.id, entry]));
+  const span = [
+    'printed_start_page',
+    'printed_end_page',
+    'pdf_start_page',
+    'pdf_end_page',
+  ] as const;
+  const components = ['glossary', 'rules', 'tables', 'examples', 'procedures', 'entities'];
+  for (const section of map.sections) {
+    if (section.redirect_to === undefined) continue;
+    const target = sections.get(section.redirect_to);
+    if (!target) errors.push(`${section.id}: unknown redirect target ${section.redirect_to}`);
+    else {
+      if (target.id === section.id) errors.push(`${section.id}: self redirect`);
+      if (target.redirect_to !== undefined) errors.push(`${section.id}: redirect chain or cycle`);
+      if (target.kind !== section.kind) errors.push(`${section.id}: redirect kind mismatch`);
+      if (span.some((key) => target[key] !== section[key]))
+        errors.push(`${section.id}: redirect page span mismatch`);
+    }
+    const entry = coverage.get(section.id);
+    if (
+      entry?.status !== 'mapped' ||
+      components.some((key) => entry.components?.[key] !== 'not_applicable')
+    )
+      errors.push(
+        `${section.id}: redirect coverage must be mapped with all components not_applicable`,
+      );
+  }
+  return errors;
+}
+
 export function checkIntegrity(map: SourceMap): string[] {
   return [
     ...checkReferences(map.sections, map.pages, map.externalSourceIds),
+    ...checkRedirects(map),
     ...checkParentCycles(map.sections),
     ...checkCoverageMatchesSections(map.sections, map.coverage),
     ...checkPageMap(map.pages, map.documentPageCount),
@@ -186,6 +223,7 @@ export function checkIntegrity(map: SourceMap): string[] {
 
 export interface SourceReference {
   document: string;
+  file?: string;
   pdf_page?: number | null;
   printed_page?: number | null;
 }
@@ -205,10 +243,20 @@ export interface Alias {
   term_id: string;
 }
 
-export interface Issue {
+export type Issue = {
   id: string;
   related: string[];
   source: SourceReference[];
+} & (
+  | { status: 'unresolved'; resolution?: never }
+  | { status: 'resolved'; resolution: { summary: string; source: SourceReference[] } }
+);
+
+/** Original concerns and their resolution evidence share the same provenance checks. */
+export function reviewSources(entry: Term | Issue): SourceReference[] {
+  return 'resolution' in entry && entry.resolution
+    ? [...entry.source, ...entry.resolution.source]
+    : entry.source;
 }
 
 export interface Glossary {
@@ -217,6 +265,7 @@ export interface Glossary {
   issues: Issue[];
   documentIds: string[];
   canonicalDocumentId: string;
+  additionalRelatedIds?: string[];
 }
 
 /** Case is ignored for lookup; punctuation (notably AP/AP(X) and NA/N/A) is not. */
@@ -227,6 +276,7 @@ export function checkGlossaryIntegrity(glossary: Glossary, map: SourceMap): stri
   const documents = new Set(glossary.documentIds);
   const relatedIds = new Set([
     ...terms.keys(),
+    ...(glossary.additionalRelatedIds ?? []),
     ...sections,
     ...glossary.issues.map((issue) => issue.id),
   ]);
@@ -247,7 +297,7 @@ export function checkGlossaryIntegrity(glossary: Glossary, map: SourceMap): stri
           errors.push(`${entry.id}: unknown related "${target}"`);
         }
       }
-      for (const source of entry.source) {
+      for (const source of reviewSources(entry)) {
         if (!documents.has(source.document)) {
           errors.push(`${entry.id}: unknown document "${source.document}"`);
         }
