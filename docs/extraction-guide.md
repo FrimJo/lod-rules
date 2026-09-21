@@ -47,7 +47,8 @@ printed sequence entirely. Each of those pages says so in its `notes`.
 | Schemas and tooling | `schemas/`, `scripts/`, `tests/` | Yes, reviewed               |
 | Build artifacts     | `generated/`                     | **Never**                   |
 
-`generated/` is gitignored and reproducible from canonical data by `npm run build:corpus`.
+`generated/` is gitignored. PDF dumps are reproduced with `inspect-pdf.ts`; corpus build
+outputs are deferred until Phase 11 (`npm run build:corpus` is currently a stub).
 If a generated file is wrong, fix the canonical input and rebuild. Documentation generated
 from canonical data — currently `docs/coverage-report.md` — follows the same rule.
 
@@ -101,3 +102,17 @@ npm test
 npm run report:coverage
 npm run lint
 ```
+
+## Phase 2 glossary status
+
+The scoped Phase 2 extraction is complete, with unresolved issues and no independent
+review claim. See [ontology.md](ontology.md) for source units, excerpts, exclusions, and
+classification conventions. Later objects may cite existing `term.*` ids. Rules, tables,
+procedures, and examples still require their own authorized phase.
+
+Terms and review issues require source references. Validation checks document membership,
+section and related ids, unique case-insensitive alias lookup, and agreement with the
+canonical page map. External-book page numbers are not checked against the rulebook map.
+Use `review/ambiguities.yaml` for uncertainty, with an `issue.*` id, type, summary, related
+ids, source references, and `status: unresolved`. Preserve conflicting quotations there;
+never make a glossary definition silently settle a rules question.

@@ -12,11 +12,12 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-Phase 1 (structural map) is complete. `corpus/source-map/` now navigates all 286 pages of
-the rulebook: every physical page is mapped to its printed folio, and 582 nodes cover the
-chapters, sections, appendices, named tables, worked examples, optional rules, and
-quest-local rules. No mechanics have been extracted yet — every node is `mapped` and
-nothing is `extracted`. Phase 2 is the glossary. See
+Phases 1 (structural map) and 2 (scoped glossary extraction) are complete. The source map
+covers all 286 pages with 586 nodes. The glossary contains 55 terms and 90 lookup forms,
+including every headword on PDF 16–17 and definitions from Introduction and Game Basics.
+Eight unresolved issues preserve source uncertainties. Extraction has not been independently
+reviewed. Rules, tables, procedures, and examples remain unextracted; Phase 3 is next.
+See [docs/ontology.md](docs/ontology.md) for the extraction boundary and distinctions,
 [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) for the full plan and
 [docs/coverage-report.md](docs/coverage-report.md) for what remains.
 
