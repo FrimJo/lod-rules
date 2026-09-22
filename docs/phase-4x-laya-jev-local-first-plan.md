@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Phases 0--4 of the League of Dungeoneers rules exporter already exist.
+Phases 0--5 of the League of Dungeoneers rules exporter already exist.
 
 **Do not rebuild Phase 4 from scratch.**
 
