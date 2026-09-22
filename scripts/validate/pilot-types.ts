@@ -220,6 +220,29 @@ export interface Procedure extends Metadata {
   entry_step: string;
   exit_step: string;
 }
+export interface StateMachineEnter {
+  label: string;
+  section_id?: string;
+  object_id?: string;
+  source_text?: string;
+}
+export interface StateMachineTransition {
+  event: string;
+  to: string;
+  source_text: string;
+  source?: PilotSource[];
+}
+export interface StateMachineState {
+  id: string;
+  source_text?: string;
+  terminal?: boolean;
+  enter?: StateMachineEnter[];
+  transitions?: StateMachineTransition[];
+}
+export interface StateMachine extends Metadata {
+  initial: string;
+  states: StateMachineState[];
+}
 export type Event =
   | { type: 'require'; satisfied: boolean }
   | { type: 'invoke' | 'ignore'; dependency: string }
@@ -245,5 +268,6 @@ export interface Pilot {
   entities: Entity[];
   tables: Table[];
   procedures: Procedure[];
+  stateMachines: StateMachine[];
   testCases: TestCase[];
 }

@@ -113,7 +113,14 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     const keys = new Set(dependencies.map((d) => d.key));
     for (const dep of dependencies) {
       if (dep.object_id)
-        link(owner, dep.object_id, ['rules', 'entities', 'tables', 'procedures', 'terms']);
+        link(owner, dep.object_id, [
+          'rules',
+          'entities',
+          'tables',
+          'procedures',
+          'terms',
+          'stateMachines',
+        ]);
       if (dep.section_id) link(owner, dep.section_id, ['sections']);
       if (dep.external_document && !context.externalIds.includes(dep.external_document))
         errors.push(`${owner}: unknown external document ${dep.external_document}`);
@@ -447,6 +454,53 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     visited.add(id);
   }
   for (const rule of pilot.rules) visit(rule.id);
+  for (const machine of pilot.stateMachines) {
+    if (!machine.id.startsWith('state_machine.'))
+      errors.push(`${machine.id}: invalid state machine namespace`);
+    metadata(machine);
+    unique(
+      machine.id,
+      machine.states.map((state) => state.id),
+    );
+    const stateIds = new Set(machine.states.map((state) => state.id));
+    if (!stateIds.has(machine.initial))
+      errors.push(`${machine.id}: unknown initial state ${machine.initial}`);
+    const reachable = new Set<string>();
+    const transitionsOf = (stateId: string): string[] =>
+      machine.states.find((state) => state.id === stateId)?.transitions?.map((t) => t.to) ?? [];
+    if (stateIds.has(machine.initial)) {
+      const queue = [machine.initial];
+      while (queue.length > 0) {
+        const current = queue.pop()!;
+        if (reachable.has(current)) continue;
+        reachable.add(current);
+        for (const target of transitionsOf(current)) if (stateIds.has(target)) queue.push(target);
+      }
+    }
+    for (const state of machine.states) {
+      if (state.terminal && (state.transitions?.length ?? 0) > 0)
+        errors.push(`${machine.id}/${state.id}: terminal state has outgoing transitions`);
+      if (!reachable.has(state.id))
+        errors.push(`${machine.id}/${state.id}: state is unreachable from the initial state`);
+      for (const transition of state.transitions ?? []) {
+        if (!stateIds.has(transition.to))
+          errors.push(`${machine.id}/${state.id}: unknown transition target ${transition.to}`);
+        provenance(`${machine.id}/${state.id}/${transition.event}`, transition.source ?? []);
+      }
+      for (const enter of state.enter ?? []) {
+        if (enter.section_id) link(machine.id, enter.section_id, ['sections']);
+        if (enter.object_id)
+          link(machine.id, enter.object_id, [
+            'rules',
+            'entities',
+            'tables',
+            'procedures',
+            'terms',
+            'stateMachines',
+          ]);
+      }
+    }
+  }
   for (const entry of [...context.terms, ...context.issues]) {
     for (const source of reviewSources(entry)) {
       const file = source.file;

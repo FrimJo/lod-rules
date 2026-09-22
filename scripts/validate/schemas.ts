@@ -17,6 +17,7 @@ const schemaFiles = [
   'entity.schema.json',
   'table.schema.json',
   'procedure.schema.json',
+  'state-machine.schema.json',
   'test-case.schema.json',
 ] as const;
 
@@ -37,6 +38,7 @@ export const schemaRefs = {
   entities: 'https://lod-rules/schemas/entity.schema.json',
   tables: 'https://lod-rules/schemas/table.schema.json',
   procedures: 'https://lod-rules/schemas/procedure.schema.json',
+  stateMachines: 'https://lod-rules/schemas/state-machine.schema.json',
   testCases: 'https://lod-rules/schemas/test-case.schema.json',
 } as const;
 

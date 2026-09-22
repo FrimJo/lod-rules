@@ -9,6 +9,7 @@ const roots = {
   entities: 'corpus/entities',
   tables: 'corpus/tables',
   procedures: 'corpus/procedures',
+  stateMachines: 'corpus/state-machines',
   testCases: 'tests/examples',
 } as const;
 export interface PilotFile {
@@ -31,7 +32,7 @@ export function discoverPilotFiles(root = repoRoot): PilotFile[] {
   return files;
 }
 export function emptyPilot(): Pilot {
-  return { rules: [], entities: [], tables: [], procedures: [], testCases: [] };
+  return { rules: [], entities: [], tables: [], procedures: [], stateMachines: [], testCases: [] };
 }
 /** Shape-validated loader for test consumers; full joins are checked by validateCorpus. */
 export function readPilot(root = repoRoot): Pilot {

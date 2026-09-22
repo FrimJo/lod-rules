@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/state-machine.schema.json",
+  "title": "Phase 6 state machines",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "initial",
+      "states"
+    ],
+    "properties": {
+      "id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "type": "string",
+        "minLength": 1
+      },
+      "see_also": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 0
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        },
+        "minItems": 0
+      },
+      "initial": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "states": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "source_text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "terminal": {
+              "type": "boolean"
+            },
+            "enter": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["label"],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "section_id": {
+                    "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+                  },
+                  "object_id": {
+                    "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+                  },
+                  "source_text": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "transitions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["event", "to", "source_text"],
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "source_text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+                    },
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
