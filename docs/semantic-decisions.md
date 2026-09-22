@@ -277,7 +277,30 @@ its denominators are 23. Completeness is unanswered. `rule_type` 16/23,
 `cites_other_material` 16/24, `completeness` 16/24, `referenced_term` 3/4.
 The single choice set of 20 or more options was wrong (0/1).
 
-Laya was not run. The ONNX weights are downloaded only when
-`@receptron/laya` is installed and a command asks for the local checkpoint.
+Laya (`base` via `@receptron/laya` `0.1.2`, pinned ONNX revision
+`68f27dfe5a27a54fb2b1fefc432f43f972e90868`) was scored in the same pass after the
+weights were downloaded into the local cache. No failures, mean latency about
+2883 ms per case, model loaded once per process. `rule_type` 7/24,
+`conditional` 19/24, `has_exception` 13/24, `cites_other_material` 12/24,
+`completeness` 14/24, `referenced_term` 2/4. By choice-set size:
+`under_10` 16/27, `10_to_19` 7/24, `20_or_more` 0/1. The `rule_type` weakness is
+concentrated in the 10–19-option set, which is where the plan warned Laya
+weakens.
+
+The `cascade` run (`laya>jev>llm`) equals the Laya numbers exactly. With
+`CALIBRATION_VERSION = uncalibrated-0`, low confidence does not escalate, and
+Laya had no failures and no 20+-option case that accepted a wrong answer
+cheaply, so nothing reached Jev. This run shows the cascade machinery works; it
+does not yet show a quality gain. Floors and confidence-based escalation stay
+off until the validation split is measured separately.
+
+`shadow` was run over the gold set with all three providers. 88 disagreement
+rows, listed by `npm run decisions -- disagreements`. Laya and Jev agree with
+each other on `rule_type` in most of the seven cases where the structural
+baseline deliberately differs from the gold label. Cases where Laya and Jev
+disagree (`gold.lost_brother.setup`, `gold.night_vision.perception`,
+`gold.heirloom.sword`, `gold.lost_brother.skirmish`, `gold.morale.hero_dies`,
+`gold.check.success`, `gold.arachnophobia`) are the review priority.
+
 The typed-decisions checkpoint has no bundle at the pinned ONNX revision, so
 it was not scored either.
