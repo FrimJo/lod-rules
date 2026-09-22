@@ -1,0 +1,281 @@
+- id: procedure.scenario_die
+  name: Scenario die
+  section_id: section.into_the_dungeons.the_scenario_die
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Scenario Die
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    The Scenario die is a d10 that is used to see if something out of the ordinary happens.
+    This die should be rolled at the start of a new turn (after the party have passed the
+    first door), or if they take a short rest. On a roll of 9 or 0, a Threat Level roll must
+    be done. Some quests may change this level, so be sure to read the quest details
+    carefully.
+  fields:
+    scenario_die_roll:
+      type: number
+      role: input
+      description: Printed d10 result; the printed 0 face is recorded as 10.
+      integer: true
+      minimum: 1
+      maximum: 10
+    threat_trigger:
+      type: number
+      role: input
+      description: Roll result that demands a Threat Level roll. The book prints 9 or 0; quests may
+        change this level.
+      integer: true
+      minimum: 1
+      maximum: 10
+  dependencies:
+    - key: threat_roll
+      label: Threat Level roll
+      object_id: procedure.threat_roll
+  steps:
+    - id: roll
+      source_text: |-
+        The Scenario die is a d10 that is used to see if something out of the ordinary happens.
+        This die should be rolled at the start of a new turn (after the party have passed the
+        first door), or if they take a short rest.
+      effects: []
+    - id: trigger_check
+      source_text: |-
+        On a roll of 9 or 0, a Threat Level roll must be done. Some quests may change this
+        level, so be sure to read the quest details carefully.
+      when:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: scenario_die_roll
+        right:
+          type: field
+          name: threat_trigger
+      effects:
+        - type: invoke
+          dependency: threat_roll
+  entry_step: roll
+  exit_step: trigger_check
+  see_also:
+    - section.into_the_dungeons.the_threat_level
+    - section.into_the_dungeons.the_turn
+- id: procedure.threat_roll
+  name: Threat Level roll
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      heading: Threat Level tables
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    When instructed to roll against the Threat Level, the player rolls 1d20. If the result is
+    20, reduce the Threat Level by 5. If the result is equal to or below the Threat Level, it
+    means that something bad just happened. This is the only dice roll where a high result is
+    a good thing. Whenever the threat roll is done and ends up equal to or below the Threat
+    Level, something out of the ordinary has happened. Depending on whether the party is in
+    battle or not, this will vary. Roll on the tables on page 89, execute the events, and then
+    reduce the Threat Level accordingly.
+  fields:
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level; the book floors it at 2 or the minimum level set by the
+        quest. Written by the natural-20 reduction and the table decrease.
+      integer: true
+      minimum: 2
+      maximum: 99
+    original_threat_level:
+      type: number
+      role: state
+      description: Threat Level as it stood when the roll was made; the trigger comparisons read
+        this so later reductions cannot reorder the branches.
+      integer: true
+      minimum: 2
+      maximum: 99
+    threat_roll:
+      type: number
+      role: input
+      description: Printed 1d20 result.
+      integer: true
+      minimum: 1
+      maximum: 20
+    in_battle:
+      type: boolean
+      role: input
+      description: Whether the party is in battle when the roll is made.
+    threat_decrease:
+      type: number
+      role: input
+      description: Threat decrease printed beside the rolled table row; caller-supplied until the
+        page 89 threat tables are extracted as table objects.
+      integer: true
+      minimum: -10
+      maximum: 0
+  dependencies:
+    - key: not_in_battle_table
+      label: Threat table — party is not in battle (page 89)
+      section_id: section.into_the_dungeons.table
+    - key: in_battle_table
+      label: Threat table — party is in battle (page 89)
+      section_id: section.into_the_dungeons.table_2
+  steps:
+    - id: roll
+      source_text: |-
+        When instructed to roll against the Threat Level, the player rolls 1d20. If the result
+        is 20, reduce the Threat Level by 5. If the result is equal to or below the Threat
+        Level, it means that something bad just happened. This is the only dice roll where a
+        high result is a good thing.
+      effects:
+        - type: set
+          target: original_threat_level
+          value:
+            type: field
+            name: threat_level
+    - id: natural_twenty
+      source_text: If the result is 20, reduce the Threat Level by 5.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: threat_roll
+        right:
+          type: literal
+          value: 20
+      effects:
+        - type: add
+          target: threat_level
+          value:
+            type: literal
+            value: -5
+          duration: until_dungeon_exit
+    - id: triggered
+      source_text: |-
+        Whenever the threat roll is done and ends up equal to or below the Threat Level,
+        something out of the ordinary has happened. Depending on whether the party is in battle
+        or not, this will vary. Roll on the tables on page 89, execute the events, and then
+        reduce the Threat Level accordingly.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: threat_roll
+            right:
+              type: field
+              name: original_threat_level
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: threat_roll
+            right:
+              type: literal
+              value: 20
+      effects: []
+      substeps:
+        - id: not_in_battle
+          source_text: |-
+            If the party is not in battle: (1d20 Result / Threat decrease table)
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_battle
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: invoke
+              dependency: not_in_battle_table
+        - id: in_battle
+          source_text: |-
+            If the party is in battle: (1d10 Result / Threat decrease table)
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_battle
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: invoke
+              dependency: in_battle_table
+        - id: decrease
+          source_text: |-
+            Once something bad has happened, the Threat Level is decreased by the appropriate
+            number listed in the tables on page 89. The Threat Level can also be lowered by
+            certain Perks or certain events. The Threat Level can never go below 2, or the
+            minimum level set by the quest.
+          effects:
+            - type: add
+              target: threat_level
+              value:
+                type: field
+                name: threat_decrease
+              duration: until_dungeon_exit
+    - id: missed
+      source_text: |-
+        Had the result of the Threat Level roll been above 9, nothing would have happened except
+        that the Threat Level would have been increased to 10.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: threat_roll
+            right:
+              type: field
+              name: original_threat_level
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: threat_roll
+            right:
+              type: literal
+              value: 20
+      effects:
+        - type: unresolved
+          issue_id: issue.phase6.failed_threat_roll_increase
+  entry_step: roll
+  exit_step: missed
+  issues:
+    - issue.phase6.failed_threat_roll_increase
+  see_also:
+    - section.into_the_dungeons.the_scenario_die
+    - section.into_the_dungeons.the_turn
+    - section.into_the_dungeons.wandering_monsters
+    - section.into_the_dungeons.table
+    - section.into_the_dungeons.table_2

@@ -1,0 +1,249 @@
+- id: procedure.rest
+  name: Short rest
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    If there are no enemies on the same tile as the heroes, or on any adjacent tiles, the party
+    may take a short rest. All heroes must be on the same tile. This costs one ration of food
+    and you may freely arrange the heroes as you see fit on the tile before the rest begins.
+    Any Wandering Monster on the map may then make 3 consecutive moves. If any Wandering
+    Monster spots the party, the rest is interrupted, and battle ensues. However, before the
+    monsters show up, the party has had time to do at least some things. The food is still
+    consumed, and the party may make free adjustments to their equipment before the battle. If
+    the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and possibly some
+    energy. Roll 1d6 per Energy Point and a result of 1-3 will replenish that Energy Point. All
+    heroes may freely rearrange their equipment during the rest and alchemists may mix potions.
+    Party Morale is increased by +2. Then, roll 1d100 to determine if the party is ambushed
+    during the rest. The risk for ambush is (5 + Threat level) % during the first rest. For
+    every rest after the first, the risk is increased by 10% (max 70%).
+  fields:
+    wandering_monster_spots_party:
+      type: boolean
+      role: input
+      description: Set when any Wandering Monster spots the party during its three moves; the rest
+        is interrupted and battle ensues.
+    rests_taken:
+      type: number
+      role: input
+      description: Count of rests taken this dungeon run including this one; the first rest has the
+        lowest ambush risk.
+      integer: true
+      minimum: 1
+      maximum: 99
+    threat_level:
+      type: number
+      role: input
+      description: Current Threat Level; feeds the ambush risk.
+      integer: true
+      minimum: 2
+      maximum: 99
+    ambush_roll:
+      type: number
+      role: input
+      description: Printed 1d100 result against the ambush risk.
+      integer: true
+      minimum: 1
+      maximum: 100
+    barred_door:
+      type: boolean
+      role: input
+      description: The party barred the door with iron wedges or a Seal door spell.
+    party_rations:
+      type: number
+      role: state
+      description: Rations of food carried by the party; a rest deducts one.
+      integer: true
+      minimum: 0
+      maximum: 999
+    party_morale:
+      type: number
+      role: state
+      description: Current Party Morale; the rest adds +2 up to the start value.
+      integer: true
+      minimum: 0
+      maximum: 99
+    ambush_risk:
+      type: number
+      role: output
+      description: Ambush chance in percent; (5 + Threat level) for the first rest, +10 per rest
+        after the first, max 70.
+      integer: true
+      minimum: 0
+      maximum: 70
+  dependencies:
+    - key: wandering_monsters
+      label: Move Wandering Monsters
+      section_id: section.into_the_dungeons.wandering_monsters
+    - key: battle_lifecycle
+      label: Battle lifecycle
+      object_id: state_machine.battle
+    - key: encounter_table
+      label: Encounter Table
+      section_id: section.into_the_dungeons.encounters
+    - key: alchemy_brewing
+      label: Alchemy (mixing potions)
+      section_id: section.alchemy
+  steps:
+    - id: arrange
+      source_text: Arrange heroes on the tile as you see fit.
+      effects: []
+    - id: bar_door
+      source_text: Bar the door (optional).
+      effects: []
+    - id: deduct_ration
+      source_text: Deduct 1 ration of food from the party.
+      effects:
+        - type: add
+          target: party_rations
+          value:
+            type: literal
+            value: -1
+          duration: immediate
+    - id: rearrange_gear
+      source_text: |-
+        Re-arrange your gear on each of your heroes if needed, and maybe also exchange gear
+        between heroes.
+      effects: []
+    - id: move_monsters
+      source_text: Move Wandering Monsters 3 times.
+      effects:
+        - type: invoke
+          dependency: wandering_monsters
+      substeps:
+        - id: interrupted
+          source_text: |-
+            If any Wandering Monster spots the party, the rest is interrupted, and battle
+            ensues. However, before the monsters show up, the party has had time to do at least
+            some things. The food is still consumed, and the party may make free adjustments to
+            their equipment before the battle.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: wandering_monster_spots_party
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: invoke
+              dependency: battle_lifecycle
+    - id: increase_morale
+      source_text: Increase Party Morale by +2 (up to start value).
+      effects:
+        - type: add
+          target: party_morale
+          value:
+            type: literal
+            value: 2
+          duration: immediate
+    - id: increase_hp
+      source_text: Increase HP by 1d6 for each character (this may vary with equipment and talents).
+      effects: []
+    - id: regain_energy
+      source_text: |-
+        Roll for each lost Energy Point. 50% chance to regain each point (This may vary with
+        Talents and Equipment).
+      effects: []
+    - id: regain_mana
+      source_text: Wizards regain all Mana.
+      effects: []
+    - id: brew_potions
+      source_text: Brew potions if you wish.
+      effects:
+        - type: invoke
+          dependency: alchemy_brewing
+    - id: ambush_roll
+      source_text: |-
+        Then, roll 1d100 to determine if the party is ambushed during the rest. The risk for
+        ambush is (5 + Threat level) % during the first rest. For every rest after the first,
+        the risk is increased by 10% (max 70%).
+      effects:
+        - type: set
+          target: ambush_risk
+          value:
+            type: arithmetic
+            operator: min
+            values:
+              - type: literal
+                value: 70
+              - type: sum
+                values:
+                  - type: literal
+                    value: 5
+                  - type: field
+                    name: threat_level
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: field
+                            name: rests_taken
+                          - type: literal
+                            value: 1
+                      - type: literal
+                        value: 10
+      substeps:
+        - id: ambushed
+          source_text: |-
+            If the party is ambushed, roll on the encounter table, and place the enemies just
+            outside the door the heroes entered through. Randomize one hero that is awake and
+            ready. The other heroes start the fight prone. The enemies start with 3 extra
+            initiative tokens.
+          when:
+            type: compare
+            operator: lte
+            left:
+              type: field
+              name: ambush_roll
+            right:
+              type: field
+              name: ambush_risk
+          effects:
+            - type: invoke
+              dependency: encounter_table
+        - id: barred_door_defence
+          source_text: |-
+            If the party bars the door with iron wedges or a Seal door spell, the door still
+            opens but all heroes start the fight standing up and the monsters have only their
+            normal initiative tokens.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: barred_door
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: ambush_roll
+                right:
+                  type: field
+                  name: ambush_risk
+          effects: []
+  entry_step: arrange
+  exit_step: ambush_roll
+  issues: []
+  see_also:
+    - section.into_the_dungeons.wandering_monsters
+    - section.psychology.party_morale
+    - section.into_the_dungeons.encounters

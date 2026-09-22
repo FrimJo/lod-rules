@@ -1,0 +1,127 @@
+- id: state_machine.battle
+  name: Battle lifecycle
+  section_id: section.into_the_dungeons.initiative
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 104
+      pdf_page: 106
+      heading: Initiative
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Activation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 107
+      pdf_page: 109
+      heading: End of Battle
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    The battle lifecycle spans three chapters. Initiative rules say when the lifecycle starts
+    and how activation order is drawn; the turn rules say what happens to the interrupted
+    turn; the combat chapter says when the battle ends. State assignments follow the source;
+    no transition is invented.
+  initial: not_in_battle
+  states:
+    - id: not_in_battle
+      source_text: |-
+        If enemies are placed on the table, all remaining actions for the heroes are lost and
+        a new turn starts.
+      transitions:
+        - event: enemies_placed_on_board
+          to: battle_setup
+          source_text: |-
+            As soon as enemies are placed on the board these rules are activated. It could be
+            either by a Standard Encounter on a new tile, or when replacing the Wandering
+            Monster token with actual enemies.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 104
+              pdf_page: 106
+              heading: Initiative
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+    - id: battle_setup
+      source_text: |-
+        As soon as enemies are placed on the table, put all the tokens representing the heroes
+        in the bag together with the same number of tokens as there are enemies.
+      enter:
+        - label: Put the hero and enemy tokens in the bag
+          source_text: |-
+            As soon as enemies are placed on the table, put all the tokens representing the
+            heroes in the bag together with the same number of tokens as there are enemies.
+          section_id: section.into_the_dungeons.initiative
+      transitions:
+        - event: tokens_prepared_new_turn
+          to: battle_active
+          source_text: When the correct number of tokens have been prepared, start a new turn.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 105
+              pdf_page: 107
+              heading: Activation
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+    - id: battle_active
+      source_text: |-
+        Then draw a token out of the bag without looking (or turn the top card of the pile).
+        If this is a hero token, choose which hero you would like to activate. Perform all
+        actions with that hero. Once done, draw the next token. If this is an enemy token,
+        activate that enemy according to the section below. Continue to draw tokens until all
+        have been taken and all models have been activated. Each model may only receive one
+        token and one activation. Once they have all acted, put the tokens for those models
+        alive/not knocked out back in the bag (re-shuffle the pile of cards) and repeat.
+      transitions:
+        - event: all_enemies_dead
+          to: battle_ended
+          source_text: Once all enemies are dead, you continue the turn with the actions your heroes
+            have remaining.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 107
+              pdf_page: 109
+              heading: End of Battle
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+    - id: battle_ended
+      source_text:
+        Once all enemies are dead, you continue the turn with the actions your heroes have
+        remaining.
+      enter:
+        - label: Continue the turn with the actions your heroes have remaining
+          source_text: Once all enemies are dead, you continue the turn with the actions your heroes
+            have remaining.
+          section_id: section.combat.end_of_battle
+      terminal: true
+  issues: []
+  see_also:
+    - section.into_the_dungeons.encounters
+    - section.into_the_dungeons.the_turn
+    - section.combat.end_of_battle
+  unresolved_references:
+    - Battle-end other than all enemies dead (fleeing enemies, quest-fought endpoints) is not
+      sourced in the extracted pages; only the all-enemies-dead condition is modelled.

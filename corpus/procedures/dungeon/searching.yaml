@@ -1,0 +1,232 @@
+- id: procedure.search_room_or_corridor
+  name: Searching through a Room or Corridor
+  section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching through a Room or Corridor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    A hero may try to search a room or corridor for hidden treasures. This takes the entire
+    turn and requires a successful Perception Roll. If there is one more hero searching as
+    well, add a +10 modifier. Any additional members of the party add a +5 modifier. Roll using
+    the highest PER value of the heroes searching. The party may only search each room once, no
+    matter how many heroes participated in the search.
+  fields:
+    per_value:
+      type: number
+      role: input
+      description: Highest PER value among the searching heroes.
+      integer: true
+      minimum: 1
+      maximum: 100
+    helpers:
+      type: number
+      role: input
+      description: Heroes searching in addition to the first.
+      integer: true
+      minimum: 0
+      maximum: 99
+    search_modifier:
+      type: number
+      role: output
+      description: Stacked helper modifier; +10 for one helper, +5 for each helper beyond the
+        first, 0 when searching alone.
+      integer: true
+      minimum: 0
+      maximum: 99
+    effective_target:
+      type: number
+      role: output
+      description: Highest PER value plus the helper modifier; the Perception Roll target.
+      integer: true
+      minimum: 1
+      maximum: 199
+  dependencies:
+    - key: core_check
+      label: Standard Skill or Stat Check
+      object_id: core.check.standard
+  steps:
+    - id: search
+      source_text: |-
+        A hero may try to search a room or corridor for hidden treasures. This takes the entire
+        turn and requires a successful Perception Roll.
+      effects: []
+    - id: with_helpers
+      source_text: |-
+        If there is one more hero searching as well, add a +10 modifier. Any additional members
+        of the party add a +5 modifier.
+      when:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: helpers
+        right:
+          type: literal
+          value: 1
+      effects:
+        - type: set
+          target: search_modifier
+          value:
+            type: sum
+            values:
+              - type: literal
+                value: 10
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: arithmetic
+                    operator: subtract
+                    values:
+                      - type: field
+                        name: helpers
+                      - type: literal
+                        value: 1
+                  - type: literal
+                    value: 5
+    - id: alone
+      source_text: |-
+        If there is one more hero searching as well, add a +10 modifier. Any additional members
+        of the party add a +5 modifier.
+      when:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: helpers
+        right:
+          type: literal
+          value: 0
+      effects:
+        - type: set
+          target: search_modifier
+          value:
+            type: literal
+            value: 0
+    - id: roll
+      source_text: |-
+        Roll using the highest PER value of the heroes searching. The party may only search each
+        room once, no matter how many heroes participated in the search.
+      effects:
+        - type: set
+          target: effective_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: per_value
+              - type: field
+                name: search_modifier
+        - type: invoke
+          dependency: core_check
+  entry_step: search
+  exit_step: roll
+  see_also:
+    - section.game_basics.skill_and_stat_checks
+- id: procedure.search_furniture
+  name: Searching Furniture
+  section_id: section.into_the_dungeons.searching_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching Furniture
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    The rooms will have many kinds of objects in them as described by the Exploration Cards.
+    These are referred to as furniture. A character standing next to a piece of furniture may
+    spend one action searching that furniture. No search roll is necessary in this case, just
+    go to chapter III: 'Treasures' and roll on the Furniture Table. Furniture can only be
+    searched once, and not when there are enemies in LOS to any party member.
+  fields:
+    already_searched:
+      type: boolean
+      role: input
+      description: The piece of furniture has already been searched.
+    enemies_in_los:
+      type: boolean
+      role: input
+      description: There are enemies in line of sight to any party member.
+  dependencies:
+    - key: furniture_table
+      label: Furniture Table
+      section_id: section.treasure.searching_furniture
+  steps:
+    - id: already_searched_check
+      source_text: Furniture can only be searched once, and not when there are enemies in LOS to
+        any party member.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_searched
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_searched
+            right:
+              type: literal
+              value: false
+    - id: enemies_check
+      source_text: Furniture can only be searched once, and not when there are enemies in LOS to
+        any party member.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemies_in_los
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_in_los
+            right:
+              type: literal
+              value: false
+    - id: search
+      source_text: |-
+        A character standing next to a piece of furniture may spend one action searching that
+        furniture. No search roll is necessary in this case, just go to chapter III: 'Treasures'
+        and roll on the Furniture Table.
+      effects:
+        - type: invoke
+          dependency: furniture_table
+  entry_step: already_searched_check
+  exit_step: search
+  issues:
+    - issue.phase6.furniture_treasure_table_location
+  unresolved_references:
+    - >-
+      the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III;
+      the furniture treasure tables are printed in Appendix V)
+  see_also:
+    - section.treasure.searching_furniture

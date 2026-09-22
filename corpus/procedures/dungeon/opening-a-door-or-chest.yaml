@@ -1,0 +1,170 @@
+- id: procedure.open_door_or_chest
+  name: Opening a Door or Chest
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Opening a Door or Chest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    Opening a door or chest costs 1 Action Point and requires the model to be adjacent to the
+    door or chest. Perform the following steps: 1. Increase the Threat Level by 1. 2. Roll 1d10
+    and 1d6 simultaneously. If the d6 ends up a 6, the door or chest is trapped. Draw a trap
+    card. Resolve the trap (if any), then check the Door Table to see if it is locked. See
+    'Locked' below. 3. Once a door is unlocked, flip the top card, and place the corresponding
+    new section. If it is a chest, roll on the Furniture Treasure Table to learn what it
+    contains. 4. In case of a door, roll to see if there are any enemies inside the room. See
+    'Encounters' and 'Placing Enemies' on page 104.
+  fields:
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level; increased by 1 as the first step of the attempt.
+      integer: true
+      minimum: 2
+      maximum: 99
+    d6_roll:
+      type: number
+      role: input
+      description: Printed 1d6 from the simultaneous roll; a 6 means the door or chest is trapped.
+      integer: true
+      minimum: 1
+      maximum: 6
+    locked:
+      type: boolean
+      role: input
+      description: Whether the Door Table result locked the door or chest. Lock handling (forcing,
+        crowbars, picking) is deferred to a later Phase 6 batch.
+    is_chest:
+      type: boolean
+      role: input
+      description: Whether the model being opened is a chest rather than a door.
+  dependencies:
+    - key: threat
+      label: The Threat Level
+      section_id: section.into_the_dungeons.the_threat_level
+    - key: door_table
+      label: Door Table (1d10 to door/chest difficulty)
+      section_id: section.into_the_dungeons.opening_a_door_or_chest.table
+    - key: exploration_cards
+      label: Reading the Exploration Cards
+      section_id: section.into_the_dungeons.reading_the_exploration_cards
+    - key: furniture_treasure_table
+      label: Furniture Treasure Table
+    - key: encounters
+      label: Encounters and Placing Enemies
+      section_id: section.into_the_dungeons.encounters
+  steps:
+    - id: spend
+      source_text: |-
+        Opening a door or chest costs 1 Action Point and requires the model to be adjacent to
+        the door or chest. Perform the following steps:
+      effects: []
+    - id: increase_threat
+      source_text: Increase the Threat Level by 1.
+      effects:
+        - type: add
+          target: threat_level
+          value:
+            type: literal
+            value: 1
+          duration: until_dungeon_exit
+    - id: roll_open
+      source_text: |-
+        Roll 1d10 and 1d6 simultaneously. If the d6 ends up a 6, the door or chest is trapped.
+        Draw a trap card. Resolve the trap (if any), then check the Door Table to see if it is
+        locked. See 'Locked' below.
+      effects: []
+      substeps:
+        - id: trapped
+          source_text:
+            If the d6 ends up a 6, the door or chest is trapped. Draw a trap card. Resolve
+            the trap (if any).
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: d6_roll
+            right:
+              type: literal
+              value: 6
+          effects:
+            - type: unresolved
+              issue_id: issue.phase6.trap_resolution_deferred
+    - id: check_locked
+      source_text: |-
+        Then check the Door Table to see if it is locked. See 'Locked' below.
+      effects:
+        - type: invoke
+          dependency: door_table
+    - id: reveal
+      source_text: |-
+        Once a door is unlocked, flip the top card, and place the corresponding new section. If
+        it is a chest, roll on the Furniture Treasure Table to learn what it contains.
+      effects: []
+      substeps:
+        - id: door_reveal
+          source_text: Once a door is unlocked, flip the top card, and place the corresponding new
+            section.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_chest
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: invoke
+              dependency: exploration_cards
+        - id: chest_reveal
+          source_text: If it is a chest, roll on the Furniture Treasure Table to learn what it
+            contains.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_chest
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: invoke
+              dependency: furniture_treasure_table
+    - id: enemies
+      source_text: |-
+        In case of a door, roll to see if there are any enemies inside the room. See
+        'Encounters' and 'Placing Enemies' on page 104.
+      effects:
+        - type: invoke
+          dependency: encounters
+  entry_step: spend
+  exit_step: enemies
+  issues:
+    - issue.phase6.trap_resolution_deferred
+    - issue.phase6.trap_headings_unmapped
+    - issue.phase6.furniture_treasure_table_location
+    - issue.phase6.door_open_threat_source
+  unresolved_references:
+    - >-
+      the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III;
+      the furniture treasure tables are printed in Appendix V)
+    - >-
+      'Locked' (locked doors: forcing, crowbars, picking the lock; deferred to a later Phase 6
+      batch)
+    - >-
+      Triggering a Trap (printed on page 90 with no matching section node)
+  see_also:
+    - section.into_the_dungeons.the_threat_level
+    - section.into_the_dungeons.opening_a_door_or_chest.table
+    - section.into_the_dungeons.encounters
