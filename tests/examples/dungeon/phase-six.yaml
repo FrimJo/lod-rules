@@ -1,0 +1,525 @@
+- id: test.phase6.scenario_die.trigger
+  name: scenario die 9 demands a Threat Level roll
+  section_id: section.into_the_dungeons.the_scenario_die
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At the start of the turn, the player rolls the Scenario die, 1d10. It ends up a 9,
+    and thus, a roll against the Threat Level must be done.
+  kind: source_example
+  procedure_id: procedure.scenario_die
+  inputs:
+    scenario_die_roll: 9
+    threat_trigger: 9
+  expected:
+    state: {}
+    events:
+      - type: invoke
+        dependency: procedure.threat_roll
+    trace:
+      - procedure.scenario_die
+    unresolved: []
+    steps:
+      - roll
+      - trigger_check
+- id: test.phase6.scenario_die.no_trigger
+  name: scenario die 8 is uneventful
+  section_id: section.into_the_dungeons.the_scenario_die
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Scenario Die
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.scenario_die
+  inputs:
+    scenario_die_roll: 8
+    threat_trigger: 9
+  expected:
+    state: {}
+    events: []
+    trace:
+      - procedure.scenario_die
+    unresolved: []
+    steps:
+      - roll
+- id: test.phase6.threat_roll.example
+  name: threat roll below the level, party not in battle
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    At the start of the turn, the player rolls the Scenario die, 1d10. It ends up a 9, and
+    thus, a roll against the Threat Level must be done. The player then rolls 1d20, resulting
+    in a 7, which happens to be below the Threat Level of 9. Since the party is not in battle,
+    the player rolls on the corresponding table and gets a 16. That means the risk of
+    encounters will go up for the rest of the quest. At the same time, the Threat Level is now
+    reduced by 6 points down to 3.
+  kind: source_example
+  procedure_id: procedure.threat_roll
+  inputs:
+    threat_level: 9
+    threat_roll: 7
+    in_battle: false
+    threat_decrease: -6
+  expected:
+    state:
+      threat_level: 3
+      original_threat_level: 9
+    events:
+      - type: invoke
+        dependency: Threat table — party is not in battle (page 89)
+    trace:
+      - procedure.threat_roll
+    unresolved: []
+    steps:
+      - roll
+      - triggered
+      - not_in_battle
+      - decrease
+- id: test.phase6.threat_roll.natural_twenty
+  name: threat roll 20 reduces the level by 5
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.threat_roll
+  inputs:
+    threat_level: 8
+    threat_roll: 20
+    in_battle: false
+    threat_decrease: 0
+  expected:
+    state:
+      threat_level: 3
+      original_threat_level: 8
+    events: []
+    trace:
+      - procedure.threat_roll
+    unresolved: []
+    steps:
+      - roll
+      - natural_twenty
+- id: test.phase6.threat_roll.missed
+  name: threat roll above the level is recorded as under-specified
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Had the result of the Threat Level roll been above 9, nothing would have happened
+    except that the Threat Level would have been increased to 10.
+  kind: derived_case
+  procedure_id: procedure.threat_roll
+  inputs:
+    threat_level: 9
+    threat_roll: 10
+    in_battle: false
+    threat_decrease: 0
+  expected:
+    state:
+      threat_level: 9
+      original_threat_level: 9
+    events: []
+    trace:
+      - procedure.threat_roll
+    unresolved:
+      - issue.phase6.failed_threat_roll_increase
+    steps:
+      - roll
+      - missed
+- id: test.phase6.open_door.clean
+  name: untrapped, unlocked door opens with its checks
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Opening a Door or Chest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.open_door_or_chest
+  inputs:
+    threat_level: 3
+    d6_roll: 3
+    locked: false
+    is_chest: false
+  expected:
+    state:
+      threat_level: 4
+    events:
+      - type: invoke
+        dependency: Door Table (1d10 to door/chest difficulty)
+      - type: invoke
+        dependency: Reading the Exploration Cards
+      - type: invoke
+        dependency: Encounters and Placing Enemies
+    trace:
+      - procedure.open_door_or_chest
+    unresolved: []
+    steps:
+      - spend
+      - increase_threat
+      - roll_open
+      - check_locked
+      - reveal
+      - door_reveal
+      - enemies
+- id: test.phase6.open_door.trapped
+  name: trapped door records the deferred trap resolution
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Opening a Door or Chest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.open_door_or_chest
+  inputs:
+    threat_level: 3
+    d6_roll: 6
+    locked: false
+    is_chest: false
+  expected:
+    state:
+      threat_level: 4
+    events:
+      - type: invoke
+        dependency: Door Table (1d10 to door/chest difficulty)
+      - type: invoke
+        dependency: Reading the Exploration Cards
+      - type: invoke
+        dependency: Encounters and Placing Enemies
+    trace:
+      - procedure.open_door_or_chest
+    unresolved:
+      - issue.phase6.trap_resolution_deferred
+    steps:
+      - spend
+      - increase_threat
+      - roll_open
+      - trapped
+      - check_locked
+      - reveal
+      - door_reveal
+      - enemies
+- id: test.phase6.rest.complete
+  name: uninterrupted rest with no ambush
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.rest
+  inputs:
+    wandering_monster_spots_party: false
+    rests_taken: 1
+    threat_level: 5
+    ambush_roll: 100
+    barred_door: false
+    party_rations: 4
+    party_morale: 3
+  expected:
+    state:
+      party_rations: 3
+      party_morale: 5
+      ambush_risk: 10
+    events:
+      - type: invoke
+        dependency: Move Wandering Monsters
+      - type: invoke
+        dependency: Alchemy (mixing potions)
+    trace:
+      - procedure.rest
+    unresolved: []
+    steps:
+      - arrange
+      - bar_door
+      - deduct_ration
+      - rearrange_gear
+      - move_monsters
+      - increase_morale
+      - increase_hp
+      - regain_energy
+      - regain_mana
+      - brew_potions
+      - ambush_roll
+- id: test.phase6.rest.ambushed
+  name: ambush roll within the risk triggers the encounter
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.rest
+  inputs:
+    wandering_monster_spots_party: false
+    rests_taken: 1
+    threat_level: 5
+    ambush_roll: 5
+    barred_door: false
+    party_rations: 4
+    party_morale: 3
+  expected:
+    state:
+      party_rations: 3
+      party_morale: 5
+      ambush_risk: 10
+    events:
+      - type: invoke
+        dependency: Move Wandering Monsters
+      - type: invoke
+        dependency: Alchemy (mixing potions)
+      - type: invoke
+        dependency: Encounter Table
+    trace:
+      - procedure.rest
+    unresolved: []
+    steps:
+      - arrange
+      - bar_door
+      - deduct_ration
+      - rearrange_gear
+      - move_monsters
+      - increase_morale
+      - increase_hp
+      - regain_energy
+      - regain_mana
+      - brew_potions
+      - ambush_roll
+      - ambushed
+- id: test.phase6.search_room.with_helpers
+  name: two searching heroes stack +15 on the highest PER
+  section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching through a Room or Corridor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.search_room_or_corridor
+  inputs:
+    per_value: 60
+    helpers: 2
+  expected:
+    state:
+      search_modifier: 15
+      effective_target: 75
+    events:
+      - type: invoke
+        dependency: core.check.standard
+    trace:
+      - procedure.search_room_or_corridor
+    unresolved: []
+    steps:
+      - search
+      - with_helpers
+      - roll
+- id: test.phase6.search_room.alone
+  name: a lone searcher rolls unmodified
+  section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching through a Room or Corridor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.search_room_or_corridor
+  inputs:
+    per_value: 60
+    helpers: 0
+  expected:
+    state:
+      search_modifier: 0
+      effective_target: 60
+    events:
+      - type: invoke
+        dependency: core.check.standard
+    trace:
+      - procedure.search_room_or_corridor
+    unresolved: []
+    steps:
+      - search
+      - alone
+      - roll
+- id: test.phase6.search_furniture.clean
+  name: furniture search with no enemies in sight
+  section_id: section.into_the_dungeons.searching_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching Furniture
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.search_furniture
+  inputs:
+    already_searched: false
+    enemies_in_los: false
+  expected:
+    state: {}
+    events:
+      - type: invoke
+        dependency: Furniture Table
+    trace:
+      - procedure.search_furniture
+    unresolved: []
+    steps:
+      - search
+- id: test.phase6.search_furniture.blocked
+  name: already-searched furniture records the prohibition
+  section_id: section.into_the_dungeons.searching_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching Furniture
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
+    example.
+  kind: derived_case
+  procedure_id: procedure.search_furniture
+  inputs:
+    already_searched: true
+    enemies_in_los: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+      - type: invoke
+        dependency: Furniture Table
+    trace:
+      - procedure.search_furniture
+    unresolved: []
+    steps:
+      - already_searched_check
+      - search
