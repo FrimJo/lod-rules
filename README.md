@@ -43,6 +43,9 @@ npm run build:corpus     # generated/ artifacts (not implemented until Phase 11)
 # Dump the PDF outline and per-page text to generated/extract/ for inspection.
 # The dump seeds YAML by hand; it is never canonical.
 npx tsx scripts/extract/inspect-pdf.ts
+
+# Score the gold set against fields already stored on each rule.
+npm run decisions -- evaluate --provider structural
 ```
 
 ## Layout
@@ -57,6 +60,10 @@ tests/         schema tests and rule regression fixtures
 docs/          conventions and generated reports
 generated/     build artifacts — never hand-edited, gitignored
 ```
+
+Semantic decisions are derived metadata. They are described in
+[docs/semantic-decisions.md](docs/semantic-decisions.md) and are written under
+`generated/decisions/`, not into `corpus/rules/`.
 
 ## Canonical versus generated
 

@@ -34,9 +34,13 @@ Machine-checked pattern (`schemas/common.schema.json`):
 | Structural section | `section.`          | `section.game_basics`                              |
 | Test fixture       | `test.`             | `test.check.equal`                                 |
 | Issue record       | `issue.`            | `issue.0042`                                       |
+| Gold decision case | `gold.`             | `gold.check.failure`                               |
 
 Source documents use their own namespace in `source/manifest.yaml`, for example
 `rulebook.second_printing.eng` and `bestiary`.
+
+`gold.` ids live in `tests/fixtures/semantic-decisions-gold/` and are not corpus
+objects. They are not registered in the global id table.
 
 ## File naming
 

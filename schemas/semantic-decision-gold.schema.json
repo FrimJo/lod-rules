@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/semantic-decision-gold.schema.json",
+  "title": "Provider-independent semantic-decision gold set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "judgment_set_version", "cases"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "judgment_set_version": { "const": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "split", "complexity", "focus", "source_text_sha256", "expected"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^gold(\\.[a-z0-9_]+)+$"
+        },
+        "split": {
+          "enum": ["development", "validation", "held_out"]
+        },
+        "complexity": {
+          "enum": [
+            "simple",
+            "conditional",
+            "exception",
+            "cross_reference",
+            "numeric",
+            "definition",
+            "procedure",
+            "ambiguous",
+            "table",
+            "no_match",
+            "large_choice"
+          ]
+        },
+        "focus": { "type": "string", "minLength": 1 },
+        "rule_id": { "type": "string", "minLength": 1 },
+        "source_text": { "type": "string", "minLength": 1 },
+        "source_text_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "term_candidates": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string" },
+        "expected": { "$ref": "#/$defs/expected" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_type",
+        "conditional",
+        "has_exception",
+        "cites_other_material",
+        "completeness"
+      ],
+      "properties": {
+        "rule_type": {
+          "enum": [
+            "calculation",
+            "constraint",
+            "modifier",
+            "choice",
+            "exception",
+            "procedure_rule",
+            "resource_change",
+            "trigger",
+            "override",
+            "definition",
+            "duration",
+            "random_resolution",
+            "lookup",
+            "scenario_rule",
+            "no_match"
+          ]
+        },
+        "conditional": { "type": "boolean" },
+        "has_exception": { "type": "boolean" },
+        "cites_other_material": { "type": "boolean" },
+        "completeness": {
+          "enum": ["self_contained", "possibly_incomplete", "clearly_incomplete"]
+        },
+        "referenced_term": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

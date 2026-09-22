@@ -12,7 +12,9 @@ Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested; see
 boundaries. Extraction does not imply independent review. Unresolved issues remain in `review/`.
 Do not start Phase 5 catalogues or Phase 6 full procedures without an explicit request. Full plan:
 [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md). Remaining work:
-[docs/coverage-report.md](docs/coverage-report.md).
+[docs/coverage-report.md](docs/coverage-report.md). Phase 4.x adds an optional semantic
+decision layer beside the corpus; it does not change canonical rules. See
+[docs/semantic-decisions.md](docs/semantic-decisions.md).
 
 ## Commands
 
@@ -24,6 +26,7 @@ npm run report:coverage   # regenerates docs/coverage-report.md
 npm run lint              # eslint + prettier --check + tsc --noEmit
 npm run lint:fix
 npx tsx scripts/extract/inspect-pdf.ts   # dumps PDF text to generated/extract/
+npm run decisions -- evaluate --provider structural
 ```
 
 `npm run build:corpus` is a stub until Phase 11. Do not invent its outputs.
@@ -91,6 +94,8 @@ rebuild the report. Never patch the markdown.
 - Collapse terminology because another game treats the words as synonyms.
 - Encode page numbers in ids (`section.p107` is forbidden).
 - Hand-edit `generated/` or treat an inspect-pdf dump as canonical.
+- Write a semantic-decision result back into a canonical rule. Judgments stay in
+  `generated/decisions/`.
 - Claim a section `extracted` or `reviewed` without coverage evidence.
 - Apply Convex, React, Next.js, or app-backend patterns. This is YAML + Node
   TypeScript tooling.
