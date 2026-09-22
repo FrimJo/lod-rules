@@ -25,6 +25,36 @@ Batch 1 catalogue extraction and Batch 2 catalogue content are present. Equipmen
 - Thirty derived ability fixtures cover usage, costs, prerequisites, threshold boundaries, duration outputs and exceptions. Five added negative schema/integrity tests cover perk costs, blank cells and quest scope.
 - Additional open issues: Sense for Gold’s “subtract -1” sign; Hunter’s Eye bow effect versus sling eligibility. Independent review remains pending.
 
+### Batch 3 — equipment and magic items (in progress)
+
+- PDF 179: the Weapons table. All 24 printed rows, eight columns and eleven special-rule
+  definitions transcribed against a render of the page. ID: `table.equipment.weapons`. Printed
+  blank cells and printed dashes are kept as distinct cell types; costs stay printed strings
+  (`10 c`) rather than bare numbers. `tests/tables/phase-five-equipment.test.ts` re-transcribes the
+  matrix independently.
+- Deferred for this heading: weapon special rules are not yet `rule` objects, and no
+  `equipment.*` entities exist, so `section.appendix_iii_equipment.weapons` stays `extracting`.
+- Open issue: `issue.phase5.weapons_undefined_specials` — the table prints the Specials
+  “Unlimited Ammo” (Sling) and “Requires STR 55” (Arbalest); the book defines neither.
+- PDF 180: the Armour table (24 armour rows plus four printed tier band rows) and the Shield
+  table (three rows), with the printed Stackable, Clunky and Huge definitions. IDs:
+  `table.equipment.armour`, `table.equipment.shields`. Tier bands are kept as valueless rows;
+  printed dashes in the Shield Special column stay markers.
+- The rendered page prints two tables, while the structural map carries three nodes.
+  `…armour_and_shields.table_3` became a compatibility redirect; no id was renamed or removed.
+  See `issue.phase5.armour_table_split`.
+- Deferred for this heading: Stackable, Clunky and Huge are not yet rule objects, and no
+  `equipment.*` entities exist, so `section.appendix_iii_equipment.armour_and_shields` stays
+  `extracting`.
+- PDF 181: the Alchemy equipment table (8 rows) and the Animals and transportation table (5 rows),
+  plus the printed `Enc` note as `character.equipment.quick_slot_stack`. IDs:
+  `table.equipment.alchemy`, `table.equipment.animals_and_transportation`. Slash notation
+  (`5/1`, `-/1`, `75/100 c`) stays printed text; the book's missing full stops on the poison
+  potions and on the Saddlebags entry are preserved, not repaired.
+- Deferred: no `equipment.*` entities; mounted travel speed, storage capacities and potion effects
+  are not yet rule objects. Horse's “See ‘Travelling and Skirmishes’” stays an
+  `unresolved_references` entry because no target rule exists.
+
 ## Catalogue inventory
 
 The headings below are the catalogue-bearing source areas. Their child entities and embedded
@@ -264,6 +294,8 @@ not merely that a table object exists. Pending nodes require PDF classification 
 ## Verification
 
 Baseline: 53 canonical files validate; 546 tests pass.
+Batch 3 gate after the Weapons, Armour, Shield, Alchemy and Animals tables: 177 canonical files
+validate; 746 tests pass; lint passes.
 Each completed unit records its source pages, object IDs, tests and remaining boundaries above.
 Run validate, tests and lint after every unit; regenerate coverage when its inputs change.
 Do not promote parent section coverage for deferred procedures or unextracted rules.
