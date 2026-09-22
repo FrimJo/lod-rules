@@ -7,13 +7,13 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 606 / 606 | 100% |
-| extracted | 67 / 606 | 11% |
-| reviewed | 0 / 606 | 0% |
+| mapped | 605 / 605 | 100% |
+| extracted | 72 / 605 | 12% |
+| reviewed | 0 / 605 | 0% |
 
-Total sections tracked: 606
+Total sections tracked: 605
 
-11 compatibility redirects are excluded from all extraction counts above and below.
+12 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
@@ -30,6 +30,7 @@ Total sections tracked: 606
 | section.appendix_ii_talents.table_2 | section.appendix_ii_talents.table |
 | section.appendix_ii_talents.table_3 | section.appendix_ii_talents.table |
 | section.appendix_ii_talents.sneaky_talents.table_2 | section.appendix_ii_talents.sneaky_talents.table |
+| section.appendix_iii_equipment.armour_and_shields.table_3 | section.appendix_iii_equipment.armour_and_shields.table |
 
 ## Nodes by kind
 
@@ -40,7 +41,7 @@ Total sections tracked: 606
 | section | 15 |
 | subsection | 306 |
 | appendix | 5 |
-| table | 192 |
+| table | 191 |
 | example | 3 |
 | optional_rule | 2 |
 | scenario_rule | 37 |
@@ -53,16 +54,16 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 341 | 254 |
-| rules | 92 | 323 | 191 |
-| tables | 39 | 492 | 75 |
-| examples | 6 | 356 | 244 |
-| procedures | 2 | 377 | 227 |
-| entities | 48 | 524 | 34 |
+| glossary | 11 | 341 | 253 |
+| rules | 92 | 323 | 190 |
+| tables | 48 | 482 | 75 |
+| examples | 6 | 356 | 243 |
+| procedures | 2 | 377 | 226 |
+| entities | 48 | 523 | 34 |
 
 ## Remaining tables
 
-156 of this kind still need their contents extracted.
+150 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
@@ -124,12 +125,6 @@ None. Every node in the structural map has been mapped.
 | section.rangers_guild.table | Rangers’ Guild table | 154 |
 | section.the_inner_sanctum.buying_special_equipment.table | Buying Special Equipment table | 156 |
 | section.the_inner_sanctum.crusades.table | Crusades table | 157 |
-| section.appendix_iii_equipment.weapons.table | Weapons table | 177 |
-| section.appendix_iii_equipment.armour_and_shields.table | Armour and Shields table | 178 |
-| section.appendix_iii_equipment.armour_and_shields.table_2 | Armour and Shields table 2 | 178 |
-| section.appendix_iii_equipment.armour_and_shields.table_3 | Armour and Shields table 3 | 178 |
-| section.appendix_iii_equipment.general_equipment.alchemy.table | Alchemy table | 179 |
-| section.appendix_iii_equipment.general_equipment.animals_and_transportation.table | Animals and transportation table | 179 |
 | section.appendix_iii_equipment.general_equipment.consumables.table | Consumables table | 180 |
 | section.appendix_iii_equipment.general_equipment.jewellery.table | Jewellery table | 180 |
 | section.appendix_iii_equipment.general_equipment.tools.table | Tools table | 183 |
