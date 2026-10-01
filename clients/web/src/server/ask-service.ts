@@ -1,7 +1,7 @@
 import type { SystemOneModel } from '../../../../scripts/ask/analysis.ts';
 import type { EvidenceItem } from '../../../../scripts/ask/evidence.ts';
 import { ask, type AskResult } from '../../../../scripts/ask/index.ts';
-import { jevModel, layaModel } from '../../../../scripts/ask/models.ts';
+import { analyzerModel as createAnalyzer, isAnalyzerName } from '../../../../scripts/ask/models.ts';
 import { checkCitations, type CitationCheck } from '../../../../scripts/ask/prompt.ts';
 import { loadLocalEnv } from '../../../../scripts/decisions/env.ts';
 import { freshDatabasePath } from '../../../../scripts/retrieve/build.ts';
@@ -34,9 +34,7 @@ function openRetrieval(): Retrieval {
 function analyzerModel(): SystemOneModel | null {
   if (model !== undefined) return model;
   const name = process.env.LOD_ANALYZER?.trim() || 'lexical';
-  if (name === 'laya') model = layaModel();
-  else if (name === 'jev') model = jevModel();
-  else model = null;
+  model = isAnalyzerName(name) ? createAnalyzer(name) : null;
   return model;
 }
 
