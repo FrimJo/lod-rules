@@ -145,7 +145,7 @@ function loadCheckpoint(
   const existing = sessions.get(key);
   if (existing) return existing;
   const specifier: string = LAYA_PACKAGE;
-  const loading = import(specifier).then((loaded) => {
+  const loading = import(/* @vite-ignore */ specifier).then((loaded) => {
     const module = loaded as { Laya?: { load: (opts?: object) => Promise<LayaRuntime> } };
     if (!module.Laya) throw new Error(`${LAYA_PACKAGE} did not export Laya`);
     return module.Laya.load({
