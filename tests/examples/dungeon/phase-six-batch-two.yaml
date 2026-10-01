@@ -1,0 +1,663 @@
+- id: test.phase6.locked_door.force_opens
+  name: forcing reduces door HP to zero and costs 1 AP
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: force
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      approach: force
+      is_locked: false
+      is_open: true
+      door_hp: 0
+      attack_damage: 10
+      damage_bonus: 2
+      pick_target_modifier: -10
+      pick_succeeded: false
+      pick_fumbled: false
+      pick_broken: false
+      lock_jammed: false
+      threat_level: 7
+      action_points_spent: 1
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - force
+      - door_reaches_zero
+- id: test.phase6.locked_door.crowbar
+  name: crowbar damage and its unstated AP cost stay explicit
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: crowbar
+    is_locked: true
+    is_open: false
+    door_hp: 11
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    is_chest: false
+  expected:
+    state:
+      approach: crowbar
+      is_locked: true
+      is_open: false
+      door_hp: 1
+      attack_damage: 10
+      damage_bonus: 2
+      pick_target_modifier: -10
+      pick_succeeded: false
+      pick_fumbled: false
+      pick_broken: false
+      lock_jammed: false
+      threat_level: 6
+      crowbar_damage: 10
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved:
+      - issue.phase6.crowbar_action_cost
+    steps:
+      - choose_approach
+      - crowbar
+- id: test.phase6.locked_door.pick_fails
+  name: a failed pick breaks it and spends its printed 2 AP
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: pick
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      approach: pick
+      is_locked: true
+      is_open: false
+      door_hp: 10
+      attack_damage: 10
+      damage_bonus: 2
+      pick_target_modifier: -10
+      pick_succeeded: false
+      pick_fumbled: false
+      pick_broken: true
+      lock_jammed: false
+      threat_level: 5
+      action_points_spent: 2
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - pick_failure
+- id: test.phase6.locked_door.pick_fumbles
+  name: a fumble jams the lock and spends its printed 2 AP
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: pick
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: true
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      approach: pick
+      is_locked: true
+      is_open: false
+      door_hp: 10
+      attack_damage: 10
+      damage_bonus: 2
+      pick_target_modifier: -10
+      pick_succeeded: false
+      pick_fumbled: true
+      pick_broken: true
+      lock_jammed: true
+      threat_level: 5
+      action_points_spent: 2
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - pick_fumble
+- id: test.phase6.wandering.direction_one
+  name: direction result 1 uses the caller supplied route
+  section_id: section.into_the_dungeons.wandering_monsters
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.wandering_monster
+  inputs:
+    direction_roll: 1
+    route: back
+    distance: 11
+    heroes_in_los: false
+    door_state: open
+    door_roll: 3
+    chasm: false
+    cross_chasm: false
+    new_token: false
+    heroes_finished: true
+    entered_room: true
+    closed_door_blocks_los: false
+    door_held_previous_turn: false
+    waiting_at_door: false
+    chasm_held_previous_turn: false
+    crossed_chasm: false
+    cross_back_requested: false
+  expected:
+    state:
+      movement_squares: 4
+      movement_stops: false
+      reveal_monsters: false
+      direction: away
+    events: []
+    trace:
+      - procedure.wandering_monster
+    unresolved: []
+    steps:
+      - move_after_heroes
+      - choose_direction
+      - away
+      - obstacles
+- id: test.phase6.wandering.reveals_at_ten
+  name: the ten-square boundary and LOS reveal monsters
+  section_id: section.into_the_dungeons.wandering_monsters
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.wandering_monster
+  inputs:
+    direction_roll: 2
+    route: toward
+    distance: 10
+    heroes_in_los: true
+    door_state: open
+    door_roll: 3
+    chasm: false
+    cross_chasm: false
+    new_token: false
+    heroes_finished: true
+    entered_room: true
+    closed_door_blocks_los: false
+    door_held_previous_turn: false
+    waiting_at_door: false
+    chasm_held_previous_turn: false
+    crossed_chasm: false
+    cross_back_requested: false
+  expected:
+    state:
+      movement_squares: 4
+      reveal_monsters: true
+      movement_stops: false
+      direction: toward
+    events:
+      - type: invoke
+        dependency: Quest-specific Monster Table
+      - type: invoke
+        dependency: procedure.initiative
+    trace:
+      - procedure.wandering_monster
+    unresolved: []
+    steps:
+      - move_after_heroes
+      - choose_direction
+      - toward
+      - obstacles
+      - reveal
+- id: test.phase6.trap.perception_avoids
+  name: successful Perception detects the trap and leaves it in place
+  section_id: section.into_the_dungeons.triggering_a_trap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Triggering a Trap
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.trap_resolution
+  inputs:
+    perception_succeeded: true
+    disarm_attempted: false
+    disarm_succeeded: false
+    deliberate_trigger: false
+    trap_detected: false
+    trap_removed: false
+    trap_triggered: false
+    is_mimic: false
+    hero_attacked_mimic: false
+    actor_is_lower_undead: false
+    door_or_chest: false
+    initial_check: true
+    actor_is_enemy: false
+    forced_entry: false
+    enters_trapped_square: false
+    card_data_supplied: false
+    card_effects_resolved: false
+  expected:
+    state:
+      trap_detected: true
+      enemy_avoids_square: false
+      mimic_can_attack: false
+      opening_eligible: false
+      victim_selection: random_hero
+    events:
+      - type: invoke
+        dependency: Trap card supplies identity, modifiers, targets, damage and effects
+    trace:
+      - procedure.trap_resolution
+    unresolved: []
+    steps:
+      - draw_card
+      - random_victim
+      - perception
+      - avoid
+      - special_cases
+      - opening_eligibility
+- id: test.phase6.trap.disarm_fails
+  name: failed disarming triggers the trap and leaves card effects unresolved
+  section_id: section.into_the_dungeons.disarming_a_trap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Disarming a Trap
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.trap_resolution
+  inputs:
+    perception_succeeded: true
+    disarm_attempted: true
+    disarm_succeeded: false
+    deliberate_trigger: false
+    trap_detected: true
+    trap_removed: false
+    trap_triggered: false
+    is_mimic: false
+    hero_attacked_mimic: false
+    actor_is_lower_undead: false
+    door_or_chest: false
+    initial_check: false
+    actor_is_enemy: false
+    forced_entry: false
+    enters_trapped_square: false
+    card_data_supplied: false
+    card_effects_resolved: false
+  expected:
+    state:
+      trap_triggered: true
+      enemy_avoids_square: false
+      mimic_can_attack: false
+      opening_eligible: false
+      action_points_spent: 2
+    events:
+      - type: invoke
+        dependency: Pick Lock roll with printed trap modifier
+    trace:
+      - procedure.trap_resolution
+    unresolved:
+      - issue.phase6.trap_resolution_deferred
+    steps:
+      - disarm
+      - disarm_failed
+      - special_cases
+      - card_consequences
+      - missing_card
+      - opening_eligibility
+- id: test.phase6.locked_door.excess_damage
+  name: excess damage
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: force
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 14
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      door_hp: 0
+      is_open: true
+      is_locked: false
+      threat_level: 7
+      action_points_spent: 1
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - force
+      - door_reaches_zero
+- id: test.phase6.locked_door.pick_success
+  name: pick success
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: pick
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: true
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      is_open: true
+      is_locked: false
+      action_points_spent: 2
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - pick_success
+- id: test.phase6.locked_door.jammed_pick
+  name: jammed pick
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: pick
+    is_locked: true
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: true
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: true
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state: {}
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+- id: test.phase6.locked_door.unlocked_force
+  name: unlocked force
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: force
+    is_locked: false
+    is_open: false
+    door_hp: 10
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - require_locked
+- id: test.phase6.locked_door.close_zero_hp
+  name: close zero hp
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: close
+    is_locked: true
+    is_open: true
+    door_hp: 0
+    attack_damage: 10
+    damage_bonus: 2
+    pick_target_modifier: -10
+    pick_succeeded: false
+    pick_fumbled: false
+    pick_broken: false
+    lock_jammed: false
+    threat_level: 5
+    action_points_spent: 0
+    is_chest: false
+  expected:
+    state:
+      is_open: false
+      action_points_spent: 1
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - close

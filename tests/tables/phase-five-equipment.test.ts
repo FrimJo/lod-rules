@@ -129,6 +129,11 @@ describe('Phase 5 independently transcribed Weapons table, PDF 179', () => {
   });
 
   it('carries all eleven printed special-rule definitions verbatim', () => {
+    expect(
+      corpus.rules.filter(
+        (rule) => rule.id.startsWith('combat.weapon.special.') && rule.id.split('.').length === 4,
+      ),
+    ).toHaveLength(11);
     const openings = [
       'AP (X):',
       'BFO (Built for offence):',
@@ -155,8 +160,22 @@ describe('Phase 5 independently transcribed Weapons table, PDF 179', () => {
     expect(table.unresolved_references!.join(' ')).toContain('Requires STR 55');
   });
 
-  it('does not yet claim weapon entities or weapon special rules', () => {
-    expect(corpus.entities.filter((e) => e.id.startsWith('equipment.'))).toEqual([]);
+  it('links every weapon row to its entity while leaving special-rule objects pending', () => {
+    expect(
+      table.rows.every((row) =>
+        corpus.entities.some(
+          (entity) =>
+            entity.id === row.entity_refs?.[0] &&
+            entity.table_rows?.some((ref) => ref.row_id === row.id),
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      corpus.entities.filter((entity) => entity.id.startsWith('equipment.weapon.')),
+    ).toHaveLength(24);
+    expect(corpus.rules.filter((rule) => rule.id.startsWith('character.weapon.special.'))).toEqual(
+      [],
+    );
   });
 });
 

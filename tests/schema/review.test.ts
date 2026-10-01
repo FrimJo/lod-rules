@@ -48,14 +48,23 @@ const resolved = context.issues.find((issue) => issue.id === 'issue.0005')!;
 const validate = getValidator(createAjv(), 'issues');
 
 describe('issue resolutions', () => {
-  it('retains all eleven IDs, with six evidenced resolutions and five open questions', () => {
+  it('retains all eleven IDs, with six evidenced legacy resolutions and five open questions', () => {
     const originalIssues = context.issues.filter((issue) => /^issue\.\d{4}$/.test(issue.id));
     expect(originalIssues.map((issue) => issue.id)).toEqual(
       Array.from({ length: 11 }, (_, i) => `issue.${String(i + 1).padStart(4, '0')}`),
     );
     expect(
       context.issues.filter((issue) => issue.status === 'resolved').map((issue) => issue.id),
-    ).toEqual(['issue.0002', 'issue.0003', 'issue.0005', 'issue.0007', 'issue.0008', 'issue.0011']);
+    ).toEqual([
+      'issue.0002',
+      'issue.0003',
+      'issue.0005',
+      'issue.0007',
+      'issue.0008',
+      'issue.0011',
+      'issue.phase6.trap_headings_unmapped',
+      'issue.quest.spider_queen_cobweb_mapping',
+    ]);
     expect(validate(context.issues)).toBe(true);
   });
   it.each([
@@ -261,6 +270,6 @@ describe('source-map compatibility redirects', () => {
       printed_start_page: 90,
       pdf_start_page: 92,
     });
-    expect(map.coverage.find((entry) => entry.id === target)?.status).toBe('mapped');
+    expect(map.coverage.find((entry) => entry.id === target)?.status).toBe('extracted');
   });
 });

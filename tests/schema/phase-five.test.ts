@@ -128,3 +128,35 @@ describe('perk costs, blank cells and quest scope', () => {
     expect(checkPilotIntegrity(data, context).join('\n')).toContain('quest');
   });
 });
+
+describe('equipment catalogue links', () => {
+  it('requires equipment category and checks bidirectional table-row references', () => {
+    const equipment = corpus.entities.find((entity) => entity.type === 'equipment')!;
+    expect(getValidator(ajv, 'entities')([equipment])).toBe(true);
+    expect(getValidator(ajv, 'entities')([{ ...equipment, category: undefined }])).toBe(false);
+    const row = corpus.tables
+      .flatMap((table) => table.rows)
+      .find((candidate) => candidate.entity_refs?.includes(equipment.id));
+    expect(row).toBeDefined();
+    const broken = structuredClone(corpus);
+    broken.tables
+      .flatMap((table) => table.rows)
+      .find((candidate) => candidate.entity_refs)
+      ?.entity_refs?.push('equipment.absent');
+    expect(checkPilotIntegrity(broken, context).join('\n')).toContain(
+      'unknown reference equipment.absent',
+    );
+  });
+
+  it('preserves all named weapon, armour and shield rows as source-linked entities', () => {
+    for (const tableId of [
+      'table.equipment.weapons',
+      'table.equipment.armour',
+      'table.equipment.shields',
+    ]) {
+      const table = corpus.tables.find((candidate) => candidate.id === tableId)!;
+      const itemRows = table.rows.filter((row) => !/^Tier \d+:$/.test(row.source_row));
+      expect(itemRows.every((row) => row.entity_refs?.length === 1)).toBe(true);
+    }
+  });
+});

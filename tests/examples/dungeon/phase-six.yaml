@@ -13,8 +13,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: At the start of the turn, the player rolls the Scenario die, 1d10. It ends up a 9,
-    and thus, a roll against the Threat Level must be done.
+  source_text: At the start of the turn, the player rolls the Scenario die, 1d10.
+    It ends up a 9, and thus, a roll against the Threat Level must be done.
   kind: source_example
   procedure_id: procedure.scenario_die
   inputs:
@@ -46,8 +46,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.scenario_die
   inputs:
@@ -129,8 +129,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.threat_roll
   inputs:
@@ -164,8 +164,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Had the result of the Threat Level roll been above 9, nothing would have happened
-    except that the Threat Level would have been increased to 10.
+  source_text: Had the result of the Threat Level roll been above 9, nothing would
+    have happened except that the Threat Level would have been increased to 10.
   kind: derived_case
   procedure_id: procedure.threat_roll
   inputs:
@@ -200,8 +200,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.open_door_or_chest
   inputs:
@@ -209,16 +209,23 @@
     d6_roll: 3
     locked: false
     is_chest: false
+    trap_prevents_opening: false
+    adjacent: true
+    initial_entrance: false
   expected:
     state:
       threat_level: 4
+      action_points_spent: 1
+      initial_entrance: false
     events:
+      - type: require
+        satisfied: true
       - type: invoke
-        dependency: Door Table (1d10 to door/chest difficulty)
+        dependency: table.dungeon.door_chest_difficulty
       - type: invoke
-        dependency: Reading the Exploration Cards
+        dependency: procedure.dungeon_route
       - type: invoke
-        dependency: Encounters and Placing Enemies
+        dependency: procedure.encounters
     trace:
       - procedure.open_door_or_chest
     unresolved: []
@@ -245,8 +252,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.open_door_or_chest
   inputs:
@@ -254,20 +261,24 @@
     d6_roll: 6
     locked: false
     is_chest: false
+    trap_prevents_opening: true
+    adjacent: true
+    initial_entrance: false
   expected:
     state:
       threat_level: 4
+      action_points_spent: 1
+      initial_entrance: false
     events:
+      - type: require
+        satisfied: true
       - type: invoke
-        dependency: Door Table (1d10 to door/chest difficulty)
+        dependency: procedure.trap_resolution
       - type: invoke
-        dependency: Reading the Exploration Cards
-      - type: invoke
-        dependency: Encounters and Placing Enemies
+        dependency: table.dungeon.door_chest_difficulty
     trace:
       - procedure.open_door_or_chest
-    unresolved:
-      - issue.phase6.trap_resolution_deferred
+    unresolved: []
     steps:
       - spend
       - increase_threat
@@ -275,8 +286,6 @@
       - trapped
       - check_locked
       - reveal
-      - door_reveal
-      - enemies
 - id: test.phase6.rest.complete
   name: uninterrupted rest with no ambush
   section_id: section.into_the_dungeons.rest
@@ -292,8 +301,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.rest
   inputs:
@@ -304,25 +313,42 @@
     barred_door: false
     party_rations: 4
     party_morale: 3
+    all_heroes_on_same_tile: true
+    enemies_on_rest_tile: false
+    enemies_on_adjacent_tiles: false
+    rest_attempt_processed: false
+    starting_morale: 5
   expected:
     state:
       party_rations: 3
       party_morale: 5
       ambush_risk: 10
+      rest_completed: true
+      rest_attempt_processed: true
+      rest_execution_allowed: true
     events:
       - type: invoke
-        dependency: Move Wandering Monsters
+        dependency: procedure.wandering_monster
+      - type: invoke
+        dependency: procedure.rest_hp_recovery
+      - type: invoke
+        dependency: procedure.rest_energy_point_recovery
+      - type: invoke
+        dependency: procedure.rest_mana_recovery
       - type: invoke
         dependency: Alchemy (mixing potions)
     trace:
       - procedure.rest
     unresolved: []
     steps:
+      - check_eligibility
+      - accept_attempt
       - arrange
       - bar_door
       - deduct_ration
       - rearrange_gear
       - move_monsters
+      - completed
       - increase_morale
       - increase_hp
       - regain_energy
@@ -344,8 +370,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.rest
   inputs:
@@ -356,27 +382,47 @@
     barred_door: false
     party_rations: 4
     party_morale: 3
+    all_heroes_on_same_tile: true
+    enemies_on_rest_tile: false
+    enemies_on_adjacent_tiles: false
+    rest_attempt_processed: false
+    starting_morale: 5
   expected:
     state:
       party_rations: 3
       party_morale: 5
       ambush_risk: 10
+      enemy_bonus_tokens: 3
+      rest_completed: true
+      rest_attempt_processed: true
+      rest_execution_allowed: true
     events:
       - type: invoke
-        dependency: Move Wandering Monsters
+        dependency: procedure.wandering_monster
+      - type: invoke
+        dependency: procedure.rest_hp_recovery
+      - type: invoke
+        dependency: procedure.rest_energy_point_recovery
+      - type: invoke
+        dependency: procedure.rest_mana_recovery
       - type: invoke
         dependency: Alchemy (mixing potions)
       - type: invoke
         dependency: Encounter Table
+      - type: invoke
+        dependency: procedure.initiative
     trace:
       - procedure.rest
     unresolved: []
     steps:
+      - check_eligibility
+      - accept_attempt
       - arrange
       - bar_door
       - deduct_ration
       - rearrange_gear
       - move_monsters
+      - completed
       - increase_morale
       - increase_hp
       - regain_energy
@@ -384,6 +430,7 @@
       - brew_potions
       - ambush_roll
       - ambushed
+      - ambush_initiative
 - id: test.phase6.search_room.with_helpers
   name: two searching heroes stack +15 on the highest PER
   section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
@@ -399,13 +446,14 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.search_room_or_corridor
   inputs:
     per_value: 60
     helpers: 2
+    search_succeeded: false
   expected:
     state:
       search_modifier: 15
@@ -435,13 +483,14 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.search_room_or_corridor
   inputs:
     per_value: 60
     helpers: 0
+    search_succeeded: false
   expected:
     state:
       search_modifier: 0
@@ -471,8 +520,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.search_furniture
   inputs:
@@ -482,7 +531,7 @@
     state: {}
     events:
       - type: invoke
-        dependency: Furniture Table
+        dependency: table.treasure.furniture
     trace:
       - procedure.search_furniture
     unresolved: []
@@ -503,8 +552,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Derived boundary case for the cited procedure; inputs are test values, not a book
-    example.
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
   kind: derived_case
   procedure_id: procedure.search_furniture
   inputs:
@@ -515,11 +564,8 @@
     events:
       - type: require
         satisfied: false
-      - type: invoke
-        dependency: Furniture Table
     trace:
       - procedure.search_furniture
     unresolved: []
     steps:
       - already_searched_check
-      - search

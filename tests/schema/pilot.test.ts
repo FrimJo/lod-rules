@@ -340,7 +340,10 @@ const badCases: Array<[string, Mutation, string]> = [
   [
     'wrong fixture input type',
     (data) => {
-      data.testCases[0]!.inputs.armour_tier = 'three';
+      const fixture = data.testCases.find(
+        (entry) => entry.id === 'test.profession.alchemist.armour_3',
+      )!;
+      fixture.inputs.armour_tier = 'three';
     },
     'fixture field type mismatch',
   ],

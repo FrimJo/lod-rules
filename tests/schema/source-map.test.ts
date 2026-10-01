@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { parse } from 'yaml';
+import type { Page, Section } from '../../scripts/validate/integrity.ts';
 import { describe, expect, it } from 'vitest';
 import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';
 
@@ -131,5 +134,21 @@ describe('coverage schema', () => {
     expect(validate({ sections: [{ id: 'section.combat', status: 'not_applicable' }] })).toBe(
       false,
     );
+  });
+});
+
+describe('rendered Quest Book I divider provenance', () => {
+  it('keeps PDF221 unlabelled instead of inventing folio219 from an offset', () => {
+    const pages = parse(
+      readFileSync(new URL('../../corpus/source-map/pages.yaml', import.meta.url), 'utf8'),
+    ) as Page[];
+    const sections = parse(
+      readFileSync(new URL('../../corpus/source-map/sections.yaml', import.meta.url), 'utf8'),
+    ) as Section[];
+    expect(pages.find((page) => page.pdf_page === 221)?.printed_page).toBeNull();
+    expect(
+      sections.find((section) => section.id === 'section.quest_book_i')?.printed_start_page,
+    ).toBeNull();
+    expect(pages.find((page) => page.pdf_page === 222)?.printed_page).toBe(220);
   });
 });

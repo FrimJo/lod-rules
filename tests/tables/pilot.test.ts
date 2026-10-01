@@ -79,8 +79,18 @@ describe('profession tables and entity features', () => {
     expect(entity.starting_equipment).toEqual([
       { label: 'Small backpack', quantity: 1, selection: 'fixed' },
       { label: 'Alchemist tools', quantity: 1, selection: 'fixed' },
-      { label: 'Alchemist belt', quantity: 1, selection: 'fixed' },
-      { label: 'Shortsword', quantity: 1, selection: 'fixed' },
+      {
+        label: 'Alchemist belt',
+        quantity: 1,
+        selection: 'fixed',
+        object_id: 'equipment.alchemy.alchemist_belt',
+      },
+      {
+        label: 'Shortsword',
+        quantity: 1,
+        selection: 'fixed',
+        object_id: 'equipment.weapon.shortsword',
+      },
       { label: 'potions', quantity: 3, selection: 'choice', qualifier: 'standard level' },
       { label: 'bag', quantity: 1, selection: 'fixed' },
       { label: 'ingredients', quantity: 3, selection: 'random', qualifier: 'in the bag' },
@@ -99,8 +109,8 @@ describe('profession tables and entity features', () => {
     const entity = pilot.entities.find((e) => e.id === 'profession.thief')!;
     expect(entity.starting_equipment).toEqual([
       { label: 'Small backpack', quantity: 1, selection: 'fixed' },
-      { label: 'Dagger', quantity: 1, selection: 'fixed' },
-      { label: 'Rope', quantity: 1, selection: 'fixed' },
+      { label: 'Dagger', quantity: 1, selection: 'fixed', object_id: 'equipment.weapon.dagger' },
+      { label: 'Rope', quantity: 1, selection: 'fixed', object_id: 'equipment.tool.rope' },
       { label: 'Lock Picks', quantity: 10, selection: 'fixed' },
     ]);
     expect(entity.grants?.map((g) => [g.kind, g.label])).toEqual([

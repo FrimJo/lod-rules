@@ -96,9 +96,14 @@ describe('phase 6 state machines', () => {
 });
 
 describe('phase 6 procedure fixtures', () => {
-  const fixtures = parse(
-    readFileSync(join(repoRoot, 'tests/examples/dungeon/phase-six.yaml'), 'utf8'),
-  ) as TestCase[];
+  const fixtures = [
+    ...(parse(
+      readFileSync(join(repoRoot, 'tests/examples/dungeon/phase-six.yaml'), 'utf8'),
+    ) as TestCase[]),
+    ...(parse(
+      readFileSync(join(repoRoot, 'tests/examples/dungeon/phase-six-batch-two.yaml'), 'utf8'),
+    ) as TestCase[]),
+  ];
 
   it('covers every phase 6 procedure with at least one fixture', () => {
     const targets = new Set(fixtures.map((fixture) => fixture.procedure_id));
@@ -110,8 +115,36 @@ describe('phase 6 procedure fixtures', () => {
         'procedure.rest',
         'procedure.search_room_or_corridor',
         'procedure.search_furniture',
+        'procedure.locked_door_and_close',
+        'procedure.wandering_monster',
+        'procedure.trap_resolution',
       ]),
     );
+  });
+
+  it('keeps new batch 2 procedures source linked and guards opening outcomes', () => {
+    const procedures = pilot.procedures;
+    for (const id of [
+      'procedure.locked_door_and_close',
+      'procedure.wandering_monster',
+      'procedure.trap_resolution',
+    ]) {
+      const procedure = procedures.find((candidate) => candidate.id === id)!;
+      expect(procedure.source.length).toBeGreaterThan(0);
+      expect(procedure.status).toBe('extracted');
+    }
+    const opening = procedures.find(
+      (candidate) => candidate.id === 'procedure.open_door_or_chest',
+    )!;
+    expect(
+      opening.dependencies.find((dependency) => dependency.key === 'door_table')?.object_id,
+    ).toBe('table.dungeon.door_chest_difficulty');
+    expect(opening.dependencies.find((d) => d.key === 'encounters')?.object_id).toBe(
+      'procedure.encounters',
+    );
+    expect(
+      opening.steps.find((step) => step.id === 'reveal')?.substeps?.every((step) => step.when),
+    ).toBe(true);
   });
 
   it.each(fixtures.map((fixture) => [fixture.id, fixture] as const))(

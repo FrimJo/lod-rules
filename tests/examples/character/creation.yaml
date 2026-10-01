@@ -1,0 +1,69 @@
+- id: test.character.wilbur_morale_example
+  name: Wilbur’s RES contribution
+  section_id: section.creating_your_character.final_touches
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 33
+      printed_page: 31
+      heading: Party Morale
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Wilbur’s RES is 37. Dividing by 10 gives 3.7; dropping the decimal gives 3 as his
+    contribution to PM.
+  kind: source_example
+  rule_ids:
+    - character.morale.member_contribution
+  inputs:
+    resolve: 37
+  expected:
+    state:
+      contribution: 3
+    events: []
+    trace:
+      - character.morale.member_contribution
+    unresolved: []
+    steps: []
+- id: test.character.starting_item_minimum_durability
+  name: Starting wear retains one durability
+  section_id: section.creating_your_character.starting_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 32
+      printed_page: 30
+      heading: Starting Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived boundary case: a supplied wear roll of 4 on an item with maximum durability 3
+    leaves at least 1 durability.'
+  kind: derived_case
+  procedure_id: procedure.character_creation_equipment_wear
+  inputs:
+    before_game: true
+    damageable: true
+    wear_applied: false
+    maximum_durability: 3
+    wear_roll: 4
+    damage: 0
+    durability_remaining: 3
+  expected:
+    state:
+      wear_applied: true
+      damage: 2
+      durability_remaining: 1
+    events: []
+    trace:
+      - procedure.character_creation_equipment_wear
+    steps:
+      - apply_wear
+    unresolved: []

@@ -66,6 +66,19 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     else expect(result.trace).toEqual([]);
   });
   it('retains the heirloom item properties and sale prohibition', () => {
+    const sword = corpus.entities.find(
+      (entity) => entity.id === 'equipment.quest.great_aunt_sword',
+    );
+    expect(sword).toMatchObject({
+      type: 'equipment',
+      quest_id: 'quest.background.the_heirloom',
+      rules: [
+        'character.background.the_heirloom.quest_setup',
+        'character.background.the_heirloom.sword_properties',
+      ],
+    });
+    expect(sword?.source_text).toContain('longsword');
+    expect(sword?.source_text).toContain('silver shortsword');
     expect(run('the_heirloom.sword_properties', {}).state).toEqual({
       weapon: 'shortsword',
       material: 'silver',
@@ -89,6 +102,25 @@ describe('Phase 5 personal traits and quest boundaries', () => {
         combat_skill_modifier: 0,
       }).state.combat_skill_modifier,
     ).toBe(spider ? 10 : 0);
+  });
+  it('Lost Brother releases the body at danger and retains a quest-bound actor', () => {
+    expect(
+      run('the_lost_brother.release_body_at_danger', {
+        burying_brother: true,
+        danger_approaches: true,
+        must_carry_body: true,
+      }).state.must_carry_body,
+    ).toBe(false);
+    expect(
+      run('the_lost_brother.release_body_at_danger', {
+        burying_brother: true,
+        danger_approaches: false,
+        must_carry_body: true,
+      }).state.must_carry_body,
+    ).toBe(true);
+    expect(
+      corpus.entities.find((entity) => entity.id === 'quest_actor.background.lost_brother'),
+    ).toMatchObject({ type: 'quest_actor', quest_id: 'quest.background.the_lost_brother' });
   });
   it.each([59, 60, 61])('Lost Brother discovery boundary at %i', (total) => {
     const result = run('the_lost_brother.discovery', { roll: total - 5, dungeons_entered: 5 }, [
@@ -167,12 +199,69 @@ describe('Phase 5 personal traits and quest boundaries', () => {
         : { coins: 0, movement_points: 0, xp: 2000 },
     );
   });
+  it.each([
+    [0, true, false],
+    [1, false, false],
+    [1, true, true],
+  ] as const)(
+    'Poverty gift rejects unavailable movement, wrong village or paid reward: %i/%s/%s',
+    (movement_points, at_family_village, reward_already_received) => {
+      const inputs = {
+        coins: 1000,
+        movement_points,
+        at_family_village,
+        reward_already_received,
+        xp: 100,
+      };
+      expect(run('poverty.family_gift', inputs).state).toEqual(inputs);
+    },
+  );
+  it.each([false, true])('Poverty preserves the random home pool for dwarves: %s', (dwarf) => {
+    const suffix = dwarf ? 'poverty.dwarf_home_selection' : 'poverty.home_selection';
+    expect(run(suffix, { dwarf }).state).toMatchObject({
+      selection_method: 'random',
+      home_pool: dwarf ? 'two_dwarven_settlements' : 'villages_except_silver_city',
+    });
+  });
   it.each([449, 450])('Proving Your Worth XP threshold: %i', (xp) => {
     expect(
       run('proving_your_worth.qualifying_kill', { enemy_xp: xp, party_made_kill: true }).state
         .qualified,
     ).toBe(xp >= 450 ? true : undefined);
   });
+  it('Proving Your Worth ends in the right column of PDF45', () => {
+    const records = [
+      ...corpus.rules.filter(
+        (rule) => rule.section_id === 'section.backgrounds.10_proving_your_worth',
+      ),
+      ...corpus.entities.filter(
+        (entity) => entity.section_id === 'section.backgrounds.10_proving_your_worth',
+      ),
+    ];
+    expect(records.length).toBeGreaterThan(0);
+    for (const record of records)
+      expect(record.source.map((source) => source.pdf_page)).toEqual([45]);
+  });
+  it.each([
+    [9, 10, 10],
+    [10, 9, 10],
+    [10, 10, 9],
+  ] as const)(
+    'The Fraud requires every improvement: %i/%i/%i',
+    (cs_improvement, rs_improvement, dodge_improvement) => {
+      expect(
+        run('the_fraud.reward', {
+          cs_improvement,
+          rs_improvement,
+          dodge_improvement,
+          reward_already_received: false,
+          extra_resolve: 'accept',
+          resolve: 20,
+          xp: 0,
+        }).state,
+      ).toMatchObject({ resolve: 20, xp: 0 });
+    },
+  );
   it('The Fraud rerolls for wizards and preserves the optional extra RES', () => {
     expect(run('the_fraud.wizard_reroll', { wizard: true }).state.reroll_background).toBe(true);
     for (const extra_resolve of ['accept', 'decline'])
@@ -204,6 +293,15 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     expect(
       run('the_family_keep.reward', {
         at_family_keep: true,
+        all_tiles_placed: false,
+        all_enemies_killed: true,
+        reward_already_received: false,
+        xp: 0,
+      }).state.xp,
+    ).toBe(0);
+    expect(
+      run('the_family_keep.reward', {
+        at_family_keep: true,
         all_tiles_placed: true,
         all_enemies_killed: false,
         reward_already_received: false,
@@ -230,6 +328,21 @@ describe('Phase 5 personal traits and quest boundaries', () => {
       }).state.xp,
     ).toBe(final ? 1000 : 0);
   });
+  it.each([1, 2])('Minotaur recognition occurs only on one: %i', (roll) => {
+    const result = run('revenge_minotaur.recognition', { fighting_minotaur: true, roll });
+    expect(result.state.recognize_scar).toBe(roll === 1 ? true : undefined);
+  });
+  it('quest enemies remain separately bound with no invented statistics', () => {
+    for (const [id, quest] of [
+      ['quest_actor.background.sworn_enemy', 'quest.background.sworn_enemy'],
+      ['quest_actor.background.scarred_minotaur', 'quest.background.revenge_minotaur'],
+    ])
+      expect(corpus.entities.find((entity) => entity.id === id)).toMatchObject({
+        type: 'quest_actor',
+        quest_id: quest,
+        tables: [],
+      });
+  });
   it('Minotaur reward stays unresolved without speculative XP', () => {
     const result = run('revenge_minotaur.reward', {
       recognize_scar: true,
@@ -239,14 +352,14 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     expect(result.unresolved).toEqual(['issue.phase5.minotaur_reward_missing']);
     expect(result.state.xp).toBe(0);
   });
-  it('A new home requires the named estate', () => {
+  it.each([false, true])('A new home requires the named estate: %s', (acquired) => {
     expect(
       run('a_new_home.reward', {
-        bergmeister_estate_acquired: true,
+        bergmeister_estate_acquired: acquired,
         reward_already_received: false,
         xp: 0,
       }).state.xp,
-    ).toBe(1500);
+    ).toBe(acquired ? 1500 : 0);
   });
   it.each(['armour_repair_kit', 'whetstone', 'other'])('Apprentice repair with %s', (tool) => {
     expect(run('the_apprentice.repair', { tool, durability: 2 }).state.durability).toBe(
