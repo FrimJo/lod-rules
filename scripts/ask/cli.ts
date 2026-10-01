@@ -7,11 +7,13 @@ import { freshDatabasePath } from '../retrieve/build.ts';
 import { Retrieval } from '../retrieve/index.ts';
 import { selectedSystems, type SystemOneModel } from './analysis.ts';
 import { ask } from './index.ts';
-import { jevModel, layaModel } from './models.ts';
+import { analyzerModel, isAnalyzerName } from './models.ts';
 
 const usage = `Usage: npm run ask -- "<question>" [options]
 
-  --analyzer lexical|laya|jev   Question analysis (default lexical; laya runs locally)
+  --analyzer lexical|laya|jev|cascade
+                                Question analysis (default lexical; laya runs locally;
+                                cascade asks Jev only what Laya is unsure of)
   --completer-cmd "<command>"   Shell command that reads the prompt on stdin and prints
                                 the answer, e.g. "claude -p". Without it, prints the prompt.
   --show-prompt                 Print the grounded prompt as well
@@ -37,15 +39,18 @@ if (!question || values.help) {
 loadLocalEnv();
 
 function analyzer(name: string): SystemOneModel | null {
-  if (name === 'lexical') return null;
-  if (name === 'laya') return layaModel();
-  if (name === 'jev') {
-    const model = jevModel();
-    if (!model) console.error('TYPESAFE_API_KEY is not set; using the lexical analyzer.');
-    return model;
+  if (!isAnalyzerName(name)) {
+    console.error(`Unknown analyzer "${name}"\n\n${usage}`);
+    process.exit(1);
   }
-  console.error(`Unknown analyzer "${name}"\n\n${usage}`);
-  process.exit(1);
+  const model = analyzerModel(name);
+  if (name === 'jev' && !model) {
+    console.error('TYPESAFE_API_KEY is not set; using the lexical analyzer.');
+  }
+  if (name === 'cascade' && !process.env.TYPESAFE_API_KEY?.trim()) {
+    console.error('TYPESAFE_API_KEY is not set; the cascade keeps Laya’s unsure answers.');
+  }
+  return model;
 }
 
 function shellCompleter(command: string): LlmCompleter {
@@ -95,6 +100,13 @@ if (values.json) {
   console.log(
     `Entities: ${analysis.entities.map((e) => `${e.title} [${e.via}]`).join(', ') || 'none'}`,
   );
+  if (analysis.escalations?.length) {
+    console.log(
+      `Escalated: ${analysis.escalations
+        .map((e) => `${e.question} (${e.reason}) → ${e.answeredBy}`)
+        .join(', ')}`,
+    );
+  }
   console.log(`\nEvidence (${evidence.length}):`);
   for (const item of evidence) {
     const page = item.citations[0] ? `PDF ${item.citations[0].pdf_page}` : '';

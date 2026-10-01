@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/ask-question-labels.schema.json",
+  "title": "Labelled rules questions for measuring question analysis and retrieval",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "label_review", "cases"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "label_review": {
+      "description": "Who checked the labels. `unreviewed` means drafted from corpus records only.",
+      "enum": ["unreviewed", "reviewed"]
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "split", "question", "expected", "required_evidence"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^askq(\\.[a-z0-9_]+)+$" },
+        "split": { "enum": ["development", "validation", "held_out"] },
+        "question": { "type": "string", "minLength": 8 },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["intent", "complexity", "entity"],
+          "properties": {
+            "intent": {
+              "enum": [
+                "rule_explanation",
+                "situation_ruling",
+                "value_lookup",
+                "definition",
+                "quest_running",
+                "character_building",
+                "no_match"
+              ]
+            },
+            "complexity": { "enum": ["single_fact", "single_rule", "multi_rule", "judgment"] },
+            "entity": {
+              "description": "The one named entity record the question is about, or null.",
+              "type": ["string", "null"]
+            }
+          }
+        },
+        "required_evidence": {
+          "description": "Record ids a correct answer must be able to cite.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

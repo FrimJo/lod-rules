@@ -92,7 +92,7 @@ can mean the section has not been extracted yet.
 `npm run ask` runs this flow end to end. The code is in `scripts/ask/`.
 
 ```text
-question → analysis (lexical | Laya | Jev) → deterministic evidence → grounded prompt → LLM → citation check
+question → analysis (lexical | Laya | Jev | Laya→Jev cascade) → deterministic evidence → grounded prompt → LLM → citation check
 ```
 
 ```bash
@@ -113,10 +113,72 @@ deterministically first. The `lexical` analyser answers the same questions witho
 model and serves as the fallback when a model fails.
 
 Laya and Jev are uncalibrated (`CALIBRATION_VERSION = uncalibrated-0`). A model analysis
-therefore keeps the lexical analysis as `baseline`, and retrieval uses the union of both:
-all selected systems, both intents and the larger budget. Model-only entities rank after
-exact names and search results. The model can widen the evidence but never remove what
-the baseline found. Review this policy only after measuring a labelled question set.
+therefore keeps the lexical analysis as `baseline`, and retrieval uses the union of both.
+Each analysis gathers evidence within its own budget. The baseline's records come first,
+and the model's records are appended after them. The model can add records but never
+remove or displace one the baseline found. An earlier version merged both analyses into
+one ranked list and then cut it to a budget. Model additions could then push baseline
+records past the cap, which happened on 1–8 records per split of the labelled set.
+
+`--analyzer cascade` asks Laya everything and then asks Jev only the answers Laya was
+unsure of (`scripts/ask/cascade.ts`). A choice counts as unsure below a chosen-option
+probability of 0.8, and a noul counts as unsure when it lies within 0.4 of 0.5. These floors are
+`provisional-1`, chosen on the development split, and are not calibrated. If Jev fails or no
+`TYPESAFE_API_KEY` is set, Laya's answers stand. If Laya fails, Jev answers everything.
+`analysis.escalations` records each answer that was sent onward, with the reason and the
+model whose answer was kept.
+
+### Labelled questions
+
+`tests/fixtures/ask-questions/cases.yaml` holds 37 rules questions in three splits:
+development (12), validation (13) and held-out (12). Each question is labelled with its
+intent, its complexity, the one entity record it is about (or `null`), and the
+`required_evidence` records a correct answer must be able to cite. Labels were drafted from
+the canonical records they name and have not been independently reviewed
+(`label_review: unreviewed`). Game systems are not labelled. Instead, "chapter coverage"
+is measured mechanically: the share of required records whose chapter falls inside the
+selected systems.
+
+```bash
+npm run ask:evaluate                 # lexical, laya, jev, cascade; writes generated/ask-eval/
+npm run ask:evaluate -- --sweep      # also replays the cascade over a grid of floors
+```
+
+Jev answers are cached per question in `generated/ask-eval/jev-cache/`. The sweep replays
+cascades from those answers, which is exact only because Jev questions in one call cannot
+see each other. `--refresh` ignores the cache. `jev-latest` can change behind the cache.
+
+Results on 1 October 2026 (Laya `68f27dfe`, `jev-latest`). Recall is the share of required
+records in the evidence, shown as development / validation / held-out:
+
+| Analyzer          | Recall alone   | Recall with lexical union | Intent (dev) | Chapter coverage (dev) |
+| ----------------- | -------------- | ------------------------- | ------------ | ---------------------- |
+| lexical           | 86 / 79 / 50 % | —                         | 83 %         | 76 %                   |
+| laya              | 86 / 42 / 57 % | 90 / 79 / 64 %            | 33 %         | 38 %                   |
+| jev               | 71 / 68 / 71 % | 86 / 89 / 79 %            | 92 %         | 95 %                   |
+| cascade (0.8/0.4) | 62 / 63 / 64 % | 86 / 89 / 71 %            | 92 %         | 81 %                   |
+
+What this shows:
+
+- Alone, every model analysis drops 38–55 baseline records per split. The lexical union is
+  required. With the union, no configuration loses a baseline record, and each one matches
+  or beats lexical recall on every split.
+- Jev plus lexical is the best measured configuration. It ties lexical on development and
+  gains 10 points on validation and 29 on held-out, for about one extra record per question.
+- Laya's system and intent judgments are weak: 5–38 % chapter coverage and 31–33 % intent
+  accuracy. Its probabilities do not separate its right answers from its wrong ones.
+  The cascade reaches Jev-level judgments only when nearly every answer is escalated. Across
+  the sweep (choice floors 0.4–0.9, noul margins 0.1–0.4), it called Jev on 83–100 % of
+  questions. At 0.8/0.4 it called Jev on all 37, so it saves no requests and scores below
+  Jev alone on the held-out split.
+- On the original case, "My hero is poisoned and bleeding out during a rest", Laya says
+  `single_fact` at 0.34 and picks the alchemy item Poison. The cascade sends the complexity
+  and four system answers to Jev, which gives `multi_rule`. Laya is at least 0.8 sure of
+  Poison, though, so the cascade keeps that wrong entity. Jev alone picks no entity. The
+  union still retrieves both rest checks either way.
+
+Thirty-seven questions are too few to calibrate any of these numbers. Keep the union and
+grow the labelled set before changing the policy.
 
 **Evidence** (`evidence.ts`) is deterministic. It retrieves exact entities and their
 rules and tables, then searches the entity's quest, the selected system chapters and
@@ -153,5 +215,15 @@ unavailable external material.
 - prompt contents;
 - that citations of invented IDs are flagged.
 
-Not yet done: a labelled question set for calibrating Laya and Jev, vector search, semantic-provider calibration, and the full Phase 11
-bundle with JSON/SQLite equivalence and repeat-build checksums.
+`tests/ask/evaluate.test.ts` checks:
+
+- that the label file loads and every id resolves;
+- that on every labelled question, a model answering as widely as possible and one answering
+  as narrowly as possible both keep every lexical record (the earlier merge failed both);
+- that the cascade asks the fallback only the unsure answers, skips it when sure, and keeps the
+  first answers when the fallback fails;
+- per-question answer replay and scoring.
+
+Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
+semantic-provider calibration, and the full Phase 11 bundle with JSON/SQLite equivalence and
+repeat-build checksums.

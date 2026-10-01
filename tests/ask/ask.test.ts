@@ -32,7 +32,7 @@ function fixtureModel(
     asked,
     async ask(_state, questions) {
       asked.push(questions);
-      return answers(questions);
+      return { answers: answers(questions) };
     },
   };
 }

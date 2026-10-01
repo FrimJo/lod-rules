@@ -1,0 +1,277 @@
+# Labelled rules questions for `npm run ask:evaluate`.
+#
+# Each label is drafted from the canonical corpus records it names, not from what any
+# analyzer retrieves. `required_evidence` lists the records a correct answer must be able
+# to cite. `expected.entity` is the one named entity record the question is about, or null.
+# Pick floors and wording on `development`, check on `validation`, and read `held_out` only
+# to report a finished configuration.
+schema_version: 1
+label_review: unreviewed
+cases:
+  # --- development ---------------------------------------------------------------------
+  - id: askq.poison_bleeding_rest
+    split: development
+    question: My hero is poisoned and bleeding out during a rest. What happens?
+    expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
+    required_evidence:
+      - procedure.bleeding_out
+      - procedure.rest_bleeding_check
+      - procedure.rest_poison_checks
+    notes: >-
+      Laya called this single_fact and chose the alchemy item Poison; on its own that would
+      have dropped both rest checks.
+
+  - id: askq.molgor_hit_points
+    split: development
+    question: How many hit points does Molgor have?
+    expected:
+      {
+        intent: value_lookup,
+        complexity: single_fact,
+        entity: quest_actor.chamber_of_reverence.molgor,
+      }
+    required_evidence: [table.quest.slaying_fiend.molgor]
+
+  - id: askq.locked_chest
+    split: development
+    question: How do I open a locked chest?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.locked_door_and_close, table.dungeon.door_chest_difficulty]
+
+  - id: askq.miscast
+    split: development
+    question: What happens when a wizard miscasts a spell?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [core.magic.miscast, table.magic.miscast]
+
+  - id: askq.longsword_cost
+    split: development
+    question: How much does a longsword cost?
+    expected: { intent: value_lookup, complexity: single_fact, entity: equipment.weapon.longsword }
+    required_evidence: [table.equipment.weapons]
+
+  - id: askq.wounded_action_points
+    split: development
+    question: What does being wounded do to a hero's action points?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.wounded_status]
+
+  - id: askq.dwarf_stats
+    split: development
+    question: What are the starting stats of a Dwarf?
+    expected: { intent: value_lookup, complexity: single_fact, entity: species.dwarf }
+    required_evidence: [table.character.dwarf_stats]
+
+  - id: askq.travel_day
+    split: development
+    question: What happens each day while the party travels between settlements?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence:
+      - procedure.travel_event_check
+      - procedure.travel_daily_movement
+      - procedure.travel_food_and_rest
+
+  - id: askq.zone_of_control
+    split: development
+    question: What is a zone of control?
+    expected: { intent: definition, complexity: single_fact, entity: null }
+    required_evidence: [core.movement.zone_of_control]
+    notes: The term record only repeats the name; the movement rule holds the definition.
+
+  - id: askq.sanity_zero
+    split: development
+    question: What happens when a hero's Sanity drops to zero?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [procedure.sanity_condition, table.psychology.mental_conditions]
+
+  - id: askq.wounded_wizard_miscast
+    split: development
+    question: Can a wounded wizard still cast spells, and is a miscast more likely?
+    expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
+    required_evidence: [character.hit_points.wounded, core.magic.miscast.threshold.wounded]
+
+  - id: askq.fighters_bounty
+    split: development
+    question: How do bounties from the Fighters' Guild work?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: guild.fighters }
+    required_evidence: [procedure.fighters_bounty, table.guild.fighters_bounty]
+
+  # --- validation ----------------------------------------------------------------------
+  - id: askq.poison_cure
+    split: validation
+    question: How can I cure a poisoned hero?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.poison_cure]
+
+  - id: askq.shove
+    split: validation
+    question: Can my warrior shove an enemy out of the way?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.combat_shove]
+
+  - id: askq.threat_roll
+    split: validation
+    question: How does a roll against the Threat Level work?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.threat_roll]
+
+  - id: askq.short_rest_recovery
+    split: validation
+    question: What do heroes recover during a short rest?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence:
+      - procedure.rest
+      - procedure.rest_hp_recovery
+      - procedure.rest_mana_recovery
+      - procedure.rest_energy_point_recovery
+
+  - id: askq.lantern
+    split: validation
+    question: What does a lantern filled with oil do for the party?
+    expected:
+      {
+        intent: rule_explanation,
+        complexity: single_rule,
+        entity: equipment.light_source.lantern_filled_with_oil,
+      }
+    required_evidence: [character.equipment.light_source.lantern_filled_with_oil.light]
+
+  - id: askq.level_up
+    split: validation
+    question: What does a hero gain when levelling up?
+    expected: { intent: character_building, complexity: multi_rule, entity: null }
+    required_evidence: [procedure.character_level_up, table.character.level_progression]
+
+  - id: askq.learn_spell_cost
+    split: validation
+    question: How much does it cost for a wizard to learn a new spell, and how long does it take?
+    expected: { intent: value_lookup, complexity: single_rule, entity: null }
+    required_evidence: [procedure.learn_spell]
+
+  - id: askq.closing_portal_interrupted
+    split: validation
+    question: In Closing the Portal, what happens if the hero reading the ritual is interrupted?
+    expected:
+      {
+        intent: quest_running,
+        complexity: single_rule,
+        entity: quest.chamber_of_reverence.closing_portal,
+      }
+    required_evidence: [procedure.closing_portal_reading_attempt]
+
+  - id: askq.fire_next_turn
+    split: validation
+    question: Does fire damage keep burning on the next turn?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.elemental_continuation]
+
+  - id: askq.encumbrance
+    split: validation
+    question: How much can my hero carry before getting a penalty?
+    expected: { intent: value_lookup, complexity: single_rule, entity: null }
+    required_evidence: [character.encumbrance.penalty, character.encumbrance.limit]
+
+  - id: askq.wizard_armour
+    split: validation
+    question: Can a wizard wear plate armour?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: profession.wizard }
+    required_evidence: [profession.wizard]
+    notes: The limitation sits in the Wizard profession record, not in an armour rule.
+
+  - id: askq.estate_cost
+    split: validation
+    question: How much does the Bergmeister Estate cost?
+    expected: { intent: value_lookup, complexity: single_fact, entity: estate.bergmeister }
+    required_evidence: [character.settlement.estate.purchase]
+
+  - id: askq.zero_hp_after_battle
+    split: validation
+    question: One hero is at 0 HP when the battle ends. Can a companion bandage him, and how does it affect morale?
+    expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
+    required_evidence: [character.hit_points.after_battle_bandage, character.morale.event.zero_hp]
+
+  # --- held out ------------------------------------------------------------------------
+  - id: askq.disease_cure
+    split: held_out
+    question: My hero caught a disease. How do I get rid of it?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.disease_cure]
+
+  - id: askq.cure_poison_on_disease
+    split: held_out
+    question: Does a Potion of Cure Poison also cure disease?
+    expected:
+      {
+        intent: situation_ruling,
+        complexity: multi_rule,
+        entity: equipment.alchemy.potion_of_cure_poison,
+      }
+    required_evidence: [equipment.alchemy.potion_of_cure_poison, procedure.disease_cure]
+
+  - id: askq.search_room
+    split: held_out
+    question: How does searching a room for hidden treasure work?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.search_room_or_corridor]
+
+  - id: askq.sarcophagus
+    split: held_out
+    question: What can happen when a hero searches a sarcophagus?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [table.treasure.furniture.sarcophagus, procedure.search_furniture]
+    notes: Sarcophagus is a furniture table and rule, not an entity record.
+
+  - id: askq.trap_disarm
+    split: held_out
+    question: How do heroes disarm a trap?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.trap_resolution]
+
+  - id: askq.turn_order
+    split: held_out
+    question: How is turn order decided in a battle?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.initiative]
+    notes: The question avoids the word "initiative".
+
+  - id: askq.hit_location
+    split: held_out
+    question: Where does a hit land on a hero?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.combat.hit_location]
+
+  - id: askq.wizard_strength_cost
+    split: held_out
+    question: How many Improvement Points does a Wizard pay to raise Strength?
+    expected: { intent: value_lookup, complexity: single_fact, entity: profession.wizard }
+    required_evidence: [table.character.improvement_costs]
+
+  - id: askq.hero_replacement
+    split: held_out
+    question: My hero died. Can I bring in a replacement?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.hero_death]
+
+  - id: askq.claustrophobia
+    split: held_out
+    question: Does Claustrophobia affect my hero in corridors?
+    expected:
+      { intent: situation_ruling, complexity: single_rule, entity: condition.claustrophobia }
+    required_evidence: [procedure.claustrophobia]
+
+  - id: askq.relic_reward
+    split: held_out
+    question: What does each hero get paid for Returning the Relic?
+    expected:
+      {
+        intent: quest_running,
+        complexity: single_fact,
+        entity: quest.chamber_of_reverence.returning_relic,
+      }
+    required_evidence: [core.quest.returning_relic.reward]
+
+  - id: askq.settlement_day
+    split: held_out
+    question: How many activities can a hero do per day in a settlement, and must they stay at the inn?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.settlement_activities_and_overnight]

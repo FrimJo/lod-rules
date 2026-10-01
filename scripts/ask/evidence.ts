@@ -42,16 +42,25 @@ export const BUDGETS: Record<ComplexityId, { limit: number; expand: boolean }> =
 
 const TEXT_LIMIT = 2_400;
 
-/** Deterministic: the same analysis and corpus always produce the same evidence. */
+/**
+ * Deterministic: the same analysis and corpus always produce the same evidence. With a
+ * baseline, each analysis gathers within its own budget and the baseline's records come
+ * first, so a model analysis can add records but never displace one the baseline found.
+ */
 export function gatherEvidence(retrieval: Retrieval, analysis: QuestionAnalysis): EvidenceItem[] {
+  const { baseline, ...model } = analysis;
+  const picked = baseline ? pick(retrieval, baseline) : new Map<string, string[]>();
+  for (const [id, why] of pick(retrieval, model))
+    picked.set(id, [...(picked.get(id) ?? []), ...why]);
+  return [...picked.entries()].map(([id, why]) => item(retrieval, id, why));
+}
+
+function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, string[]> {
   const { question } = analysis;
-  const views = analysis.baseline ? [analysis, analysis.baseline] : [analysis];
-  const budget = views
-    .map((view) => BUDGETS[view.complexity.value])
-    .reduce((a, b) => (b.limit > a.limit ? b : a));
-  const intents = new Set(views.map((view) => view.intent.value));
-  const systems = [...new Set(views.flatMap(selectedSystems))];
-  const entities = new Map(views.flatMap((view) => view.entities).map((e) => [e.id, e]));
+  const budget = BUDGETS[analysis.complexity.value];
+  const intents = new Set([analysis.intent.value]);
+  const systems = selectedSystems(analysis);
+  const entities = new Map(analysis.entities.map((e) => [e.id, e]));
   const picked = new Map<string, string[]>();
   const add = (id: string, why: string): void => {
     if (!retrieval.document(id)) return;
@@ -112,7 +121,7 @@ export function gatherEvidence(retrieval: Retrieval, analysis: QuestionAnalysis)
   }
 
   const cap = budget.limit + [...entities.values()].filter((e) => e.via === 'alias').length;
-  return [...picked.entries()].slice(0, cap).map(([id, why]) => item(retrieval, id, why));
+  return new Map([...picked.entries()].slice(0, cap));
 }
 
 function item(retrieval: Retrieval, id: string, why: string[]): EvidenceItem {

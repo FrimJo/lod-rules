@@ -107,14 +107,27 @@ export interface ModelQuestion {
   criteria: Record<string, string>;
 }
 
-/** Raw answers keyed by question id: `{ choice, probabilities }` or `{ noul }`. */
+/** An answer a cascade sent onward because the first model was unsure of it. */
+export interface AnswerEscalation {
+  question: string;
+  reason: string;
+  /** Model whose answer was kept: the fallback, or the first model if the fallback failed. */
+  answeredBy: string;
+}
+
+export interface ModelResponse {
+  /** Raw answers keyed by question id: `{ choice, probabilities }` or `{ noul }`. */
+  answers: Record<string, unknown>;
+  escalations?: AnswerEscalation[];
+}
+
 export interface SystemOneModel {
   id: string;
   probabilityMeaning: 'model' | 'deterministic';
   ask(
     state: Record<string, string>,
     questions: Record<string, ModelQuestion>,
-  ): Promise<Record<string, unknown>>;
+  ): Promise<ModelResponse>;
 }
 
 export interface EntityRef {
@@ -135,6 +148,8 @@ export interface QuestionAnalysis {
   complexity: { value: ComplexityId; probabilities: Record<string, number> };
   /** Set when the model failed and the lexical analyzer answered instead. */
   fallback?: string;
+  /** Answers a cascade escalated from its first model, with the reason and final answerer. */
+  escalations?: AnswerEscalation[];
   /**
    * Lexical analysis kept beside an uncalibrated model analysis. Retrieval uses the
    * union of both, so the model can widen retrieval but never narrow it.
@@ -297,7 +312,7 @@ export async function modelAnalysis(
     };
   }
 
-  const answers = await model.ask(
+  const { answers, escalations } = await model.ask(
     { game: 'League of Dungeoneers tabletop dungeon crawler', question },
     questions,
   );
@@ -330,6 +345,7 @@ export async function modelAnalysis(
     systems,
     entities,
     complexity,
+    ...(escalations ? { escalations } : {}),
   };
 }
 
