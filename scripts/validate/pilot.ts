@@ -271,6 +271,55 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       errors.push(`${entity.id}: missing talent classification`);
     if (!entity.id.startsWith(`${entity.type}.`))
       errors.push(`${entity.id}: invalid entity namespace`);
+    if (entity.type === 'equipment' && !entity.category)
+      errors.push(`${entity.id}: equipment requires a category`);
+    if (
+      entity.type === 'equipment' &&
+      entity.category &&
+      ![
+        'weapon',
+        'ammunition',
+        'armour',
+        'shield',
+        'alchemy',
+        'transport',
+        'consumable',
+        'jewellery',
+        'light_source',
+        'general',
+        'tool',
+      ].includes(entity.category)
+    )
+      errors.push(`${entity.id}: invalid equipment category`);
+    if (entity.type === 'spell' || entity.type === 'prayer') {
+      if (
+        !Number.isInteger(entity.level) ||
+        entity.level! < 1 ||
+        entity.level! > (entity.type === 'spell' ? 6 : 4)
+      )
+        errors.push(`${entity.id}: invalid catalogue level`);
+    }
+    if (
+      entity.quality &&
+      ((entity.type !== 'equipment' && entity.type !== 'recipe') ||
+        (entity.type === 'equipment' && entity.category !== 'alchemy'))
+    )
+      errors.push(`${entity.id}: quality requires alchemy equipment or recipe`);
+    for (const component of entity.components ?? []) {
+      link(entity.id, component.entity_id, ['entities']);
+      if (
+        !['ingredient', 'part'].includes(
+          pilot.entities.find((e) => e.id === component.entity_id)?.type ?? '',
+        )
+      )
+        errors.push(`${entity.id}: recipe component must be ingredient or part`);
+    }
+    if (entity.result?.entity_id) {
+      link(entity.id, entity.result.entity_id, ['entities']);
+      const result = pilot.entities.find((e) => e.id === entity.result?.entity_id);
+      if (result?.type !== 'equipment' || result.category !== 'alchemy')
+        errors.push(`${entity.id}: recipe result must be alchemy equipment`);
+    }
     for (const id of entity.rules) link(entity.id, id, ['rules']);
     for (const id of entity.tables) link(entity.id, id, ['tables']);
     for (const ref of entity.table_rows ?? []) {
@@ -279,6 +328,24 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
         errors.push(`${entity.id}: row reference must also appear in tables`);
       if (!pilot.tables.find((t) => t.id === ref.table_id)?.rows.some((r) => r.id === ref.row_id))
         errors.push(`${entity.id}: unknown table row ${ref.table_id}/${ref.row_id}`);
+      if (
+        [
+          'equipment',
+          'spell',
+          'prayer',
+          'ingredient',
+          'part',
+          'recipe',
+          'settlement',
+          'guild',
+          'estate',
+        ].includes(entity.type) &&
+        !pilot.tables
+          .find((t) => t.id === ref.table_id)
+          ?.rows.find((r) => r.id === ref.row_id)
+          ?.entity_refs?.includes(entity.id)
+      )
+        errors.push(`${entity.id}: ${entity.type} table-row link is not reciprocal`);
     }
     if (
       entity.initial_hit_points &&
@@ -345,6 +412,25 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       errors.push(`${table.id}: partial selection does not match source rows`);
     for (const row of table.rows) {
       if (row.source) provenance(`${table.id}/${row.id}`, row.source);
+      for (const id of row.entity_refs ?? []) {
+        link(`${table.id}/${row.id}`, id, ['entities']);
+        if (table.id.startsWith('table.equipment.') && !id.startsWith('equipment.'))
+          errors.push(`${table.id}/${row.id}: entity reference must be equipment`);
+        if (
+          !pilot.entities
+            .find((e) => e.id === id)
+            ?.table_rows?.some((ref) => ref.table_id === table.id && ref.row_id === row.id)
+        )
+          errors.push(`${table.id}/${row.id}: equipment entity link is not reciprocal`);
+      }
+      if (row.row_kind === 'structural' && row.entity_refs?.length)
+        errors.push(`${table.id}/${row.id}: structural row must not have entities`);
+      if (
+        table.id === 'table.equipment.armour' &&
+        /^tier_\d+$/.test(row.id) &&
+        row.entity_refs?.length
+      )
+        errors.push(`${table.id}/${row.id}: tier-band row must not have item entities`);
       for (const id of row.rule_refs ?? []) link(table.id, id, ['rules']);
       const columns = new Set(table.columns.map((c) => c.id));
       if (
@@ -375,6 +461,13 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
             ![
               ...(cell.min === cell.max ? [String(cell.min)] : [`${cell.min}-${cell.max}`]),
               ...(cell.min === 10 && cell.max === 10 ? ['0'] : []),
+              ...(cell.min < cell.max && cell.max <= 100
+                ? [
+                    String(cell.min).padStart(2, '0') +
+                      '-' +
+                      (cell.max === 100 ? '00' : String(cell.max).padStart(2, '0')),
+                  ]
+                : []),
             ].includes(cell.printed))
         )
           errors.push(`${table.id}/${row.id}: invalid printed range`);

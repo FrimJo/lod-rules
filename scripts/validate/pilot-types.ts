@@ -144,7 +144,11 @@ export type Cell =
     }
   | { type: 'range'; printed: string; min: number; max: number }
   | { type: 'blank'; printed: '' }
-  | { type: 'marker'; printed: '-' | 'N/A'; meaning: 'no_increase' | 'unavailable' };
+  | {
+      type: 'marker';
+      printed: '-' | 'N/A';
+      meaning: 'no_increase' | 'unavailable' | 'not_specified';
+    };
 export interface Table extends Metadata {
   type: string;
   completeness: 'complete' | 'partial';
@@ -153,15 +157,50 @@ export interface Table extends Metadata {
   rows: Array<{
     id: string;
     source_row: string;
+    row_kind?: 'data' | 'structural';
     cells: Record<string, Cell>;
     rule_refs?: string[];
+    entity_refs?: string[];
     source?: PilotSource[];
   }>;
   roll_domain?: Range;
   footnotes: string[];
 }
 export interface Entity extends Metadata {
-  type: 'profession' | 'talent' | 'condition' | 'species' | 'background' | 'quest' | 'perk';
+  type:
+    | 'profession'
+    | 'talent'
+    | 'condition'
+    | 'species'
+    | 'background'
+    | 'quest'
+    | 'perk'
+    | 'equipment'
+    | 'spell'
+    | 'prayer'
+    | 'ingredient'
+    | 'part'
+    | 'recipe'
+    | 'settlement'
+    | 'guild'
+    | 'estate'
+    | 'quest_actor';
+  level?: number;
+  school?:
+    | 'Necromancy'
+    | 'Destruction'
+    | 'Alteration'
+    | 'Restoration'
+    | 'Mysticism'
+    | 'Hex'
+    | 'Illusion'
+    | 'Enchantment'
+    | 'Conjuration'
+    | 'Divination';
+  quality?: 'weak' | 'standard' | 'supreme';
+  qualities?: Array<'weak' | 'standard' | 'supreme'>;
+  components?: Array<{ printed: string; quantity: number; entity_id: string }>;
+  result?: { printed: string; entity_id?: string };
   rules: string[];
   tables: string[];
   background_number?: number;
