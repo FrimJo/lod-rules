@@ -1,0 +1,1541 @@
+- id: character.settlement.event.1
+  name: event 1
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Stray dog. The party is followed through the streets by a stray dog. After receiving a
+    small treat from one of the heroes. It seems that you now are the proud owners of a dog.
+    Randomise what kind of dog, using the Companions’ Compendium. If you do not own this compendium,
+    or if you already have a dog, treat this result as: ‘Nothing special happens’.'
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    requires_companions_book:
+      type: boolean
+      role: output
+      description: requires companions book
+    ignored_if_already_own_dog:
+      type: boolean
+      role: output
+      description: ignored if already own dog
+    reward:
+      type: string
+      role: output
+      description: reward
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: requires_companions_book
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignored_if_already_own_dog
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward
+      value:
+        type: literal
+        value: one random dog; otherwise nothing special happens
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.2
+  name: event 2
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Scrolls Salesman. The heroes are approached by a man who sells magic scrolls. Randomise
+    three spells that are available. Each scroll cost 100 c.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    available_spell_rolls:
+      type: number
+      role: output
+      description: available spell rolls
+    scroll_cost:
+      type: number
+      role: output
+      description: scroll cost
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: available_spell_rolls
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: scroll_cost
+      value:
+        type: literal
+        value: 100
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.3
+  name: event 3
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Potion Salesman. A man clad in purple robes informs the party that he sells premium
+    potions. Use the Potions Table with an availability of 4 for every potion regardless of class,
+    and -20 c as a price modifier.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    all_potion_availability:
+      type: number
+      role: output
+      description: all potion availability
+    potion_price_modifier_coins:
+      type: number
+      role: output
+      description: potion price modifier coins
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: all_potion_availability
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: potion_price_modifier_coins
+      value:
+        type: literal
+        value: -20
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.4
+  name: event 4
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Trinket Salesman. This old man claims to be selling magic trinkets. Most of the things
+    he carries around seem quite plain and ordinary, but some of them do have a special feel to
+    them. He charges 100 c for each trinket, but you are only allowed to buy 1 per hero. For each
+    trinket bought, roll 1d12. On a result of 1-5, it is magic. A result of 5-11 means the trinket
+    is useless and cannot even be sold. A result of 12 means you have bought a cursed item. For any
+    magic trinkets, roll on the Magic Items Table. For cursed trinkets, roll on the Curses Table.
+    The unaware hero must wear the trinket until he or she exits the next dungeon before it can be
+    thrown away. In all cases, decide whether the trinket is a ring or necklace.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    trinket_cost:
+      type: number
+      role: output
+      description: trinket cost
+    trinkets_per_hero:
+      type: number
+      role: output
+      description: trinkets per hero
+    trinket_die:
+      type: number
+      role: output
+      description: trinket die
+    magic_range:
+      type: string
+      role: output
+      description: magic range
+    useless_unsellable_range:
+      type: string
+      role: output
+      description: useless unsellable range
+    cursed_range:
+      type: string
+      role: output
+      description: cursed range
+    cursed_wear_until:
+      type: string
+      role: output
+      description: cursed wear until
+    choose_form:
+      type: string
+      role: output
+      description: choose form
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: trinket_cost
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: trinkets_per_hero
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: trinket_die
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: magic_range
+      value:
+        type: literal
+        value: 1–5
+    - type: set
+      target: useless_unsellable_range
+      value:
+        type: literal
+        value: 5–11
+    - type: set
+      target: cursed_range
+      value:
+        type: literal
+        value: '12'
+    - type: set
+      target: cursed_wear_until
+      value:
+        type: literal
+        value: exit next dungeon
+    - type: set
+      target: choose_form
+      value:
+        type: literal
+        value: ring or necklace
+  uses_tables:
+    - table.settlement.events
+  issues:
+    - issue.settlement.trinket_overlap
+- id: character.settlement.event.5
+  name: event 5
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Sale! There seems to be a settlement-wide sale going on. All stores sell their items at
+    a 20% discount.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    store_price_percent_modifier:
+      type: number
+      role: output
+      description: store price percent modifier
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: store_price_percent_modifier
+      value:
+        type: literal
+        value: -20
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.6
+  name: event 6
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Fresh Stocks. All stores have just been restocked and there is plenty to choose from.
+    All availabilities are modified by +2. If this results in 6, the item is automatically in stock.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    availability_modifier:
+      type: number
+      role: output
+      description: availability modifier
+    automatic_stock_at:
+      type: number
+      role: output
+      description: automatic stock at
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: availability_modifier
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: automatic_stock_at
+      value:
+        type: literal
+        value: 6
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.7
+  name: event 7
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Settlement Feast. There is a celebration in the settlement and there are people
+    everywhere. If you stay the night, the good mood of the citizens boosts Party Morale temporarily
+    by +2 (which can go above PM max). It stays at +2 until lowered by natural means and can then
+    only be raised back to the standard level. However, the huge amount of people means that most
+    beds at the inns are taken. On a result of 9-12 on 1d12, there are no beds, and the party must
+    continue their travel without doing any business (you may claim any quest reward before
+    leaving).
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    requires_overnight_for_morale:
+      type: boolean
+      role: output
+      description: requires overnight for morale
+    party_morale_modifier:
+      type: number
+      role: output
+      description: party morale modifier
+    may_exceed_morale_max:
+      type: boolean
+      role: output
+      description: may exceed morale max
+    morale_duration:
+      type: string
+      role: output
+      description: morale duration
+    no_beds_die:
+      type: number
+      role: output
+      description: no beds die
+    no_beds_minimum:
+      type: number
+      role: output
+      description: no beds minimum
+    no_beds_forbids_business:
+      type: boolean
+      role: output
+      description: no beds forbids business
+    no_beds_allows_quest_reward:
+      type: boolean
+      role: output
+      description: no beds allows quest reward
+    no_beds_requires_travel:
+      type: boolean
+      role: output
+      description: no beds requires travel
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: requires_overnight_for_morale
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: party_morale_modifier
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: may_exceed_morale_max
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: morale_duration
+      value:
+        type: literal
+        value: until lowered naturally; can then only recover to standard level
+    - type: set
+      target: no_beds_die
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: no_beds_minimum
+      value:
+        type: literal
+        value: 9
+    - type: set
+      target: no_beds_forbids_business
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: no_beds_allows_quest_reward
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: no_beds_requires_travel
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.8
+  name: event 8
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Side Quest. The party is approached by a citizen, urgently requesting their help. Roll
+    on the Side Quest Table and decide if you wish to add this to your current quest.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    offered_side_quest:
+      type: boolean
+      role: output
+      description: offered side quest
+    may_add_to_current_quest:
+      type: boolean
+      role: output
+      description: may add to current quest
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: offered_side_quest
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: may_add_to_current_quest
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.9
+  name: event 9
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Shortage of Goods. The settlement has not had any trade caravans passing by for weeks,
+    and the stores are nearly empty. All availabilities are modified by -2. If this results in 0,
+    the item is automatically out of stock. As a result, prices have also gone up, resulting in a
+    +10% price modifier on all items.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    availability_modifier:
+      type: number
+      role: output
+      description: availability modifier
+    automatic_out_of_stock_at:
+      type: number
+      role: output
+      description: automatic out of stock at
+    price_percent_modifier:
+      type: number
+      role: output
+      description: price percent modifier
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: availability_modifier
+      value:
+        type: literal
+        value: -2
+    - type: set
+      target: automatic_out_of_stock_at
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: price_percent_modifier
+      value:
+        type: literal
+        value: 10
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.10
+  name: event 10
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Thief. The party realizes that a pickpocket has managed to get close. 1d100 c have been stolen.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    coins_stolen_die:
+      type: number
+      role: output
+      description: coins stolen die
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: coins_stolen_die
+      value:
+        type: literal
+        value: 100
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.11
+  name: event 11
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Assassination attempt. It seems someone is holding a grudge against the heroes.
+    Randomize one hero that is attacked by 1d4 bandits. Randomize each bandits’ weapon by using the
+    enemy equipment cards. Bandits with ranged weapons will also have daggers. Use the city tile and
+    place the heroes along one board edge and the bandits along the opposite edge. The battle ends
+    when all bandits are dead or all heroes have dropped to 0 HP. The heroes do not die, but instead
+    be nursed back to 1 HP by the locals. The bandits may be searched.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    target_selection:
+      type: string
+      role: output
+      description: target selection
+    bandits_die:
+      type: number
+      role: output
+      description: bandits die
+    weapons:
+      type: string
+      role: output
+      description: weapons
+    tile:
+      type: string
+      role: output
+      description: tile
+    deployment:
+      type: string
+      role: output
+      description: deployment
+    battle_ends:
+      type: string
+      role: output
+      description: battle ends
+    heroes_die:
+      type: boolean
+      role: output
+      description: heroes die
+    locals_restore_hp:
+      type: number
+      role: output
+      description: locals restore hp
+    bandits_searchable:
+      type: boolean
+      role: output
+      description: bandits searchable
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: target_selection
+      value:
+        type: literal
+        value: one random hero
+    - type: set
+      target: bandits_die
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: weapons
+      value:
+        type: literal
+        value: random enemy equipment cards; ranged bandits also have daggers
+    - type: set
+      target: tile
+      value:
+        type: literal
+        value: city
+    - type: set
+      target: deployment
+      value:
+        type: literal
+        value: heroes along one board edge, bandits along opposite edge
+    - type: set
+      target: battle_ends
+      value:
+        type: literal
+        value: all bandits dead or all heroes at 0 HP
+    - type: set
+      target: heroes_die
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: locals_restore_hp
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: bandits_searchable
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.event.12
+  name: event 12
+  section_id: section.settlements.settlement_events.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Curse! While walking down the street, a gnarly old woman suddenly points her finger at
+    the party and screams: “Heretics! I curse thee!”. Roll on the Curses Table once and apply the
+    curse to all heroes until they exit the next dungeon.'
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    curse_rolls:
+      type: number
+      role: output
+      description: curse rolls
+    curse_applies_to:
+      type: string
+      role: output
+      description: curse applies to
+    curse_duration:
+      type: string
+      role: output
+      description: curse duration
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: curse_rolls
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: curse_applies_to
+      value:
+        type: literal
+        value: all heroes
+    - type: set
+      target: curse_duration
+      value:
+        type: literal
+        value: until exit next dungeon
+  uses_tables:
+    - table.settlement.events
+- id: character.settlement.ghost_event.1
+  name: ghost_event 1
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The heroes may roll twice on the Wonderful Treasure Chart. However, the lack of sleep
+    will deprive each hero of 1 Point of Energy.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    wonderful_treasure_rolls:
+      type: number
+      role: output
+      description: wonderful treasure rolls
+    energy_loss_per_hero:
+      type: number
+      role: output
+      description: energy loss per hero
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: wonderful_treasure_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: energy_loss_per_hero
+      value:
+        type: literal
+        value: 1
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.2
+  name: ghost_event 2
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: +1 Luck for all heroes during the coming quest.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    luck_modifier_all_heroes:
+      type: number
+      role: output
+      description: luck modifier all heroes
+    duration:
+      type: string
+      role: output
+      description: duration
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: luck_modifier_all_heroes
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: coming quest
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.3
+  name: ghost_event 3
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Add a Side Quest Card to the first half of the pile when setting up the Dungeon Cards.
+    When you draw the Side Quest Card, you remove it and immediately draw the next card. On this
+    card, you add 1 extra door leading to the R10 tile. This door is considered a normal door in all
+    aspects as the ghost’s explanation makes it easy to find. It can still be locked and trapped but
+    there are no encounters inside.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    side_quest_card_position:
+      type: string
+      role: output
+      description: side quest card position
+    on_draw:
+      type: string
+      role: output
+      description: on draw
+    extra_door_target:
+      type: string
+      role: output
+      description: extra door target
+    door_is_normal:
+      type: boolean
+      role: output
+      description: door is normal
+    door_can_be_locked_or_trapped:
+      type: boolean
+      role: output
+      description: door can be locked or trapped
+    encounters_inside:
+      type: boolean
+      role: output
+      description: encounters inside
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: side_quest_card_position
+      value:
+        type: literal
+        value: first half of Dungeon Card pile
+    - type: set
+      target: on_draw
+      value:
+        type: literal
+        value: remove side quest card and immediately draw next card
+    - type: set
+      target: extra_door_target
+      value:
+        type: literal
+        value: R10
+    - type: set
+      target: door_is_normal
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: door_can_be_locked_or_trapped
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encounters_inside
+      value:
+        type: literal
+        value: false
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.4
+  name: ghost_event 4
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All Heroes get +5 CS/+5 RS during the quest.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    cs_modifier_all_heroes:
+      type: number
+      role: output
+      description: cs modifier all heroes
+    rs_modifier_all_heroes:
+      type: number
+      role: output
+      description: rs modifier all heroes
+    duration:
+      type: string
+      role: output
+      description: duration
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: cs_modifier_all_heroes
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: rs_modifier_all_heroes
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: quest
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.5
+  name: ghost_event 5
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any wizard in the party will only miscast on 97-00 during the coming quest. If there
+    are no wizards in the party, ignore this and head out on your quest without any ghostly events.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    wizard_miscast_minimum:
+      type: number
+      role: output
+      description: wizard miscast minimum
+    wizard_miscast_maximum:
+      type: number
+      role: output
+      description: wizard miscast maximum
+    ignore_without_wizard:
+      type: boolean
+      role: output
+      description: ignore without wizard
+    duration:
+      type: string
+      role: output
+      description: duration
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: wizard_miscast_minimum
+      value:
+        type: literal
+        value: 97
+    - type: set
+      target: wizard_miscast_maximum
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: ignore_without_wizard
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: coming quest
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.6
+  name: ghost_event 6
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'See the Grieving Mother Side Quest. If you already have succeeded in this quest,
+    ignore this and treat it as if you rolled #2. If you have tried and failed, you may try again.'
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    side_quest:
+      type: string
+      role: output
+      description: side quest
+    if_previously_succeeded:
+      type: string
+      role: output
+      description: if previously succeeded
+    retry_after_failure_allowed:
+      type: boolean
+      role: output
+      description: retry after failure allowed
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: side_quest
+      value:
+        type: literal
+        value: The Grieving Mother
+    - type: set
+      target: if_previously_succeeded
+      value:
+        type: literal
+        value: treat as result 2
+    - type: set
+      target: retry_after_failure_allowed
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.estate.ghost_events
+  dependencies:
+    - key: grieving_mother
+      label: The Grieving Mother side quest
+      object_id: quest.estate.grieving_mother
+- id: character.settlement.ghost_event.7
+  name: ghost_event 7
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 163
+      printed_page: 161
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any rations from the crops, hen house, and pigsty are lost.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    lose_all_estate_crop_rations:
+      type: boolean
+      role: output
+      description: lose all estate crop rations
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: lose_all_estate_crop_rations
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.8
+  name: ghost_event 8
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 163
+      printed_page: 161
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The heroes have a tough time getting a good night’s sleep. All heroes start the next
+    quest with -2 Energy (minimum 0). This can be regained as usual after the quest has started
+    through the usual means.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    energy_loss_all_heroes:
+      type: number
+      role: output
+      description: energy loss all heroes
+    energy_minimum:
+      type: number
+      role: output
+      description: energy minimum
+    may_recover_after_quest_starts:
+      type: boolean
+      role: output
+      description: may recover after quest starts
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: energy_loss_all_heroes
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: energy_minimum
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: may_recover_after_quest_starts
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.9
+  name: ghost_event 9
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 163
+      printed_page: 161
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    First randomise which hero is affected. Then randomise between all weapons, all pieces
+    of armour and all rations (All rations are considered a single item for this purpose). This item
+    is left back at the estate and cannot be used until you have left the next dungeon.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    hero_selection:
+      type: string
+      role: output
+      description: hero selection
+    item_selection:
+      type: string
+      role: output
+      description: item selection
+    item_location:
+      type: string
+      role: output
+      description: item location
+    unavailable_until:
+      type: string
+      role: output
+      description: unavailable until
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: hero_selection
+      value:
+        type: literal
+        value: random
+    - type: set
+      target: item_selection
+      value:
+        type: literal
+        value: random among all weapons, all armour pieces and all rations as one item
+    - type: set
+      target: item_location
+      value:
+        type: literal
+        value: left at estate
+    - type: set
+      target: unavailable_until
+      value:
+        type: literal
+        value: leaving next dungeon
+  uses_tables:
+    - table.estate.ghost_events
+- id: character.settlement.ghost_event.10
+  name: ghost_event 10
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 163
+      printed_page: 161
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Every hero suffers an individual curse from the Curse Table in the Rulebook that cannot
+    be lifted until they are back in the city again.
+  type: modifier
+  scope: settlement
+  fields:
+    selected:
+      type: boolean
+      role: input
+      description: Selected event; supplies catalogue consequences, not a second application of resources.
+    curse_rolls_per_hero:
+      type: number
+      role: output
+      description: curse rolls per hero
+    cannot_lift_until:
+      type: string
+      role: output
+      description: cannot lift until
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: selected
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: curse_rolls_per_hero
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: cannot_lift_until
+      value:
+        type: literal
+        value: back in the city
+  uses_tables:
+    - table.estate.ghost_events

@@ -1,0 +1,595 @@
+- id: core.quest.missing_brother.setup
+  name: The Missing Brother — setup
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'A young lady at The Screaming Hog asks heroes to investigate her missing brother in
+    the dungeon of their next quest. Location: the same dungeon as the next quest. Reward: 100 c per
+    hero. Encounters: as defined by the main quest. Objective room: as explained below. Do not read
+    more than one section at a time.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    read_sections_one_at_a_time:
+      type: boolean
+      role: output
+      description: read sections one at a time
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: as defined by the main quest
+    - type: set
+      target: read_sections_one_at_a_time
+      value:
+        type: literal
+        value: true
+- id: core.quest.missing_brother.deck
+  name: The Missing Brother — card pile
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — card pile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the card pile is done, place one extra Room Card within reach without looking at
+    it. Next, add Side Quest 1 to the pile.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    main_card_pile_done:
+      type: boolean
+      role: input
+      description: main card pile done
+    extra_room_cards:
+      type: number
+      role: output
+      description: extra room cards
+      integer: true
+    extra_room_card_kept_unseen:
+      type: boolean
+      role: output
+      description: extra room card kept unseen
+    side_quest_card_to_add:
+      type: string
+      role: output
+      description: side quest card to add
+  effects:
+    - type: set
+      target: extra_room_cards
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: extra_room_card_kept_unseen
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: side_quest_card_to_add
+      value:
+        type: literal
+        value: Side Quest 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: main_card_pile_done
+    right:
+      type: literal
+      value: true
+- id: core.quest.missing_brother.room_card
+  name: The Missing Brother — Side Quest card drawn
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — Side Quest card drawn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When Side Quest 1 is drawn, replace it with the extra Room Card. This is the Side Quest
+    Objective Room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    side_quest_1_drawn:
+      type: boolean
+      role: input
+      description: side quest 1 drawn
+    replace_side_quest_card_with_extra_room_card:
+      type: boolean
+      role: output
+      description: replace side quest card with extra room card
+    extra_room_is_side_quest_objective:
+      type: boolean
+      role: output
+      description: extra room is side quest objective
+  effects:
+    - type: set
+      target: replace_side_quest_card_with_extra_room_card
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: extra_room_is_side_quest_objective
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_1_drawn
+    right:
+      type: literal
+      value: true
+- id: core.quest.missing_brother.main_objective_first
+  name: The Missing Brother — main objective first
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — main objective first
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the main objective room is found before this one, the heroes must decide whether to
+    go home or continue searching for the Side Quest Room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    main_objective_room_found:
+      type: boolean
+      role: input
+      description: main objective room found
+    side_quest_room_found:
+      type: boolean
+      role: input
+      description: side quest room found
+    return_or_continue_choice_required:
+      type: boolean
+      role: output
+      description: return or continue choice required
+    choice_options:
+      type: string
+      role: output
+      description: choice options
+  effects:
+    - type: set
+      target: return_or_continue_choice_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: choice_options
+      value:
+        type: literal
+        value: go home or continue searching for the Side Quest Room
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: main_objective_room_found
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_room_found
+        right:
+          type: literal
+          value: false
+- id: core.quest.missing_brother.objective
+  name: The Missing Brother — ongoing fight
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — ongoing fight
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When the heroes open the door, there is already a fight. Place the lone fighter in one
+    of the far corners. Roll twice on the Encounter Table and place enemies as close to the survivor
+    as possible. Any Archers are placed as far away from the fighter as possible, but not in the 2
+    squares next to the door where heroes are.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    side_quest_objective_door_opened:
+      type: boolean
+      role: input
+      description: side quest objective door opened
+    fight_already_ongoing:
+      type: boolean
+      role: output
+      description: fight already ongoing
+    fighter_placement:
+      type: string
+      role: output
+      description: fighter placement
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    ordinary_enemy_placement:
+      type: string
+      role: output
+      description: ordinary enemy placement
+    archer_placement:
+      type: string
+      role: output
+      description: archer placement
+    archer_excluded_squares:
+      type: string
+      role: output
+      description: archer excluded squares
+  effects:
+    - type: set
+      target: fight_already_ongoing
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: fighter_placement
+      value:
+        type: literal
+        value: one of the far corners
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ordinary_enemy_placement
+      value:
+        type: literal
+        value: as close to the survivor as possible
+    - type: set
+      target: archer_placement
+      value:
+        type: literal
+        value: as far away from the fighter as possible
+    - type: set
+      target: archer_excluded_squares
+      value:
+        type: literal
+        value: the 2 squares next to the door where the heroes are
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_objective_door_opened
+    right:
+      type: literal
+      value: true
+- id: core.quest.missing_brother.targeting
+  name: The Missing Brother — heroes join
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — heroes join
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The heroes may continue their turn. The enemies will only target the heroes from now on.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    side_quest_objective_door_opened:
+      type: boolean
+      role: input
+      description: side quest objective door opened
+    heroes_may_continue_turn:
+      type: boolean
+      role: output
+      description: heroes may continue turn
+    enemies_target_only_heroes:
+      type: boolean
+      role: output
+      description: enemies target only heroes
+  effects:
+    - type: set
+      target: heroes_may_continue_turn
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: enemies_target_only_heroes
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_objective_door_opened
+    right:
+      type: literal
+      value: true
+- id: core.quest.missing_brother.found
+  name: The Missing Brother — found him
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — found him
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the last enemy is dead, heroes check on the fighter. He is bleeding but not
+    heavily wounded, introduces himself as the missing brother, thanks them and heads toward the
+    exit and back to the city.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    side_quest_room_found:
+      type: boolean
+      role: input
+      description: side quest room found
+    last_enemy_dead:
+      type: boolean
+      role: input
+      description: last enemy dead
+    missing_brother_rescued:
+      type: boolean
+      role: output
+      description: missing brother rescued
+    brother_not_heavily_wounded:
+      type: boolean
+      role: output
+      description: brother not heavily wounded
+    brother_heads_to_city:
+      type: boolean
+      role: output
+      description: brother heads to city
+  effects:
+    - type: set
+      target: missing_brother_rescued
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: brother_not_heavily_wounded
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: brother_heads_to_city
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_room_found
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: last_enemy_dead
+        right:
+          type: literal
+          value: true
+- id: core.quest.missing_brother.reward
+  name: The Missing Brother — sister pays
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — sister pays
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Reward: 100 c per hero. Once back in the city, the heroes receive their promised coins
+    from a very grateful sister.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    missing_brother_rescued:
+      type: boolean
+      role: input
+      description: missing brother rescued
+    back_in_city:
+      type: boolean
+      role: input
+      description: back in city
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    reward_payer:
+      type: string
+      role: output
+      description: reward payer
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: reward_payer
+      value:
+        type: literal
+        value: sister
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: missing_brother_rescued
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_in_city
+        right:
+          type: literal
+          value: true
+- id: core.quest.missing_brother.not_found
+  name: The Missing Brother — did not find him
+  section_id: section.quest_book_i.side_quests.side_quest_1_the_missing_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 274
+      printed_page: 272
+      heading: The Missing Brother — did not find him
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As soon as heroes set foot in the tavern the sister looks at them nervously. A hero
+    shakes his head and she rushes out through the door.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.missing_brother
+  fields:
+    brother_not_found:
+      type: boolean
+      role: input
+      description: brother not found
+    back_at_tavern:
+      type: boolean
+      role: input
+      description: back at tavern
+    sister_leaves_tavern:
+      type: boolean
+      role: output
+      description: sister leaves tavern
+  effects:
+    - type: set
+      target: sister_leaves_tavern
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: brother_not_found
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_tavern
+        right:
+          type: literal
+          value: true

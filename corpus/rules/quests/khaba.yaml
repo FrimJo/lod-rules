@@ -1,0 +1,1278 @@
+- id: core.quest.khaba.setup
+  name: Crypt of Khaba — setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Quest Location: Ancient Lands, random. Number of tiles: 6 corridors, 6 rooms. Reward:
+    500 c per hero. Encounters: Ancient Lands.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Ancient Lands, random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 500
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Ancient Lands
+- id: core.quest.khaba.standard_room_pool
+  name: Crypt of Khaba — Standard room pool
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — Standard room pool
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If not using Ancient Lands tiles, randomise rooms using R1B, R2B, R4B-R8B, R1, R4-R6,
+    R9-R11, R14, R16, R17. All corridors can be part of the mix.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    random_room_pool:
+      type: string
+      role: output
+      description: random room pool
+    all_corridors_available:
+      type: boolean
+      role: output
+      description: all corridors available
+  effects:
+    - type: set
+      target: random_room_pool
+      value:
+        type: literal
+        value: R1B, R2B, R4B-R8B, R1, R4-R6, R9-R11, R14, R16, R17
+    - type: set
+      target: all_corridors_available
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.khaba.furniture_reroll
+  name: Crypt of Khaba — Furniture Chart rerolls
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — Furniture Chart rerolls
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    You may re-roll 4 rolls on the furniture chart during the quest. A re-roll may never be
+    re-rolled.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    furniture_chart_roll:
+      type: boolean
+      role: input
+      description: furniture chart roll
+    already_a_reroll:
+      type: boolean
+      role: input
+      description: already a reroll
+    furniture_rerolls_used_this_quest:
+      type: number
+      role: input
+      description: furniture rerolls used this quest
+      integer: true
+    furniture_reroll_allowed:
+      type: boolean
+      role: output
+      description: furniture reroll allowed
+  effects:
+    - type: set
+      target: furniture_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: furniture_chart_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_a_reroll
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 4
+- id: core.quest.khaba.deck
+  name: Crypt of Khaba — playing cards
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — playing cards
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Mix a deck of 12 playing cards. All are red except the Ace of Spades.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    playing_cards:
+      type: number
+      role: output
+      description: playing cards
+      integer: true
+    ordinary_red_cards:
+      type: number
+      role: output
+      description: ordinary red cards
+      integer: true
+    special_card:
+      type: string
+      role: output
+      description: special card
+    mix_deck:
+      type: boolean
+      role: output
+      description: mix deck
+  effects:
+    - type: set
+      target: playing_cards
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: ordinary_red_cards
+      value:
+        type: literal
+        value: 11
+    - type: set
+      target: special_card
+      value:
+        type: literal
+        value: Ace of Spades
+    - type: set
+      target: mix_deck
+      value:
+        type: literal
+        value: true
+- id: core.quest.khaba.new_tile_card
+  name: Crypt of Khaba — new tile
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — new tile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every time you enter a new tile, flip a card. If the Ace of Spades shows up, consult
+    the corresponding paragraph.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    entering_new_tile:
+      type: boolean
+      role: input
+      description: entering new tile
+    cards_to_flip:
+      type: number
+      role: output
+      description: cards to flip
+      integer: true
+  effects:
+    - type: set
+      target: cards_to_flip
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: entering_new_tile
+    right:
+      type: literal
+      value: true
+- id: core.quest.khaba.ace_encounter
+  name: Crypt of Khaba — Ace of Spades
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — Ace of Spades
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Ignore the normal roll for encounters. Instead encounter the undead Queen Khaba and
+    her retinue: her eternal bodyguard, 4 Wights, are also in the room.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: drawn card
+    normal_encounter_roll_used:
+      type: boolean
+      role: output
+      description: normal encounter roll used
+    queen_khaba_present:
+      type: boolean
+      role: output
+      description: queen khaba present
+    wights_present:
+      type: number
+      role: output
+      description: wights present
+      integer: true
+  effects:
+    - type: set
+      target: normal_encounter_roll_used
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: queen_khaba_present
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wights_present
+      value:
+        type: literal
+        value: 4
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: drawn_card
+    right:
+      type: literal
+      value: Ace of Spades
+- id: core.quest.khaba.queen_profile
+  name: Queen Khaba — equipment and spells
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Queen Khaba — equipment and spells
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Queen is armed with a dagger, armour 0 and can activate 3 close combat spells, 2
+    ranged spells, 2 support spells and the raise dead spell.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    queen_weapon:
+      type: string
+      role: output
+      description: queen weapon
+    queen_armour:
+      type: number
+      role: output
+      description: queen armour
+      integer: true
+    queen_close_combat_spells:
+      type: number
+      role: output
+      description: queen close combat spells
+      integer: true
+    queen_ranged_spells:
+      type: number
+      role: output
+      description: queen ranged spells
+      integer: true
+    queen_support_spells:
+      type: number
+      role: output
+      description: queen support spells
+      integer: true
+    queen_additional_spell:
+      type: string
+      role: output
+      description: queen additional spell
+  effects:
+    - type: set
+      target: queen_weapon
+      value:
+        type: literal
+        value: dagger
+    - type: set
+      target: queen_armour
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: queen_close_combat_spells
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: queen_ranged_spells
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: queen_support_spells
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: queen_additional_spell
+      value:
+        type: literal
+        value: Raise Dead
+  entity_id: quest_actor.ancient_lands.khaba
+  dependencies:
+    - key: dagger
+      label: Dagger
+      object_id: equipment.weapon.dagger
+    - key: raise_dead
+      label: Raise Dead
+      object_id: spell.raise_dead
+  issues:
+    - issue.quest.khaba_boundaries
+- id: core.quest.khaba.wight_profile
+  name: Khaba’s Wights — equipment
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Khaba’s Wights — equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Wights are armed with cursed longswords and shields, and have armour 2.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    wight_weapon:
+      type: string
+      role: output
+      description: wight weapon
+    wight_shield:
+      type: boolean
+      role: output
+      description: wight shield
+    wight_armour:
+      type: number
+      role: output
+      description: wight armour
+      integer: true
+  effects:
+    - type: set
+      target: wight_weapon
+      value:
+        type: literal
+        value: cursed longsword
+    - type: set
+      target: wight_shield
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wight_armour
+      value:
+        type: literal
+        value: 2
+  dependencies:
+    - key: longsword
+      label: Longsword; quest specifies cursed weapons
+      object_id: equipment.weapon.longsword
+    - key: shield
+      label: Shield; the quest does not specify a shield type
+  issues:
+    - issue.quest.khaba_boundaries
+- id: core.quest.khaba.ancient_objective
+  name: Crypt of Khaba — ancient objective
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — ancient objective
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Use The Large Tomb tile. Enter along the long edge. Roll twice on the Encounter Table
+    and place enemies randomly in the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    entry_edge:
+      type: string
+      role: output
+      description: entry edge
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagus_count:
+      type: number
+      role: output
+      description: sarcophagus count
+      integer: true
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: The Large Tomb tile
+    - type: set
+      target: entry_edge
+      value:
+        type: literal
+        value: long
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: sarcophagus_count
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+- id: core.quest.khaba.ancient_queen
+  name: Crypt of Khaba — ancient Queen fallback
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — ancient Queen fallback
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the party has not yet met Queen Khaba, she is present in the room next to one of the
+    sarcophagi (choose which one is hers).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    party_has_met_queen_khaba:
+      type: boolean
+      role: input
+      description: party has met queen khaba
+    queen_khaba_present:
+      type: boolean
+      role: output
+      description: queen khaba present
+    queen_placement:
+      type: string
+      role: output
+      description: queen placement
+  effects:
+    - type: set
+      target: queen_khaba_present
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: queen_placement
+      value:
+        type: literal
+        value: next to one of the sarcophagi; choose which one is hers
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: party_has_met_queen_khaba
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: queen
+      label: Queen Khaba equipment and spells
+      object_id: core.quest.khaba.queen_profile
+  issues:
+    - issue.quest.khaba_boundaries
+- id: core.quest.khaba.ancient_queen_sarcophagus
+  name: Crypt of Khaba — ancient Queen sarcophagus
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — ancient Queen sarcophagus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Queen Khaba’s sarcophagus cannot spawn another mummy (ignore the result), but can
+    contain treasure.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_queen_sarcophagus:
+      type: boolean
+      role: input
+      description: searching queen sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    ignore_mummy_search_result:
+      type: boolean
+      role: output
+      description: ignore mummy search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: ignore_mummy_search_result
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_queen_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Standard sarcophagus findings apart from the ignored mummy result
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.khaba.ancient_other_sarcophagus
+  name: Crypt of Khaba — other sarcophagus
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Crypt of Khaba — other sarcophagus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The other sarcophagus works as usual when searched.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_other_sarcophagus:
+      type: boolean
+      role: input
+      description: searching other sarcophagus
+    standard_sarcophagus_search:
+      type: boolean
+      role: output
+      description: standard sarcophagus search
+  effects:
+    - type: set
+      target: standard_sarcophagus_search
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: sarcophagus
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_other_sarcophagus
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Ordinary sarcophagus search
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.khaba.standard_objective
+  name: Crypt of Khaba — standard objective
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Crypt of Khaba — standard objective
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Use The Lone Tomb room. Enter along the short edge. Roll twice on the Encounter Table
+    and place enemies randomly in the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    entry_edge:
+      type: string
+      role: output
+      description: entry edge
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagus_count:
+      type: number
+      role: output
+      description: sarcophagus count
+      integer: true
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: The Lone Tomb room
+    - type: set
+      target: entry_edge
+      value:
+        type: literal
+        value: short
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: sarcophagus_count
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.khaba.standard_queen
+  name: Crypt of Khaba — standard Queen fallback
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Crypt of Khaba — standard Queen fallback
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the party has not yet met Queen Khaba, she is present in the room next to the sarcophagus.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    party_has_met_queen_khaba:
+      type: boolean
+      role: input
+      description: party has met queen khaba
+    queen_khaba_present:
+      type: boolean
+      role: output
+      description: queen khaba present
+    queen_placement:
+      type: string
+      role: output
+      description: queen placement
+  effects:
+    - type: set
+      target: queen_khaba_present
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: queen_placement
+      value:
+        type: literal
+        value: next to the sarcophagus
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: party_has_met_queen_khaba
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: queen
+      label: Queen Khaba equipment and spells
+      object_id: core.quest.khaba.queen_profile
+  issues:
+    - issue.quest.khaba_boundaries
+- id: core.quest.khaba.standard_queen_sarcophagus
+  name: Crypt of Khaba — standard Queen sarcophagus
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Crypt of Khaba — standard Queen sarcophagus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Queen Khaba’s sarcophagus cannot spawn another mummy (ignore the result), but can
+    contain treasure.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_queen_sarcophagus:
+      type: boolean
+      role: input
+      description: searching queen sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    ignore_mummy_search_result:
+      type: boolean
+      role: output
+      description: ignore mummy search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: ignore_mummy_search_result
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_queen_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Standard sarcophagus findings apart from the ignored mummy result
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.khaba.aftermath
+  name: Crypt of Khaba — aftermath
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Crypt of Khaba — aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With all undead vanquished the party rummages through the chamber for valuables. The
+    sceptre can be found in the Queen’s final resting place.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    all_undead_vanquished:
+      type: boolean
+      role: input
+      description: all undead vanquished
+    sceptre_found:
+      type: boolean
+      role: output
+      description: sceptre found
+    valuables_search_available:
+      type: boolean
+      role: output
+      description: valuables search available
+  effects:
+    - type: set
+      target: sceptre_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: valuables_search_available
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_undead_vanquished
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: sceptre
+      label: Sceptre of the Queen
+      object_id: equipment.quest.sceptre_of_the_queen
+- id: core.quest.khaba.sceptre
+  name: Sceptre of the Queen — properties
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Sceptre of the Queen — properties
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This is a legendary item (cannot be sold). Although metal, it is surprisingly light and
+    appears covered in gold. It is considered a magic staff and contains the Fireball spell. It can
+    only be cast once during each dungeon or skirmish, but never needs to be recharged.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    legendary_item:
+      type: boolean
+      role: output
+      description: legendary item
+    sale_allowed:
+      type: boolean
+      role: output
+      description: sale allowed
+    weapon_kind:
+      type: string
+      role: output
+      description: weapon kind
+    contained_spell:
+      type: string
+      role: output
+      description: contained spell
+    casts_per_dungeon_or_skirmish:
+      type: number
+      role: output
+      description: casts per dungeon or skirmish
+      integer: true
+    recharge_required:
+      type: boolean
+      role: output
+      description: recharge required
+  effects:
+    - type: set
+      target: legendary_item
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: sale_allowed
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: weapon_kind
+      value:
+        type: literal
+        value: magic staff
+    - type: set
+      target: contained_spell
+      value:
+        type: literal
+        value: Fireball
+    - type: set
+      target: casts_per_dungeon_or_skirmish
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: recharge_required
+      value:
+        type: literal
+        value: false
+  entity_id: equipment.quest.sceptre_of_the_queen
+  dependencies:
+    - key: staff
+      label: Staff
+      object_id: equipment.weapon.staff
+    - key: fireball
+      label: Fireball
+      object_id: spell.fireball
+- id: core.quest.khaba.sceptre_cast_permission
+  name: Sceptre of the Queen — Fireball limit
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Sceptre of the Queen — Fireball limit
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Sceptre contains Fireball. It can only be cast once during each dungeon or
+    skirmish; it never needs to be recharged.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.khaba
+  fields:
+    sceptre_available:
+      type: boolean
+      role: input
+      description: sceptre available
+    current_activity_is_dungeon_or_skirmish:
+      type: boolean
+      role: input
+      description: current activity is dungeon or skirmish
+    sceptre_fireball_casts_this_dungeon_or_skirmish:
+      type: number
+      role: input
+      description: sceptre fireball casts this dungeon or skirmish
+      integer: true
+    sceptre_fireball_cast_allowed:
+      type: boolean
+      role: output
+      description: sceptre fireball cast allowed
+  effects:
+    - type: set
+      target: sceptre_fireball_cast_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sceptre_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_activity_is_dungeon_or_skirmish
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sceptre_fireball_casts_this_dungeon_or_skirmish
+        right:
+          type: literal
+          value: 0
+  dependencies:
+    - key: fireball
+      label: Use the existing Fireball definition; casting resolution is supplied
+      object_id: spell.fireball
+  issues:
+    - issue.quest.khaba_boundaries

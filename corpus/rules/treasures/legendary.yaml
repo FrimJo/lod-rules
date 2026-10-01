@@ -1,0 +1,2553 @@
+- id: character.treasure.legendary.general
+  name: Legendary item restrictions
+  section_id: section.appendix_v_treasures.legendary_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 203
+      printed_page: 201
+      heading: Legendary item restrictions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Unique unless otherwise noted; cannot be sold, run out of magic or be damaged. Must be
+    identified before use.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    can_use:
+      type: boolean
+      role: output
+      description: can use
+    can_sell:
+      type: boolean
+      role: output
+      description: can sell
+    can_run_out_of_magic:
+      type: boolean
+      role: output
+      description: can run out of magic
+    can_be_damaged:
+      type: boolean
+      role: output
+      description: can be damaged
+    unique_by_default:
+      type: boolean
+      role: output
+      description: unique by default
+  effects:
+    - type: set
+      target: can_use
+      value:
+        type: field
+        name: identified
+    - type: set
+      target: can_sell
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: can_run_out_of_magic
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: can_be_damaged
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: unique_by_default
+      value:
+        type: literal
+        value: true
+- id: character.treasure.legendary.horn_of_alfheim
+  name: Horn of Alfheim
+  section_id: section.appendix_v_treasures.legendary_items.horn_of_alfheim
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 203
+      printed_page: 201
+      heading: Horn of Alfheim
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Sounding requires a ready slot and takes a full turn. Costs 2 Energy. All heroes gain
+    +3 Damage (magical and physical) until end of battle.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    ready_slot_required:
+      type: boolean
+      role: output
+      description: ready slot required
+    full_turn:
+      type: boolean
+      role: output
+      description: full turn
+    energy_cost:
+      type: number
+      role: output
+      description: energy cost
+    all_heroes_damage_modifier:
+      type: number
+      role: output
+      description: all heroes damage modifier
+    duration:
+      type: string
+      role: output
+      description: duration
+    damage_scope:
+      type: string
+      role: output
+      description: damage scope
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: ready_slot_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: full_turn
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: energy_cost
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: all_heroes_damage_modifier
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: until end of battle
+    - type: set
+      target: damage_scope
+      value:
+        type: literal
+        value: magical and physical
+- id: character.treasure.legendary.bow_of_divine_twilight
+  name: Bow of Divine Twilight
+  section_id: section.appendix_v_treasures.legendary_items.bow_of_divine_twilight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 203
+      printed_page: 201
+      heading: Bow of Divine Twilight
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Shortbow; adds +5 chance of Bloodlust, cumulative with talents and perks. If Bloodlust
+    triggers, that shot does +5 Damage on top of Bloodlust.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+    bloodlust_chance_modifier:
+      type: number
+      role: output
+      description: bloodlust chance modifier
+    bloodlust_shot_damage_modifier:
+      type: number
+      role: output
+      description: bloodlust shot damage modifier
+    stacks_with_talents_perks:
+      type: boolean
+      role: output
+      description: stacks with talents perks
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.shortbow
+    - type: set
+      target: bloodlust_chance_modifier
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: stacks_with_talents_perks
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bloodlust_shot_damage_modifier
+      value:
+        type: literal
+        value: 5
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.shortbow
+- id: character.treasure.legendary.stone_of_valheir
+  name: Stone of Valheir
+  section_id: section.appendix_v_treasures.legendary_items.stone_of_valheir
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 204
+      printed_page: 202
+      heading: Stone of Valheir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A wizard may store up to 3 Focus bonuses, drawing on them at any time for a 10-30 Focus
+    bonus without focusing or increasing miscast risk. May combine with normal Focus following its
+    normal rules. Storing each bonus takes a full turn and successful Arcane Arts roll; can instead
+    fill between quests without rolls. Every draw of a Focus bonus requires RES Test or loses 1
+    Sanity.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    maximum_focus_bonuses:
+      type: number
+      role: output
+      description: maximum focus bonuses
+    bonus_per_focus:
+      type: number
+      role: output
+      description: bonus per focus
+    maximum_stored_focus_modifier:
+      type: number
+      role: output
+      description: maximum stored focus modifier
+    failed_draw_sanity_loss:
+      type: number
+      role: output
+      description: failed draw sanity loss
+    increases_miscast_risk:
+      type: boolean
+      role: output
+      description: increases miscast risk
+    combines_with_normal_focus:
+      type: boolean
+      role: output
+      description: combines with normal focus
+    storage_full_turn_per_bonus:
+      type: boolean
+      role: output
+      description: storage full turn per bonus
+    storage_arcane_arts_test:
+      type: boolean
+      role: output
+      description: storage arcane arts test
+    between_quests_refill_without_roll:
+      type: boolean
+      role: output
+      description: between quests refill without roll
+    draw_res_test:
+      type: boolean
+      role: output
+      description: draw res test
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: maximum_focus_bonuses
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: bonus_per_focus
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: maximum_stored_focus_modifier
+      value:
+        type: literal
+        value: 30
+    - type: set
+      target: increases_miscast_risk
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: combines_with_normal_focus
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: storage_full_turn_per_bonus
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: storage_arcane_arts_test
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: between_quests_refill_without_roll
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: draw_res_test
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: failed_draw_sanity_loss
+      value:
+        type: literal
+        value: 1
+- id: character.treasure.legendary.gauntlets_of_hraefnir
+  name: Gauntlets of Hraefnir
+  section_id: section.appendix_v_treasures.legendary_items.gauntlets_of_hraefnir
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 204
+      printed_page: 202
+      heading: Gauntlets of Hraefnir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Grant +15 Strength. Do not take up armour slots; note in inventory.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    strength_modifier:
+      type: number
+      role: output
+      description: strength modifier
+    armour_slots_used:
+      type: number
+      role: output
+      description: armour slots used
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: strength_modifier
+      value:
+        type: literal
+        value: 15
+    - type: set
+      target: armour_slots_used
+      value:
+        type: literal
+        value: 0
+- id: character.treasure.legendary.belt_of_copperbane
+  name: Belt of Copperbane
+  section_id: section.appendix_v_treasures.legendary_items.belt_of_copperbane
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 204
+      printed_page: 202
+      heading: Belt of Copperbane
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Grants +20 Constitution but all goblins fighting the wearer gain the Hate Special Rule.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    constitution_modifier:
+      type: number
+      role: output
+      description: constitution modifier
+    goblins_fighting_wearer_gain_hate:
+      type: boolean
+      role: output
+      description: goblins fighting wearer gain hate
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: constitution_modifier
+      value:
+        type: literal
+        value: 20
+    - type: set
+      target: goblins_fighting_wearer_gain_hate
+      value:
+        type: literal
+        value: true
+- id: character.treasure.legendary.vial_of_never_ending
+  name: Vial of Never Ending
+  section_id: section.appendix_v_treasures.legendary_items.vial_of_never_ending
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 205
+      printed_page: 203
+      heading: Vial of Never Ending
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any healing potion originally mixed in this vial restores the drinker to full health;
+    not one poured from another bottle. May find several and reuse. If hit during battle it is
+    destroyed.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    healing_potion_mixed_in_vial_restores_full_health:
+      type: boolean
+      role: output
+      description: healing potion mixed in vial restores full health
+    poured_potion_qualifies:
+      type: boolean
+      role: output
+      description: poured potion qualifies
+    repeat_find_allowed:
+      type: boolean
+      role: output
+      description: repeat find allowed
+    reusable:
+      type: boolean
+      role: output
+      description: reusable
+    destroyed_if_hit_in_battle:
+      type: boolean
+      role: output
+      description: destroyed if hit in battle
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: healing_potion_mixed_in_vial_restores_full_health
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: poured_potion_qualifies
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: repeat_find_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reusable
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: destroyed_if_hit_in_battle
+      value:
+        type: literal
+        value: true
+  issues:
+    - issue.treasure.vial_destruction
+- id: character.treasure.legendary.ring_of_the_hierophant
+  name: Ring of the Hierophant
+  section_id: section.appendix_v_treasures.legendary_items.ring_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 205
+      printed_page: 203
+      heading: Ring of the Hierophant
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any Undead trying to strike the bearer does so at -15 CS.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    undead_attacker_cs_modifier:
+      type: number
+      role: output
+      description: undead attacker cs modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: undead_attacker_cs_modifier
+      value:
+        type: literal
+        value: -15
+- id: character.treasure.legendary.amulet_of_haamile
+  name: Amulet of Haamile
+  section_id: section.appendix_v_treasures.legendary_items.amulet_of_haamile
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 205
+      printed_page: 203
+      heading: Amulet of Haamile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Bearer gains +15 Wisdom.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    wisdom_modifier:
+      type: number
+      role: output
+      description: wisdom modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: wisdom_modifier
+      value:
+        type: literal
+        value: 15
+- id: character.treasure.legendary.boots_of_stability
+  name: Boots of Stability
+  section_id: section.appendix_v_treasures.legendary_items.boots_of_stability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 205
+      printed_page: 203
+      heading: Boots of Stability
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero wearing these boots can never fall down and can ignore any destabilising effects.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    cannot_fall:
+      type: boolean
+      role: output
+      description: cannot fall
+    ignore_destabilising_effects:
+      type: boolean
+      role: output
+      description: ignore destabilising effects
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: cannot_fall
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_destabilising_effects
+      value:
+        type: literal
+        value: true
+- id: character.treasure.legendary.ring_of_awareness
+  name: Ring of Awareness
+  section_id: section.appendix_v_treasures.legendary_items.ring_of_awareness
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 206
+      printed_page: 204
+      heading: Ring of Awareness
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Adds +1 initiative token on first round of battle and +15 Perception when detecting
+    traps. Party may find more than one. Initiative effect cumulative up to +3.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    first_round_initiative_tokens:
+      type: number
+      role: output
+      description: first round initiative tokens
+    detect_traps_perception_modifier:
+      type: number
+      role: output
+      description: detect traps perception modifier
+    initiative_cumulative_cap:
+      type: number
+      role: output
+      description: initiative cumulative cap
+    repeat_find_allowed:
+      type: boolean
+      role: output
+      description: repeat find allowed
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: first_round_initiative_tokens
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: detect_traps_perception_modifier
+      value:
+        type: literal
+        value: 15
+    - type: set
+      target: repeat_find_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: initiative_cumulative_cap
+      value:
+        type: literal
+        value: 3
+- id: character.treasure.legendary.cloak_of_elsewhyr
+  name: Cloak of Elsewhyr
+  section_id: section.appendix_v_treasures.legendary_items.cloak_of_elsewhyr
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 206
+      printed_page: 204
+      heading: Cloak of Elsewhyr
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Wearer gets +15 Dodge.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    dodge_modifier:
+      type: number
+      role: output
+      description: dodge modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: dodge_modifier
+      value:
+        type: literal
+        value: 15
+- id: character.treasure.legendary.priestly_dice
+  name: Priestly Dice
+  section_id: section.appendix_v_treasures.legendary_items.priestly_dice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 206
+      printed_page: 204
+      heading: Priestly Dice
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Hero gets 2 extra points of luck.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    luck_modifier:
+      type: number
+      role: output
+      description: luck modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: luck_modifier
+      value:
+        type: literal
+        value: 2
+- id: character.treasure.legendary.legendary_elixir
+  name: Legendary Elixir
+  section_id: section.appendix_v_treasures.legendary_items.legendary_elixir
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 207
+      printed_page: 205
+      heading: Legendary Elixir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Party may find more than one. Randomise which basic stat it increases; increase that stat by +10.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    repeat_find_allowed:
+      type: boolean
+      role: output
+      description: repeat find allowed
+    random_basic_stat_modifier:
+      type: number
+      role: output
+      description: random basic stat modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: repeat_find_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: random_basic_stat_modifier
+      value:
+        type: literal
+        value: 10
+- id: character.treasure.legendary.dagger_of_vrunior
+  name: Dagger of Vrunior
+  section_id: section.appendix_v_treasures.legendary_items.dagger_of_vrunior
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 207
+      printed_page: 205
+      heading: Dagger of Vrunior
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This dagger treats all its attacks as being from behind.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+    all_attacks_from_behind:
+      type: boolean
+      role: output
+      description: all attacks from behind
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.dagger
+    - type: set
+      target: all_attacks_from_behind
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.dagger
+- id: character.treasure.legendary.the_summoners_staff
+  name: The Summoner’s Staff
+  section_id: section.appendix_v_treasures.legendary_items.the_summoners_staff
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 207
+      printed_page: 205
+      heading: The Summoner’s Staff
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Any Conjuring Spell cast while wielding the staff is at +20 Arcane Arts. Any elementals
+    or demons summoned with it get 1 extra initiative token.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    conjuring_arcane_arts_modifier:
+      type: number
+      role: output
+      description: conjuring arcane arts modifier
+    summoned_elemental_demon_extra_initiative:
+      type: number
+      role: output
+      description: summoned elemental demon extra initiative
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: conjuring_arcane_arts_modifier
+      value:
+        type: literal
+        value: 20
+    - type: set
+      target: summoned_elemental_demon_extra_initiative
+      value:
+        type: literal
+        value: 1
+- id: character.treasure.legendary.the_headsmans_axe
+  name: The Headsman’s Axe
+  section_id: section.appendix_v_treasures.legendary_items.the_headsmans_axe
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 207
+      printed_page: 205
+      heading: The Headsman’s Axe
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 208
+      printed_page: 206
+      heading: The Headsman’s Axe
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Adds +2 Damage for every consecutive hit that succeeds in dealing damage. Missing or
+    not causing damage returns bonus to 0; removed after each battle. In all other respects a
+    Greataxe.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    damage_modifier_per_consecutive_damaging_hit:
+      type: number
+      role: output
+      description: damage modifier per consecutive damaging hit
+    reset_on_miss_or_no_damage:
+      type: boolean
+      role: output
+      description: reset on miss or no damage
+    reset_after_battle:
+      type: boolean
+      role: output
+      description: reset after battle
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: damage_modifier_per_consecutive_damaging_hit
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: reset_on_miss_or_no_damage
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reset_after_battle
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.greataxe
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.greataxe
+- id: character.treasure.legendary.sword_of_lightning
+  name: Sword of Lightning
+  section_id: section.appendix_v_treasures.legendary_items.sword_of_lightning
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 208
+      printed_page: 206
+      heading: Sword of Lightning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Any hit with an odd number causes additional 1d6 wounds with no armour save. Half that
+    roll RDD passes to the closest character from the target, excluding the sword holder; randomise
+    ties. In all other respects a Longsword.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    odd_hit_extra_damage:
+      type: string
+      role: output
+      description: odd hit extra damage
+    secondary_rounding:
+      type: string
+      role: output
+      description: secondary rounding
+    secondary_target:
+      type: string
+      role: output
+      description: secondary target
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+    extra_damage_ignores_armour:
+      type: boolean
+      role: output
+      description: extra damage ignores armour
+    secondary_damage_multiplier:
+      type: number
+      role: output
+      description: secondary damage multiplier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: odd_hit_extra_damage
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: extra_damage_ignores_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: secondary_damage_multiplier
+      value:
+        type: literal
+        value: 0.5
+    - type: set
+      target: secondary_rounding
+      value:
+        type: literal
+        value: down
+    - type: set
+      target: secondary_target
+      value:
+        type: literal
+        value: closest character to target excluding wielder; randomise equal distance
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.longsword
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.longsword
+- id: character.treasure.legendary.ohlnirs_hammer
+  name: Ohlnir’s Hammer
+  section_id: section.appendix_v_treasures.legendary_items.ohlnirs_hammer
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 208
+      printed_page: 206
+      heading: Ohlnir’s Hammer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Stuns enemy every time it hits without tests. Stun not cumulative: enemy can never
+    lose more than 1 Action per turn. In all other respects a Battlehammer.'
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    stun_on_every_hit:
+      type: boolean
+      role: output
+      description: stun on every hit
+    stun_test_required:
+      type: boolean
+      role: output
+      description: stun test required
+    maximum_actions_lost_per_turn:
+      type: number
+      role: output
+      description: maximum actions lost per turn
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: stun_on_every_hit
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: stun_test_required
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: maximum_actions_lost_per_turn
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.battle_hammer
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.battle_hammer
+- id: character.treasure.legendary.the_vampires_brooch
+  name: The Vampire’s Brooch
+  section_id: section.appendix_v_treasures.legendary_items.the_vampires_brooch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 209
+      printed_page: 207
+      heading: The Vampire’s Brooch
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Worn as a necklace. Every time owner wounds an enemy, restores 1d6 HP to owner up to
+    damage dealt. On roll 6 instead drains 1d6 HP from closest hero.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    slot:
+      type: string
+      role: output
+      description: slot
+    healing_on_wounding_enemy:
+      type: string
+      role: output
+      description: healing on wounding enemy
+    closest_hero_hp_drain:
+      type: string
+      role: output
+      description: closest hero hp drain
+    healing_capped_by_damage_dealt:
+      type: boolean
+      role: output
+      description: healing capped by damage dealt
+    drain_instead_on:
+      type: number
+      role: output
+      description: drain instead on
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: slot
+      value:
+        type: literal
+        value: necklace
+    - type: set
+      target: healing_on_wounding_enemy
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: healing_capped_by_damage_dealt
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: drain_instead_on
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: closest_hero_hp_drain
+      value:
+        type: literal
+        value: 1d6
+- id: character.treasure.legendary.the_helmet_of_golgorosh_the_ram
+  name: The Helmet of Golgorosh the Ram
+  section_id: section.appendix_v_treasures.legendary_items.the_helmet_of_golgorosh_the_ram
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 209
+      printed_page: 207
+      heading: The Helmet of Golgorosh the Ram
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hit against the head causes no -1 Sanity even if helmet fails to absorb all damage.
+    On head hit pass RES Test or spend next AP passively (stunned). Shoving +15. Metal helmet in all
+    other aspects; DEF 6, Enc 5.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    head_hit_sanity_loss:
+      type: number
+      role: output
+      description: head hit sanity loss
+    failed_res_next_ap_lost:
+      type: number
+      role: output
+      description: failed res next ap lost
+    shove_modifier:
+      type: number
+      role: output
+      description: shove modifier
+    defence:
+      type: number
+      role: output
+      description: defence
+    encumbrance:
+      type: number
+      role: output
+      description: encumbrance
+    head_hit_res_test:
+      type: boolean
+      role: output
+      description: head hit res test
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: head_hit_sanity_loss
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: head_hit_res_test
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: failed_res_next_ap_lost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: shove_modifier
+      value:
+        type: literal
+        value: 15
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: metal helmet (printed)
+    - type: set
+      target: defence
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: encumbrance
+      value:
+        type: literal
+        value: 5
+  dependencies:
+    - key: base_equipment
+      label: metal helmet (printed description; catalogue calls its item Helmet)
+  unresolved_references:
+    - The printed “metal helmet” base is not an exact catalogue name; supplied base equipment.
+- id: character.treasure.legendary.the_breastplate_of_rannulf
+  name: The Breastplate of Rannulf
+  section_id: section.appendix_v_treasures.legendary_items.the_breastplate_of_rannulf
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 210
+      printed_page: 208
+      heading: The Breastplate of Rannulf
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: DEF 8; denies Double Damage roll made by Large Creatures. ENC 7.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    defence:
+      type: number
+      role: output
+      description: defence
+    encumbrance:
+      type: number
+      role: output
+      description: encumbrance
+    deny_large_creature_double_damage_roll:
+      type: boolean
+      role: output
+      description: deny large creature double damage roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: defence
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: deny_large_creature_double_damage_roll
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encumbrance
+      value:
+        type: literal
+        value: 7
+- id: character.treasure.legendary.the_golden_khopesh
+  name: The Golden Khopesh
+  section_id: section.appendix_v_treasures.legendary_items.the_golden_khopesh
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 210
+      printed_page: 208
+      heading: The Golden Khopesh
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Ignores all armour and Natural Armour saves. Higher Undead always attempt to attack
+    wielder, forgoing normal targeting priority. DMG 1d12+1, Class 4, Encumbrance 10.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+    higher_undead_target_wielder:
+      type: boolean
+      role: output
+      description: higher undead target wielder
+    damage:
+      type: string
+      role: output
+      description: damage
+    weapon_class:
+      type: number
+      role: output
+      description: weapon class
+    encumbrance:
+      type: number
+      role: output
+      description: encumbrance
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: higher_undead_target_wielder
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: damage
+      value:
+        type: literal
+        value: 1d12+1
+    - type: set
+      target: weapon_class
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: encumbrance
+      value:
+        type: literal
+        value: 10
+- id: character.treasure.legendary.ring_of_regeneration
+  name: Ring of Regeneration
+  section_id: section.appendix_v_treasures.legendary_items.ring_of_regeneration
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 211
+      printed_page: 209
+      heading: Ring of Regeneration
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Owner gains Regeneration Special Rule with 1d3 HP instead of normal 1d6 HP.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    special_rule:
+      type: string
+      role: output
+      description: special rule
+    regeneration_hp:
+      type: string
+      role: output
+      description: regeneration hp
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: special_rule
+      value:
+        type: literal
+        value: Regeneration
+    - type: set
+      target: regeneration_hp
+      value:
+        type: literal
+        value: 1d3
+  dependencies:
+    - key: regeneration
+      label: Regeneration Special Rule (definition not supplied here)
+  unresolved_references:
+    - 'Regeneration Special Rule: only its 1d3 HP override is defined here; full special-rule
+      execution is unavailable.'
+- id: character.treasure.legendary.crown_of_resolve
+  name: Crown of Resolve
+  section_id: section.appendix_v_treasures.legendary_items.crown_of_resolve
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 211
+      printed_page: 209
+      heading: Crown of Resolve
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Grants +15 RES but prevents use of a helmet or cap.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    resolve_modifier:
+      type: number
+      role: output
+      description: resolve modifier
+    helmet_allowed:
+      type: boolean
+      role: output
+      description: helmet allowed
+    cap_allowed:
+      type: boolean
+      role: output
+      description: cap allowed
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: resolve_modifier
+      value:
+        type: literal
+        value: 15
+    - type: set
+      target: helmet_allowed
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: cap_allowed
+      value:
+        type: literal
+        value: false
+- id: character.treasure.legendary.boots_of_energy
+  name: Boots of Energy
+  section_id: section.appendix_v_treasures.legendary_items.boots_of_energy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 211
+      printed_page: 209
+      heading: Boots of Energy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Wearer gains 2 additional Points of Energy.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    energy_modifier:
+      type: number
+      role: output
+      description: energy modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: energy_modifier
+      value:
+        type: literal
+        value: 2
+- id: character.treasure.legendary.the_goblin_scimitar
+  name: The Goblin Scimitar
+  section_id: section.appendix_v_treasures.legendary_items.the_goblin_scimitar
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 212
+      printed_page: 210
+      heading: The Goblin Scimitar
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Wielder gains Frenzy Perk; same stats as a broadsword.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    frenzy_perk:
+      type: boolean
+      role: output
+      description: frenzy perk
+    base_equipment:
+      type: string
+      role: output
+      description: base equipment
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: frenzy_perk
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: base_equipment
+      value:
+        type: literal
+        value: equipment.weapon.broadsword
+  dependencies:
+    - key: base_equipment
+      label: Base equipment
+      object_id: equipment.weapon.broadsword
+    - key: frenzy
+      label: Frenzy Perk
+      object_id: character.perk.frenzy.activation
+- id: character.treasure.legendary.the_halfling_backpack
+  name: The Halfling Backpack
+  section_id: section.appendix_v_treasures.legendary_items.the_halfling_backpack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 212
+      printed_page: 210
+      heading: The Halfling Backpack
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All objects carried in bag have their ENC halved (RDD).
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    contained_object_enc_multiplier:
+      type: number
+      role: output
+      description: contained object enc multiplier
+    rounding:
+      type: string
+      role: output
+      description: rounding
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: contained_object_enc_multiplier
+      value:
+        type: literal
+        value: 0.5
+    - type: set
+      target: rounding
+      value:
+        type: literal
+        value: down
+- id: character.treasure.legendary.trap_sensing_ring
+  name: Trap-sensing Ring
+  section_id: section.appendix_v_treasures.legendary_items.trap_sensing_ring
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 212
+      printed_page: 210
+      heading: Trap-sensing Ring
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Increases PER of any party member +10 when rolling to detect traps. Worn as a magic
+    item using Ring Slot.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    party_detect_traps_perception_modifier:
+      type: number
+      role: output
+      description: party detect traps perception modifier
+    slot:
+      type: string
+      role: output
+      description: slot
+    magic_item:
+      type: boolean
+      role: output
+      description: magic item
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: party_detect_traps_perception_modifier
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: slot
+      value:
+        type: literal
+        value: ring
+    - type: set
+      target: magic_item
+      value:
+        type: literal
+        value: true
+- id: character.treasure.legendary.necklace_of_flight
+  name: Necklace of Flight
+  section_id: section.appendix_v_treasures.legendary_items.necklace_of_flight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 212
+      printed_page: 210
+      heading: Necklace of Flight
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Allows walking across water, chasms and pits and staying in such a square. Immune to
+    pit traps. Cannot walk across lava: heat would consume wearer.'
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    walk_across_water_chasms_pits:
+      type: boolean
+      role: output
+      description: walk across water chasms pits
+    remain_in_those_squares:
+      type: boolean
+      role: output
+      description: remain in those squares
+    immune_to_pit_traps:
+      type: boolean
+      role: output
+      description: immune to pit traps
+    walk_across_lava:
+      type: boolean
+      role: output
+      description: walk across lava
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: walk_across_water_chasms_pits
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: remain_in_those_squares
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: immune_to_pit_traps
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: walk_across_lava
+      value:
+        type: literal
+        value: false
+- id: character.treasure.legendary.armour_of_the_father
+  name: Armour of the Father
+  section_id: section.appendix_v_treasures.legendary_items.armour_of_the_father
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 213
+      printed_page: 211
+      heading: Armour of the Father
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Hero chooses Padded Vest, Leather Vest, Chainmail Shirt or Breastplate depending on
+    profession. Same stats with +1 DEF. Wearing it gives +15 RES.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    base_armour_choices:
+      type: string
+      role: output
+      description: base armour choices
+    defence_modifier:
+      type: number
+      role: output
+      description: defence modifier
+    resolve_modifier:
+      type: number
+      role: output
+      description: resolve modifier
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: base_armour_choices
+      value:
+        type: literal
+        value: Padded Vest; Leather Vest; Chainmail Shirt; Breastplate
+    - type: set
+      target: defence_modifier
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: resolve_modifier
+      value:
+        type: literal
+        value: 15
+- id: character.treasure.legendary.necklace_of_deflection
+  name: Necklace of Deflection
+  section_id: section.appendix_v_treasures.legendary_items.necklace_of_deflection
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 213
+      printed_page: 211
+      heading: Necklace of Deflection
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever hit by a projectile from ranged weapons or traps (arrows, darts, sling
+    stones), may roll on the table. Treated as magic item; Necklace Slot.
+  scope: global
+  type: modifier
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+    selected:
+      type: boolean
+      role: input
+      description: selected
+    projectiles:
+      type: string
+      role: output
+      description: projectiles
+    slot:
+      type: string
+      role: output
+      description: slot
+    ranged_weapon_and_trap_projectiles:
+      type: boolean
+      role: output
+      description: ranged weapon and trap projectiles
+    optional_deflection_roll:
+      type: boolean
+      role: output
+      description: optional deflection roll
+    magic_item:
+      type: boolean
+      role: output
+      description: magic item
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: selected
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: projectiles
+      value:
+        type: literal
+        value: arrows; darts; sling stones
+    - type: set
+      target: ranged_weapon_and_trap_projectiles
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: optional_deflection_roll
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: magic_item
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: slot
+      value:
+        type: literal
+        value: necklace
+  dependencies:
+    - key: deflection_table
+      label: Optional projectile deflection
+      object_id: table.treasure.necklace_deflection

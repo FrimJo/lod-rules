@@ -1,0 +1,312 @@
+- id: core.quest.tomb_raiders.setup
+  name: Tomb Raiders — setup
+  section_id: section.quest_book_i.the_great_crypt.quest_3_tomb_raiders
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 262
+      printed_page: 260
+      heading: Tomb Raiders — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'High King Logan III requests an old tomb south of Silver City opened and examined.
+    Quest Location: White 38. Special rules: - Number of tiles: 7 corridors, 5 rooms, using the
+    tiles R1B-8B. Reward: Any loot found. Encounters: Undead.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.tomb_raiders
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    special_rules_printed:
+      type: string
+      role: output
+      description: special rules printed
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    room_tiles:
+      type: string
+      role: output
+      description: room tiles
+    reward_printed:
+      type: string
+      role: output
+      description: reward printed
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    keep_any_loot_found:
+      type: boolean
+      role: output
+      description: keep any loot found
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: White 38
+    - type: set
+      target: special_rules_printed
+      value:
+        type: literal
+        value: '-'
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: room_tiles
+      value:
+        type: literal
+        value: R1B-8B
+    - type: set
+      target: reward_printed
+      value:
+        type: literal
+        value: Any loot found
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Undead
+    - type: set
+      target: keep_any_loot_found
+      value:
+        type: literal
+        value: true
+- id: core.quest.tomb_raiders.objective_setup
+  name: Tomb Raiders — Objective Room setup
+  section_id: section.quest_book_i.the_great_crypt.quest_3_tomb_raiders
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 262
+      printed_page: 260
+      heading: Tomb Raiders — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes enter a vast chamber filled with tombs, with no movement. Heroes remain where
+    they stood when the door was opened.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.tomb_raiders
+  fields:
+    hero_position:
+      type: string
+      role: output
+      description: hero position
+    room_contents:
+      type: string
+      role: output
+      description: room contents
+    initial_room_movement:
+      type: boolean
+      role: output
+      description: initial room movement
+  effects:
+    - type: set
+      target: hero_position
+      value:
+        type: literal
+        value: where they stood when the door was opened
+    - type: set
+      target: room_contents
+      value:
+        type: literal
+        value: tombs
+    - type: set
+      target: initial_room_movement
+      value:
+        type: literal
+        value: false
+- id: core.quest.tomb_raiders.open_tomb
+  name: Tomb Raiders — tomb opening and findings
+  section_id: section.quest_book_i.the_great_crypt.quest_3_tomb_raiders
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 262
+      printed_page: 260
+      heading: Tomb Raiders — tomb opening and findings
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Opening a tomb takes a complete turn for 2 heroes working together (the lids are really
+    heavy). Follow the standard Treasure Rules for sarcophagi.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.tomb_raiders
+  fields:
+    heroes_working_together:
+      type: number
+      role: input
+      description: heroes working together
+      integer: true
+    complete_turn_spent:
+      type: boolean
+      role: input
+      description: complete turn spent
+    lid_removed:
+      type: boolean
+      role: output
+      description: lid removed
+    standard_sarcophagus_findings_required:
+      type: boolean
+      role: output
+      description: standard sarcophagus findings required
+  effects:
+    - type: set
+      target: lid_removed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: standard_sarcophagus_findings_required
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: sarcophagus
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_working_together
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: complete_turn_spent
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Standard sarcophagus Treasure Rules
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.tomb_raiders.objective_threat
+  name: Tomb Raiders — Objective Room Threat exception
+  section_id: section.quest_book_i.the_great_crypt.quest_3_tomb_raiders
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 262
+      printed_page: 260
+      heading: Tomb Raiders — Objective Room Threat exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    While at least on hero is in the objective room, a Threat roll above the current Threat
+    level result in a Wandering Monster as well as an increase of the Threat level.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.tomb_raiders
+  fields:
+    heroes_in_objective_room:
+      type: number
+      role: input
+      description: heroes in objective room
+      integer: true
+      minimum: 0
+    threat_roll:
+      type: number
+      role: input
+      description: threat roll
+      integer: true
+      minimum: 1
+      maximum: 20
+      dice:
+        count: 1
+        sides: 20
+    current_threat_level:
+      type: number
+      role: input
+      description: current threat level
+      integer: true
+      minimum: 1
+      maximum: 20
+    wandering_monster_required:
+      type: boolean
+      role: output
+      description: wandering monster required
+    threat_increase_required:
+      type: boolean
+      role: output
+      description: threat increase required
+  effects:
+    - type: set
+      target: wandering_monster_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_increase_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: heroes_in_objective_room
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: threat_roll
+        right:
+          type: field
+          name: current_threat_level
+  dependencies:
+    - key: wandering_monster
+      label: Wandering Monster outcome, supplied; not specified in this quest
+    - key: ordinary_threat
+      label: Ordinary Threat roll for comparison; no inferred execution or precedence at 20
+      object_id: procedure.threat_roll
+  issues:
+    - issue.quest.tomb_raiders_threat_boundary

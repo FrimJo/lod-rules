@@ -1,0 +1,1017 @@
+- id: combat.weapon.special.ap_x
+  name: AP (X)
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: Armour piercing. Ignores X points of armour.
+  type: modifier
+  scope: global
+  fields:
+    armour:
+      type: number
+      role: state
+      description: armour
+    armour_piercing:
+      type: number
+      role: input
+      description: armour piercing
+  effects:
+    - type: set
+      target: armour
+      value:
+        type: arithmetic
+        operator: max
+        values:
+          - type: literal
+            value: 0
+          - type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: armour
+              - type: field
+                name: armour_piercing
+  uses_tables:
+    - table.equipment.weapons
+  dependencies:
+    - key: existing_0
+      label: combat.damage.basic
+      object_id: combat.damage.basic
+- id: combat.weapon.special.bfo_built_for_offence
+  name: BFO (Built for offence)
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: These are not optimal to parry with and suffer a -5 to CS while parrying. This is
+    cumulative with the Slow Special Rule.
+  type: modifier
+  scope: global
+  fields:
+    parrying:
+      type: boolean
+      role: input
+      description: parrying
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: -5
+      duration: check
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parrying
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.defensive
+  name: Defensive
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This weapon is easy to use defensively and receives +10 when parrying. However, it
+    cannot withstand as much punishment as a good sword, and therefore can only take 4 Points of
+    Damage before it breaks.
+  type: modifier
+  scope: global
+  fields:
+    parrying:
+      type: boolean
+      role: input
+      description: parrying
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parrying
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.dual_wield_x
+  name: Dual wield +X
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text:
+    These weapons can be used in the offhand if your hero has the Dual Wielding Skill. The
+    X indicates the extra DMG caused during a successful attack.
+  type: modifier
+  scope: global
+  fields:
+    has_dual_wield:
+      type: boolean
+      role: input
+      description: has dual wield
+    offhand_damage_bonus:
+      type: number
+      role: state
+      description: offhand damage bonus
+    printed_x:
+      type: number
+      role: input
+      description: printed x
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_dual_wield
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: offhand_damage_bonus
+      value:
+        type: field
+        name: printed_x
+  uses_tables:
+    - table.equipment.weapons
+  dependencies:
+    - key: existing_0
+      label: character.talent.dual_wield.damage
+      object_id: character.talent.dual_wield.damage
+    - key: existing_1
+      label: character.talent.dual_wield.offhand_weapon
+      object_id: character.talent.dual_wield.offhand_weapon
+- id: combat.weapon.special.ensnare
+  name: Ensnare
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: If this weapon hits, the target is trapped in the net and must spend 1 action to get
+    free with a successful DEX Test. Until freed, this is the only action it can do. A net can be
+    used once per battle and is retrieved automatically after the battle.
+  type: modifier
+  scope: global
+  fields:
+    net_thrown:
+      type: boolean
+      role: input
+      description: net thrown
+    net_uses_this_battle:
+      type: number
+      role: output
+      description: net uses this battle
+    trapped_in_net:
+      type: boolean
+      role: output
+      description: trapped in net
+    attack_hit:
+      type: boolean
+      role: input
+      description: attack hit
+    only_escape_action:
+      type: boolean
+      role: output
+      description: only escape action
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: net_uses_this_battle
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: net_uses_this_battle
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: trapped_in_net
+      value:
+        type: field
+        name: attack_hit
+    - type: set
+      target: only_escape_action
+      value:
+        type: field
+        name: attack_hit
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: net_thrown
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.fast
+  name: Fast
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text:
+    Weapon may be used to parry once per turn even though the hero did not choose the Parry
+    Stance, but the weapon is damaged on 90-00.
+  type: modifier
+  scope: global
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: parry stance
+    fast_parries_this_turn:
+      type: number
+      role: state
+      description: fast parries this turn
+    parry_allowed:
+      type: boolean
+      role: state
+      description: parry allowed
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lt
+        left:
+          type: field
+          name: fast_parries_this_turn
+        right:
+          type: literal
+          value: 1
+    - type: set
+      target: parry_allowed
+      value:
+        type: literal
+        value: true
+    - type: add
+      target: fast_parries_this_turn
+      value:
+        type: literal
+        value: 1
+      duration: turn
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parry_stance
+    right:
+      type: literal
+      value: false
+- id: combat.weapon.special.reach
+  name: Reach
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text:
+    May attack at a range of 2 squares, even if there is a friendly character in the square
+    in between.
+  type: modifier
+  scope: global
+  fields:
+    attack_range:
+      type: number
+      role: state
+      description: attack range
+    friendly_intervening_square_allowed:
+      type: boolean
+      role: state
+      description: friendly intervening square allowed
+  effects:
+    - type: set
+      target: attack_range
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: friendly_intervening_square_allowed
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.equipment.weapons
+- id: combat.weapon.special.secondary_weapon
+  name: Secondary Weapon
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This weapon may be used in your hero’s offhand while carrying a hand weapon in the
+    primary hand. Firing this weapon may be done in the same action as moving (-10) or at a target
+    adjacent to the firer. It cannot be reloaded while wielded as a secondary weapon.
+  type: modifier
+  scope: global
+  fields:
+    wielded_as_secondary:
+      type: boolean
+      role: input
+      description: wielded as secondary
+    primary_is_hand_weapon:
+      type: boolean
+      role: input
+      description: primary is hand weapon
+    adjacent_target_allowed:
+      type: boolean
+      role: state
+      description: adjacent target allowed
+    reload_allowed:
+      type: boolean
+      role: state
+      description: reload allowed
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: primary_is_hand_weapon
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: adjacent_target_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reload_allowed
+      value:
+        type: literal
+        value: false
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wielded_as_secondary
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.slow
+  name: Slow
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: Weapon is heavy and difficult to parry with. -5 chance to parry.
+  type: modifier
+  scope: global
+  fields:
+    parrying:
+      type: boolean
+      role: input
+      description: parrying
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: -5
+      duration: check
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parrying
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.stun
+  name: Stun
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text:
+    This weapon has a chance to put the enemy off balance. If you roll an even number when
+    rolling to damage, the enemy loses one action next turn. This does not stack.
+  type: modifier
+  scope: global
+  fields:
+    damage_roll:
+      type: number
+      role: input
+      description: damage roll
+    actions_lost_next_turn:
+      type: number
+      role: state
+      description: actions lost next turn
+  effects:
+    - type: set
+      target: actions_lost_next_turn
+      value:
+        type: literal
+        value: 1
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: arithmetic
+      operator: subtract
+      values:
+        - type: field
+          name: damage_roll
+        - type: arithmetic
+          operator: multiply
+          values:
+            - type: literal
+              value: 2
+            - type: arithmetic
+              operator: floor
+              values:
+                - type: arithmetic
+                  operator: divide
+                  values:
+                    - type: field
+                      name: damage_roll
+                    - type: literal
+                      value: 2
+    right:
+      type: literal
+      value: 0
+- id: combat.weapon.special.unwieldy
+  name: Unwieldy
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: Wielding these weapons is tiring and the +X damage only applies to the first hit in every battle.
+  type: modifier
+  scope: global
+  fields:
+    hits_this_battle:
+      type: number
+      role: input
+      description: hits this battle
+    weapon_damage_bonus:
+      type: number
+      role: state
+      description: weapon damage bonus
+  effects:
+    - type: set
+      target: weapon_damage_bonus
+      value:
+        type: literal
+        value: 0
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: field
+      name: hits_this_battle
+    right:
+      type: literal
+      value: 0
+- id: combat.weapon.special.defensive.durability
+  name: 'Defensive: durability'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This weapon is easy to use defensively and receives +10 when parrying. However, it
+    cannot withstand as much punishment as a good sword, and therefore can only take 4 Points of
+    Damage before it breaks.
+  type: modifier
+  scope: global
+  fields:
+    maximum_durability:
+      type: number
+      role: state
+      description: maximum durability
+  effects:
+    - type: set
+      target: maximum_durability
+      value:
+        type: literal
+        value: 4
+  uses_tables:
+    - table.equipment.weapons
+  overrides:
+    - character.durability.standard
+- id: combat.weapon.special.ensnare.escape
+  name: 'Ensnare: escape'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: If this weapon hits, the target is trapped in the net and must spend 1 action to get
+    free with a successful DEX Test. Until freed, this is the only action it can do. A net can be
+    used once per battle and is retrieved automatically after the battle.
+  type: modifier
+  scope: global
+  fields:
+    trapped_in_net:
+      type: boolean
+      role: state
+      description: trapped in net
+    dexterity_test_succeeded:
+      type: boolean
+      role: input
+      description: dexterity test succeeded
+    actions_spent:
+      type: number
+      role: state
+      description: actions spent
+    only_escape_action:
+      type: boolean
+      role: state
+      description: only escape action
+  effects:
+    - type: set
+      target: actions_spent
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: trapped_in_net
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: only_escape_action
+      value:
+        type: literal
+        value: false
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: trapped_in_net
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dexterity_test_succeeded
+        right:
+          type: literal
+          value: true
+- id: combat.weapon.special.ensnare.failed_escape
+  name: 'Ensnare: failed escape'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: If this weapon hits, the target is trapped in the net and must spend 1 action to get
+    free with a successful DEX Test. Until freed, this is the only action it can do. A net can be
+    used once per battle and is retrieved automatically after the battle.
+  type: modifier
+  scope: global
+  fields:
+    trapped_in_net:
+      type: boolean
+      role: input
+      description: trapped in net
+    dexterity_test_succeeded:
+      type: boolean
+      role: input
+      description: dexterity test succeeded
+    actions_spent:
+      type: number
+      role: state
+      description: actions spent
+  effects:
+    - type: set
+      target: actions_spent
+      value:
+        type: literal
+        value: 1
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: trapped_in_net
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dexterity_test_succeeded
+        right:
+          type: literal
+          value: false
+- id: combat.weapon.special.ensnare.retrieve
+  name: 'Ensnare: retrieve'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: If this weapon hits, the target is trapped in the net and must spend 1 action to get
+    free with a successful DEX Test. Until freed, this is the only action it can do. A net can be
+    used once per battle and is retrieved automatically after the battle.
+  type: modifier
+  scope: global
+  fields:
+    battle_ended:
+      type: boolean
+      role: input
+      description: battle ended
+    net_retrieved:
+      type: boolean
+      role: state
+      description: net retrieved
+    net_uses_this_battle:
+      type: number
+      role: state
+      description: net uses this battle
+  effects:
+    - type: set
+      target: net_retrieved
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: net_uses_this_battle
+      value:
+        type: literal
+        value: 0
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: battle_ended
+    right:
+      type: literal
+      value: true
+- id: combat.weapon.special.fast.damage
+  name: 'Fast: damage'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text:
+    Weapon may be used to parry once per turn even though the hero did not choose the Parry
+    Stance, but the weapon is damaged on 90-00.
+  type: modifier
+  scope: global
+  fields:
+    using_fast_parry:
+      type: boolean
+      role: input
+      description: using fast parry
+    roll:
+      type: number
+      role: input
+      description: roll
+    durability:
+      type: number
+      role: state
+      description: durability
+  effects:
+    - type: add
+      target: durability
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: using_fast_parry
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 90
+  overrides:
+    - character.durability.weapon_parry
+    - character.durability.fumble
+- id: combat.weapon.special.secondary_weapon.moving_fire
+  name: 'Secondary Weapon: moving fire'
+  section_id: section.appendix_iii_equipment.weapons.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This weapon may be used in your hero’s offhand while carrying a hand weapon in the
+    primary hand. Firing this weapon may be done in the same action as moving (-10) or at a target
+    adjacent to the firer. It cannot be reloaded while wielded as a secondary weapon.
+  type: modifier
+  scope: global
+  fields:
+    wielded_as_secondary:
+      type: boolean
+      role: input
+      description: wielded as secondary
+    moving:
+      type: boolean
+      role: input
+      description: moving
+    ranged_attack_modifier:
+      type: number
+      role: state
+      description: ranged attack modifier
+    fire_during_move_allowed:
+      type: boolean
+      role: state
+      description: fire during move allowed
+  effects:
+    - type: add
+      target: ranged_attack_modifier
+      value:
+        type: literal
+        value: -10
+      duration: check
+    - type: set
+      target: fire_during_move_allowed
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.equipment.weapons
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wielded_as_secondary
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: moving
+        right:
+          type: literal
+          value: true

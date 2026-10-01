@@ -1,0 +1,220 @@
+- id: character.equipment.armour.stackable
+  name: Stackable armour
+  section_id: section.appendix_iii_equipment.armour_and_shields.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 178
+      pdf_page: 180
+      heading: Armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.armour
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This armour can be combined with ONE armour of a different tier that also have the
+    stackable special rule. However, this impedes your Dexterity (-10 DEX). This effect on DEX is
+    not cumulative if you stack armour in different hit zones. Cloaks can be worn even if the hero
+    is already using stacked armour (for example a mail shirt on top of a padded jacket). Durability
+    is only subtracted from the outer layer of armour and the highest tier is always the outer
+    layer.
+  type: modifier
+  scope: global
+  fields:
+    both_pieces_stackable:
+      type: boolean
+      role: input
+      description: both pieces stackable
+    inner_tier:
+      type: number
+      role: input
+      description: inner tier
+    outer_tier:
+      type: number
+      role: input
+      description: outer tier
+    non_cloak_layers:
+      type: number
+      role: input
+      description: non cloak layers
+    stacking_dex_modifier:
+      type: number
+      role: state
+      description: stacking dex modifier
+    cloak_additionally_allowed:
+      type: boolean
+      role: state
+      description: cloak additionally allowed
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: both_pieces_stackable
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: inner_tier
+            right:
+              type: field
+              name: outer_tier
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: non_cloak_layers
+            right:
+              type: literal
+              value: 2
+    - type: set
+      target: stacking_dex_modifier
+      value:
+        type: literal
+        value: -10
+    - type: set
+      target: cloak_additionally_allowed
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.equipment.armour
+  dependencies:
+    - key: existing_0
+      label: character.equipment.stacked_armour
+      object_id: character.equipment.stacked_armour
+    - key: existing_1
+      label: character.durability.armour_damage
+      object_id: character.durability.armour_damage
+- id: character.equipment.armour.clunky
+  name: Clunky armour
+  section_id: section.appendix_iii_equipment.armour_and_shields.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 178
+      pdf_page: 180
+      heading: Armour
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.armour
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This armour offers good protection, but moving effectively is difficult, giving your
+    hero a -10 DEX. This is not cumulative with other pieces of armour that are also clunky.
+  type: modifier
+  scope: global
+  fields:
+    clunky_dex_modifier:
+      type: number
+      role: state
+      description: clunky dex modifier
+  effects:
+    - type: set
+      target: clunky_dex_modifier
+      value:
+        type: literal
+        value: -10
+  uses_tables:
+    - table.equipment.armour
+- id: character.equipment.shield.huge
+  name: Huge shield
+  section_id: section.appendix_iii_equipment.armour_and_shields.table_2
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 178
+      pdf_page: 180
+      heading: Shields
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.shields
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This shield is so huge, that it is almost impossible to strike someone behind it. It
+    gives +10 CS when parrying with it against strikes and missiles from Ranged Weapons. Although
+    it’s class 5, it does not require 2 hands.
+  type: modifier
+  scope: global
+  fields:
+    parrying_strike_or_ranged_missile:
+      type: boolean
+      role: input
+      description: parrying strike or ranged missile
+    parry_modifier:
+      type: number
+      role: state
+      description: parry modifier
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  uses_tables:
+    - table.equipment.shields
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parrying_strike_or_ranged_missile
+    right:
+      type: literal
+      value: true
+- id: character.equipment.shield.huge.hands
+  name: 'Huge shield: hands'
+  section_id: section.appendix_iii_equipment.armour_and_shields.table_2
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 178
+      pdf_page: 180
+      heading: Shields
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        table: table.equipment.shields
+        region: printed special-rule definition
+  status: extracted
+  confidence: high
+  source_text: This shield is so huge, that it is almost impossible to strike someone behind it. It
+    gives +10 CS when parrying with it against strikes and missiles from Ranged Weapons. Although
+    it’s class 5, it does not require 2 hands.
+  type: modifier
+  scope: global
+  fields:
+    hands_required:
+      type: number
+      role: state
+      description: hands required
+  effects:
+    - type: set
+      target: hands_required
+      value:
+        type: literal
+        value: 1
+  uses_tables:
+    - table.equipment.shields

@@ -1,0 +1,863 @@
+- id: core.quest.cleansing_water.setup
+  name: Cleansing the Water — setup
+  section_id: section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 253
+      printed_page: 251
+      heading: Cleansing the Water — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    No travel necessary. Seven corridors,seven rooms,Reptiles,300c perhero. Investigate the
+    polluted source of Meredith temple water in its basement.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.cleansing_water
+  fields:
+    travel_required:
+      type: boolean
+      role: output
+      description: travel required
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: travel_required
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Reptiles
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+- id: core.quest.cleansing_water.threshold
+  name: Quest Threat 14
+  section_id: section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 253
+      printed_page: 251
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 14, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.cleansing_water
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 14
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 14
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.cleansing_water.objective_setup
+  name: Cleansing the Water — Objective Room setup
+  section_id: section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 253
+      printed_page: 251
+      heading: Cleansing the Water — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Roll three times on Reptile Table and place results randomly in the chamber. Place two
+    Gecko Assassins close to the fountain,shortswords,Armour0.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.cleansing_water
+  fields:
+    reptile_encounter_rolls:
+      type: number
+      role: output
+      description: reptile encounter rolls
+      integer: true
+    reptile_placement:
+      type: string
+      role: output
+      description: reptile placement
+    gecko_assassins:
+      type: number
+      role: output
+      description: gecko assassins
+      integer: true
+    assassin_placement:
+      type: string
+      role: output
+      description: assassin placement
+    assassin_weapon:
+      type: string
+      role: output
+      description: assassin weapon
+    assassin_armour:
+      type: number
+      role: output
+      description: assassin armour
+      integer: true
+  effects:
+    - type: set
+      target: reptile_encounter_rolls
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: reptile_placement
+      value:
+        type: literal
+        value: randomly in the chamber
+    - type: set
+      target: gecko_assassins
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: assassin_placement
+      value:
+        type: literal
+        value: close to the fountain
+    - type: set
+      target: assassin_weapon
+      value:
+        type: literal
+        value: shortswords
+    - type: set
+      target: assassin_armour
+      value:
+        type: literal
+        value: 0
+  dependencies:
+    - key: assassins
+      label: Two Gecko Assassins
+      object_id: quest_actor.fountain_room.gecko_assassins
+  unresolved_references:
+    - Standard Reptile encounters and Gecko Assassin statistics are not printed in this quest.
+- id: core.quest.cleansing_water.aftermath
+  name: Cleansing the Water — return to surface
+  section_id: section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 253
+      printed_page: 251
+      heading: Cleansing the Water — return to surface
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once all reptiles are dead, heroes prepare to return. With Assassins dead the water
+    colour slowly returns to normal.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.cleansing_water
+  fields:
+    all_reptiles_dead:
+      type: boolean
+      role: input
+      description: All reptiles,including Assassins,are dead.
+    prepare_return_to_surface:
+      type: boolean
+      role: output
+      description: Prepare to return.
+    water_colour_returning_to_normal:
+      type: boolean
+      role: output
+      description: Observed return of normal colour.
+  effects:
+    - type: set
+      target: prepare_return_to_surface
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: water_colour_returning_to_normal
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_reptiles_dead
+    right:
+      type: literal
+      value: true
+- id: core.quest.cleansing_water.reward
+  name: Cleansing the Water — temple reward
+  section_id: section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 253
+      printed_page: 251
+      heading: Cleansing the Water — temple reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Back in the temple the High Priest gives the300c reward and one Potion of Healing to
+    eachhero. Potion strength is not stated.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.cleansing_water
+  fields:
+    all_reptiles_dead:
+      type: boolean
+      role: input
+      description: All reptiles are dead.
+    heroes_back_in_temple:
+      type: boolean
+      role: input
+      description: Heroes returned to the temple.
+    reward_per_hero:
+      type: number
+      role: output
+      description: 300c perhero.
+      integer: true
+      minimum: 0
+    healing_potions_per_hero:
+      type: number
+      role: output
+      description: OnePotionofHealing perhero.
+      integer: true
+      minimum: 0
+    potion_strength_unspecified:
+      type: boolean
+      role: output
+      description: No strength inferred.
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: healing_potions_per_hero
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: potion_strength_unspecified
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_reptiles_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_back_in_temple
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: healing_potion
+      label: Healing Potion catalogue;quest leaves strength unspecified
+      object_id: equipment.alchemy.healing_potion
+- id: core.quest.baptising.setup
+  name: Baptising — setup
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Baptising — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Random location,SpecialRules dash,seven corridors and sevenrooms,300c
+    perhero,OrcsandGoblins. Retrieve water from a sacred Ramos fountain for the localgarrison.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    special_rules_printed:
+      type: string
+      role: output
+      description: special rules printed
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective:
+      type: string
+      role: output
+      description: objective
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: special_rules_printed
+      value:
+        type: literal
+        value: '-'
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Orcs and Goblins
+    - type: set
+      target: objective
+      value:
+        type: literal
+        value: retrieve sacred fountain water for the local garrison
+- id: core.quest.baptising.objective_setup
+  name: Baptising — Objective Room setup
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Baptising — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Roll twice on Orcs and Goblins Table and randomly place results in chamber. Place Gaul
+    next to fountain on far side.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    encounter_rolls:
+      type: number
+      role: output
+      description: encounter rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    gaul_position:
+      type: string
+      role: output
+      description: gaul position
+  effects:
+    - type: set
+      target: encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the chamber
+    - type: set
+      target: gaul_position
+      value:
+        type: literal
+        value: next to the fountain, on the far side
+  dependencies:
+    - key: gaul
+      label: Gaul the Mauler
+      object_id: quest_actor.fountain_room.gaul
+- id: core.quest.baptising.gaul
+  name: Gaul the Mauler — equipment and included bonus
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Gaul the Mauler — equipment and included bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Huge Orc,Longsword,Shield,Armour2. Before charging he dips his weapon into fountain
+    for+1Damage restofbattle,already included in printedDMG2. XP150,T4.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    enemy_kind:
+      type: string
+      role: output
+      description: enemy kind
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    shield:
+      type: boolean
+      role: output
+      description: shield
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    weapon_damage_bonus:
+      type: number
+      role: output
+      description: weapon damage bonus
+      integer: true
+    bonus_duration:
+      type: string
+      role: output
+      description: bonus duration
+    printed_damage:
+      type: number
+      role: output
+      description: printed damage
+      integer: true
+    printed_damage_includes_fountain_bonus:
+      type: boolean
+      role: output
+      description: printed damage includes fountain bonus
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: enemy_kind
+      value:
+        type: literal
+        value: huge Orc
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: Longsword
+    - type: set
+      target: shield
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: weapon_damage_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: bonus_duration
+      value:
+        type: literal
+        value: rest of the battle
+    - type: set
+      target: printed_damage
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: printed_damage_includes_fountain_bonus
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 150
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T4
+  entity_id: quest_actor.fountain_room.gaul
+  dependencies:
+    - key: treasure
+      label: T4
+      object_id: table.treasure.t4
+- id: core.quest.baptising.aftermath_chests
+  name: Baptising — objective chests
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Baptising — objective chests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    After the fight,two large objective-type chests are stacked against a wall,unlocked and
+    untrapped.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: Objective fight is over.
+    objective_chests:
+      type: number
+      role: output
+      description: Two objective-type chests.
+      integer: true
+      minimum: 0
+    chest_position:
+      type: string
+      role: output
+      description: Against a wall.
+    chests_locked:
+      type: boolean
+      role: output
+      description: Explicit unlocked.
+    chests_trapped:
+      type: boolean
+      role: output
+      description: Explicit not trapped.
+  effects:
+    - type: set
+      target: objective_chests
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: chest_position
+      value:
+        type: literal
+        value: stacked against a wall
+    - type: set
+      target: chests_locked
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: chests_trapped
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: objective_fight_over
+    right:
+      type: literal
+      value: true
+- id: core.quest.baptising.weapon_baptising
+  name: Baptising — heroes dip their weapons
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Baptising — heroes dip their weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After the fight,heroes take turns dipping their weapons into the water for+1Damage
+    until the end of the nextquest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: Objective fight is over.
+    hero_weapon_dipped:
+      type: boolean
+      role: input
+      description: This hero’s weapon was dipped in sacred water.
+    weapon_damage_bonus:
+      type: number
+      role: output
+      description: +1Damage for the dipped weapon.
+      integer: true
+      minimum: 0
+    bonus_duration:
+      type: string
+      role: output
+      description: Until endofnextquest,not merely current battle.
+  effects:
+    - type: set
+      target: weapon_damage_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: bonus_duration
+      value:
+        type: literal
+        value: until the end of the next quest
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_fight_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_weapon_dipped
+        right:
+          type: literal
+          value: true
+- id: core.quest.baptising.water_return
+  name: Baptising — bottle for the garrison
+  section_id: section.quest_book_i.the_fountain_room.quest_2_baptising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 254
+      printed_page: 252
+      heading: Baptising — bottle for the garrison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Then heroes fill the bottle for the garrison and head back to SilverCity.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.fountain_room.baptising
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: The fight is over.
+    fill_bottle_for_garrison:
+      type: boolean
+      role: output
+      description: Fill bottle for garrison.
+    return_destination:
+      type: string
+      role: output
+      description: SilverCity.
+  effects:
+    - type: set
+      target: fill_bottle_for_garrison
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: return_destination
+      value:
+        type: literal
+        value: Silver City
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: objective_fight_over
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: water
+      label: Sacred water bottle
+      object_id: equipment.quest.ramos_water_bottle

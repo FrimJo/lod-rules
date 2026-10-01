@@ -1,0 +1,876 @@
+- id: core.quest.spider_queen_tomb.setup
+  name: The Tomb — setup
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: The Tomb — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Starting Tile C8. Cobweb Opening at the far end, heroes placed as you see fit. Seven
+    rooms except R1, R9 and R17; seven corridors except C16. Encounters follow Special Rules.
+    Objective Room: The Great Crypt.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    starting_tile:
+      type: string
+      role: output
+      description: starting tile
+    starting_opening:
+      type: string
+      role: output
+      description: starting opening
+    hero_positions:
+      type: string
+      role: output
+      description: hero positions
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    excluded_rooms:
+      type: string
+      role: output
+      description: excluded rooms
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    excluded_corridor:
+      type: string
+      role: output
+      description: excluded corridor
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: starting_tile
+      value:
+        type: literal
+        value: C8
+    - type: set
+      target: starting_opening
+      value:
+        type: literal
+        value: Cobweb Opening at the far end
+    - type: set
+      target: hero_positions
+      value:
+        type: literal
+        value: as you see fit
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: excluded_rooms
+      value:
+        type: literal
+        value: R1, R9, R17
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: excluded_corridor
+      value:
+        type: literal
+        value: C16
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: The Great Crypt
+- id: core.quest.spider_queen_tomb.encounter_odd
+  name: The Tomb — odd encounter roll
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: The Tomb — odd encounter roll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever an encounter occurs, roll a die. An odd number results in 1d3 Giant Spiders.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    encounter_die_odd:
+      type: boolean
+      role: input
+      description: Whether the supplied encounter die result is odd; no die size is printed.
+    encounter_kind:
+      type: string
+      role: output
+      description: Giant Spiders.
+    encounter_count_dice:
+      type: string
+      role: output
+      description: Printed 1d3 count expression.
+  effects:
+    - type: set
+      target: encounter_kind
+      value:
+        type: literal
+        value: Giant Spiders
+    - type: set
+      target: encounter_count_dice
+      value:
+        type: literal
+        value: 1d3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: encounter_die_odd
+    right:
+      type: literal
+      value: true
+  unresolved_references:
+    - The parity die size is not specified in this quest. Giant Spider standard statistics require
+      the unavailable Bestiary.
+- id: core.quest.spider_queen_tomb.encounter_even
+  name: The Tomb — even encounter roll
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: The Tomb — even encounter roll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An even number results in an encounter from the Undead Encounter List.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    encounter_die_odd:
+      type: boolean
+      role: input
+      description: Whether the supplied encounter die result is odd.
+    encounter_list:
+      type: string
+      role: output
+      description: Printed list.
+  effects:
+    - type: set
+      target: encounter_list
+      value:
+        type: literal
+        value: Undead Encounter List
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: encounter_die_odd
+    right:
+      type: literal
+      value: false
+  unresolved_references:
+    - Undead Encounter List entries are unavailable; no list roll or enemy statistics are invented.
+- id: core.quest.spider_queen_tomb.doors
+  name: The Tomb — cobweb covered openings
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: The Tomb — cobweb covered openings
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All doors are considered cobweb covered openings. See the rules on page 101.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    all_doors_cobweb_covered_openings:
+      type: boolean
+      role: output
+      description: all doors cobweb covered openings
+  effects:
+    - type: set
+      target: all_doors_cobweb_covered_openings
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: cobweb_placement
+      label: Cobweb Covered Openings, page101
+      object_id: core.cobweb_opening.placement
+    - key: cobweb_clearing
+      label: 2AP clearing and Threat cost
+      object_id: core.cobweb_opening.clearing
+    - key: cobweb_alert
+      label: Spider alert on clearing
+      object_id: core.cobweb_opening.alert
+  see_also:
+    - section.into_the_dungeons.cobweb_covered_openings
+- id: core.quest.spider_queen_tomb.threshold
+  name: Quest Threat 12
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 12, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 12
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.spider_queen_tomb.objective_setup
+  name: The Tomb — Objective Room setup
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: The Tomb — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Gigantic Spider Belua is next to the sarcophagus; heroes enter on the short side. There
+    is no way to get to the sarcophagus without killing the beast. The sarcophagus rests at the far
+    end of the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    belua_position:
+      type: string
+      role: output
+      description: belua position
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    sarcophagus_access_requires_belua_dead:
+      type: boolean
+      role: output
+      description: sarcophagus access requires belua dead
+    sarcophagus_position:
+      type: string
+      role: output
+      description: At the far end of the room.
+  effects:
+    - type: set
+      target: belua_position
+      value:
+        type: literal
+        value: next to the sarcophagus
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side of the room
+    - type: set
+      target: sarcophagus_access_requires_belua_dead
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: sarcophagus_position
+      value:
+        type: literal
+        value: far end of the room
+  dependencies:
+    - key: belua
+      label: Belua, the Gigantic Spider
+      object_id: quest_actor.spider_queen.belua
+- id: core.quest.spider_queen_tomb.belua
+  name: Belua — special rules and experience
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Belua — special rules and experience
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Belua causes Terror 5, Poison and Large (not wall-climbing). XP 1100, Part. All nine
+    statistics, including DMG 1d10+3, are printed in the grid.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    enemy_kind:
+      type: string
+      role: output
+      description: enemy kind
+    terror:
+      type: number
+      role: output
+      description: terror
+      integer: true
+    poison:
+      type: boolean
+      role: output
+      description: poison
+    large:
+      type: boolean
+      role: output
+      description: large
+    wall_climbing:
+      type: boolean
+      role: output
+      description: wall climbing
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    loot_printed:
+      type: string
+      role: output
+      description: loot printed
+  effects:
+    - type: set
+      target: enemy_kind
+      value:
+        type: literal
+        value: Gigantic Spider
+    - type: set
+      target: terror
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: poison
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: large
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wall_climbing
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 1100
+    - type: set
+      target: loot_printed
+      value:
+        type: literal
+        value: Part
+  entity_id: quest_actor.spider_queen.belua
+  dependencies:
+    - key: poison
+      label: Poison follow-up
+      object_id: procedure.damage_follow_up
+    - key: parts
+      label: Parts catalogue
+      object_id: table.alchemy.parts
+- id: core.quest.spider_queen_tomb.summon_attempt
+  name: Belua — behaviour 5–6 summoning attempt
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Belua — behaviour 5–6 summoning attempt
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On behaviour 5–6 Belua tries to summon a child. Make a CS test for her.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    behaviour_roll:
+      type: number
+      role: input
+      description: Supplied behaviour result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    summoning_attempt:
+      type: boolean
+      role: output
+      description: Attempt a summon.
+    cs_test_required:
+      type: boolean
+      role: output
+      description: Requires her CS test.
+    cs_test_value:
+      type: number
+      role: output
+      description: Printed CS 55.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: summoning_attempt
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: cs_test_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: cs_test_value
+      value:
+        type: literal
+        value: 55
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: behaviour_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: behaviour_roll
+        right:
+          type: literal
+          value: 6
+- id: core.quest.spider_queen_tomb.summon_success
+  name: Belua — successful summoning
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Belua — successful summoning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    On behaviour 5–6, if Belua succeeds at her CS test, place one Giant Spider randomly in
+    the room. It may not act on the turn it arrives.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    behaviour_roll:
+      type: number
+      role: input
+      description: Supplied behaviour result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    belua_cs_test_succeeded:
+      type: boolean
+      role: input
+      description: Supplied outcome of Belua’s CS test.
+    summoned_giant_spiders:
+      type: number
+      role: output
+      description: One child.
+      integer: true
+      minimum: 0
+    summoned_spider_position:
+      type: string
+      role: output
+      description: Randomly in the room.
+    summoned_spider_may_act_on_arrival_turn:
+      type: boolean
+      role: output
+      description: Cannot act this turn.
+  effects:
+    - type: set
+      target: summoned_giant_spiders
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: summoned_spider_position
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: summoned_spider_may_act_on_arrival_turn
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: behaviour_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: behaviour_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: belua_cs_test_succeeded
+        right:
+          type: literal
+          value: true
+  unresolved_references:
+    - Random placement is supplied; standard Giant Spider statistics are not printed here.
+- id: core.quest.spider_queen_tomb.aftermath
+  name: The Tomb — sarcophagus findings
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 242
+      printed_page: 240
+      heading: The Tomb — sarcophagus findings
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With Belua and her children slain the heroes examine the sarcophagus and take Queen
+    Araneae’s long black sceptre with a golden spider-shaped head. The sarcophagus also holds 4d100
+    c and three Wonderful Treasures.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    belua_and_children_slain:
+      type: boolean
+      role: input
+      description: Belua and her children have all been slain.
+    sceptre_found:
+      type: boolean
+      role: output
+      description: Take the sceptre.
+    coin_roll_expression:
+      type: string
+      role: output
+      description: Party coins, printed 4d100.
+    wonderful_treasures:
+      type: number
+      role: output
+      description: Three party Wonderful Treasures.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: sceptre_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: coin_roll_expression
+      value:
+        type: literal
+        value: 4d100
+    - type: set
+      target: wonderful_treasures
+      value:
+        type: literal
+        value: 3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: belua_and_children_slain
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: sceptre
+      label: Queen Araneae’s sceptre
+      object_id: equipment.quest.araneae_sceptre
+- id: core.quest.spider_queen_tomb.return
+  name: The Tomb — return journey boundary
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 242
+      printed_page: 240
+      heading: The Tomb — return journey boundary
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once done, heroes may leave without walking the whole dungeon because the trek to the
+    surface is eventless. Overland Travel must be done. Once back in Whiteport they receive their
+    reward.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    sarcophagus_findings_done:
+      type: boolean
+      role: input
+      description: The sarcophagus findings are done.
+    dungeon_return_eventless:
+      type: boolean
+      role: output
+      description: Eventless trek to the surface.
+    retrace_dungeon_not_required:
+      type: boolean
+      role: output
+      description: No need to walk all dungeon tiles.
+    overland_travel_required:
+      type: boolean
+      role: output
+      description: Overland travel still required.
+    reward_location:
+      type: string
+      role: output
+      description: Whiteport.
+  effects:
+    - type: set
+      target: dungeon_return_eventless
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: retrace_dungeon_not_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: overland_travel_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward_location
+      value:
+        type: literal
+        value: Whiteport
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: sarcophagus_findings_done
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: travel
+      label: Overland daily movement
+      object_id: procedure.travel_daily_movement
+- id: core.quest.spider_queen_tomb.reward
+  name: Spider Queen — reward in Whiteport
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 242
+      printed_page: 240
+      heading: Aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 237
+      printed_page: 235
+      heading: Reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once back in Whiteport, the heroes receive their reward. The campaign opening states
+    1200 c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.spider_queen.tomb
+  fields:
+    campaign_return_completed_in_whiteport:
+      type: boolean
+      role: input
+      description: The completed campaign party has returned to Whiteport.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Advertised 1200 c per hero, no resource mutation.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 1200
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: campaign_return_completed_in_whiteport
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: campaign
+      label: Campaign advertised reward
+      object_id: core.quest.spider_queen_campaign.opening

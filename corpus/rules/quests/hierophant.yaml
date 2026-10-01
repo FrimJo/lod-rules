@@ -1,0 +1,1525 @@
+- id: core.quest.hierophant.setup
+  name: Tomb of the Hierophant — setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Requested by the Golden College of Magic to investigate artifacts of Djet. Quest
+    Location: Ancient Lands, random. Number of tiles: 7 corridors, 7 rooms (not R22). Reward: 300 c
+    per hero; extra may be paid for what you bring back. Encounters: Ancient Lands.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    random_room_exclusion:
+      type: string
+      role: output
+      description: random room exclusion
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    extra_rewards_possible:
+      type: boolean
+      role: output
+      description: extra rewards possible
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Ancient Lands, random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: random_room_exclusion
+      value:
+        type: literal
+        value: R22
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: extra_rewards_possible
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Ancient Lands
+- id: core.quest.hierophant.standard_room_pool
+  name: Tomb of the Hierophant — standard room pool
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — standard room pool
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Without Ancient Lands tiles randomise rooms from R2B, R4B-8B, R1, R4-R6, R9-R11, R14,
+    R16, R17. All corridors can be part of the mix.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    random_room_pool:
+      type: string
+      role: output
+      description: random room pool
+    all_corridors_available:
+      type: boolean
+      role: output
+      description: all corridors available
+  effects:
+    - type: set
+      target: random_room_pool
+      value:
+        type: literal
+        value: R2B, R4B-8B, R1, R4-R6, R9-R11, R14, R16, R17
+    - type: set
+      target: all_corridors_available
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.hierophant.furniture_reroll
+  name: Tomb of the Hierophant — Furniture Chart rerolls
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — Furniture Chart rerolls
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    You may re-roll 4 rolls on the furniture chart during the quest. A re-roll may never be
+    re-rolled.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    furniture_chart_roll:
+      type: boolean
+      role: input
+      description: furniture chart roll
+    already_a_reroll:
+      type: boolean
+      role: input
+      description: already a reroll
+    furniture_rerolls_used_this_quest:
+      type: number
+      role: input
+      description: furniture rerolls used this quest
+      integer: true
+    furniture_reroll_allowed:
+      type: boolean
+      role: output
+      description: furniture reroll allowed
+  effects:
+    - type: set
+      target: furniture_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: furniture_chart_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_a_reroll
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 4
+- id: core.quest.hierophant.card_deck
+  name: Tomb of the Hierophant — deck
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — deck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Mix a deck of 14 playing cards. All are red except Ace of Spades, 2 of Spades and 3 of Spades.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    playing_cards:
+      type: number
+      role: output
+      description: playing cards
+      integer: true
+    ordinary_red_cards:
+      type: number
+      role: output
+      description: ordinary red cards
+      integer: true
+    special_cards:
+      type: string
+      role: output
+      description: special cards
+    mix_deck:
+      type: boolean
+      role: output
+      description: mix deck
+  effects:
+    - type: set
+      target: playing_cards
+      value:
+        type: literal
+        value: 14
+    - type: set
+      target: ordinary_red_cards
+      value:
+        type: literal
+        value: 11
+    - type: set
+      target: special_cards
+      value:
+        type: literal
+        value: Ace of Spades, 2 of Spades, 3 of Spades
+    - type: set
+      target: mix_deck
+      value:
+        type: literal
+        value: true
+- id: core.quest.hierophant.new_tile_card
+  name: Tomb of the Hierophant — new tile
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — new tile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every time you enter a new tile, flip a card. If any of the three spades show up,
+    consult the corresponding paragraph.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    entering_new_tile:
+      type: boolean
+      role: input
+      description: entering new tile
+    cards_to_flip:
+      type: number
+      role: output
+      description: cards to flip
+      integer: true
+  effects:
+    - type: set
+      target: cards_to_flip
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: entering_new_tile
+    right:
+      type: literal
+      value: true
+- id: core.quest.hierophant.statue
+  name: Tomb of the Hierophant — Ace of Spades
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — Ace of Spades
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A small golden statue stands in a niche in the wall. If the party clears out any
+    monsters in the room, they automatically acquire the statue.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: drawn card
+    room_clear_of_monsters:
+      type: boolean
+      role: input
+      description: room clear of monsters
+    statue_acquired:
+      type: boolean
+      role: output
+      description: statue acquired
+  effects:
+    - type: set
+      target: statue_acquired
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card
+        right:
+          type: literal
+          value: Ace of Spades
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: room_clear_of_monsters
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: statue
+      label: Djet’s golden statue
+      object_id: equipment.quest.djet_statue
+- id: core.quest.hierophant.tablet
+  name: Tomb of the Hierophant — 3 of Spades
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — 3 of Spades
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A stone tablet filled with lines of glyphs is on one wall. If the party clears out any
+    monsters in the room, they automatically acquire the tablet.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: drawn card
+    room_clear_of_monsters:
+      type: boolean
+      role: input
+      description: room clear of monsters
+    tablet_acquired:
+      type: boolean
+      role: output
+      description: tablet acquired
+  effects:
+    - type: set
+      target: tablet_acquired
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card
+        right:
+          type: literal
+          value: 3 of Spades
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: room_clear_of_monsters
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: tablet
+      label: Djet’s stone tablet
+      object_id: equipment.quest.djet_tablet
+- id: core.quest.hierophant.fire_trap
+  name: Tomb of the Hierophant — 2 of Spades
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — 2 of Spades
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Once the door is opened a trap triggers: a jet of fire passes through the doorway.
+    Each hero must make a successful Dodge roll or suffer 1d12 fire DMG.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: drawn card
+    door_opened:
+      type: boolean
+      role: input
+      description: door opened
+    fire_trap_triggered:
+      type: boolean
+      role: output
+      description: fire trap triggered
+    each_hero_dodge_required:
+      type: boolean
+      role: output
+      description: each hero dodge required
+    fire_damage_dice:
+      type: string
+      role: output
+      description: fire damage dice
+  effects:
+    - type: set
+      target: fire_trap_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: each_hero_dodge_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: fire_damage_dice
+      value:
+        type: literal
+        value: 1d12
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card
+        right:
+          type: literal
+          value: 2 of Spades
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: door_opened
+        right:
+          type: literal
+          value: true
+- id: core.quest.hierophant.fire_damage
+  name: Tomb of the Hierophant — failed Dodge
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — failed Dodge
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Each hero must make a successful Dodge roll or suffer 1d12 fire DMG.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    fire_trap_triggered:
+      type: boolean
+      role: input
+      description: fire trap triggered
+    hero_dodge_succeeded:
+      type: boolean
+      role: input
+      description: hero dodge succeeded
+    fire_damage_roll:
+      type: number
+      role: input
+      description: fire damage roll
+      integer: true
+      minimum: 1
+      maximum: 12
+      dice:
+        count: 1
+        sides: 12
+    fire_damage:
+      type: number
+      role: output
+      description: fire damage
+      integer: true
+  effects:
+    - type: set
+      target: fire_damage
+      value:
+        type: field
+        name: fire_damage_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fire_trap_triggered
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_dodge_succeeded
+        right:
+          type: literal
+          value: false
+- id: core.quest.hierophant.fire_dodge
+  name: Tomb of the Hierophant — successful Dodge
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: Tomb of the Hierophant — successful Dodge
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful Dodge avoids the 1d12 fire DMG from the doorway trap.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    fire_trap_triggered:
+      type: boolean
+      role: input
+      description: fire trap triggered
+    hero_dodge_succeeded:
+      type: boolean
+      role: input
+      description: hero dodge succeeded
+    fire_damage:
+      type: number
+      role: output
+      description: fire damage
+      integer: true
+  effects:
+    - type: set
+      target: fire_damage
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fire_trap_triggered
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_dodge_succeeded
+        right:
+          type: literal
+          value: true
+- id: core.quest.hierophant.ancient_objective_setup
+  name: Tomb of the Hierophant — ancient setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — ancient setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place R22. Place a Mummy Priest next to the sarcophagus. Roll twice on the Encounter
+    Table and place enemies on the tile heroes vacated before moving to the tile currently occupied.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    djet_type:
+      type: string
+      role: output
+      description: djet type
+    djet_position:
+      type: string
+      role: output
+      description: djet position
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagus_position:
+      type: string
+      role: output
+      description: sarcophagus position
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: R22
+    - type: set
+      target: djet_type
+      value:
+        type: literal
+        value: Mummy Priest
+    - type: set
+      target: djet_position
+      value:
+        type: literal
+        value: next to the sarcophagus
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: on the tile the heroes vacated before moving to the tile they currently occupy
+    - type: set
+      target: sarcophagus_position
+      value:
+        type: literal
+        value: centre of the room
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+  entity_id: quest_actor.ancient_lands.djet
+  dependencies:
+    - key: djet
+      label: Mummy Priest statistics and abilities are not printed here; supply outcomes
+- id: core.quest.hierophant.ancient_sarcophagus
+  name: Djet — ancient sarcophagus exception
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Djet — ancient sarcophagus exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The sarcophagus can be searched without risk of awakening another mummy (just ignore
+    that result).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_djet_sarcophagus:
+      type: boolean
+      role: input
+      description: searching djet sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    ignore_mummy_search_result:
+      type: boolean
+      role: output
+      description: ignore mummy search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: ignore_mummy_search_result
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_djet_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Standard sarcophagus findings, ignoring the mummy result
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.hierophant.ancient_tome
+  name: Tomb of the Hierophant — ancient aftermath tome
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — ancient aftermath tome
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As silence settles the party goes through the chamber. An ancient rune-covered tome
+    lies in the sarcophagus. It is automatically collected; the sarcophagus may also be searched for
+    treasures.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    chamber_goes_quiet:
+      type: boolean
+      role: input
+      description: chamber goes quiet
+    tome_found:
+      type: boolean
+      role: output
+      description: tome found
+    tome_automatically_collected:
+      type: boolean
+      role: output
+      description: tome automatically collected
+    additional_sarcophagus_search_allowed:
+      type: boolean
+      role: output
+      description: additional sarcophagus search allowed
+  effects:
+    - type: set
+      target: tome_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: tome_automatically_collected
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: additional_sarcophagus_search_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chamber_goes_quiet
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: tome
+      label: Djet’s grimoire
+      object_id: equipment.quest.djet_grimoire
+- id: core.quest.hierophant.standard_objective_setup
+  name: Tomb of the Hierophant — standard setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — standard setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place R1B. Place a Mummy Priest next to the sarcophagus. Roll twice on the Encounter
+    Table and place enemies on the tile heroes vacated before moving to the tile currently occupied.
+    Ignore the dead adventurer; he is not there and cannot be searched.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    djet_type:
+      type: string
+      role: output
+      description: djet type
+    djet_position:
+      type: string
+      role: output
+      description: djet position
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagus_position:
+      type: string
+      role: output
+      description: sarcophagus position
+    dead_adventurer_present:
+      type: boolean
+      role: output
+      description: dead adventurer present
+    dead_adventurer_search_allowed:
+      type: boolean
+      role: output
+      description: dead adventurer search allowed
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: R1B
+    - type: set
+      target: djet_type
+      value:
+        type: literal
+        value: Mummy Priest
+    - type: set
+      target: djet_position
+      value:
+        type: literal
+        value: next to the sarcophagus
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: on the tile the heroes vacated before moving to the tile they currently occupy
+    - type: set
+      target: sarcophagus_position
+      value:
+        type: literal
+        value: centre of the room
+    - type: set
+      target: dead_adventurer_present
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: dead_adventurer_search_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+  entity_id: quest_actor.ancient_lands.djet
+  dependencies:
+    - key: djet
+      label: Mummy Priest statistics and abilities are not printed here; supply outcomes
+- id: core.quest.hierophant.standard_sarcophagus
+  name: Djet — standard sarcophagus exception
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Djet — standard sarcophagus exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The sarcophagus can be searched without risk of awakening another mummy (just ignore
+    that result).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_djet_sarcophagus:
+      type: boolean
+      role: input
+      description: searching djet sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    ignore_mummy_search_result:
+      type: boolean
+      role: output
+      description: ignore mummy search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: ignore_mummy_search_result
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_djet_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Standard sarcophagus findings, ignoring the mummy result
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.hierophant.standard_tome
+  name: Tomb of the Hierophant — standard aftermath tome
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — standard aftermath tome
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As silence settles the party goes through the chamber. An ancient rune-covered tome
+    lies in the sarcophagus.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    chamber_goes_quiet:
+      type: boolean
+      role: input
+      description: chamber goes quiet
+    tome_found:
+      type: boolean
+      role: output
+      description: tome found
+  effects:
+    - type: set
+      target: tome_found
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chamber_goes_quiet
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: tome
+      label: Djet’s grimoire
+      object_id: equipment.quest.djet_grimoire
+  issues:
+    - issue.quest.hierophant_tome_boundaries
+- id: core.quest.hierophant.base_reward
+  name: Tomb of the Hierophant — base reward
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 266
+      printed_page: 264
+      heading: 'Reward: 300 c per hero'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — base reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Reward: 300 c per hero. The aftermath returns heroes to the Outpost for settlement of rewards.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    chamber_goes_quiet:
+      type: boolean
+      role: input
+      description: chamber goes quiet
+    back_at_outpost:
+      type: boolean
+      role: input
+      description: back at outpost
+    base_reward_per_hero:
+      type: number
+      role: output
+      description: base reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: base_reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chamber_goes_quiet
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_outpost
+        right:
+          type: literal
+          value: true
+- id: core.quest.hierophant.tablet_bonus
+  name: Tomb of the Hierophant — tablet bonus
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — tablet bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When back at the outpost you get 100 c extra per hero if you bring back the tablet.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    back_at_outpost:
+      type: boolean
+      role: input
+      description: back at outpost
+    tablet_brought_back:
+      type: boolean
+      role: input
+      description: tablet brought back
+    tablet_bonus_per_hero:
+      type: number
+      role: output
+      description: tablet bonus per hero
+      integer: true
+  effects:
+    - type: set
+      target: tablet_bonus_per_hero
+      value:
+        type: literal
+        value: 100
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_outpost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: tablet_brought_back
+        right:
+          type: literal
+          value: true
+- id: core.quest.hierophant.statue_bonus
+  name: Tomb of the Hierophant — statue bonus
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — statue bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When back at the outpost you get 100 c extra per hero if you bring back the statue.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    back_at_outpost:
+      type: boolean
+      role: input
+      description: back at outpost
+    statue_brought_back:
+      type: boolean
+      role: input
+      description: statue brought back
+    statue_bonus_per_hero:
+      type: number
+      role: output
+      description: statue bonus per hero
+      integer: true
+  effects:
+    - type: set
+      target: statue_bonus_per_hero
+      value:
+        type: literal
+        value: 100
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_outpost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: statue_brought_back
+        right:
+          type: literal
+          value: true
+- id: core.quest.hierophant.grimoire_handover
+  name: Tomb of the Hierophant — grimoire handover
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — grimoire handover
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When back at the outpost the tome can be handed in with the rest of the treasures for
+    an extra 200 c per hero, or used by a wizard to learn a spell.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    back_at_outpost:
+      type: boolean
+      role: input
+      description: back at outpost
+    grimoire_available:
+      type: boolean
+      role: input
+      description: grimoire available
+    grimoire_disposition:
+      type: string
+      role: input
+      description: grimoire disposition
+    grimoire_bonus_per_hero:
+      type: number
+      role: output
+      description: grimoire bonus per hero
+      integer: true
+    grimoire_handed_in:
+      type: boolean
+      role: output
+      description: grimoire handed in
+  effects:
+    - type: set
+      target: grimoire_bonus_per_hero
+      value:
+        type: literal
+        value: 200
+    - type: set
+      target: grimoire_handed_in
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_outpost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: grimoire_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: grimoire_disposition
+        right:
+          type: literal
+          value: hand_in
+- id: core.quest.hierophant.grimoire_learning
+  name: Tomb of the Hierophant — grimoire learning
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 267
+      printed_page: 265
+      heading: Tomb of the Hierophant — grimoire learning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When back at the outpost the tome is a grimoire and can be used by a wizard to learn a
+    spell or handed in for an extra 200 c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.hierophant
+  fields:
+    back_at_outpost:
+      type: boolean
+      role: input
+      description: back at outpost
+    grimoire_available:
+      type: boolean
+      role: input
+      description: grimoire available
+    grimoire_disposition:
+      type: string
+      role: input
+      description: grimoire disposition
+    hero_is_wizard:
+      type: boolean
+      role: input
+      description: hero is wizard
+    grimoire_learning_allowed:
+      type: boolean
+      role: output
+      description: grimoire learning allowed
+  effects:
+    - type: set
+      target: grimoire_learning_allowed
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: learning
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_outpost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: grimoire_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: grimoire_disposition
+        right:
+          type: literal
+          value: learn_spell
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_is_wizard
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: learning
+      label: Learning a spell; the grimoire spell is supplied, not named here
+      object_id: procedure.learn_spell
+  issues:
+    - issue.quest.hierophant_tome_boundaries

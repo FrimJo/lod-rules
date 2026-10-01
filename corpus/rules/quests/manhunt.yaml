@@ -1,0 +1,438 @@
+- id: core.quest.manhunt.setup
+  name: Manhunt — setup
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'A bandit killed a city guard and hides in the party’s next dungeon. Anyone who kills
+    him and can prove it will be rewarded. Location: same dungeon as the next quest. Reward: 250 c.
+    Encounters: as defined by the main quest. Objective room: No specific Objective Room.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    advertised_reward_coins:
+      type: number
+      role: output
+      description: advertised reward coins
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: advertised_reward_coins
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: as defined by the main quest
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: No specific Objective Room
+- id: core.quest.manhunt.identification
+  name: Manhunt — identifying features
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — identifying features
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Posters show a man missing both an eye and an ear.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    bandit_missing_eye:
+      type: boolean
+      role: output
+      description: bandit missing eye
+    bandit_missing_ear:
+      type: boolean
+      role: output
+      description: bandit missing ear
+  effects:
+    - type: set
+      target: bandit_missing_eye
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bandit_missing_ear
+      value:
+        type: literal
+        value: true
+- id: core.quest.manhunt.deck
+  name: Manhunt — separate Dungeoneers Deck pile
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — separate Dungeoneers Deck pile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the dungeon deck is done, take the same number of cards from the Dungeoneers Deck
+    in a separate pile. Choose one specific card to represent the bandit, mix that deck and place it
+    next to the ordinary deck.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    dungeon_deck_done:
+      type: boolean
+      role: input
+      description: dungeon deck done
+    dungeon_deck_cards:
+      type: number
+      role: input
+      description: dungeon deck cards
+      integer: true
+      minimum: 1
+    auxiliary_deck_cards:
+      type: number
+      role: output
+      description: auxiliary deck cards
+      integer: true
+    chosen_bandit_cards:
+      type: number
+      role: output
+      description: chosen bandit cards
+      integer: true
+    mix_auxiliary_deck:
+      type: boolean
+      role: output
+      description: mix auxiliary deck
+    auxiliary_deck_next_to_ordinary:
+      type: boolean
+      role: output
+      description: auxiliary deck next to ordinary
+  effects:
+    - type: set
+      target: auxiliary_deck_cards
+      value:
+        type: field
+        name: dungeon_deck_cards
+    - type: set
+      target: chosen_bandit_cards
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: mix_auxiliary_deck
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: auxiliary_deck_next_to_ordinary
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dungeon_deck_done
+    right:
+      type: literal
+      value: true
+- id: core.quest.manhunt.door_draw
+  name: Manhunt — door draw
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — door draw
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once you open a door, draw one card from the new deck.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    door_opened:
+      type: boolean
+      role: input
+      description: door opened
+    auxiliary_cards_to_draw:
+      type: number
+      role: output
+      description: auxiliary cards to draw
+      integer: true
+  effects:
+    - type: set
+      target: auxiliary_cards_to_draw
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: door_opened
+    right:
+      type: literal
+      value: true
+- id: core.quest.manhunt.found
+  name: Manhunt — bandit card
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — bandit card
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the card representing the bandit is drawn, you have found him. Roll for Encounters
+    as usual, then place the bandit in the far end of the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    door_opened:
+      type: boolean
+      role: input
+      description: door opened
+    drawn_card_represents_bandit:
+      type: boolean
+      role: input
+      description: drawn card represents bandit
+    bandit_found:
+      type: boolean
+      role: output
+      description: bandit found
+    roll_encounters_as_usual:
+      type: boolean
+      role: output
+      description: roll encounters as usual
+    bandit_placement:
+      type: string
+      role: output
+      description: bandit placement
+    bandit_placed_after_encounter_roll:
+      type: boolean
+      role: output
+      description: bandit placed after encounter roll
+  effects:
+    - type: set
+      target: bandit_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: roll_encounters_as_usual
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bandit_placement
+      value:
+        type: literal
+        value: far end of the room
+    - type: set
+      target: bandit_placed_after_encounter_roll
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: door_opened
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card_represents_bandit
+        right:
+          type: literal
+          value: true
+- id: core.quest.manhunt.profile
+  name: Manhunt — Bandit equipment
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — Bandit equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Bandit is equipped with a battle-axe and a shield. He has Armour 3.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    bandit_weapon:
+      type: string
+      role: output
+      description: bandit weapon
+    bandit_has_shield:
+      type: boolean
+      role: output
+      description: bandit has shield
+    bandit_armour:
+      type: number
+      role: output
+      description: bandit armour
+      integer: true
+  effects:
+    - type: set
+      target: bandit_weapon
+      value:
+        type: literal
+        value: battle-axe
+    - type: set
+      target: bandit_has_shield
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bandit_armour
+      value:
+        type: literal
+        value: 3
+  dependencies:
+    - key: battleaxe
+      label: Battle-axe
+      object_id: equipment.weapon.battleaxe
+    - key: shield
+      label: Shield type not specified in this quest
+  entity_id: quest_actor.side.manhunt_bandit
+- id: core.quest.manhunt.reward
+  name: Manhunt — city reward
+  section_id: section.quest_book_i.side_quests.side_quest_5_manhunt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 278
+      printed_page: 276
+      heading: Manhunt — city reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Anyone who kills the bandit and can prove it will be rewarded. Reward: 250 c. If
+    heroes kill him, they receive the reward once back in the city.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.manhunt
+  fields:
+    bandit_killed:
+      type: boolean
+      role: input
+      description: bandit killed
+    kill_proven:
+      type: boolean
+      role: input
+      description: kill proven
+    back_in_city:
+      type: boolean
+      role: input
+      description: back in city
+    reward_coins:
+      type: number
+      role: output
+      description: reward coins
+      integer: true
+  effects:
+    - type: set
+      target: reward_coins
+      value:
+        type: literal
+        value: 250
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: bandit_killed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: kill_proven
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_in_city
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.quest.manhunt_proof_boundary

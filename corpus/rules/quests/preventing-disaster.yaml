@@ -1,0 +1,899 @@
+- id: core.quest.preventing_disaster.setup
+  name: Preventing a Disaster — setup
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Silver City, seven corridors and seven rooms using R1B–8B. Undead encounters.
+    Reward300c per hero. The priests of Rhidnir provide two scrolls for the altar; only one
+    successful incantation is needed, with the second as backup.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    room_tiles:
+      type: string
+      role: output
+      description: room tiles
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    scrolls_supplied:
+      type: number
+      role: output
+      description: scrolls supplied
+      integer: true
+    successful_incantations_required:
+      type: number
+      role: output
+      description: successful incantations required
+      integer: true
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Silver City
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: room_tiles
+      value:
+        type: literal
+        value: R1B-8B
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Undead
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: scrolls_supplied
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: successful_incantations_required
+      value:
+        type: literal
+        value: 1
+  dependencies:
+    - key: scrolls
+      label: Rhidnir temple incantation scrolls
+      object_id: equipment.quest.rhidnir_incantation_scrolls
+- id: core.quest.preventing_disaster.threshold
+  name: Quest Threat 12
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 12, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 12
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.preventing_disaster.brotherhood_corpses
+  name: Preventing a Disaster — Brotherhood corpse exception
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — Brotherhood corpse exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Ignore Special Rules for dead members of the Brotherhood. Treat these corpses as dead
+    adventurers and search accordingly.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    ignore_dead_brotherhood_special_rules:
+      type: boolean
+      role: output
+      description: ignore dead brotherhood special rules
+    brotherhood_corpses_treated_as:
+      type: string
+      role: output
+      description: brotherhood corpses treated as
+    search_as_dead_adventurers:
+      type: boolean
+      role: output
+      description: search as dead adventurers
+  effects:
+    - type: set
+      target: ignore_dead_brotherhood_special_rules
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: brotherhood_corpses_treated_as
+      value:
+        type: literal
+        value: dead adventurers
+    - type: set
+      target: search_as_dead_adventurers
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: dead_adventurer_search
+      label: Dead adventurer findings
+      object_id: character.treasure.furniture.dead_adventurer
+- id: core.quest.preventing_disaster.objective_setup
+  name: Preventing a Disaster — Objective Room setup
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes enter along the wall opposite the altar. Roll three times on the Undead
+    Encounter Table and place results randomly in the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    undead_encounter_rolls:
+      type: number
+      role: output
+      description: undead encounter rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+  effects:
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: wall opposite the altar
+    - type: set
+      target: undead_encounter_rolls
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+  unresolved_references:
+    - Undead Encounter Table entries and standard enemy statistics require unavailable external
+      material.
+- id: core.quest.preventing_disaster.tremor_event
+  name: Preventing a Disaster — Scenario1–2 tremor
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — Scenario1–2 tremor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In this Objective Room, Scenario1–2 makes each character test DEX. Undead are
+    accustomed to tremors and unaffected.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    tremors_active:
+      type: boolean
+      role: input
+      description: Tremors still active.
+    in_objective_room:
+      type: boolean
+      role: input
+      description: In the stated Objective Room.
+    scenario_roll:
+      type: number
+      role: input
+      description: SuppliedScenario result.
+      integer: true
+      minimum: 1
+      maximum: 10
+    each_character_dex_test_required:
+      type: boolean
+      role: output
+      description: Each character tests, subject to explicit Undead exemption.
+    undead_unaffected:
+      type: boolean
+      role: output
+      description: Undead exempt.
+  effects:
+    - type: set
+      target: each_character_dex_test_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: undead_unaffected
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: tremors_active
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_objective_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 2
+- id: core.quest.preventing_disaster.toppled
+  name: Preventing a Disaster — failed hero DEX
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — failed hero DEX
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A hero failing the tremor DEX test is toppled and must spend their next action standing
+    up, which also requires a DEX Test.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    hero_failed_tremor_dex_test:
+      type: boolean
+      role: input
+      description: Hero failed the required tremor DEX test.
+    hero_toppled:
+      type: boolean
+      role: output
+      description: Hero is toppled.
+    next_action_required:
+      type: string
+      role: output
+      description: Next action standing DEX test.
+  effects:
+    - type: set
+      target: hero_toppled
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_action_required
+      value:
+        type: literal
+        value: stand up with a DEX Test
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hero_failed_tremor_dex_test
+    right:
+      type: literal
+      value: true
+- id: core.quest.preventing_disaster.standing_attempt
+  name: Preventing a Disaster — stand-up attempt limits
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — stand-up attempt limits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The toppled hero may try to stand once per action, twice per turn. If still lying when
+    Undead attack, the Undead receive the Standard Bonus for attacking someone lying down.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    hero_still_lying:
+      type: boolean
+      role: input
+      description: Hero is still lying down.
+    standing_attempts_per_action:
+      type: number
+      role: output
+      description: Once per action.
+      integer: true
+      minimum: 0
+    standing_attempts_per_turn:
+      type: number
+      role: output
+      description: Twice per turn.
+      integer: true
+      minimum: 0
+    standing_requires_dex_test:
+      type: boolean
+      role: output
+      description: DEX required.
+    undead_attack_bonus_against_lying_hero:
+      type: string
+      role: output
+      description: Printed Standard Bonus pointer, no invented value.
+  effects:
+    - type: set
+      target: standing_attempts_per_action
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: standing_attempts_per_turn
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: standing_requires_dex_test
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: undead_attack_bonus_against_lying_hero
+      value:
+        type: literal
+        value: Standard Bonus for attacking someone lying down
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hero_still_lying
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: lying_target_bonus
+      label: Standard Bonus for attacking a lying target
+      object_id: table.combat.melee_modifiers
+- id: core.quest.preventing_disaster.scroll_attempt
+  name: Preventing a Disaster — incantation attempt
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — incantation attempt
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Hero with the scrolls must cast while standing adjacent to the altar. The powerful
+    scroll crumbles even when casting fails, unlike ordinary scroll failure.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    valid_incantation_attempt:
+      type: boolean
+      role: input
+      description: Scroll carrier casts while standing adjacent to the altar with a scroll available.
+    scroll_consumed_per_attempt:
+      type: number
+      role: output
+      description: One scroll per valid attempt, no duplicated inventory mutation.
+      integer: true
+      minimum: 0
+    failed_scroll_also_crumbles:
+      type: boolean
+      role: output
+      description: Explicit failure destruction.
+  effects:
+    - type: set
+      target: scroll_consumed_per_attempt
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: failed_scroll_also_crumbles
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: valid_incantation_attempt
+    right:
+      type: literal
+      value: true
+  overrides:
+    - core.magic.scroll.destroyed
+  unresolved_references:
+    - This unnamed incantation has no printed casting difficulty, spell level or named spell. Supply
+      the casting outcome; do not assign a spell or threshold.
+- id: core.quest.preventing_disaster.incantation_success
+  name: Preventing a Disaster — successful incantation
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Preventing a Disaster — successful incantation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If successful, tremors stop and heroes can easily escape to the surface to receive300c
+    per hero. No all-enemies-defeated prerequisite is printed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    valid_incantation_attempt:
+      type: boolean
+      role: input
+      description: Valid source incantation attempt.
+    incantation_succeeded:
+      type: boolean
+      role: input
+      description: Supplied casting outcome.
+    tremors_stop:
+      type: boolean
+      role: output
+      description: Tremors stop.
+    easy_escape_to_surface:
+      type: boolean
+      role: output
+      description: Easy escape; no enemy-death requirement added.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Advertised300c per hero.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: tremors_stop
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: easy_escape_to_surface
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_incantation_attempt
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: incantation_succeeded
+        right:
+          type: literal
+          value: true
+- id: core.quest.preventing_disaster.both_scrolls_fail
+  name: Preventing a Disaster — both scrolls fail
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 248
+      printed_page: 246
+      heading: Continuation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If both scrolls fail, the river floods and lava spills onto floors. Heroes have three
+    turns to leave the chamber.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    both_scroll_attempts_failed:
+      type: boolean
+      role: input
+      description: Both supplied scrolls were attempted and failed.
+    river_flooding:
+      type: boolean
+      role: output
+      description: River floods.
+    lava_spills_onto_floors:
+      type: boolean
+      role: output
+      description: Lava on floors.
+    escape_turns_before_damage:
+      type: number
+      role: output
+      description: Three turns to leave.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: river_flooding
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: lava_spills_onto_floors
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: escape_turns_before_damage
+      value:
+        type: literal
+        value: 3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: both_scroll_attempts_failed
+    right:
+      type: literal
+      value: true
+- id: core.quest.preventing_disaster.flood_damage
+  name: Preventing a Disaster — damage after three turns
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 248
+      printed_page: 246
+      heading: Preventing a Disaster — damage after three turns
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Each turn after the three-turn escape window, heroes remaining in the chamber
+    lose1d6Hit Points to Fire Damage.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    river_flooding:
+      type: boolean
+      role: input
+      description: Flood caused by both scroll failures.
+    hero_remains_in_chamber:
+      type: boolean
+      role: input
+      description: Hero remains in the chamber.
+    turns_since_flooding:
+      type: number
+      role: input
+      description: Current turn index from flood, supplied source clock.
+      integer: true
+      minimum: 0
+    hit_point_loss_dice:
+      type: string
+      role: output
+      description: 1d6HP loss this turn.
+    damage_type:
+      type: string
+      role: output
+      description: Fire Damage.
+    damage_recurs_each_remaining_turn:
+      type: boolean
+      role: output
+      description: Each subsequent remaining turn.
+  effects:
+    - type: set
+      target: hit_point_loss_dice
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: damage_type
+      value:
+        type: literal
+        value: Fire Damage
+    - type: set
+      target: damage_recurs_each_remaining_turn
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: river_flooding
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_remains_in_chamber
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: turns_since_flooding
+        right:
+          type: literal
+          value: 3
+- id: core.quest.preventing_disaster.failure_reward
+  name: Preventing a Disaster — failure reward boundary
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 248
+      printed_page: 246
+      heading: Preventing a Disaster — failure reward boundary
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The priests refuse to pay, but Rhidnir grants the heroes+1luck on their next quest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.preventing_disaster
+  fields:
+    both_scroll_attempts_failed:
+      type: boolean
+      role: input
+      description: Both supplied scroll attempts failed.
+    priest_reward_per_hero:
+      type: number
+      role: output
+      description: Priests refuse payment.
+      integer: true
+      minimum: 0
+    next_quest_luck_bonus:
+      type: number
+      role: output
+      description: +1luck nextquest, no currentquest mutation.
+      integer: true
+      minimum: 0
+    luck_bonus_scope:
+      type: string
+      role: output
+      description: Heroes, next quest.
+  effects:
+    - type: set
+      target: priest_reward_per_hero
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: next_quest_luck_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: luck_bonus_scope
+      value:
+        type: literal
+        value: heroes on their next quest
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: both_scroll_attempts_failed
+    right:
+      type: literal
+      value: true

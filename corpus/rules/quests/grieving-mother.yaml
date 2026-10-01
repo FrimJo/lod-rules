@@ -1,0 +1,1058 @@
+- id: core.quest.grieving_mother.reading
+  name: The Grieving Mother — reading boundaries
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: The Grieving Mother — reading boundaries
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: Read the next paragraph only after the first turn of combat
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Do not read until the quest has been triggered. Do not read more than one section at a
+    time. Read the next paragraph only after the first turn of combat.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    quest_triggered:
+      type: boolean
+      role: input
+      description: Whether the side quest has been triggered.
+    first_turn_finished:
+      type: boolean
+      role: input
+      description: Whether the first turn of combat has finished.
+    initial_text_readable:
+      type: boolean
+      role: output
+      description: Quest opening permission.
+    door_slam_text_readable:
+      type: boolean
+      role: output
+      description: Door-slam paragraph permission.
+    read_one_section_at_a_time:
+      type: boolean
+      role: output
+      description: Printed section-at-a-time instruction.
+  effects:
+    - type: set
+      target: initial_text_readable
+      value:
+        type: field
+        name: quest_triggered
+    - type: set
+      target: door_slam_text_readable
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: read_one_section_at_a_time
+      value:
+        type: literal
+        value: true
+- id: core.quest.grieving_mother.reading_door_slam
+  name: The Grieving Mother — door-slam reading permission
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — door-slam reading permission
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Do not read this quest until triggered; read the next paragraph only after the first
+    turn of combat.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    quest_triggered:
+      type: boolean
+      role: input
+      description: Side quest was triggered.
+    first_turn_finished:
+      type: boolean
+      role: input
+      description: First combat turn finished.
+    door_slam_text_readable:
+      type: boolean
+      role: output
+      description: Permission to read the door-slam paragraph.
+  effects:
+    - type: set
+      target: door_slam_text_readable
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quest_triggered
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_turn_finished
+        right:
+          type: literal
+          value: true
+- id: core.quest.grieving_mother.setup
+  name: The Grieving Mother — setup
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: The Grieving Mother — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Return the son’s remains for burial in the family grave on the estate. Location: same
+    dungeon as the next quest. Add one Side Quest Card to the pile. Encounters are defined by the
+    main quest.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    objective:
+      type: string
+      role: output
+      description: Printed side-quest task.
+    location:
+      type: string
+      role: output
+      description: Location relative to the main quest.
+    side_quest_cards_to_add:
+      type: number
+      role: output
+      description: One additional card; lifecycle inserts it exactly once.
+      integer: true
+      minimum: 0
+    encounter_source:
+      type: string
+      role: output
+      description: Main quest encounter source.
+  effects:
+    - type: set
+      target: objective
+      value:
+        type: literal
+        value: bring back the son to be buried in the family grave on the estate
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: side_quest_cards_to_add
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: encounter_source
+      value:
+        type: literal
+        value: main quest
+- id: core.quest.grieving_mother.side_quest_card
+  name: The Grieving Mother — card replacement
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: The Grieving Mother — card replacement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When the Side Quest Card is drawn, put it aside and pull the next card. This card leads
+    to the side Objective Room. There is a hidden door in one wall; once in the room read The Hidden
+    Door.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    side_quest_card_drawn:
+      type: boolean
+      role: input
+      description: Whether the added Side Quest Card was drawn.
+    set_side_quest_card_aside:
+      type: boolean
+      role: output
+      description: Set the Side Quest Card aside.
+    draw_next_card:
+      type: boolean
+      role: output
+      description: Pull the next card; no invented card contents.
+    next_card_leads_to_side_objective:
+      type: boolean
+      role: output
+      description: Replacement card leads to side Objective Room.
+    hidden_door_location:
+      type: string
+      role: output
+      description: One of the walls, supplied geometry.
+    next_reading:
+      type: string
+      role: output
+      description: Printed reading instruction.
+  effects:
+    - type: set
+      target: set_side_quest_card_aside
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: draw_next_card
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_card_leads_to_side_objective
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: hidden_door_location
+      value:
+        type: literal
+        value: one of the walls
+    - type: set
+      target: next_reading
+      value:
+        type: literal
+        value: Once in the room, read The Hidden Door
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_card_drawn
+    right:
+      type: literal
+      value: true
+- id: core.quest.grieving_mother.main_quest_finished
+  name: The Grieving Mother — unfinished search
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: The Grieving Mother — unfinished search
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the quest finishes before the card is drawn, the heroes may continue trying to find
+    it or end the quest, in which case this side quest fails.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    main_quest_finished:
+      type: boolean
+      role: input
+      description: Main quest has finished.
+    side_quest_card_drawn:
+      type: boolean
+      role: input
+      description: Whether this side-quest card was drawn.
+    may_continue_search:
+      type: boolean
+      role: output
+      description: Permission to continue after the main quest ends.
+    ending_now_fails_side_quest:
+      type: boolean
+      role: output
+      description: Failure consequence if the party chooses to end now.
+  effects:
+    - type: set
+      target: may_continue_search
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ending_now_fails_side_quest
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: main_quest_finished
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_card_drawn
+        right:
+          type: literal
+          value: false
+- id: core.quest.grieving_mother.hidden_door
+  name: The Grieving Mother — hidden door
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: The Grieving Mother — hidden door
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll if locked or trapped as usual; apart from that treat the hidden door as a regular door.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    door_kind:
+      type: string
+      role: output
+      description: Regular door, despite being hidden.
+    roll_for_lock:
+      type: boolean
+      role: output
+      description: Usual lock determination.
+    roll_for_trap:
+      type: boolean
+      role: output
+      description: Usual trap determination.
+  effects:
+    - type: set
+      target: door_kind
+      value:
+        type: literal
+        value: regular door
+    - type: set
+      target: roll_for_lock
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: roll_for_trap
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: door_resolution
+      label: Usual opening/lock/trap determination
+      object_id: procedure.open_door_or_chest
+- id: core.quest.grieving_mother.objective_room
+  name: The Grieving Mother — side Objective Room
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — side Objective Room
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place R17. The opening opposite the door leads outside, and heroes may leave the
+    dungeon that way. Remains lie in one square in front of the door. Two giant spiders emerge from
+    opposite corners. A broken shield and rusty longsword lie beside the skeletal remains.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    room_tile:
+      type: string
+      role: output
+      description: Printed tile.
+    outside_opening:
+      type: string
+      role: output
+      description: Relative placement of exit.
+    may_leave_via_opening:
+      type: boolean
+      role: output
+      description: Exit permission.
+    remains_location:
+      type: string
+      role: output
+      description: One of the squares in front of the door; no invented coordinate.
+    giant_spiders:
+      type: number
+      role: output
+      description: Initial enemy count.
+      integer: true
+      minimum: 0
+    spider_placement:
+      type: string
+      role: output
+      description: Opposite corners.
+    items_beside_remains:
+      type: string
+      role: output
+      description: Described items; no invented sale values or condition statistics.
+  effects:
+    - type: set
+      target: room_tile
+      value:
+        type: literal
+        value: R17
+    - type: set
+      target: outside_opening
+      value:
+        type: literal
+        value: opposite side of the room
+    - type: set
+      target: may_leave_via_opening
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: remains_location
+      value:
+        type: literal
+        value: one of the squares in front of the door
+    - type: set
+      target: giant_spiders
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: spider_placement
+      value:
+        type: literal
+        value: opposite corners
+    - type: set
+      target: items_beside_remains
+      value:
+        type: literal
+        value: broken shield and rusty longsword
+  unresolved_references:
+    - Giant spider statistics are not printed in this quest.
+- id: core.quest.grieving_mother.door_slam
+  name: The Grieving Mother — door slams shut
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — door slams shut
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After the first turn of combat, the hidden door slams shut. Heroes inside the secret
+    chamber are trapped. The door is locked as though 10 was rolled on the Door Table.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    first_turn_finished:
+      type: boolean
+      role: input
+      description: First combat turn is finished.
+    hidden_door_closed:
+      type: boolean
+      role: output
+      description: Door slams closed.
+    door_table_result:
+      type: number
+      role: output
+      description: Treat the lock as a printed Door Table roll of 10.
+      integer: true
+      minimum: 0
+    heroes_inside_trapped:
+      type: boolean
+      role: output
+      description: Those inside are trapped with the spiders.
+  effects:
+    - type: set
+      target: hidden_door_closed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: door_table_result
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: heroes_inside_trapped
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: first_turn_finished
+    right:
+      type: literal
+      value: true
+  uses_tables:
+    - table.dungeon.door_chest_difficulty
+- id: core.quest.grieving_mother.door_access
+  name: The Grieving Mother — opening the slammed door
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — opening the slammed door
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The slammed door cannot be opened from inside until the spiders are dead. From outside
+    it can be opened if heroes open the lock or beat down the door.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    opening_from_inside:
+      type: boolean
+      role: input
+      description: Which side is attempting to open the door.
+    spiders_dead:
+      type: boolean
+      role: input
+      description: Whether the room spiders are dead.
+    lock_opened:
+      type: boolean
+      role: input
+      description: Supplied successful lock opening from outside.
+    door_beaten_down:
+      type: boolean
+      role: input
+      description: Supplied successful force outcome from outside.
+    door_opening_allowed:
+      type: boolean
+      role: output
+      description: Legal opening under the quest exception.
+  effects:
+    - type: set
+      target: door_opening_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: opening_from_inside
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spiders_dead
+            right:
+              type: literal
+              value: true
+      - type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: opening_from_inside
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lock_opened
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_beaten_down
+                right:
+                  type: literal
+                  value: true
+  dependencies:
+    - key: lock_or_force
+      label: Outside lock opening or beating down the door
+      object_id: procedure.locked_door_and_close
+- id: core.quest.grieving_mother.door_access_blocked
+  name: The Grieving Mother — blocked door opening
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — blocked door opening
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The slammed door cannot be opened from inside until the spiders are dead. From outside
+    a successful lock opening or beating down the door is required.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    opening_from_inside:
+      type: boolean
+      role: input
+      description: Side attempting to open.
+    spiders_dead:
+      type: boolean
+      role: input
+      description: Whether spiders are dead.
+    lock_opened:
+      type: boolean
+      role: input
+      description: Supplied successful lock opening.
+    door_beaten_down:
+      type: boolean
+      role: input
+      description: Supplied successful force outcome.
+    door_opening_allowed:
+      type: boolean
+      role: output
+      description: Opening is currently blocked.
+  effects:
+    - type: set
+      target: door_opening_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: not
+    condition:
+      type: any
+      conditions:
+        - type: all
+          conditions:
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: opening_from_inside
+              right:
+                type: literal
+                value: true
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: spiders_dead
+              right:
+                type: literal
+                value: true
+        - type: all
+          conditions:
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: opening_from_inside
+              right:
+                type: literal
+                value: false
+            - type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: lock_opened
+                  right:
+                    type: literal
+                    value: true
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: door_beaten_down
+                  right:
+                    type: literal
+                    value: true
+- id: core.quest.grieving_mother.remains_pickup
+  name: The Grieving Mother — picking up the remains
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — picking up the remains
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the spiders have been beaten, spend one action to place skeletal remains in one
+    backpack (ENC 8).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    spiders_beaten:
+      type: boolean
+      role: input
+      description: Required before the pickup.
+    pickup_action_cost:
+      type: number
+      role: output
+      description: One action, preserved as action rather than invented Action Points.
+      integer: true
+      minimum: 0
+    remains_enc:
+      type: number
+      role: output
+      description: ENC carried by one backpack.
+      integer: true
+      minimum: 0
+    backpacks_required:
+      type: number
+      role: output
+      description: One backpack holds the remains.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: pickup_action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: remains_enc
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: backpacks_required
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: spiders_beaten
+    right:
+      type: literal
+      value: true
+- id: core.quest.grieving_mother.wandering_spiders
+  name: The Grieving Mother — later Wandering Monsters
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — later Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: From this point forward, any Wandering Monster originates from the opening where the
+    light comes. Each Wandering Monster is 1d2 Giant spiders.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    later_wandering_monster:
+      type: boolean
+      role: input
+      description:
+        Supplied confirmation that a Wandering Monster occurs after the chosen interpretation
+        of from this point forward. Activation timing remains
+        issue.quest.grieving_mother_wandering_activation.
+    spider_roll:
+      type: number
+      role: input
+      description: Supplied 1d2 Giant spiders.
+      integer: true
+      minimum: 1
+      maximum: 2
+      dice:
+        count: 1
+        sides: 2
+    giant_spiders:
+      type: number
+      role: output
+      description: Later Wandering Monster count.
+      integer: true
+      minimum: 0
+    wandering_monster_origin:
+      type: string
+      role: output
+      description: Outside opening from which the light comes.
+  effects:
+    - type: set
+      target: giant_spiders
+      value:
+        type: field
+        name: spider_roll
+    - type: set
+      target: wandering_monster_origin
+      value:
+        type: literal
+        value: opening from where the light comes
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: later_wandering_monster
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.quest.grieving_mother_wandering_activation
+- id: core.quest.grieving_mother.failure
+  name: The Grieving Mother — failure aftermath
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — failure aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'On failure, there is automatically a Ghostly Event before the next quest, and it is #8.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    side_quest_failed:
+      type: boolean
+      role: input
+      description: Confirmed failure.
+    automatic_ghostly_event:
+      type: boolean
+      role: output
+      description: No random occurrence roll for this event.
+    next_ghostly_event:
+      type: number
+      role: output
+      description: 'Forced next event is #8.'
+      integer: true
+      minimum: 0
+    ghostly_event_time:
+      type: string
+      role: output
+      description: Before the next quest.
+  effects:
+    - type: set
+      target: automatic_ghostly_event
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_ghostly_event
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: ghostly_event_time
+      value:
+        type: literal
+        value: before the next quest
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_failed
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: restless_night
+      label: 'Ghostly Event #8, Restless Night'
+      object_id: character.settlement.ghost_event.8
+- id: core.quest.grieving_mother.success
+  name: The Grieving Mother — returned remains
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: The Grieving Mother — returned remains
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Back at the estate, bury the returned remains in the old family cemetery. The old lady
+    is never seen again. Next morning an exquisite magical Longsword with +2 DMG is found on the
+    dining table.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.estate.grieving_mother
+  fields:
+    back_at_estate:
+      type: boolean
+      role: input
+      description: Party has returned to the estate.
+    remains_buried:
+      type: boolean
+      role: input
+      description: Remains buried in the old family cemetery.
+    mother_never_seen_again:
+      type: boolean
+      role: output
+      description: Printed successful resolution.
+    reward_item:
+      type: string
+      role: output
+      description: Printed reward item.
+    reward_magical:
+      type: boolean
+      role: output
+      description: Longsword is magical.
+    reward_damage_bonus:
+      type: number
+      role: output
+      description: Additional DMG.
+      integer: true
+      minimum: 0
+    reward_time:
+      type: string
+      role: output
+      description: Next morning.
+    reward_location:
+      type: string
+      role: output
+      description: Dining table.
+  effects:
+    - type: set
+      target: mother_never_seen_again
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward_item
+      value:
+        type: literal
+        value: Longsword
+    - type: set
+      target: reward_magical
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward_damage_bonus
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: reward_time
+      value:
+        type: literal
+        value: next morning
+    - type: set
+      target: reward_location
+      value:
+        type: literal
+        value: dining table
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_at_estate
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: remains_buried
+        right:
+          type: literal
+          value: true
+  entity_id: equipment.quest.grieving_mother_longsword

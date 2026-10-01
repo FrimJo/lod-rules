@@ -1,0 +1,724 @@
+- id: core.quest.amenhotep.setup
+  name: Halls of Amenhotep — setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Quest Location: Ancient Lands, random. Number of Tiles: 6 corridors, 6 rooms. Reward:
+    500 c per hero. Encounters: Ancient Land.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Ancient Lands, random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 500
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Ancient Land
+- id: core.quest.amenhotep.standard_room_pool
+  name: Halls of Amenhotep — Standard room pool
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — Standard room pool
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If not using the ancient lands tiles, randomise rooms using R1B, R2B, R4B-R8B, R1,
+    R4-R6, R9-R11, R14, R16, R17. All corridors can be part of the mix.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    random_room_pool:
+      type: string
+      role: output
+      description: random room pool
+    all_corridors_available:
+      type: boolean
+      role: output
+      description: all corridors available
+  effects:
+    - type: set
+      target: random_room_pool
+      value:
+        type: literal
+        value: R1B, R2B, R4B-R8B, R1, R4-R6, R9-R11, R14, R16, R17
+    - type: set
+      target: all_corridors_available
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.amenhotep.furniture_reroll
+  name: Halls of Amenhotep — Furniture Chart rerolls
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — Furniture Chart rerolls
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Due to the abundance of treasure, you may re-roll 4 rolls on the furniture chart during
+    the quest. A re-roll may never be re-rolled.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    furniture_chart_roll:
+      type: boolean
+      role: input
+      description: furniture chart roll
+    already_a_reroll:
+      type: boolean
+      role: input
+      description: already a reroll
+    furniture_rerolls_used_this_quest:
+      type: number
+      role: input
+      description: furniture rerolls used this quest
+      integer: true
+    furniture_reroll_allowed:
+      type: boolean
+      role: output
+      description: furniture reroll allowed
+  effects:
+    - type: set
+      target: furniture_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: furniture_chart_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_a_reroll
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 4
+- id: core.quest.amenhotep.ancient_objective
+  name: Halls of Amenhotep — ancient setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — ancient setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Place The Ancient Throne Room. The party enters along the short edge. Roll twice on the
+    Encounter Table and place the enemies randomly in the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    entry_edge:
+      type: string
+      role: output
+      description: entry edge
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: The Ancient Throne Room
+    - type: set
+      target: entry_edge
+      value:
+        type: literal
+        value: short
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+- id: core.quest.amenhotep.ancient_awakening
+  name: Halls of Amenhotep — ancient fifth reload
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — ancient fifth reload
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The fifth time the bag is reloaded with initiative tokens, add 2 more and add two Tomb
+    Guardians as the seated statues wake up and join the fray. Place them on top of the seated
+    statues’ art on the tile. If the party wins before then the statues remain dormant.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    initiative_bag_reload_number:
+      type: number
+      role: input
+      description: initiative bag reload number
+      integer: true
+    fight_won:
+      type: boolean
+      role: input
+      description: fight won
+    initiative_tokens_to_add:
+      type: number
+      role: output
+      description: initiative tokens to add
+      integer: true
+    tomb_guardians_to_add:
+      type: number
+      role: output
+      description: tomb guardians to add
+      integer: true
+    guardian_placement:
+      type: string
+      role: output
+      description: guardian placement
+  effects:
+    - type: set
+      target: initiative_tokens_to_add
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: tomb_guardians_to_add
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: guardian_placement
+      value:
+        type: literal
+        value: on top of the seated statues’ art on the tile
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: initiative_bag_reload_number
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fight_won
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: guardians
+      label: Tomb Guardian statistics and abilities are not printed here; supplied enemy outcomes
+  issues:
+    - issue.quest.amenhotep_boundaries
+- id: core.quest.amenhotep.standard_objective
+  name: Halls of Amenhotep — standard setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — standard setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place The Throne room. The party enters along the long edge. Roll twice on the
+    Encounter Table and place the enemies randomly in the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    entry_edge:
+      type: string
+      role: output
+      description: entry edge
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: The Throne room
+    - type: set
+      target: entry_edge
+      value:
+        type: literal
+        value: long
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.amenhotep.standard_awakening
+  name: Halls of Amenhotep — standard fifth reload
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — standard fifth reload
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The fifth time the bag is reloaded with initiative tokens, add 2 more and add two Tomb
+    Guardians as the statues wake up and join the fray. Place them on top of the small statues
+    flanking the hall. If the party wins before then the statues remain dormant.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    initiative_bag_reload_number:
+      type: number
+      role: input
+      description: initiative bag reload number
+      integer: true
+    fight_won:
+      type: boolean
+      role: input
+      description: fight won
+    initiative_tokens_to_add:
+      type: number
+      role: output
+      description: initiative tokens to add
+      integer: true
+    tomb_guardians_to_add:
+      type: number
+      role: output
+      description: tomb guardians to add
+      integer: true
+    guardian_placement:
+      type: string
+      role: output
+      description: guardian placement
+  effects:
+    - type: set
+      target: initiative_tokens_to_add
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: tomb_guardians_to_add
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: guardian_placement
+      value:
+        type: literal
+        value: on top of the small statues flanking the hall
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: initiative_bag_reload_number
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fight_won
+        right:
+          type: literal
+          value: false
+  dependencies:
+    - key: guardians
+      label: Tomb Guardian statistics and abilities are not printed here; supplied enemy outcomes
+  issues:
+    - issue.quest.amenhotep_boundaries
+- id: core.quest.amenhotep.statues_dormant
+  name: Halls of Amenhotep — early victory
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — early victory
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the party somehow manages to win the fight before the fifth initiative-bag reload,
+    the statues remain dormant.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    fight_won:
+      type: boolean
+      role: input
+      description: fight won
+    initiative_bag_reload_number:
+      type: number
+      role: input
+      description: initiative bag reload number
+      integer: true
+    statues_remain_dormant:
+      type: boolean
+      role: output
+      description: statues remain dormant
+    tomb_guardians_to_add:
+      type: number
+      role: output
+      description: tomb guardians to add
+      integer: true
+  effects:
+    - type: set
+      target: statues_remain_dormant
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: tomb_guardians_to_add
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fight_won
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: initiative_bag_reload_number
+        right:
+          type: literal
+          value: 5
+- id: core.quest.amenhotep.standard_statue_square
+  name: Halls of Amenhotep — vacated Standard statue squares
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — vacated Standard statue squares
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once they move away from that square, treat the squares with statues as open.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    guardian_has_moved_from_statue_square:
+      type: boolean
+      role: input
+      description: guardian has moved from statue square
+    vacated_statue_square_is_open:
+      type: boolean
+      role: output
+      description: vacated statue square is open
+  effects:
+    - type: set
+      target: vacated_statue_square_is_open
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: guardian_has_moved_from_statue_square
+        right:
+          type: literal
+          value: true
+- id: core.quest.amenhotep.aftermath
+  name: Halls of Amenhotep — aftermath
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 270
+      printed_page: 268
+      heading: Halls of Amenhotep — aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All the evil are dead, and there is lots of loot to go through. Once done, your party
+    is ready to move on.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.amenhotep
+  fields:
+    all_evil_dead:
+      type: boolean
+      role: input
+      description: all evil dead
+    loot_available:
+      type: boolean
+      role: output
+      description: loot available
+    party_ready_to_move_on_after_looting:
+      type: boolean
+      role: output
+      description: party ready to move on after looting
+  effects:
+    - type: set
+      target: loot_available
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: party_ready_to_move_on_after_looting
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_evil_dead
+    right:
+      type: literal
+      value: true

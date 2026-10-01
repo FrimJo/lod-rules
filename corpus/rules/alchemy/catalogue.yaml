@@ -1,0 +1,5046 @@
+- id: character.alchemy.identify
+  name: identify
+  section_id: section.alchemy.identifying_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 72
+      printed_page: 70
+      heading: identify
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Found potions must be identified before use. One Alchemy attempt per hero and potion;
+    failure can be remedied in a settlement.
+  type: modifier
+  scope: global
+  fields:
+    attempts_this_hero_potion:
+      type: number
+      role: input
+      description: attempts this hero potion
+    roll:
+      type: number
+      role: input
+      description: roll
+    alchemy:
+      type: number
+      role: input
+      description: alchemy
+    identified:
+      type: boolean
+      role: output
+      description: identified
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: attempts_this_hero_potion
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: identified
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: lte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: alchemy
+- id: character.alchemy.drink
+  name: drink
+  section_id: section.alchemy.drinking_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 72
+      printed_page: 70
+      heading: drink
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Drinking requires 1 action. Stat increases last 5 turns unless otherwise stated. Keep
+    the empty bottle. Identical temporary stat potions do not stack; different stats can coexist.
+  type: modifier
+  scope: global
+  fields:
+    same_stat_potion_active:
+      type: boolean
+      role: input
+      description: same stat potion active
+    actions_spent:
+      type: number
+      role: output
+      description: actions spent
+    default_duration_turns:
+      type: number
+      role: output
+      description: default duration turns
+    keep_bottle:
+      type: boolean
+      role: output
+      description: keep bottle
+    stat_effect_applied:
+      type: boolean
+      role: output
+      description: stat effect applied
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: same_stat_potion_active
+        right:
+          type: literal
+          value: false
+    - type: set
+      target: actions_spent
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: default_duration_turns
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: keep_bottle
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: stat_effect_applied
+      value:
+        type: literal
+        value: true
+- id: character.alchemy.components
+  name: components
+  section_id: section.alchemy.components_for_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 72
+      printed_page: 70
+      heading: components
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Ingredients come from plants; parts come from defeated monsters. Harvest or purchase
+    them at Alchemists’ Guild and certain stores.
+  type: modifier
+  scope: global
+  fields:
+    ingredient_origin:
+      type: string
+      role: output
+      description: ingredient origin
+    part_origin:
+      type: string
+      role: output
+      description: part origin
+  effects:
+    - type: set
+      target: ingredient_origin
+      value:
+        type: literal
+        value: plant
+    - type: set
+      target: part_origin
+      value:
+        type: literal
+        value: defeated monster
+- id: character.alchemy.throwing
+  name: throwing
+  section_id: section.alchemy.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 72
+      printed_page: 70
+      heading: throwing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: (Tr) marks a potion used as a thrown weapon; resolution is described in Combat.
+  type: modifier
+  scope: global
+  fields: {}
+  effects:
+    - type: invoke
+      dependency: throw
+  dependencies:
+    - key: throw
+      label: Thrown preparation resolution
+      object_id: procedure.thrown_preparation
+  see_also: []
+- id: character.alchemy.gathering
+  name: gathering
+  section_id: section.alchemy.gathering_ingredients
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: gathering
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: During travel to/from quests, once per day use the highest Alchemical Skill. Success
+    rolls twice on Ingredients Table. A gathering roll 01-10 makes all ingredients Exquisite. Travel
+    procedure remains deferred.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    alchemy:
+      type: number
+      role: input
+      description: alchemy
+    ingredient_table_rolls:
+      type: number
+      role: output
+      description: ingredient table rolls
+  effects:
+    - type: set
+      target: ingredient_table_rolls
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: lte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: alchemy
+- id: character.alchemy.gathering.exquisite
+  name: exquisite
+  section_id: section.alchemy.gathering_ingredients
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: exquisite
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 01-10 when gathering makes all gathered ingredients Exquisite.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    all_exquisite:
+      type: boolean
+      role: output
+      description: all exquisite
+  effects:
+    - type: set
+      target: all_exquisite
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 10
+- id: character.alchemy.habitat.roadside
+  name: roadside
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: roadside
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: any hex including a road
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: any hex including a road
+- id: character.alchemy.habitat.plains
+  name: plains
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: plains
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: any open green hex
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: any open green hex
+- id: character.alchemy.habitat.woods
+  name: woods
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: woods
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: any hex containing trees or conceivably part of a woods
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: any hex containing trees or conceivably part of a woods
+- id: character.alchemy.habitat.water
+  name: water
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: water
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: any hex with a water feature and any adjacent hex
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: any hex with a water feature and any adjacent hex
+- id: character.alchemy.habitat.highland
+  name: highland
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: highland
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: any hex with mountain or hill features
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: any hex with mountain or hill features
+- id: character.alchemy.habitat.site
+  name: site
+  section_id: section.alchemy.habitats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: site
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: quest sites marked on map
+  type: modifier
+  scope: global
+  fields:
+    habitat_definition:
+      type: string
+      role: output
+      description: habitat definition
+  effects:
+    - type: set
+      target: habitat_definition
+      value:
+        type: literal
+        value: quest sites marked on map
+- id: character.alchemy.harvest
+  name: harvest
+  section_id: section.alchemy.harvesting_parts
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 74
+      printed_page: 72
+      heading: harvest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Passing Alchemy permits harvesting up to 3 dead enemies in LOS. An unlisted enemy
+    provides nothing usable. Quantities measure potions, not body parts.
+  type: modifier
+  scope: global
+  fields:
+    alchemy_succeeded:
+      type: boolean
+      role: input
+      description: alchemy succeeded
+    dead_enemies:
+      type: number
+      role: input
+      description: dead enemies
+    all_in_los:
+      type: boolean
+      role: input
+      description: all in los
+    listed_enemy:
+      type: boolean
+      role: input
+      description: listed enemy
+    harvest_allowed:
+      type: boolean
+      role: output
+      description: harvest allowed
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: dead_enemies
+        right:
+          type: literal
+          value: 3
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_in_los
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: listed_enemy
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: harvest_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: alchemy_succeeded
+    right:
+      type: literal
+      value: true
+- id: character.alchemy.harvest.exquisite
+  name: exquisite
+  section_id: section.alchemy.harvesting_parts
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 74
+      printed_page: 72
+      heading: exquisite
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 01-10 on the harvesting Alchemy test makes all parts from the creatures Exquisite.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    all_exquisite:
+      type: boolean
+      role: output
+      description: all exquisite
+  effects:
+    - type: set
+      target: all_exquisite
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 10
+- id: character.alchemy.ordinary.weak
+  name: weak
+  section_id: section.alchemy.quality
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
+    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    parts:
+      type: number
+      role: input
+      description: parts
+    ingredients:
+      type: number
+      role: input
+      description: ingredients
+    empty_bottle:
+      type: boolean
+      role: input
+      description: empty bottle
+    components_required:
+      type: number
+      role: output
+      description: components required
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: parts
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: ingredients
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: sum
+          values:
+            - type: field
+              name: parts
+            - type: field
+              name: ingredients
+        right:
+          type: literal
+          value: 2
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: empty_bottle
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: weak
+- id: character.alchemy.ordinary.standard
+  name: standard
+  section_id: section.alchemy.quality
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
+    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    parts:
+      type: number
+      role: input
+      description: parts
+    ingredients:
+      type: number
+      role: input
+      description: ingredients
+    empty_bottle:
+      type: boolean
+      role: input
+      description: empty bottle
+    components_required:
+      type: number
+      role: output
+      description: components required
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: parts
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: ingredients
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: sum
+          values:
+            - type: field
+              name: parts
+            - type: field
+              name: ingredients
+        right:
+          type: literal
+          value: 3
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: empty_bottle
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 3
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: standard
+- id: character.alchemy.ordinary.supreme
+  name: supreme
+  section_id: section.alchemy.quality
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
+    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    parts:
+      type: number
+      role: input
+      description: parts
+    ingredients:
+      type: number
+      role: input
+      description: ingredients
+    empty_bottle:
+      type: boolean
+      role: input
+      description: empty bottle
+    components_required:
+      type: number
+      role: output
+      description: components required
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: parts
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: ingredients
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: sum
+          values:
+            - type: field
+              name: parts
+            - type: field
+              name: ingredients
+        right:
+          type: literal
+          value: 4
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: empty_bottle
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 4
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: supreme
+- id: character.alchemy.recipe
+  name: recipe
+  section_id: section.alchemy.making_a_recipe
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: recipe
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Choose intended potion, then ingredients and parts following weak/standard/supreme requirements.
+  type: modifier
+  scope: global
+  fields:
+    quality_requirements_met:
+      type: boolean
+      role: input
+      description: quality requirements met
+    result_selection:
+      type: string
+      role: output
+      description: result selection
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality_requirements_met
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: result_selection
+      value:
+        type: literal
+        value: choose intended potion
+- id: character.alchemy.mix
+  name: mix
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: mix
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Mix with Alchemical Tools and an empty bottle, in settlement, evening travel or dungeon
+    rest. Choose quality before Alchemy roll. Recipe success creates intended potion (+10); without
+    recipe success rolls on Potions Table.
+  type: modifier
+  scope: global
+  fields:
+    has_tools:
+      type: boolean
+      role: input
+      description: has tools
+    has_bottle:
+      type: boolean
+      role: input
+      description: has bottle
+    location:
+      type: string
+      role: input
+      description: location
+    quality_before_roll:
+      type: boolean
+      role: output
+      description: quality before roll
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_tools
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_bottle
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: settlement
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: travel_evening
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: dungeon_rest
+    - type: set
+      target: quality_before_roll
+      value:
+        type: literal
+        value: true
+- id: character.alchemy.mix.recipe_bonus
+  name: recipe bonus
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: recipe bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A followed recipe adds +10 to Alchemy.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    has_recipe:
+      type: boolean
+      role: input
+      description: has recipe
+    recipe_modifier:
+      type: number
+      role: output
+      description: recipe modifier
+  effects:
+    - type: set
+      target: recipe_modifier
+      value:
+        type: literal
+        value: 10
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_recipe
+        right:
+          type: literal
+          value: true
+- id: character.alchemy.mix.exquisite_bonus
+  name: exquisite bonus
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: exquisite bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An Exquisite component adds +10 irrespective of how many are used.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    exquisite_count:
+      type: number
+      role: input
+      description: exquisite count
+    exquisite_modifier:
+      type: number
+      role: output
+      description: exquisite modifier
+  effects:
+    - type: set
+      target: exquisite_modifier
+      value:
+        type: literal
+        value: 10
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: exquisite_count
+        right:
+          type: literal
+          value: 1
+- id: character.alchemy.mix.failure
+  name: failure
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: failure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Failed Alchemy forfeits all components except bottle.
+  type: modifier
+  scope: global
+  fields:
+    succeeded:
+      type: boolean
+      role: input
+      description: succeeded
+    components_lost:
+      type: boolean
+      role: output
+      description: components lost
+    bottle_kept:
+      type: boolean
+      role: output
+      description: bottle kept
+  effects:
+    - type: set
+      target: components_lost
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bottle_kept
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: succeeded
+    right:
+      type: literal
+      value: false
+- id: character.alchemy.mix.success.random
+  name: random
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: random
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Tables of Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful recipe makes its intended potion; without a recipe roll on the Potions
+    Table. Potions resulting from your own mixing do not need identification before drinking.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    succeeded:
+      type: boolean
+      role: input
+      description: succeeded
+    has_recipe:
+      type: boolean
+      role: input
+      description: has recipe
+    result_selection:
+      type: string
+      role: output
+      description: result selection
+    identification_required:
+      type: boolean
+      role: output
+      description: identification required
+  effects:
+    - type: set
+      target: result_selection
+      value:
+        type: literal
+        value: random_potions_table
+    - type: set
+      target: identification_required
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: succeeded
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_recipe
+        right:
+          type: literal
+          value: false
+- id: character.alchemy.mix.success.recipe
+  name: recipe
+  section_id: section.alchemy.mixing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: recipe
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Tables of Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful recipe makes its intended potion; without a recipe roll on the Potions
+    Table. Potions resulting from your own mixing do not need identification before drinking.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    succeeded:
+      type: boolean
+      role: input
+      description: succeeded
+    has_recipe:
+      type: boolean
+      role: input
+      description: has recipe
+    result_selection:
+      type: string
+      role: output
+      description: result selection
+    identification_required:
+      type: boolean
+      role: output
+      description: identification required
+  effects:
+    - type: set
+      target: result_selection
+      value:
+        type: literal
+        value: recipe
+    - type: set
+      target: identification_required
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: succeeded
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_recipe
+        right:
+          type: literal
+          value: true
+- id: character.alchemy.simplified.weak
+  name: weak
+  section_id: section.alchemy.simplified
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
+    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
+    loses components. Only one potion of experience between quests.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    component_count:
+      type: number
+      role: input
+      description: component count
+    unique_count:
+      type: number
+      role: input
+      description: unique count
+    components_required:
+      type: number
+      role: output
+      description: components required
+    exquisite_modifier:
+      type: number
+      role: output
+      description: exquisite modifier
+    success_selection:
+      type: string
+      role: output
+      description: success selection
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: component_count
+        right:
+          type: literal
+          value: 4
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: unique_count
+        right:
+          type: field
+          name: component_count
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: exquisite_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: success_selection
+      value:
+        type: literal
+        value: free choice
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: weak
+- id: character.alchemy.simplified.standard
+  name: standard
+  section_id: section.alchemy.simplified
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
+    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
+    loses components. Only one potion of experience between quests.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    component_count:
+      type: number
+      role: input
+      description: component count
+    unique_count:
+      type: number
+      role: input
+      description: unique count
+    components_required:
+      type: number
+      role: output
+      description: components required
+    exquisite_modifier:
+      type: number
+      role: output
+      description: exquisite modifier
+    success_selection:
+      type: string
+      role: output
+      description: success selection
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: component_count
+        right:
+          type: literal
+          value: 6
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: unique_count
+        right:
+          type: field
+          name: component_count
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: exquisite_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: success_selection
+      value:
+        type: literal
+        value: free choice
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: standard
+- id: character.alchemy.simplified.supreme
+  name: supreme
+  section_id: section.alchemy.simplified
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
+    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
+    loses components. Only one potion of experience between quests.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    quality:
+      type: string
+      role: input
+      description: quality
+    component_count:
+      type: number
+      role: input
+      description: component count
+    unique_count:
+      type: number
+      role: input
+      description: unique count
+    components_required:
+      type: number
+      role: output
+      description: components required
+    exquisite_modifier:
+      type: number
+      role: output
+      description: exquisite modifier
+    success_selection:
+      type: string
+      role: output
+      description: success selection
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: component_count
+        right:
+          type: literal
+          value: 8
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: unique_count
+        right:
+          type: field
+          name: component_count
+    - type: set
+      target: components_required
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: exquisite_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: success_selection
+      value:
+        type: literal
+        value: free choice
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: simplified
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quality
+        right:
+          type: literal
+          value: supreme
+- id: character.alchemy.simplified.experience
+  name: experience
+  section_id: section.alchemy.simplified
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: experience
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one potion of experience can be made between each quest under Simplified Alchemy.
+  type: modifier
+  scope: global
+  fields:
+    simplified:
+      type: boolean
+      role: input
+      description: simplified
+    experience_potions_since_quest:
+      type: number
+      role: input
+      description: experience potions since quest
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lt
+        left:
+          type: field
+          name: experience_potions_since_quest
+        right:
+          type: literal
+          value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: simplified
+    right:
+      type: literal
+      value: true
+- id: character.alchemy.preparation.acidic_bomb
+  name: acidic bomb
+  section_id: section.alchemy.preparations.acidic_bomb
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: acidic bomb
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Thrown at enemy or square. Acidic damage to hit square, half to surrounding squares:
+    Weak 1d6, Standard 1d10, Supreme 1d12.'
+  type: modifier
+  scope: global
+  fields:
+    thrown:
+      type: boolean
+      role: output
+      description: thrown
+    damage_type:
+      type: string
+      role: output
+      description: damage type
+    surrounding_fraction:
+      type: number
+      role: output
+      description: surrounding fraction
+  effects:
+    - type: set
+      target: thrown
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: damage_type
+      value:
+        type: literal
+        value: acidic
+    - type: set
+      target: surrounding_fraction
+      value:
+        type: literal
+        value: 0.5
+  entity_id: equipment.alchemy.acidic_bomb
+- id: character.alchemy.preparation.alchemical_dust
+  name: alchemical dust
+  section_id: section.alchemy.preparations.alchemical_dust
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: alchemical dust
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: One use covers a room. Use before searching a room or corridor to reroll and choose best result.
+  type: modifier
+  scope: global
+  fields:
+    uses:
+      type: number
+      role: output
+      description: uses
+    search_rerolls:
+      type: number
+      role: output
+      description: search rerolls
+    selection:
+      type: string
+      role: output
+      description: selection
+  effects:
+    - type: set
+      target: uses
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: search_rerolls
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: selection
+      value:
+        type: literal
+        value: best
+  entity_id: equipment.alchemy.alchemical_dust
+- id: character.alchemy.preparation.bottle_of_experience
+  name: bottle of experience
+  section_id: section.alchemy.preparations.bottle_of_experience
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: bottle of experience
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Instantly grants 300 XP. Only one may be consumed by a hero between each dungeon.
+  type: modifier
+  scope: global
+  fields:
+    xp:
+      type: number
+      role: output
+      description: xp
+    maximum_between_dungeons:
+      type: number
+      role: output
+      description: maximum between dungeons
+  effects:
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: maximum_between_dungeons
+      value:
+        type: literal
+        value: 1
+  entity_id: equipment.alchemy.bottle_of_experience
+- id: character.alchemy.preparation.bottle_of_the_void
+  name: bottle of the void
+  section_id: section.alchemy.preparations.bottle_of_the_void
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: bottle of the void
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Open rather than consume. Any spell during the battle suffers -20 on top of CL modifier.
+  type: modifier
+  scope: global
+  fields:
+    spell_modifier:
+      type: number
+      role: output
+      description: spell modifier
+    duration:
+      type: string
+      role: output
+      description: duration
+    consume:
+      type: boolean
+      role: output
+      description: consume
+  effects:
+    - type: set
+      target: spell_modifier
+      value:
+        type: literal
+        value: -20
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: battle
+    - type: set
+      target: consume
+      value:
+        type: literal
+        value: false
+  entity_id: equipment.alchemy.bottle_of_the_void
+- id: character.alchemy.preparation.elixir_of_speed
+  name: elixir of speed
+  section_id: section.alchemy.preparations.elixir_of_speed
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: elixir of speed
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Movement +1 for rest of dungeon or until end of skirmish; no effect on Overland Map.
+  type: modifier
+  scope: global
+  fields:
+    movement_bonus:
+      type: number
+      role: output
+      description: movement bonus
+    duration:
+      type: string
+      role: output
+      description: duration
+    overland_effect:
+      type: boolean
+      role: output
+      description: overland effect
+  effects:
+    - type: set
+      target: movement_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: dungeon or skirmish
+    - type: set
+      target: overland_effect
+      value:
+        type: literal
+        value: false
+  entity_id: equipment.alchemy.elixir_of_speed
+- id: character.alchemy.preparation.elixir_of_the_archer
+  name: elixir of the archer
+  section_id: section.alchemy.preparations.elixir_of_the_archer
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: elixir of the archer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Coat one Ranged Weapon during travel or in dungeon for +1 DMG until next dungeon exit.
+  type: modifier
+  scope: global
+  fields:
+    weapons:
+      type: number
+      role: output
+      description: weapons
+    weapon_kind:
+      type: string
+      role: output
+      description: weapon kind
+    damage_bonus:
+      type: number
+      role: output
+      description: damage bonus
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: weapons
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: weapon_kind
+      value:
+        type: literal
+        value: ranged
+    - type: set
+      target: damage_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: until_dungeon_exit
+  entity_id: equipment.alchemy.elixir_of_the_archer
+- id: character.alchemy.preparation.firebomb
+  name: firebomb
+  section_id: section.alchemy.preparations.firebomb
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: firebomb
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Thrown at enemy or square. Fire Damage to hit square, half to surrounding squares:
+    Weak 1d6, Standard 1d10, Supreme 1d12.'
+  type: modifier
+  scope: global
+  fields:
+    thrown:
+      type: boolean
+      role: output
+      description: thrown
+    damage_type:
+      type: string
+      role: output
+      description: damage type
+    surrounding_fraction:
+      type: number
+      role: output
+      description: surrounding fraction
+  effects:
+    - type: set
+      target: thrown
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: damage_type
+      value:
+        type: literal
+        value: Fire
+    - type: set
+      target: surrounding_fraction
+      value:
+        type: literal
+        value: 0.5
+  entity_id: equipment.alchemy.firebomb
+- id: character.alchemy.preparation.liquid_fire
+  name: liquid fire
+  section_id: section.alchemy.preparations.liquid_fire
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: liquid fire
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Pour on close-combat weapon, causing Fire Damage for rest of battle.
+  type: modifier
+  scope: global
+  fields:
+    weapon_kind:
+      type: string
+      role: output
+      description: weapon kind
+    damage_type:
+      type: string
+      role: output
+      description: damage type
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: weapon_kind
+      value:
+        type: literal
+        value: close combat
+    - type: set
+      target: damage_type
+      value:
+        type: literal
+        value: Fire
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: battle
+  entity_id: equipment.alchemy.liquid_fire
+- id: character.alchemy.preparation.poison
+  name: poison
+  section_id: section.alchemy.preparations.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Apply to a weapon at any time; evaporates at next battle end even without a strike.
+    Alternatively poisons 5 projectiles, dipped as part of reloading without extra AP or time limit.
+    Enemies losing HP lose 1 HP each turn for rest of battle.
+  type: modifier
+  scope: global
+  fields:
+    projectiles:
+      type: number
+      role: output
+      description: projectiles
+    reloading_extra_ap:
+      type: number
+      role: output
+      description: reloading extra ap
+    hp_loss_each_turn:
+      type: number
+      role: output
+      description: hp loss each turn
+    trigger:
+      type: string
+      role: output
+      description: trigger
+    duration:
+      type: string
+      role: output
+      description: duration
+    unused_weapon_expiry:
+      type: string
+      role: output
+      description: unused weapon expiry
+    projectile_time_limit:
+      type: boolean
+      role: output
+      description: projectile time limit
+  effects:
+    - type: set
+      target: projectiles
+      value:
+        type: literal
+        value: 5
+    - type: set
+      target: reloading_extra_ap
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: hp_loss_each_turn
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: trigger
+      value:
+        type: literal
+        value: enemy loses HP to weapon
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: battle
+    - type: set
+      target: unused_weapon_expiry
+      value:
+        type: literal
+        value: next battle end
+    - type: set
+      target: projectile_time_limit
+      value:
+        type: literal
+        value: false
+  entity_id: equipment.alchemy.poison
+- id: character.alchemy.preparation.potion_of_constitution
+  name: potion of constitution
+  section_id: section.alchemy.preparations.potion_of_constitution
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: potion of constitution
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +10/+15/+20 CON until current battle end, or next battle
+    end if used outside battle.
+  type: modifier
+  scope: global
+  fields:
+    stat:
+      type: string
+      role: output
+      description: stat
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: CON
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle
+  entity_id: equipment.alchemy.potion_of_constitution
+- id: character.alchemy.preparation.potion_of_courage
+  name: potion of courage
+  section_id: section.alchemy.preparations.potion_of_courage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: potion of courage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: Potion of Courage (continued)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +10/+15/+20 RES until current battle end, or next battle
+    end if used outside battle.
+  type: modifier
+  scope: global
+  fields:
+    stat:
+      type: string
+      role: output
+      description: stat
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: RES
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle
+  entity_id: equipment.alchemy.potion_of_courage
+- id: character.alchemy.preparation.potion_of_cure_disease
+  name: potion of cure disease
+  section_id: section.alchemy.preparations.potion_of_cure_disease
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of cure disease
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak succeeds 75%; Standard and Supreme 100%. Removes disease and all its negative
+    effects. Supreme also heals 1d3 HP.
+  type: modifier
+  scope: global
+  fields:
+    removes:
+      type: string
+      role: output
+      description: removes
+  effects:
+    - type: set
+      target: removes
+      value:
+        type: literal
+        value: disease and negative effects
+  entity_id: equipment.alchemy.potion_of_cure_disease
+- id: character.alchemy.preparation.potion_of_cure_poison
+  name: potion of cure poison
+  section_id: section.alchemy.preparations.potion_of_cure_poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of cure poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Antidote. Weak succeeds 75%; Standard and Supreme 100%. Removes poison effect. Supreme
+    also heals 1d3 HP.
+  type: modifier
+  scope: global
+  fields:
+    removes:
+      type: string
+      role: output
+      description: removes
+  effects:
+    - type: set
+      target: removes
+      value:
+        type: literal
+        value: poison effect
+  entity_id: equipment.alchemy.potion_of_cure_poison
+- id: character.alchemy.preparation.potion_of_disorientation
+  name: potion of disorientation
+  section_id: section.alchemy.preparations.potion_of_disorientation
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of disorientation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Thrown. Model in square hit must pass RES or forfeit next turn. Adjacent models test
+    RES+20. Does not work on undead.
+  type: modifier
+  scope: global
+  fields:
+    thrown:
+      type: boolean
+      role: output
+      description: thrown
+    hit_test_modifier:
+      type: number
+      role: output
+      description: hit test modifier
+    adjacent_test_modifier:
+      type: number
+      role: output
+      description: adjacent test modifier
+    undead_immune:
+      type: boolean
+      role: output
+      description: undead immune
+    failure:
+      type: string
+      role: output
+      description: failure
+  effects:
+    - type: set
+      target: thrown
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: hit_test_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: adjacent_test_modifier
+      value:
+        type: literal
+        value: 20
+    - type: set
+      target: undead_immune
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: failure
+      value:
+        type: literal
+        value: forfeit next turn
+  entity_id: equipment.alchemy.potion_of_disorientation
+- id: character.alchemy.preparation.potion_of_dexterity
+  name: potion of dexterity
+  section_id: section.alchemy.preparations.potion_of_dexterity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of dexterity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +5/+10/+15 DEX and same modifier to all DEX based skills.
+    Lasts until current battle end or next battle end if outside battle.
+  type: modifier
+  scope: global
+  fields:
+    stat:
+      type: string
+      role: output
+      description: stat
+    affects_based_skills:
+      type: boolean
+      role: output
+      description: affects based skills
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: DEX
+    - type: set
+      target: affects_based_skills
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle
+  entity_id: equipment.alchemy.potion_of_dexterity
+- id: character.alchemy.preparation.potion_of_dragons_breath
+  name: potion of dragons breath
+  section_id: section.alchemy.preparations.potion_of_dragons_breath
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of dragons breath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Breathe fire once, range 2 squares. Either 1d8 Fire in adjacent square, or 1d4 Fire in
+    adjacent square and one square adjacent to it. Can form line or two connected squares adjacent
+    to hero. Diagram includes diagonal squares; caption prints 2dx1d4.
+  type: modifier
+  scope: global
+  fields:
+    uses:
+      type: number
+      role: output
+      description: uses
+    range:
+      type: number
+      role: output
+      description: range
+    single_square:
+      type: string
+      role: output
+      description: single square
+    two_squares:
+      type: string
+      role: output
+      description: two squares
+    geometry:
+      type: string
+      role: output
+      description: geometry
+  effects:
+    - type: set
+      target: uses
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: range
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: single_square
+      value:
+        type: literal
+        value: 1d8 Fire
+    - type: set
+      target: two_squares
+      value:
+        type: literal
+        value: 1d4 Fire each
+    - type: set
+      target: geometry
+      value:
+        type: literal
+        value: adjacent square plus adjacent to that square; diagram also diagonal
+  entity_id: equipment.alchemy.potion_of_dragons_breath
+- id: character.alchemy.preparation.potion_of_dragon_skin
+  name: potion of dragon skin
+  section_id: section.alchemy.preparations.potion_of_dragon_skin
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of dragon skin
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For 3 turns ignore all damage except spells or poison. Armour may still be damaged
+    normally; no HP deducted for ignored damage.
+  type: modifier
+  scope: global
+  fields:
+    duration_turns:
+      type: number
+      role: output
+      description: duration turns
+    exceptions:
+      type: string
+      role: output
+      description: exceptions
+    armour_damage_allowed:
+      type: boolean
+      role: output
+      description: armour damage allowed
+  effects:
+    - type: set
+      target: duration_turns
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: exceptions
+      value:
+        type: literal
+        value: spells or poison
+    - type: set
+      target: armour_damage_allowed
+      value:
+        type: literal
+        value: true
+  entity_id: equipment.alchemy.potion_of_dragon_skin
+- id: character.alchemy.preparation.potion_of_energy
+  name: potion of energy
+  section_id: section.alchemy.preparations.potion_of_energy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: potion of energy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +1/+2/+3 Energy until end of dungeon or skirmish.
+  type: modifier
+  scope: global
+  fields:
+    duration:
+      type: string
+      role: output
+      description: duration
+    stat:
+      type: string
+      role: output
+      description: stat
+  effects:
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: dungeon or skirmish
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: Energy
+  entity_id: equipment.alchemy.potion_of_energy
+- id: character.alchemy.preparation.potion_of_fire_protection
+  name: potion of fire protection
+  section_id: section.alchemy.preparations.potion_of_fire_protection
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of fire protection
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Any hero that drinks this becomes impervious to Fire Damage. All DMG caused by fire is
+    reduced by 1d10. Make a separate roll each time the hero is attacked. It lasts until the end of
+    the current battle. If not in battle, it lasts until the end of the next battle.
+  type: modifier
+  scope: global
+  fields:
+    reduction_dice:
+      type: string
+      role: output
+      description: reduction dice
+    reroll:
+      type: string
+      role: output
+      description: reroll
+    damage_type:
+      type: string
+      role: output
+      description: damage type
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: reduction_dice
+      value:
+        type: literal
+        value: 1d10
+    - type: set
+      target: reroll
+      value:
+        type: literal
+        value: each attack
+    - type: set
+      target: damage_type
+      value:
+        type: literal
+        value: Fire
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle
+  entity_id: equipment.alchemy.potion_of_fire_protection
+  issues:
+    - issue.alchemy.fire_protection
+- id: character.alchemy.preparation.potion_of_health
+  name: potion of health
+  section_id: section.alchemy.preparations.potion_of_health
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of health
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak, Standard and Supreme restore 1d4, 1d6 and 1d10 HP respectively.
+  type: modifier
+  scope: global
+  fields:
+    resource:
+      type: string
+      role: output
+      description: resource
+  effects:
+    - type: set
+      target: resource
+      value:
+        type: literal
+        value: HP
+  entity_id: equipment.alchemy.potion_of_health
+- id: character.alchemy.preparation.potion_of_mana
+  name: potion of mana
+  section_id: section.alchemy.preparations.potion_of_mana
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of mana
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak, Standard and Supreme restore 1d20, 2d20 and 3d20 Mana respectively.
+  type: modifier
+  scope: global
+  fields:
+    resource:
+      type: string
+      role: output
+      description: resource
+  effects:
+    - type: set
+      target: resource
+      value:
+        type: literal
+        value: Mana
+  entity_id: equipment.alchemy.potion_of_mana
+- id: character.alchemy.preparation.vial_of_invisibility
+  name: vial of invisibility
+  section_id: section.alchemy.preparations.vial_of_invisibility
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: vial of invisibility
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Invisible for one battle and unable to fight. Remove hero until battle end, then return
+    to any chosen square in original room or corridor.
+  type: modifier
+  scope: global
+  fields:
+    can_fight:
+      type: boolean
+      role: output
+      description: can fight
+    remove_from_table:
+      type: boolean
+      role: output
+      description: remove from table
+    duration:
+      type: string
+      role: output
+      description: duration
+    return_location:
+      type: string
+      role: output
+      description: return location
+  effects:
+    - type: set
+      target: can_fight
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: remove_from_table
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: battle
+    - type: set
+      target: return_location
+      value:
+        type: literal
+        value: chosen square in original room or corridor
+  entity_id: equipment.alchemy.vial_of_invisibility
+- id: character.alchemy.preparation.potion_of_rage
+  name: potion of rage
+  section_id: section.alchemy.preparations.potion_of_rage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of rage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Grants Frenzy Perk effect without paying Energy for one battle.
+  type: modifier
+  scope: global
+  fields:
+    energy_spent:
+      type: number
+      role: output
+      description: energy spent
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: energy_spent
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: battle
+    - type: invoke
+      dependency: frenzy
+  entity_id: equipment.alchemy.potion_of_rage
+  dependencies:
+    - key: frenzy
+      label: Frenzy effects; Energy waived by potion
+      object_id: perk.frenzy
+- id: character.alchemy.preparation.potion_of_restoration
+  name: potion of restoration
+  section_id: section.alchemy.preparations.potion_of_restoration
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of restoration
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Restores hero to full health and removes any disease or poison.
+  type: modifier
+  scope: global
+  fields:
+    health_restored:
+      type: string
+      role: output
+      description: health restored
+    remove_disease:
+      type: boolean
+      role: output
+      description: remove disease
+    remove_poison:
+      type: boolean
+      role: output
+      description: remove poison
+  effects:
+    - type: set
+      target: health_restored
+      value:
+        type: literal
+        value: full
+    - type: set
+      target: remove_disease
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: remove_poison
+      value:
+        type: literal
+        value: true
+  entity_id: equipment.alchemy.potion_of_restoration
+  dependencies:
+    - key: recovery_bounds
+      label: Existing recovery boundaries; explicit spell exceptions remain local
+      object_id: character.recovery.hp_overflow
+- id: character.alchemy.preparation.potion_of_strength
+  name: potion of strength
+  section_id: section.alchemy.preparations.potion_of_strength
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of strength
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +10/+15/+20 Strength. Text says until next battle and
+    current battle; between battles lasts next battle or dungeon end if no more battles.
+  type: modifier
+  scope: global
+  fields:
+    stat:
+      type: string
+      role: output
+      description: stat
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: STR
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle_or_dungeon_end
+  entity_id: equipment.alchemy.potion_of_strength
+- id: character.alchemy.preparation.potion_of_wisdom
+  name: potion of wisdom
+  section_id: section.alchemy.preparations.potion_of_wisdom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of wisdom
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weak/Standard/Supreme grant +10/+15/+20 WIS and all WIS based skills. Current battle
+    end; between battles next battle end or dungeon end if no more battles.
+  type: modifier
+  scope: global
+  fields:
+    stat:
+      type: string
+      role: output
+      description: stat
+    affects_based_skills:
+      type: boolean
+      role: output
+      description: affects based skills
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: stat
+      value:
+        type: literal
+        value: WIS
+    - type: set
+      target: affects_based_skills
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: current_or_next_battle_or_dungeon_end
+  entity_id: equipment.alchemy.potion_of_wisdom
+- id: character.alchemy.preparation.vial_of_corrosion
+  name: vial of corrosion
+  section_id: section.alchemy.preparations.vial_of_corrosion
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: vial of corrosion
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: One quality; one vial opens one lock automatically. Spend one action adjacent to door.
+  type: modifier
+  scope: global
+  fields:
+    actions_spent:
+      type: number
+      role: output
+      description: actions spent
+    locks_opened:
+      type: number
+      role: output
+      description: locks opened
+    adjacent_to_door_required:
+      type: boolean
+      role: output
+      description: adjacent to door required
+  effects:
+    - type: set
+      target: actions_spent
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: locks_opened
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: adjacent_to_door_required
+      value:
+        type: literal
+        value: true
+  entity_id: equipment.alchemy.vial_of_corrosion
+- id: character.alchemy.preparation.potion_of_smoke
+  name: potion of smoke
+  section_id: section.alchemy.preparations.potion_of_smoke
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: potion of smoke
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Thrown; obscures LOS in hit square and 8 surrounding squares. Fighting in smoke at -20
+    CS; shooting through impossible. Lasts 4 turns.
+  type: modifier
+  scope: global
+  fields:
+    thrown:
+      type: boolean
+      role: output
+      description: thrown
+    surrounding_squares:
+      type: number
+      role: output
+      description: surrounding squares
+    cs_modifier:
+      type: number
+      role: output
+      description: cs modifier
+    shooting_through_allowed:
+      type: boolean
+      role: output
+      description: shooting through allowed
+    duration_turns:
+      type: number
+      role: output
+      description: duration turns
+  effects:
+    - type: set
+      target: thrown
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: surrounding_squares
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: cs_modifier
+      value:
+        type: literal
+        value: -20
+    - type: set
+      target: shooting_through_allowed
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: duration_turns
+      value:
+        type: literal
+        value: 4
+  entity_id: equipment.alchemy.potion_of_smoke
+- id: character.alchemy.preparation.weapon_oil
+  name: weapon oil
+  section_id: section.alchemy.preparations.weapon_oil
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: weapon oil
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Coat one edged weapon during travel or in dungeon for +1 DMG until next dungeon exit.
+  type: modifier
+  scope: global
+  fields:
+    weapons:
+      type: number
+      role: output
+      description: weapons
+    weapon_kind:
+      type: string
+      role: output
+      description: weapon kind
+    damage_bonus:
+      type: number
+      role: output
+      description: damage bonus
+    duration:
+      type: string
+      role: output
+      description: duration
+  effects:
+    - type: set
+      target: weapons
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: weapon_kind
+      value:
+        type: literal
+        value: edged
+    - type: set
+      target: damage_bonus
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: duration
+      value:
+        type: literal
+        value: until_dungeon_exit
+  entity_id: equipment.alchemy.weapon_oil
+- id: character.alchemy.quality_effect.acidic_bomb.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.acidic_bomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.acidic_bomb.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d10
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.acidic_bomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.acidic_bomb.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d12
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.acidic_bomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.firebomb.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.firebomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.firebomb.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d10
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.firebomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.firebomb.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d12
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.firebomb
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_constitution.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_constitution
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_constitution.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_constitution
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_constitution.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 20
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_constitution
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_courage.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_courage
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_courage.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_courage
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_courage.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 79
+      printed_page: 77
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 20
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_courage
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_disease.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 75
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: none
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_cure_disease
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_disease.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: none
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_cure_disease
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_disease.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: 1d3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_cure_disease
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_poison.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 75
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: none
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_cure_poison
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_poison.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: none
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_cure_poison
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_cure_poison.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    success_chance:
+      type: number
+      role: output
+      description: success chance
+    bonus_healing_dice:
+      type: string
+      role: output
+      description: bonus healing dice
+  effects:
+    - type: set
+      target: success_chance
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: bonus_healing_dice
+      value:
+        type: literal
+        value: 1d3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_cure_poison
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_dexterity.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 5
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_dexterity
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_dexterity.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_dexterity
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_dexterity.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_dexterity
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_energy.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_energy
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_energy.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_energy
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_energy.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 3
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_energy
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_health.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d4
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_health
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_health.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_health
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_health.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d10
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_health
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_mana.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 1d20
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_mana
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_mana.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 2d20
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_mana
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_mana.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    effect_roll:
+      type: number
+      role: input
+      description: effect roll
+    effect_dice:
+      type: string
+      role: output
+      description: effect dice
+    amount:
+      type: number
+      role: output
+      description: amount
+  effects:
+    - type: set
+      target: effect_dice
+      value:
+        type: literal
+        value: 3d20
+    - type: set
+      target: amount
+      value:
+        type: field
+        name: effect_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_mana
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_strength.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_strength
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_strength.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_strength
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_strength.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 20
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_strength
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_wisdom.weak
+  name: weak
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: weak
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: weak
+  entity_id: equipment.alchemy.potion_of_wisdom
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_wisdom.standard
+  name: standard
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 15
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: standard
+  entity_id: equipment.alchemy.potion_of_wisdom
+  uses_tables:
+    - table.alchemy.strengths
+- id: character.alchemy.quality_effect.potion_of_wisdom.supreme
+  name: supreme
+  section_id: section.alchemy.preparations
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: supreme
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  type: modifier
+  scope: global
+  fields:
+    quality:
+      type: string
+      role: input
+      description: quality
+    stat_bonus:
+      type: number
+      role: output
+      description: stat bonus
+  effects:
+    - type: set
+      target: stat_bonus
+      value:
+        type: literal
+        value: 20
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quality
+    right:
+      type: literal
+      value: supreme
+  entity_id: equipment.alchemy.potion_of_wisdom
+  uses_tables:
+    - table.alchemy.strengths

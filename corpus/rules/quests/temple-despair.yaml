@@ -1,0 +1,943 @@
+- id: core.quest.temple_despair.setup
+  name: Temple of Despair — setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'The High Priest asks heroes to examine the site and bring back any artefacts related
+    to the Ancient Gods. Quest Location: Ancient Lands, random. Number of tiles: 6 corridors, 6
+    rooms (not R33). Reward: Any loot found. Encounters: Ancient Lands.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    random_room_exclusion:
+      type: string
+      role: output
+      description: random room exclusion
+    reward:
+      type: string
+      role: output
+      description: reward
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Ancient Lands, random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: random_room_exclusion
+      value:
+        type: literal
+        value: R33
+    - type: set
+      target: reward
+      value:
+        type: literal
+        value: Any loot found
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Ancient Lands
+- id: core.quest.temple_despair.standard_room_pool
+  name: Temple of Despair — standard room pool
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — standard room pool
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Without Ancient Lands tiles randomise rooms from R1B, R2B, R4B-8B, R1, R4, R5, R9-R11,
+    R14, R16, R17.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    random_room_pool:
+      type: string
+      role: output
+      description: random room pool
+  effects:
+    - type: set
+      target: random_room_pool
+      value:
+        type: literal
+        value: R1B, R2B, R4B-8B, R1, R4, R5, R9-R11, R14, R16, R17
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.temple_despair.furniture_reroll
+  name: Temple of Despair — Furniture Chart rerolls
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — Furniture Chart rerolls
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    You may re-roll 4 rolls on the furniture chart during the quest. A re-roll may never be
+    re-rolled.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    furniture_chart_roll:
+      type: boolean
+      role: input
+      description: furniture chart roll
+    already_a_reroll:
+      type: boolean
+      role: input
+      description: already a reroll
+    furniture_rerolls_used_this_quest:
+      type: number
+      role: input
+      description: furniture rerolls used this quest
+      integer: true
+    furniture_reroll_allowed:
+      type: boolean
+      role: output
+      description: furniture reroll allowed
+  effects:
+    - type: set
+      target: furniture_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: furniture_chart_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_a_reroll
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 4
+- id: core.quest.temple_despair.side_quest_card
+  name: Temple of Despair — side quest card
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — side quest card
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Add a side quest card randomly to the deck, so it could be anywhere in the deck. If it
+    is drawn, read the paragraph below.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    side_quest_cards_to_add:
+      type: number
+      role: output
+      description: side quest cards to add
+      integer: true
+    side_quest_card_position:
+      type: string
+      role: output
+      description: side quest card position
+  effects:
+    - type: set
+      target: side_quest_cards_to_add
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: side_quest_card_position
+      value:
+        type: literal
+        value: random; anywhere in the deck
+- id: core.quest.temple_despair.last_card
+  name: Temple of Despair — last card exception
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — last card exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If this is the last card in the pile, remove it and ignore the effect. Setup identifies
+    the Secondary Objective card as the one removed for being last.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    side_quest_card_drawn:
+      type: boolean
+      role: input
+      description: side quest card drawn
+    side_quest_card_is_last:
+      type: boolean
+      role: input
+      description: side quest card is last
+    secondary_objective_removed_as_last:
+      type: boolean
+      role: output
+      description: secondary objective removed as last
+    secondary_objective_effect_ignored:
+      type: boolean
+      role: output
+      description: secondary objective effect ignored
+  effects:
+    - type: set
+      target: secondary_objective_removed_as_last
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: secondary_objective_effect_ignored
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_card_drawn
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_card_is_last
+        right:
+          type: literal
+          value: true
+- id: core.quest.temple_despair.secondary_objective
+  name: Temple of Despair — Secondary Objective
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — Secondary Objective
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Immediately draw the next exploration card. In this room the party encounters the old
+    hierophant and his Wraiths. Ignore this effect if the card is last in the pile.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    side_quest_card_drawn:
+      type: boolean
+      role: input
+      description: side quest card drawn
+    side_quest_card_is_last:
+      type: boolean
+      role: input
+      description: side quest card is last
+    exploration_cards_to_draw:
+      type: number
+      role: output
+      description: exploration cards to draw
+      integer: true
+    secondary_encounter_required:
+      type: boolean
+      role: output
+      description: secondary encounter required
+    secondary_enemy_placement:
+      type: string
+      role: output
+      description: secondary enemy placement
+  effects:
+    - type: set
+      target: exploration_cards_to_draw
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: secondary_encounter_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: secondary_enemy_placement
+      value:
+        type: literal
+        value: in this room
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_card_drawn
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: side_quest_card_is_last
+        right:
+          type: literal
+          value: false
+- id: core.quest.temple_despair.secondary_creatures
+  name: Temple of Despair — hierophant and Wraiths
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — hierophant and Wraiths
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Mummy Priest wields a staff and has Armour 1. He has 3 close combat spells, 2
+    ranged spells, 1 support spell plus the Raise Dead spell. The Wraiths are armed with cursed
+    greatswords.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    hierophant_type:
+      type: string
+      role: output
+      description: hierophant type
+    hierophant_weapon:
+      type: string
+      role: output
+      description: hierophant weapon
+    hierophant_armour:
+      type: number
+      role: output
+      description: hierophant armour
+      integer: true
+    hierophant_close_combat_spells:
+      type: number
+      role: output
+      description: hierophant close combat spells
+      integer: true
+    hierophant_ranged_spells:
+      type: number
+      role: output
+      description: hierophant ranged spells
+      integer: true
+    hierophant_support_spells:
+      type: number
+      role: output
+      description: hierophant support spells
+      integer: true
+    hierophant_additional_spell:
+      type: string
+      role: output
+      description: hierophant additional spell
+    wraith_weapons:
+      type: string
+      role: output
+      description: wraith weapons
+  effects:
+    - type: set
+      target: hierophant_type
+      value:
+        type: literal
+        value: Mummy Priest
+    - type: set
+      target: hierophant_weapon
+      value:
+        type: literal
+        value: staff
+    - type: set
+      target: hierophant_armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: hierophant_close_combat_spells
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: hierophant_ranged_spells
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: hierophant_support_spells
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: hierophant_additional_spell
+      value:
+        type: literal
+        value: Raise Dead
+    - type: set
+      target: wraith_weapons
+      value:
+        type: literal
+        value: cursed greatswords
+  dependencies:
+    - key: staff
+      label: Staff
+      object_id: equipment.weapon.staff
+    - key: greatsword
+      label: Greatsword; quest specifies cursed weapons
+      object_id: equipment.weapon.greatsword
+    - key: raise_dead
+      label: Raise Dead
+      object_id: spell.raise_dead
+  issues:
+    - issue.quest.temple_despair_boundaries
+- id: core.quest.temple_despair.ancient_objective_setup
+  name: Temple of Despair — Ancient Land setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — Ancient Land setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place R33. The Objective Room is a chapel or other place of worship.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: R33
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: chapel or other place of worship
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+- id: core.quest.temple_despair.objective_encounter
+  name: Temple of Despair — ordinary Objective Room encounter
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — ordinary Objective Room encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: 'Setup: Standard dungeon tiles'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll once on the Encounter Table and place the enemies randomly in the room. If the
+    Secondary Objective card was removed because it was last, those creatures replace this roll.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    objective_room_entered:
+      type: boolean
+      role: input
+      description: objective room entered
+    secondary_objective_removed_as_last:
+      type: boolean
+      role: input
+      description: secondary objective removed as last
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+  effects:
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_room_entered
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: secondary_objective_removed_as_last
+        right:
+          type: literal
+          value: false
+- id: core.quest.temple_despair.replacement_encounter
+  name: Temple of Despair — replacement Objective Room encounter
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 268
+      printed_page: 266
+      heading: Temple of Despair — replacement Objective Room encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: 'Setup: Standard dungeon tiles'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the Secondary Objective card was removed because it was last in the pile, those
+    creatures appear in the Objective Room instead, overriding the normal Encounter roll.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    objective_room_entered:
+      type: boolean
+      role: input
+      description: objective room entered
+    secondary_objective_removed_as_last:
+      type: boolean
+      role: input
+      description: secondary objective removed as last
+    normal_encounter_roll_used:
+      type: boolean
+      role: output
+      description: normal encounter roll used
+    secondary_creatures_in_objective_room:
+      type: boolean
+      role: output
+      description: secondary creatures in objective room
+  effects:
+    - type: set
+      target: normal_encounter_roll_used
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: secondary_creatures_in_objective_room
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_room_entered
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: secondary_objective_removed_as_last
+        right:
+          type: literal
+          value: true
+  overrides:
+    - core.quest.temple_despair.objective_encounter
+  dependencies:
+    - key: creatures
+      label: Secondary Objective creatures
+      object_id: core.quest.temple_despair.secondary_creatures
+- id: core.quest.temple_despair.standard_objective_setup
+  name: Temple of Despair — Standard setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: Temple of Despair — Standard setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place R6. The Objective Room is a chapel or other place of worship.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: R6
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: chapel or other place of worship
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.temple_despair.books
+  name: Temple of Despair — aftermath books
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: Temple of Despair — aftermath books
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    There are several dusty and thick old books in the chamber. These could be valuable to
+    the High Priests. The heroes fill their backpacks and head out of the temple.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    temple_aftermath_reached:
+      type: boolean
+      role: input
+      description: temple aftermath reached
+    old_books_collected:
+      type: boolean
+      role: output
+      description: old books collected
+  effects:
+    - type: set
+      target: old_books_collected
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: temple_aftermath_reached
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: books
+      label: Old books from the temple
+      object_id: equipment.quest.temple_despair_books
+- id: core.quest.temple_despair.curse
+  name: Temple of Despair — one curse on each hero
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: Temple of Despair — one curse on each hero
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The Ancient Gods place a curse on each hero. Randomise a curse for each character using
+    the Curses Table. These curses are in effect until the heroes leave their next dungeon.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    temple_aftermath_reached:
+      type: boolean
+      role: input
+      description: temple aftermath reached
+    curses_to_randomise_for_this_hero:
+      type: number
+      role: output
+      description: curses to randomise for this hero
+      integer: true
+    temple_curse_active:
+      type: boolean
+      role: output
+      description: temple curse active
+    temple_curse_duration:
+      type: string
+      role: output
+      description: temple curse duration
+  effects:
+    - type: set
+      target: curses_to_randomise_for_this_hero
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: temple_curse_active
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: temple_curse_duration
+      value:
+        type: literal
+        value: until this hero leaves their next dungeon
+    - type: invoke
+      dependency: curses
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: temple_aftermath_reached
+    right:
+      type: literal
+      value: true
+  uses_tables:
+    - table.treasure.curses
+  dependencies:
+    - key: curses
+      label: Randomise a curse for each character using the Curses Table
+      object_id: table.treasure.curses
+- id: core.quest.temple_despair.curse_expiry
+  name: Temple of Despair — curse expiry
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 269
+      printed_page: 267
+      heading: Temple of Despair — curse expiry
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These curses are in effect until the heroes leave their next dungeon.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.temple_despair
+  fields:
+    hero_received_temple_curse:
+      type: boolean
+      role: input
+      description: hero received temple curse
+    hero_left_next_dungeon:
+      type: boolean
+      role: input
+      description: hero left next dungeon
+    temple_curse_active:
+      type: boolean
+      role: output
+      description: temple curse active
+  effects:
+    - type: set
+      target: temple_curse_active
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_received_temple_curse
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_left_next_dungeon
+        right:
+          type: literal
+          value: true

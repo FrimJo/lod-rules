@@ -1,0 +1,212 @@
+- id: core.cobweb_opening.placement
+  name: Cobweb Covered Openings — placement
+  section_id: section.into_the_dungeons.cobweb_covered_openings
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 103
+      printed_page: 101
+      heading: Cobweb Covered Openings — placement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Cobweb covered openings are placed and block movement just like a door.
+  type: modifier
+  scope: global
+  fields:
+    placed_like_door:
+      type: boolean
+      role: output
+      description: Door placement.
+    blocks_movement_like_door:
+      type: boolean
+      role: output
+      description: Door movement blocking.
+  effects:
+    - type: set
+      target: placed_like_door
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: blocks_movement_like_door
+      value:
+        type: literal
+        value: true
+- id: core.cobweb_opening.clearing
+  name: Cobweb Covered Openings — clearing cost and result
+  section_id: section.into_the_dungeons.cobweb_covered_openings
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 103
+      printed_page: 101
+      heading: Cobweb Covered Openings — clearing cost and result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The only way to pass is to attack it with a weapon or torch. It takes 2 AP and
+    automatically succeeds. Raise Threat by +1 when doing this.
+  type: modifier
+  scope: global
+  fields:
+    clearing_implement:
+      type: string
+      role: input
+      description: weapon or torch
+    clearing_cost_ap:
+      type: number
+      role: output
+      description: Two AP.
+      integer: true
+      minimum: 0
+    clearing_automatically_succeeds:
+      type: boolean
+      role: output
+      description: Automatic success.
+    threat_increase:
+      type: number
+      role: output
+      description: One Threat, source-defined cost not state mutation.
+      integer: true
+      minimum: 0
+    alert_roll_required:
+      type: boolean
+      role: output
+      description: Roll1d10 after clearing.
+  effects:
+    - type: set
+      target: clearing_cost_ap
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: clearing_automatically_succeeds
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_increase
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: alert_roll_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: clearing_implement
+        right:
+          type: literal
+          value: weapon
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: clearing_implement
+        right:
+          type: literal
+          value: torch
+- id: core.cobweb_opening.alert
+  name: Cobweb Covered Openings — alerted spiders
+  section_id: section.into_the_dungeons.cobweb_covered_openings
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 103
+      printed_page: 101
+      heading: Cobweb Covered Openings — alerted spiders
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll 1d10 when clearing. On 9–10, randomly place 1d2 Giant Spiders on the tile being
+    left or entered. Roll individually for each spider’s placement.
+  type: modifier
+  scope: global
+  fields:
+    clearing_completed:
+      type: boolean
+      role: input
+      description: Opening was cleared by the stated attack.
+    alert_roll:
+      type: number
+      role: input
+      description: Supplied1d10 result.
+      integer: true
+      minimum: 1
+      maximum: 10
+    spiders_alerted:
+      type: boolean
+      role: output
+      description: Alerts spiders.
+    spider_count_dice:
+      type: string
+      role: output
+      description: Printed1d2.
+    placement_tiles:
+      type: string
+      role: output
+      description: Departure or arrival tile.
+    individual_placement_rolls:
+      type: boolean
+      role: output
+      description: A separate placement roll for each spider.
+  effects:
+    - type: set
+      target: spiders_alerted
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spider_count_dice
+      value:
+        type: literal
+        value: 1d2
+    - type: set
+      target: placement_tiles
+      value:
+        type: literal
+        value: tile being left or tile being entered
+    - type: set
+      target: individual_placement_rolls
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: clearing_completed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: alert_roll
+        right:
+          type: literal
+          value: 9
+  unresolved_references:
+    - Giant Spider statistics are in the unavailable Bestiary. No placement die size or initiative
+      is supplied by this heading.

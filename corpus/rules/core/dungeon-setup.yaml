@@ -1,0 +1,259 @@
+- id: core.dungeon.tile_placement
+  name: tile placement
+  section_id: section.into_the_dungeons.general_dungeon_layout
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 86
+      printed_page: 84
+      heading: tile placement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one tile initially. Rooms and corridors differ in encounters and treasure. Place
+    revealed tiles freely unless quest states otherwise; align squares and leave room for a door
+    unobscured by furniture.
+  type: modifier
+  scope: global
+  fields:
+    squares_aligned:
+      type: boolean
+      role: input
+      description: squares aligned
+    door_unobscured:
+      type: boolean
+      role: input
+      description: door unobscured
+    quest_placement_satisfied:
+      type: boolean
+      role: input
+      description: quest placement satisfied
+    placement_allowed:
+      type: boolean
+      role: output
+      description: placement allowed
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: squares_aligned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_unobscured
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_placement_satisfied
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: placement_allowed
+      value:
+        type: literal
+        value: true
+- id: core.dungeon.door_placement
+  name: door placement
+  section_id: section.into_the_dungeons.doors_and_placement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 86
+      printed_page: 84
+      heading: door placement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Exploration Card gives doors including entrance. Place on black tile border without
+    furniture obstruction. Standard door unless quest says otherwise; replace opened door with
+    opening. Cobweb openings only when quest dictates, replaced by standard opening when cleared.
+  type: modifier
+  scope: global
+  fields:
+    quest_cobweb:
+      type: boolean
+      role: input
+      description: quest cobweb
+    default_token:
+      type: string
+      role: output
+      description: default token
+    opened_token:
+      type: string
+      role: output
+      description: opened token
+    cleared_cobweb_token:
+      type: string
+      role: output
+      description: cleared cobweb token
+    placement:
+      type: string
+      role: output
+      description: placement
+  effects:
+    - type: set
+      target: default_token
+      value:
+        type: literal
+        value: standard door
+    - type: set
+      target: opened_token
+      value:
+        type: literal
+        value: opening without door
+    - type: set
+      target: cleared_cobweb_token
+      value:
+        type: literal
+        value: standard opening
+    - type: set
+      target: placement
+      value:
+        type: literal
+        value: black border; furniture unobscured
+- id: core.dungeon.card_contents
+  name: card contents
+  section_id: section.into_the_dungeons.reading_the_exploration_cards
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 87
+      printed_page: 85
+      heading: card contents
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Detailed Exploration Cards give Tile ID/name, door count including entrance, visual
+    tile presentation, description and special rules. With own tiles, playing cards may
+    cross-reference a room table; dressed card or Joker can represent Objective or Side Quest.
+    Template is referenced, not extracted.
+  type: modifier
+  scope: global
+  fields:
+    card_fields:
+      type: string
+      role: output
+      description: card fields
+    own_tiles_alternative:
+      type: string
+      role: output
+      description: own tiles alternative
+    objective_or_side_quest:
+      type: string
+      role: output
+      description: objective or side quest
+  effects:
+    - type: set
+      target: card_fields
+      value:
+        type: literal
+        value: Tile ID; name; door count including entered door; tile picture; description; special rules
+    - type: set
+      target: own_tiles_alternative
+      value:
+        type: literal
+        value: playing cards with supplied room lookup
+    - type: set
+      target: objective_or_side_quest
+      value:
+        type: literal
+        value: dressed card or Joker
+  unresolved_references:
+    - External room-table template at boardgamegeek.com/boardgame/336195/dungeoneers is not part of
+      the canonical source.
+- id: core.dungeon.card_eligibility
+  name: card eligibility
+  section_id: section.into_the_dungeons.what_cards_to_include
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 87
+      printed_page: 85
+      heading: card eligibility
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Normally include all cards except B IDs. Quest may remove cards. Optional variety
+    inclusion conflicts with PDF 88, which restricts B rooms to specified use.
+  type: modifier
+  scope: global
+  fields:
+    quest_removed:
+      type: boolean
+      role: input
+      description: quest removed
+    is_b_card:
+      type: boolean
+      role: input
+      description: is b card
+    quest_specifies_b:
+      type: boolean
+      role: input
+      description: quest specifies b
+    eligible:
+      type: boolean
+      role: output
+      description: eligible
+  effects:
+    - type: set
+      target: eligible
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quest_removed
+        right:
+          type: literal
+          value: false
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_b_card
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_specifies_b
+            right:
+              type: literal
+              value: true
+  issues:
+    - issue.phase6.b_cards

@@ -1,0 +1,956 @@
+- id: core.quest.pyramid_xanthu.setup
+  name: Pyramid of Xánthu — setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Pyramid of Xánthu — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Quest Location: Ancient Lands, random. Number of Tiles: 7 corridors, 7 rooms. Reward:
+    Any loot found. Encounters: Ancient Lands.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_printed:
+      type: string
+      role: output
+      description: reward printed
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Ancient Lands, random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: reward_printed
+      value:
+        type: literal
+        value: Any loot found
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Ancient Lands
+- id: core.quest.pyramid_xanthu.standard_room_pool
+  name: Pyramid of Xánthu — standard room pool
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Pyramid of Xánthu — standard room pool
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If not using Ancient Lands tiles, randomise using R1B, R2B, R4B-8B, R1, R4-R6, R9-R11,
+    R14, R16, R17.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    random_room_pool:
+      type: string
+      role: output
+      description: random room pool
+  effects:
+    - type: set
+      target: random_room_pool
+      value:
+        type: literal
+        value: R1B, R2B, R4B-8B, R1, R4-R6, R9-R11, R14, R16, R17
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.pyramid_xanthu.furniture_reroll
+  name: Pyramid of Xánthu — Furniture Chart rerolls
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Pyramid of Xánthu — Furniture Chart rerolls
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Due to abundance of treasure, you may re-roll 4 rolls on the Furniture Chart during the
+    quest. A re-roll may never be re-rolled.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    furniture_chart_roll:
+      type: boolean
+      role: input
+      description: furniture chart roll
+    already_a_reroll:
+      type: boolean
+      role: input
+      description: already a reroll
+    furniture_rerolls_used_this_quest:
+      type: number
+      role: input
+      description: furniture rerolls used this quest
+      integer: true
+      minimum: 0
+    furniture_reroll_allowed:
+      type: boolean
+      role: output
+      description: furniture reroll allowed
+  effects:
+    - type: set
+      target: furniture_reroll_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: furniture_chart_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: already_a_reroll
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: furniture_rerolls_used_this_quest
+        right:
+          type: literal
+          value: 4
+  dependencies:
+    - key: furniture
+      label: Furniture treasure findings
+      section_id: section.appendix_v_treasures.treasure_found_in_furniture
+- id: core.quest.pyramid_xanthu.ancient_objective_setup
+  name: Pyramid of Xánthu — Ancient Land setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Pyramid of Xánthu — Ancient Land setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Use the Large Tomb tile. Heroes enter along one of the short edges. Make 2 Encounter
+    Table rolls and place undead randomly in the room. Two sarcophagi stand in the chamber centre
+    surrounded by painted glyphs.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagi:
+      type: number
+      role: output
+      description: sarcophagi
+      integer: true
+    sarcophagus_position:
+      type: string
+      role: output
+      description: sarcophagus position
+    painted_glyphs_surround_sarcophagi:
+      type: boolean
+      role: output
+      description: painted glyphs surround sarcophagi
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: Large Tomb
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: one of the short edges
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: sarcophagi
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: sarcophagus_position
+      value:
+        type: literal
+        value: centre of the chamber
+    - type: set
+      target: painted_glyphs_surround_sarcophagi
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+- id: core.quest.pyramid_xanthu.ancient_awakening
+  name: Xánthu — Ancient Land awakening
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Xánthu — Ancient Land awakening
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the Scenario roll is triggered during your stay in the Objective Room, Xánthu rises
+    and joins the fight. Place a Mummy Priest next to one sarcophagus, armed with a dagger, 2
+    support, 2 Ranged and 2 Close Combat spells.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    in_objective_room:
+      type: boolean
+      role: input
+      description: in objective room
+    scenario_roll_triggered:
+      type: boolean
+      role: input
+      description: scenario roll triggered
+    xanthu_joins_fight:
+      type: boolean
+      role: output
+      description: xanthu joins fight
+    xanthu_type:
+      type: string
+      role: output
+      description: xanthu type
+    xanthu_position:
+      type: string
+      role: output
+      description: xanthu position
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    support_spells:
+      type: number
+      role: output
+      description: support spells
+      integer: true
+    ranged_spells:
+      type: number
+      role: output
+      description: ranged spells
+      integer: true
+    close_combat_spells:
+      type: number
+      role: output
+      description: close combat spells
+      integer: true
+  effects:
+    - type: set
+      target: xanthu_joins_fight
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xanthu_type
+      value:
+        type: literal
+        value: Mummy Priest
+    - type: set
+      target: xanthu_position
+      value:
+        type: literal
+        value: next to one of the sarcophagi
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: dagger
+    - type: set
+      target: support_spells
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ranged_spells
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: close_combat_spells
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_objective_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: scenario_roll_triggered
+        right:
+          type: literal
+          value: true
+  entity_id: quest_actor.ancient_lands.xanthu
+  dependencies:
+    - key: statistics
+      label: Mummy Priest/Prince statistics not printed in this quest; supplied outcome required
+    - key: dagger
+      label: Dagger
+      object_id: equipment.weapon.dagger
+  issues:
+    - issue.quest.xanthu_awakening_boundaries
+  unresolved_references:
+    - Two Support, two Ranged and two Close Combat spells are unnamed; no selection method is stated.
+- id: core.quest.pyramid_xanthu.ancient_sarcophagus
+  name: Xánthu — Ancient Land sarcophagus exception
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Xánthu — Ancient Land sarcophagus exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This sarcophagus cannot spawn another mummy when searched (just treat such a result as nothing).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_xanthu_sarcophagus:
+      type: boolean
+      role: input
+      description: searching xanthu sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    sarcophagus_search_result:
+      type: string
+      role: output
+      description: sarcophagus search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: sarcophagus_search_result
+      value:
+        type: literal
+        value: nothing
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_xanthu_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Ordinary sarcophagus findings; local mummy result becomes nothing
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.pyramid_xanthu.ancient_aftermath
+  name: Pyramid of Xánthu — Ancient Land aftermath
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 264
+      printed_page: 262
+      heading: Pyramid of Xánthu — Ancient Land aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the chamber goes quiet, heroes search the entire room. Behind movable stones is a
+    beautiful chest that may be searched as an objective chest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    chamber_goes_quiet:
+      type: boolean
+      role: input
+      description: Source chamber-clear prerequisite; undead must be dispatched before thorough examination.
+    objective_chests:
+      type: number
+      role: output
+      description: objective chests
+      integer: true
+    objective_chest_search_allowed:
+      type: boolean
+      role: output
+      description: objective chest search allowed
+    chest_position:
+      type: string
+      role: output
+      description: chest position
+  effects:
+    - type: set
+      target: objective_chests
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: objective_chest_search_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: chest_position
+      value:
+        type: literal
+        value: behind movable stones
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chamber_goes_quiet
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: aftermath
+      label: Aftermath findings have no traps/locks and may be looted off table
+      object_id: core.quest_book.aftermath_looting
+- id: core.quest.pyramid_xanthu.standard_objective_setup
+  name: Pyramid of Xánthu — Standard setup
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 265
+      printed_page: 263
+      heading: Pyramid of Xánthu — Standard setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Use The Lone Tomb tile. Heroes enter along one of the short edges. Make 2 Encounter
+    Table rolls and place undead randomly in the room. A sarcophagus stands on a dais at the far
+    end.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    sarcophagi:
+      type: number
+      role: output
+      description: sarcophagi
+      integer: true
+    sarcophagus_position:
+      type: string
+      role: output
+      description: sarcophagus position
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: The Lone Tomb
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: one of the short edges
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: sarcophagi
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: sarcophagus_position
+      value:
+        type: literal
+        value: on a dais at the far end of the chamber
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false
+- id: core.quest.pyramid_xanthu.standard_awakening
+  name: Xánthu — Standard awakening
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 265
+      printed_page: 263
+      heading: Xánthu — Standard awakening
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the Scenario roll is triggered during your stay in the Objective Room, Xánthu rises
+    and joins the fight. Place a Mummy Prince next to the sarcophagus.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    in_objective_room:
+      type: boolean
+      role: input
+      description: in objective room
+    scenario_roll_triggered:
+      type: boolean
+      role: input
+      description: scenario roll triggered
+    xanthu_joins_fight:
+      type: boolean
+      role: output
+      description: xanthu joins fight
+    xanthu_type:
+      type: string
+      role: output
+      description: xanthu type
+    xanthu_position:
+      type: string
+      role: output
+      description: xanthu position
+  effects:
+    - type: set
+      target: xanthu_joins_fight
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xanthu_type
+      value:
+        type: literal
+        value: Mummy Prince
+    - type: set
+      target: xanthu_position
+      value:
+        type: literal
+        value: next to the sarcophagus
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_objective_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: scenario_roll_triggered
+        right:
+          type: literal
+          value: true
+  entity_id: quest_actor.ancient_lands.xanthu
+  dependencies:
+    - key: statistics
+      label: Mummy Priest/Prince statistics not printed in this quest; supplied outcome required
+  issues:
+    - issue.quest.xanthu_awakening_boundaries
+- id: core.quest.pyramid_xanthu.standard_sarcophagus
+  name: Xánthu — Standard sarcophagus exception
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 265
+      printed_page: 263
+      heading: Xánthu — Standard sarcophagus exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This sarcophagus cannot spawn another mummy when searched (just treat such a result as nothing).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    searching_xanthu_sarcophagus:
+      type: boolean
+      role: input
+      description: searching xanthu sarcophagus
+    search_result_is_mummy:
+      type: boolean
+      role: input
+      description: search result is mummy
+    sarcophagus_search_result:
+      type: string
+      role: output
+      description: sarcophagus search result
+    spawn_another_mummy:
+      type: boolean
+      role: output
+      description: spawn another mummy
+  effects:
+    - type: set
+      target: sarcophagus_search_result
+      value:
+        type: literal
+        value: nothing
+    - type: set
+      target: spawn_another_mummy
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: searching_xanthu_sarcophagus
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_result_is_mummy
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: sarcophagus
+      label: Ordinary sarcophagus findings; local mummy result becomes nothing
+      object_id: character.treasure.furniture.sarcophagus
+- id: core.quest.pyramid_xanthu.standard_aftermath
+  name: Pyramid of Xánthu — Standard aftermath
+  section_id: section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 265
+      printed_page: 263
+      heading: Pyramid of Xánthu — Standard aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the chamber goes quiet, heroes search the entire room. Behind movable stones is a
+    beautiful chest that may be searched as an objective chest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.ancient_lands.pyramid_xanthu
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    chamber_goes_quiet:
+      type: boolean
+      role: input
+      description: Source chamber-clear prerequisite; undead must be dispatched before thorough examination.
+    objective_chests:
+      type: number
+      role: output
+      description: objective chests
+      integer: true
+    objective_chest_search_allowed:
+      type: boolean
+      role: output
+      description: objective chest search allowed
+    chest_position:
+      type: string
+      role: output
+      description: chest position
+  effects:
+    - type: set
+      target: objective_chests
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: objective_chest_search_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: chest_position
+      value:
+        type: literal
+        value: behind movable stones
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ancient_tiles_available
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: chamber_goes_quiet
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: aftermath
+      label: Aftermath findings have no traps/locks and may be looted off table
+      object_id: core.quest_book.aftermath_looting

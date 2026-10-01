@@ -1,0 +1,945 @@
+- id: core.quest.apprentice.setup
+  name: The Apprentice — setup
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: The Apprentice — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Investigate the ruins and find and kill whoever is collecting corpses. Quest Location:
+    White 22. Six corridors and six rooms; Undead encounters; Objective room: The Chamber of
+    Reverence.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    objective:
+      type: string
+      role: output
+      description: objective
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: objective
+      value:
+        type: literal
+        value: investigate ruins and find and kill whoever is collecting corpses
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: White 22
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Undead
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: The Chamber of Reverence
+- id: core.quest.apprentice.threshold
+  name: Quest Threat 10
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 10, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.apprentice.caretaker_encounter
+  name: The Apprentice — additional caretaker encounter
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: The Apprentice — additional caretaker encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Any Encounter Table roll of 15–20 results in an encounter with the caretaker, plus the
+    ordinary encounter.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    encounter_roll:
+      type: number
+      role: input
+      description: Supplied Encounter Table roll.
+      integer: true
+      minimum: 1
+      maximum: 100
+    caretaker_added:
+      type: boolean
+      role: output
+      description: Caretaker joins this encounter.
+    ordinary_encounter_retained:
+      type: boolean
+      role: output
+      description: Ordinary encounter is not replaced.
+  effects:
+    - type: set
+      target: caretaker_added
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ordinary_encounter_retained
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: encounter_roll
+        right:
+          type: literal
+          value: 15
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: encounter_roll
+        right:
+          type: literal
+          value: 20
+  entity_id: quest_actor.dead_rising.emil
+  issues:
+    - issue.quest.apprentice_caretaker_repeat
+- id: core.quest.apprentice.emil_equipment
+  name: Emil — equipment and reward pointer
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: Emil — equipment and reward pointer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Emil carries a sharpened shovel counted as a Greataxe in all aspects, Armour 0. XP:
+    110, T2 Treasure Table.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    counts_as:
+      type: string
+      role: output
+      description: counts as
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: sharpened shovel
+    - type: set
+      target: counts_as
+      value:
+        type: literal
+        value: Greataxe in all aspects
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 110
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T2
+  entity_id: quest_actor.dead_rising.emil
+  dependencies:
+    - key: greataxe
+      label: Greataxe
+      object_id: equipment.weapon.greataxe
+    - key: tier_two_treasure
+      label: T2 Treasure Table
+      object_id: table.treasure.t2
+- id: core.quest.apprentice.bronze_key
+  name: Emil — bronze key
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: Emil — bronze key
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once Emil is killed, heroes find a bronze key hanging around his neck. Better hold on to this.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    emil_killed:
+      type: boolean
+      role: input
+      description: Emil has been killed.
+    bronze_key_found:
+      type: boolean
+      role: output
+      description: Printed item finding.
+    bronze_key_location:
+      type: string
+      role: output
+      description: Around his neck.
+  effects:
+    - type: set
+      target: bronze_key_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: bronze_key_location
+      value:
+        type: literal
+        value: around Emil’s neck
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: emil_killed
+    right:
+      type: literal
+      value: true
+  entity_id: equipment.quest.emil_bronze_key
+- id: core.quest.apprentice.objective_setup
+  name: The Apprentice — Objective Room setup
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: The Apprentice — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place Imgrahil in the centre of the chalk circle. Place one unarmed Zombie, Armour 0,
+    next to him. Place 2d6 unarmed Zombies along the long walls, starting as far as possible from
+    heroes and dividing evenly between the walls.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    imgrahil_placement:
+      type: string
+      role: output
+      description: imgrahil placement
+    adjacent_zombies:
+      type: number
+      role: output
+      description: adjacent zombies
+      integer: true
+    adjacent_zombie_placement:
+      type: string
+      role: output
+      description: adjacent zombie placement
+    adjacent_zombie_unarmed:
+      type: boolean
+      role: output
+      description: adjacent zombie unarmed
+    adjacent_zombie_armour:
+      type: number
+      role: output
+      description: adjacent zombie armour
+      integer: true
+    wall_zombies_unarmed:
+      type: boolean
+      role: output
+      description: wall zombies unarmed
+    wall_zombie_placement:
+      type: string
+      role: output
+      description: wall zombie placement
+  effects:
+    - type: set
+      target: imgrahil_placement
+      value:
+        type: literal
+        value: centre of the chalk circle
+    - type: set
+      target: adjacent_zombies
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: adjacent_zombie_placement
+      value:
+        type: literal
+        value: next to Imgrahil
+    - type: set
+      target: adjacent_zombie_unarmed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: adjacent_zombie_armour
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: wall_zombies_unarmed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wall_zombie_placement
+      value:
+        type: literal
+        value:
+          along the long walls, starting as far away as possible from the heroes, divided evenly
+          between the walls
+  unresolved_references:
+    - Zombie statistics are not printed in this quest.
+- id: core.quest.apprentice.wall_zombies
+  name: The Apprentice — wall Zombie count
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: The Apprentice — wall Zombie count
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place 2d6 unarmed Zombies along the long walls.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    zombie_roll:
+      type: number
+      role: input
+      description: Supplied 2d6 total.
+      integer: true
+      minimum: 2
+      maximum: 12
+      dice:
+        count: 2
+        sides: 6
+    wall_zombies:
+      type: number
+      role: output
+      description: Printed 2d6 unarmed Zombies.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: wall_zombies
+      value:
+        type: field
+        name: zombie_roll
+- id: core.quest.apprentice.imgrahil
+  name: Imgrahil — equipment, spells and treasure
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 233
+      printed_page: 231
+      heading: Imgrahil — equipment, spells and treasure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Imgrahil is an apprentice Necromancer with poisoned dagger and Armour 1, mastering
+    Raise Dead, Healing, Vampiric Touch and Mirrored Self. Any dagger hit may poison heroes; see
+    Poison on page 120. XP: 200, T2 Treasure Table.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    raise_dead_mastered:
+      type: boolean
+      role: output
+      description: raise dead mastered
+    healing_mastered:
+      type: boolean
+      role: output
+      description: healing mastered
+    vampiric_touch_mastered:
+      type: boolean
+      role: output
+      description: vampiric touch mastered
+    mirrored_self_mastered:
+      type: boolean
+      role: output
+      description: mirrored self mastered
+    dagger_hit_may_poison:
+      type: boolean
+      role: output
+      description: dagger hit may poison
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: poisoned dagger
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: raise_dead_mastered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: healing_mastered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: vampiric_touch_mastered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: mirrored_self_mastered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: dagger_hit_may_poison
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 200
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T2
+  entity_id: quest_actor.dead_rising.imgrahil
+  dependencies:
+    - key: raise_dead
+      label: Raise Dead
+      object_id: spell.raise_dead
+    - key: healing
+      label: Healing
+      object_id: spell.healing
+    - key: vampiric_touch
+      label: Vampiric Touch
+      object_id: spell.vampiric_touch
+    - key: mirrored_self
+      label: Mirrored Self
+      object_id: spell.mirrored_self
+    - key: poison
+      label: Poison, printed page 120
+      object_id: procedure.damage_follow_up
+    - key: tier_two_treasure
+      label: T2 Treasure Table
+      object_id: table.treasure.t2
+- id: core.quest.apprentice.reward
+  name: The Apprentice — advertised reward
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 232
+      printed_page: 230
+      heading: The Apprentice — advertised reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Reward: 200 c per hero.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 200
+- id: core.quest.apprentice.aftermath
+  name: The Apprentice — findings and forced onward travel
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 233
+      printed_page: 231
+      heading: The Apprentice — findings and forced onward travel
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once all Zombies are down and Imgrahil is dead, find his notebook with passages about
+    the Master and the Apostle, her sacrifice to Melkhior, and a map with marked locations. There is
+    no time to head back to Silver City; press on.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    all_zombies_down:
+      type: boolean
+      role: input
+      description: All Zombies down.
+    imgrahil_dead:
+      type: boolean
+      role: input
+      description: Imgrahil dead.
+    notebook_found:
+      type: boolean
+      role: output
+      description: Source finding.
+    map_with_marked_locations_found:
+      type: boolean
+      role: output
+      description: Found map, not a printed diagram.
+    master_army_growing:
+      type: boolean
+      role: output
+      description: Source narrative informs the choice.
+    apostle_sacrifice_to:
+      type: string
+      role: output
+      description: Melkhior.
+    return_to_silver_city_allowed:
+      type: boolean
+      role: output
+      description: No time to return.
+    press_on:
+      type: boolean
+      role: output
+      description: Continue directly.
+  effects:
+    - type: set
+      target: notebook_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: map_with_marked_locations_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: master_army_growing
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: apostle_sacrifice_to
+      value:
+        type: literal
+        value: Melkhior
+    - type: set
+      target: return_to_silver_city_allowed
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: press_on
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_zombies_down
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: imgrahil_dead
+        right:
+          type: literal
+          value: true
+- id: core.quest.apprentice.choose_apostle
+  name: The Apprentice — choose the Apostle
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 233
+      printed_page: 231
+      heading: The Apprentice — choose the Apostle
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If they choose to go for the Apostle, play quest 6A.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    aftermath_choice:
+      type: string
+      role: input
+      description: Apostle or Master, selected after the aftermath.
+    next_quest:
+      type: string
+      role: output
+      description: Printed quest 6A.
+    chosen_target:
+      type: string
+      role: output
+      description: Apostle.
+    all_zombies_down:
+      type: boolean
+      role: input
+      description: All Zombies down, required to reach the aftermath choice.
+    imgrahil_dead:
+      type: boolean
+      role: input
+      description: Imgrahil dead, required for the aftermath.
+  effects:
+    - type: set
+      target: next_quest
+      value:
+        type: literal
+        value: 6A
+    - type: set
+      target: chosen_target
+      value:
+        type: literal
+        value: Apostle
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_zombies_down
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: imgrahil_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: aftermath_choice
+        right:
+          type: literal
+          value: Apostle
+  dependencies:
+    - key: next_quest
+      label: 'Quest 6A: Sacrifice'
+      object_id: quest.dead_rising.sacrifice
+- id: core.quest.apprentice.choose_master
+  name: The Apprentice — choose the Master
+  section_id: section.quest_book_i.the_dead_rising.quest_5_the_apprentice
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 233
+      printed_page: 231
+      heading: The Apprentice — choose the Master
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If they choose to go for the Master, play quest 6B.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.apprentice
+  fields:
+    aftermath_choice:
+      type: string
+      role: input
+      description: Apostle or Master, selected after the aftermath.
+    next_quest:
+      type: string
+      role: output
+      description: Printed quest 6B.
+    chosen_target:
+      type: string
+      role: output
+      description: Master.
+    all_zombies_down:
+      type: boolean
+      role: input
+      description: All Zombies down, required to reach the aftermath choice.
+    imgrahil_dead:
+      type: boolean
+      role: input
+      description: Imgrahil dead, required for the aftermath.
+  effects:
+    - type: set
+      target: next_quest
+      value:
+        type: literal
+        value: 6B
+    - type: set
+      target: chosen_target
+      value:
+        type: literal
+        value: Master
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_zombies_down
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: imgrahil_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: aftermath_choice
+        right:
+          type: literal
+          value: Master
+  dependencies:
+    - key: next_quest
+      label: 'Quest 6B: The Master'
+      object_id: quest.dead_rising.master

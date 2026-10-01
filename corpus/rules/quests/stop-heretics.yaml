@@ -1,0 +1,647 @@
+- id: core.quest.stop_heretics.setup
+  name: Stop the Heretics — quest setup
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Stop the Heretics — quest setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Random Quest Location. Six corridors, six rooms. Reward250c per hero. Enter the dungeon
+    and slay the heretic conjurer before the ritual summons Demons.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    objective:
+      type: string
+      role: output
+      description: objective
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: objective
+      value:
+        type: literal
+        value: slay the heretic conjurer before the ritual summons Demons
+  uses_tables:
+    - table.quest.stop_heretics.threat
+    - table.quest.stop_heretics.encounters
+    - table.quest.stop_heretics.demons
+- id: core.quest.stop_heretics.threshold
+  name: Quest Threat 10
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 10, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.stop_heretics.objective_setup
+  name: Stop the Heretics — Objective Room setup
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Stop the Heretics — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes enter on the short side opposite the altar. Roll twice on the Encounter Table
+    for guards on the heroes’ side, placed as close to the lava river as possible. On the far side
+    by the altar on the dais at the far end stands a Magic User from the encountered race,
+    randomised from those available on the entire encounter list.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    guard_encounter_rolls:
+      type: number
+      role: output
+      description: guard encounter rolls
+      integer: true
+    guards_side:
+      type: string
+      role: output
+      description: guards side
+    guard_placement:
+      type: string
+      role: output
+      description: guard placement
+    caster_side:
+      type: string
+      role: output
+      description: caster side
+    caster_position:
+      type: string
+      role: output
+      description: caster position
+    caster_kind:
+      type: string
+      role: output
+      description: caster kind
+    caster_selection:
+      type: string
+      role: output
+      description: caster selection
+  effects:
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side opposite the altar
+    - type: set
+      target: guard_encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: guards_side
+      value:
+        type: literal
+        value: heroes’ side of river
+    - type: set
+      target: guard_placement
+      value:
+        type: literal
+        value: as close to the lava river as possible
+    - type: set
+      target: caster_side
+      value:
+        type: literal
+        value: other side of river
+    - type: set
+      target: caster_position
+      value:
+        type: literal
+        value: by the altar on the dais at the far end
+    - type: set
+      target: caster_kind
+      value:
+        type: literal
+        value: Magic User from encountered race
+    - type: set
+      target: caster_selection
+      value:
+        type: literal
+        value: randomise among those available on the entire encounter list
+  unresolved_references:
+    - Standard encounter entries, Magic Users and enemy statistics are unavailable; supplied
+      encounter outcomes are required.
+- id: core.quest.stop_heretics.caster_occupied
+  name: Stop the Heretics — caster occupied
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Stop the Heretics — caster occupied
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The caster is so occupied with the ritual that he does not even notice the ongoing
+    battle, even if attacked.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    caster_notices_battle:
+      type: boolean
+      role: output
+      description: caster notices battle
+    being_attacked_does_not_end_ritual_preoccupation:
+      type: boolean
+      role: output
+      description: being attacked does not end ritual preoccupation
+  effects:
+    - type: set
+      target: caster_notices_battle
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: being_attacked_does_not_end_ritual_preoccupation
+      value:
+        type: literal
+        value: true
+- id: core.quest.stop_heretics.deadline
+  name: Stop the Heretics — ritual deadline
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Stop the Heretics — ritual deadline
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes have10turns to kill the caster or Demons are summoned. If the ritual succeeds
+    the caster collapses from exertion and is out of the battle.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    turn_limit:
+      type: number
+      role: output
+      description: turn limit
+      integer: true
+    deadline_goal:
+      type: string
+      role: output
+      description: deadline goal
+    successful_ritual_caster_out_of_battle:
+      type: boolean
+      role: output
+      description: successful ritual caster out of battle
+  effects:
+    - type: set
+      target: turn_limit
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: deadline_goal
+      value:
+        type: literal
+        value: kill the caster
+    - type: set
+      target: successful_ritual_caster_out_of_battle
+      value:
+        type: literal
+        value: true
+  unresolved_references:
+    - The source does not specify the exact turn phase of the ten-turn deadline. Supply whether the
+      ritual completed instead of inventing a start/end-of-turn convention.
+- id: core.quest.stop_heretics.ritual_completed
+  name: Stop the Heretics — ritual succeeds
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Stop the Heretics — ritual succeeds
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the ritual succeeds the caster collapses and is out of the battle. Roll the Demon
+    table and place the results on random squares along the river as they emerge from the lava.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    ritual_succeeded:
+      type: boolean
+      role: input
+      description: Supplied source ritual outcome.
+    caster_collapses:
+      type: boolean
+      role: output
+      description: Exhaustion collapse.
+    caster_out_of_battle:
+      type: boolean
+      role: output
+      description: Caster is out of battle.
+    demon_table_roll_required:
+      type: boolean
+      role: output
+      description: Roll the Demon table.
+    demon_placement:
+      type: string
+      role: output
+      description: Random river squares.
+  effects:
+    - type: set
+      target: caster_collapses
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: caster_out_of_battle
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: demon_table_roll_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: demon_placement
+      value:
+        type: literal
+        value: random squares along the river
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ritual_succeeded
+    right:
+      type: literal
+      value: true
+  uses_tables:
+    - table.quest.stop_heretics.demons
+- id: core.quest.stop_heretics.exit
+  name: Stop the Heretics — alternative exit
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 245
+      printed_page: 243
+      heading: Stop the Heretics — alternative exit
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once all creatures in the Objective Room are defeated, heroes find an alternative exit
+    and may leave immediately.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    all_objective_creatures_defeated:
+      type: boolean
+      role: input
+      description: All creatures in the Objective Room are defeated.
+    alternative_exit_found:
+      type: boolean
+      role: output
+      description: Alternative exit.
+    may_leave_immediately:
+      type: boolean
+      role: output
+      description: Immediate departure.
+  effects:
+    - type: set
+      target: alternative_exit_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: may_leave_immediately
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_objective_creatures_defeated
+    right:
+      type: literal
+      value: true
+- id: core.quest.stop_heretics.full_reward
+  name: Stop the Heretics — full reward
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 245
+      printed_page: 243
+      heading: Stop the Heretics — full reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If heroes kill the Spellcaster before he opens the portal, receive the promised250c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    all_objective_creatures_defeated:
+      type: boolean
+      role: input
+      description: All Objective Room creatures defeated.
+    caster_killed_before_portal:
+      type: boolean
+      role: input
+      description: Caster killed before portal opened.
+    reward_per_hero:
+      type: number
+      role: output
+      description: 250c per hero.
+      integer: true
+      minimum: 0
+    portal_open:
+      type: boolean
+      role: output
+      description: Prevented opening.
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: portal_open
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_objective_creatures_defeated
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: caster_killed_before_portal
+        right:
+          type: literal
+          value: true
+- id: core.quest.stop_heretics.half_reward
+  name: Stop the Heretics — half reward
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 245
+      printed_page: 243
+      heading: Stop the Heretics — half reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If heroes fail to kill the Spellcaster before the portal opens they receive only half
+    the promised reward, as the portal remains open and more Demons can pour through.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.stop_heretics
+  fields:
+    all_objective_creatures_defeated:
+      type: boolean
+      role: input
+      description: All Objective Room creatures defeated.
+    caster_killed_before_portal:
+      type: boolean
+      role: input
+      description: Caster killed before portal opened.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Half250c,125c per hero.
+      integer: true
+      minimum: 0
+    portal_open:
+      type: boolean
+      role: output
+      description: Portal remains open.
+    more_demons_can_pour_through:
+      type: boolean
+      role: output
+      description: Narrative continuing risk, no unstated spawn timer.
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 125
+    - type: set
+      target: portal_open
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: more_demons_can_pour_through
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_objective_creatures_defeated
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: caster_killed_before_portal
+        right:
+          type: literal
+          value: false

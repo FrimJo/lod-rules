@@ -1,0 +1,2693 @@
+- id: core.magic.mana
+  name: mana
+  section_id: section.magic.mana
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: mana
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Mana is WIS x 1.5 (RDU). Mana may be regained through resting, Mana potions and magic charms.
+  type: modifier
+  scope: global
+  fields:
+    wis:
+      type: number
+      role: input
+      description: wis
+    maximum_mana:
+      type: number
+      role: output
+      description: maximum mana
+  effects:
+    - type: set
+      target: maximum_mana
+      value:
+        type: arithmetic
+        operator: ceil
+        values:
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: wis
+              - type: literal
+                value: 1.5
+- id: core.magic.upkeep
+  name: upkeep
+  section_id: section.magic.upkeep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: upkeep
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Upkeep is spent every turn starting the turn after casting. If Mana is insufficient,
+    the spell is cancelled as soon as the wizard is activated.
+  type: modifier
+  scope: global
+  fields:
+    turn_after_cast:
+      type: boolean
+      role: input
+      description: turn after cast
+    wizard_activated:
+      type: boolean
+      role: input
+      description: wizard activated
+    mana:
+      type: number
+      role: input
+      description: mana
+    upkeep:
+      type: number
+      role: input
+      description: upkeep
+    spell_cancelled:
+      type: boolean
+      role: output
+      description: spell cancelled
+    mana_after:
+      type: number
+      role: output
+      description: mana after
+  effects:
+    - type: set
+      target: spell_cancelled
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: mana_after
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: mana
+          - type: field
+            name: upkeep
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: turn_after_cast
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wizard_activated
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: mana
+        right:
+          type: field
+          name: upkeep
+- id: core.magic.upkeep.cancel
+  name: cancel
+  section_id: section.magic.upkeep
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: cancel
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Insufficient upkeep cancels the spell as soon as the wizard is activated.
+  type: modifier
+  scope: global
+  fields:
+    turn_after_cast:
+      type: boolean
+      role: input
+      description: turn after cast
+    wizard_activated:
+      type: boolean
+      role: input
+      description: wizard activated
+    mana:
+      type: number
+      role: input
+      description: mana
+    upkeep:
+      type: number
+      role: input
+      description: upkeep
+    spell_cancelled:
+      type: boolean
+      role: output
+      description: spell cancelled
+  effects:
+    - type: set
+      target: spell_cancelled
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: turn_after_cast
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wizard_activated
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: mana
+        right:
+          type: field
+          name: upkeep
+- id: core.magic.level
+  name: level
+  section_id: section.magic.difficulty_of_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A wizard can never learn spells with a higher level than their own character level.
+  type: modifier
+  scope: global
+  fields:
+    spell_level:
+      type: number
+      role: input
+      description: spell level
+    caster_level:
+      type: number
+      role: input
+      description: caster level
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: spell_level
+        right:
+          type: field
+          name: caster_level
+- id: core.magic.standard
+  name: standard
+  section_id: section.magic.different_types_of_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: standard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A spell is Standard unless otherwise stated. It requires 2 actions in the same turn or
+    spread over 2 turns, with no other actions between.
+  type: modifier
+  scope: global
+  fields:
+    intervening_actions:
+      type: number
+      role: input
+      description: intervening actions
+    casting_actions:
+      type: number
+      role: output
+      description: casting actions
+    maximum_turns:
+      type: number
+      role: output
+      description: maximum turns
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: intervening_actions
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: casting_actions
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: maximum_turns
+      value:
+        type: literal
+        value: 2
+- id: core.magic.quick
+  name: quick
+  section_id: section.magic.different_types_of_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: quick
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Quick Spells (Q) take only 1 action to cast.
+  type: modifier
+  scope: global
+  fields:
+    casting_actions:
+      type: number
+      role: output
+      description: casting actions
+  effects:
+    - type: set
+      target: casting_actions
+      value:
+        type: literal
+        value: 1
+- id: core.magic.incantation
+  name: incantation
+  section_id: section.magic.different_types_of_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: incantation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Incantations (I) can only be cast while in a settlement.
+  type: modifier
+  scope: global
+  fields:
+    in_settlement:
+      type: boolean
+      role: input
+      description: in settlement
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_settlement
+        right:
+          type: literal
+          value: true
+- id: core.magic.missile
+  name: missile
+  section_id: section.magic.spell_characteristics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: missile
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Magic Missiles require LOS. No to-hit roll is required and no modifiers for obstacles
+    and such things apply.
+  type: modifier
+  scope: global
+  fields:
+    target_in_los:
+      type: boolean
+      role: input
+      description: target in los
+    to_hit_required:
+      type: boolean
+      role: output
+      description: to hit required
+    obstacle_modifier:
+      type: number
+      role: output
+      description: obstacle modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_in_los
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: to_hit_required
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: obstacle_modifier
+      value:
+        type: literal
+        value: 0
+- id: core.magic.touch
+  name: touch
+  section_id: section.magic.spell_characteristics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: touch
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Touching an enemy requires CS+20 and may be parried or dodged normally. Ignore for
+    allies. Arcane Arts is still required. A failed touch consumes half Mana (RDU).
+  type: modifier
+  scope: global
+  fields:
+    cs:
+      type: number
+      role: input
+      description: cs
+    enemy_target:
+      type: boolean
+      role: input
+      description: enemy target
+    touch_threshold:
+      type: number
+      role: output
+      description: touch threshold
+    parry_allowed:
+      type: boolean
+      role: output
+      description: parry allowed
+    dodge_allowed:
+      type: boolean
+      role: output
+      description: dodge allowed
+  effects:
+    - type: set
+      target: touch_threshold
+      value:
+        type: sum
+        values:
+          - type: field
+            name: cs
+          - type: literal
+            value: 20
+    - type: set
+      target: parry_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: dodge_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_target
+    right:
+      type: literal
+      value: true
+- id: core.magic.touch.failed
+  name: failed
+  section_id: section.magic.spell_characteristics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 64
+      printed_page: 62
+      heading: failed
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the caster fails to touch the target, only half the Mana (RDU) is consumed.
+  type: modifier
+  scope: global
+  fields:
+    touch_succeeded:
+      type: boolean
+      role: input
+      description: touch succeeded
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: arithmetic
+        operator: ceil
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: mana_cost
+              - type: literal
+                value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: touch_succeeded
+    right:
+      type: literal
+      value: false
+- id: core.magic.adjacent
+  name: adjacent
+  section_id: section.magic.adjacent_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: adjacent
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The only spells that may be cast while an enemy is adjacent are Touch Spells.
+  type: modifier
+  scope: global
+  fields:
+    enemy_adjacent:
+      type: boolean
+      role: input
+      description: enemy adjacent
+    touch_spell:
+      type: boolean
+      role: input
+      description: touch spell
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_adjacent
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: touch_spell
+            right:
+              type: literal
+              value: true
+- id: core.magic.casting.threshold
+  name: threshold
+  section_id: section.magic.casting_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: threshold
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Have enough Mana; roll equal to or below Arcane Art minus Casting Value. Success
+    consumes listed Mana; failure consumes half (RDU).
+  type: modifier
+  scope: global
+  fields:
+    arcane_arts:
+      type: number
+      role: input
+      description: arcane arts
+    casting_value:
+      type: number
+      role: input
+      description: casting value
+    mana:
+      type: number
+      role: input
+      description: mana
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    casting_threshold:
+      type: number
+      role: output
+      description: casting threshold
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: mana
+        right:
+          type: field
+          name: mana_cost
+    - type: set
+      target: casting_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: arcane_arts
+          - type: field
+            name: casting_value
+- id: core.magic.casting.success
+  name: success
+  section_id: section.magic.casting_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: success
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Ordinary casting roll after supplied modifiers and miscast/perfect-cast classification;
+    success pays full Mana, failure half rounded up.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    casting_threshold:
+      type: number
+      role: input
+      description: casting threshold
+    ordinary_cast:
+      type: boolean
+      role: input
+      description: ordinary cast
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: field
+        name: mana_cost
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ordinary_cast
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: casting_threshold
+- id: core.magic.casting.failure
+  name: failure
+  section_id: section.magic.casting_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: failure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Ordinary casting roll after supplied modifiers and miscast/perfect-cast classification;
+    success pays full Mana, failure half rounded up.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    casting_threshold:
+      type: number
+      role: input
+      description: casting threshold
+    ordinary_cast:
+      type: boolean
+      role: input
+      description: ordinary cast
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: arithmetic
+        operator: ceil
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: mana_cost
+              - type: literal
+                value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ordinary_cast
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: casting_threshold
+- id: core.magic.miscast.threshold.normal
+  name: normal
+  section_id: section.magic.miscast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: normal
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A result of 95 or more miscasts; a wounded caster miscasts on 90 or higher. Power
+    reduces threshold by 1 per level; focus by 5 per action.
+  type: modifier
+  scope: global
+  fields:
+    wounded:
+      type: boolean
+      role: input
+      description: wounded
+    power_levels:
+      type: number
+      role: input
+      description: power levels
+    focus_actions:
+      type: number
+      role: input
+      description: focus actions
+    miscast_threshold:
+      type: number
+      role: output
+      description: miscast threshold
+  effects:
+    - type: set
+      target: miscast_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 95
+              - type: field
+                name: power_levels
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: focus_actions
+              - type: literal
+                value: 5
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wounded
+    right:
+      type: literal
+      value: false
+- id: core.magic.miscast.threshold.wounded
+  name: wounded
+  section_id: section.magic.miscast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: wounded
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A result of 95 or more miscasts; a wounded caster miscasts on 90 or higher. Power
+    reduces threshold by 1 per level; focus by 5 per action.
+  type: modifier
+  scope: global
+  fields:
+    wounded:
+      type: boolean
+      role: input
+      description: wounded
+    power_levels:
+      type: number
+      role: input
+      description: power levels
+    focus_actions:
+      type: number
+      role: input
+      description: focus actions
+    miscast_threshold:
+      type: number
+      role: output
+      description: miscast threshold
+  effects:
+    - type: set
+      target: miscast_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 90
+              - type: field
+                name: power_levels
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: focus_actions
+              - type: literal
+                value: 5
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wounded
+    right:
+      type: literal
+      value: true
+- id: core.magic.miscast
+  name: miscast
+  section_id: section.magic.miscast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: miscast
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Miscast ends the wizard’s turn immediately; Mana is spent as a failed spell and the
+    Miscast table supplies any exception.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    miscast_threshold:
+      type: number
+      role: input
+      description: miscast threshold
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    turn_ended:
+      type: boolean
+      role: output
+      description: turn ended
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: turn_ended
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: mana_spent
+      value:
+        type: arithmetic
+        operator: ceil
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: mana_cost
+              - type: literal
+                value: 2
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: miscast_threshold
+  uses_tables:
+    - table.magic.miscast
+    - table.magic.demons
+- id: core.magic.power
+  name: power
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only Restoration and Destruction may add power. Maximum min(5, wizard level). Each
+    level adds 2 Mana and +1 damage or healing and lowers miscast threshold by 1.
+  type: modifier
+  scope: global
+  fields:
+    school:
+      type: string
+      role: input
+      description: school
+    power_levels:
+      type: number
+      role: input
+      description: power levels
+    caster_level:
+      type: number
+      role: input
+      description: caster level
+    base_mana:
+      type: number
+      role: input
+      description: base mana
+    mana_cost:
+      type: number
+      role: output
+      description: mana cost
+    effect_bonus:
+      type: number
+      role: output
+      description: effect bonus
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: school
+            right:
+              type: literal
+              value: Restoration
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: school
+            right:
+              type: literal
+              value: Destruction
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: power_levels
+        right:
+          type: literal
+          value: 0
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: power_levels
+        right:
+          type: arithmetic
+          operator: min
+          values:
+            - type: literal
+              value: 5
+            - type: field
+              name: caster_level
+    - type: set
+      target: mana_cost
+      value:
+        type: sum
+        values:
+          - type: field
+            name: base_mana
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: power_levels
+              - type: literal
+                value: 2
+    - type: set
+      target: effect_bonus
+      value:
+        type: field
+        name: power_levels
+- id: core.magic.focus
+  name: focus
+  section_id: section.magic.focus
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: focus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Each focus AP temporarily adds 10 Arcane Arts and increases miscast risk by 5. Cast as
+    the next possible action after the last focus action.
+  type: modifier
+  scope: global
+  fields:
+    focus_actions:
+      type: number
+      role: input
+      description: focus actions
+    arcane_arts:
+      type: number
+      role: input
+      description: arcane arts
+    cast_next_possible_action:
+      type: boolean
+      role: input
+      description: cast next possible action
+    focused_arcane_arts:
+      type: number
+      role: output
+      description: focused arcane arts
+    miscast_reduction:
+      type: number
+      role: output
+      description: miscast reduction
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: cast_next_possible_action
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: focused_arcane_arts
+      value:
+        type: sum
+        values:
+          - type: field
+            name: arcane_arts
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: focus_actions
+              - type: literal
+                value: 10
+    - type: set
+      target: miscast_reduction
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: focus_actions
+          - type: literal
+            value: 5
+- id: core.magic.perfect
+  name: perfect
+  section_id: section.magic.perfect_cast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: perfect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 01-05 is a perfect cast. Instead of spending Mana the caster may add the same amount,
+    temporarily exceeding maximum. Damage and healing are maximized.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    choose_mana_gain:
+      type: boolean
+      role: input
+      description: choose mana gain
+    mana:
+      type: number
+      role: input
+      description: mana
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    maximize_damage_healing:
+      type: boolean
+      role: output
+      description: maximize damage healing
+    mana_after:
+      type: number
+      role: output
+      description: mana after
+  effects:
+    - type: set
+      target: maximize_damage_healing
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: mana_after
+      value:
+        type: sum
+        values:
+          - type: field
+            name: mana
+          - type: field
+            name: mana_cost
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: choose_mana_gain
+        right:
+          type: literal
+          value: true
+- id: core.magic.dispel
+  name: dispel
+  section_id: section.magic.dispelling_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: dispel
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Any magic caster may attempt once per turn, out of activation order, after success but
+    before damage. Touch/Close Combat Spells cannot be dispelled. Heroes test Arcane Arts/2 RDD;
+    enemy casters Ranged Skills/2 RDD.
+  type: modifier
+  scope: global
+  fields:
+    already_attempted:
+      type: boolean
+      role: input
+      description: already attempted
+    spell_succeeded:
+      type: boolean
+      role: input
+      description: spell succeeded
+    damage_calculated:
+      type: boolean
+      role: input
+      description: damage calculated
+    touch_or_close_combat:
+      type: boolean
+      role: input
+      description: touch or close combat
+    relevant_skill:
+      type: number
+      role: input
+      description: relevant skill
+    roll:
+      type: number
+      role: input
+      description: roll
+    dispel_threshold:
+      type: number
+      role: output
+      description: dispel threshold
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_attempted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spell_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_calculated
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: touch_or_close_combat
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: dispel_threshold
+      value:
+        type: arithmetic
+        operator: floor
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: relevant_skill
+              - type: literal
+                value: 2
+- id: core.magic.dispel.success
+  name: success
+  section_id: section.magic.dispelling_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: success
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Successful dispelling cancels the spell; a hero whose spell is cancelled still expends
+    intended Mana.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    dispel_threshold:
+      type: number
+      role: input
+      description: dispel threshold
+    spell_cancelled:
+      type: boolean
+      role: output
+      description: spell cancelled
+    original_mana_still_spent:
+      type: boolean
+      role: output
+      description: original mana still spent
+  effects:
+    - type: set
+      target: spell_cancelled
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: original_mana_still_spent
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: lte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: dispel_threshold
+- id: core.magic.dispel.cost.mana
+  name: mana
+  section_id: section.magic.dispelling_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: mana
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A dispelling hero loses 15 Mana, or remaining Mana and 1d3 Sanity if insufficient.
+    Enemy Wizards and Mercenaries ignore this penalty.
+  type: modifier
+  scope: global
+  fields:
+    enemy_or_mercenary:
+      type: boolean
+      role: input
+      description: enemy or mercenary
+    mana:
+      type: number
+      role: input
+      description: mana
+    sanity_roll:
+      type: number
+      role: input
+      description: sanity roll
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+    sanity_lost:
+      type: number
+      role: output
+      description: sanity lost
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: literal
+        value: 15
+    - type: set
+      target: sanity_lost
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_or_mercenary
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: mana
+        right:
+          type: literal
+          value: 15
+- id: core.magic.dispel.cost.sanity
+  name: sanity
+  section_id: section.magic.dispelling_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: sanity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A dispelling hero loses 15 Mana, or remaining Mana and 1d3 Sanity if insufficient.
+    Enemy Wizards and Mercenaries ignore this penalty.
+  type: modifier
+  scope: global
+  fields:
+    enemy_or_mercenary:
+      type: boolean
+      role: input
+      description: enemy or mercenary
+    mana:
+      type: number
+      role: input
+      description: mana
+    sanity_roll:
+      type: number
+      role: input
+      description: sanity roll
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+    sanity_lost:
+      type: number
+      role: output
+      description: sanity lost
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: field
+        name: mana
+    - type: set
+      target: sanity_lost
+      value:
+        type: field
+        name: sanity_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_or_mercenary
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: mana
+        right:
+          type: literal
+          value: 15
+- id: core.magic.scroll
+  name: scroll
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: scroll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any hero may cast a scroll of any level. Non-wizards use WIS. CV is reduced by 10,
+    minimum 0. No focus or Mana. Success or miscast destroys the scroll. Upkeep spells last 1d6
+    turns without upkeep. Quick Slot use costs 1 AP.
+  type: modifier
+  scope: global
+  fields:
+    casting_value:
+      type: number
+      role: input
+      description: casting value
+    focus_actions:
+      type: number
+      role: input
+      description: focus actions
+    quick_slot:
+      type: boolean
+      role: input
+      description: quick slot
+    scroll_cv:
+      type: number
+      role: output
+      description: scroll cv
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+    upkeep_spent:
+      type: number
+      role: output
+      description: upkeep spent
+    level_restricted:
+      type: boolean
+      role: output
+      description: level restricted
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: focus_actions
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: scroll_cv
+      value:
+        type: arithmetic
+        operator: max
+        values:
+          - type: literal
+            value: 0
+          - type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: casting_value
+              - type: literal
+                value: 10
+    - type: set
+      target: mana_spent
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: upkeep_spent
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: level_restricted
+      value:
+        type: literal
+        value: false
+- id: core.magic.scroll.skill.wizard
+  name: wizard
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: wizard
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A non-wizard uses WIS instead of Arcane Arts when reading a scroll.
+  type: modifier
+  scope: global
+  fields:
+    wizard:
+      type: boolean
+      role: input
+      description: wizard
+    wis:
+      type: number
+      role: input
+      description: wis
+    arcane_arts:
+      type: number
+      role: input
+      description: arcane arts
+    scroll_cv:
+      type: number
+      role: input
+      description: scroll cv
+    casting_threshold:
+      type: number
+      role: output
+      description: casting threshold
+  effects:
+    - type: set
+      target: casting_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: arcane_arts
+          - type: field
+            name: scroll_cv
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wizard
+    right:
+      type: literal
+      value: true
+- id: core.magic.scroll.skill.other
+  name: other
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: other
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A non-wizard uses WIS instead of Arcane Arts when reading a scroll.
+  type: modifier
+  scope: global
+  fields:
+    wizard:
+      type: boolean
+      role: input
+      description: wizard
+    wis:
+      type: number
+      role: input
+      description: wis
+    arcane_arts:
+      type: number
+      role: input
+      description: arcane arts
+    scroll_cv:
+      type: number
+      role: input
+      description: scroll cv
+    casting_threshold:
+      type: number
+      role: output
+      description: casting threshold
+  effects:
+    - type: set
+      target: casting_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: wis
+          - type: field
+            name: scroll_cv
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wizard
+    right:
+      type: literal
+      value: false
+- id: core.magic.scroll.destroyed
+  name: destroyed
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: destroyed
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successfully cast scroll or a scroll that miscasts on 95+ is destroyed.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    casting_threshold:
+      type: number
+      role: input
+      description: casting threshold
+    scroll_destroyed:
+      type: boolean
+      role: output
+      description: scroll destroyed
+  effects:
+    - type: set
+      target: scroll_destroyed
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 95
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: casting_threshold
+- id: core.magic.scroll.duration
+  name: duration
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: duration
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A scroll spell normally requiring upkeep lasts 1d6 turns, with no upkeep.
+  type: modifier
+  scope: global
+  fields:
+    normally_has_upkeep:
+      type: boolean
+      role: input
+      description: normally has upkeep
+    duration_roll:
+      type: number
+      role: input
+      description: duration roll
+    duration_turns:
+      type: number
+      role: output
+      description: duration turns
+  effects:
+    - type: set
+      target: duration_turns
+      value:
+        type: field
+        name: duration_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: normally_has_upkeep
+    right:
+      type: literal
+      value: true
+- id: core.magic.scroll.quick_slot
+  name: quick slot
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 67
+      printed_page: 65
+      heading: quick slot
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Using a scroll from a Quick Slot requires 1 AP.
+  type: modifier
+  scope: global
+  fields:
+    quick_slot:
+      type: boolean
+      role: input
+      description: quick slot
+    action_points_spent:
+      type: number
+      role: output
+      description: action points spent
+  effects:
+    - type: set
+      target: action_points_spent
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quick_slot
+    right:
+      type: literal
+      value: true
+- id: core.magic.miscast.outcome_1_damage
+  name: outcome 1 damage
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 1 damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Through luck or skill, the wizard manages to shape the spell and change the outcome at
+    the very last second. Any DMG or Healing effect of the spell is maximized. Any other spell is
+    cast without the need to spend any Mana.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    damage_or_healing:
+      type: boolean
+      role: input
+      description: damage or healing
+    maximize_damage_healing:
+      type: boolean
+      role: output
+      description: maximize damage healing
+  effects:
+    - type: set
+      target: maximize_damage_healing
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_or_healing
+        right:
+          type: literal
+          value: true
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_1_other
+  name: outcome 1 other
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 1 other
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Through luck or skill, the wizard manages to shape the spell and change the outcome at
+    the very last second. Any DMG or Healing effect of the spell is maximized. Any other spell is
+    cast without the need to spend any Mana.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    damage_or_healing:
+      type: boolean
+      role: input
+      description: damage or healing
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+    spell_cast:
+      type: boolean
+      role: output
+      description: spell cast
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: spell_cast
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_or_healing
+        right:
+          type: literal
+          value: false
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_2
+  name: outcome 2
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard consumes Mana as if the spell succeeded.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: field
+        name: mana_cost
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 2
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_3
+  name: outcome 3
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 3
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The Wizard loses control of the spell and it takes a tremendous effort to stop if from
+    turning into a complete disaster. The Wizard loses 3 times the Mana cost for the spell.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: mana_cost
+          - type: literal
+            value: 3
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 3
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_4
+  name: outcome 4
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 4
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard’s mind is wracked by images of the void. The Wizard loses 1d3 point of Sanity.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    sanity_roll:
+      type: number
+      role: input
+      description: sanity roll
+    sanity_lost:
+      type: number
+      role: output
+      description: sanity lost
+    sanity_dice:
+      type: string
+      role: output
+      description: sanity dice
+  effects:
+    - type: set
+      target: sanity_lost
+      value:
+        type: field
+        name: sanity_roll
+    - type: set
+      target: sanity_dice
+      value:
+        type: literal
+        value: 1d3
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 4
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_5
+  name: outcome 5
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 5
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The Wizard becomes unconscious and falls to the floor. The wizard must make a CON test
+    at the start of his activation to see if he wakes up.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    unconscious:
+      type: boolean
+      role: output
+      description: unconscious
+    prone:
+      type: boolean
+      role: output
+      description: prone
+    wake_test:
+      type: string
+      role: output
+      description: wake test
+  effects:
+    - type: set
+      target: unconscious
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: prone
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wake_test
+      value:
+        type: literal
+        value: CON at start of activation
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 5
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_6
+  name: outcome 6
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 6
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Confused, the Wizard realises he has forgotten the spell halfway through the casting.
+    Mana is consumed just as a failed spell, and the Wizard is not allowed to use the spell again
+    until he has rested in a tavern.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    mana_cost:
+      type: number
+      role: input
+      description: mana cost
+    mana_spent:
+      type: number
+      role: output
+      description: mana spent
+    spell_unavailable_until:
+      type: string
+      role: output
+      description: spell unavailable until
+  effects:
+    - type: set
+      target: mana_spent
+      value:
+        type: arithmetic
+        operator: ceil
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: mana_cost
+              - type: literal
+                value: 2
+    - type: set
+      target: spell_unavailable_until
+      value:
+        type: literal
+        value: rest in tavern
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 6
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_7
+  name: outcome 7
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 7
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A searing pain shoots through the mind of the Wizard. He loses 1d6 HP with no armour or
+    Natural Armour.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    hp_roll:
+      type: number
+      role: input
+      description: hp roll
+    hp_lost:
+      type: number
+      role: output
+      description: hp lost
+    damage_dice:
+      type: string
+      role: output
+      description: damage dice
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+  effects:
+    - type: set
+      target: hp_lost
+      value:
+        type: field
+        name: hp_roll
+    - type: set
+      target: damage_dice
+      value:
+        type: literal
+        value: 1d6
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 7
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_8
+  name: outcome 8
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 8
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Visions of the Void is portrayed in the minds of all friendly characters within 3
+    squares. Not used to seeing this, all characters lose 1d8 points of Sanity and the Wizard loses
+    1d3 points of Sanity.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    friendly_sanity_roll:
+      type: number
+      role: input
+      description: friendly sanity roll
+    wizard_sanity_roll:
+      type: number
+      role: input
+      description: wizard sanity roll
+    friendly_radius:
+      type: number
+      role: output
+      description: friendly radius
+    friendly_sanity_lost:
+      type: number
+      role: output
+      description: friendly sanity lost
+    wizard_sanity_lost:
+      type: number
+      role: output
+      description: wizard sanity lost
+    dice:
+      type: string
+      role: output
+      description: dice
+  effects:
+    - type: set
+      target: friendly_radius
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: friendly_sanity_lost
+      value:
+        type: field
+        name: friendly_sanity_roll
+    - type: set
+      target: wizard_sanity_lost
+      value:
+        type: field
+        name: wizard_sanity_roll
+    - type: set
+      target: dice
+      value:
+        type: literal
+        value: friendly 1d8; wizard 1d3
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 8
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.miscast.outcome_9
+  name: outcome 9
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 9
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The wizard manages to open a portal to the Void and Demons pour through. Roll on the
+    Demon table to see what materialises.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    resolve_demon_table:
+      type: boolean
+      role: output
+      description: resolve demon table
+  effects:
+    - type: set
+      target: resolve_demon_table
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 9
+  uses_tables:
+    - table.magic.demons
+- id: core.magic.miscast.outcome_10
+  name: outcome 10
+  section_id: section.magic.casting_spells.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: outcome 10
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A magic blast in unleashed from the Wizard, causing 1D10 DMG to any character within 3
+    squares, ignoring armour and Natural armour.
+  type: modifier
+  scope: global
+  fields:
+    miscast_result:
+      type: number
+      role: input
+      description: miscast result
+    damage_roll:
+      type: number
+      role: input
+      description: damage roll
+    radius:
+      type: number
+      role: output
+      description: radius
+    damage:
+      type: number
+      role: output
+      description: damage
+    damage_dice:
+      type: string
+      role: output
+      description: damage dice
+    targets:
+      type: string
+      role: output
+      description: targets
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+  effects:
+    - type: set
+      target: radius
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: damage
+      value:
+        type: field
+        name: damage_roll
+    - type: set
+      target: damage_dice
+      value:
+        type: literal
+        value: 1D10
+    - type: set
+      target: targets
+      value:
+        type: literal
+        value: any character
+    - type: set
+      target: ignore_armour
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ignore_natural_armour
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: miscast_result
+        right:
+          type: literal
+          value: 10
+  uses_tables:
+    - table.magic.miscast
+- id: core.magic.perfect.maximize
+  name: maximize
+  section_id: section.magic.perfect_cast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: maximize
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Perfect casts maximize damage or healing regardless of whether optional Mana gain is selected.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    maximize_damage_healing:
+      type: boolean
+      role: output
+      description: maximize damage healing
+  effects:
+    - type: set
+      target: maximize_damage_healing
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5

@@ -1,0 +1,763 @@
+- id: core.quest_book.reading_boundaries
+  name: Reading the Quests
+  section_id: section.quest_book_i.introduction.reading_the_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Reading the Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Do not read further than the first border line. Once you reach the Quest Room, you may
+    read until the second line and, once the quest is complete, you can read the last part.
+  type: constraint
+  scope: quest
+  fields:
+    quest_room_reached:
+      type: boolean
+      role: input
+      description: Whether the Quest Room has been reached.
+    quest_complete:
+      type: boolean
+      role: input
+      description: Whether the quest is complete.
+    quest_room_text_readable:
+      type: boolean
+      role: output
+      description: Permission to read up to the second border.
+    aftermath_readable:
+      type: boolean
+      role: output
+      description: Permission to read the last part.
+  effects:
+    - type: set
+      target: quest_room_text_readable
+      value:
+        type: field
+        name: quest_room_reached
+    - type: set
+      target: aftermath_readable
+      value:
+        type: field
+        name: quest_complete
+- id: core.quest_book.aftermath_looting
+  name: Aftermath findings
+  section_id: section.quest_book_i.introduction.reading_the_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Aftermath findings
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Aftermath findings such as treasure chests may be in excess of those drawn on the
+    tiles. Everything found in the aftermath can be looted off table, with no traps or locks.
+  type: exception
+  scope: quest
+  fields:
+    found_in_aftermath:
+      type: boolean
+      role: input
+      description: Identifies a finding explicitly described in the aftermath.
+    off_table_looting:
+      type: boolean
+      role: output
+      description: Finding can be looted off table.
+    check_traps:
+      type: boolean
+      role: output
+      description: Whether aftermath loot needs trap checks.
+    check_locks:
+      type: boolean
+      role: output
+      description: Whether aftermath loot needs lock checks.
+  effects:
+    - type: set
+      target: off_table_looting
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: check_traps
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: check_locks
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: found_in_aftermath
+    right:
+      type: literal
+      value: true
+- id: core.quest_book.individual_repeatability
+  name: Individual quest repeatability
+  section_id: section.quest_book_i.introduction.reading_the_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Individual quest repeatability
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Individual quests can generally be played several times with the same party.
+  type: definition
+  scope: quest
+  fields:
+    individual_quests_generally_repeatable:
+      type: boolean
+      role: output
+      description: General permission; quest-specific restrictions still apply.
+  effects:
+    - type: set
+      target: individual_quests_generally_repeatable
+      value:
+        type: literal
+        value: true
+- id: core.quest_book.threat_threshold_monster
+  name: Triggering Wandering Monsters
+  section_id: section.quest_book_i.introduction
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When a quest says a Wandering Monster appears when Threat reaches XX, it happens every
+    time Threat is increased to XX. Threat is not decreased when that monster is placed. Decreasing
+    to XX does not place a monster; decreasing below and increasing back to XX does.
+  type: trigger
+  scope: quest
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat immediately before this supplied change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this supplied change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: input
+      description: XX supplied by the current quest.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Whether this Threat change triggers the quest monster.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No Threat reduction for this special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: quest_threshold
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+- id: core.quest.first_blood.setup
+  name: First Blood — setup
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Three bandits and one bandit leader attack. The leader has a longsword, shield and
+    armour 1; two bandits have shortswords and armour 0; one has shortbow, dagger and armour 0. Use
+    four open-ground wilderness tiles; heroes start in the centre adjacent to each other.
+  type: scenario_rule
+  scope: quest
+  fields:
+    bandit_leaders:
+      type: number
+      role: output
+      description: Number of bandit leaders.
+      integer: true
+      minimum: 0
+    melee_bandits:
+      type: number
+      role: output
+      description: Number of shortsword bandits.
+      integer: true
+      minimum: 0
+    ranged_bandits:
+      type: number
+      role: output
+      description: Number of shortbow bandits.
+      integer: true
+      minimum: 0
+    leader_weapon:
+      type: string
+      role: output
+      description: Printed leader weapon.
+    leader_shield:
+      type: boolean
+      role: output
+      description: Leader carries a shield.
+    leader_armour:
+      type: number
+      role: output
+      description: Printed armour value.
+      integer: true
+      minimum: 0
+    melee_weapon:
+      type: string
+      role: output
+      description: Printed melee bandit weapon.
+    ranged_weapon:
+      type: string
+      role: output
+      description: Printed ranged weapon.
+    ranged_backup:
+      type: string
+      role: output
+      description: Printed backup weapon.
+    bandit_armour:
+      type: number
+      role: output
+      description: Armour of all three bandits.
+      integer: true
+      minimum: 0
+    outdoor_tiles:
+      type: number
+      role: output
+      description: Open-ground tile count.
+      integer: true
+      minimum: 0
+    tile_kind:
+      type: string
+      role: output
+      description: Printed tile kind.
+    hero_placement:
+      type: string
+      role: output
+      description: Printed hero placement constraint.
+  effects:
+    - type: set
+      target: bandit_leaders
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: melee_bandits
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ranged_bandits
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: leader_weapon
+      value:
+        type: literal
+        value: longsword
+    - type: set
+      target: leader_shield
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: leader_armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: melee_weapon
+      value:
+        type: literal
+        value: shortsword
+    - type: set
+      target: ranged_weapon
+      value:
+        type: literal
+        value: shortbow
+    - type: set
+      target: ranged_backup
+      value:
+        type: literal
+        value: dagger
+    - type: set
+      target: bandit_armour
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: outdoor_tiles
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: tile_kind
+      value:
+        type: literal
+        value: wilderness outdoor open ground
+    - type: set
+      target: hero_placement
+      value:
+        type: literal
+        value: centre, adjacent to each other
+  quest_id: quest.first_blood
+  unresolved_references:
+    - Locate the corresponding monster cards and monster equipment cards and combine them. Their
+      other statistics are not printed here.
+- id: core.quest.first_blood.enemy_placement
+  name: First Blood — bandit placement
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — bandit placement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Randomise which board edge each bandit approaches from, placing them 1d10 squares from the edge.
+  type: scenario_rule
+  scope: quest
+  fields:
+    approach_edge_randomised:
+      type: boolean
+      role: input
+      description: External geometry supplies the randomised board edge per bandit.
+    distance_roll:
+      type: number
+      role: input
+      description: Supplied 1d10 distance per bandit.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    distance_from_edge:
+      type: number
+      role: output
+      description: Squares from the supplied edge.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: distance_from_edge
+      value:
+        type: field
+        name: distance_roll
+  quest_id: quest.first_blood
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: approach_edge_randomised
+    right:
+      type: literal
+      value: true
+- id: core.quest.first_blood.surprise
+  name: First Blood — surprise
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — surprise
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The bandits gain +2 initiative tokens on the first turn as they surprise the sleeping heroes.
+  type: scenario_rule
+  scope: quest
+  fields:
+    first_turn:
+      type: boolean
+      role: input
+      description: First turn of this quest.
+    bandit_initiative_bonus:
+      type: number
+      role: output
+      description: Bonus tokens for the bandits this turn.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: bandit_initiative_bonus
+      value:
+        type: literal
+        value: 2
+  quest_id: quest.first_blood
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: first_turn
+    right:
+      type: literal
+      value: true
+- id: core.quest.first_blood.darkness_and_scenario
+  name: First Blood — darkness and Scenario die
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — darkness and Scenario die
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Due to the darkness, no one can see or shoot further than 10 squares. The Scenario die
+    is not used.
+  type: scenario_rule
+  scope: quest
+  fields:
+    sight_limit:
+      type: number
+      role: output
+      description: Maximum squares of sight for everyone.
+      integer: true
+      minimum: 0
+    shooting_limit:
+      type: number
+      role: output
+      description: Maximum squares for shooting for everyone.
+      integer: true
+      minimum: 0
+    scenario_die_used:
+      type: boolean
+      role: output
+      description: Whether the Scenario die is used.
+  effects:
+    - type: set
+      target: sight_limit
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: shooting_limit
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: scenario_die_used
+      value:
+        type: literal
+        value: false
+  quest_id: quest.first_blood
+- id: core.quest.first_blood.aftermath
+  name: First Blood — aftermath
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With the bandits dead, gather gear and continue travel. Arrive at the settlement
+    without further issues. Start the settlement chapter by rolling for a settlement event, then
+    decide where the adventure takes the heroes.
+  type: scenario_rule
+  scope: quest
+  fields:
+    all_bandits_dead:
+      type: boolean
+      role: input
+      description: Printed aftermath trigger.
+    arrive_without_further_issues:
+      type: boolean
+      role: output
+      description: No further travel issues on this arrival.
+    settlement_event_required:
+      type: boolean
+      role: output
+      description: Begin with a settlement event.
+  effects:
+    - type: set
+      target: arrive_without_further_issues
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: settlement_event_required
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: settlement_arrival
+  quest_id: quest.first_blood
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_bandits_dead
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: settlement_arrival
+      label: Settlement arrival; start by rolling a settlement event
+      object_id: procedure.settlement_arrival
+- id: core.quest_book.threat_threshold_monster_otherwise
+  name: Triggering Wandering Monsters
+  section_id: section.quest_book_i.introduction
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When a quest says a Wandering Monster appears when Threat reaches XX, it happens every
+    time Threat is increased to XX. Threat is not decreased when that monster is placed. Decreasing
+    to XX does not place a monster; decreasing below and increasing back to XX does.
+  type: trigger
+  scope: quest
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat immediately before this supplied change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this supplied change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: input
+      description: XX supplied by the current quest.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Whether this Threat change triggers the quest monster.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No Threat reduction for this special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: false
+  when:
+    type: not
+    condition:
+      type: all
+      conditions:
+        - type: compare
+          operator: eq
+          left:
+            type: field
+            name: current_threat
+          right:
+            type: field
+            name: quest_threshold
+        - type: compare
+          operator: gt
+          left:
+            type: field
+            name: current_threat
+          right:
+            type: field
+            name: previous_threat
+- id: core.quest.first_blood.surprise_otherwise
+  name: First Blood — surprise
+  section_id: section.quest_book_i.introduction.first_blood_introductory_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 223
+      printed_page: 221
+      heading: First Blood — surprise
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The bandits gain +2 initiative tokens on the first turn as they surprise the sleeping heroes.
+  type: scenario_rule
+  scope: quest
+  fields:
+    first_turn:
+      type: boolean
+      role: input
+      description: First turn of this quest.
+    bandit_initiative_bonus:
+      type: number
+      role: output
+      description: Bonus tokens for the bandits this turn.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: bandit_initiative_bonus
+      value:
+        type: literal
+        value: 0
+  quest_id: quest.first_blood
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: first_turn
+    right:
+      type: literal
+      value: false
+
+- id: core.quest_book.catalogue_structure
+  name: Quest Book I — catalogue structure
+  section_id: section.quest_book_i.introduction
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Quest Book I — catalogue structure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This book has two campaigns and several individual quests grouped by which objective
+    room is used. Quest Book II has more campaigns and individual quests and tables to randomize
+    which individual quest to play.
+  type: definition
+  scope: quest
+  fields:
+    campaigns_in_this_book:
+      type: number
+      role: output
+      description: campaigns in this book
+      integer: true
+    individual_quest_grouping:
+      type: string
+      role: output
+      description: individual quest grouping
+  effects:
+    - type: set
+      target: campaigns_in_this_book
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: individual_quest_grouping
+      value:
+        type: literal
+        value: which objective room is used
+  dependencies:
+    - key: dead_rising
+      label: The Dead Rising campaign
+      object_id: quest.dead_rising.campaign
+    - key: spider_queen
+      label: Lair of the Spider Queen campaign
+      object_id: quest.spider_queen.campaign
+    - key: quest_book_ii
+      label: Quest Book II is not present; its contents are not invented
+  see_also:
+    - section.quest_book_i.the_dead_rising
+    - section.quest_book_i.lair_of_the_spider_queen

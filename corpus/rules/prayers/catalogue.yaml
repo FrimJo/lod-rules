@@ -1,0 +1,1792 @@
+- id: character.prayer.bringer_of_light
+  name: bringer of light
+  section_id: section.prayers.bringer_of_light
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: bringer of light
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any Undead trying to attack the Warrior Priest suffers -10 CS.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    undead_attacker:
+      type: boolean
+      role: input
+      description: undead attacker
+    target_is_priest:
+      type: boolean
+      role: input
+      description: target is priest
+    cs_modifier:
+      type: number
+      role: output
+      description: cs modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: undead_attacker
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_is_priest
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: cs_modifier
+      value:
+        type: literal
+        value: -10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.bringer_of_light
+- id: character.prayer.the_power_of_iphy
+  name: the power of iphy
+  section_id: section.prayers.the_power_of_iphy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: the power of iphy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Party gains +10 RES on Fear or Terror Tests during battle; already failed tests may be
+    retaken with bonus.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    res_modifier:
+      type: number
+      role: output
+      description: res modifier
+    tests:
+      type: string
+      role: output
+      description: tests
+    retake_failed_tests:
+      type: boolean
+      role: output
+      description: retake failed tests
+  effects:
+    - type: set
+      target: res_modifier
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: tests
+      value:
+        type: literal
+        value: Fear or Terror
+    - type: set
+      target: retake_failed_tests
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.the_power_of_iphy
+- id: character.prayer.charus_walk_with_us
+  name: charus walk with us
+  section_id: section.prayers.charus_walk_with_us
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: charus walk with us
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All heroes regain Energy on skill rolls 01-10 instead of 01-05; only Energy changes,
+    not the other 01-05 options.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    skill_roll:
+      type: number
+      role: input
+      description: skill roll
+    energy_regained:
+      type: number
+      role: output
+      description: energy regained
+    other_perfect_options_unchanged:
+      type: boolean
+      role: output
+      description: other perfect options unchanged
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: skill_roll
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: skill_roll
+        right:
+          type: literal
+          value: 10
+    - type: set
+      target: energy_regained
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: other_perfect_options_unchanged
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.charus_walk_with_us
+- id: character.prayer.metheias_ward
+  name: metheias ward
+  section_id: section.prayers.metheias_ward
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: metheias ward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Priest regains 1 lost HP at start of activation for rest of battle.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    at_activation_start:
+      type: boolean
+      role: input
+      description: at activation start
+    hp_regained:
+      type: number
+      role: output
+      description: hp regained
+    target:
+      type: string
+      role: output
+      description: target
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_activation_start
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: hp_regained
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: target
+      value:
+        type: literal
+        value: priest
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.metheias_ward
+  dependencies:
+    - key: recovery_bounds
+      label: Existing recovery boundaries; explicit spell exceptions remain local
+      object_id: character.recovery.hp_overflow
+- id: character.prayer.power_of_the_gods
+  name: power of the gods
+  section_id: section.prayers.power_of_the_gods
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: power of the gods
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: While active any hero wizard gains +10 Arcane Arts.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    hero_wizard:
+      type: boolean
+      role: input
+      description: hero wizard
+    arcane_arts_bonus:
+      type: number
+      role: output
+      description: arcane arts bonus
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_wizard
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: arcane_arts_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.power_of_the_gods
+- id: character.prayer.methias_balm
+  name: methias balm
+  section_id: section.prayers.methias_balm
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: methias balm
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heal adjacent hero or priest 1d6+1 HP. Prayer stops once effect resolved.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    adjacent_or_self:
+      type: boolean
+      role: input
+      description: adjacent or self
+    healing_roll:
+      type: number
+      role: input
+      description: healing roll
+    hp_regained:
+      type: number
+      role: output
+      description: hp regained
+    prayer_stops:
+      type: boolean
+      role: output
+      description: prayer stops
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent_or_self
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: hp_regained
+      value:
+        type: sum
+        values:
+          - type: field
+            name: healing_roll
+          - type: literal
+            value: 1
+    - type: set
+      target: prayer_stops
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.methias_balm
+  dependencies:
+    - key: recovery_bounds
+      label: Existing recovery boundaries; explicit spell exceptions remain local
+      object_id: character.recovery.hp_overflow
+- id: character.prayer.litany_of_metheia
+  name: litany of metheia
+  section_id: section.prayers.litany_of_metheia
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: litany of metheia
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every hero passing RES at start of activation regains 1 HP.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    res_succeeded:
+      type: boolean
+      role: input
+      description: res succeeded
+    at_activation_start:
+      type: boolean
+      role: input
+      description: at activation start
+    hp_regained:
+      type: number
+      role: output
+      description: hp regained
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: res_succeeded
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_activation_start
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: hp_regained
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.litany_of_metheia
+  dependencies:
+    - key: recovery_bounds
+      label: Existing recovery boundaries; explicit spell exceptions remain local
+      object_id: character.recovery.hp_overflow
+- id: character.prayer.power_of_faith
+  name: power of faith
+  section_id: section.prayers.power_of_faith
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: power of faith
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Party immune to fear and treats terror as fear; already scared heroes regain courage if
+    prayer succeeds.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    fear_immune:
+      type: boolean
+      role: output
+      description: fear immune
+    terror_treated_as:
+      type: string
+      role: output
+      description: terror treated as
+    scared_heroes_regain_courage:
+      type: boolean
+      role: output
+      description: scared heroes regain courage
+  effects:
+    - type: set
+      target: fear_immune
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: terror_treated_as
+      value:
+        type: literal
+        value: fear
+    - type: set
+      target: scared_heroes_regain_courage
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.power_of_faith
+- id: character.prayer.smite_the_heretics
+  name: smite the heretics
+  section_id: section.prayers.smite_the_heretics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: smite the heretics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At start of each turn enemies within 4 squares of priest must pass RES or lose 1 HP.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    distance:
+      type: number
+      role: input
+      description: distance
+    res_succeeded:
+      type: boolean
+      role: input
+      description: res succeeded
+    at_turn_start:
+      type: boolean
+      role: input
+      description: at turn start
+    is_enemy:
+      type: boolean
+      role: input
+      description: is enemy
+    hp_lost:
+      type: number
+      role: output
+      description: hp lost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: distance
+        right:
+          type: literal
+          value: 4
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: res_succeeded
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_turn_start
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_enemy
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: hp_lost
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.smite_the_heretics
+  dependencies:
+    - key: damage_resolution
+      label: Apply damage using existing damage and protection rules with this effect’s printed exceptions
+      object_id: combat.damage.basic
+- id: character.prayer.verse_of_the_sane
+  name: verse of the sane
+  section_id: section.prayers.verse_of_the_sane
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: verse of the sane
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Target hero regains 1d3 Sanity Points; once per hero and quest.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    uses_this_hero_quest:
+      type: number
+      role: input
+      description: uses this hero quest
+    sanity_roll:
+      type: number
+      role: input
+      description: sanity roll
+    sanity_regained:
+      type: number
+      role: output
+      description: sanity regained
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: uses_this_hero_quest
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: sanity_regained
+      value:
+        type: field
+        name: sanity_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.verse_of_the_sane
+- id: character.prayer.shield_of_the_gods
+  name: shield of the gods
+  section_id: section.prayers.shield_of_the_gods
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: shield of the gods
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: While active one hero in LOS of priest gets +2 Natural Armour.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    in_los:
+      type: boolean
+      role: input
+      description: in los
+    natural_armour_bonus:
+      type: number
+      role: output
+      description: natural armour bonus
+    targets:
+      type: number
+      role: output
+      description: targets
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_los
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: natural_armour_bonus
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: targets
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.shield_of_the_gods
+- id: character.prayer.strengths_of_ohlnir
+  name: strengths of ohlnir
+  section_id: section.prayers.strengths_of_ohlnir
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: strengths of ohlnir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All party members gain +1 DMG with close combat weapons.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    close_combat_weapon:
+      type: boolean
+      role: input
+      description: close combat weapon
+    damage_bonus:
+      type: number
+      role: output
+      description: damage bonus
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: close_combat_weapon
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: damage_bonus
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.strengths_of_ohlnir
+- id: character.prayer.warriors_of_ramos
+  name: warriors of ramos
+  section_id: section.prayers.warriors_of_ramos
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: warriors of ramos
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All party members fight with +10 CS.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    cs_bonus:
+      type: number
+      role: output
+      description: cs bonus
+  effects:
+    - type: set
+      target: cs_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.warriors_of_ramos
+- id: character.prayer.stay_thy_hand
+  name: stay thy hand
+  section_id: section.prayers.stay_thy_hand
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: stay thy hand
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At start of every turn enemies within 4 squares test RES or lose 1 AP that turn. Not
+    cumulative with other action-loss effects; wounded enemies unaffected.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    distance:
+      type: number
+      role: input
+      description: distance
+    at_turn_start:
+      type: boolean
+      role: input
+      description: at turn start
+    res_succeeded:
+      type: boolean
+      role: input
+      description: res succeeded
+    other_action_loss:
+      type: boolean
+      role: input
+      description: other action loss
+    wounded:
+      type: boolean
+      role: input
+      description: wounded
+    is_enemy:
+      type: boolean
+      role: input
+      description: is enemy
+    actions_lost:
+      type: number
+      role: output
+      description: actions lost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: distance
+        right:
+          type: literal
+          value: 4
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_turn_start
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: res_succeeded
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: other_action_loss
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: wounded
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_enemy
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: actions_lost
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.stay_thy_hand
+- id: character.prayer.be_gone
+  name: be gone
+  section_id: section.prayers.be_gone
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: be gone
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Any ethereal creature within 4 squares must pass RES at start of turn or lose 1d3 HP.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    ethereal:
+      type: boolean
+      role: input
+      description: ethereal
+    distance:
+      type: number
+      role: input
+      description: distance
+    res_succeeded:
+      type: boolean
+      role: input
+      description: res succeeded
+    at_turn_start:
+      type: boolean
+      role: input
+      description: at turn start
+    damage_roll:
+      type: number
+      role: input
+      description: damage roll
+    hp_lost:
+      type: number
+      role: output
+      description: hp lost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: ethereal
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: distance
+        right:
+          type: literal
+          value: 4
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: res_succeeded
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_turn_start
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: hp_lost
+      value:
+        type: field
+        name: damage_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.be_gone
+  dependencies:
+    - key: damage_resolution
+      label: Apply damage using existing damage and protection rules with this effect’s printed exceptions
+      object_id: combat.damage.basic
+- id: character.prayer.providence_of_metheia
+  name: providence of metheia
+  section_id: section.prayers.providence_of_metheia
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: providence of metheia
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: While active all heroes get +10 CON when rolling to resist disease or poison.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    resist_disease_or_poison:
+      type: boolean
+      role: input
+      description: resist disease or poison
+    con_bonus:
+      type: number
+      role: output
+      description: con bonus
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: resist_disease_or_poison
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: con_bonus
+      value:
+        type: literal
+        value: 10
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.providence_of_metheia
+- id: character.prayer.we_shalt_not_falter
+  name: we shalt not falter
+  section_id: section.prayers.we_shalt_not_falter
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: we shalt not falter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All party members gain +5 HP, temporarily exceeding current maximum. After battle
+    returns to normal max HP.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    hp:
+      type: number
+      role: input
+      description: hp
+    hp_after:
+      type: number
+      role: output
+      description: hp after
+    after_battle:
+      type: string
+      role: output
+      description: after battle
+  effects:
+    - type: set
+      target: hp_after
+      value:
+        type: sum
+        values:
+          - type: field
+            name: hp
+          - type: literal
+            value: 5
+    - type: set
+      target: after_battle
+      value:
+        type: literal
+        value: normal maximum applies
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.we_shalt_not_falter
+- id: character.prayer.gods_champion
+  name: gods champion
+  section_id: section.prayers.gods_champion
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: gods champion
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Priest gains +20 CS and +2 DMG. After battle loses additional Energy; if insufficient,
+    CON halved RDD until next short rest or dungeon exit.
+  type: modifier
+  scope: global
+  fields:
+    prayer_active:
+      type: boolean
+      role: input
+      description: prayer active
+    cs_bonus:
+      type: number
+      role: output
+      description: cs bonus
+    damage_bonus:
+      type: number
+      role: output
+      description: damage bonus
+    post_battle_energy_cost:
+      type: number
+      role: output
+      description: post battle energy cost
+  effects:
+    - type: set
+      target: cs_bonus
+      value:
+        type: literal
+        value: 20
+    - type: set
+      target: damage_bonus
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: post_battle_energy_cost
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prayer_active
+    right:
+      type: literal
+      value: true
+  entity_id: prayer.gods_champion
+- id: character.prayer.activation
+  name: activation
+  section_id: section.prayers.about_prayers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: activation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Prayer is a free action parallel to moving or fighting, costing 1 Energy.
+  type: modifier
+  scope: global
+  fields:
+    action_points_spent:
+      type: number
+      role: output
+      description: action points spent
+    energy_spent:
+      type: number
+      role: output
+      description: energy spent
+  effects:
+    - type: set
+      target: action_points_spent
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: energy_spent
+      value:
+        type: literal
+        value: 1
+- id: character.prayer.success
+  name: success
+  section_id: section.prayers.will_the_gods_listen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: success
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll equal to or below Battle Prayer skill for success. Enemies may have opposed
+    Resolve tests as specified.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    battle_prayer:
+      type: number
+      role: input
+      description: battle prayer
+    prayer_succeeded:
+      type: boolean
+      role: output
+      description: prayer succeeded
+  effects:
+    - type: set
+      target: prayer_succeeded
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: lte
+    left:
+      type: field
+      name: roll
+    right:
+      type: field
+      name: battle_prayer
+- id: character.prayer.impeccable
+  name: impeccable
+  section_id: section.prayers.will_the_gods_listen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: impeccable
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 01-05 is impeccable and spends no Energy.
+  type: modifier
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: roll
+    energy_spent:
+      type: number
+      role: output
+      description: energy spent
+  effects:
+    - type: set
+      target: energy_spent
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5
+- id: character.prayer.duration
+  name: duration
+  section_id: section.prayers.duration
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: duration
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one prayer active at once; lasts current battle unless noted, or 4 turns between battles.
+  type: modifier
+  scope: global
+  fields:
+    active_prayers:
+      type: number
+      role: input
+      description: active prayers
+    maximum_active_prayers:
+      type: number
+      role: output
+      description: maximum active prayers
+    between_battles_turns:
+      type: number
+      role: output
+      description: between battles turns
+    default_duration:
+      type: string
+      role: output
+      description: default duration
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: active_prayers
+        right:
+          type: literal
+          value: 1
+    - type: set
+      target: maximum_active_prayers
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: between_battles_turns
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: default_duration
+      value:
+        type: literal
+        value: current battle
+- id: character.prayer.interruption
+  name: interruption
+  section_id: section.prayers.interruption
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: interruption
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Stunned, falling over, reaching 0 HP or failing Terror stops chanting and cancels prayer.
+  type: modifier
+  scope: global
+  fields:
+    stunned:
+      type: boolean
+      role: input
+      description: stunned
+    fallen_over:
+      type: boolean
+      role: input
+      description: fallen over
+    hp:
+      type: number
+      role: input
+      description: hp
+    terror_failed:
+      type: boolean
+      role: input
+      description: terror failed
+    prayer_active:
+      type: boolean
+      role: output
+      description: prayer active
+  effects:
+    - type: set
+      target: prayer_active
+      value:
+        type: literal
+        value: false
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: stunned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fallen_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: hp
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: terror_failed
+        right:
+          type: literal
+          value: true
+- id: character.prayer.relics
+  name: relics
+  section_id: section.prayers.relics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Only Warrior Priests benefit from relics: at most one ring and one necklace at a time
+    (two total).'
+  type: modifier
+  scope: global
+  fields:
+    warrior_priest:
+      type: boolean
+      role: input
+      description: warrior priest
+    rings:
+      type: number
+      role: input
+      description: rings
+    necklaces:
+      type: number
+      role: input
+      description: necklaces
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: warrior_priest
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: rings
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: necklaces
+        right:
+          type: literal
+          value: 1
+  dependencies:
+    - key: relics
+      label: Table of Relics
+      object_id: table.treasure.relics
+- id: character.prayer.gods_champion.after_battle.constitution
+  name: constitution
+  section_id: section.prayers.gods_champion
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: constitution
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    After battle, God’s Champion costs an additional Energy; insufficient Energy halves CON
+    (RDD) until next short rest or leaving dungeon.
+  type: modifier
+  scope: global
+  fields:
+    battle_ended:
+      type: boolean
+      role: input
+      description: battle ended
+    energy:
+      type: number
+      role: input
+      description: energy
+    constitution:
+      type: number
+      role: input
+      description: constitution
+    constitution_after:
+      type: number
+      role: output
+      description: constitution after
+    penalty_duration:
+      type: string
+      role: output
+      description: penalty duration
+  effects:
+    - type: set
+      target: constitution_after
+      value:
+        type: arithmetic
+        operator: floor
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: constitution
+              - type: literal
+                value: 2
+    - type: set
+      target: penalty_duration
+      value:
+        type: literal
+        value: until next short rest or dungeon exit
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: battle_ended
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+- id: character.prayer.gods_champion.after_battle.energy
+  name: energy
+  section_id: section.prayers.gods_champion
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      heading: energy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    After battle, God’s Champion costs an additional Energy; insufficient Energy halves CON
+    (RDD) until next short rest or leaving dungeon.
+  type: modifier
+  scope: global
+  fields:
+    battle_ended:
+      type: boolean
+      role: input
+      description: battle ended
+    energy:
+      type: number
+      role: input
+      description: energy
+    constitution:
+      type: number
+      role: input
+      description: constitution
+    energy_after:
+      type: number
+      role: output
+      description: energy after
+  effects:
+    - type: set
+      target: energy_after
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: energy
+          - type: literal
+            value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: battle_ended
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1

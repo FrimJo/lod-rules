@@ -1,0 +1,525 @@
+- id: core.quest.returning_relic.setup
+  name: Returning the Relic — setup
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Return a polished black stone to its statue in a forgotten temple. Random location,
+    eight corridors, eight rooms, 300c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  dependencies:
+    - key: stone
+      label: Polished black stone
+      object_id: equipment.quest.polished_black_stone
+- id: core.quest.returning_relic.luck_nullification
+  name: Returning the Relic — nullified Luck
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — nullified Luck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All heroes have their Luck Points nullified until the stone has been returned.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    stone_returned:
+      type: boolean
+      role: input
+      description: The stone has been returned.
+    all_heroes_luck_points_nullified:
+      type: boolean
+      role: output
+      description: all heroes luck points nullified
+  effects:
+    - type: set
+      target: all_heroes_luck_points_nullified
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: stone_returned
+    right:
+      type: literal
+      value: false
+- id: core.quest.returning_relic.curse_ends
+  name: Returning the Relic — nullification ends
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — nullification ends
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Luck Points are nullified until the stone has been returned. No new Luck Point amount
+    is specified.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    stone_returned:
+      type: boolean
+      role: input
+      description: The stone has been returned.
+    all_heroes_luck_points_nullified:
+      type: boolean
+      role: output
+      description: all heroes luck points nullified
+  effects:
+    - type: set
+      target: all_heroes_luck_points_nullified
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: stone_returned
+    right:
+      type: literal
+      value: true
+- id: core.quest.returning_relic.scenario_trigger
+  name: Returning the Relic — Scenario trigger
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — Scenario trigger
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Scenario die is triggered on a result of 8–10.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    scenario_roll:
+      type: number
+      role: input
+      description: Scenario die result.
+      integer: true
+      minimum: 1
+      maximum: 10
+    scenario_die_triggered:
+      type: boolean
+      role: output
+      description: The quest Scenario trigger.
+  effects:
+    - type: set
+      target: scenario_die_triggered
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 8
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 10
+- id: core.quest.returning_relic.objective_setup
+  name: Returning the Relic — Objective Room setup
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Heroes enter on the short side. The statue stands at the far end, with enemies between
+    it and the heroes. Roll twice on the Encounter Table and place enemies randomly.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    statue_position:
+      type: string
+      role: output
+      description: statue position
+    encounter_rolls:
+      type: number
+      role: output
+      description: encounter rolls
+      integer: true
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+  effects:
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side
+    - type: set
+      target: statue_position
+      value:
+        type: literal
+        value: far end of the room
+    - type: set
+      target: encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: enemy_placement
+      value:
+        type: literal
+        value: randomly in the room, between the statue and heroes
+- id: core.quest.returning_relic.refit_attempt
+  name: Returning the Relic — refit prerequisite
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — refit prerequisite
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once all enemies are dead, a hero standing in front of the statue can try to refit the
+    stone once per turn by making a DEX test.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    all_enemies_dead:
+      type: boolean
+      role: input
+      description: All enemies are dead.
+    hero_in_front_of_statue:
+      type: boolean
+      role: input
+      description: This hero stands in front of the statue.
+    refit_attempts_this_turn:
+      type: number
+      role: input
+      description: Refit attempts already made this turn.
+      integer: true
+      minimum: 0
+    refit_attempt_allowed:
+      type: boolean
+      role: output
+      description: refit attempt allowed
+    dex_test_required:
+      type: boolean
+      role: output
+      description: dex test required
+  effects:
+    - type: set
+      target: refit_attempt_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_enemies_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_in_front_of_statue
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: refit_attempts_this_turn
+        right:
+          type: literal
+          value: 0
+- id: core.quest.returning_relic.refit_success
+  name: Returning the Relic — successful refit
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — successful refit
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful DEX test puts the stone in place.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    valid_refit_attempt:
+      type: boolean
+      role: input
+      description: The source refit prerequisites are satisfied.
+    dex_test_succeeded:
+      type: boolean
+      role: input
+      description: The DEX test succeeded.
+    stone_returned:
+      type: boolean
+      role: output
+      description: stone returned
+  effects:
+    - type: set
+      target: stone_returned
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_refit_attempt
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dex_test_succeeded
+        right:
+          type: literal
+          value: true
+- id: core.quest.returning_relic.refit_failure
+  name: Returning the Relic — failed refit
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — failed refit
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A failed attempt increases Threat by 1.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    valid_refit_attempt:
+      type: boolean
+      role: input
+      description: The source refit prerequisites are satisfied.
+    dex_test_succeeded:
+      type: boolean
+      role: input
+      description: The DEX test succeeded.
+    threat_increase:
+      type: number
+      role: output
+      description: threat increase
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: threat_increase
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_refit_attempt
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dex_test_succeeded
+        right:
+          type: literal
+          value: false
+- id: core.quest.returning_relic.reward
+  name: Returning the Relic — home reward
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 255
+      printed_page: 253
+      heading: Returning the Relic — home reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the stone is in place the heroes head home. Once home, the nobleman pays 300c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.returning_relic
+  fields:
+    stone_returned:
+      type: boolean
+      role: input
+      description: The stone is in place.
+    heroes_home:
+      type: boolean
+      role: input
+      description: The heroes have arrived home.
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: stone_returned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_home
+        right:
+          type: literal
+          value: true

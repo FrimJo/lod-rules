@@ -1,0 +1,697 @@
+- id: core.quest.family_heirloom.setup
+  name: Retrieving the Family Heirloom — setup
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Quest Location: In the settlement. Number of Tiles: 8 corridors, 8 rooms using the
+    tiles R1B-8B. Reward: 300 c per hero. Encounters: Undead.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    room_tiles:
+      type: string
+      role: output
+      description: room tiles
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: In the settlement
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: room_tiles
+      value:
+        type: literal
+        value: R1B-8B
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Undead
+  dependencies:
+    - key: sword
+      label: Knight’s family sword
+      object_id: equipment.quest.family_heirloom_sword
+- id: core.quest.family_heirloom.brotherhood_corpses
+  name: Retrieving the Family Heirloom — Brotherhood corpse exception
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — Brotherhood corpse exception
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Ignore any special rules for dead members of the Brotherhood. Treat these corpses as
+    dead adventurers and search them accordingly.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    ignore_dead_brotherhood_special_rules:
+      type: boolean
+      role: output
+      description: ignore dead brotherhood special rules
+    brotherhood_corpses_treated_as:
+      type: string
+      role: output
+      description: brotherhood corpses treated as
+    search_as_dead_adventurers:
+      type: boolean
+      role: output
+      description: search as dead adventurers
+  effects:
+    - type: set
+      target: ignore_dead_brotherhood_special_rules
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: brotherhood_corpses_treated_as
+      value:
+        type: literal
+        value: dead adventurers
+    - type: set
+      target: search_as_dead_adventurers
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: dead_adventurer_search
+      label: Dead adventurer findings
+      object_id: character.treasure.furniture.dead_adventurer
+- id: core.quest.family_heirloom.scenario_trigger
+  name: Retrieving the Family Heirloom — Scenario trigger
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — Scenario trigger
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Scenario die is triggered on 8-10.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    scenario_roll:
+      type: number
+      role: input
+      description: scenario roll
+      integer: true
+      minimum: 1
+      maximum: 10
+    scenario_die_triggered:
+      type: boolean
+      role: output
+      description: scenario die triggered
+  effects:
+    - type: set
+      target: scenario_die_triggered
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 8
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 10
+- id: core.quest.family_heirloom.objective_setup
+  name: Retrieving the Family Heirloom — Objective Room setup
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There are six tombs. There are no enemies in the room. Heroes remain where they were
+    when the door was opened on the short side of the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    tombs:
+      type: number
+      role: output
+      description: tombs
+      integer: true
+    initial_enemies:
+      type: number
+      role: output
+      description: initial enemies
+      integer: true
+    hero_position:
+      type: string
+      role: output
+      description: hero position
+    door_side:
+      type: string
+      role: output
+      description: door side
+  effects:
+    - type: set
+      target: tombs
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: initial_enemies
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: hero_position
+      value:
+        type: literal
+        value: where they were when the door was opened
+    - type: set
+      target: door_side
+      value:
+        type: literal
+        value: short side
+- id: core.quest.family_heirloom.cards
+  name: Retrieving the Family Heirloom — cards
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — cards
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Take 6 playing cards (3 black, 1 red and 2 dressed cards). Shuffle them and place them
+    with their backs up.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    playing_cards:
+      type: number
+      role: output
+      description: playing cards
+      integer: true
+    black_cards:
+      type: number
+      role: output
+      description: black cards
+      integer: true
+    red_cards:
+      type: number
+      role: output
+      description: red cards
+      integer: true
+    dressed_cards:
+      type: number
+      role: output
+      description: dressed cards
+      integer: true
+    shuffle_cards:
+      type: boolean
+      role: output
+      description: shuffle cards
+    cards_face_down:
+      type: boolean
+      role: output
+      description: cards face down
+  effects:
+    - type: set
+      target: playing_cards
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: black_cards
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: red_cards
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dressed_cards
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: shuffle_cards
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: cards_face_down
+      value:
+        type: literal
+        value: true
+  issues:
+    - issue.quest.heirloom_card_categories
+- id: core.quest.family_heirloom.open_tomb
+  name: Retrieving the Family Heirloom — opening a tomb
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — opening a tomb
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Opening a tomb takes a complete turn for 2 heroes working together (the lids are really
+    heavy). Once the lid is off, draw one of the cards.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    heroes_working_together:
+      type: number
+      role: input
+      description: heroes working together
+      integer: true
+    complete_turn_spent:
+      type: boolean
+      role: input
+      description: complete turn spent
+    lid_removed:
+      type: boolean
+      role: output
+      description: lid removed
+    cards_to_draw:
+      type: number
+      role: output
+      description: cards to draw
+      integer: true
+  effects:
+    - type: set
+      target: lid_removed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: cards_to_draw
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_working_together
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: complete_turn_spent
+        right:
+          type: literal
+          value: true
+- id: core.quest.family_heirloom.black_card
+  name: Retrieving the Family Heirloom — Black
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — Black
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Black: There is a mummified corpse in the bottom of the tomb, but nothing else.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    lid_removed:
+      type: boolean
+      role: input
+      description: lid removed
+    drawn_card_category:
+      type: string
+      role: input
+      description: drawn card category
+    mummified_corpse_found:
+      type: boolean
+      role: output
+      description: mummified corpse found
+    other_contents_found:
+      type: boolean
+      role: output
+      description: other contents found
+  effects:
+    - type: set
+      target: mummified_corpse_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: other_contents_found
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: lid_removed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card_category
+        right:
+          type: literal
+          value: Black
+- id: core.quest.family_heirloom.red_card
+  name: Retrieving the Family Heirloom — Red
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: Retrieving the Family Heirloom — Red
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Red: A shining sword with intricate details lies on top of a mummified corpse. Heroes
+    break the mummy’s fingers and force the sword from its grip.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    lid_removed:
+      type: boolean
+      role: input
+      description: lid removed
+    drawn_card_category:
+      type: string
+      role: input
+      description: drawn card category
+    sword_retrieved:
+      type: boolean
+      role: output
+      description: sword retrieved
+  effects:
+    - type: set
+      target: sword_retrieved
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: lid_removed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card_category
+        right:
+          type: literal
+          value: Red
+  dependencies:
+    - key: sword
+      label: Knight’s family sword
+      object_id: equipment.quest.family_heirloom_sword
+- id: core.quest.family_heirloom.dressed_card
+  name: Retrieving the Family Heirloom — Dressed Card
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 260
+      printed_page: 258
+      heading: Retrieving the Family Heirloom — Dressed Card
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Dressed Card: The mummy climbs out of the tomb. Place the mummy next to the tomb and
+    commence combat.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    lid_removed:
+      type: boolean
+      role: input
+      description: lid removed
+    drawn_card_category:
+      type: string
+      role: input
+      description: drawn card category
+    mummy_placement:
+      type: string
+      role: output
+      description: mummy placement
+    commence_combat:
+      type: boolean
+      role: output
+      description: commence combat
+  effects:
+    - type: set
+      target: mummy_placement
+      value:
+        type: literal
+        value: next to the tomb
+    - type: set
+      target: commence_combat
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: lid_removed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card_category
+        right:
+          type: literal
+          value: Dressed Card
+  dependencies:
+    - key: mummy
+      label: Mummy statistics are not printed in this quest; supply its outcome
+  unresolved_references:
+    - Dressed Card mummy statistics are not defined locally.
+  issues:
+    - issue.quest.heirloom_card_categories
+- id: core.quest.family_heirloom.reward
+  name: Retrieving the Family Heirloom — aftermath
+  section_id: section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 259
+      printed_page: 257
+      heading: 'Reward: 300 c per hero'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 260
+      printed_page: 258
+      heading: Retrieving the Family Heirloom — aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once the sword is retrieved heroes return to the surface. The young knight takes the
+    presented sword and pays the agreed reward (300 c per hero).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.great_crypt.family_heirloom
+  fields:
+    sword_retrieved:
+      type: boolean
+      role: input
+      description: sword retrieved
+    heroes_back_at_surface:
+      type: boolean
+      role: input
+      description: heroes back at surface
+    sword_presented_to_knight:
+      type: boolean
+      role: input
+      description: sword presented to knight
+    sword_handed_to_knight:
+      type: boolean
+      role: output
+      description: sword handed to knight
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: sword_handed_to_knight
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sword_retrieved
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_back_at_surface
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sword_presented_to_knight
+        right:
+          type: literal
+          value: true

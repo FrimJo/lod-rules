@@ -1,0 +1,1351 @@
+- id: core.quest.closing_portal.setup
+  name: Closing the Portal — setup
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'The wizard provides the team with a scroll which could be cast by one with very limited skills in the Arcane Arts. Quest Location: In Silver City. Number of Tiles: 8 corridors, 8 rooms. Reward: 300 c per hero.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    ritual_scroll_supplied:
+      type: boolean
+      role: output
+      description: ritual scroll supplied
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Silver City
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: advertised_reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: ritual_scroll_supplied
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: scroll
+      label: Supplied ritual scroll
+      object_id: equipment.quest.portal_ritual_scroll
+- id: core.quest.closing_portal.encounter_replacement
+  name: Closing the Portal — encounter replacement
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — encounter replacement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All encounter results of even 10s (10, 20, 30...) result in an encounter with random demons.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    encounter_result:
+      type: number
+      role: input
+      description: encounter result
+      integer: true
+      minimum: 1
+    demon_encounter:
+      type: boolean
+      role: output
+      description: demon encounter
+    demon_table_rolls:
+      type: number
+      role: output
+      description: demon table rolls
+      integer: true
+  effects:
+    - type: set
+      target: demon_encounter
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: demon_table_rolls
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: encounter_result
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: encounter_result
+        right:
+          type: arithmetic
+          operator: multiply
+          values:
+            - type: arithmetic
+              operator: floor
+              values:
+                - type: arithmetic
+                  operator: divide
+                  values:
+                    - type: field
+                      name: encounter_result
+                    - type: literal
+                      value: 10
+            - type: literal
+              value: 10
+  dependencies:
+    - key: demons
+      label: Special rules demon Encounter Table
+      object_id: table.quest.closing_portal.demons
+- id: core.quest.closing_portal.objective_setup
+  name: Closing the Portal — Objective Room setup
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In the centre of the room over a large summoning circle is a shimmering bubble. Roll twice on the special rules Encounter Table and place demons randomly in the room. Heroes enter centred along the long side.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    initial_demon_table_rolls:
+      type: number
+      role: output
+      description: initial demon table rolls
+      integer: true
+    initial_demon_placement:
+      type: string
+      role: output
+      description: initial demon placement
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    portal_position:
+      type: string
+      role: output
+      description: portal position
+  effects:
+    - type: set
+      target: initial_demon_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: initial_demon_placement
+      value:
+        type: literal
+        value: randomly in the room
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: centred along the long side
+    - type: set
+      target: portal_position
+      value:
+        type: literal
+        value: centre of the room over a large summoning circle
+  dependencies:
+    - key: demons
+      label: Initial demon groups, using printed quantities
+      object_id: table.quest.closing_portal.demons
+- id: core.quest.closing_portal.demon_type_1
+  name: Closing the Portal — demon type 1
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — demon type 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Demon table 1–4: 1d6 Lesser Plague Demons, no weapon, Armour 0.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    demon_type:
+      type: string
+      role: output
+      description: demon type
+    demon_weapon:
+      type: string
+      role: output
+      description: demon weapon
+    demon_armour:
+      type: number
+      role: output
+      description: demon armour
+      integer: true
+  effects:
+    - type: set
+      target: demon_type
+      value:
+        type: literal
+        value: Lesser Plague Demons
+    - type: set
+      target: demon_weapon
+      value:
+        type: literal
+        value: no weapon
+    - type: set
+      target: demon_armour
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 4
+  dependencies:
+    - key: statistics
+      label: Demon statistics not printed in this quest; supplied external outcome required
+  unresolved_references:
+    - Lesser Plague Demons, Blood Demons and Plague Demons are named without statistics in this quest. Cursed Weapons are named without local effects.
+- id: core.quest.closing_portal.demon_group_1
+  name: Closing the Portal — initial/ordinary group quantity 1
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — initial/ordinary group quantity 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For the initial two rolls and encounter replacement, demon table result 1–4 supplies 1d6 Lesser Plague Demons. Later every-other-turn spawning adds only one demon.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    group_quantity_roll:
+      type: number
+      role: input
+      description: group quantity roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    group_encounter:
+      type: boolean
+      role: input
+      description: True only for an initial room group or ordinary encounter replacement; false for a later single-demon spawn.
+    demon_count:
+      type: number
+      role: output
+      description: demon count
+      integer: true
+  effects:
+    - type: set
+      target: demon_count
+      value:
+        type: field
+        name: group_quantity_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: group_encounter
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 4
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 6
+- id: core.quest.closing_portal.demon_type_2
+  name: Closing the Portal — demon type 2
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — demon type 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Demon table 5: 1d3 Blood Demons, with Cursed Weapons, Armour 0.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    demon_type:
+      type: string
+      role: output
+      description: demon type
+    demon_weapon:
+      type: string
+      role: output
+      description: demon weapon
+    demon_armour:
+      type: number
+      role: output
+      description: demon armour
+      integer: true
+  effects:
+    - type: set
+      target: demon_type
+      value:
+        type: literal
+        value: Blood Demons
+    - type: set
+      target: demon_weapon
+      value:
+        type: literal
+        value: Cursed Weapons
+    - type: set
+      target: demon_armour
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 5
+  dependencies:
+    - key: statistics
+      label: Demon statistics not printed in this quest; supplied external outcome required
+  unresolved_references:
+    - Lesser Plague Demons, Blood Demons and Plague Demons are named without statistics in this quest. Cursed Weapons are named without local effects.
+- id: core.quest.closing_portal.demon_group_2
+  name: Closing the Portal — initial/ordinary group quantity 2
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — initial/ordinary group quantity 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For the initial two rolls and encounter replacement, demon table result 5 supplies 1d3 Blood Demons. Later every-other-turn spawning adds only one demon.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    group_quantity_roll:
+      type: number
+      role: input
+      description: group quantity roll
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    group_encounter:
+      type: boolean
+      role: input
+      description: True only for an initial room group or ordinary encounter replacement; false for a later single-demon spawn.
+    demon_count:
+      type: number
+      role: output
+      description: demon count
+      integer: true
+  effects:
+    - type: set
+      target: demon_count
+      value:
+        type: field
+        name: group_quantity_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: group_encounter
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 3
+- id: core.quest.closing_portal.demon_type_3
+  name: Closing the Portal — demon type 3
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — demon type 3
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Demon table 6: 1d3 Plague Demons, with Cursed Weapons, Armour 0.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    demon_type:
+      type: string
+      role: output
+      description: demon type
+    demon_weapon:
+      type: string
+      role: output
+      description: demon weapon
+    demon_armour:
+      type: number
+      role: output
+      description: demon armour
+      integer: true
+  effects:
+    - type: set
+      target: demon_type
+      value:
+        type: literal
+        value: Plague Demons
+    - type: set
+      target: demon_weapon
+      value:
+        type: literal
+        value: Cursed Weapons
+    - type: set
+      target: demon_armour
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 6
+  dependencies:
+    - key: statistics
+      label: Demon statistics not printed in this quest; supplied external outcome required
+  unresolved_references:
+    - Lesser Plague Demons, Blood Demons and Plague Demons are named without statistics in this quest. Cursed Weapons are named without local effects.
+- id: core.quest.closing_portal.demon_group_3
+  name: Closing the Portal — initial/ordinary group quantity 3
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — initial/ordinary group quantity 3
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For the initial two rolls and encounter replacement, demon table result 6 supplies 1d3 Plague Demons. Later every-other-turn spawning adds only one demon.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    demon_type_roll:
+      type: number
+      role: input
+      description: demon type roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    group_quantity_roll:
+      type: number
+      role: input
+      description: group quantity roll
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    group_encounter:
+      type: boolean
+      role: input
+      description: True only for an initial room group or ordinary encounter replacement; false for a later single-demon spawn.
+    demon_count:
+      type: number
+      role: output
+      description: demon count
+      integer: true
+  effects:
+    - type: set
+      target: demon_count
+      value:
+        type: field
+        name: group_quantity_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: group_encounter
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: demon_type_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: group_quantity_roll
+        right:
+          type: literal
+          value: 3
+- id: core.quest.closing_portal.ritual_start
+  name: Closing the Portal — reading the scroll
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — reading the scroll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Reading can be done from anywhere in the room. Roll 1d6+1 for duration. They must hold still while reading it.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    hero_in_objective_room:
+      type: boolean
+      role: input
+      description: hero in objective room
+    ritual_eligibility_supplied:
+      type: boolean
+      role: input
+      description: Supplied unresolved eligibility judgment; very limited Arcane Arts skills have no printed threshold.
+    reader_stationary:
+      type: boolean
+      role: input
+      description: reader stationary
+    duration_die:
+      type: number
+      role: input
+      description: duration die
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    reading_allowed:
+      type: boolean
+      role: output
+      description: reading allowed
+    required_turns:
+      type: number
+      role: output
+      description: required turns
+      integer: true
+    reading_position:
+      type: string
+      role: output
+      description: reading position
+    must_remain_stationary:
+      type: boolean
+      role: output
+      description: must remain stationary
+  effects:
+    - type: set
+      target: reading_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: required_turns
+      value:
+        type: sum
+        values:
+          - type: field
+            name: duration_die
+          - type: literal
+            value: 1
+    - type: set
+      target: reading_position
+      value:
+        type: literal
+        value: anywhere in the room
+    - type: set
+      target: must_remain_stationary
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_in_objective_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ritual_eligibility_supplied
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reader_stationary
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.quest.portal_ritual_boundaries
+- id: core.quest.closing_portal.ritual_interruption
+  name: Closing the Portal — interruption and restart
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — interruption and restart
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the character is interrupted in any way (wounded, dodges, or parries), they have to start over. They must hold still while reading.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    reading_active:
+      type: boolean
+      role: input
+      description: reading active
+    interrupted_other_way:
+      type: boolean
+      role: input
+      description: interrupted other way
+    reader_wounded:
+      type: boolean
+      role: input
+      description: reader wounded
+    reader_dodged:
+      type: boolean
+      role: input
+      description: reader dodged
+    reader_parried:
+      type: boolean
+      role: input
+      description: reader parried
+    reader_stationary:
+      type: boolean
+      role: input
+      description: reader stationary
+    restart_required:
+      type: boolean
+      role: output
+      description: restart required
+    reading_progress_turns:
+      type: number
+      role: output
+      description: reading progress turns
+      integer: true
+  effects:
+    - type: set
+      target: restart_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reading_progress_turns
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reading_active
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: interrupted_other_way
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reader_wounded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reader_dodged
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reader_parried
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reader_stationary
+            right:
+              type: literal
+              value: false
+  issues:
+    - issue.quest.portal_ritual_boundaries
+- id: core.quest.closing_portal.portal_closure
+  name: Closing the Portal — portal closure
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — portal closure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The scroll seals the portal after its required uninterrupted stationary reading duration. Once the portal is closed, all demons must be killed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    valid_reading_attempt:
+      type: boolean
+      role: input
+      description: The reading prerequisites are satisfied, including supplied eligibility and restart handling.
+    reader_stationary:
+      type: boolean
+      role: input
+      description: reader stationary
+    reading_interrupted:
+      type: boolean
+      role: input
+      description: reading interrupted
+    reading_progress_turns:
+      type: number
+      role: input
+      description: reading progress turns
+      integer: true
+    required_turns:
+      type: number
+      role: input
+      description: required turns
+      integer: true
+    portal_closed:
+      type: boolean
+      role: output
+      description: portal closed
+    remaining_demons_must_be_killed:
+      type: boolean
+      role: output
+      description: remaining demons must be killed
+  effects:
+    - type: set
+      target: portal_closed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: remaining_demons_must_be_killed
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_reading_attempt
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reader_stationary
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reading_interrupted
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: required_turns
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: required_turns
+        right:
+          type: literal
+          value: 7
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: reading_progress_turns
+        right:
+          type: field
+          name: required_turns
+- id: core.quest.closing_portal.single_demon_spawn
+  name: Closing the Portal — every-other-turn spawning
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — every-other-turn spawning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise what kind it is.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    portal_open:
+      type: boolean
+      role: input
+      description: portal open
+    spawn_turn_supplied:
+      type: boolean
+      role: input
+      description: Supplied every-other-turn schedule; the source gives no first spawn phase or ordering within the turn.
+    demons_spawned:
+      type: number
+      role: output
+      description: demons spawned
+      integer: true
+    demon_type_table_rolls:
+      type: number
+      role: output
+      description: demon type table rolls
+      integer: true
+  effects:
+    - type: set
+      target: demons_spawned
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: demon_type_table_rolls
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: portal_open
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: spawn_turn_supplied
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: demon_type
+      label: Demon table selects type only; ignore its group quantities for this spawn
+      object_id: table.quest.closing_portal.demons
+  issues:
+    - issue.quest.portal_ritual_boundaries
+- id: core.quest.closing_portal.objective_loot
+  name: Closing the Portal — objective loot
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Once the portal is closed, all demons must be killed.
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 258
+      printed_page: 256
+      heading: Closing the Portal — objective loot
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As the final demon is slayed, heroes loot 2 objective chests (unlocked, not trapped, just roll on the Treasure Tables).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    portal_closed:
+      type: boolean
+      role: input
+      description: portal closed
+    all_demons_dead:
+      type: boolean
+      role: input
+      description: all demons dead
+    objective_chests:
+      type: number
+      role: output
+      description: objective chests
+      integer: true
+    chests_locked:
+      type: boolean
+      role: output
+      description: chests locked
+    chests_trapped:
+      type: boolean
+      role: output
+      description: chests trapped
+    treasure_tables_required:
+      type: boolean
+      role: output
+      description: treasure tables required
+  effects:
+    - type: set
+      target: objective_chests
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: chests_locked
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: chests_trapped
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: treasure_tables_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: portal_closed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_demons_dead
+        right:
+          type: literal
+          value: true
+- id: core.quest.closing_portal.reward
+  name: Closing the Portal — outside reward
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: 'Reward: 300 c per hero'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 258
+      printed_page: 256
+      heading: Closing the Portal — outside reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once back in the fresh air again, the wizard and Jarl give the promised reward (300 c per hero).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.closing_portal
+  fields:
+    portal_closed:
+      type: boolean
+      role: input
+      description: portal closed
+    all_demons_dead:
+      type: boolean
+      role: input
+      description: all demons dead
+    heroes_back_outside:
+      type: boolean
+      role: input
+      description: heroes back outside
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: portal_closed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_demons_dead
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_back_outside
+        right:
+          type: literal
+          value: true

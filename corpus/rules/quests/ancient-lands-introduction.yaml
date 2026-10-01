@@ -1,0 +1,347 @@
+- id: core.quest.ancient_lands.outpost_membership
+  name: Ancient Lands — Outpost requirement
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — Outpost requirement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    To enter these lands via the Outpost, you must be a member of the League of Dungeoneers
+    (Play the first campaign to become this).
+  type: constraint
+  scope: quest
+  fields:
+    via_outpost:
+      type: boolean
+      role: input
+      description: via outpost
+    league_membership_required:
+      type: boolean
+      role: output
+      description: league membership required
+  effects:
+    - type: set
+      target: league_membership_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: via_outpost
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: campaign
+      label: 'First campaign: The Dead Rising'
+      object_id: quest.dead_rising.campaign
+    - key: outpost
+      label: The Outpost
+      object_id: settlement.outpost
+- id: core.quest.ancient_lands.outpost_eligibility
+  name: Ancient Lands — Outpost eligibility
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — Outpost eligibility
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Entry via the Outpost requires League of Dungeoneers membership.
+  type: constraint
+  scope: quest
+  fields:
+    via_outpost:
+      type: boolean
+      role: input
+      description: via outpost
+    league_member:
+      type: boolean
+      role: input
+      description: league member
+    outpost_entry_eligible:
+      type: boolean
+      role: output
+      description: outpost entry eligible
+  effects:
+    - type: set
+      target: outpost_entry_eligible
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: via_outpost
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: league_member
+        right:
+          type: literal
+          value: true
+- id: core.quest.ancient_lands.travel_costs
+  name: Ancient Lands — travel reminder
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — travel reminder
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As described in the main rules, each hex requires 2 Movement Points and each day
+    requires 2 Rations to accommodate extra water supplies. A camel is preferred because it reduces
+    travel time.
+  type: constraint
+  scope: quest
+  fields:
+    travelling_in_ancient_lands:
+      type: boolean
+      role: input
+      description: travelling in ancient lands
+    movement_points_per_hex:
+      type: number
+      role: output
+      description: movement points per hex
+      integer: true
+    rations_per_day_printed:
+      type: number
+      role: output
+      description: rations per day printed
+      integer: true
+    camel_reduces_travel_time:
+      type: boolean
+      role: output
+      description: camel reduces travel time
+  effects:
+    - type: set
+      target: movement_points_per_hex
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: rations_per_day_printed
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: camel_reduces_travel_time
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: travelling_in_ancient_lands
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: movement
+      label: Main travel movement accounting
+      object_id: procedure.travel_daily_movement
+    - key: rations
+      label: Main food and rest accounting; supplies recipient scope
+      object_id: procedure.travel_food_and_rest
+    - key: camel
+      label: Camel travel advantages
+      object_id: character.equipment.transport.camel.travel
+- id: core.quest.ancient_lands.travel_event
+  name: Ancient Lands — Travel Event
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — Travel Event
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A Travel Event die roll of 10-12 results in an Event. Use the Desert Event Cards.
+  type: constraint
+  scope: quest
+  fields:
+    travelling_in_ancient_lands:
+      type: boolean
+      role: input
+      description: travelling in ancient lands
+    travel_event_roll:
+      type: number
+      role: input
+      description: travel event roll
+      integer: true
+      minimum: 1
+      maximum: 12
+    travel_event_required:
+      type: boolean
+      role: output
+      description: travel event required
+    event_cards:
+      type: string
+      role: output
+      description: event cards
+  effects:
+    - type: set
+      target: travel_event_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: event_cards
+      value:
+        type: literal
+        value: Desert Event Cards
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: travelling_in_ancient_lands
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: travel_event_roll
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: travel_event_roll
+        right:
+          type: literal
+          value: 12
+  dependencies:
+    - key: event
+      label: Travel Event accounting, with supplied Desert Event Card
+      object_id: procedure.travel_event_check
+- id: core.quest.ancient_lands.ancient_objective
+  name: Ancient Lands — Ancient Land objective rooms
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — Ancient Land objective rooms
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These 5 quests each have 2 different objective rooms, depending on access to Ancient
+    lands tiles. Read the correct one.
+  type: constraint
+  scope: quest
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_room_variant:
+      type: string
+      role: output
+      description: objective room variant
+  effects:
+    - type: set
+      target: objective_room_variant
+      value:
+        type: literal
+        value: Ancient Land tiles
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: true
+- id: core.quest.ancient_lands.standard_objective
+  name: Ancient Lands — Standard objective rooms
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Ancient Lands — Standard objective rooms
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These 5 quests each have 2 different objective rooms, depending on access to Ancient
+    lands tiles. Read the correct one.
+  type: constraint
+  scope: quest
+  fields:
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: ancient tiles available
+    objective_room_variant:
+      type: string
+      role: output
+      description: objective room variant
+  effects:
+    - type: set
+      target: objective_room_variant
+      value:
+        type: literal
+        value: Standard tiles
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ancient_tiles_available
+    right:
+      type: literal
+      value: false

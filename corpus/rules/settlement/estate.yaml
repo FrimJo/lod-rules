@@ -1,0 +1,251 @@
+- id: character.settlement.estate.purchase
+  name: Buying the House
+  section_id: section.buying_an_estate.buying_the_house
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: Buying the House
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: The key to the Bergmeister Estate costs the party 4000 c while in Silver City.
+  type: modifier
+  scope: settlement
+  fields:
+    purchase_cost:
+      type: number
+      role: output
+      description: purchase cost
+    purchase_location:
+      type: string
+      role: output
+      description: purchase location
+  effects:
+    - type: set
+      target: purchase_cost
+      value:
+        type: literal
+        value: 4000
+    - type: set
+      target: purchase_location
+      value:
+        type: literal
+        value: Silver City
+  dependencies:
+    - key: related_0
+      label: estate.bergmeister
+      object_id: estate.bergmeister
+- id: character.settlement.estate.lodging
+  name: Staying at the House
+  section_id: section.buying_an_estate.staying_at_the_house
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: Staying at the House
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once they have the key, heroes may stay between quests without the daily inn cost.
+    Normal between-quest resting rules apply. Excess equipment can be stored.
+  type: modifier
+  scope: settlement
+  fields:
+    requires_key:
+      type: boolean
+      role: output
+      description: requires key
+    daily_lodging_cost:
+      type: number
+      role: output
+      description: daily lodging cost
+    normal_between_quest_rest:
+      type: boolean
+      role: output
+      description: normal between quest rest
+    excess_equipment_storage:
+      type: boolean
+      role: output
+      description: excess equipment storage
+  effects:
+    - type: set
+      target: requires_key
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: daily_lodging_cost
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: normal_between_quest_rest
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: excess_equipment_storage
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: related_0
+      label: character.settlement.rest
+      object_id: character.settlement.rest
+- id: character.settlement.estate.ghost_contact
+  name: The Ghosts of Past Generations
+  section_id: section.buying_an_estate
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 161
+      printed_page: 159
+      heading: The Ghosts of Past Generations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Between every quest, roll 1d10 the night before planned departure. On 7–10, roll on the
+    Ghostly Events Table.
+  type: modifier
+  scope: settlement
+  fields:
+    contact_die:
+      type: number
+      role: output
+      description: contact die
+    contact_minimum:
+      type: number
+      role: output
+      description: contact minimum
+    timing:
+      type: string
+      role: output
+      description: timing
+  effects:
+    - type: set
+      target: contact_die
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: contact_minimum
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: timing
+      value:
+        type: literal
+        value: night before planned departure between every quest
+  dependencies:
+    - key: related_0
+      label: table.estate.ghost_events
+      object_id: table.estate.ghost_events
+- id: character.settlement.estate.furnishing
+  name: Furnishing the Manor
+  section_id: section.buying_an_estate.furnishing_the_manor
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 161
+      printed_page: 159
+      heading: Furnishing the Manor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one furnishing or new area may be bought between quests. It cannot be used until
+    after leaving the next dungeon.
+  type: modifier
+  scope: settlement
+  fields:
+    purchases_between_quests:
+      type: number
+      role: output
+      description: purchases between quests
+    usable_after:
+      type: string
+      role: output
+      description: usable after
+  effects:
+    - type: set
+      target: purchases_between_quests
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: usable_after
+      value:
+        type: literal
+        value: leaving the next dungeon
+  dependencies:
+    - key: related_0
+      label: table.estate.furnishings
+      object_id: table.estate.furnishings
+- id: character.settlement.estate.departure
+  name: Ghostly Events Table
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Roll 1d10 for the events of the last evening or night before departure. There is no
+    time to change plans afterward; head straight to the World Map.
+  type: modifier
+  scope: settlement
+  fields:
+    event_die:
+      type: number
+      role: output
+      description: event die
+    may_change_plans:
+      type: boolean
+      role: output
+      description: may change plans
+    must_head_straight_to_world_map:
+      type: boolean
+      role: output
+      description: must head straight to world map
+  effects:
+    - type: set
+      target: event_die
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: may_change_plans
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: must_head_straight_to_world_map
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: related_0
+      label: table.estate.ghost_events
+      object_id: table.estate.ghost_events

@@ -59,6 +59,10 @@
       type: literal
       value: 1
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.discovery
   name: 'The Lost Brother: discovery'
   section_id: section.backgrounds.6_the_lost_brother
@@ -120,6 +124,10 @@
         type: literal
         value: false
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.surviving_brother
   name: 'The Lost Brother: surviving brother'
   section_id: section.backgrounds.6_the_lost_brother
@@ -190,6 +198,9 @@
     - key: civilian
       label: civilian Monster Card
       external_document: bestiary
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
   quest_id: quest.background.the_lost_brother
 - id: character.background.the_lost_brother.death_consequences
   name: 'The Lost Brother: death consequences'
@@ -260,10 +271,14 @@
           type: literal
           value: false
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.carrying_restrictions
   name: 'The Lost Brother: carrying restrictions'
   section_id: section.backgrounds.6_the_lost_brother
-  source:
+  source: &a1
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
@@ -339,6 +354,10 @@
           type: literal
           value: false
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.bury_outside
   name: 'The Lost Brother: bury outside'
   section_id: section.backgrounds.6_the_lost_brother
@@ -399,6 +418,10 @@
           type: literal
           value: false
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.rescue_reward
   name: 'The Lost Brother: rescue reward'
   section_id: section.backgrounds.6_the_lost_brother
@@ -472,6 +495,10 @@
           type: literal
           value: false
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.death_after_rescue
   name: 'The Lost Brother: death after rescue'
   section_id: section.backgrounds.6_the_lost_brother
@@ -532,6 +559,10 @@
           type: literal
           value: true
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
 - id: character.background.the_lost_brother.skirmish_body_exception
   name: 'The Lost Brother: skirmish body exception'
   section_id: section.backgrounds.6_the_lost_brother
@@ -576,3 +607,62 @@
       type: literal
       value: true
   quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
+- id: character.background.the_lost_brother.release_body_at_danger
+  name: 'The Lost Brother: release the body when danger approaches'
+  section_id: section.backgrounds.6_the_lost_brother
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text:
+    If you choose to bury him, you must carry him through the dungeon (of course letting go
+    of him when danger approaches).
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  quest_id: quest.background.the_lost_brother
+  fields:
+    burying_brother:
+      type: boolean
+      role: input
+      description: The hero chose to carry the body for burial.
+    danger_approaches:
+      type: boolean
+      role: input
+      description: Supplied danger condition.
+    must_carry_body:
+      type: boolean
+      role: output
+      description: The hero lets go of the body when danger approaches.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: burying_brother
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: danger_approaches
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: must_carry_body
+      value:
+        type: literal
+        value: false
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother

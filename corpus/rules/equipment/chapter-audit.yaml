@@ -1,0 +1,621 @@
+- id: character.equipment.weapon_class.one_hand
+  name: weapon class one hand
+  section_id: section.equipment.weapon_class
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 51
+      printed_page: 49
+      heading: weapon class
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weapon class determines the minimum Strength for one or two hands. Class 5 and 6
+    weapons cannot be used in one hand.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapon_class
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: strength
+                right:
+                  type: literal
+                  value: 20
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapon_class
+                right:
+                  type: literal
+                  value: 2
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: strength
+                right:
+                  type: literal
+                  value: 30
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapon_class
+                right:
+                  type: literal
+                  value: 3
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: strength
+                right:
+                  type: literal
+                  value: 40
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: weapon_class
+                right:
+                  type: literal
+                  value: 4
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: strength
+                right:
+                  type: literal
+                  value: 50
+  fields:
+    hands_used:
+      type: number
+      role: input
+      description: hands used
+    weapon_class:
+      type: number
+      role: input
+      description: weapon class
+      integer: true
+      minimum: 1
+      maximum: 6
+    strength:
+      type: number
+      role: input
+      description: strength
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hands_used
+    right:
+      type: literal
+      value: 1
+  uses_tables:
+    - table.equipment.weapon_class_strength
+- id: character.equipment.weapon_class.two_hands
+  name: weapon class two hands
+  section_id: section.equipment.weapon_class
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 51
+      printed_page: 49
+      heading: weapon class
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weapon class determines the minimum Strength for one or two hands. Class 5 and 6
+    weapons cannot be used in one hand.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: weapon_class
+        right:
+          type: literal
+          value: 6
+    - type: lookup
+      table_id: table.equipment.weapon_class_strength
+      key_column: weapon_class
+      key:
+        type: field
+        name: weapon_class
+      value_column: two_hands
+      target: required_strength
+      on_missing_issue: issue.phase4.lookup_domain
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: strength
+        right:
+          type: field
+          name: required_strength
+  fields:
+    hands_used:
+      type: number
+      role: input
+      description: hands used
+    weapon_class:
+      type: number
+      role: input
+      description: weapon class
+      integer: true
+      minimum: 1
+      maximum: 6
+    required_strength:
+      type: number
+      role: output
+      description: Minimum Strength from the printed class table.
+    strength:
+      type: number
+      role: input
+      description: strength
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hands_used
+    right:
+      type: literal
+      value: 2
+  uses_tables:
+    - table.equipment.weapon_class_strength
+- id: character.equipment.weapon.arbalest_strength
+  name: weapon arbalest strength
+  section_id: section.equipment.weapon_class
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 179
+      printed_page: 177
+      heading: weapon class
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Arbalest: Requires STR 55.'
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: strength
+        right:
+          type: literal
+          value: 55
+  fields:
+    strength:
+      type: number
+      role: input
+      description: strength
+- id: character.equipment.reload
+  name: reload
+  section_id: section.equipment.weapon_class
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 51
+      printed_page: 49
+      heading: weapon class
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Reload indicates how many Action Points are required to reload the Missile Weapon.
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: reload_action_points
+      value:
+        type: field
+        name: printed_reload
+  fields:
+    reload_action_points:
+      type: number
+      role: output
+      description: reload action points
+    printed_reload:
+      type: number
+      role: input
+      description: printed reload
+- id: character.equipment.enemy_weapon_stats
+  name: enemy weapon stats
+  section_id: section.equipment.weapon_class
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 51
+      printed_page: 49
+      heading: weapon class
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: For enemies only Special Rules and Damage need to be kept in mind; these are on Weapon Cards.
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: enemy_uses_only_damage_and_specials
+      value:
+        type: literal
+        value: true
+  fields:
+    enemy_uses_only_damage_and_specials:
+      type: boolean
+      role: output
+      description: enemy uses only damage and specials
+- id: character.equipment.quiver
+  name: quiver
+  section_id: section.equipment.quiver
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 52
+      printed_page: 50
+      heading: quiver
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Optional rule: All heroes automatically have a quiver holding 10 arrows or bolts.
+    Surplus is in the backpack. Used arrows or bolts can never be retrieved.'
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: has_quiver
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: quiver_capacity
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: quiver_projectiles
+      value:
+        type: arithmetic
+        operator: min
+        values:
+          - type: field
+            name: projectiles
+          - type: literal
+            value: 10
+    - type: set
+      target: backpack_projectiles
+      value:
+        type: arithmetic
+        operator: max
+        values:
+          - type: literal
+            value: 0
+          - type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: projectiles
+              - type: literal
+                value: 10
+    - type: set
+      target: used_projectiles_retrievable
+      value:
+        type: literal
+        value: false
+  fields:
+    optional_quiver_enabled:
+      type: boolean
+      role: input
+      description: optional quiver enabled
+    has_quiver:
+      type: boolean
+      role: output
+      description: has quiver
+    quiver_capacity:
+      type: number
+      role: output
+      description: quiver capacity
+    quiver_projectiles:
+      type: number
+      role: output
+      description: quiver projectiles
+    projectiles:
+      type: number
+      role: input
+      description: projectiles
+    backpack_projectiles:
+      type: number
+      role: output
+      description: backpack projectiles
+    used_projectiles_retrievable:
+      type: boolean
+      role: output
+      description: used projectiles retrievable
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: optional_quiver_enabled
+    right:
+      type: literal
+      value: true
+- id: character.equipment.mithril.weapon
+  name: mithril weapon
+  section_id: section.equipment.mithril
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 53
+      printed_page: 51
+      heading: mithril
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Mithril weapons get +1 DMG and -2 ENC. Armour and shields get +1 DEF and -1 ENC.
+  scope: global
+  type: modifier
+  effects:
+    - type: add
+      target: weapon_damage
+      value:
+        type: literal
+        value: 1
+      duration: while_condition
+    - type: add
+      target: encumbrance
+      value:
+        type: literal
+        value: -2
+      duration: while_condition
+  fields:
+    made_of_mithril:
+      type: boolean
+      role: input
+      description: made of mithril
+    weapon_damage:
+      type: number
+      role: state
+      description: weapon damage
+    encumbrance:
+      type: number
+      role: state
+      description: encumbrance
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: made_of_mithril
+    right:
+      type: literal
+      value: true
+- id: character.equipment.mithril.armour_or_shield
+  name: mithril armour or shield
+  section_id: section.equipment.mithril
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 53
+      printed_page: 51
+      heading: mithril
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Mithril weapons get +1 DMG and -2 ENC. Armour and shields get +1 DEF and -1 ENC.
+  scope: global
+  type: modifier
+  effects:
+    - type: add
+      target: defence
+      value:
+        type: literal
+        value: 1
+      duration: while_condition
+    - type: add
+      target: encumbrance
+      value:
+        type: literal
+        value: -1
+      duration: while_condition
+  fields:
+    made_of_mithril:
+      type: boolean
+      role: input
+      description: made of mithril
+    defence:
+      type: number
+      role: state
+      description: defence
+    encumbrance:
+      type: number
+      role: state
+      description: encumbrance
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: made_of_mithril
+    right:
+      type: literal
+      value: true
+- id: character.equipment.sell_initial_value
+  name: sell initial value
+  section_id: section.appendix_iii_equipment.general_equipment.sell_and_repair_table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 186
+      printed_page: 184
+      heading: sell and repair table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Initial value is the purchase value or value on the treasure card; all sales use the
+    Sell and Repair Table unless otherwise noted.
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: price
+      value:
+        type: field
+        name: purchase_or_treasure_value
+    - type: set
+      target: sell_via_table
+      value:
+        type: literal
+        value: true
+  fields:
+    otherwise_noted:
+      type: boolean
+      role: input
+      description: otherwise noted
+    price:
+      type: number
+      role: output
+      description: price
+    purchase_or_treasure_value:
+      type: number
+      role: input
+      description: purchase or treasure value
+    sell_via_table:
+      type: boolean
+      role: output
+      description: sell via table
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: otherwise_noted
+    right:
+      type: literal
+      value: false
+  uses_tables:
+    - table.equipment.sell_and_repair
+- id: character.equipment.settlement_trade
+  name: settlement trade
+  section_id: section.equipment.buying_and_selling_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 53
+      printed_page: 51
+      heading: buying and selling equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Buying and selling equipment may be done when visiting a settlement.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: visiting_settlement
+        right:
+          type: literal
+          value: true
+  fields:
+    visiting_settlement:
+      type: boolean
+      role: input
+      description: visiting settlement
+- id: character.equipment.settlement_repair
+  name: settlement repair
+  section_id: section.equipment.repairing_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 53
+      printed_page: 51
+      heading: repairing equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Damaged equipment can be repaired in settlements; see Settlements for details.
+  scope: global
+  type: modifier
+  effects:
+    - type: invoke
+      dependency: repair
+  fields: {}
+  dependencies:
+    - key: repair
+      label: Repair equipment
+      object_id: character.durability.repair_location

@@ -1,0 +1,481 @@
+- id: core.quest.highwaymen.setup
+  name: Highwaymen — setup
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Highwaymen — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Deal with the bandits in exchange for coins. Quest Location: White 34. Six corridors
+    and six rooms. Encounters: Bandits and Brigands. Objective room: The Dwarven hall.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    objective:
+      type: string
+      role: output
+      description: objective
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: objective
+      value:
+        type: literal
+        value: deal with the bandits
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: White 34
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Bandits and Brigands
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: The Dwarven hall
+- id: core.quest.highwaymen.threshold
+  name: Quest Threat 10
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 10, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 10
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.highwaymen.objective_setup
+  name: Highwaymen — Dwarven hall setup
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Highwaymen — Dwarven hall setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place Graup the Ogre by the throne. Roll twice on the Bandits and Brigands Table and
+    place the resulting enemies randomly around the Ogre, as close as possible. Heroes enter along
+    the short side. Bandits move first.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    graup_placement:
+      type: string
+      role: output
+      description: graup placement
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    encounter_table:
+      type: string
+      role: output
+      description: encounter table
+    bodyguard_placement:
+      type: string
+      role: output
+      description: bodyguard placement
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    first_to_move:
+      type: string
+      role: output
+      description: first to move
+  effects:
+    - type: set
+      target: graup_placement
+      value:
+        type: literal
+        value: by the throne
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: encounter_table
+      value:
+        type: literal
+        value: Bandits and Brigands Table
+    - type: set
+      target: bodyguard_placement
+      value:
+        type: literal
+        value: randomly around the Ogre, as close as possible
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side of the room
+    - type: set
+      target: first_to_move
+      value:
+        type: literal
+        value: Bandits
+  unresolved_references:
+    - 'Bandits and Brigands Table: encounter outcomes are not printed in this quest and must be
+      supplied.'
+- id: core.quest.highwaymen.graup
+  name: Graup — equipment
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Graup — equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Graup is an ordinary Ogre, armed with a longsword and Armour 1.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    enemy_kind:
+      type: string
+      role: output
+      description: enemy kind
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+  effects:
+    - type: set
+      target: enemy_kind
+      value:
+        type: literal
+        value: ordinary Ogre
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: longsword
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 1
+  entity_id: quest_actor.dead_rising.graup
+  unresolved_references:
+    - Ordinary Ogre statistics are not printed in this quest.
+- id: core.quest.highwaymen.reward
+  name: Highwaymen — advertised reward
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Highwaymen — advertised reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Reward: 200 c per hero.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 200
+- id: core.quest.highwaymen.aftermath_loot
+  name: Highwaymen — aftermath findings
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: Highwaymen — aftermath findings
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    After the last bandit falls the party notices two chests filled with bandit plunder and
+    a thick ledger detailing raids, including wagon crews as plunder.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    aftermath_chests:
+      type: number
+      role: output
+      description: aftermath chests
+      integer: true
+    aftermath_ledger:
+      type: boolean
+      role: output
+      description: aftermath ledger
+    ledger_lists_wagon_crews_as_plunder:
+      type: boolean
+      role: output
+      description: ledger lists wagon crews as plunder
+  effects:
+    - type: set
+      target: aftermath_chests
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: aftermath_ledger
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ledger_lists_wagon_crews_as_plunder
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: aftermath_looting
+      label: Off-table aftermath findings
+      object_id: core.quest_book.aftermath_looting
+- id: core.quest.highwaymen.aftermath_travel
+  name: Highwaymen — travel to Rochdale
+  section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 230
+      printed_page: 228
+      heading: Highwaymen — travel to Rochdale
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Gather rations for two days from the bandit stash. Head north through the forest to
+    Rochdale. The party travels to Rochdale without event using those rations. Midday on the second
+    day, smoke rises over the forest ahead.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.highwaymen
+  fields:
+    rations_days_supplied:
+      type: number
+      role: output
+      description: rations days supplied
+      integer: true
+    travel_direction:
+      type: string
+      role: output
+      description: travel direction
+    next_destination:
+      type: string
+      role: output
+      description: next destination
+    travel_without_event:
+      type: boolean
+      role: output
+      description: travel without event
+    use_bandit_stash_rations:
+      type: boolean
+      role: output
+      description: use bandit stash rations
+    smoke_sighted:
+      type: string
+      role: output
+      description: smoke sighted
+  effects:
+    - type: set
+      target: rations_days_supplied
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: travel_direction
+      value:
+        type: literal
+        value: north through the forest
+    - type: set
+      target: next_destination
+      value:
+        type: literal
+        value: Rochdale
+    - type: set
+      target: travel_without_event
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: use_bandit_stash_rations
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: smoke_sighted
+      value:
+        type: literal
+        value: mid-day on the second day

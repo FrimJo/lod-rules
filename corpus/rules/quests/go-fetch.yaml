@@ -1,0 +1,775 @@
+- id: core.quest.go_fetch.setup
+  name: Go Fetch — setup
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'An adventurer asks heroes to recover his shield, left at a fountain during his
+    retreat. Location: same dungeon as the next quest. Reward: 350 c. Encounters: as defined by the
+    main quest. Objective room: The Sanctuary (R9).'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    advertised_reward_coins:
+      type: number
+      role: output
+      description: advertised reward coins
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: advertised_reward_coins
+      value:
+        type: literal
+        value: 350
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: as defined by the main quest
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: The Sanctuary (R9)
+- id: core.quest.go_fetch.exploration
+  name: Go Fetch — Exploration Cards
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — Exploration Cards
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Make sure R9 makes it into the pile of Exploration Cards. If you find R9, you have also
+    found the Objective Room for this side quest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    required_exploration_card:
+      type: string
+      role: output
+      description: required exploration card
+  effects:
+    - type: set
+      target: required_exploration_card
+      value:
+        type: literal
+        value: R9
+- id: core.quest.go_fetch.objective_found
+  name: Go Fetch — R9 found
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — R9 found
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you manage to find R9, you have also found the Objective Room for this side quest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    r9_found:
+      type: boolean
+      role: input
+      description: r9 found
+    side_quest_objective_room_found:
+      type: boolean
+      role: output
+      description: side quest objective room found
+  effects:
+    - type: set
+      target: side_quest_objective_room_found
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: r9_found
+    right:
+      type: literal
+      value: true
+- id: core.quest.go_fetch.encounter
+  name: Go Fetch — automatic Encounter
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — automatic Encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There is an automatic Encounter in this room. Roll on the quest-specific Encounter
+    Table. Once the fight is over, try to locate the shield.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    side_quest_objective_room_found:
+      type: boolean
+      role: input
+      description: side quest objective room found
+    automatic_encounter:
+      type: boolean
+      role: output
+      description: automatic encounter
+    encounter_table_rolls:
+      type: number
+      role: output
+      description: encounter table rolls
+      integer: true
+    encounter_table_basis:
+      type: string
+      role: output
+      description: encounter table basis
+  effects:
+    - type: set
+      target: automatic_encounter
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encounter_table_rolls
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: encounter_table_basis
+      value:
+        type: literal
+        value: quest-specific Encounter Table
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: side_quest_objective_room_found
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: encounter
+      label: The quest-specific Encounter Table for the main quest; supplied encounter outcomes
+- id: core.quest.go_fetch.untouched
+  name: Go Fetch — untouched
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — untouched
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The shield is exactly where it was said to be and seems untouched.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: objective fight over
+    shield_search_roll:
+      type: number
+      role: input
+      description: shield search roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    shield_found:
+      type: boolean
+      role: output
+      description: shield found
+    shield_condition:
+      type: string
+      role: output
+      description: shield condition
+    shield_position:
+      type: string
+      role: output
+      description: shield position
+  effects:
+    - type: set
+      target: shield_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: shield_condition
+      value:
+        type: literal
+        value: seems untouched
+    - type: set
+      target: shield_position
+      value:
+        type: literal
+        value: where it was said to be
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_fight_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 3
+  uses_tables:
+    - table.quest.go_fetch.shield_condition
+- id: core.quest.go_fetch.damaged
+  name: Go Fetch — damaged
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — damaged
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The shield is lying on the floor beside the fountain and is in a miserable condition.
+    Remove 1d4 points of wear.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: objective fight over
+    shield_search_roll:
+      type: number
+      role: input
+      description: shield search roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    shield_found:
+      type: boolean
+      role: output
+      description: shield found
+    shield_condition:
+      type: string
+      role: output
+      description: shield condition
+    shield_position:
+      type: string
+      role: output
+      description: shield position
+    wear_points_to_remove_dice:
+      type: string
+      role: output
+      description: wear points to remove dice
+  effects:
+    - type: set
+      target: shield_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: shield_condition
+      value:
+        type: literal
+        value: miserable
+    - type: set
+      target: shield_position
+      value:
+        type: literal
+        value: floor beside the fountain
+    - type: set
+      target: wear_points_to_remove_dice
+      value:
+        type: literal
+        value: 1d4
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_fight_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 4
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 5
+  uses_tables:
+    - table.quest.go_fetch.shield_condition
+- id: core.quest.go_fetch.missing
+  name: Go Fetch — missing
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — missing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There is no shield to be seen. It seems you have been fighting for nothing.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: objective fight over
+    shield_search_roll:
+      type: number
+      role: input
+      description: shield search roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    shield_found:
+      type: boolean
+      role: output
+      description: shield found
+  effects:
+    - type: set
+      target: shield_found
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_fight_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 6
+  uses_tables:
+    - table.quest.go_fetch.shield_condition
+- id: core.quest.go_fetch.wear
+  name: Go Fetch — remove wear points
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — remove wear points
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On result 4-5, remove 1d4 points of wear from the shield.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    objective_fight_over:
+      type: boolean
+      role: input
+      description: objective fight over
+    shield_search_roll:
+      type: number
+      role: input
+      description: shield search roll
+      integer: true
+    shield_wear_roll:
+      type: number
+      role: input
+      description: shield wear roll
+      integer: true
+      minimum: 1
+      maximum: 4
+      dice:
+        count: 1
+        sides: 4
+    shield_wear_points_to_remove:
+      type: number
+      role: output
+      description: shield wear points to remove
+      integer: true
+  effects:
+    - type: set
+      target: shield_wear_points_to_remove
+      value:
+        type: field
+        name: shield_wear_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_fight_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 4
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: shield_search_roll
+        right:
+          type: literal
+          value: 5
+- id: core.quest.go_fetch.shield
+  name: Go Fetch — Heater Shield
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — Heater Shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The shield is a standard Heater Shield (DEF 6, ENC 4) and can be used by heroes if they
+    feel like it. Track its health as usual.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    shield_found:
+      type: boolean
+      role: input
+      description: shield found
+    shield_kind:
+      type: string
+      role: output
+      description: shield kind
+    shield_def:
+      type: number
+      role: output
+      description: shield def
+      integer: true
+    shield_enc:
+      type: number
+      role: output
+      description: shield enc
+      integer: true
+    heroes_may_use_shield:
+      type: boolean
+      role: output
+      description: heroes may use shield
+    track_shield_health_as_usual:
+      type: boolean
+      role: output
+      description: track shield health as usual
+  effects:
+    - type: set
+      target: shield_kind
+      value:
+        type: literal
+        value: standard Heater Shield
+    - type: set
+      target: shield_def
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: shield_enc
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: heroes_may_use_shield
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: track_shield_health_as_usual
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: shield_found
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: heater_shield
+      label: Standard Heater Shield
+      object_id: equipment.shield.heater_shield
+  entity_id: equipment.quest.go_fetch_shield
+- id: core.quest.go_fetch.reward
+  name: Go Fetch — back with shield
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — back with shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Back with the shield, the adventurer hands heroes the agreed reward. Reward: 350 c.
+    Broken or not-found shield earns no money.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    returned_to_adventurer:
+      type: boolean
+      role: input
+      description: returned to adventurer
+    shield_brought_back:
+      type: boolean
+      role: input
+      description: shield brought back
+    shield_broken:
+      type: boolean
+      role: input
+      description: shield broken
+    reward_coins:
+      type: number
+      role: output
+      description: reward coins
+      integer: true
+  effects:
+    - type: set
+      target: reward_coins
+      value:
+        type: literal
+        value: 350
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: returned_to_adventurer
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shield_brought_back
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shield_broken
+        right:
+          type: literal
+          value: false
+- id: core.quest.go_fetch.no_reward
+  name: Go Fetch — broken or not found
+  section_id: section.quest_book_i.side_quests.side_quest_4_go_fetch
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 277
+      printed_page: 275
+      heading: Go Fetch — broken or not found
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Aftermath: Shield is Broken or was Not Found. He sighs, lowers his head and walks
+    away. No shield – No money.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.go_fetch
+  fields:
+    returned_to_adventurer:
+      type: boolean
+      role: input
+      description: returned to adventurer
+    shield_was_not_found:
+      type: boolean
+      role: input
+      description: shield was not found
+    shield_broken:
+      type: boolean
+      role: input
+      description: shield broken
+    reward_coins:
+      type: number
+      role: output
+      description: reward coins
+      integer: true
+  effects:
+    - type: set
+      target: reward_coins
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: returned_to_adventurer
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shield_was_not_found
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shield_broken
+            right:
+              type: literal
+              value: true

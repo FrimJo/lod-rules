@@ -1,0 +1,944 @@
+- id: core.quest.master.setup
+  name: The Master — quest setup
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — quest setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Quest Location: White 39. Seven corridors and seven rooms. Make sure R10 is mixed in
+    among the top seven cards. Encounters: Undead. Objective Room: The Great Crypt.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    r10_in_top_seven_cards:
+      type: boolean
+      role: output
+      description: r10 in top seven cards
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: White 39
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: r10_in_top_seven_cards
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Undead
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: The Great Crypt
+- id: core.quest.master.scenario_event
+  name: The Master — Scenario event
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — Scenario event
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Scenario die triggers an event on 8 through 10.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    scenario_roll:
+      type: number
+      role: input
+      description: Supplied Scenario die.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    event_triggered:
+      type: boolean
+      role: output
+      description: Printed event trigger.
+  effects:
+    - type: set
+      target: event_triggered
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: scenario_roll
+    right:
+      type: literal
+      value: 8
+- id: core.quest.master.scenario_no_event
+  name: The Master — no Scenario event
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — no Scenario event
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The stated Scenario event range is 8 through 10.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    scenario_roll:
+      type: number
+      role: input
+      description: Supplied Scenario die.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    event_triggered:
+      type: boolean
+      role: output
+      description: No stated event trigger on 1–7.
+  effects:
+    - type: set
+      target: event_triggered
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: lt
+    left:
+      type: field
+      name: scenario_roll
+    right:
+      type: literal
+      value: 8
+- id: core.quest.master.harder_encounter
+  name: The Master — sacrifice-path encounter selection
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — sacrifice-path encounter selection
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If heroes chose to stop the sacrifice, roll twice on the Encounter Table for every
+    encounter and choose the higher result.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    chose_to_stop_sacrifice:
+      type: boolean
+      role: input
+      description: Choice of sacrifice path; does not require successful sacrifice prevention.
+    first_roll:
+      type: number
+      role: input
+      description: First supplied d100 Encounter Table result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    second_roll:
+      type: number
+      role: input
+      description: Second supplied d100 Encounter Table result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    encounter_rolls_required:
+      type: number
+      role: output
+      description: Two rolls per encounter.
+      integer: true
+      minimum: 0
+    selected_encounter_roll:
+      type: number
+      role: output
+      description: Higher of the two results.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: encounter_rolls_required
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: selected_encounter_roll
+      value:
+        type: arithmetic
+        operator: max
+        values:
+          - type: field
+            name: first_roll
+          - type: field
+            name: second_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: chose_to_stop_sacrifice
+    right:
+      type: literal
+      value: true
+- id: core.quest.master.key_chest
+  name: The Master — R10 middle chest
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — R10 middle chest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The middle chest on R10 is locked and can only be opened with the bronze key from Quest
+    5. It contains the Vanquisher.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    chest_tile:
+      type: string
+      role: output
+      description: chest tile
+    chest_position:
+      type: string
+      role: output
+      description: chest position
+    chest_locked:
+      type: boolean
+      role: output
+      description: chest locked
+    opening_method:
+      type: string
+      role: output
+      description: opening method
+    chest_contents:
+      type: string
+      role: output
+      description: chest contents
+  effects:
+    - type: set
+      target: chest_tile
+      value:
+        type: literal
+        value: R10
+    - type: set
+      target: chest_position
+      value:
+        type: literal
+        value: middle
+    - type: set
+      target: chest_locked
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: opening_method
+      value:
+        type: literal
+        value: bronze key from Quest 5 only
+    - type: set
+      target: chest_contents
+      value:
+        type: literal
+        value: The Vanquisher
+  dependencies:
+    - key: bronze_key
+      label: Bronze key from Quest 5
+      object_id: equipment.quest.emil_bronze_key
+    - key: vanquisher
+      label: The Vanquisher
+      object_id: equipment.quest.vanquisher
+- id: core.quest.master.key_opening
+  name: The Master — key-only opening permission
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — key-only opening permission
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The middle chest can only be opened with the bronze key from Quest 5.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    has_emil_bronze_key:
+      type: boolean
+      role: input
+      description: Party has the specific key from Quest 5.
+    middle_chest_opening_allowed:
+      type: boolean
+      role: output
+      description: Key-only opening restriction.
+  effects:
+    - type: set
+      target: middle_chest_opening_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: has_emil_bronze_key
+    right:
+      type: literal
+      value: true
+- id: core.quest.master.key_missing
+  name: The Master — missing-key restriction
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — missing-key restriction
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The middle chest can only be opened with the bronze key from Quest 5.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    has_emil_bronze_key:
+      type: boolean
+      role: input
+      description: Party has the specific key from Quest 5.
+    middle_chest_opening_allowed:
+      type: boolean
+      role: output
+      description: Other opening methods do not satisfy the source restriction.
+  effects:
+    - type: set
+      target: middle_chest_opening_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: has_emil_bronze_key
+    right:
+      type: literal
+      value: false
+- id: core.quest.master.vanquisher_properties
+  name: The Vanquisher — properties
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Vanquisher — properties
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Pure silver blade with runes, magical and in perfect condition. It has the same stats
+    as a standard longsword apart from special qualities and condition 8. It can be sold for 400 c.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    blade_material:
+      type: string
+      role: output
+      description: blade material
+    magical:
+      type: boolean
+      role: output
+      description: magical
+    initial_condition:
+      type: number
+      role: output
+      description: initial condition
+      integer: true
+    condition_description:
+      type: string
+      role: output
+      description: condition description
+    standard_weapon:
+      type: string
+      role: output
+      description: standard weapon
+    sale_coins:
+      type: number
+      role: output
+      description: sale coins
+      integer: true
+  effects:
+    - type: set
+      target: blade_material
+      value:
+        type: literal
+        value: pure silver
+    - type: set
+      target: magical
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: initial_condition
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: condition_description
+      value:
+        type: literal
+        value: perfect condition
+    - type: set
+      target: standard_weapon
+      value:
+        type: literal
+        value: longsword
+    - type: set
+      target: sale_coins
+      value:
+        type: literal
+        value: 400
+  entity_id: equipment.quest.vanquisher
+  dependencies:
+    - key: standard_longsword
+      label: Standard longsword statistics
+      object_id: equipment.weapon.longsword
+- id: core.quest.master.vanquisher_undead
+  name: The Vanquisher — Undead damage bonus
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Vanquisher — Undead damage bonus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The magical blade inflicts +2 damage to all Undead creatures.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    target_is_undead:
+      type: boolean
+      role: input
+      description: Explicit target classification.
+    vanquisher_damage_bonus:
+      type: number
+      role: output
+      description: Bonus only against Undead.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: vanquisher_damage_bonus
+      value:
+        type: literal
+        value: 2
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target_is_undead
+    right:
+      type: literal
+      value: true
+  entity_id: equipment.quest.vanquisher
+- id: core.quest.master.vanquisher_other
+  name: The Vanquisher — other targets
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Vanquisher — other targets
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The stated +2 damage special quality applies to Undead creatures.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    target_is_undead:
+      type: boolean
+      role: input
+      description: Explicit target classification.
+    vanquisher_damage_bonus:
+      type: number
+      role: output
+      description: No stated special bonus to other targets.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: vanquisher_damage_bonus
+      value:
+        type: literal
+        value: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target_is_undead
+    right:
+      type: literal
+      value: false
+  entity_id: equipment.quest.vanquisher
+- id: core.quest.master.objective_setup
+  name: The Master — Objective Room setup
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Heroes enter along a short side and remain where they were when opening the door. Place
+    two Zombie Ogres at the far end and the Master between them. Heroes go first. All six tombs may
+    be looted on the table as usual.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    hero_placement:
+      type: string
+      role: output
+      description: hero placement
+    zombie_ogres:
+      type: number
+      role: output
+      description: zombie ogres
+      integer: true
+    ogre_placement:
+      type: string
+      role: output
+      description: ogre placement
+    master_placement:
+      type: string
+      role: output
+      description: master placement
+    first_to_move:
+      type: string
+      role: output
+      description: first to move
+    lootable_tombs:
+      type: number
+      role: output
+      description: lootable tombs
+      integer: true
+    tomb_looting_on_table:
+      type: boolean
+      role: output
+      description: tomb looting on table
+  effects:
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side
+    - type: set
+      target: hero_placement
+      value:
+        type: literal
+        value: remain where they were when opening the door
+    - type: set
+      target: zombie_ogres
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ogre_placement
+      value:
+        type: literal
+        value: far end of the room
+    - type: set
+      target: master_placement
+      value:
+        type: literal
+        value: between the two Ogres
+    - type: set
+      target: first_to_move
+      value:
+        type: literal
+        value: heroes
+    - type: set
+      target: lootable_tombs
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: tomb_looting_on_table
+      value:
+        type: literal
+        value: true
+  unresolved_references:
+    - Zombie Ogre statistics are not printed in this quest.
+- id: core.quest.master.master
+  name: The Master — equipment, spells and treasure
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 236
+      printed_page: 234
+      heading: The Master — equipment, spells and treasure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Master is a Necromancer with poisoned dagger and Armour 1. He knows Raise Dead,
+    three Closecombat Spells and four Ranged Spells. XP 200, T4 Treasure Table.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    raise_dead_known:
+      type: boolean
+      role: output
+      description: raise dead known
+    closecombat_spells:
+      type: number
+      role: output
+      description: closecombat spells
+      integer: true
+    ranged_spells:
+      type: number
+      role: output
+      description: ranged spells
+      integer: true
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: poisoned dagger
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: raise_dead_known
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: closecombat_spells
+      value:
+        type: literal
+        value: 3
+    - type: set
+      target: ranged_spells
+      value:
+        type: literal
+        value: 4
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 200
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T4
+  entity_id: quest_actor.dead_rising.master
+  dependencies:
+    - key: raise_dead
+      label: Raise Dead
+      object_id: spell.raise_dead
+    - key: tier_four_treasure
+      label: T4 Treasure Table
+      object_id: table.treasure.t4
+    - key: poison
+      label: Poison for the poisoned dagger
+      object_id: procedure.damage_follow_up
+    - key: dagger
+      label: Master’s engraved poisoned dagger
+      object_id: equipment.quest.master_engraved_dagger
+  unresolved_references:
+    - 'Three Closecombat Spells and four Ranged Spells: the source does not name them or state a
+      selection method.'
+- id: core.quest.master.reward
+  name: The Master — advertised reward
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 235
+      printed_page: 233
+      heading: The Master — advertised reward
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Reward: 1000 c. The heading does not specify a recipient; the campaign aftermath later
+    explicitly presents each hero with 1000 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    advertised_reward_coins:
+      type: number
+      role: output
+      description: advertised reward coins
+      integer: true
+    advertised_recipient:
+      type: string
+      role: output
+      description: advertised recipient
+  effects:
+    - type: set
+      target: advertised_reward_coins
+      value:
+        type: literal
+        value: 1000
+    - type: set
+      target: advertised_recipient
+      value:
+        type: literal
+        value: not specified in this heading
+- id: core.quest.master.aftermath
+  name: The Master — aftermath findings and return
+  section_id: section.quest_book_i.the_dead_rising.quest_6b_the_master
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 236
+      printed_page: 234
+      heading: The Master — aftermath findings and return
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As the Master falls, his body disappears. Find a Grimoire open to one spell and his
+    dagger with strange engraved markings. Randomise which spell can be learned from the book. Take
+    desired crypt findings and travel to Silver City.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.master
+  fields:
+    master_fallen:
+      type: boolean
+      role: input
+      description: Printed aftermath trigger.
+    master_body_disappears:
+      type: boolean
+      role: output
+      description: Body disappears.
+    grimoire_found:
+      type: boolean
+      role: output
+      description: Found Grimoire.
+    grimoire_spells:
+      type: number
+      role: output
+      description: One revealed spell.
+      integer: true
+      minimum: 0
+    spell_selection:
+      type: string
+      role: output
+      description: Printed randomisation instruction; resolved outcome supplied.
+    engraved_dagger_found:
+      type: boolean
+      role: output
+      description: Found engraved dagger.
+    next_destination:
+      type: string
+      role: output
+      description: Return to Silver City.
+  effects:
+    - type: set
+      target: master_body_disappears
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: grimoire_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: grimoire_spells
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: spell_selection
+      value:
+        type: literal
+        value: randomise which spell can be learned
+    - type: set
+      target: engraved_dagger_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_destination
+      value:
+        type: literal
+        value: Silver City
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: master_fallen
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: learn_from_grimoire
+      label: Learning a spell from a found Grimoire
+      object_id: procedure.learn_spell
+    - key: grimoire
+      label: Master’s Grimoire
+      object_id: equipment.quest.master_grimoire
+    - key: dagger
+      label: Master’s engraved dagger
+      object_id: equipment.quest.master_engraved_dagger
+    - key: campaign_aftermath
+      label: Campaign aftermath in Silver City
+      object_id: quest.dead_rising.campaign
+  unresolved_references:
+    - Randomise which spell you can learn from this book; this quest prints no selection table or
+      distribution.

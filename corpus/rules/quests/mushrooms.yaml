@@ -1,0 +1,525 @@
+- id: core.quest.mushrooms.setup
+  name: Mushrooms — setup
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'An alchemist requests a specimen of a mushroom growing indoors in dark, damp areas.
+    Location: same dungeon as the next quest. Reward: 250 c. Encounters: as defined by the main
+    quest. Objective room: No specific room.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    advertised_reward_coins:
+      type: number
+      role: output
+      description: advertised reward coins
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    objective_room:
+      type: string
+      role: output
+      description: objective room
+    mushroom_habitat:
+      type: string
+      role: output
+      description: mushroom habitat
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: advertised_reward_coins
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: as defined by the main quest
+    - type: set
+      target: objective_room
+      value:
+        type: literal
+        value: No specific room
+    - type: set
+      target: mushroom_habitat
+      value:
+        type: literal
+        value: indoors in dark, damp areas
+- id: core.quest.mushrooms.deck
+  name: Mushrooms — separate Dungeoneers Deck
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — separate Dungeoneers Deck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the Dungeon Deck is done, take the same number of cards from the Dungeoneers Deck
+    in a separate deck. Choose one specific card for the Side Quest Objective, mix that deck and
+    place it next to the ordinary deck.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    dungeon_deck_done:
+      type: boolean
+      role: input
+      description: dungeon deck done
+    dungeon_deck_cards:
+      type: number
+      role: input
+      description: dungeon deck cards
+      integer: true
+      minimum: 1
+    auxiliary_deck_cards:
+      type: number
+      role: output
+      description: auxiliary deck cards
+      integer: true
+    chosen_objective_cards:
+      type: number
+      role: output
+      description: chosen objective cards
+      integer: true
+    mix_auxiliary_deck:
+      type: boolean
+      role: output
+      description: mix auxiliary deck
+    auxiliary_deck_next_to_ordinary:
+      type: boolean
+      role: output
+      description: auxiliary deck next to ordinary
+  effects:
+    - type: set
+      target: auxiliary_deck_cards
+      value:
+        type: field
+        name: dungeon_deck_cards
+    - type: set
+      target: chosen_objective_cards
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: mix_auxiliary_deck
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: auxiliary_deck_next_to_ordinary
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dungeon_deck_done
+    right:
+      type: literal
+      value: true
+- id: core.quest.mushrooms.search_draw
+  name: Mushrooms — search draw
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — search draw
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once you search a room or corridor, draw one card from this new deck. It does not
+    matter whether the roll succeeds, as the mushrooms are not really hidden; it takes time to look
+    through each room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    search_attempt_made:
+      type: boolean
+      role: input
+      description: search attempt made
+    searched_tile_kind:
+      type: string
+      role: input
+      description: searched tile kind
+    auxiliary_cards_to_draw:
+      type: number
+      role: output
+      description: auxiliary cards to draw
+      integer: true
+    search_roll_success_required:
+      type: boolean
+      role: output
+      description: search roll success required
+    search_takes_time:
+      type: boolean
+      role: output
+      description: search takes time
+  effects:
+    - type: set
+      target: auxiliary_cards_to_draw
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: search_roll_success_required
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: search_takes_time
+      value:
+        type: literal
+        value: true
+  when: &a1
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_attempt_made
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: searched_tile_kind
+            right:
+              type: literal
+              value: room
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: searched_tile_kind
+            right:
+              type: literal
+              value: corridor
+- id: core.quest.mushrooms.found
+  name: Mushrooms — Objective Card found
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — Objective Card found
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the drawn card is the Side Quest Objective Card, you have found the mushrooms,
+    regardless of search-roll success.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    search_attempt_made:
+      type: boolean
+      role: input
+      description: search attempt made
+    searched_tile_kind:
+      type: string
+      role: input
+      description: searched tile kind
+    drawn_card_is_side_quest_objective:
+      type: boolean
+      role: input
+      description: drawn card is side quest objective
+    mushrooms_found:
+      type: boolean
+      role: output
+      description: mushrooms found
+  effects:
+    - type: set
+      target: mushrooms_found
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - *a1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: drawn_card_is_side_quest_objective
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: specimen
+      label: Requested mushroom specimen
+      object_id: equipment.quest.mushroom_specimen
+- id: core.quest.mushrooms.reward
+  name: Mushrooms — alchemist payment
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — alchemist payment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'If you bring a specimen back, the alchemist rewards you. Reward: 250 c. The satisfied
+    Alchemist pays the promised money.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    specimen_brought_back_to_alchemist:
+      type: boolean
+      role: input
+      description: specimen brought back to alchemist
+    reward_coins:
+      type: number
+      role: output
+      description: reward coins
+      integer: true
+    alchemist_payment_received:
+      type: boolean
+      role: output
+      description: alchemist payment received
+  effects:
+    - type: set
+      target: reward_coins
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: alchemist_payment_received
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: specimen_brought_back_to_alchemist
+    right:
+      type: literal
+      value: true
+- id: core.quest.mushrooms.gift
+  name: Mushrooms — next-day potion
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — next-day potion
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A day later a messenger boy catches up and hands you a package with a carefully wrapped
+    potion and a note from the Alchemist saying it is his new healing potion.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    alchemist_payment_received:
+      type: boolean
+      role: input
+      description: alchemist payment received
+    days_since_alchemist_payment:
+      type: number
+      role: input
+      description: days since alchemist payment
+      integer: true
+    new_healing_potion_delivered:
+      type: boolean
+      role: output
+      description: new healing potion delivered
+    potions_delivered:
+      type: number
+      role: output
+      description: potions delivered
+      integer: true
+  effects:
+    - type: set
+      target: new_healing_potion_delivered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: potions_delivered
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: alchemist_payment_received
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: days_since_alchemist_payment
+        right:
+          type: literal
+          value: 1
+  dependencies:
+    - key: potion
+      label: Alchemist’s new healing potion
+      object_id: equipment.quest.mushrooms_healing_potion
+- id: core.quest.mushrooms.potion
+  name: Mushrooms — potion healing
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — potion healing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The potion is very potent and heals 2d6 HP once consumed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    potion_healing_dice:
+      type: string
+      role: output
+      description: potion healing dice
+  effects:
+    - type: set
+      target: potion_healing_dice
+      value:
+        type: literal
+        value: 2d6
+  entity_id: equipment.quest.mushrooms_healing_potion
+- id: core.quest.mushrooms.consume
+  name: Mushrooms — consume healing potion
+  section_id: section.quest_book_i.side_quests.side_quest_6_mushrooms
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 279
+      printed_page: 277
+      heading: Mushrooms — consume healing potion
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The potion heals 2d6 HP once consumed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.mushrooms
+  fields:
+    new_healing_potion_available:
+      type: boolean
+      role: input
+      description: new healing potion available
+    new_healing_potion_consumed:
+      type: boolean
+      role: input
+      description: new healing potion consumed
+    potion_healing_roll:
+      type: number
+      role: input
+      description: potion healing roll
+      integer: true
+      minimum: 2
+      maximum: 12
+      dice:
+        count: 2
+        sides: 6
+    potion_hp_healing:
+      type: number
+      role: output
+      description: potion hp healing
+      integer: true
+  effects:
+    - type: set
+      target: potion_hp_healing
+      value:
+        type: field
+        name: potion_healing_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: new_healing_potion_available
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: new_healing_potion_consumed
+        right:
+          type: literal
+          value: true

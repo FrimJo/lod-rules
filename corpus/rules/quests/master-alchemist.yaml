@@ -1,0 +1,767 @@
+- id: core.quest.master_alchemist.setup
+  name: The Master Alchemist — quest setup
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — quest setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Random location;seven corridors and seven rooms;300c per hero. The alchemist supplies a
+    special vial which magically prevents lava cooling while staying cool to touch. Carry it in the
+    heroes’ backpacks.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    vial_prevents_lava_cooling:
+      type: boolean
+      role: output
+      description: vial prevents lava cooling
+    vial_cool_to_touch:
+      type: boolean
+      role: output
+      description: vial cool to touch
+    vial_carried_in_backpack:
+      type: boolean
+      role: output
+      description: vial carried in backpack
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 7
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: vial_prevents_lava_cooling
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: vial_cool_to_touch
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: vial_carried_in_backpack
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: vial
+      label: Alchemist’s special vial
+      object_id: equipment.quest.lava_vial
+  uses_tables:
+    - table.quest.master_alchemist.threat
+    - table.quest.master_alchemist.encounters
+    - table.quest.master_alchemist.filling
+- id: core.quest.master_alchemist.threshold
+  name: Quest Threat 12
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 12, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 12
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 12
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.master_alchemist.objective_setup
+  name: The Master Alchemist — Objective Room setup
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll twice on the Encounter Table. Place first result on heroes’ side of river and
+    second on far side. Heroes enter along the short side.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    encounter_rolls:
+      type: number
+      role: output
+      description: encounter rolls
+      integer: true
+    first_encounter_side:
+      type: string
+      role: output
+      description: first encounter side
+    second_encounter_side:
+      type: string
+      role: output
+      description: second encounter side
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+  effects:
+    - type: set
+      target: encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: first_encounter_side
+      value:
+        type: literal
+        value: same side of river as heroes
+    - type: set
+      target: second_encounter_side
+      value:
+        type: literal
+        value: far side of river
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side
+- id: core.quest.master_alchemist.filling_attempt
+  name: The Master Alchemist — filling actions
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — filling actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero carrying the vial must spend2actions next to the river trying to reach down.
+    Make a DEX Test and consult the table.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    hero_carries_vial:
+      type: boolean
+      role: input
+      description: The hero carries the vial.
+    hero_next_to_river:
+      type: boolean
+      role: input
+      description: The hero is next to the river.
+    filling_cost_actions:
+      type: number
+      role: output
+      description: Two actions, not silently converted intoAP.
+      integer: true
+      minimum: 0
+    dex_test_required:
+      type: boolean
+      role: output
+      description: DEX test.
+  effects:
+    - type: set
+      target: filling_cost_actions
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_carries_vial
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hero_next_to_river
+        right:
+          type: literal
+          value: true
+  uses_tables:
+    - table.quest.master_alchemist.filling
+- id: core.quest.master_alchemist.filled
+  name: The Master Alchemist — printed filled result
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — printed filled result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Less or equal to DEX: the vial is filled with its cork back in place.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    selected_vial_result:
+      type: string
+      role: input
+      description: Supplied table result resolving the overlapping printed bounds.
+    dex:
+      type: number
+      role: input
+      description: HeroDEX.
+      integer: true
+      minimum: 0
+    dex_roll:
+      type: number
+      role: input
+      description: SuppliedDEXtest result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    vial_filled:
+      type: boolean
+      role: output
+      description: Filled vial.
+    cork_back_in_place:
+      type: boolean
+      role: output
+      description: Cork replaced.
+    valid_filling_attempt_completed:
+      type: boolean
+      role: input
+      description: The vial carrier spent two actions next to the river and made the DEX Test.
+  effects:
+    - type: set
+      target: vial_filled
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: cork_back_in_place
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_filling_attempt_completed
+        right:
+          type: literal
+          value: true
+      - type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_vial_result
+            right:
+              type: literal
+              value: filled
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: dex_roll
+            right:
+              type: field
+              name: dex
+  issues:
+    - issue.quest.alchemist_vial_results
+- id: core.quest.master_alchemist.burned
+  name: The Master Alchemist — printed burn result
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — printed burn result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Less or equal to DEX+20: the hero reaches too far and burns his hand for1d4points of
+    Fire Damage. The source does not state whether the vial is filled.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    selected_vial_result:
+      type: string
+      role: input
+      description: Supplied table result resolving overlapping bounds.
+    dex:
+      type: number
+      role: input
+      description: HeroDEX.
+      integer: true
+      minimum: 0
+    dex_roll:
+      type: number
+      role: input
+      description: SuppliedDEXtest result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    fire_damage_dice:
+      type: string
+      role: output
+      description: Printed1d4FireDamage.
+    vial_state_after_burn_unspecified:
+      type: boolean
+      role: output
+      description: Filled/retry status not stated.
+    valid_filling_attempt_completed:
+      type: boolean
+      role: input
+      description: The vial carrier spent two actions next to the river and made the DEX Test.
+  effects:
+    - type: set
+      target: fire_damage_dice
+      value:
+        type: literal
+        value: 1d4
+    - type: set
+      target: vial_state_after_burn_unspecified
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_filling_attempt_completed
+        right:
+          type: literal
+          value: true
+      - type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_vial_result
+            right:
+              type: literal
+              value: burned
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: dex_roll
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: dex
+                - type: literal
+                  value: 20
+  issues:
+    - issue.quest.alchemist_vial_results
+- id: core.quest.master_alchemist.dropped
+  name: The Master Alchemist — printed drop result
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — printed drop result
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'AboveDEX+20: the hero drops the vial which sinks into the lava.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    selected_vial_result:
+      type: string
+      role: input
+      description: Supplied table result.
+    dex:
+      type: number
+      role: input
+      description: HeroDEX.
+      integer: true
+      minimum: 0
+    dex_roll:
+      type: number
+      role: input
+      description: SuppliedDEXtest result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    vial_dropped:
+      type: boolean
+      role: output
+      description: Dropped vial.
+    vial_sinks_into_lava:
+      type: boolean
+      role: output
+      description: Vial sinks.
+    valid_filling_attempt_completed:
+      type: boolean
+      role: input
+      description: The vial carrier spent two actions next to the river and made the DEX Test.
+  effects:
+    - type: set
+      target: vial_dropped
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: vial_sinks_into_lava
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: valid_filling_attempt_completed
+        right:
+          type: literal
+          value: true
+      - type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_vial_result
+            right:
+              type: literal
+              value: dropped
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: dex_roll
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: dex
+                - type: literal
+                  value: 20
+- id: core.quest.master_alchemist.exit
+  name: The Master Alchemist — alternative exit
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — alternative exit
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once all creatures in the Objective Room are defeated, heroes find an alternative exit
+    and may leave immediately.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    all_objective_creatures_defeated:
+      type: boolean
+      role: input
+      description: All Objective Room creatures are defeated.
+    alternative_exit_found:
+      type: boolean
+      role: output
+      description: Alternative exit.
+    may_leave_immediately:
+      type: boolean
+      role: output
+      description: Immediate departure.
+  effects:
+    - type: set
+      target: alternative_exit_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: may_leave_immediately
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: all_objective_creatures_defeated
+    right:
+      type: literal
+      value: true
+- id: core.quest.master_alchemist.reward
+  name: The Master Alchemist — return with lava
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — return with lava
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If heroes return with the lava, they receive300c per hero.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    heroes_returned_with_lava:
+      type: boolean
+      role: input
+      description: Heroes returned with the lava.
+    reward_per_hero:
+      type: number
+      role: output
+      description: 300c per hero, catalogue amount.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 300
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: heroes_returned_with_lava
+    right:
+      type: literal
+      value: true
+- id: core.quest.master_alchemist.failure
+  name: The Master Alchemist — dropped vial failure
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: The Master Alchemist — dropped vial failure
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If they drop the vial into the river, they receive nothing but a scolding.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.lava_river.master_alchemist
+  fields:
+    vial_dropped_into_river:
+      type: boolean
+      role: input
+      description: The vial was dropped into the river.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Explicit no reward.
+      integer: true
+      minimum: 0
+    alchemist_scolding:
+      type: boolean
+      role: output
+      description: Scolding.
+  effects:
+    - type: set
+      target: reward_per_hero
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: alchemist_scolding
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: vial_dropped_into_river
+    right:
+      type: literal
+      value: true

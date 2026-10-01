@@ -1,0 +1,976 @@
+- id: core.quest.slay_beast.setup
+  name: Slay the Beast — setup
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'At the Flying Wheel Tavern the party is challenged by other adventurers. Quest
+    Location: same dungeon as the next quest. Reward: see the Monster/Bet table. Encounters: as
+    defined by the main quest.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    reward_basis:
+      type: string
+      role: output
+      description: reward basis
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: same dungeon as the next quest
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: as defined by the main quest
+    - type: set
+      target: reward_basis
+      value:
+        type: literal
+        value: printed Monster/Bet table
+- id: core.quest.slay_beast.decline
+  name: Slay the Beast — decline
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — decline
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The party can always choose to back out and go on the quest without a side quest.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    challenge_accepted:
+      type: boolean
+      role: input
+      description: challenge accepted
+    main_quest_without_side_quest_allowed:
+      type: boolean
+      role: output
+      description: main quest without side quest allowed
+  effects:
+    - type: set
+      target: main_quest_without_side_quest_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: challenge_accepted
+    right:
+      type: literal
+      value: false
+- id: core.quest.slay_beast.deck
+  name: Slay the Beast — printed card reference
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — printed card reference
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Add Side Quest 1 card to the pile. The printed quest is Side Quest 2, but its special
+    rules specify Side Quest 1.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    printed_card_to_add:
+      type: string
+      role: output
+      description: printed card to add
+  effects:
+    - type: set
+      target: printed_card_to_add
+      value:
+        type: literal
+        value: Side Quest 1
+  issues:
+    - issue.quest.slay_beast_boundaries
+- id: core.quest.slay_beast.draw
+  name: Slay the Beast — side card drawn
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — side card drawn
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When you draw this, put it aside and pull the next card. This card leads to the
+    Objective Room. There is one more door than normal in that room, leading to the Side Quest
+    Objective Room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    printed_side_quest_card_drawn:
+      type: boolean
+      role: input
+      description: printed side quest card drawn
+    put_side_quest_card_aside:
+      type: boolean
+      role: output
+      description: put side quest card aside
+    next_cards_to_draw:
+      type: number
+      role: output
+      description: next cards to draw
+      integer: true
+    next_card_leads_to_objective_room:
+      type: boolean
+      role: output
+      description: next card leads to objective room
+    extra_doors_in_that_room:
+      type: number
+      role: output
+      description: extra doors in that room
+      integer: true
+    extra_door_destination:
+      type: string
+      role: output
+      description: extra door destination
+  effects:
+    - type: set
+      target: put_side_quest_card_aside
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_cards_to_draw
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: next_card_leads_to_objective_room
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: extra_doors_in_that_room
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: extra_door_destination
+      value:
+        type: literal
+        value: Side Quest Objective Room
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: printed_side_quest_card_drawn
+    right:
+      type: literal
+      value: true
+- id: core.quest.slay_beast.objective
+  name: Slay the Beast — Objective Room setup
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place the R17 tile. The monster is at the far end of the room.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    objective_tile:
+      type: string
+      role: output
+      description: objective tile
+    monster_placement:
+      type: string
+      role: output
+      description: monster placement
+  effects:
+    - type: set
+      target: objective_tile
+      value:
+        type: literal
+        value: R17
+    - type: set
+      target: monster_placement
+      value:
+        type: literal
+        value: far end of the room
+- id: core.quest.slay_beast.result_1
+  name: Slay the Beast — Giant spider
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Giant spider
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '1-3: Giant spider; Bet 300 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Giant spider
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 300
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 3
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+- id: core.quest.slay_beast.result_2
+  name: Slay the Beast — Cave Monster
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Cave Monster
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '4-5: Cave Monster; Bet 400 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Cave Monster
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 400
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 4
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 5
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+- id: core.quest.slay_beast.result_3
+  name: Slay the Beast — Common Troll
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Common Troll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '6-7: Common Troll; Bet 500 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Common Troll
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 500
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 7
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+- id: core.quest.slay_beast.result_4
+  name: Slay the Beast — Minotaur with Greataxe, Armour 2
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Minotaur with Greataxe, Armour 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '8: Minotaur with Greataxe, Armour 2; Bet 600 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+    minotaur_weapon:
+      type: string
+      role: output
+      description: minotaur weapon
+    minotaur_armour:
+      type: number
+      role: output
+      description: minotaur armour
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Minotaur with Greataxe, Armour 2
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 600
+    - type: set
+      target: minotaur_weapon
+      value:
+        type: literal
+        value: Greataxe
+    - type: set
+      target: minotaur_armour
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 8
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 8
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+    - key: greataxe
+      label: Greataxe
+      object_id: equipment.weapon.greataxe
+- id: core.quest.slay_beast.result_5
+  name: Slay the Beast — Gigantic Snake
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Gigantic Snake
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '9: Gigantic Snake; Bet 700 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Gigantic Snake
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 700
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 9
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 9
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+- id: core.quest.slay_beast.result_6
+  name: Slay the Beast — Gigantic Spider
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — Gigantic Spider
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '10: Gigantic Spider; Bet 800 c.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    monster_selection_roll:
+      type: number
+      role: input
+      description: monster selection roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    selected_monster:
+      type: string
+      role: output
+      description: selected monster
+    bet_coins:
+      type: number
+      role: output
+      description: bet coins
+      integer: true
+  effects:
+    - type: set
+      target: selected_monster
+      value:
+        type: literal
+        value: Gigantic Spider
+    - type: set
+      target: bet_coins
+      value:
+        type: literal
+        value: 800
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: monster_selection_roll
+        right:
+          type: literal
+          value: 10
+  uses_tables:
+    - table.quest.slay_beast.monster_bet
+  dependencies:
+    - key: monster
+      label: Selected monster statistics are not printed here; supplied enemy outcomes
+- id: core.quest.slay_beast.win
+  name: Slay the Beast — winning the bet
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — winning the bet
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    After slaying the Beast heroes return to the tavern and put its decapitated head on the
+    table. The challenger takes out a bag of coins. Accepted challenges win the bet or pay it upon
+    return if they fail.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    challenge_accepted:
+      type: boolean
+      role: input
+      description: challenge accepted
+    beast_slain:
+      type: boolean
+      role: input
+      description: beast slain
+    returned_to_tavern:
+      type: boolean
+      role: input
+      description: returned to tavern
+    beast_head_presented:
+      type: boolean
+      role: input
+      description: beast head presented
+    bet_coins:
+      type: number
+      role: input
+      description: bet coins
+      integer: true
+    bet_winnings_coins:
+      type: number
+      role: output
+      description: bet winnings coins
+      integer: true
+  effects:
+    - type: set
+      target: bet_winnings_coins
+      value:
+        type: field
+        name: bet_coins
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: challenge_accepted
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: beast_slain
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: returned_to_tavern
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: beast_head_presented
+        right:
+          type: literal
+          value: true
+  issues: &a1
+    - issue.quest.slay_beast_boundaries
+- id: core.quest.slay_beast.loss
+  name: Slay the Beast — losing the bet
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 275
+      printed_page: 273
+      heading: Slay the Beast — losing the bet
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 276
+      printed_page: 274
+      heading: 'Aftermath: Failed to Slay the Beast!'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If heroes accept the challenge, they either win the bet or have to pay the bet when
+    they come back, should they fail.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    challenge_accepted:
+      type: boolean
+      role: input
+      description: challenge accepted
+    challenge_failed:
+      type: boolean
+      role: input
+      description: challenge failed
+    returned_from_quest:
+      type: boolean
+      role: input
+      description: returned from quest
+    bet_coins:
+      type: number
+      role: input
+      description: bet coins
+      integer: true
+    bet_payment_due_coins:
+      type: number
+      role: output
+      description: bet payment due coins
+      integer: true
+  effects:
+    - type: set
+      target: bet_payment_due_coins
+      value:
+        type: field
+        name: bet_coins
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: challenge_accepted
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: challenge_failed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: returned_from_quest
+        right:
+          type: literal
+          value: true
+  issues: *a1
+- id: core.quest.slay_beast.cannot_afford
+  name: Slay the Beast — cannot afford the lost bet
+  section_id: section.quest_book_i.side_quests.side_quest_2_slay_the_beast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 276
+      printed_page: 274
+      heading: Slay the Beast — cannot afford the lost bet
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After failing, heroes return to the tavern. There is nothing to do but pay up. If you
+    cannot afford to, you must try to pay with what you have.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.side.slay_beast
+  fields:
+    challenge_accepted:
+      type: boolean
+      role: input
+      description: challenge accepted
+    challenge_failed:
+      type: boolean
+      role: input
+      description: challenge failed
+    returned_to_tavern:
+      type: boolean
+      role: input
+      description: returned to tavern
+    can_afford_bet:
+      type: boolean
+      role: input
+      description: can afford bet
+    must_try_to_pay_with_what_you_have:
+      type: boolean
+      role: output
+      description: must try to pay with what you have
+  effects:
+    - type: set
+      target: must_try_to_pay_with_what_you_have
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: challenge_accepted
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: challenge_failed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: returned_to_tavern
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: can_afford_bet
+        right:
+          type: literal
+          value: false
+  issues:
+    - issue.quest.slay_beast_boundaries

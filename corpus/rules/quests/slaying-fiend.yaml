@@ -1,0 +1,863 @@
+- id: core.quest.slaying_fiend.setup
+  name: Slaying the Fiend — setup
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Slaying the Fiend — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Quest Location: Random. Special Rules: - Number of Tiles: 8 corridors, 8 rooms.
+    Reward: None. Encounters: Beast.'
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    special_rules_printed:
+      type: string
+      role: output
+      description: special rules printed
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    reward_printed:
+      type: string
+      role: output
+      description: reward printed
+    encounters:
+      type: string
+      role: output
+      description: encounters
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: special_rules_printed
+      value:
+        type: literal
+        value: '-'
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: reward_printed
+      value:
+        type: literal
+        value: None
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Beast
+- id: core.quest.slaying_fiend.molgor
+  name: Molgor — equipment and named abilities
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — equipment and named abilities
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Molgor is a huge Minotaur, armed with a Greataxe and Armour 2. He has the Frenzy and
+    Ferocious Charge Rule.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    species:
+      type: string
+      role: output
+      description: species
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    frenzy:
+      type: boolean
+      role: output
+      description: frenzy
+    ferocious_charge:
+      type: boolean
+      role: output
+      description: ferocious charge
+  effects:
+    - type: set
+      target: species
+      value:
+        type: literal
+        value: Minotaur
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: Greataxe
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: frenzy
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ferocious_charge
+      value:
+        type: literal
+        value: true
+  entity_id: quest_actor.chamber_of_reverence.molgor
+  dependencies:
+    - key: greataxe
+      label: Greataxe
+      object_id: equipment.weapon.greataxe
+    - key: frenzy
+      label: Frenzy (existing hero perk; quest does not specify equivalence)
+      object_id: perk.frenzy
+    - key: ferocious_charge
+      label: Ferocious Charge — named ability; definition unavailable
+  unresolved_references:
+    - Ferocious Charge Rule is named without a definition. Frenzy is also an existing hero perk, but
+      the quest does not establish whether its hero activation costs and restrictions apply to
+      Molgor.
+- id: core.quest.slaying_fiend.prior_wounds_1
+  name: Molgor — prior wounds result 1
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 1, subtract 2d6 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+      dice:
+        count: 2
+        sides: 6
+      minimum: 2
+      maximum: 12
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 12
+- id: core.quest.slaying_fiend.prior_wounds_2
+  name: Molgor — prior wounds result 2
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 2, subtract 1d10 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+      dice:
+        count: 1
+        sides: 10
+      minimum: 1
+      maximum: 10
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 10
+- id: core.quest.slaying_fiend.prior_wounds_3
+  name: Molgor — prior wounds result 3
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 3
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 3, subtract 1d6+1 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+      dice:
+        count: 1
+        sides: 6
+        modifier: 1
+      minimum: 2
+      maximum: 7
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 7
+- id: core.quest.slaying_fiend.prior_wounds_4
+  name: Molgor — prior wounds result 4
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 4
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 4, subtract 1d4 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+      dice:
+        count: 1
+        sides: 4
+      minimum: 1
+      maximum: 4
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 4
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 4
+- id: core.quest.slaying_fiend.prior_wounds_5
+  name: Molgor — prior wounds result 5
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 5
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 5, subtract 1d3 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+      dice:
+        count: 1
+        sides: 3
+      minimum: 1
+      maximum: 3
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 5
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 3
+- id: core.quest.slaying_fiend.prior_wounds_6
+  name: Molgor — prior wounds result 6
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Molgor — prior wounds result 6
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: On 1d6 result 6, subtract 1 wounds from the initial 45 HP before the fight begins.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    wound_table_roll:
+      type: number
+      role: input
+      description: wound table roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    prior_wounds:
+      type: number
+      role: input
+      description: Supplied result of the selected wound dice, or fixed 1 on result 6.
+      integer: true
+    molgor_starting_hp:
+      type: number
+      role: output
+      description: molgor starting hp
+      integer: true
+  effects:
+    - type: set
+      target: molgor_starting_hp
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: literal
+            value: 45
+          - type: field
+            name: prior_wounds
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: wound_table_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: prior_wounds
+        right:
+          type: literal
+          value: 1
+- id: core.quest.slaying_fiend.placement
+  name: Slaying the Fiend — placement
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Slaying the Fiend — placement
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Place the heroes 1d3 squares from the door on the short side of the room. Place Molgor
+    1d6 squares from the idol toward the heroes.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    hero_placement_roll:
+      type: number
+      role: input
+      description: hero placement roll
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    molgor_placement_roll:
+      type: number
+      role: input
+      description: molgor placement roll
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    hero_distance_from_door:
+      type: number
+      role: output
+      description: hero distance from door
+      integer: true
+    molgor_distance_from_idol:
+      type: number
+      role: output
+      description: molgor distance from idol
+      integer: true
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    molgor_direction:
+      type: string
+      role: output
+      description: molgor direction
+    idol_position:
+      type: string
+      role: output
+      description: idol position
+  effects:
+    - type: set
+      target: hero_distance_from_door
+      value:
+        type: field
+        name: hero_placement_roll
+    - type: set
+      target: molgor_distance_from_idol
+      value:
+        type: field
+        name: molgor_placement_roll
+    - type: set
+      target: hero_entry
+      value:
+        type: literal
+        value: short side
+    - type: set
+      target: molgor_direction
+      value:
+        type: literal
+        value: toward the heroes
+    - type: set
+      target: idol_position
+      value:
+        type: literal
+        value: far end of the room
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: hero_placement_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: hero_placement_roll
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: molgor_placement_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: molgor_placement_roll
+        right:
+          type: literal
+          value: 6
+- id: core.quest.slaying_fiend.aftermath
+  name: Slaying the Fiend — aftermath
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 256
+      printed_page: 254
+      heading: Slaying the Fiend — aftermath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the fiend is down, heroes find a pile of gold and two objective chests (Unlocked,
+    no traps. Just roll on the Treasure Tables).
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.chamber_of_reverence.slaying_fiend
+  fields:
+    molgor_defeated:
+      type: boolean
+      role: input
+      description: molgor defeated
+    gold_pile_found:
+      type: boolean
+      role: output
+      description: gold pile found
+    objective_chests:
+      type: number
+      role: output
+      description: objective chests
+      integer: true
+    chests_locked:
+      type: boolean
+      role: output
+      description: chests locked
+    chests_trapped:
+      type: boolean
+      role: output
+      description: chests trapped
+    treasure_tables_required:
+      type: boolean
+      role: output
+      description: treasure tables required
+  effects:
+    - type: set
+      target: gold_pile_found
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: objective_chests
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: chests_locked
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: chests_trapped
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: treasure_tables_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: molgor_defeated
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.quest.molgor_gold_quantity

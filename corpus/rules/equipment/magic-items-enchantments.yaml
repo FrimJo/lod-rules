@@ -1,0 +1,882 @@
+- id: character.magic_item.identify
+  name: identify
+  section_id: section.magic_items.identifying
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 70
+      printed_page: 68
+      heading: identifying
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Before use a Magic Item must be identified with a successful Arcane Arts roll. Failure
+    leaves it unusable. One attempt per party and object; settlements offer another chance.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lt
+        left:
+          type: field
+          name: party_attempts_for_object
+        right:
+          type: literal
+          value: 1
+    - type: add
+      target: party_attempts_for_object
+      value:
+        type: literal
+        value: 1
+      duration: permanent
+    - type: set
+      target: identified
+      value:
+        type: field
+        name: arcane_arts_succeeded
+  fields:
+    party_attempts_for_object:
+      type: number
+      role: state
+      description: party attempts for object
+    identified:
+      type: boolean
+      role: output
+      description: identified
+    arcane_arts_succeeded:
+      type: boolean
+      role: input
+      description: arcane arts succeeded
+  unresolved_references:
+    - Settlement identification service remains a later procedure; the party/object retry limit does
+      not define its service rules.
+- id: character.magic_item.use
+  name: use
+  section_id: section.magic_items.identifying
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 70
+      printed_page: 68
+      heading: identifying
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Before use a Magic Item must be identified with a successful Arcane Arts roll. Failure
+    leaves it unusable. One attempt per party and object; settlements offer another chance.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+  fields:
+    identified:
+      type: boolean
+      role: input
+      description: identified
+- id: character.magic_item.jewellery_limits
+  name: jewellery limits
+  section_id: section.magic_items.carrying_magic_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 70
+      printed_page: 68
+      heading: carrying magic items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A hero may wear at most 1 magic ring and 1 magic necklace at once, including Legendary
+    Items. Several magic weapons, armour pieces and other non-jewellery items may be carried.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: magic_rings_including_legendary
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: magic_necklaces_including_legendary
+            right:
+              type: literal
+              value: 1
+    - type: set
+      target: multiple_non_jewellery_magic_items_allowed
+      value:
+        type: literal
+        value: true
+  fields:
+    magic_rings_including_legendary:
+      type: number
+      role: input
+      description: magic rings including legendary
+    magic_necklaces_including_legendary:
+      type: number
+      role: input
+      description: magic necklaces including legendary
+    multiple_non_jewellery_magic_items_allowed:
+      type: boolean
+      role: output
+      description: multiple non jewellery magic items allowed
+- id: character.magic_item.recharge
+  name: recharge
+  section_id: section.magic_items.dissipating_magic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 70
+      printed_page: 68
+      heading: dissipating magic
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Weapons and armour not broken can be recharged at the Wizard’s Guild and regain all
+    magical properties. The broken-item repair wording is separately unresolved.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: at_wizards_guild
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: durability
+            right:
+              type: literal
+              value: 1
+    - type: set
+      target: magical_properties_restored
+      value:
+        type: literal
+        value: true
+  fields:
+    broken:
+      type: boolean
+      role: input
+      description: broken
+    at_wizards_guild:
+      type: boolean
+      role: input
+      description: at wizards guild
+    durability:
+      type: number
+      role: input
+      description: durability
+    magical_properties_restored:
+      type: boolean
+      role: output
+      description: magical properties restored
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: broken
+    right:
+      type: literal
+      value: false
+  dependencies:
+    - key: broken_item
+      label: Broken magic repair contradiction
+      object_id: character.durability.magic_repair_uncertain
+- id: character.magic_item.enchant.success
+  name: enchant success
+  section_id: section.enchantments.requirements_for_magic_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: requirements for magic items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A wizard must know Enchant Item, have a Powerstone and a suitable item at full
+    durability. The stone dictates the magic. Success grants its traits; failure destroys the object
+    but the stone can be reused. Only one enchantment per object. Enchanting cannot be done while
+    travelling.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_wizard
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_enchant_item
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_powerstone
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_at_full_durability
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_suitable_for_powerstone
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: existing_enchantments
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: travelling
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: enchantments
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: powerstone_traits_gained
+      value:
+        type: literal
+        value: true
+  fields:
+    enchant_spell_succeeded:
+      type: boolean
+      role: input
+      description: enchant spell succeeded
+    is_wizard:
+      type: boolean
+      role: input
+      description: is wizard
+    knows_enchant_item:
+      type: boolean
+      role: input
+      description: knows enchant item
+    has_powerstone:
+      type: boolean
+      role: input
+      description: has powerstone
+    item_at_full_durability:
+      type: boolean
+      role: input
+      description: item at full durability
+    item_suitable_for_powerstone:
+      type: boolean
+      role: input
+      description: item suitable for powerstone
+    existing_enchantments:
+      type: number
+      role: input
+      description: existing enchantments
+    travelling:
+      type: boolean
+      role: input
+      description: travelling
+    enchantments:
+      type: number
+      role: output
+      description: enchantments
+    powerstone_traits_gained:
+      type: boolean
+      role: output
+      description: powerstone traits gained
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enchant_spell_succeeded
+    right:
+      type: literal
+      value: true
+  unresolved_references:
+    - Powerstone traits are table-backed supplied results. Success does not state here whether the
+      stone is consumed; do not infer it.
+  dependencies:
+    - key: enchant_spell
+      label: Enchant Item
+      object_id: spell.enchant_item
+    - key: powerstone_traits
+      label: Powerstone traits and permitted objects
+      object_id: table.treasure.powerstones
+- id: character.magic_item.enchant.failure
+  name: enchant failure
+  section_id: section.enchantments.requirements_for_magic_items
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: requirements for magic items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A wizard must know Enchant Item, have a Powerstone and a suitable item at full
+    durability. The stone dictates the magic. Success grants its traits; failure destroys the object
+    but the stone can be reused. Only one enchantment per object. Enchanting cannot be done while
+    travelling.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_wizard
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_enchant_item
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_powerstone
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_at_full_durability
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_suitable_for_powerstone
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: existing_enchantments
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: travelling
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: object_destroyed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: powerstone_reusable
+      value:
+        type: literal
+        value: true
+  fields:
+    enchant_spell_succeeded:
+      type: boolean
+      role: input
+      description: enchant spell succeeded
+    is_wizard:
+      type: boolean
+      role: input
+      description: is wizard
+    knows_enchant_item:
+      type: boolean
+      role: input
+      description: knows enchant item
+    has_powerstone:
+      type: boolean
+      role: input
+      description: has powerstone
+    item_at_full_durability:
+      type: boolean
+      role: input
+      description: item at full durability
+    item_suitable_for_powerstone:
+      type: boolean
+      role: input
+      description: item suitable for powerstone
+    existing_enchantments:
+      type: number
+      role: input
+      description: existing enchantments
+    travelling:
+      type: boolean
+      role: input
+      description: travelling
+    object_destroyed:
+      type: boolean
+      role: output
+      description: object destroyed
+    powerstone_reusable:
+      type: boolean
+      role: output
+      description: powerstone reusable
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enchant_spell_succeeded
+    right:
+      type: literal
+      value: false
+  unresolved_references:
+    - Powerstone traits are table-backed supplied results. Success does not state here whether the
+      stone is consumed; do not infer it.
+  dependencies:
+    - key: enchant_spell
+      label: Enchant Item
+      object_id: spell.enchant_item
+    - key: powerstone_traits
+      label: Powerstone traits and permitted objects
+      object_id: table.treasure.powerstones
+- id: character.magic_item.scroll.success
+  name: scroll success
+  section_id: section.enchantments.making_a_magic_scroll
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: making a magic scroll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Knowing Magic Scribbles and the spell to write, plus fine parchment, is required. Cast
+    Magic Scribbles normally, with optional focus. Success copies the chosen spell; failure destroys
+    the parchment and requires new parchment.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_magic_scribbles
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_written_spell
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_fine_parchment
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: travelling
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: focus_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: spell_copied_to_scroll
+      value:
+        type: literal
+        value: true
+  fields:
+    magic_scribbles_succeeded:
+      type: boolean
+      role: input
+      description: magic scribbles succeeded
+    knows_magic_scribbles:
+      type: boolean
+      role: input
+      description: knows magic scribbles
+    knows_written_spell:
+      type: boolean
+      role: input
+      description: knows written spell
+    has_fine_parchment:
+      type: boolean
+      role: input
+      description: has fine parchment
+    focus_allowed:
+      type: boolean
+      role: output
+      description: focus allowed
+    spell_copied_to_scroll:
+      type: boolean
+      role: output
+      description: spell copied to scroll
+    travelling:
+      type: boolean
+      role: input
+      description: Enchantments cannot be made while travelling.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: magic_scribbles_succeeded
+    right:
+      type: literal
+      value: true
+  unresolved_references: []
+  dependencies:
+    - key: scribbles_spell
+      label: Magic Scribbles
+      object_id: spell.magic_scribbles
+- id: character.magic_item.scroll.failure
+  name: scroll failure
+  section_id: section.enchantments.making_a_magic_scroll
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: making a magic scroll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Knowing Magic Scribbles and the spell to write, plus fine parchment, is required. Cast
+    Magic Scribbles normally, with optional focus. Success copies the chosen spell; failure destroys
+    the parchment and requires new parchment.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_magic_scribbles
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: knows_written_spell
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_fine_parchment
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: travelling
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: focus_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: parchment_destroyed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: new_parchment_required
+      value:
+        type: literal
+        value: true
+  fields:
+    magic_scribbles_succeeded:
+      type: boolean
+      role: input
+      description: magic scribbles succeeded
+    knows_magic_scribbles:
+      type: boolean
+      role: input
+      description: knows magic scribbles
+    knows_written_spell:
+      type: boolean
+      role: input
+      description: knows written spell
+    has_fine_parchment:
+      type: boolean
+      role: input
+      description: has fine parchment
+    focus_allowed:
+      type: boolean
+      role: output
+      description: focus allowed
+    parchment_destroyed:
+      type: boolean
+      role: output
+      description: parchment destroyed
+    new_parchment_required:
+      type: boolean
+      role: output
+      description: new parchment required
+    travelling:
+      type: boolean
+      role: input
+      description: Enchantments cannot be made while travelling.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: magic_scribbles_succeeded
+    right:
+      type: literal
+      value: false
+  unresolved_references: []
+  dependencies:
+    - key: scribbles_spell
+      label: Magic Scribbles
+      object_id: spell.magic_scribbles
+- id: character.magic_item.time.object
+  name: time object
+  section_id: section.enchantments.enchantments_take_time
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: enchantments take time
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one object OR two attempts (successful or not) to create scrolls between quests.
+    Each Magic Scroll takes 1 day to make.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: objects_between_quests
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scroll_attempts_between_quests
+            right:
+              type: literal
+              value: 0
+    - type: add
+      target: objects_between_quests
+      value:
+        type: literal
+        value: 1
+      duration: permanent
+  fields:
+    objects_between_quests:
+      type: number
+      role: state
+      description: objects between quests
+    scroll_attempts_between_quests:
+      type: number
+      role: input
+      description: scroll attempts between quests
+- id: character.magic_item.time.scroll
+  name: time scroll
+  section_id: section.enchantments.enchantments_take_time
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: enchantments take time
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one object OR two attempts (successful or not) to create scrolls between quests.
+    Each Magic Scroll takes 1 day to make.
+  scope: global
+  type: modifier
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: objects_between_quests
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: scroll_attempts_between_quests
+            right:
+              type: literal
+              value: 2
+    - type: add
+      target: scroll_attempts_between_quests
+      value:
+        type: literal
+        value: 1
+      duration: permanent
+    - type: set
+      target: days_spent
+      value:
+        type: literal
+        value: 1
+  fields:
+    objects_between_quests:
+      type: number
+      role: input
+      description: objects between quests
+    scroll_attempts_between_quests:
+      type: number
+      role: state
+      description: scroll attempts between quests
+    days_spent:
+      type: number
+      role: output
+      description: days spent

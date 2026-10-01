@@ -1,0 +1,1153 @@
+- id: core.quest.rescuing_prisoners.setup
+  name: Rescuing the Prisoners — setup
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Random location,eight corridors and eight rooms. Bandits and Brigands. Reward250c per
+    hero. Rescue the kidnapped caravan passengers from Golfrid the Short.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    encounters:
+      type: string
+      role: output
+      description: encounters
+    reward_heading_per_hero:
+      type: number
+      role: output
+      description: reward heading per hero
+      integer: true
+    prisoners_total:
+      type: number
+      role: output
+      description: prisoners total
+      integer: true
+  effects:
+    - type: set
+      target: location
+      value:
+        type: literal
+        value: Random
+    - type: set
+      target: corridors
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: rooms
+      value:
+        type: literal
+        value: 8
+    - type: set
+      target: encounters
+      value:
+        type: literal
+        value: Bandits and Brigands
+    - type: set
+      target: reward_heading_per_hero
+      value:
+        type: literal
+        value: 250
+    - type: set
+      target: prisoners_total
+      value:
+        type: literal
+        value: 10
+  issues:
+    - issue.quest.prisoner_reward_conflict
+- id: core.quest.rescuing_prisoners.threshold
+  name: Quest Threat 14
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: When Threat reaches 14, a Wandering Monster appears regardless of the Scenario die
+    result. The introduction defines this as an increase to the threshold.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    previous_threat:
+      type: number
+      role: input
+      description: Threat before this change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: output
+      description: Quest threshold.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: Place special quest monster.
+    scenario_result_ignored:
+      type: boolean
+      role: output
+      description: Ignore Scenario result for this trigger.
+    threat_reduction_on_placement:
+      type: number
+      role: output
+      description: No reduction for special placement.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: quest_threshold
+      value:
+        type: literal
+        value: 14
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: scenario_result_ignored
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: threat_reduction_on_placement
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: literal
+          value: 14
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: current_threat
+        right:
+          type: field
+          name: previous_threat
+  dependencies:
+    - key: threshold_convention
+      label: Quest Book I directional Threat convention
+      object_id: core.quest_book.threat_threshold_monster
+- id: core.quest.rescuing_prisoners.encounter_briggo
+  name: Rescuing the Prisoners — briggo encounter
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — briggo encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Unmodified Encounter result17–18 replaces the table result with Briggo, one of
+    Golfrid’s ogre bodyguards.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    unmodified_encounter_roll:
+      type: number
+      role: input
+      description: Unmodified Encounter roll, before modifiers.
+      integer: true
+      minimum: 1
+      maximum: 100
+    encounter_enemy:
+      type: string
+      role: output
+      description: Named ogre.
+    ignore_ordinary_encounter_result:
+      type: boolean
+      role: output
+      description: Replace instead of add.
+  effects:
+    - type: set
+      target: encounter_enemy
+      value:
+        type: literal
+        value: Briggo
+    - type: set
+      target: ignore_ordinary_encounter_result
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: unmodified_encounter_roll
+        right:
+          type: literal
+          value: 17
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: unmodified_encounter_roll
+        right:
+          type: literal
+          value: 18
+  dependencies:
+    - key: ogre
+      label: briggo
+      object_id: quest_actor.bandits_hideout.briggo
+  unresolved_references:
+    - No repeat-encounter or post-death replacement instruction is printed for these named ogres; do
+      not invent respawning or a once-only limit.
+- id: core.quest.rescuing_prisoners.encounter_gorm
+  name: Rescuing the Prisoners — gorm encounter
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — gorm encounter
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Unmodified Encounter result19–20 replaces the table result with Gorm, one of Golfrid’s
+    ogre bodyguards.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    unmodified_encounter_roll:
+      type: number
+      role: input
+      description: Unmodified Encounter roll, before modifiers.
+      integer: true
+      minimum: 1
+      maximum: 100
+    encounter_enemy:
+      type: string
+      role: output
+      description: Named ogre.
+    ignore_ordinary_encounter_result:
+      type: boolean
+      role: output
+      description: Replace instead of add.
+  effects:
+    - type: set
+      target: encounter_enemy
+      value:
+        type: literal
+        value: Gorm
+    - type: set
+      target: ignore_ordinary_encounter_result
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: unmodified_encounter_roll
+        right:
+          type: literal
+          value: 19
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: unmodified_encounter_roll
+        right:
+          type: literal
+          value: 20
+  dependencies:
+    - key: ogre
+      label: gorm
+      object_id: quest_actor.bandits_hideout.gorm
+  unresolved_references:
+    - No repeat-encounter or post-death replacement instruction is printed for these named ogres; do
+      not invent respawning or a once-only limit.
+- id: core.quest.rescuing_prisoners.objective_setup
+  name: Rescuing the Prisoners — Objective Room setup
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — Objective Room setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Golfrid stands by a bed at the far end. Prisoners sit along one wall and run around
+    screaming as battle ensues. Roll twice on Encounter Table and place results evenly along walls.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    golfrid_position:
+      type: string
+      role: output
+      description: golfrid position
+    prisoners_initial_position:
+      type: string
+      role: output
+      description: prisoners initial position
+    prisoners_during_battle:
+      type: string
+      role: output
+      description: prisoners during battle
+    ordinary_encounter_rolls:
+      type: number
+      role: output
+      description: ordinary encounter rolls
+      integer: true
+    ordinary_enemy_placement:
+      type: string
+      role: output
+      description: ordinary enemy placement
+  effects:
+    - type: set
+      target: golfrid_position
+      value:
+        type: literal
+        value: by the bed at the far end
+    - type: set
+      target: prisoners_initial_position
+      value:
+        type: literal
+        value: along one wall
+    - type: set
+      target: prisoners_during_battle
+      value:
+        type: literal
+        value: try to escape, running around in the room screaming with panic
+    - type: set
+      target: ordinary_encounter_rolls
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: ordinary_enemy_placement
+      value:
+        type: literal
+        value: evenly along the walls
+- id: core.quest.rescuing_prisoners.objective_briggo
+  name: Rescuing the Prisoners — surviving briggo
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — surviving briggo
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place briggo next to Golfrid unless already killed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    briggo_already_killed:
+      type: boolean
+      role: input
+      description: This ogre was already killed.
+    briggo_placed_next_to_golfrid:
+      type: boolean
+      role: output
+      description: Place living named ogre next to Golfrid.
+  effects:
+    - type: set
+      target: briggo_placed_next_to_golfrid
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: briggo_already_killed
+    right:
+      type: literal
+      value: false
+- id: core.quest.rescuing_prisoners.objective_gorm
+  name: Rescuing the Prisoners — surviving gorm
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — surviving gorm
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Place gorm next to Golfrid unless already killed.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    gorm_already_killed:
+      type: boolean
+      role: input
+      description: This ogre was already killed.
+    gorm_placed_next_to_golfrid:
+      type: boolean
+      role: output
+      description: Place living named ogre next to Golfrid.
+  effects:
+    - type: set
+      target: gorm_placed_next_to_golfrid
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: gorm_already_killed
+    right:
+      type: literal
+      value: false
+- id: core.quest.rescuing_prisoners.briggo
+  name: Briggo — equipment and experience
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Briggo — equipment and experience
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Briggo has a large club (Warhammer), Armour2,XP350,T2.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: large club (Warhammer)
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 2
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 350
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T2
+  entity_id: quest_actor.bandits_hideout.briggo
+  dependencies:
+    - key: treasure
+      label: T2
+      object_id: table.treasure.t2
+- id: core.quest.rescuing_prisoners.gorm
+  name: Gorm — equipment and Frenzy
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Gorm — equipment and Frenzy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Gorm is an Ogre Berserker with Frenzy, large club (Warhammer),Armour1,XP350,T2.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    enemy_kind:
+      type: string
+      role: output
+      description: enemy kind
+    frenzy:
+      type: boolean
+      role: output
+      description: frenzy
+    weapon:
+      type: string
+      role: output
+      description: weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: enemy_kind
+      value:
+        type: literal
+        value: Ogre Berserker
+    - type: set
+      target: frenzy
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: weapon
+      value:
+        type: literal
+        value: large club (Warhammer)
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 350
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T2
+  entity_id: quest_actor.bandits_hideout.gorm
+  dependencies:
+    - key: treasure
+      label: T2
+      object_id: table.treasure.t2
+- id: core.quest.rescuing_prisoners.prisoner_death
+  name: Rescuing the Prisoners — Scenario prisoner death
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 249
+      printed_page: 247
+      heading: Rescuing the Prisoners — Scenario prisoner death
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every time Scenario1–3 occurs a prisoner is caught in battle and killed. Ten prisoners total.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    objective_battle_active:
+      type: boolean
+      role: input
+      description: Battle in the Objective Room is active.
+    scenario_roll:
+      type: number
+      role: input
+      description: SuppliedScenario result.
+      integer: true
+      minimum: 1
+      maximum: 10
+    prisoners_still_alive:
+      type: number
+      role: input
+      description: Prisoners still alive.
+      integer: true
+      minimum: 0
+      maximum: 10
+    prisoners_killed_this_result:
+      type: number
+      role: output
+      description: One prisoner death; caller composes count once.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: prisoners_killed_this_result
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_battle_active
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: scenario_roll
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: prisoners_still_alive
+        right:
+          type: literal
+          value: 0
+- id: core.quest.rescuing_prisoners.golfrid
+  name: Golfrid the Short — equipment and experience
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Golfrid the Short — equipment and experience
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Halfling Thief with a shortbow and unlimited arrows,shortsword,Armour1,XP120,T4.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    enemy_kind:
+      type: string
+      role: output
+      description: enemy kind
+    ranged_weapon:
+      type: string
+      role: output
+      description: ranged weapon
+    arrows_unlimited:
+      type: boolean
+      role: output
+      description: arrows unlimited
+    melee_weapon:
+      type: string
+      role: output
+      description: melee weapon
+    armour:
+      type: number
+      role: output
+      description: armour
+      integer: true
+    xp:
+      type: number
+      role: output
+      description: xp
+      integer: true
+    treasure_table:
+      type: string
+      role: output
+      description: treasure table
+  effects:
+    - type: set
+      target: enemy_kind
+      value:
+        type: literal
+        value: Halfling Thief
+    - type: set
+      target: ranged_weapon
+      value:
+        type: literal
+        value: shortbow
+    - type: set
+      target: arrows_unlimited
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: melee_weapon
+      value:
+        type: literal
+        value: shortsword
+    - type: set
+      target: armour
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: xp
+      value:
+        type: literal
+        value: 120
+    - type: set
+      target: treasure_table
+      value:
+        type: literal
+        value: T4
+  entity_id: quest_actor.bandits_hideout.golfrid
+  dependencies:
+    - key: treasure
+      label: T4
+      object_id: table.treasure.t4
+- id: core.quest.rescuing_prisoners.golfrid_not_cornered
+  name: Golfrid — avoids close combat until cornered
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Golfrid — avoids close combat until cornered
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Golfrid will not engage in close combat until cornered and always tries to move out of
+    close combat in favour of his shortbow.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    golfrid_cornered:
+      type: boolean
+      role: input
+      description: Golfrid is cornered.
+    engages_close_combat:
+      type: boolean
+      role: output
+      description: Will not engage before cornered.
+    tries_to_leave_close_combat_for_shortbow:
+      type: boolean
+      role: output
+      description: Prefers shortbow.
+  effects:
+    - type: set
+      target: engages_close_combat
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: tries_to_leave_close_combat_for_shortbow
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: golfrid_cornered
+    right:
+      type: literal
+      value: false
+- id: core.quest.rescuing_prisoners.golfrid_movement
+  name: Golfrid — ranged preference
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Golfrid — ranged preference
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Golfrid always tries to move out of close combat in favour of using his shortbow.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    tries_to_leave_close_combat_for_shortbow:
+      type: boolean
+      role: output
+      description: tries to leave close combat for shortbow
+  effects:
+    - type: set
+      target: tries_to_leave_close_combat_for_shortbow
+      value:
+        type: literal
+        value: true
+- id: core.quest.rescuing_prisoners.aftermath
+  name: Rescuing the Prisoners — headcount and escort
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Rescuing the Prisoners — headcount and escort
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once battle is over, heroes count prisoners and escort any survivors back to the city.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    objective_battle_over:
+      type: boolean
+      role: input
+      description: The battle is over.
+    headcount_prisoners:
+      type: boolean
+      role: output
+      description: Headcount.
+    escort_survivors_back_to_city:
+      type: boolean
+      role: output
+      description: Escort any survivors.
+  effects:
+    - type: set
+      target: headcount_prisoners
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: escort_survivors_back_to_city
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: objective_battle_over
+    right:
+      type: literal
+      value: true
+- id: core.quest.rescuing_prisoners.reward_terms
+  name: Rescuing the Prisoners — conflicting reward terms
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Rescuing the Prisoners — conflicting reward terms
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If all prisoners alive,the Jarl pays extra100c to eachhero. For eachdeadprisoner
+    deduct50c from initial promised300c. Heroes may end withoutreward; this conflicts with
+    Reward250c perhero on previouspage.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    aftermath_initial_promised:
+      type: number
+      role: output
+      description: aftermath initial promised
+      integer: true
+    all_alive_bonus_per_hero:
+      type: number
+      role: output
+      description: all alive bonus per hero
+      integer: true
+    deduction_per_dead_prisoner:
+      type: number
+      role: output
+      description: deduction per dead prisoner
+      integer: true
+    no_reward_possible:
+      type: boolean
+      role: output
+      description: no reward possible
+    header_and_aftermath_reward_conflict:
+      type: boolean
+      role: output
+      description: header and aftermath reward conflict
+  effects:
+    - type: set
+      target: aftermath_initial_promised
+      value:
+        type: literal
+        value: 300
+    - type: set
+      target: all_alive_bonus_per_hero
+      value:
+        type: literal
+        value: 100
+    - type: set
+      target: deduction_per_dead_prisoner
+      value:
+        type: literal
+        value: 50
+    - type: set
+      target: no_reward_possible
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: header_and_aftermath_reward_conflict
+      value:
+        type: literal
+        value: true
+  issues:
+    - issue.quest.prisoner_reward_conflict
+- id: core.quest.rescuing_prisoners.reward_arithmetic
+  name: Rescuing the Prisoners — supplied reward interpretation
+  section_id: section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 250
+      printed_page: 248
+      heading: Rescuing the Prisoners — supplied reward interpretation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Reward base conflicts between250heading and300aftermath. Expose raw arithmetic using a
+    supplied source base; do not silently choose a base,negative-value floor or a debt consequence.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.bandits_hideout.rescuing_prisoners
+  fields:
+    objective_battle_over:
+      type: boolean
+      role: input
+      description: Battle over.
+    survivor_escort_completed:
+      type: boolean
+      role: input
+      description: Surviving prisoners escorted to city.
+    selected_reward_base:
+      type: number
+      role: input
+      description: Supplied choice of conflicting source amounts250or300.
+      integer: true
+      minimum: 0
+    dead_prisoners:
+      type: number
+      role: input
+      description: Dead prisoners.
+      integer: true
+      minimum: 0
+      maximum: 10
+    reward_arithmetic_before_uncertain_floor:
+      type: number
+      role: output
+      integer: true
+      description: Raw source arithmetic; negative result does not invent a debt or payout.
+    reward_case:
+      type: string
+      role: input
+      description: all_alive or dead_prisoners, guarded against the count.
+  effects:
+    - type: choice
+      selection: reward_case
+      options:
+        - id: all_alive
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead_prisoners
+            right:
+              type: literal
+              value: 0
+          effects:
+            - type: set
+              target: reward_arithmetic_before_uncertain_floor
+              value:
+                type: sum
+                values:
+                  - type: field
+                    name: selected_reward_base
+                  - type: literal
+                    value: 100
+        - id: dead_prisoners
+          when:
+            type: compare
+            operator: gt
+            left:
+              type: field
+              name: dead_prisoners
+            right:
+              type: literal
+              value: 0
+          effects:
+            - type: set
+              target: reward_arithmetic_before_uncertain_floor
+              value:
+                type: arithmetic
+                operator: subtract
+                values:
+                  - type: field
+                    name: selected_reward_base
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: dead_prisoners
+                      - type: literal
+                        value: 50
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_battle_over
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: survivor_escort_completed
+        right:
+          type: literal
+          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_reward_base
+            right:
+              type: literal
+              value: 250
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_reward_base
+            right:
+              type: literal
+              value: 300
+  issues:
+    - issue.quest.prisoner_reward_conflict
