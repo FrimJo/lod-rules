@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api.chat'
+import { Route as ApiRulebookRouteImport } from './routes/api.rulebook'
+import { Route as ApiPdfFontsFileRouteImport } from './routes/api.pdf-fonts.$file'
+import { Route as ApiRulebookPagePdfRouteImport } from './routes/api.rulebook-page.$pdf'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +25,74 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRulebookRoute = ApiRulebookRouteImport.update({
+  id: '/api/rulebook',
+  path: '/api/rulebook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPdfFontsFileRoute = ApiPdfFontsFileRouteImport.update({
+  id: '/api/pdf-fonts/$file',
+  path: '/api/pdf-fonts/$file',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRulebookPagePdfRoute = ApiRulebookPagePdfRouteImport.update({
+  id: '/api/rulebook-page/$pdf',
+  path: '/api/rulebook-page/$pdf',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/rulebook': typeof ApiRulebookRoute
+  '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
+  '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/rulebook': typeof ApiRulebookRoute
+  '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
+  '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/rulebook': typeof ApiRulebookRoute
+  '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
+  '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/api/chat'
+    | '/api/rulebook'
+    | '/api/pdf-fonts/$file'
+    | '/api/rulebook-page/$pdf'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat'
-  id: '__root__' | '/' | '/api/chat'
+  to:
+    | '/'
+    | '/api/chat'
+    | '/api/rulebook'
+    | '/api/pdf-fonts/$file'
+    | '/api/rulebook-page/$pdf'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/chat'
+    | '/api/rulebook'
+    | '/api/pdf-fonts/$file'
+    | '/api/rulebook-page/$pdf'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiRulebookRoute: typeof ApiRulebookRoute
+  ApiPdfFontsFileRoute: typeof ApiPdfFontsFileRoute
+  ApiRulebookPagePdfRoute: typeof ApiRulebookPagePdfRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +111,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rulebook': {
+      id: '/api/rulebook'
+      path: '/api/rulebook'
+      fullPath: '/api/rulebook'
+      preLoaderRoute: typeof ApiRulebookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pdf-fonts/$file': {
+      id: '/api/pdf-fonts/$file'
+      path: '/api/pdf-fonts/$file'
+      fullPath: '/api/pdf-fonts/$file'
+      preLoaderRoute: typeof ApiPdfFontsFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rulebook-page/$pdf': {
+      id: '/api/rulebook-page/$pdf'
+      path: '/api/rulebook-page/$pdf'
+      fullPath: '/api/rulebook-page/$pdf'
+      preLoaderRoute: typeof ApiRulebookPagePdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiRulebookRoute: ApiRulebookRoute,
+  ApiPdfFontsFileRoute: ApiPdfFontsFileRoute,
+  ApiRulebookPagePdfRoute: ApiRulebookPagePdfRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

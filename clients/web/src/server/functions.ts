@@ -1,5 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
 import { checkAnswer as check, getAskSummary } from './ask-service.ts';
+import { getRulebookIndex, loadSource } from './rulebook.ts';
+
+export const getRulebook = createServerFn({ method: 'GET' }).handler(() => {
+  void loadSource().catch(() => {});
+  return getRulebookIndex();
+});
 
 export const getEvidence = createServerFn({ method: 'POST' })
   .validator((data: { question: string }) => data)
