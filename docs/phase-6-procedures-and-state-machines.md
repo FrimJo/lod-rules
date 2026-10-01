@@ -76,10 +76,10 @@ every other candidate stays a plain procedure. `procedure.dungeon_turn` and
   `procedure.scenario_die` and `procedure.threat_roll`, including the natural-20 reduction,
   the in-battle/not-in-battle branch, and the table-driven decrease. The threat tables are
   invoked as section-bound dependencies, not extracted as table objects. The worked example
-  (threat 9, roll 7, row 16, level down to 3) is a `source_example` fixture. The failed-roll
-  case has no general rule text; the example sentence alone is recorded under
-  `issue.phase6.failed_threat_roll_increase` and the procedure surfaces it as an unresolved
-  effect.
+  (threat 9, roll 7, row 16, level down to 3) is a `source_example` fixture. A roll above the
+  level raises it by 1, per the Increasing Threat Level list ("If a Threat Level roll exceeds
+  the current Threat Level"); `issue.phase6.failed_threat_roll_increase` is resolved on that
+  text.
 - PDF 101 (printed 99): `procedure.open_door_or_chest` — the printed four-step sequence with
   the trapped branch. Trap-card resolution remains dependency-bound. Open issues:
   `issue.phase6.door_open_threat_source` (step-1 increase versus the "instant a door is

@@ -62,6 +62,7 @@ describe('issue resolutions', () => {
       'issue.0007',
       'issue.0008',
       'issue.0011',
+      'issue.phase6.failed_threat_roll_increase',
       'issue.phase6.trap_headings_unmapped',
       'issue.quest.spider_queen_cobweb_mapping',
     ]);
