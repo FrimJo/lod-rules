@@ -19,13 +19,13 @@ import { isFailure, normalizeModelChoice, normalizeModelNoul } from './normalize
 
 const require = createRequire(import.meta.url);
 
-interface LayaQuestion {
+export interface LayaQuestion {
   type: 'choice' | 'noul';
   instructions: string;
   criteria?: Record<string, string | null> | string[];
 }
 
-interface LayaRuntime {
+export interface LayaRuntime {
   systemOne(
     state: unknown,
     questions: Record<string, LayaQuestion>,
@@ -129,6 +129,11 @@ function packageInstalled(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Shared session for callers outside the rule-judgment provider (question analysis). */
+export function loadLayaRuntime(cacheDir?: string): Promise<LayaRuntime> {
+  return loadCheckpoint('base', cacheDir);
 }
 
 function loadCheckpoint(
