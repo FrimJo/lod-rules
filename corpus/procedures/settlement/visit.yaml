@@ -1,0 +1,4187 @@
+- id: procedure.settlement_arrival
+  name: Settlement arrival and quest availability
+  section_id: section.settlements.taking_on_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Settlement Events; Taking on Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Available quests; Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Whenever the party enters a settlement, roll 1d12 and consult its event threshold. When
+    in a settlement, the party may start an available campaign or roll for random quests. Quest
+    availability uses 1d6, followed by 1d8 for a side quest (1-2); Luck cannot modify either roll.
+    If no quest interests the party, they must move to another settlement. The quest site is
+    determined by rolling the settlement's listed quest die and cross-referencing the corresponding
+    map colour. A party may reject two quests in a village and three in Silver City before it must
+    move to another settlement.
+  fields:
+    phase:
+      type: string
+      role: input
+      description: arrival, quests, accept or reject. Repeat calls preserve visit counters; random
+        availability is established once per visit.
+    settlement:
+      type: string
+      role: input
+      description: settlement
+    quest_mode:
+      type: string
+      role: input
+      description: quest mode
+    visit_id:
+      type: number
+      role: input
+      description:
+        Monotonic identifier for a genuine later return to this settlement. Shared by arrival,
+        hero visit state and per-item locks.
+      integer: true
+      minimum: 0
+    arrival_visit:
+      type: number
+      role: state
+      description: arrival visit
+      integer: true
+      minimum: -1
+    quests_checked_visit:
+      type: number
+      role: state
+      description: quests checked visit
+      integer: true
+      minimum: -1
+    rejected_quests:
+      type: number
+      role: state
+      description: rejected quests
+      integer: true
+      minimum: 0
+    available_quests:
+      type: number
+      role: state
+      description: available quests
+      integer: true
+      minimum: 0
+    arrival_roll:
+      type: number
+      role: input
+      description: arrival roll
+      integer: true
+      minimum: 1
+      maximum: 12
+    event_threshold:
+      type: number
+      role: input
+      description: event threshold
+      integer: true
+      minimum: 1
+      maximum: 12
+    quest_availability_roll:
+      type: number
+      role: input
+      description: quest availability roll
+      integer: true
+      minimum: 1
+      maximum: 6
+    side_quest_roll:
+      type: number
+      role: input
+      description: side quest roll
+      integer: true
+      minimum: 1
+      maximum: 8
+    luck_spent:
+      type: number
+      role: input
+      description: luck spent
+      minimum: 0
+    campaign_available:
+      type: boolean
+      role: input
+      description: campaign available
+    event_forces_departure:
+      type: boolean
+      role: input
+      description: Supplied event consequence, e.g. feast without beds. Rewards remain separately
+        eligible; ordinary business is blocked.
+    quest_accepted:
+      type: boolean
+      role: state
+      description: quest accepted
+    side_quest_available:
+      type: boolean
+      role: state
+      description: side quest available
+    must_depart:
+      type: boolean
+      role: state
+      description: must depart
+    business_allowed:
+      type: boolean
+      role: state
+      description: business allowed
+    new_arrival:
+      type: boolean
+      role: output
+      description: new arrival
+    arrival_event_triggered:
+      type: boolean
+      role: output
+      description: arrival event triggered
+    rejection_limit:
+      type: number
+      role: output
+      description: rejection limit
+  dependencies:
+    - key: settlement_catalogue
+      label: Settlement-specific availability and quest-site selector
+      object_id: table.settlement.quest_availability
+    - key: settlement_event
+      label: Settlement Event Table and nested outcomes
+      object_id: table.settlement.events
+    - key: map_site
+      label: Cross-reference quest-site roll and map colour
+    - key: quest_catalogue
+      label: Quest Book selector for available quests
+      section_id: section.quest_book_i
+    - key: quest_site_selector
+      label: Settlement quest-site dice and map colours
+      object_id: table.settlement.quest_sites
+  steps:
+    - id: arrival_event_check
+      source_text: Each genuine settlement entry requires an event check.
+      effects:
+        - type: set
+          target: new_arrival
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: rejection_limit
+          value:
+            type: literal
+            value: 2
+    - id: silver_city_limit
+      source_text: Three quests may be rejected in Silver City; two in a village.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: settlement
+        right:
+          type: literal
+          value: silver_city
+      effects:
+        - type: set
+          target: rejection_limit
+          value:
+            type: literal
+            value: 3
+    - id: initialise_visit
+      source_text: New visit counters belong to this settlement return, not to every procedure invocation.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: arrival
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: visit_id
+            right:
+              type: field
+              name: arrival_visit
+      effects:
+        - type: set
+          target: new_arrival
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arrival_event_triggered
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: rejected_quests
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: quest_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: side_quest_available
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: must_depart
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: business_allowed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arrival_visit
+          value:
+            type: field
+            name: visit_id
+    - id: resolve_arrival_event
+      source_text: If the settlement threshold is reached, roll on the event table and supply its consequences.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: new_arrival
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: arrival_roll
+            right:
+              type: field
+              name: event_threshold
+      effects:
+        - type: set
+          target: arrival_event_triggered
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: settlement_event
+    - id: event_departure
+      source_text: A supplied event requiring departure forbids ordinary settlement business.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: new_arrival
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arrival_event_triggered
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_forces_departure
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: must_depart
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: business_allowed
+          value:
+            type: literal
+            value: false
+    - id: forbid_luck
+      source_text: Luck cannot modify quest availability or side-quest rolls.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: phase
+        right:
+          type: literal
+          value: quests
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: luck_spent
+            right:
+              type: literal
+              value: 0
+    - id: check_available_quests
+      source_text: Use the appropriate Settlement/Silver City column.
+      when: &a1
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: quests
+          - &a2
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: arrival_visit
+            right:
+              type: field
+              name: visit_id
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: visit_id
+            right:
+              type: field
+              name: quests_checked_visit
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: must_depart
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_accepted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: luck_spent
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: side_quest_available
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: settlement_catalogue
+    - id: village_two
+      source_text: A village result of 1 gives two quests.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 2
+    - id: village_one
+      source_text: A village result of 2–4 gives one quest.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 4
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 1
+    - id: city_three
+      source_text: Silver City result 1 gives three quests.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 3
+    - id: city_two
+      source_text: Silver City result 2–4 gives two quests.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 4
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 2
+    - id: city_one
+      source_text: Silver City result 5 gives one quest.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_availability_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 1
+    - id: campaign
+      source_text: The party may instead start an available campaign.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: campaign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_available
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: available_quests
+          value:
+            type: literal
+            value: 1
+    - id: side_quest
+      source_text: If a random quest is available, a d8 result of 1–2 also offers a side quest.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_mode
+            right:
+              type: literal
+              value: random
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: available_quests
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: side_quest_roll
+            right:
+              type: literal
+              value: 2
+      effects:
+        - type: set
+          target: side_quest_available
+          value:
+            type: literal
+            value: true
+    - id: generate_quests
+      source_text: Use supplied Quest Book selectors to generate the available quest choices.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: available_quests
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: invoke
+          dependency: quest_catalogue
+    - id: record_quest_check
+      source_text: Do not reroll the same visit’s offer by invoking the procedure again.
+      when: *a1
+      effects:
+        - type: set
+          target: quests_checked_visit
+          value:
+            type: field
+            name: visit_id
+    - id: accept_quest
+      source_text: Accept one of the available quests and determine its site from the source die/map colour.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: accept
+          - &a3
+            type: all
+            conditions:
+              - *a2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: must_depart
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_accepted
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: available_quests
+                right:
+                  type: literal
+                  value: 0
+      effects:
+        - type: set
+          target: quest_accepted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: quest_site_selector
+        - type: invoke
+          dependency: map_site
+    - id: reject_quest
+      source_text: Reject one offered quest; count rejections and remove that offered choice.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: reject
+          - *a3
+      effects:
+        - type: set
+          target: rejected_quests
+          value:
+            type: sum
+            values:
+              - type: field
+                name: rejected_quests
+              - type: literal
+                value: 1
+        - type: set
+          target: available_quests
+          value:
+            type: sum
+            values:
+              - type: field
+                name: available_quests
+              - type: literal
+                value: -1
+    - id: enforce_rejection_limit
+      source_text: Move to another settlement when the limit is reached or no offered quests remain.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_accepted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quests_checked_visit
+            right:
+              type: field
+              name: visit_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: rejected_quests
+                right:
+                  type: field
+                  name: rejection_limit
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: available_quests
+                right:
+                  type: literal
+                  value: 0
+      effects:
+        - type: set
+          target: must_depart
+          value:
+            type: literal
+            value: true
+  entry_step: arrival_event_check
+  exit_step: enforce_rejection_limit
+  unresolved_references:
+    - Quest Book quest generation outcomes are supplied; remaining quest catalogues belong to Phase
+      5 Batch 7. Map geometry is supplied.
+- id: procedure.settlement_activities_and_overnight
+  name: Settlement activity days and overnight stay
+  section_id: section.settlements.activities_in_a_settlement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Activities in a Settlement; Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Rest and Recuperation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: Staying at the House
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Each hero may perform activities worth 1 Activity Point per day; an activity also
+    requires staying overnight at the inn. Activities costing more than 1 Activity Point take longer
+    than a day, and nothing else may be done during those days. If one party member undertakes a
+    long activity, the other party members must also stay at the inn when done. The inn price is for
+    the entire party, regardless of size. Some activities cost 0 Activity Points but still require
+    an inn stay where stated. Leaving on a quest is always early in the morning, and no other
+    settlement activities are allowed that day.
+  fields:
+    phase:
+      type: string
+      role: input
+      description: new_visit, start_day, activity, overnight, recover or depart. Hero
+        budgets/occupancy/recovery markers are separate per hero; lodging_day, inn_nights, payer
+        coins and party_occupied_until are shared.
+    activity:
+      type: string
+      role: input
+      description: activity
+    lodging_choice:
+      type: string
+      role: input
+      description: lodging choice
+    day:
+      type: number
+      role: input
+      description: day
+      integer: true
+      minimum: 0
+    visit_id:
+      type: number
+      role: input
+      description: visit id
+      integer: true
+      minimum: 0
+    activity_cost:
+      type: number
+      role: input
+      description: activity cost
+      integer: true
+      minimum: 0
+    hero_day:
+      type: number
+      role: state
+      description: hero day
+      integer: true
+      minimum: -1
+    hero_occupied_until:
+      type: number
+      role: state
+      description: hero occupied until
+      integer: true
+      minimum: -1
+    party_occupied_until:
+      type: number
+      role: state
+      description: party occupied until
+      integer: true
+      minimum: -1
+    last_activity_day:
+      type: number
+      role: state
+      description: last activity day
+      integer: true
+      minimum: -1
+    lodging_day:
+      type: number
+      role: state
+      description: lodging day
+      integer: true
+      minimum: -1
+    hero_recovery_day:
+      type: number
+      role: state
+      description: hero recovery day
+      integer: true
+      minimum: -1
+    hero_visit_id:
+      type: number
+      role: state
+      description: hero visit id
+      integer: true
+      minimum: -1
+    hero_activity_points:
+      type: number
+      role: state
+      description: hero activity points
+      integer: true
+      minimum: 0
+      maximum: 1
+    party_activity_days:
+      type: number
+      role: state
+      description: party activity days
+      integer: true
+      minimum: 0
+    inn_nights:
+      type: number
+      role: state
+      description: inn nights
+      integer: true
+      minimum: 0
+    scroll_activities:
+      type: number
+      role: state
+      description: scroll activities
+      integer: true
+      minimum: 0
+    enchant_activities:
+      type: number
+      role: state
+      description: enchant activities
+      integer: true
+      minimum: 0
+    coins:
+      type: number
+      role: state
+      description: coins
+      minimum: 0
+    inn_price_per_party:
+      type: number
+      role: input
+      description: inn price per party
+      minimum: 0
+    activity_available:
+      type: boolean
+      role: input
+      description: activity available
+    service_eligible:
+      type: boolean
+      role: input
+      description: service eligible
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: leaving on quest
+    travelling_elsewhere:
+      type: boolean
+      role: input
+      description: travelling elsewhere
+    estate_owned:
+      type: boolean
+      role: input
+      description: estate owned
+    inn_available:
+      type: boolean
+      role: input
+      description: inn available
+    business_allowed:
+      type: boolean
+      role: state
+      description: business allowed
+    must_leave_next_morning:
+      type: boolean
+      role: state
+      description: must leave next morning
+    luck_restored_this_visit:
+      type: boolean
+      role: state
+      description: luck restored this visit
+    activity_reserved:
+      type: boolean
+      role: state
+      description: activity reserved
+    departed:
+      type: boolean
+      role: output
+      description: departed
+    lodging_kind:
+      type: string
+      role: state
+      description: lodging kind
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    mana:
+      type: number
+      role: state
+      description: mana
+    energy:
+      type: number
+      role: state
+      description: energy
+    luck:
+      type: number
+      role: state
+      description: luck
+    maximum_hit_points:
+      type: number
+      role: input
+      description: maximum hit points
+    maximum_mana:
+      type: number
+      role: input
+      description: maximum mana
+    maximum_energy:
+      type: number
+      role: input
+      description: maximum energy
+    maximum_luck:
+      type: number
+      role: input
+      description: maximum luck
+    hp_roll:
+      type: number
+      role: input
+      description:
+        Supplied 2d6 sum (2–12) for paid inn/estate, or 1d6 (1–6) for stable. Above-maximum
+        recovery remains unresolved.
+      integer: true
+      minimum: 1
+      maximum: 12
+    stable_outcome_supplied:
+      type: boolean
+      role: input
+      description: Caller explicitly supplies recovery amounts after resolving the existing
+        half-of-maximum versus half-of-missing source ambiguity. No default interpretation.
+    stable_mana_recovery:
+      type: number
+      role: input
+      description: stable mana recovery
+      minimum: 0
+    stable_energy_recovery:
+      type: number
+      role: input
+      description: stable energy recovery
+      minimum: 0
+    stable_luck_recovery:
+      type: number
+      role: input
+      description: stable luck recovery
+      minimum: 0
+    party_visit_id:
+      type: number
+      role: state
+      description: party visit id
+      integer: true
+      minimum: -1
+    activity_requires_inn:
+      type: boolean
+      role: input
+      description: activity requires inn
+    stable_recovery_ready:
+      type: boolean
+      role: output
+      description: stable recovery ready
+    quest_accepted:
+      type: boolean
+      role: input
+      description: quest accepted
+    quest_departure_day:
+      type: number
+      role: state
+      description: quest departure day
+      integer: true
+      minimum: -1
+  dependencies:
+    - key: activity_catalogue
+      label: Available Actions
+      object_id: table.settlement.activities
+    - key: lodging
+      label: Settlement recovery rule
+      object_id: character.settlement.rest
+    - key: estate
+      label: Owned estate lodging
+      object_id: character.settlement.estate.lodging
+  steps:
+    - id: new_visit
+      source_text: A genuine new visit restores eligibility for once-per-visit Luck and catalogue limits.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: new_visit
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: visit_id
+            right:
+              type: field
+              name: hero_visit_id
+      effects:
+        - type: set
+          target: hero_visit_id
+          value:
+            type: field
+            name: visit_id
+        - type: set
+          target: luck_restored_this_visit
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: scroll_activities
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: enchant_activities
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: activity_reserved
+          value:
+            type: literal
+            value: false
+    - id: new_party_visit
+      source_text:
+        Initialise shared lodging obligations once per genuine return; hero initialisation must
+        not reset another hero’s shared charges.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: new_visit
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: visit_id
+            right:
+              type: field
+              name: party_visit_id
+      effects:
+        - type: set
+          target: party_visit_id
+          value:
+            type: field
+            name: visit_id
+        - type: set
+          target: lodging_day
+          value:
+            type: sum
+            values:
+              - type: field
+                name: day
+              - type: literal
+                value: -1
+        - type: set
+          target: party_occupied_until
+          value:
+            type: sum
+            values:
+              - type: field
+                name: day
+              - type: literal
+                value: -1
+        - type: set
+          target: last_activity_day
+          value:
+            type: sum
+            values:
+              - type: field
+                name: day
+              - type: literal
+                value: -1
+        - type: set
+          target: inn_nights
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: must_leave_next_morning
+          value:
+            type: literal
+            value: false
+    - id: start_day
+      source_text: Each hero has one Activity Point per day; repeated calls do not replenish it.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: start_day
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: hero_day
+      effects:
+        - type: set
+          target: hero_day
+          value:
+            type: field
+            name: day
+        - type: set
+          target: hero_activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: activity_reserved
+          value:
+            type: literal
+            value: false
+    - id: occupied_day
+      source_text: During a multi-day activity nothing else can be done.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: start_day
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: hero_occupied_until
+      effects:
+        - type: set
+          target: hero_activity_points
+          value:
+            type: literal
+            value: 0
+    - id: confirm_service
+      source_text:
+        Activities require a offered service, eligibility, the hero’s daily budget, and no
+        departure or multi-day conflict.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: phase
+        right:
+          type: literal
+          value: activity
+      effects:
+        - type: set
+          target: activity_reserved
+          value:
+            type: literal
+            value: false
+        - type: require
+          condition: &a4
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: activity
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hero_day
+                right:
+                  type: field
+                  name: day
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: must_leave_next_morning
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_available
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_eligible
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: hero_occupied_until
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: hero_activity_points
+                right:
+                  type: arithmetic
+                  operator: min
+                  values:
+                    - type: literal
+                      value: 1
+                    - type: field
+                      name: activity_cost
+              - type: all
+                conditions:
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: ne
+                        left:
+                          type: field
+                          name: activity
+                        right:
+                          type: literal
+                          value: create_scroll
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: scroll_activities
+                        right:
+                          type: literal
+                          value: 2
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: ne
+                        left:
+                          type: field
+                          name: activity
+                        right:
+                          type: literal
+                          value: enchant
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: enchant_activities
+                        right:
+                          type: literal
+                          value: 1
+        - type: require
+          condition: &a5
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_requires_inn
+                right:
+                  type: literal
+                  value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: inn_available
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: lodging_choice
+                    right:
+                      type: literal
+                      value: inn
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: coins
+                    right:
+                      type: field
+                      name: inn_price_per_party
+        - type: require
+          condition:
+            type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+    - id: reserve_activity_days
+      source_text: Reserve the activity and record the overnight obligation for the whole party.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a4
+              - *a5
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: activity_reserved
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hero_activity_points
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: hero_activity_points
+              - type: arithmetic
+                operator: min
+                values:
+                  - type: literal
+                    value: 1
+                  - type: field
+                    name: activity_cost
+        - type: set
+          target: last_activity_day
+          value:
+            type: field
+            name: day
+        - type: set
+          target: party_activity_days
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: field
+                name: party_activity_days
+              - type: field
+                name: activity_cost
+        - type: set
+          target: party_occupied_until
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: field
+                name: party_occupied_until
+              - type: sum
+                values:
+                  - type: field
+                    name: day
+                  - type: arithmetic
+                    operator: max
+                    values:
+                      - type: literal
+                        value: 0
+                      - type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: field
+                            name: activity_cost
+                          - type: literal
+                            value: 1
+        - type: invoke
+          dependency: activity_catalogue
+    - id: scroll_limit
+      source_text: 'Create a Scroll: max two per visit.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: activity
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity_reserved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity
+            right:
+              type: literal
+              value: create_scroll
+      effects:
+        - type: set
+          target: scroll_activities
+          value:
+            type: sum
+            values:
+              - type: field
+                name: scroll_activities
+              - type: literal
+                value: 1
+    - id: enchant_limit
+      source_text: 'Enchant Objects: max once per visit.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: activity
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity_reserved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity
+            right:
+              type: literal
+              value: enchant
+      effects:
+        - type: set
+          target: enchant_activities
+          value:
+            type: sum
+            values:
+              - type: field
+                name: enchant_activities
+              - type: literal
+                value: 1
+    - id: multi_day_exclusivity
+      source_text:
+        A cost above one occupies the hero for that many consecutive days, excluding all other
+        activities.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: activity
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity_reserved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: activity_cost
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: hero_occupied_until
+          value:
+            type: sum
+            values:
+              - type: field
+                name: day
+              - type: field
+                name: activity_cost
+              - type: literal
+                value: -1
+    - id: paid_inn
+      source_text: Pay the inn price once for the party per night, not once for each hero.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - &a6
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: overnight
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: gt
+                    left:
+                      type: field
+                      name: day
+                    right:
+                      type: field
+                      name: lodging_day
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: must_leave_next_morning
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_choice
+                right:
+                  type: literal
+                  value: inn
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: inn_available
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: inn_price_per_party
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lodging_day
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: day
+                - type: literal
+                  value: -1
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: inn_price_per_party
+        - type: set
+          target: inn_nights
+          value:
+            type: sum
+            values:
+              - type: field
+                name: inn_nights
+              - type: literal
+                value: 1
+        - type: set
+          target: lodging_kind
+          value:
+            type: literal
+            value: inn
+        - type: set
+          target: lodging_day
+          value:
+            type: field
+            name: day
+        - type: invoke
+          dependency: lodging
+    - id: estate_lodging
+      source_text:
+        Owners may stay at their estate without the daily inn charge; normal between-quest rest
+        applies.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a6
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_choice
+                right:
+                  type: literal
+                  value: estate
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: estate_owned
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lodging_day
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: day
+                - type: literal
+                  value: -1
+      effects:
+        - type: set
+          target: lodging_kind
+          value:
+            type: literal
+            value: estate
+        - type: set
+          target: lodging_day
+          value:
+            type: field
+            name: day
+        - type: invoke
+          dependency: estate
+    - id: stable_lodging
+      source_text: If the inn cannot be afforded, sleep in its stable and leave in the morning.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a6
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_choice
+                right:
+                  type: literal
+                  value: inn
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: inn_available
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: inn_price_per_party
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lodging_day
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: day
+                - type: literal
+                  value: -1
+      effects:
+        - type: set
+          target: lodging_kind
+          value:
+            type: literal
+            value: stable
+        - type: set
+          target: lodging_day
+          value:
+            type: field
+            name: day
+        - type: set
+          target: must_leave_next_morning
+          value:
+            type: literal
+            value: true
+    - id: recovery_boundary
+      source_text: HP recovery above recorded maximum is unresolved.
+      when:
+        type: all
+        conditions:
+          - &a7
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: recover
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_day
+                right:
+                  type: field
+                  name: day
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: hero_recovery_day
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: maximum_hit_points
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: hp_roll
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.recovery_bounds
+    - id: stable_half_boundary
+      source_text: Half of each stat is ambiguous; require explicit supplied amounts.
+      when:
+        type: all
+        conditions:
+          - &a9
+            type: all
+            conditions:
+              - *a7
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_kind
+                right:
+                  type: literal
+                  value: stable
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: hp_roll
+                right:
+                  type: literal
+                  value: 6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stable_outcome_supplied
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.recovery_bounds
+    - id: restore_luck
+      source_text: Once Luck is restored, later spending is not restored until a new settlement visit.
+      when:
+        type: all
+        conditions:
+          - &a8
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - *a7
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: lodging_kind
+                        right:
+                          type: literal
+                          value: inn
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: lodging_kind
+                        right:
+                          type: literal
+                          value: estate
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: hp_roll
+                    right:
+                      type: literal
+                      value: 2
+              - &a10
+                type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: maximum_hit_points
+                right:
+                  type: sum
+                  values:
+                    - type: field
+                      name: hit_points
+                    - type: field
+                      name: hp_roll
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: luck_restored_this_visit
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: luck
+          value:
+            type: field
+            name: maximum_luck
+        - type: set
+          target: luck_restored_this_visit
+          value:
+            type: literal
+            value: true
+    - id: paid_recovery
+      source_text: Paid lodging or owned-home rest restores Mana/Energy and 2d6 HP once for this hero and night.
+      when: *a8
+      effects:
+        - type: set
+          target: mana
+          value:
+            type: field
+            name: maximum_mana
+        - type: set
+          target: energy
+          value:
+            type: field
+            name: maximum_energy
+        - type: set
+          target: hit_points
+          value:
+            type: sum
+            values:
+              - type: field
+                name: hit_points
+              - type: field
+                name: hp_roll
+        - type: set
+          target: hero_recovery_day
+          value:
+            type: field
+            name: day
+    - id: stable_readiness
+      source_text: Resolve all supplied half-stat and HP bounds before applying any recovery.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: phase
+        right:
+          type: literal
+          value: recover
+      effects:
+        - type: set
+          target: stable_recovery_ready
+          value:
+            type: literal
+            value: false
+    - id: allow_stable_recovery
+      source_text: The caller supplied a bounded interpretation of the half-stat amounts.
+      when:
+        type: all
+        conditions:
+          - *a9
+          - *a10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stable_outcome_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_mana
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: mana
+                - type: field
+                  name: stable_mana_recovery
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_energy
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: energy
+                - type: field
+                  name: stable_energy_recovery
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_luck
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: luck
+                - type: field
+                  name: stable_luck_recovery
+      effects:
+        - type: set
+          target: stable_recovery_ready
+          value:
+            type: literal
+            value: true
+    - id: stable_luck
+      source_text: Use the explicitly supplied half-stat recovery once for Luck during this visit.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: recover
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stable_recovery_ready
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: luck_restored_this_visit
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: luck
+          value:
+            type: sum
+            values:
+              - type: field
+                name: luck
+              - type: field
+                name: stable_luck_recovery
+        - type: set
+          target: luck_restored_this_visit
+          value:
+            type: literal
+            value: true
+    - id: stable_recovery
+      source_text: Use supplied half-stat amounts and the 1d6 HP result; retain the mandatory morning departure.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: recover
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stable_recovery_ready
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: mana
+          value:
+            type: sum
+            values:
+              - type: field
+                name: mana
+              - type: field
+                name: stable_mana_recovery
+        - type: set
+          target: energy
+          value:
+            type: sum
+            values:
+              - type: field
+                name: energy
+              - type: field
+                name: stable_energy_recovery
+        - type: set
+          target: hit_points
+          value:
+            type: sum
+            values:
+              - type: field
+                name: hit_points
+              - type: field
+                name: hp_roll
+        - type: set
+          target: hero_recovery_day
+          value:
+            type: field
+            name: day
+    - id: departure_lock
+      source_text: Leave early with no activities that day. All multi-day work must have finished.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: phase
+        right:
+          type: literal
+          value: depart
+      effects:
+        - type: set
+          target: departed
+          value:
+            type: literal
+            value: false
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: last_activity_day
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: party_occupied_until
+        - type: require
+          condition: &a11
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: lodging_day
+            right:
+              type: field
+              name: party_occupied_until
+        - type: require
+          condition: &a12
+            type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: quest_accepted
+                    right:
+                      type: literal
+                      value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: travelling_elsewhere
+                    right:
+                      type: literal
+                      value: true
+    - id: depart
+      source_text: Departure follows all occupied days and has no settlement activity on that day.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: depart
+                  - type: compare
+                    operator: gt
+                    left:
+                      type: field
+                      name: day
+                    right:
+                      type: field
+                      name: last_activity_day
+                  - type: compare
+                    operator: gt
+                    left:
+                      type: field
+                      name: day
+                    right:
+                      type: field
+                      name: party_occupied_until
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: travelling_elsewhere
+                        right:
+                          type: literal
+                          value: true
+              - *a11
+          - *a12
+      effects:
+        - type: set
+          target: departed
+          value:
+            type: literal
+            value: true
+    - id: record_quest_departure
+      source_text: No settlement activities may be performed on the day of quest departure.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: depart
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: departed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaving_on_quest
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: quest_departure_day
+          value:
+            type: field
+            name: day
+  entry_step: new_visit
+  exit_step: record_quest_departure
+  issues:
+    - issue.phase4.recovery_bounds
+    - issue.phase4.settlement_recovery
+- id: procedure.settlement_buy_sell_and_service
+  name: Settlement purchases, sales and service eligibility
+  section_id: section.settlements.buying_and_selling
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 144
+      printed_page: 142
+      heading: Buying and Selling; Cure Disease and Poison
+      extraction: &a13
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Identifying Items and Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Repair Equipment; Treat Mental Conditions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: 'Settlement Events: Settlement Feast'
+      extraction: *a13
+  status: extracted
+  confidence: high
+  source_text: Shopping is performed at a service offering the item. Roll 1d6 for availability; one
+    item may be bought per successful roll. After a failed availability roll, neither that hero nor
+    any other hero may buy that specific item until returning to the settlement later. Selling uses
+    the Sell Table or Treasure Card value and local price variations do not apply, except
+    event-triggered changes. Items may be bought for another hero and party excess gear may be
+    pooled. Repair price is the equipment appendix Sell Table Repair column; repairs are at a
+    General Store while buying/selling gear, or a Blacksmith for weapons and armour. Potions can be
+    identified at the General Store or Alchemists' Guild; Magic Items by a Scryer or Wizards' Guild.
+    Collect a promised completed-quest reward only in the quest’s starting settlement; the feast
+    no-bed event allows this before leaving.
+  fields:
+    operation:
+      type: string
+      role: input
+      description: operation
+    visit_id:
+      type: number
+      role: input
+      description: visit id
+      integer: true
+      minimum: 0
+    item_lock_visit:
+      type: number
+      role: state
+      description:
+        Visit on which the specific item availability attempt failed. Only a genuine later
+        return releases it.
+      integer: true
+      minimum: -1
+    availability_roll:
+      type: number
+      role: input
+      description: availability roll
+      integer: true
+      minimum: 1
+      maximum: 6
+    item_availability:
+      type: number
+      role: input
+      description: item availability
+      integer: true
+    item_locked_until_return:
+      type: boolean
+      role: state
+      description: Shared party lock for this item at this settlement, not per hero. Carry separate
+        records for other items and settlements.
+    service_available:
+      type: boolean
+      role: input
+      description: service available
+    service_eligible:
+      type: boolean
+      role: input
+      description: service eligible
+    business_allowed:
+      type: boolean
+      role: input
+      description: business allowed
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: leaving on quest
+    activity_authorized:
+      type: boolean
+      role: input
+      description:
+        Supplied result of this hero’s correct shop/service activity reservation (or completed
+        multi-day reservation). Shopping can cover multiple items; no extra Activity Point is
+        charged for each item.
+    quote_supplied:
+      type: boolean
+      role: input
+      description: The base price or Sell/Repair value is supplied from the source-backed catalogue.
+    item_present:
+      type: boolean
+      role: input
+      description: item present
+    treatment_succeeds:
+      type: boolean
+      role: input
+      description: treatment succeeds
+    purchase_price:
+      type: number
+      role: output
+      description: Derived catalogue price when there is a single modifier source; an overlapping
+        local/event quote must be explicitly resolved.
+      minimum: 0
+    sale_value:
+      type: number
+      role: input
+      description:
+        Sell Table or Treasure Card value before event changes. Local price variations are
+        deliberately ignored.
+      minimum: 0
+    repair_price:
+      type: number
+      role: input
+      description: repair price
+      minimum: 0
+    event_sale_multiplier:
+      type: number
+      role: input
+      description:
+        Supplied event price factor, 1 without a price-changing event. Local modifiers never
+        enter sale arithmetic.
+      minimum: 0
+    local_price_modifier:
+      type: number
+      role: input
+      description: local price modifier
+    coins:
+      type: number
+      role: state
+      description: coins
+      minimum: 0
+    inventory_count:
+      type: number
+      role: state
+      description: inventory count
+      integer: true
+      minimum: 0
+    durability:
+      type: number
+      role: state
+      description: durability
+    maximum_durability:
+      type: number
+      role: input
+      description: maximum durability
+    identified:
+      type: boolean
+      role: state
+      description: identified
+    diseased:
+      type: boolean
+      role: state
+      description: diseased
+    poisoned:
+      type: boolean
+      role: state
+      description: poisoned
+    mental_attempt_used:
+      type: boolean
+      role: state
+      description: mental attempt used
+    mental_conditions:
+      type: number
+      role: state
+      description: mental conditions
+      integer: true
+      minimum: 0
+    treatment_roll:
+      type: number
+      role: input
+      description: treatment roll
+      integer: true
+      minimum: 1
+      maximum: 6
+    purchase_attempted:
+      type: boolean
+      role: output
+      description: purchase attempted
+    service_completed:
+      type: boolean
+      role: output
+      description: service completed
+    transaction_eligible:
+      type: boolean
+      role: output
+      description: transaction eligible
+    service_cost:
+      type: number
+      role: output
+      description: service cost
+    day:
+      type: number
+      role: input
+      description: day
+      integer: true
+      minimum: 0
+    activity_completion_day:
+      type: number
+      role: input
+      description: activity completion day
+      integer: true
+      minimum: 0
+    last_treatment_day:
+      type: number
+      role: state
+      description: last treatment day
+      integer: true
+      minimum: -1
+    quest_departure_day:
+      type: number
+      role: input
+      description: quest departure day
+      integer: true
+      minimum: -1
+    quest_completed:
+      type: boolean
+      role: input
+      description: quest completed
+    reward_promised:
+      type: boolean
+      role: input
+      description: reward promised
+    at_quest_start_settlement:
+      type: boolean
+      role: input
+      description: at quest start settlement
+    reward_collected:
+      type: boolean
+      role: state
+      description: reward collected
+    reward_value:
+      type: number
+      role: input
+      description: reward value
+      minimum: 0
+    base_purchase_price:
+      type: number
+      role: input
+      description: base purchase price
+      minimum: 0
+    quoted_purchase_price:
+      type: number
+      role: input
+      description: quoted purchase price
+      minimum: 0
+    event_price_modifier:
+      type: number
+      role: input
+      description: event price modifier
+    event_price_delta:
+      type: number
+      role: input
+      description: event price delta
+    combined_price_resolved:
+      type: boolean
+      role: input
+      description: combined price resolved
+    purchase_quote_ready:
+      type: boolean
+      role: output
+      description: purchase quote ready
+    already_poisoned:
+      type: boolean
+      role: state
+      description:
+        Current poison-condition checkpoint shared with procedure.damage_follow_up; a supplied
+        successful poison treatment clears it with poisoned.
+    remaining_poison_rolls:
+      type: number
+      role: state
+      description:
+        Remaining checks owned by the treated hero/poison episode; successful poison treatment
+        cancels them.
+    poison_rolls_due:
+      type: number
+      role: state
+      description: Pending poison-check handoff count for that episode, cancelled after a successful treatment.
+    cured:
+      type: boolean
+      role: state
+      description:
+        Confirmed poison removal from this successful poison-treatment operation; unrelated
+        diseases and HP are not healed by this flag.
+    disease_penalty_active:
+      type: boolean
+      role: state
+      description:
+        Current disease-episode stat-loss applicability. Successful supplied disease treatment
+        clears this modifier without guessing numeric base-stat restoration.
+  dependencies:
+    - key: equipment_catalogue
+      label: Sell and Repair prices
+      object_id: character.durability.repair_price
+    - key: service_catalogue
+      label: Settlement service catalogue
+      object_id: character.settlement.buying
+    - key: availability
+      label: Availability roll and item purchase
+    - key: service_outcome
+      label: Explicitly supplied treatment or identification outcome
+  steps:
+    - id: initialise_transaction
+      source_text: Service, eligibility, activity, item availability and funds are separate checks.
+      effects:
+        - type: set
+          target: purchase_attempted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: transaction_eligible
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: service_cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: purchase_quote_ready
+          value:
+            type: literal
+            value: false
+    - id: release_return_lock
+      source_text: A failed item lock ends only on a later return to this settlement.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_locked_until_return
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: visit_id
+            right:
+              type: field
+              name: item_lock_visit
+      effects:
+        - type: set
+          target: item_locked_until_return
+          value:
+            type: literal
+            value: false
+    - id: check_service_guard
+      source_text: Only offered, eligible services with authorized activity and no quest departure may be used.
+      effects:
+        - type: require
+          condition: &a17
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_available
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_eligible
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+        - type: require
+          condition: &a19
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: activity_completion_day
+        - type: require
+          condition:
+            type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      when:
+        type: compare
+        operator: ne
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: collect_reward
+    - id: local_purchase_price
+      source_text: Apply a local equipment price percentage when no event changes the price.
+      when:
+        type: all
+        conditions:
+          - &a14
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: purchase
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quote_supplied
+                right:
+                  type: literal
+                  value: true
+          - type: not
+            condition: &a15
+              type: any
+              conditions:
+                - type: compare
+                  operator: ne
+                  left:
+                    type: field
+                    name: event_price_modifier
+                  right:
+                    type: literal
+                    value: 0
+                - type: compare
+                  operator: ne
+                  left:
+                    type: field
+                    name: event_price_delta
+                  right:
+                    type: literal
+                    value: 0
+      effects:
+        - type: set
+          target: purchase_price
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: base_purchase_price
+                  - type: sum
+                    values:
+                      - type: literal
+                        value: 100
+                      - type: field
+                        name: local_price_modifier
+              - type: literal
+                value: 100
+        - type: set
+          target: purchase_quote_ready
+          value:
+            type: literal
+            value: true
+    - id: event_purchase_price
+      source_text: Apply the event percentage and explicit coin adjustment when no local modifier overlaps.
+      when:
+        type: all
+        conditions:
+          - *a14
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: local_price_modifier
+            right:
+              type: literal
+              value: 0
+          - *a15
+      effects:
+        - type: set
+          target: purchase_price
+          value:
+            type: sum
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: base_purchase_price
+                      - type: sum
+                        values:
+                          - type: literal
+                            value: 100
+                          - type: field
+                            name: event_price_modifier
+                  - type: literal
+                    value: 100
+              - type: field
+                name: event_price_delta
+        - type: set
+          target: purchase_quote_ready
+          value:
+            type: literal
+            value: true
+    - id: combined_price_boundary
+      source_text: The source does not state an order for simultaneous local and event price changes.
+      when:
+        type: all
+        conditions:
+          - *a14
+          - &a16
+            type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: local_price_modifier
+                right:
+                  type: literal
+                  value: 0
+              - *a15
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: combined_price_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.price_modifier_combination
+    - id: supplied_combined_quote
+      source_text: Use an explicitly supplied combined quote without choosing a canonical stacking order.
+      when:
+        type: all
+        conditions:
+          - *a14
+          - *a16
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: combined_price_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: purchase_price
+          value:
+            type: field
+            name: quoted_purchase_price
+        - type: set
+          target: purchase_quote_ready
+          value:
+            type: literal
+            value: true
+    - id: check_purchase_funds
+      source_text: A purchase needs an unlocked item, supplied price and sufficient money before
+        attempting availability.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: purchase
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: purchase_quote_ready
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: purchase_price
+                right:
+                  type: literal
+                  value: 0
+              - &a18
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: operation
+                    right:
+                      type: literal
+                      value: purchase
+                  - *a17
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: item_locked_until_return
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: quote_supplied
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: coins
+                    right:
+                      type: field
+                      name: purchase_price
+    - id: purchase_availability
+      source_text: An actual availability attempt occurs only after service, item-lock and funds guards pass.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: purchase_quote_ready
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: purchase_price
+            right:
+              type: literal
+              value: 0
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - *a18
+                  - *a19
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: quest_departure_day
+                right:
+                  type: field
+                  name: day
+      effects:
+        - type: set
+          target: purchase_attempted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: availability
+    - id: failed_roll_lock
+      source_text: Only an actual failed availability attempt locks this item for all heroes.
+      when:
+        type: all
+        conditions:
+          - &a20
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: purchase
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: purchase_attempted
+                right:
+                  type: literal
+                  value: true
+          - type: not
+            condition: &a21
+              type: any
+              conditions:
+                - type: compare
+                  operator: gte
+                  left:
+                    type: field
+                    name: item_availability
+                  right:
+                    type: literal
+                    value: 6
+                - type: all
+                  conditions:
+                    - type: compare
+                      operator: gt
+                      left:
+                        type: field
+                        name: item_availability
+                      right:
+                        type: literal
+                        value: 0
+                    - type: compare
+                      operator: lte
+                      left:
+                        type: field
+                        name: availability_roll
+                      right:
+                        type: field
+                        name: item_availability
+      effects:
+        - type: set
+          target: item_locked_until_return
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: item_lock_visit
+          value:
+            type: field
+            name: visit_id
+    - id: purchase_one
+      source_text: 'Each successful availability roll buys one piece: charge once and grant one.'
+      when:
+        type: all
+        conditions:
+          - *a20
+          - *a21
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: purchase_price
+        - type: set
+          target: inventory_count
+          value:
+            type: sum
+            values:
+              - type: field
+                name: inventory_count
+              - type: literal
+                value: 1
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: true
+    - id: sell
+      source_text: Sell one owned item using Sell Table/Treasure Card value and only event-based price changes.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: operation
+                    right:
+                      type: literal
+                      value: sale
+                  - *a17
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: quote_supplied
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: inventory_count
+                    right:
+                      type: literal
+                      value: 1
+              - *a19
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: sum
+            values:
+              - type: field
+                name: coins
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: sale_value
+                  - type: field
+                    name: event_sale_multiplier
+        - type: set
+          target: inventory_count
+          value:
+            type: sum
+            values:
+              - type: field
+                name: inventory_count
+              - type: literal
+                value: -1
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: equipment_catalogue
+    - id: repair_price
+      source_text: Repair cost comes from the printed Repair Column.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: repair
+      effects:
+        - type: set
+          target: service_cost
+          value:
+            type: field
+            name: repair_price
+    - id: magic_identification_price
+      source_text: Magic Item identification costs 150 c.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: identify_magic
+      effects:
+        - type: set
+          target: service_cost
+          value:
+            type: literal
+            value: 150
+    - id: potion_identification_price
+      source_text: Potion identification costs 25 c.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: identify_potion
+      effects:
+        - type: set
+          target: service_cost
+          value:
+            type: literal
+            value: 25
+    - id: illness_treatment_price
+      source_text: Disease or poison treatment costs 100 c and one day.
+      when:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: cure_disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: cure_poison
+      effects:
+        - type: set
+          target: service_cost
+          value:
+            type: literal
+            value: 100
+    - id: mental_treatment_price
+      source_text:
+        One attempt to treat a mental condition costs 1000 c, takes five days and is limited
+        between quests.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: operation
+        right:
+          type: literal
+          value: treat_mental
+      effects:
+        - type: set
+          target: service_cost
+          value:
+            type: literal
+            value: 1000
+    - id: repair_eligibility
+      source_text: Repair requires an owned item, supplied repair price and the appropriate gear/weapon shop.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: operation
+                        right:
+                          type: literal
+                          value: repair
+                      - *a17
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: item_present
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: quote_supplied
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: gte
+                        left:
+                          type: field
+                          name: coins
+                        right:
+                          type: field
+                          name: service_cost
+                  - *a19
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: durability
+                right:
+                  type: field
+                  name: maximum_durability
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: transaction_eligible
+          value:
+            type: literal
+            value: true
+    - id: identify_eligibility
+      source_text: Identification requires an owned unidentified item and an appropriate provider.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: operation
+                        right:
+                          type: literal
+                          value: identify_magic
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: operation
+                        right:
+                          type: literal
+                          value: identify_potion
+                  - *a17
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: item_present
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: identified
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: coins
+                    right:
+                      type: field
+                      name: service_cost
+              - *a19
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: transaction_eligible
+          value:
+            type: literal
+            value: true
+    - id: illness_eligibility
+      source_text: Treatment requires the corresponding condition and appropriate service.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - *a17
+                      - type: compare
+                        operator: gte
+                        left:
+                          type: field
+                          name: coins
+                        right:
+                          type: field
+                          name: service_cost
+                      - type: any
+                        conditions:
+                          - type: all
+                            conditions:
+                              - type: compare
+                                operator: eq
+                                left:
+                                  type: field
+                                  name: operation
+                                right:
+                                  type: literal
+                                  value: cure_disease
+                              - type: compare
+                                operator: eq
+                                left:
+                                  type: field
+                                  name: diseased
+                                right:
+                                  type: literal
+                                  value: true
+                          - type: all
+                            conditions:
+                              - type: compare
+                                operator: eq
+                                left:
+                                  type: field
+                                  name: operation
+                                right:
+                                  type: literal
+                                  value: cure_poison
+                              - type: compare
+                                operator: eq
+                                left:
+                                  type: field
+                                  name: poisoned
+                                right:
+                                  type: literal
+                                  value: true
+                  - *a19
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: last_treatment_day
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: transaction_eligible
+          value:
+            type: literal
+            value: true
+    - id: mental_eligibility
+      source_text:
+        Only one disorder treatment attempt between quests; require an existing disorder and
+        completed five-day service.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: operation
+                        right:
+                          type: literal
+                          value: treat_mental
+                      - *a17
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: mental_attempt_used
+                        right:
+                          type: literal
+                          value: false
+                      - type: compare
+                        operator: gt
+                        left:
+                          type: field
+                          name: mental_conditions
+                        right:
+                          type: literal
+                          value: 0
+                      - type: compare
+                        operator: gte
+                        left:
+                          type: field
+                          name: coins
+                        right:
+                          type: field
+                          name: service_cost
+                  - *a19
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: last_treatment_day
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+      effects:
+        - type: set
+          target: transaction_eligible
+          value:
+            type: literal
+            value: true
+    - id: charge_service
+      source_text: Charge an eligible service once, separately from purchases and sales.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: transaction_eligible
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: service_cost
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: true
+    - id: repair_result
+      source_text: Apply the supplied catalogue repair result once.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: repair
+      effects:
+        - type: set
+          target: durability
+          value:
+            type: field
+            name: maximum_durability
+    - id: identification_result
+      source_text: Paid identification identifies the selected item.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: identify_magic
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: identify_potion
+      effects:
+        - type: set
+          target: identified
+          value:
+            type: literal
+            value: true
+    - id: cure_disease_result
+      source_text: The supplied successful treatment removes disease.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: cure_disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: treatment_succeeds
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: diseased
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: disease_penalty_active
+          value:
+            type: literal
+            value: false
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: Disease
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 144
+          printed_page: 142
+          heading: Cure Disease/Poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+    - id: cure_poison_result
+      source_text: The supplied successful poison treatment removes the current poison condition and
+        cancels its remaining checks. Carry both poison-state checkpoints forward; do not leave a
+        stale already_poisoned state able to resume damage. Existing treatment resource/visit guards
+        remain the accounting owner.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: cure_poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: treatment_succeeds
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: already_poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: true
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 144
+          printed_page: 142
+          heading: Cure Disease and Poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: Poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+    - id: mental_attempt
+      source_text: An attempted treatment consumes the between-quest opportunity even when it fails.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: treat_mental
+      effects:
+        - type: set
+          target: mental_attempt_used
+          value:
+            type: literal
+            value: true
+    - id: mental_success
+      source_text: A result of 1–5 on d6 cures one disorder.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: treat_mental
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: treatment_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: mental_conditions
+          value:
+            type: sum
+            values:
+              - type: field
+                name: mental_conditions
+              - type: literal
+                value: -1
+    - id: record_treatment_day
+      source_text:
+        A one-day treatment or completed multi-day treatment cannot be charged again for the
+        same hero on the same day.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transaction_eligible
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: cure_disease
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: cure_poison
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: treat_mental
+      effects:
+        - type: set
+          target: last_treatment_day
+          value:
+            type: field
+            name: day
+    - id: collect_reward
+      source_text:
+        A finished quest’s promised reward is collected only where accepted. The feast no-bed
+        event expressly allows collecting it before leaving.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: collect_reward
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaving_on_quest
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: quest_departure_day
+            right:
+              type: field
+              name: day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_completed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward_promised
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: at_quest_start_settlement
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward_collected
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: sum
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: reward_value
+        - type: set
+          target: reward_collected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: true
+  entry_step: initialise_transaction
+  exit_step: collect_reward
+  issues:
+    - issue.settlement.price_modifier_combination

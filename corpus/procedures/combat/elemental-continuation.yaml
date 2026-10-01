@@ -1,0 +1,236 @@
+- id: procedure.elemental_continuation
+  name: Fire or Acidic one-turn continuation
+  section_id: section.combat.different_kinds_of_damage
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Acidic Damage; Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: Fire Damage continuation; Frost Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    On 4–6, Fire or Acidic damage continues next turn at half damage rounded down, minimum
+    1, then ends. Resolve the supplied scheduled amount once with the existing generic HP-loss rule;
+    the source halving/protection basis remains explicit uncertainty. Continuation does not
+    introduce weapon-hit location or equipment damage.
+  issues:
+    - issue.damage_follow_up.continuation_basis
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: Fire or Acidic source hit.
+    continuation_pending:
+      type: boolean
+      role: state
+      description: This target/hit has its one Fire or Acidic next-turn damage checkpoint pending.
+    continuation_handoff_processed:
+      type: boolean
+      role: state
+      description: Target/hit next-turn damage handoff marker, reset for a distinct accepted Fire/Acidic hit.
+    continuation_result_processed:
+      type: boolean
+      role: state
+      description: Target/hit next-turn resolved-result marker; persist after the one continuation ends.
+    next_turn_damage:
+      type: number
+      role: state
+      description:
+        This target/hit scheduled Fire/Acidic damage before its separately resolved next-turn
+        damage handoff; cancelled after the completed continuation.
+    next_turn_started:
+      type: boolean
+      role: input
+      description: Actual next turn of this target/hit is reached, not merely a request.
+    continuation_damage_resolved:
+      type: boolean
+      role: input
+      description:
+        Actual scheduled next-turn damage and HP/protection/death effects already resolved once
+        by the supplied damage owner. Invoke alone does not establish this.
+    continuation_allowed:
+      type: boolean
+      role: output
+      description: Current pending next-turn checkpoint accepted; reset every call.
+    expires:
+      type: string
+      role: output
+      description: Source-defined end of this one-turn effect.
+  dependencies:
+    - key: damage
+      label:
+        Subtract supplied resolved nonnegative continuation damage once with the generic HP-loss
+        rule; caller resolves protection and target-condition outcomes separately
+      object_id: character.hit_points.loss
+  steps:
+    - id: check_continuation
+      source: &a3
+        - *a1
+        - *a2
+      source_text: Re-evaluate this target/hit next-turn effect without executing another damage resolution.
+      effects:
+        - type: set
+          target: continuation_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_continuation
+          source: *a3
+          source_text: Only this pending unprocessed continuation on its actual next turn is eligible.
+          when:
+            type: all
+            conditions:
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: damage_type
+                    right:
+                      type: literal
+                      value: fire
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: damage_type
+                    right:
+                      type: literal
+                      value: acidic
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: continuation_pending
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: continuation_result_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: next_turn_started
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: continuation_allowed
+              value:
+                type: literal
+                value: true
+    - id: request_damage
+      source: *a3
+      source_text:
+        Record one generic HP-loss handoff after the caller supplies resolved continuation
+        damage and its protection basis. Do not infer weapon-hit location or equipment effects, and
+        do not charge HP here.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_damage_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: continuation_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: damage
+    - id: end_continuation
+      source: *a3
+      source_text:
+        Once the actual next-turn damage is resolved, Fire is extinguished or Acidic negated.
+        Cancel this pending amount and persist its result marker; replay cannot resolve another
+        damage event.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_damage_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: continuation_result_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: continuation_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: next_turn_damage
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: expires
+          value:
+            type: literal
+            value: now
+  entry_step: check_continuation
+  exit_step: end_continuation

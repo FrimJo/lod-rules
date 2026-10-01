@@ -11,6 +11,15 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 88
+      printed_page: 86
+      heading: Initial Setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: |-
@@ -29,7 +38,6 @@
       description: Current Threat Level; increased by 1 as the first step of the attempt.
       integer: true
       minimum: 2
-      maximum: 99
     d6_roll:
       type: number
       role: input
@@ -40,12 +48,27 @@
     locked:
       type: boolean
       role: input
-      description: Whether the Door Table result locked the door or chest. Lock handling (forcing,
-        crowbars, picking) is deferred to a later Phase 6 batch.
+      description: Supplied remaining lock state after Door Table and any locked-door resolution.
     is_chest:
       type: boolean
       role: input
       description: Whether the model being opened is a chest rather than a door.
+    trap_prevents_opening:
+      type: boolean
+      role: input
+      description: Whether a detected trap remains unresolved and prevents opening.
+    adjacent:
+      type: boolean
+      role: input
+      description: 'Supplied geometry: the model is adjacent to the door/chest.'
+    action_points_spent:
+      type: number
+      role: output
+      description: Opening attempt costs 1 AP; separate resolution costs are not included.
+    initial_entrance:
+      type: boolean
+      role: input
+      description: True only for the stone-side door on the starting tile (PDF 88).
   dependencies:
     - key: threat
       label: The Threat Level
@@ -53,20 +76,65 @@
     - key: door_table
       label: Door Table (1d10 to door/chest difficulty)
       section_id: section.into_the_dungeons.opening_a_door_or_chest.table
+      object_id: table.dungeon.door_chest_difficulty
     - key: exploration_cards
       label: Reading the Exploration Cards
       section_id: section.into_the_dungeons.reading_the_exploration_cards
+      object_id: procedure.dungeon_route
     - key: furniture_treasure_table
       label: Furniture Treasure Table
+      object_id: table.treasure.furniture
     - key: encounters
       label: Encounters and Placing Enemies
       section_id: section.into_the_dungeons.encounters
+      object_id: procedure.encounters
+    - key: trap_resolution
+      label: Detect and resolve the trap
+      object_id: procedure.trap_resolution
+    - key: locked_resolution
+      label: Force, crowbar or pick the lock
+      object_id: procedure.locked_door_and_close
   steps:
     - id: spend
       source_text: |-
         Opening a door or chest costs 1 Action Point and requires the model to be adjacent to
         the door or chest. Perform the following steps:
-      effects: []
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_entrance
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: is_chest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 1
     - id: increase_threat
       source_text: Increase the Threat Level by 1.
       effects:
@@ -76,6 +144,45 @@
             type: literal
             value: 1
           duration: until_dungeon_exit
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
     - id: roll_open
       source_text: |-
         Roll 1d10 and 1d6 simultaneously. If the d6 ends up a 6, the door or chest is trapped.
@@ -85,8 +192,8 @@
       substeps:
         - id: trapped
           source_text:
-            If the d6 ends up a 6, the door or chest is trapped. Draw a trap card. Resolve
-            the trap (if any).
+            If the d6 ends up a 6, the door or chest is trapped. Draw a trap card. Resolve the trap
+            (if any).
           when:
             type: compare
             operator: eq
@@ -97,14 +204,108 @@
               type: literal
               value: 6
           effects:
-            - type: unresolved
-              issue_id: issue.phase6.trap_resolution_deferred
+            - type: invoke
+              dependency: trap_resolution
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
     - id: check_locked
-      source_text: |-
-        Then check the Door Table to see if it is locked. See 'Locked' below.
+      source_text: Then check the Door Table to see if it is locked. See 'Locked' below.
       effects:
         - type: invoke
           dependency: door_table
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+      substeps:
+        - id: locked_handoff
+          source_text:
+            If locked, force, use a crowbar or pick the lock; the caller supplies the resolution
+            before reveal.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: locked
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_prevents_opening
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: invoke
+              dependency: locked_resolution
     - id: reveal
       source_text: |-
         Once a door is unlocked, flip the top card, and place the corresponding new section. If
@@ -112,35 +313,118 @@
       effects: []
       substeps:
         - id: door_reveal
-          source_text: Once a door is unlocked, flip the top card, and place the corresponding new
-            section.
+          source_text: Once a door is unlocked, flip the top card, and place the corresponding new section.
           when:
-            type: compare
-            operator: eq
-            left:
-              type: field
-              name: is_chest
-            right:
-              type: literal
-              value: false
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: locked
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_entrance
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_prevents_opening
+                right:
+                  type: literal
+                  value: false
           effects:
             - type: invoke
               dependency: exploration_cards
         - id: chest_reveal
-          source_text: If it is a chest, roll on the Furniture Treasure Table to learn what it
-            contains.
+          source_text: If it is a chest, roll on the Furniture Treasure Table to learn what it contains.
           when:
-            type: compare
-            operator: eq
-            left:
-              type: field
-              name: is_chest
-            right:
-              type: literal
-              value: true
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: locked
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_entrance
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_prevents_opening
+                right:
+                  type: literal
+                  value: false
           effects:
             - type: invoke
               dependency: furniture_treasure_table
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
     - id: enemies
       source_text: |-
         In case of a door, roll to see if there are any enemies inside the room. See
@@ -148,22 +432,80 @@
       effects:
         - type: invoke
           dependency: encounters
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_entrance
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: locked
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_entrance
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_prevents_opening
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
   entry_step: spend
   exit_step: enemies
   issues:
     - issue.phase6.trap_resolution_deferred
-    - issue.phase6.trap_headings_unmapped
     - issue.phase6.furniture_treasure_table_location
     - issue.phase6.door_open_threat_source
   unresolved_references:
-    - >-
-      the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III;
-      the furniture treasure tables are printed in Appendix V)
-    - >-
-      'Locked' (locked doors: forcing, crowbars, picking the lock; deferred to a later Phase 6
-      batch)
-    - >-
-      Triggering a Trap (printed on page 90 with no matching section node)
+    - "the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III; the
+      furniture treasure tables are printed in Appendix V)"
   see_also:
     - section.into_the_dungeons.the_threat_level
     - section.into_the_dungeons.opening_a_door_or_chest.table

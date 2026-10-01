@@ -1,0 +1,385 @@
+- id: procedure.rest_hp_recovery
+  name: Short rest — one hero HP recovery
+  section_id: section.into_the_dungeons.rest
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Increase HP by 1d6 for each character (this may vary with equipment
+    and talents).
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: Supplied completion checkpoint from this party rest attempt; false
+        when Wandering Monsters interrupted before recovery.
+    die: &a2
+      type: number
+      role: input
+      description: Supplied printed 1d6 result for this one hero HP roll or this one
+        lost Energy point; each context supplies its own roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+    hit_points:
+      type: number
+      role: state
+      description: HP owned by this hero, not shared party HP.
+    maximum_hp:
+      type: number
+      role: input
+      description: This hero’s recorded maximum; above-maximum recovery remains the
+        existing source ambiguity.
+    recovery:
+      type: number
+      role: output
+      description: Current HP die supplied to the existing overflow rule before HP can
+        change.
+    standard_hp_recovery_applicable:
+      type: boolean
+      role: input
+      description: 'Supplied applicability: ordinary 1d6 recovery rather than an
+        equipment/talent-modified outcome.'
+    untreated_bleeding_out:
+      type: boolean
+      role: input
+      description: Supplied hero condition. Untreated bleeding uses its separate
+        CON+10 test and 1d4 recovery instead of this ordinary HP helper.
+    hp_recovery_processed:
+      type: boolean
+      role: state
+      description: Processed checkpoint owned by the identified hero and rest attempt
+        (and Energy point for the point helper). Retain on replay; initialize
+        false for a distinct context. Processed means this calculation was
+        evaluated, including a source-unresolved outcome.
+    hp_recovery_allowed:
+      type: boolean
+      role: output
+      description: Permission for this invocation only; reset before checking
+        completion and context processing.
+  dependencies:
+    - key: recovery_rule_1
+      label: character.recovery.hp_overflow
+      object_id: character.recovery.hp_overflow
+    - key: recovery_rule_2
+      label: character.recovery.short_rest_hp
+      object_id: character.recovery.short_rest_hp
+  steps:
+    - id: check_recovery
+      source_text: Increase HP by 1d6 for each character (this may vary with equipment
+        and talents).
+      effects:
+        - type: set
+          target: hp_recovery_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_recovery
+          source_text: Increase HP by 1d6 for each character (this may vary with equipment
+            and talents).
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hp_recovery_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: standard_hp_recovery_applicable
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: untreated_bleeding_out
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: hp_recovery_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: hp_recovery_processed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: recovery
+              value:
+                type: field
+                name: die
+    - id: apply_recovery
+      source_text: Increase HP by 1d6 for each character (this may vary with equipment
+        and talents).
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: hp_recovery_allowed
+        right:
+          type: literal
+          value: true
+      rule_refs:
+        - character.recovery.hp_overflow
+        - character.recovery.short_rest_hp
+      effects: []
+  entry_step: check_recovery
+  exit_step: apply_recovery
+  issues:
+    - issue.phase4.recovery_bounds
+- id: procedure.rest_energy_point_recovery
+  name: Short rest — one lost Energy point
+  section_id: section.into_the_dungeons.rest
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: Roll 1d6 per Energy Point and a result of 1-3 will replenish that
+    Energy Point.
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: Supplied completion checkpoint from this party rest attempt; false
+        when Wandering Monsters interrupted before recovery.
+    die: *a2
+    point_is_lost:
+      type: boolean
+      role: input
+      description: This identified Energy point was lost at entry to the hero’s
+        recovery. Supply distinct point contexts from that entry snapshot, not a
+        newly enlarged list after recovery.
+    energy:
+      type: number
+      role: state
+      description: Energy owned by this hero; carry updated Energy between distinct
+        lost-point contexts.
+    standard_energy_recovery_applicable:
+      type: boolean
+      role: input
+      description: Supplied applicability of the ordinary 1–3 success range;
+        talent/equipment variations are handled separately.
+    energy_point_processed:
+      type: boolean
+      role: state
+      description: Processed checkpoint owned by the identified hero and rest attempt
+        (and Energy point for the point helper). Retain on replay; initialize
+        false for a distinct context. Processed means this calculation was
+        evaluated, including a source-unresolved outcome.
+    energy_recovery_allowed:
+      type: boolean
+      role: output
+      description: Permission for this invocation only; reset before checking
+        completion and context processing.
+  dependencies:
+    - key: recovery_rule_1
+      label: character.recovery.short_rest_energy
+      object_id: character.recovery.short_rest_energy
+  steps:
+    - id: check_recovery
+      source_text: Roll 1d6 per Energy Point and a result of 1-3 will replenish that
+        Energy Point.
+      effects:
+        - type: set
+          target: energy_recovery_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_recovery
+          source_text: Roll 1d6 per Energy Point and a result of 1-3 will replenish that
+            Energy Point.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: energy_point_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: point_is_lost
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: standard_energy_recovery_applicable
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: energy_recovery_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: energy_point_processed
+              value:
+                type: literal
+                value: true
+    - id: apply_recovery
+      source_text: Roll 1d6 per Energy Point and a result of 1-3 will replenish that
+        Energy Point.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: energy_recovery_allowed
+        right:
+          type: literal
+          value: true
+      rule_refs:
+        - character.recovery.short_rest_energy
+      effects: []
+  entry_step: check_recovery
+  exit_step: apply_recovery
+  issues: []
+- id: procedure.rest_mana_recovery
+  name: Short rest — one hero Mana recovery
+  section_id: section.into_the_dungeons.rest
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit
+    Points and possibly some energy.
+  fields:
+    rest_completed:
+      type: boolean
+      role: input
+      description: Supplied completion checkpoint from this party rest attempt; false
+        when Wandering Monsters interrupted before recovery.
+    mana:
+      type: number
+      role: state
+      description: Mana owned by this hero; this helper does not alter another hero or
+        party resources.
+    mana_maximum:
+      type: number
+      role: input
+      description: Mana maximum supplied from this hero’s record.
+    mana_recovery_processed:
+      type: boolean
+      role: state
+      description: Processed checkpoint owned by the identified hero and rest attempt
+        (and Energy point for the point helper). Retain on replay; initialize
+        false for a distinct context. Processed means this calculation was
+        evaluated, including a source-unresolved outcome.
+    mana_recovery_allowed:
+      type: boolean
+      role: output
+      description: Permission for this invocation only; reset before checking
+        completion and context processing.
+  dependencies:
+    - key: recovery_rule_1
+      label: character.recovery.short_rest_mana
+      object_id: character.recovery.short_rest_mana
+  steps:
+    - id: check_recovery
+      source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit
+        Points and possibly some energy.
+      effects:
+        - type: set
+          target: mana_recovery_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_recovery
+          source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit
+            Points and possibly some energy.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mana_recovery_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: mana_recovery_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: mana_recovery_processed
+              value:
+                type: literal
+                value: true
+    - id: apply_recovery
+      source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit
+        Points and possibly some energy.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: mana_recovery_allowed
+        right:
+          type: literal
+          value: true
+      rule_refs:
+        - character.recovery.short_rest_mana
+      effects: []
+  entry_step: check_recovery
+  exit_step: apply_recovery
+  issues: []

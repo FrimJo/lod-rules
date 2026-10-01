@@ -1,0 +1,524 @@
+- id: procedure.locked_door_and_close
+  name: Opening a locked door or chest / closing a door
+  section_id: section.into_the_dungeons.opening_a_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Locked / Closing a door
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Locked door/chest: force it with an attack for 1 AP and +2 Threat per attempt until 0
+    HP; use a crowbar for +1 Threat and 8+DB damage each turn; or pick the lock for 2 AP without
+    further Threat. Failed picks break; a fumble jams the lock. Closing a door costs 1 AP.'
+  fields:
+    approach:
+      type: string
+      role: input
+      description: 'Chosen method: force, crowbar, pick, or close.'
+    is_locked:
+      type: boolean
+      role: state
+      description: Whether the Door Table result was locked.
+    is_open:
+      type: boolean
+      role: state
+      description: Whether this door or chest has been opened.
+    door_hp:
+      type: number
+      role: state
+      description: Current door or chest HP from the Door Table.
+      integer: true
+      minimum: 0
+    attack_damage:
+      type: number
+      role: input
+      description: Damage supplied by the chosen attack.
+      integer: true
+      minimum: 0
+    damage_bonus:
+      type: number
+      role: input
+      description: Current Damage Bonus for crowbar damage.
+      integer: true
+    pick_target_modifier:
+      type: number
+      role: input
+      description: 'Door Table Pick lock modifier: 0, -10, -15 or -20.'
+      integer: true
+      minimum: -20
+      maximum: 0
+    pick_succeeded:
+      type: boolean
+      role: input
+      description: Whether the Pick Lock check succeeded.
+    pick_fumbled:
+      type: boolean
+      role: input
+      description: Whether the Pick Lock check fumbled.
+    pick_broken:
+      type: boolean
+      role: state
+      description: Whether the pick breaks after a failed attempt.
+    lock_jammed:
+      type: boolean
+      role: state
+      description: Whether a fumble jams the lock.
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+    crowbar_damage:
+      type: number
+      role: output
+      description: 8 + Damage Bonus damage from one crowbar turn.
+      integer: true
+      minimum: 0
+    action_points_spent:
+      type: number
+      role: output
+      description: Known AP cost only. Omit for crowbar; its cost is unresolved, not zero.
+      integer: true
+      minimum: 0
+      maximum: 2
+    is_chest:
+      type: boolean
+      role: input
+      description: Closing applies to a door, not to a chest.
+  dependencies:
+    - key: door_difficulty_table
+      label: Door/chest difficulty table
+      object_id: table.dungeon.door_chest_difficulty
+    - key: attack_damage
+      label: Resolve the attack used to force the door
+    - key: crowbar
+      label: Crowbar equipment
+      object_id: equipment.tool.crowbar
+    - key: lockpicks
+      label: Lockpicks (5) equipment
+      object_id: equipment.tool.lockpicks_5
+  steps:
+    - id: choose_approach
+      source_text:
+        If the door or chest is locked, it may be forced, opened with a crowbar, or picked.
+        Closing a door costs 1 AP.
+      effects: []
+      substeps:
+        - id: require_locked
+          source_text: This procedure applies after the Door Table says that the door or chest is locked.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: close
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: require
+              condition:
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+        - id: force
+          source_text:
+            It takes 1 Action Point, and you automatically damage the door/chest with whatever
+            attack you make. Every try adds +2 Threat.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: force
+          effects:
+            - type: set
+              target: action_points_spent
+              value:
+                type: literal
+                value: 1
+            - type: add
+              target: threat_level
+              value:
+                type: literal
+                value: 2
+              duration: until_dungeon_exit
+            - type: set
+              target: door_hp
+              value:
+                type: arithmetic
+                operator: max
+                values:
+                  - type: literal
+                    value: 0
+                  - type: sum
+                    values:
+                      - type: field
+                        name: door_hp
+                      - type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: literal
+                            value: 0
+                          - type: field
+                            name: attack_damage
+        - id: crowbar
+          source_text: A crowbar adds +1 Threat and inflicts 8+DB damage every turn.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: crowbar
+          effects:
+            - type: add
+              target: threat_level
+              value:
+                type: literal
+                value: 1
+              duration: until_dungeon_exit
+            - type: set
+              target: crowbar_damage
+              value:
+                type: sum
+                values:
+                  - type: literal
+                    value: 8
+                  - type: field
+                    name: damage_bonus
+            - type: set
+              target: door_hp
+              value:
+                type: arithmetic
+                operator: max
+                values:
+                  - type: literal
+                    value: 0
+                  - type: sum
+                    values:
+                      - type: field
+                        name: door_hp
+                      - type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: literal
+                            value: 0
+                          - type: field
+                            name: crowbar_damage
+            - type: unresolved
+              issue_id: issue.phase6.crowbar_action_cost
+        - id: pick_success
+          source_text: Picking the lock takes 2 AP, adds no Threat, and opens the door if successful.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: approach
+                    right:
+                      type: literal
+                      value: pick
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: pick_succeeded
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lock_jammed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: pick_fumbled
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action_points_spent
+              value:
+                type: literal
+                value: 2
+            - type: set
+              target: is_open
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: is_locked
+              value:
+                type: literal
+                value: false
+        - id: pick_failure
+          source_text: If the attempt fails, the pick breaks.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: approach
+                    right:
+                      type: literal
+                      value: pick
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: pick_succeeded
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: pick_fumbled
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lock_jammed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action_points_spent
+              value:
+                type: literal
+                value: 2
+            - type: set
+              target: pick_broken
+              value:
+                type: literal
+                value: true
+        - id: pick_fumble
+          source_text: If the roll fumbles, the lock is jammed and only breaking it down can open the door.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_locked
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: approach
+                    right:
+                      type: literal
+                      value: pick
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: pick_fumbled
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lock_jammed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action_points_spent
+              value:
+                type: literal
+                value: 2
+            - type: set
+              target: lock_jammed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: pick_broken
+              value:
+                type: literal
+                value: true
+        - id: close
+          source_text: Closing a door costs 1 AP.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: close
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_chest
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action_points_spent
+              value:
+                type: literal
+                value: 1
+            - type: set
+              target: is_open
+              value:
+                type: literal
+                value: false
+    - id: door_reaches_zero
+      source_text: Once the door or chest reaches 0 HP it is opened.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_locked
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: force
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach
+                right:
+                  type: literal
+                  value: crowbar
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: door_hp
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: is_open
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: is_locked
+          value:
+            type: literal
+            value: false
+  entry_step: choose_approach
+  exit_step: door_reaches_zero
+  see_also:
+    - section.into_the_dungeons.opening_a_door_or_chest
+  unresolved_references:
+    - AP totals are recorded as source requirements; per-turn retry sequencing requires
+      caller-supplied state.
+  issues:
+    - issue.phase6.crowbar_action_cost

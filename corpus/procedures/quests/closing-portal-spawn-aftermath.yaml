@@ -1,0 +1,713 @@
+- id: procedure.closing_portal_single_spawn
+  name: Closing the Portal actual single-demon spawn
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — every-other-turn spawning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every other turn one demon emerges while the portal is open.
+    Require actual supplied schedule and chronological event ordering; no first
+    phase/modulo convention or same-turn closure priority is invented. Consume
+    an actual new spawn event once, then resolve its type d6 only. Group
+    quantities never apply. A type handoff is not a roll; a pending
+    already-emerged demon may receive its type after closure without spawning
+    another. Never overwrite a pending earlier event with a later spawn.
+    Statistics, placement and battle are separately owned.
+  fields:
+    instance_quest_id:
+      type: string
+      role: state
+      description: Immutable actual quest catalogue ID.
+    portal_owner_matches:
+      type: boolean
+      role: input
+      description: Actual party/quest occurrence and event ownership confirmed; never
+        reassign another occurrence state.
+    portal_open:
+      type: boolean
+      role: input
+      description: portal open
+    spawn_turn_supplied:
+      type: boolean
+      role: input
+      description: Supplied every-other-turn schedule; the source gives no first spawn
+        phase or ordering within the turn.
+    demons_spawned:
+      type: number
+      role: output
+      description: demons spawned
+      integer: true
+    demon_type_table_rolls:
+      type: number
+      role: output
+      description: demon type table rolls
+      integer: true
+    spawn_schedule_context_resolved:
+      type: boolean
+      role: input
+      description: Actual schedule/ordering context or actual selected type available;
+        no first phase or closure priority inferred.
+    spawn_type_supplied:
+      type: boolean
+      role: input
+      description: Actual schedule/ordering context or actual selected type available;
+        no first phase or closure priority inferred.
+    spawn_pending:
+      type: boolean
+      role: state
+      description: Owned chronological spawn marker; reset only when an actual new
+        event is accepted.
+    spawn_type_request_processed:
+      type: boolean
+      role: state
+      description: Owned chronological spawn marker; reset only when an actual new
+        event is accepted.
+    actual_spawn_turn:
+      type: number
+      role: input
+      description: Actual chronological event index for this occurrence; last starts0
+        and persists across replay/closure.
+      integer: true
+      minimum: 1
+    last_spawn_turn:
+      type: number
+      role: state
+      description: Actual chronological event index for this occurrence; last starts0
+        and persists across replay/closure.
+      integer: true
+      minimum: 0
+    pending_spawn_turn:
+      type: number
+      role: state
+      description: Actual chronological event index for this occurrence; last starts0
+        and persists across replay/closure.
+      integer: true
+      minimum: 0
+    actual_spawn_type_roll:
+      type: number
+      role: input
+      description: Actual type-only d6 result for the pending event.
+      integer: true
+      minimum: 1
+      maximum: 6
+    demon_type_roll:
+      type: number
+      role: state
+      description: Owned resolved type for source rule execution.
+      integer: true
+      minimum: 1
+      maximum: 6
+    demon_type:
+      type: string
+      role: output
+      description: demon type
+    demon_weapon:
+      type: string
+      role: output
+      description: demon weapon
+    demon_armour:
+      type: number
+      role: output
+      description: demon armour
+      integer: true
+  dependencies:
+    - key: type
+      label: Actual selected type-only d6; ignore group quantities
+      object_id: table.quest.closing_portal.demons
+    - key: statistics
+      label: Demon statistics, Cursed Weapons, placement and battle not resolved here
+  steps:
+    - id: unresolved_schedule
+      source: *a1
+      source_text: Unresolved schedule/within-turn ordering cannot create a spawn.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - &a3
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: portal_owner_matches
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: instance_quest_id
+                    right:
+                      type: literal
+                      value: quest.chamber_of_reverence.closing_portal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: spawn_turn_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: spawn_pending
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: actual_spawn_turn
+                right:
+                  type: field
+                  name: last_spawn_turn
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_schedule_context_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.portal_ritual_boundaries
+    - id: single_spawn
+      source: *a1
+      source_text: Every other turn, 1 more demon pops out of the bubble. Use the same
+        table to randomise what kind it is.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_schedule_context_resolved
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - core.quest.closing_portal.single_demon_spawn
+      effects:
+        - type: set
+          target: last_spawn_turn
+          value:
+            type: field
+            name: actual_spawn_turn
+        - type: set
+          target: pending_spawn_turn
+          value:
+            type: field
+            name: actual_spawn_turn
+        - type: set
+          target: spawn_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: spawn_type_request_processed
+          value:
+            type: literal
+            value: false
+    - id: request_type
+      source: *a1
+      source_text: Request the missing type once for this already-emerged single demon.
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: all
+            conditions:
+              - *a3
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: spawn_pending
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: actual_spawn_turn
+                right:
+                  type: field
+                  name: pending_spawn_turn
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: spawn_type_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: type
+    - id: actual_type
+      source: *a1
+      source_text: Resolve supplied type-only d6 to owned state, without reading group
+        quantity.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: demon_type_roll
+          value:
+            type: field
+            name: actual_spawn_type_roll
+    - id: type_1
+      source: *a1
+      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_supplied
+            right:
+              type: literal
+              value: true
+          - type: all
+            conditions:
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: demon_type_roll
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: demon_type_roll
+                right:
+                  type: literal
+                  value: 4
+      rule_refs:
+        - core.quest.closing_portal.demon_type_1
+      effects:
+        - type: set
+          target: spawn_pending
+          value:
+            type: literal
+            value: false
+    - id: type_2
+      source: *a1
+      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: demon_type_roll
+            right:
+              type: literal
+              value: 5
+      rule_refs:
+        - core.quest.closing_portal.demon_type_2
+      effects:
+        - type: set
+          target: spawn_pending
+          value:
+            type: literal
+            value: false
+    - id: type_3
+      source: *a1
+      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spawn_type_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: demon_type_roll
+            right:
+              type: literal
+              value: 6
+      rule_refs:
+        - core.quest.closing_portal.demon_type_3
+      effects:
+        - type: set
+          target: spawn_pending
+          value:
+            type: literal
+            value: false
+  issues:
+    - issue.quest.portal_ritual_boundaries
+  entry_step: unresolved_schedule
+  exit_step: type_3
+- id: procedure.closing_portal_aftermath
+  name: Closing the Portal final-demon treasure and outside hero reward
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source: &a5
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Once the portal is closed, all demons must be killed.
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 258
+      printed_page: 256
+      heading: Closing the Portal — objective loot
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After actual closure and the final demon slain, reveal two
+    unlocked/untrapped objective chests and request their Treasure Table
+    outcomes once. The request does not fabricate contents or collect them. Back
+    outside after success, credit the promised300c once to each actually owned
+    hero; party treasure markers and per-hero reward markers are distinct. No
+    generic quest completion/abandonment, dead/missing hero entitlement, XP or
+    additional loot amount is inferred.
+  fields:
+    instance_quest_id:
+      type: string
+      role: state
+      description: Immutable actual quest catalogue ID.
+    portal_owner_matches:
+      type: boolean
+      role: input
+      description: Actual party/quest occurrence and event ownership confirmed; never
+        reassign another occurrence state.
+    portal_closed:
+      type: boolean
+      role: input
+      description: portal closed
+    all_demons_dead:
+      type: boolean
+      role: input
+      description: all demons dead
+    objective_chests:
+      type: number
+      role: output
+      description: objective chests
+      integer: true
+    chests_locked:
+      type: boolean
+      role: output
+      description: chests locked
+    chests_trapped:
+      type: boolean
+      role: output
+      description: chests trapped
+    treasure_tables_required:
+      type: boolean
+      role: output
+      description: treasure tables required
+    heroes_back_outside:
+      type: boolean
+      role: input
+      description: heroes back outside
+    reward_per_hero:
+      type: number
+      role: output
+      description: reward per hero
+      integer: true
+    phase:
+      type: string
+      role: input
+      description: loot for party occurrence or reward for actual hero/occurrence.
+    portal_loot_processed:
+      type: boolean
+      role: state
+      description: Persist once per actual party/quest occurrence; hero rewards do not
+        reset party loot.
+    portal_treasure_request_processed:
+      type: boolean
+      role: state
+      description: Persist once per actual party/quest occurrence; hero rewards do not
+        reset party loot.
+    portal_reward_processed:
+      type: boolean
+      role: state
+      description: Persist once per actual hero/quest occurrence; every hero has
+        independently owned reward state.
+    portal_reward_owner_matches:
+      type: boolean
+      role: input
+      description: Actual rewarded hero and quest occurrence confirmed;
+        missing/dead/replacement entitlement is not inferred.
+    coins:
+      type: number
+      role: state
+      description: Actual owned rewarded hero coins; add300 once, no party multiplication.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: treasure
+      label: Actual two objective-chest Treasure Table outcomes; handoff is not
+        contents/collection
+  steps:
+    - id: loot
+      source: *a5
+      source_text: As the final demon is slayed, heroes loot 2 objective chests
+        (unlocked, not trapped, just roll on the Treasure Tables).
+      when:
+        type: all
+        conditions:
+          - &a6
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: portal_owner_matches
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: instance_quest_id
+                    right:
+                      type: literal
+                      value: quest.chamber_of_reverence.closing_portal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_closed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_demons_dead
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: loot
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_loot_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.closing_portal.objective_loot
+      effects:
+        - type: set
+          target: portal_loot_processed
+          value:
+            type: literal
+            value: true
+    - id: treasure_handoff
+      source: *a5
+      source_text: Request two actual unlocked/untrapped objective-chest outcomes once
+        without inventing contents.
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: loot
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_loot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_treasure_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: portal_treasure_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: treasure
+    - id: hero_reward
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 257
+          printed_page: 255
+          heading: 'Reward: 300 c per hero'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 258
+          printed_page: 256
+          heading: Closing the Portal — outside reward
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Once back in the fresh air again, the wizard and Jarl give the
+        promised reward (300 c per hero).
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: reward
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: heroes_back_outside
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_reward_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_reward_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.closing_portal.reward
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: sum
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: reward_per_hero
+        - type: set
+          target: portal_reward_processed
+          value:
+            type: literal
+            value: true
+  issues:
+    - issue.quest.portal_aftermath_scope
+  entry_step: loot
+  exit_step: hero_reward

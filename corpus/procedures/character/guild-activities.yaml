@@ -1,0 +1,5833 @@
+- id: procedure.guild_access
+  name: Guild access and recharging visitor exception
+  section_id: section.settlements.guilds
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Guilds
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: dark
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 151
+      printed_page: 149
+      heading: fighters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: wizards
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 154
+      printed_page: 152
+      heading: alchemists
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: rangers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: inner_sanctum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All guilds are in Silver City. Their services are restricted to the appropriate
+    professions. The Wizards’ Guild separately admits visitors recharging magic items. The source
+    gives no membership fee, enrolment sequence or membership rank.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: output
+      description: Access is permitted for this operation; not persistent guild membership.
+  dependencies:
+    - key: dark
+      object_id: guild.dark
+      label: Existing guild catalogue.
+    - key: fighters
+      object_id: guild.fighters
+      label: Existing guild catalogue.
+    - key: wizards
+      object_id: guild.wizards
+      label: Existing guild catalogue.
+    - key: alchemists
+      object_id: guild.alchemists
+      label: Existing guild catalogue.
+    - key: rangers
+      object_id: guild.rangers
+      label: Existing guild catalogue.
+    - key: inner_sanctum
+      object_id: guild.inner_sanctum
+      label: Existing guild catalogue.
+  steps:
+    - id: initialize
+      source_text: Guilds only allow heroes of appropriate professions to enter.
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: false
+    - id: enter_dark
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 148
+          printed_page: 146
+          heading: Guild access
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: dark
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: thief
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: rogue
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: dark
+    - id: enter_fighters
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 151
+          printed_page: 149
+          heading: Guild access
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: fighters
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: barbarian
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: fighters
+    - id: enter_wizards
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Guild access
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: wizards
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: wizard
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: wizards
+    - id: enter_alchemists
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 154
+          printed_page: 152
+          heading: Guild access
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: alchemists
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: alchemist
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: alchemists
+    - id: enter_rangers
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 156
+          printed_page: 154
+          heading: Guild access
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: rangers
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: rangers
+    - id: enter_inner_sanctum
+      source_text: Appropriate professions may enter their guild.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: The Inner Sanctum
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: inner_sanctum
+    - id: recharging_visitor
+      source_text: Apart from visitors recharging magic items, only Wizards are allowed here.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Wizards’ Guild
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: business_allowed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: wizards
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: recharge
+      effects:
+        - type: set
+          target: access_granted
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: wizards
+  entry_step: initialize
+  exit_step: recharging_visitor
+- id: procedure.ranger_special_talent
+  name: Ranger special-talent tuition
+  section_id: section.rangers_guild
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Special talents; Skinning; Butcher; Taxidermist
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    A ranger may learn the following talents at any time by paying the tutor fee. Once one
+    has been learnt, the ranger must level up once before learning another. Skinning costs 250 c,
+    Butcher 200 c, and Taxidermist 350 c.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    level:
+      type: number
+      role: input
+      description: Current hero level.
+      integer: true
+      minimum: 1
+      maximum: 10
+    last_tuition_level:
+      type: number
+      role: state
+      description: Hero level at the previous special-talent tuition; zero before the first.
+      integer: true
+      minimum: 0
+      maximum: 10
+    talent:
+      type: string
+      role: input
+      description: skinning, butcher or taxidermist.
+    already_known:
+      type: boolean
+      role: state
+      description: Per selected talent.
+    tuition_cost:
+      type: number
+      role: output
+      description: Printed tutor fee.
+      integer: true
+      minimum: 0
+    learned:
+      type: boolean
+      role: output
+      description: Selected special talent was learned.
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: skinning
+      object_id: character.settlement.guild.rangers.skinning
+      label: Existing special-talent effect.
+    - key: butcher
+      object_id: character.settlement.guild.rangers.butcher
+      label: Existing special-talent effect.
+    - key: taxidermist
+      object_id: character.settlement.guild.rangers.taxidermist
+      label: Existing special-talent effect.
+  steps:
+    - id: quote
+      source_text: A ranger may learn these talents at any time for the tutor fee, but must level up
+        before another.
+      effects:
+        - type: set
+          target: tuition_cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: false
+    - id: quote_skinning
+      source_text: Printed special-talent tutor fee.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent
+        right:
+          type: literal
+          value: skinning
+      effects:
+        - type: set
+          target: tuition_cost
+          value:
+            type: literal
+            value: 250
+    - id: quote_butcher
+      source_text: Printed special-talent tutor fee.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent
+        right:
+          type: literal
+          value: butcher
+      effects:
+        - type: set
+          target: tuition_cost
+          value:
+            type: literal
+            value: 200
+    - id: quote_taxidermist
+      source_text: Printed special-talent tutor fee.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent
+        right:
+          type: literal
+          value: taxidermist
+      effects:
+        - type: set
+          target: tuition_cost
+          value:
+            type: literal
+            value: 350
+    - id: check_tuition
+      source_text: Level up once between special talent purchases; afford the selected fee.
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: rangers
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: field
+                  name: last_tuition_level
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: tuition_cost
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: tuition_cost
+    - id: learn_skinning
+      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: rangers
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: field
+                  name: last_tuition_level
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: tuition_cost
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: tuition_cost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent
+            right:
+              type: literal
+              value: skinning
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: invoke
+          dependency: skinning
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: tuition_cost
+          duration: permanent
+        - type: set
+          target: last_tuition_level
+          value:
+            type: field
+            name: level
+        - type: set
+          target: already_known
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: true
+    - id: learn_butcher
+      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: rangers
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: field
+                  name: last_tuition_level
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: tuition_cost
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: tuition_cost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent
+            right:
+              type: literal
+              value: butcher
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: invoke
+          dependency: butcher
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: tuition_cost
+          duration: permanent
+        - type: set
+          target: last_tuition_level
+          value:
+            type: field
+            name: level
+        - type: set
+          target: already_known
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: true
+    - id: learn_taxidermist
+      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: rangers
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: field
+                  name: last_tuition_level
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: tuition_cost
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: tuition_cost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent
+            right:
+              type: literal
+              value: taxidermist
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: invoke
+          dependency: taxidermist
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: tuition_cost
+          duration: permanent
+        - type: set
+          target: last_tuition_level
+          value:
+            type: field
+            name: level
+        - type: set
+          target: already_known
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: true
+  entry_step: quote
+  exit_step: learn_taxidermist
+- id: procedure.fighters_bounty
+  name: Fighters’ Guild bounty assignment and claim
+  section_id: section.fighters_guild
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 151
+      printed_page: 149
+      heading: Bounty Hunt
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    Roll on the Bounty Hunt table five times and note which enemies to hunt until the next
+    city visit. Find and kill them on the next quest and return for 250 gold per creature kind. Only
+    one reward may be claimed for each kind of enemy.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    phase:
+      type: string
+      role: input
+      description: assign or claim.
+    offer_initialized:
+      type: boolean
+      role: state
+      description: Shared offered list initialized for this city-to-next-city interval.
+    five_rolls_resolved:
+      type: boolean
+      role: input
+      description: All five supplied d100 draws have been resolved against the existing Bounty Hunt table.
+    offered_enemy:
+      type: string
+      role: input
+      description: One enemy kind from that offered list; persist claims by kind, merging duplicate rolls.
+    enemy_was_offered:
+      type: boolean
+      role: input
+      description: This enemy kind is present in that five-roll list.
+    killed_on_next_quest:
+      type: boolean
+      role: input
+      description: Supplied quest trace confirms this enemy was found and killed on the next quest.
+    claim_window_valid:
+      type: boolean
+      role: input
+      description: Return is the next visit to the city after the offered hunt; no later quest substitution.
+    kind_claimed:
+      type: boolean
+      role: state
+      description: Per offered list and enemy kind; shared by duplicate slots and all kills of that kind.
+    claimed:
+      type: boolean
+      role: output
+      description: A single 250-gold bounty was paid on this call.
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: bounty_table
+      object_id: table.guild.fighters_bounty
+      label: Five supplied d100 selections; no absent Bestiary statistics invented.
+  steps:
+    - id: initialize
+      source_text: Keep one claim per enemy kind even when the offered list has duplicate kinds.
+      effects:
+        - type: set
+          target: claimed
+          value:
+            type: literal
+            value: false
+    - id: assign
+      source_text: Roll five times and note the offered hunt list until the next city visit.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: fighters
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: profession
+                    right:
+                      type: literal
+                      value: warrior
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: profession
+                    right:
+                      type: literal
+                      value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_initialized
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: five_rolls_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: bounty_table
+        - type: set
+          target: offer_initialized
+          value:
+            type: literal
+            value: true
+    - id: claim
+      source_text:
+        Return after the next quest and receive one 250-gold reward for each offered enemy kind
+        killed.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: fighters
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: profession
+                    right:
+                      type: literal
+                      value: warrior
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: profession
+                    right:
+                      type: literal
+                      value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: claim
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_initialized
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_was_offered
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: offered_enemy
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: killed_on_next_quest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claim_window_valid
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind_claimed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: 250
+          duration: permanent
+        - type: set
+          target: kind_claimed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: claimed
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: claim
+- id: procedure.sanctum_crusade
+  name: Inner Sanctum crusade and trophy payment
+  section_id: section.the_inner_sanctum.crusades
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 159
+      printed_page: 157
+      heading: Crusades
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    Roll 1d6 for the crusade target. For every matching enemy killed the priest receives 25
+    c; who landed the killing blow does not matter. Trophies are automatic. The crusade lasts until
+    leaving the next dungeon and pays on the next Sanctum visit.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    phase:
+      type: string
+      role: input
+      description: assign or collect.
+    assigned:
+      type: boolean
+      role: state
+      description: This crusade was assigned once before the next dungeon.
+    crusade_roll:
+      type: number
+      role: input
+      description: Supplied 1d6 crusade target roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+    target:
+      type: string
+      role: state
+      description: Printed crusade target.
+    eligible_trophies:
+      type: number
+      role: input
+      description:
+        Supplied count of matching enemies killed by any party member before leaving the next
+        dungeon; trophies automatically collected.
+      integer: true
+      minimum: 0
+    next_dungeon_left:
+      type: boolean
+      role: input
+      description: The crusade duration has ended on leaving the next dungeon.
+    trophy_count_resolved:
+      type: boolean
+      role: input
+      description: Caller verified target matches and scope of the completed crusade.
+    next_sanctum_visit:
+      type: boolean
+      role: input
+      description: This is the next Sanctum visit after the assigned crusade; supplied by the visit lifecycle.
+    paid:
+      type: boolean
+      role: state
+      description: Per hero and crusade assignment; payment on the next Sanctum visit only.
+    reward:
+      type: number
+      role: output
+      description: 25 c per eligible enemy trophy.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: crusade_table
+      object_id: table.guild.crusade
+      label: Printed target categories.
+  steps:
+    - id: initialize
+      source_text: Roll to determine the declared crusade.
+      effects:
+        - type: set
+          target: reward
+          value:
+            type: literal
+            value: 0
+    - id: assign_1
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Undead
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: assign_2
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 2
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Bandits
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: assign_3
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Orcs and Goblins
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: assign_4
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 4
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Beasts
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: assign_5
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Dark Elves
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: assign_6
+      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: assign
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: crusade_roll
+            right:
+              type: literal
+              value: 6
+      effects:
+        - type: invoke
+          dependency: crusade_table
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: Reptiles
+        - type: set
+          target: assigned
+          value:
+            type: literal
+            value: true
+    - id: early_return_uncertain
+      source_text:
+        The source specifies next-visit payment but does not explain payment on a return before
+        leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: collect
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_sanctum_visit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_dungeon_left
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: paid
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.guild.crusade_early_payment
+    - id: collect
+      source_text:
+        Trophies are automatic, regardless of who landed the killing blow; pay on the next
+        Sanctum visit.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: collect
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: assigned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_dungeon_left
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trophy_count_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_sanctum_visit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: paid
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: reward
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: 25
+              - type: field
+                name: eligible_trophies
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: reward
+          duration: permanent
+        - type: set
+          target: paid
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: collect
+  issues:
+    - issue.guild.crusade_early_payment
+- id: procedure.guild_item_service
+  name: Guild recharging and item blessings
+  section_id: section.settlements.guilds
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Charging Magic Items; Charges and Recharges
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Blessing Your Armour and Weapons
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Repaired broken magic items recharge for 250 c; a staff recharge costs half its
+    purchase price. The Warrior Priest may have each armour piece blessed for 25 c (+1 durability)
+    or a weapon for 75 c (+2 DMG against Undead or Demons), lasting until leaving the next dungeon.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    service_completed:
+      type: boolean
+      role: state
+      description: Per authorized operation and item; prevents replay of its payment or grant.
+    item_kind:
+      type: string
+      role: input
+      description: magic_item, staff, armour or weapon.
+    item_present:
+      type: boolean
+      role: input
+      description: The selected item is actually held by the hero.
+    repaired:
+      type: boolean
+      role: input
+      description: A broken magic item has been repaired before recharging.
+    needs_recharge:
+      type: boolean
+      role: state
+      description: Selected item/staff has lost magic or spent charges.
+    purchase_price:
+      type: number
+      role: input
+      description: Printed staff purchase price from its existing catalogue.
+      integer: true
+      minimum: 0
+    staff_capacity:
+      type: number
+      role: input
+      description: Printed charge capacity, three unless the catalogue says otherwise.
+      integer: true
+      minimum: 0
+    charges:
+      type: number
+      role: state
+      description: Selected staff charges; special non-charge staves use their own catalogue outcomes.
+      integer: true
+      minimum: 0
+    magic_active:
+      type: boolean
+      role: state
+      description: Selected item’s magical power is active.
+    blessing_active:
+      type: boolean
+      role: state
+      description: Selected item already has this temporary blessing.
+    temporary_durability_bonus:
+      type: number
+      role: state
+      description: Blessed armour contribution, separate from permanent durability.
+      integer: true
+      minimum: 0
+    undead_demon_damage_bonus:
+      type: number
+      role: state
+      description: Blessed weapon conditional contribution, separate from base damage.
+      integer: true
+      minimum: 0
+    expires_at:
+      type: string
+      role: state
+      description: Source endpoint for the item blessing; lifecycle enforcement belongs to Package F.
+    cost:
+      type: number
+      role: output
+      description: Service fee only.
+      integer: true
+      minimum: 0
+    service_eligible:
+      type: boolean
+      role: output
+      description: Specific item/action prerequisites permit service.
+    performed:
+      type: boolean
+      role: output
+      description: This call completed the service.
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: charging
+      object_id: character.settlement.guild.wizards.charging
+      label: Repaired magic items.
+    - key: staff_rules
+      object_id: character.settlement.guild.wizards.staves
+      label: Staff-specific capacity and magical effects.
+    - key: armour_blessing
+      object_id: character.settlement.guild.inner_sanctum.blessed_armour
+      label: Temporary armour bonus.
+    - key: weapon_blessing
+      object_id: character.settlement.guild.inner_sanctum.blessed_weapon
+      label: Temporary conditional weapon bonus.
+  steps:
+    - id: initialize
+      source_text: Select the correct guild item service and its fee.
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: performed
+          value:
+            type: literal
+            value: false
+    - id: quote_magic_recharge
+      source_text: A broken Magic Item that has been repaired can be recharged for 250 coins.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charging Magic Items
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: wizards
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: recharge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: magic_item
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: repaired
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: needs_recharge
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 250
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: true
+    - id: quote_staff_recharge
+      source_text:
+        Recharging a staff costs half its purchase price; normal capacity is three unless noted
+        otherwise.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charges and Recharges
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: wizards
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: recharge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: staff
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: needs_recharge
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: purchase_price
+              - type: literal
+                value: 2
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: true
+    - id: quote_bless_armour
+      source_text: Each piece is blessed individually at the printed fee until leaving the next dungeon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Blessing Your Armour and Weapons
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: bless
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: armour
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: blessing_active
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 25
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: true
+    - id: quote_bless_weapon
+      source_text: Each piece is blessed individually at the printed fee until leaving the next dungeon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Blessing Your Armour and Weapons
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: bless
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: blessing_active
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 75
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: true
+    - id: check_service
+      source_text: Require a held eligible item, correct access, completed authorized activity and
+        sufficient funds.
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: item_present
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_completed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_eligible
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: cost
+    - id: perform_service
+      source_text: Pay exactly once for this item service. Activity Points and lodging were already
+        accounted for.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_present
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: service_completed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: service_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: field
+              name: cost
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: cost
+          duration: permanent
+        - type: set
+          target: service_completed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: performed
+          value:
+            type: literal
+            value: true
+    - id: recharge
+      source_text: Restore the item’s magic; staff-specific consequences remain catalogue-bound.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: performed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: recharge
+      effects:
+        - type: set
+          target: magic_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: needs_recharge
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: charging
+    - id: staff_charges
+      source_text:
+        Restore the staff’s printed capacity, unless its special catalogue specifies another
+        recharge outcome.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: performed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: staff
+      effects:
+        - type: set
+          target: charges
+          value:
+            type: field
+            name: staff_capacity
+        - type: invoke
+          dependency: staff_rules
+    - id: bless_armour
+      source_text: Blessed armour gains +1 durability until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: performed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: bless
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: armour
+      effects:
+        - type: set
+          target: blessing_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: temporary_durability_bonus
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: invoke
+          dependency: armour_blessing
+    - id: bless_weapon
+      source_text: Undead or Demons struck suffer a further 2 DMG until leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: performed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: operation
+            right:
+              type: literal
+              value: bless
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: weapon
+      effects:
+        - type: set
+          target: blessing_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: undead_demon_damage_bonus
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: invoke
+          dependency: weapon_blessing
+  entry_step: initialize
+  exit_step: bless_weapon
+- id: procedure.sanctum_prayer
+  name: Pray in the Inner Sanctum
+  section_id: section.the_inner_sanctum.praying_in_the_inner_sanctum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Praying in the Inner Sanctum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Pray at the Local Temples; Temple of Charus; Temple of Iphy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Metheia; Temple of Ohlnir; Temple of Rhidnir; Temple of Ramos
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: A Warrior Priest prays to one god in the Inner Sanctum. The ordinary temple prayer
+    costs 50 c, takes one day, and lasts until leaving the next dungeon. The Sanctum grants the same
+    boon on 1–5; the Trickster on 6 has an unspecified Luck deduction.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    god:
+      type: string
+      role: input
+      description: charus, iphy, metheia, ohlnir, rhidnir or ramos.
+    prayer_roll:
+      type: number
+      role: input
+      description: Supplied 1d6.
+      integer: true
+      minimum: 1
+      maximum: 6
+    prayed_since_quest:
+      type: boolean
+      role: state
+      description:
+        Per hero across temples and Sanctum; a god was chosen and a prayer already made this
+        quest interval.
+    chosen_god:
+      type: string
+      role: state
+      description: God chosen on the first prayer in this quest interval.
+    reserved_activity_points:
+      type: number
+      role: input
+      description: Praying takes one Activity Point.
+      integer: true
+      minimum: 0
+    completed_activity_days:
+      type: number
+      role: input
+      description: Fully completed days in that same reservation.
+      integer: true
+      minimum: 0
+    ohlnir_choice:
+      type: string
+      role: input
+      description: cs or rs when choosing Ohlnir.
+    boon:
+      type: string
+      role: state
+      description: Current granted boon, recorded for later application/expiry by the hero lifecycle.
+    expires_at:
+      type: string
+      role: state
+      description: Endpoint of this granted boon.
+    prayer_attempted:
+      type: boolean
+      role: output
+      description: Attempt and payment occurred on this call.
+    boon_granted:
+      type: boolean
+      role: output
+      description: God granted the selected boon on this call.
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: charus
+      object_id: character.settlement.temple.charus
+      label: Existing source-backed temple boon; invocation records application handoff.
+    - key: iphy
+      object_id: character.settlement.temple.iphy
+      label: Existing source-backed temple boon; invocation records application handoff.
+    - key: metheia
+      object_id: character.settlement.temple.metheia
+      label: Existing source-backed temple boon; invocation records application handoff.
+    - key: ohlnir
+      object_id: character.settlement.temple.ohlnir
+      label: Existing source-backed temple boon; invocation records application handoff.
+    - key: rhidnir
+      object_id: character.settlement.temple.rhidnir
+      label: Existing source-backed temple boon; invocation records application handoff.
+    - key: ramos
+      object_id: character.settlement.temple.ramos
+      label: Existing source-backed temple boon; invocation records application handoff.
+  steps:
+    - id: initialize
+      source_text: Choose one god before each quest; the Sanctum improves the success threshold.
+      effects:
+        - type: set
+          target: prayer_attempted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: false
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: inner_sanctum
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: prayed_since_quest
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reserved_activity_points
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: completed_activity_days
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: literal
+                  value: 50
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: charus
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: iphy
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: metheia
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: ohlnir
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: rhidnir
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: ramos
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: god
+                    right:
+                      type: literal
+                      value: ohlnir
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: ohlnir_choice
+                        right:
+                          type: literal
+                          value: cs
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: ohlnir_choice
+                        right:
+                          type: literal
+                          value: rs
+    - id: pray
+      source_text: A prayer costs 50 c and takes one day, including a failed attempt.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayed_since_quest
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reserved_activity_points
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: completed_activity_days
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: literal
+              value: 50
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: charus
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: iphy
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: metheia
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: rhidnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ramos
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: cs
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: rs
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -50
+          duration: permanent
+        - type: set
+          target: prayed_since_quest
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: chosen_god
+          value:
+            type: field
+            name: god
+        - type: set
+          target: prayer_attempted
+          value:
+            type: literal
+            value: true
+    - id: boon_charus
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: charus
+      effects:
+        - type: invoke
+          dependency: charus
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +1 Energy that cannot be regained through resting
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: boon_iphy
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: iphy
+      effects:
+        - type: invoke
+          dependency: iphy
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +5 Resolve
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: boon_metheia
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: metheia
+      effects:
+        - type: invoke
+          dependency: metheia
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +1 HP
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: boon_ohlnir
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: ohlnir
+      effects:
+        - type: invoke
+          dependency: ohlnir
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +5 to the selected CS or RS
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: boon_rhidnir
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: rhidnir
+      effects:
+        - type: invoke
+          dependency: rhidnir
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +1 Luck
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: boon_ramos
+      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: ramos
+      effects:
+        - type: invoke
+          dependency: ramos
+        - type: set
+          target: boon
+          value:
+            type: literal
+            value: +5 STR
+        - type: set
+          target: expires_at
+          value:
+            type: literal
+            value: leave_next_dungeon
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: same_god_retry_uncertain
+      source_text: Choosing only one temple or god does not explicitly settle repeat attempts at the same god.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayed_since_quest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: field
+              name: chosen_god
+      effects:
+        - type: unresolved
+          issue_id: issue.guild.same_god_prayer_retry
+    - id: trickster_six
+      source_text: On 6 the Sanctum text says Luck is deducted, but the Temple section gives no amount.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayer_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: god
+            right:
+              type: literal
+              value: rhidnir
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.trickster_deduction
+  entry_step: initialize
+  exit_step: trickster_six
+  issues:
+    - issue.settlement.trickster_deduction
+    - issue.settlement.ohlnir_temple_name
+    - issue.guild.same_god_prayer_retry
+- id: procedure.ranger_trophy_sale
+  name: Sell a Taxidermist trophy
+  section_id: section.rangers_guild
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Taxidermist (350 c)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    A Ranger may take one 15-ENC trophy per quest from a Large creature after a successful
+    Foraging roll. In a settlement, roll 1d20 and add the printed adjustment to the creature XP.
+    Zero or negative means no buyer; only one attempt per settlement. Searching for a buyer costs
+    one Activity Point.
+  fields:
+    settlement_type:
+      type: string
+      role: input
+      description: village or silver_city.
+    profession:
+      type: string
+      role: input
+      description: Must be ranger.
+    taxidermist_known:
+      type: boolean
+      role: input
+      description: Ranger has learned Taxidermist.
+    trophy_available:
+      type: boolean
+      role: state
+      description: One prepared trophy carried from the quest; 15 ENC as recorded by the source.
+    sale_attempted_here:
+      type: boolean
+      role: state
+      description: Per trophy and settlement, not per visit; even no buyer consumes the attempt.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: A one-Activity-Point trophy-sale reservation in this settlement.
+    reserved_activity_points:
+      type: number
+      role: input
+      description: The trophy-sale reservation cost.
+      integer: true
+      minimum: 0
+    duration_completed:
+      type: boolean
+      role: input
+      description: The reserved activity has fully completed.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Current visit permits business.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    sale_roll:
+      type: number
+      role: input
+      description: Supplied 1d20.
+      integer: true
+      minimum: 1
+      maximum: 20
+    creature_xp:
+      type: number
+      role: input
+      description:
+        XP of the Large creature, supplied from the encounter/absent Bestiary without inventing
+        stats.
+      integer: true
+      minimum: 0
+    coins:
+      type: number
+      role: state
+      description: Hero proceeds.
+      integer: true
+      minimum: 0
+    sale_modifier:
+      type: number
+      role: output
+      description: Printed settlement/roll adjustment.
+      integer: true
+      minimum: -500
+    sale_value:
+      type: number
+      role: output
+      description: Creature XP plus the printed adjustment.
+      integer: true
+      minimum: -500
+    attempted:
+      type: boolean
+      role: output
+      description: A sale attempt was made on this call.
+    sold:
+      type: boolean
+      role: output
+      description: A buyer paid and removed the trophy.
+  dependencies:
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One-point reservation and party lodging; not charged again.
+    - key: sale_table
+      object_id: table.guild.taxidermy_sale
+      label: Complete printed modifiers.
+    - key: trophy_capture
+      object_id: character.settlement.guild.rangers.taxidermist
+      label: Large-creature Foraging, one trophy per quest and 15 ENC; supplied trophy capture outcome.
+  steps:
+    - id: initialize
+      source_text: Selling the trophy requires one Activity Point to search for a buyer.
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: sale_value
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: attempted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: sold
+          value:
+            type: literal
+            value: false
+    - id: quote_village_1
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -500
+    - id: quote_silver_city_1
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -300
+    - id: quote_village_2
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -400
+    - id: quote_silver_city_2
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -200
+    - id: quote_village_4
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 4
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -300
+    - id: quote_silver_city_4
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 4
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -100
+    - id: quote_village_6
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 8
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -150
+    - id: quote_silver_city_6
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 8
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: -50
+    - id: quote_village_9
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 9
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 14
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 0
+    - id: quote_silver_city_9
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 9
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 14
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 0
+    - id: quote_village_15
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 15
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 17
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 50
+    - id: quote_silver_city_15
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 15
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 17
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 100
+    - id: quote_village_18
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 18
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 19
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 100
+    - id: quote_silver_city_18
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 18
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 19
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 200
+    - id: quote_village_20
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 20
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 20
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 200
+    - id: quote_silver_city_20
+      source_text: Add the printed modifier to the creature XP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 20
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: sale_roll
+            right:
+              type: literal
+              value: 20
+      effects:
+        - type: set
+          target: sale_modifier
+          value:
+            type: literal
+            value: 300
+    - id: attempt_sale
+      source_text: Only one sale attempt per settlement. Zero or negative total means no buyer.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: taxidermist_known
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trophy_available
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sale_attempted_here
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: activity_authorized
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reserved_activity_points
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: duration_completed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: business_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaving_on_quest
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement_type
+                right:
+                  type: literal
+                  value: village
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement_type
+                right:
+                  type: literal
+                  value: silver_city
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: invoke
+          dependency: sale_table
+        - type: set
+          target: sale_value
+          value:
+            type: sum
+            values:
+              - type: field
+                name: creature_xp
+              - type: field
+                name: sale_modifier
+        - type: set
+          target: sale_attempted_here
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: attempted
+          value:
+            type: literal
+            value: true
+    - id: sell
+      source_text: A positive sale value is paid and the trophy is no longer held.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: sale_value
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: sale_value
+          duration: permanent
+        - type: set
+          target: trophy_available
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: sold
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: sell
+- id: procedure.guild_purchase_authorization
+  name: Authorize a guild catalogue purchase
+  section_id: section.settlements.guilds
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Guilds
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Buying Special Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 152
+      printed_page: 150
+      heading: Buying Special Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Buying Wizard’s Staffs
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 154
+      printed_page: 152
+      heading: Purchasing Ingredients, Parts, and Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 157
+      printed_page: 155
+      heading: Buying Special Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Buying Special Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 144
+      printed_page: 142
+      heading: Buying and Selling
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Guild purchases reuse the structured special-equipment and component catalogues.
+    Resolve the printed price, availability and restrictions, then use the ordinary settlement
+    purchasing procedure. Alchemists’ components cost 15 c; a successful part-availability roll
+    permits a kind of part from the selected enemy, with the printed illegal-body-part boundary
+    retained. Weak potions are always in stock, Standard have availability 5 and Supreme 4. Guild
+    access is checked separately.
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Guilds are in Silver City.
+    profession:
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    guild:
+      type: string
+      role: input
+      description: Stable guild ID suffix.
+    operation:
+      type: string
+      role: input
+      description: Requested guild service.
+    business_allowed:
+      type: boolean
+      role: input
+      description: Supplied visit authorization.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: No settlement activities on quest departure day.
+    access_granted:
+      type: boolean
+      role: input
+      description: Confirmed guild_access result for this same operation.
+    activity_authorized:
+      type: boolean
+      role: input
+      description: Correct guild/service reservation supplied by settlement accounting.
+    duration_completed:
+      type: boolean
+      role: input
+      description: The authorized activity has completed; no outcome is granted on reservation alone.
+    coins:
+      type: number
+      role: state
+      description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
+      integer: true
+      minimum: 0
+    item_catalogue_resolved:
+      type: boolean
+      role: input
+      description:
+        Selected item, guild offering, price, availability, profession restrictions and special
+        acquisition conditions were resolved from the existing guild/item tables.
+    service_eligible:
+      type: boolean
+      role: output
+      description:
+        Pass this result into the existing buy/sell/service procedure for this same item and
+        reservation.
+  dependencies:
+    - key: access
+      object_id: procedure.guild_access
+      label: Check access for this operation.
+    - key: accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label: One reservation owns activity time and party lodging; this procedure never charges them
+        again.
+    - key: purchase
+      object_id: procedure.settlement_buy_sell_and_service
+      label:
+        Owns the availability attempt, shared per-item lock, price and inventory mutation; invoke is
+        a handoff, not another purchase.
+    - key: catalogue_dark
+      object_id: guild.dark
+      label: Resolve this guild’s linked structured offering, effects and tables.
+    - key: catalogue_fighters
+      object_id: guild.fighters
+      label: Resolve this guild’s linked structured offering, effects and tables.
+    - key: catalogue_wizards
+      object_id: guild.wizards
+      label: Resolve this guild’s linked structured offering, effects and tables.
+    - key: catalogue_alchemists
+      object_id: guild.alchemists
+      label: Resolve this guild’s linked structured offering, effects and tables.
+    - key: catalogue_rangers
+      object_id: guild.rangers
+      label: Resolve this guild’s linked structured offering, effects and tables.
+    - key: catalogue_inner_sanctum
+      object_id: guild.inner_sanctum
+      label: Resolve this guild’s linked structured offering, effects and tables.
+  steps:
+    - id: initialize
+      source_text: Resolve guild access, completed shopping activity, and a real catalogue offering.
+      effects:
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: false
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: business_allowed
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: leaving_on_quest
+                        right:
+                          type: literal
+                          value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: access_granted
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: duration_completed
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: item_catalogue_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: dark
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: fighters
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: wizards
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: alchemists
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: rangers
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: guild
+                    right:
+                      type: literal
+                      value: inner_sanctum
+    - id: authorize
+      source_text: Pass eligibility and the resolved quote to ordinary settlement purchasing; do not
+        charge twice.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_catalogue_resolved
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: dark
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: fighters
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: wizards
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: alchemists
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: rangers
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: guild
+                right:
+                  type: literal
+                  value: inner_sanctum
+      effects:
+        - type: set
+          target: service_eligible
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: purchase
+  entry_step: initialize
+  exit_step: authorize

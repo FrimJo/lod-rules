@@ -1,0 +1,485 @@
+- id: procedure.fear_of_the_dark
+  name: Fear of the Dark owned Resolve Test contribution
+  section_id: section.psychology.table
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 5 Fear of the Dark
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Fear of the Dark gives all Resolve Tests -10. Recompute this owned fixed contribution
+    while the actual condition and optional rule apply, or clear only this contribution when they do
+    not. The row does not restrict the penalty to darkness. Repeated tests/replays do not accumulate
+    it; no total RES, other modifiers, test roll, cure, Sanity or count changes are performed here.
+  fields:
+    sanity_system_enabled: &a2
+      type: boolean
+      role: input
+      description: Supplied applicability of this optional Sanity-table rule. This checkpoint never
+        changes condition count or decides source-owned background/treatment accounting.
+    fear_of_the_dark_owner_matches:
+      type: boolean
+      role: input
+      description: This is the owned hero/Fear of the Dark condition context, including an actually
+        removed condition. False cannot overwrite another hero contribution.
+    fear_of_the_dark:
+      type: boolean
+      role: state
+      description: Actual Fear of the Dark condition applies to this hero; initialized by accepted
+        diagnosis, actual removal separately owned. A treatment request alone cannot clear it.
+    resolve_test_modifier:
+      type: number
+      role: state
+      description:
+        Contribution from Fear of the Dark only, preserving the stable source-rule field. Not
+        total RES, Acute Stress contribution, Trauma contribution or the outcome of a Resolve Test.
+    fear_dark_modifier_resolved:
+      type: boolean
+      role: output
+      description:
+        This call recomputed the owned contribution for a matching context; false means this
+        checkpoint did not accept another owner.
+  dependencies:
+    - key: source_rule
+      label: Existing stable all-Resolve-Tests -10 source rule
+      object_id: character.condition.fear_of_the_dark
+    - key: acquisition
+      label: Actual accepted condition acquisition; handoff alone does not apply a modifier
+      object_id: procedure.sanity_condition
+  steps:
+    - id: check_owner
+      source: *a1
+      source_text:
+        Recompute only this matching owned contribution. Identity zero when this condition/rule
+        does not apply is not a total-stat restoration or removal of other condition modifiers.
+      effects:
+        - type: set
+          target: fear_dark_modifier_resolved
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: clear_owned
+          source: *a1
+          source_text:
+            For this matching owner, initialize the contribution to zero before applying the
+            current source applicability.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: fear_of_the_dark_owner_matches
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: resolve_test_modifier
+              value:
+                type: literal
+                value: 0
+            - type: set
+              target: fear_dark_modifier_resolved
+              value:
+                type: literal
+                value: true
+    - id: apply
+      source: *a1
+      source_text:
+        While this actual condition and optional rule apply, all Resolve Tests receive the
+        fixed -10 contribution, regardless of light/dark. Re-evaluation sets a contribution, never
+        subtracts another ten from total RES.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fear_of_the_dark_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fear_of_the_dark
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - character.condition.fear_of_the_dark
+      effects: []
+  entry_step: check_owner
+  exit_step: apply
+- id: procedure.claustrophobia
+  name: Claustrophobia owned corridor skill/stat contribution
+  section_id: section.psychology.table
+  source: &a3
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 9 Claustrophobia
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All skills and stats are at -10 in corridors while Claustrophobia applies. Recompute
+    the owned generic contribution in a supplied actual location, clear only it outside corridors or
+    when the condition/rule no longer applies, and preserve an unresolved prior value if location is
+    missing. Exact individual target/pool/bounds interpretation remains separate; do not permanently
+    subtract ten from actual HP, Energy, Mana or other stats. This checkpoint does not cure, count
+    corridor battles, grant a quest reward, alter Sanity/count or choose source-owned treatment
+    eligibility.
+  issues:
+    - issue.sanity.claustrophobia_stat_scope
+  unresolved_references:
+    - 'All skills and stats: the row gives a generic corridor modifier but does not define the
+      individual pool/derived-stat/floor application.'
+  fields:
+    sanity_system_enabled: *a2
+    claustrophobia_owner_matches:
+      type: boolean
+      role: input
+      description:
+        This is the owned hero/Claustrophobia context, including actual removal, not another
+        hero or another modifier.
+    claustrophobia:
+      type: boolean
+      role: state
+      description:
+        Actual Claustrophobia condition is active. Preserve the existing background-rule field;
+        accepted diagnosis may set it, but this checkpoint does not cure it or enforce a quest-local
+        cure as a global rule.
+    claustrophobia_location_supplied:
+      type: boolean
+      role: input
+      description:
+        The actual owned current location classification is supplied; false is missing caller
+        input rather than a guessed corridor/room.
+    in_corridor:
+      type: boolean
+      role: input
+      description:
+        Actual supplied current location is a corridor; re-evaluate on a real location change
+        rather than keep a previous corridor penalty in a room.
+    claustrophobia_modifier_resolved:
+      type: boolean
+      role: output
+      description:
+        This call recomputed the owned applicable contribution. False preserves its previous
+        numerical value as unresolved, not as an asserted current modifier.
+    claustrophobia_location_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/distinct unresolved location-context input request marker; persist after request,
+        fresh false only for a genuinely different unknown location.
+    individual_stat_application_requested:
+      type: boolean
+      role: input
+      description:
+        Caller requests concrete individual skill/stat/pool application beyond the raw printed
+        generic contribution.
+    claustrophobia_stat_scope_resolved:
+      type: boolean
+      role: input
+      description:
+        Exact individual target inclusion/bounds is source-grounded; false for the undefined
+        pool/derived-stat/floor questions. This checkpoint never performs those individual
+        mutations.
+    claustrophobia_skill_stat_modifier:
+      type: number
+      role: state
+      description:
+        Owned Claustrophobia contribution to the printed all skills and stats scope. Dedicated
+        field avoids the legacy skill_stat_modifier spelling also used by Encumbrance. Not actual
+        skills/stats, current HP/Energy/Mana or another contribution.
+  dependencies:
+    - key: source_rule
+      label:
+        Existing stable -10 source fact/rule, retained as provenance dependency; dedicated procedure
+        output avoids its legacy field collision with Encumbrance
+      object_id: character.condition.claustrophobia
+    - key: location
+      label: Actual owned current corridor/non-corridor location for Claustrophobia
+    - key: individual_scope
+      label: All skills and stats — individual target inclusion and bounds remain source-dependent
+    - key: acquisition
+      label: Actual accepted diagnosis; handoff alone does not apply its corridor modifier
+      object_id: procedure.sanity_condition
+  steps:
+    - id: check_owner
+      source: *a3
+      source_text: Recompute only this matching owned contribution when its applicability or actual
+        location is known. A missing active-condition location cannot be silently treated as outside
+        a corridor.
+      effects:
+        - type: set
+          target: claustrophobia_modifier_resolved
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: clear_owned
+          source: *a3
+          source_text:
+            For a matching owner with known applicability/location, start the contribution at zero;
+            do not restore total stats or erase another condition contribution.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: claustrophobia_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_system_enabled
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: claustrophobia
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: claustrophobia_location_supplied
+                    right:
+                      type: literal
+                      value: true
+          effects:
+            - type: set
+              target: claustrophobia_skill_stat_modifier
+              value:
+                type: literal
+                value: 0
+            - type: set
+              target: claustrophobia_modifier_resolved
+              value:
+                type: literal
+                value: true
+    - id: request_location
+      source: *a3
+      source_text:
+        If this active applicable condition has no supplied location, request actual corridor
+        classification once and preserve the prior modifier as unresolved; no move or numerical
+        guess is performed.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_location_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_location_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: claustrophobia_location_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: location
+    - id: apply
+      source: *a3
+      source_text:
+        In this actual corridor, set the printed -10 contribution in its dedicated owned field,
+        preserving both the stable source fact/rule dependency and any Encumbrance legacy
+        skill_stat_modifier. Re-evaluation never accumulates loss or mutates individual stats.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_location_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_corridor
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: claustrophobia_skill_stat_modifier
+          value:
+            type: literal
+            value: -10
+    - id: individual_scope_unknown
+      source: *a3
+      source_text:
+        Keep the certain raw -10 all-skills/stats contribution, but an unresolved request to
+        apply it to concrete pools/derived stats/bounds cannot invent a roster, floor or permanent
+        stat loss.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_location_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_corridor
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: individual_stat_application_requested
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia_stat_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.claustrophobia_stat_scope
+  entry_step: check_owner
+  exit_step: individual_scope_unknown

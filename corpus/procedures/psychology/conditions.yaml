@@ -1,0 +1,1604 @@
+- id: procedure.sanity_condition
+  name: Exact-zero condition draw, duplicate reroll and acquisition
+  section_id: section.psychology.sanity.conditions
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 55
+      printed_page: 53
+      heading: Conditions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Mental conditions table
+      extraction: &a2
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At 0 Sanity, roll on the condition table. If the hero has already
+    been diagnosed with that condition, roll again. After acquiring a condition,
+    reset Sanity and its maximum to 8 minus current conditions, including the
+    new condition. Distinct draws belong to one acquisition episode; one
+    accepted diagnosis changes the count/reset once. Nonpositive reset,
+    exhausted diagnoses and historical cured-diagnosis policy remain unresolved.
+    Condition effects are explicit handoffs to existing source-backed records,
+    not automatically applied.
+  issues:
+    - issue.phase4.sanity_boundaries
+    - issue.phase4.sanity_maximum
+  fields:
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Supplied use of optional Sanity; retain the caller omission choice.
+    sanity:
+      type: number
+      role: state
+      description: Current hero Sanity; exactly 0 is the printed acquisition checkpoint.
+    maximum_sanity:
+      type: number
+      role: state
+      description: Current hero maximum Sanity, reset by successful acquisition only.
+    current_conditions:
+      type: number
+      role: state
+      description: Actual current active conditions before this acquisition; increment
+        once only for a novel accepted diagnosis.
+      minimum: 0
+      maximum: 9
+      integer: true
+    sanity_condition_pending:
+      type: boolean
+      role: state
+      description: Current exact-zero acquisition episode pending from
+        procedure.sanity_loss.
+    condition_episode_processed:
+      type: boolean
+      role: state
+      description: Hero/exact-zero episode successful-acquisition marker; persist
+        after count/reset, fresh false only for a distinct later episode.
+    condition_draw_processed:
+      type: boolean
+      role: state
+      description: Hero/episode/distinct draw lookup marker; start false for a
+        genuinely new roll, persist to preserve its selected name.
+    condition_selected:
+      type: boolean
+      role: state
+      description: This episode has an actual selected condition from its persisted
+        table draw.
+    condition_name:
+      type: string
+      role: state
+      description: Persisted selected name from the actual draw; changed die input on
+        replay does not select again.
+    die:
+      type: number
+      role: input
+      description: Actual 1d10 condition roll; value 10 represents the printed 0 row.
+      minimum: 1
+      maximum: 10
+      integer: true
+    diagnosis_status_supplied:
+      type: boolean
+      role: input
+      description: Actual membership result for this persisted selected condition in
+        this hero diagnosis history is supplied.
+    diagnosis_history_resolved:
+      type: boolean
+      role: input
+      description: That membership uses a source-reconciled diagnosis history; false
+        when the cured historical-diagnosis policy is unresolved.
+    already_diagnosed:
+      type: boolean
+      role: input
+      description: Actual supplied membership for this selected condition, not merely
+        total active-condition count.
+    no_distinct_condition_left:
+      type: boolean
+      role: input
+      description: Supplied exhaustion of eligible distinct diagnoses; no invented
+        reroll ceiling or repeated diagnosis is allowed.
+    condition_diagnosis_processed:
+      type: boolean
+      role: state
+      description: Hero/episode/draw membership result consumed after duplicate or
+        novel acceptance; replay cannot substitute a different membership
+        outcome.
+    condition_draw_rejected:
+      type: boolean
+      role: state
+      description: Persisted duplicate diagnosis result for this draw; reset only by a
+        genuinely new draw.
+    condition_reroll_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/episode/draw duplicate-reroll request marker; fresh false per
+        distinct new draw, persist after handoff.
+    condition_effect_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/acquisition episode condition-effect handoff marker; persist
+        after request, invoke alone applies no modifier.
+    reroll_required:
+      type: boolean
+      role: output
+      description: Current selected draw is a duplicate and requires another actual roll.
+    condition_acquired_this_call:
+      type: boolean
+      role: output
+      description: Current call accepted one novel diagnosis; reset each invocation.
+    condition_acquisition_allowed:
+      type: boolean
+      role: output
+      description: Current enabled exact-zero pending unprocessed episode accepted;
+        reset every call.
+    acquired_condition_name:
+      type: string
+      role: state
+      description: Accepted condition name retained for its separately resolved source
+        effects.
+    acute_stress_effect_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/current-quest effect initialization marker; persist
+        after application and expiry, fresh false only for a new accepted
+        diagnosis.
+    acute_stress_active:
+      type: boolean
+      role: state
+      description: Owned Acute Stress quest effect is active; its expiry is separate
+        from diagnosis-history and Sanity accounting.
+    acute_stress_expired:
+      type: boolean
+      role: state
+      description: Owned quest effect has expired at a source-reconciled endpoint;
+        replay cannot reactivate it.
+    acute_stress_battle_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/quest/distinct-battle Threat marker. Start false for
+        a genuinely new battle; persist for all turns, hits and replays within
+        that battle.
+    trauma_selected:
+      type: boolean
+      role: state
+      description: Actual complete structured-table selection has resolved for this
+        diagnosis.
+    trauma_selection_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis table selection marker; fresh false only for a new
+        accepted diagnosis, persist to prevent a changed die rerolling the
+        trigger.
+    trauma_selection_request_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis request for actual trigger selection handed off
+        once; invoke alone selects nothing.
+    trauma_trigger_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/next-dungeon activation marker; persist across
+        events/turns and exit, so penalties apply only once.
+    active_until_dungeon_exit:
+      type: boolean
+      role: state
+      description: Owned Lingering Trauma effect is active until actually leaving its
+        triggering next dungeon; not a diagnosis-cure flag.
+    trauma_dungeon_closed:
+      type: boolean
+      role: state
+      description: Owned next-dungeon visit has actually ended; persist after exit,
+        including an untriggered visit. Later recurrence is unresolved, not
+        silently rearmed.
+    trauma_resolve_modifier:
+      type: number
+      role: state
+      description: Contribution from this Lingering Trauma diagnosis only; do not
+        change total RES or another condition contribution.
+    trauma_combat_skill_modifier:
+      type: number
+      role: state
+      description: Contribution from this Lingering Trauma diagnosis only; do not
+        change total CS or another condition contribution.
+    jumpy_active:
+      type: boolean
+      role: state
+      description: Actual Jumpy condition remains active. Separately completed
+        treatment may clear it; this checkpoint never cures or changes diagnosis
+        count.
+    jumpy_scenario_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/distinct-Scenario-roll result marker, consumed for
+        every actual result including 1–9; fresh false only for a new actual
+        roll, persist against replay/substituted result.
+    jumpy_noise_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/distinct-unsuspecting-noise marker; fresh false only
+        for a new actual noise, persist so replay reports no new scream.
+    trauma_diagnosed:
+      type: boolean
+      role: state
+      description: Actual accepted Lingering Trauma diagnosis owned by this context,
+        initialized only by successful acquisition. Persist independently of
+        later acquired names or pending episodes; this visit expiry does not
+        cure the diagnosis.
+    depression_active:
+      type: boolean
+      role: state
+      description: Actual accepted Depression condition is active; source-completed
+        treatment is separately owned and may clear it.
+    depression_reduction_pending:
+      type: boolean
+      role: state
+      description: This actual accepted diagnosis awaits its once-only source
+        reduction. Initialize true only on a fresh accepted Depression
+        diagnosis, persist while unresolved.
+    depression_effect_processed:
+      type: boolean
+      role: state
+      description: Hero/distinct accepted Depression diagnosis numerical reduction
+        marker; persist after application, never reset by rest, capacity growth
+        or another condition.
+    depression_pool_snapshot_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis onset-capacity snapshot captured once; persist so
+        later capacity growth cannot erase the original floor boundary.
+    depression_capacity_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis request for actual onset capacity handed off once;
+        request alone cannot seed capacity from the ordinary starting value.
+    fear_of_the_dark:
+      type: boolean
+      role: state
+      description: Actual Fear of the Dark condition applies to this hero; initialized
+        by accepted diagnosis, actual removal separately owned. A treatment
+        request alone cannot clear it.
+    claustrophobia:
+      type: boolean
+      role: state
+      description: Actual Claustrophobia condition is active. Preserve the existing
+        background-rule field; accepted diagnosis may set it, but this
+        checkpoint does not cure it or enforce a quest-local cure as a global
+        rule.
+    claustrophobia_location_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/distinct unresolved location-context input request marker;
+        persist after request, fresh false only for a genuinely different
+        unknown location.
+    arachnophobia:
+      type: boolean
+      role: state
+      description: Actual active Arachnophobia condition; accepted diagnosis may set
+        it, actual removal separately owned. Persist independently of later
+        diagnosis names.
+    arachnophobia_encounter_processed:
+      type: boolean
+      role: state
+      description: Hero/condition/distinct-encounter known classification consumed;
+        fresh false only for a new actual encounter, persist against
+        replay/substituted classification. Ambiguous non-spider scope remains
+        unconsumed.
+    arachnophobia_causes_terror:
+      type: boolean
+      role: state
+      description: Owned Arachnophobia source contribution for this encounter only;
+        not global/natural Terror, Fear or an already resolved test result.
+    arachnophobia_classification_request_processed:
+      type: boolean
+      role: state
+      description: Hero/condition/encounter actual-taxonomy request marker; persist
+        after handoff, fresh false for a distinct actual encounter.
+    arachnophobia_terror_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/condition/actual source-grounded encounter reaction request
+        marker; persist after request. Handoff alone performs no test, AP/HP
+        loss, flight, immunity or Sanity/morale change.
+    irrational_fear:
+      type: boolean
+      role: state
+      description: Actual active Irrational Fear condition; actual removal separately owned.
+    irrational_fear_faction_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis actual valid randomized selection consumed once;
+        fresh false only for a new accepted diagnosis.
+    irrational_fear_selection_request_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis faction-selection request handed off once;
+        invocation chooses no faction or weights.
+    irrational_fear_monster_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/distinct actual monster-occurrence classification
+        marker; consume both matches/nonmatches, fresh false for another actual
+        monster. It does not itself reset an encounter reaction marker.
+    irrational_fear_causes_fear:
+      type: boolean
+      role: state
+      description: Owned condition source Fear contribution for this monster
+        occurrence only, not global/natural Fear or Terror and not a test
+        result.
+    irrational_fear_membership_request_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis/monster-occurrence actual membership input request
+        marker; persist after request, fresh false for a new actual monster.
+    irrational_fear_handoff_processed:
+      type: boolean
+      role: state
+      description: Actual source-grounded hero/encounter reaction request marker;
+        persist across monsters when the same reaction context remains. New
+        monster classification alone cannot create extra reaction tests;
+        invocation alone has no resource effects.
+    hate:
+      type: boolean
+      role: state
+      description: Actual active Hate diagnosis, independent of later diagnosis names.
+    hate_enemy_snapshot_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis onset enemy snapshot consumed once; persist while
+        external eligibility unresolved.
+    hate_enemy_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-diagnosis request for actual onset enemy; request is not a
+        grant.
+    hate_bestiary_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-diagnosis request for missing Monster List evidence.
+    hate_grant_processed:
+      type: boolean
+      role: state
+      description: Once-only completed source grant for this accepted diagnosis; not
+        reset by a new fight/rest/another diagnosis.
+  dependencies:
+    - key: condition_table
+      label: Complete existing structured Mental conditions table
+      object_id: table.psychology.mental_conditions
+    - key: reroll
+      label: Explicit new draw for this same pending episode after duplicate;
+        source-defined re-entry, never automatic recursion
+      object_id: procedure.sanity_condition
+    - key: effect_hate
+      label: Existing source effect for Hate; caller resolves actual condition
+        modifiers/timing
+      object_id: procedure.hate
+    - key: effect_acute_stress
+      label: Current-quest Acute Stress lifecycle; actual caller resolves
+        acquisition/battle/expiry checkpoints
+      object_id: procedure.acute_stress
+    - key: effect_lingering_trauma
+      label: Lingering Trauma actual selection/next-dungeon/expiry lifecycle; handoff
+        alone applies no penalties
+      object_id: procedure.lingering_trauma
+    - key: effect_fear_of_the_dark
+      label: Fear of the Dark owned Resolve Test contribution; handoff alone does not
+        mutate stats
+      object_id: procedure.fear_of_the_dark
+    - key: effect_arachnophobia
+      label: Arachnophobia actual encounter classification and Terror handoff; handoff
+        alone does not perform a reaction
+      object_id: procedure.arachnophobia
+    - key: effect_jumpy
+      label: Actual Jumpy Scenario/noise lifecycle; acquisition alone does not roll or
+        add Threat
+      object_id: procedure.jumpy
+    - key: effect_irrational_fear
+      label: Irrational Fear persisted faction and actual monster applicability;
+        handoff alone does not perform a reaction
+      object_id: procedure.irrational_fear
+    - key: effect_claustrophobia
+      label: Claustrophobia owned corridor skill/stat contribution; handoff alone does
+        not mutate stats
+      object_id: procedure.claustrophobia
+    - key: effect_depression
+      label: Actual Depression onset-capacity reduction; handoff alone does not
+        subtract or replenish Energy
+      object_id: procedure.depression
+  steps:
+    - id: check_episode
+      source: *a1
+      source_text: Re-evaluate one hero/pending exact-zero episode; disabled, nonzero
+        and already acquired contexts cannot alter diagnosis count or Sanity.
+      effects:
+        - type: set
+          target: condition_acquisition_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_acquired_this_call
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_episode
+          source: *a1
+          source_text: Accept only the enabled actual pending unprocessed exact-zero
+            episode.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_condition_pending
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: condition_episode_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 0
+          effects:
+            - type: set
+              target: condition_acquisition_allowed
+              value:
+                type: literal
+                value: true
+    - id: boundary
+      source: *a1
+      source_text: Nonpositive reset/exhausted diagnoses and negative Sanity are not
+        defined. Preserve the existing boundary issue without draw, count/reset
+        or guessed fallback.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_condition_pending
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_episode_processed
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: current_conditions
+                right:
+                  type: literal
+                  value: 7
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: no_distinct_condition_left
+                right:
+                  type: literal
+                  value: true
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.sanity_boundaries
+    - id: draw
+      source: *a1
+      source_text: Look up this actual new draw once in the existing full table. It
+        replaces the prior draw state, but does not acquire a diagnosis or apply
+        its effects.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_draw_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: condition_draw_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: condition_selected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: condition_diagnosis_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_draw_rejected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_reroll_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reroll_required
+          value:
+            type: literal
+            value: false
+      rule_refs:
+        - character.sanity.draw_condition
+    - id: history_unknown
+      source: *a1
+      source_text: A supplied diagnosis check using unresolved historical
+        cured-diagnosis policy cannot accept or reject this selected condition
+        by guessing.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_status_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_history_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.sanity_boundaries
+    - id: duplicate
+      source: *a1
+      source_text: Consume the actual duplicate membership result for this draw; do
+        not increment conditions or reset Sanity.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_diagnosis_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_status_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_history_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_diagnosed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: condition_diagnosis_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: condition_draw_rejected
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.duplicate_condition
+    - id: signal_duplicate
+      source: *a1
+      source_text: Retain the pending duplicate reroll requirement on replay, without
+        changing its consumed membership result.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_draw_rejected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: reroll_required
+          value:
+            type: literal
+            value: true
+    - id: request_reroll
+      source: *a1
+      source_text: Request a distinct actual roll for the same pending episode once
+        per rejected draw. Caller starts a new draw marker; invoke does not
+        roll/select or recursively execute.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_draw_rejected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_reroll_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: condition_reroll_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: reroll
+    - id: acquire
+      source: *a1
+      source_text: A source-reconciled selected novel diagnosis increments current
+        conditions once, then resets Sanity and maximum to 8 minus that
+        resulting count. Persist episode completion and clear only its pending
+        handoff.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquisition_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: no_distinct_condition_left
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_diagnosis_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_draw_rejected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_status_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagnosis_history_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_diagnosed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: condition_diagnosis_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: condition_episode_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: sanity_condition_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_acquired_this_call
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: acquired_condition_name
+          value:
+            type: field
+            name: condition_name
+      rule_refs:
+        - character.sanity.acquire_condition
+    - id: request_hate
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '1'
+      source_text: Hand off the newly acquired Hate effect once. Invoke does not apply
+        its stats, quest timing, random faction, trauma trigger or unavailable
+        external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Hate
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hate
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hate_enemy_snapshot_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: hate_enemy_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: hate_bestiary_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: hate_grant_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_hate
+    - id: request_acute_stress
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: 2-3
+      source_text: Hand off the newly acquired Acute Stress effect once. Invoke does
+        not apply its stats, quest timing, random faction, trauma trigger or
+        unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Acute Stress
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: acute_stress_effect_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: acute_stress_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: acute_stress_expired
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: acute_stress_battle_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_acute_stress
+    - id: request_lingering_trauma
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '4'
+      source_text: Hand off the newly acquired Lingering Trauma effect once. Invoke
+        does not apply its stats, quest timing, random faction, trauma trigger
+        or unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Lingering Trauma
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: trauma_diagnosed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: trauma_selected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trauma_selection_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trauma_selection_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trauma_trigger_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: active_until_dungeon_exit
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trauma_dungeon_closed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trauma_resolve_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: trauma_combat_skill_modifier
+          value:
+            type: literal
+            value: 0
+        - type: invoke
+          dependency: effect_lingering_trauma
+    - id: request_fear_of_the_dark
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '5'
+      source_text: Hand off the newly acquired Fear of the Dark effect once. Invoke
+        does not apply its stats, quest timing, random faction, trauma trigger
+        or unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Fear of the Dark
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: fear_of_the_dark
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: effect_fear_of_the_dark
+    - id: request_arachnophobia
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '6'
+      source_text: Hand off the newly acquired Arachnophobia effect once. Invoke does
+        not apply its stats, quest timing, random faction, trauma trigger or
+        unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Arachnophobia
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arachnophobia
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arachnophobia_encounter_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: arachnophobia_causes_terror
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: arachnophobia_classification_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: arachnophobia_terror_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_arachnophobia
+    - id: request_jumpy
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '7'
+      source_text: Hand off the newly acquired Jumpy effect once. Invoke does not
+        apply its stats, quest timing, random faction, trauma trigger or
+        unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Jumpy
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: jumpy_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: jumpy_scenario_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: jumpy_noise_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_jumpy
+    - id: request_irrational_fear
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '8'
+      source_text: Hand off the newly acquired Irrational Fear effect once. Invoke
+        does not apply its stats, quest timing, random faction, trauma trigger
+        or unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Irrational Fear
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: irrational_fear
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: irrational_fear_faction_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: irrational_fear_selection_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: irrational_fear_monster_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: irrational_fear_causes_fear
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: irrational_fear_membership_request_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: irrational_fear_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_irrational_fear
+    - id: request_claustrophobia
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '9'
+      source_text: Hand off the newly acquired Claustrophobia effect once. Invoke does
+        not apply its stats, quest timing, random faction, trauma trigger or
+        unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Claustrophobia
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: claustrophobia
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: claustrophobia_location_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_claustrophobia
+    - id: request_depression
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 57
+          printed_page: 55
+          heading: Mental conditions table
+          extraction: *a2
+          locator:
+            table: Mental conditions
+            row: '0'
+      source_text: Hand off the newly acquired Depression effect once. Invoke does not
+        apply its stats, quest timing, random faction, trauma trigger or
+        unavailable external details.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_acquired_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_effect_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Depression
+      effects:
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: depression_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: depression_reduction_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: depression_effect_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: depression_pool_snapshot_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: depression_capacity_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: effect_depression
+  entry_step: check_episode
+  exit_step: request_depression

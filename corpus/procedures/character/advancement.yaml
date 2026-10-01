@@ -1,0 +1,7264 @@
+- id: procedure.character_level_up
+  name: Open one level advancement session
+  section_id: section.levelling_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 60
+      printed_page: 58
+      heading: Levelling Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 61
+      printed_page: 59
+      heading: Increasing your Skills and Basic Stats
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 62
+      printed_page: 60
+      heading: Talents and Perks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Level Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Once enough experience is obtained, level up in a settlement. Each new level grants
+    +1d2 Hit Points and 15 Improvement Points; Luck and Energy increases use the progression table.
+    Talent and Perk choices use their profession/level tables. Saved Improvement Points carry
+    forward. Level Up costs 0 Activity Points.
+  fields:
+    in_settlement:
+      type: boolean
+      role: input
+      description: Hero is back in a settlement.
+    activity_authorized:
+      type: boolean
+      role: input
+      description:
+        Existing settlement accounting permits this zero-point action; no concurrent multi-day
+        activity.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: Settlement activities cannot occur on quest departure day.
+    level:
+      type: number
+      role: state
+      description: Current hero level.
+      integer: true
+      minimum: 1
+      maximum: 10
+    target_level:
+      type: number
+      role: input
+      description: The next level, not an arbitrary higher level.
+      integer: true
+      minimum: 2
+      maximum: 10
+    experience:
+      type: number
+      role: state
+      description: Cumulative XP; not spent by level advancement.
+      integer: true
+      minimum: 0
+    required_experience:
+      type: number
+      role: output
+      description: Required cumulative XP from the progression table.
+      integer: true
+      minimum: 0
+    hp_roll:
+      type: number
+      role: input
+      description: Supplied +1d2 Hit Point increase.
+      integer: true
+      minimum: 1
+      maximum: 2
+    maximum_hit_points:
+      type: number
+      role: state
+      description: Hero Hit Point statistic; current wounds/recovery are not changed here.
+      integer: true
+      minimum: 1
+    maximum_luck:
+      type: number
+      role: state
+      description: Hero Luck capacity; current Luck recovery belongs to settlement rest.
+      integer: true
+      minimum: 0
+    maximum_energy:
+      type: number
+      role: state
+      description: Hero Energy capacity; current Energy recovery belongs to settlement rest.
+      integer: true
+      minimum: 0
+    improvement_points:
+      type: number
+      role: state
+      description: Hero unspent Improvement Points carried across levels.
+      integer: true
+      minimum: 0
+    session_open:
+      type: boolean
+      role: state
+      description: Current level advancement session remains open until spending/choices are complete.
+    session_level:
+      type: number
+      role: state
+      description: Level for this advancement session.
+      integer: true
+      minimum: 1
+      maximum: 10
+    talent_selected:
+      type: boolean
+      role: state
+      description: Whether this session has used its talent choice.
+    perk_selected:
+      type: boolean
+      role: state
+      description: Whether this session has used its perk choice.
+    advanced:
+      type: boolean
+      role: output
+      description: This call actually advanced the hero.
+  dependencies:
+    - key: progression
+      object_id: table.character.level_progression
+      label: XP and resource gains.
+    - key: activities
+      object_id: table.settlement.activities
+      label: Level Up is a zero-point settlement activity.
+    - key: talents
+      object_id: table.character.talent_progression
+      label: Talent categories.
+    - key: perks
+      object_id: table.character.perk_progression
+      label: Perk categories.
+  steps:
+    - id: lookup_level
+      source_text: Consult the next progression row.
+      effects:
+        - type: set
+          target: advanced
+          value:
+            type: literal
+            value: false
+        - type: lookup
+          table_id: table.character.level_progression
+          key_column: level
+          key:
+            type: field
+            name: target_level
+          value_column: xp_requirement
+          target: required_experience
+          on_missing_issue: issue.phase4.lookup_domain
+        - type: require
+          condition: &a1
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: in_settlement
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaving_on_quest
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: session_open
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_level
+                right:
+                  type: sum
+                  values:
+                    - type: field
+                      name: level
+                    - type: literal
+                      value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: experience
+                right:
+                  type: field
+                  name: required_experience
+    - id: advance
+      source_text: Grant each new level once; keep cumulative experience and carried Improvement Points.
+      when: *a1
+      effects:
+        - type: invoke
+          dependency: progression
+        - type: invoke
+          dependency: activities
+        - type: set
+          target: level
+          value:
+            type: field
+            name: target_level
+        - type: set
+          target: session_level
+          value:
+            type: field
+            name: target_level
+        - type: set
+          target: session_open
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: talent_selected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: perk_selected
+          value:
+            type: literal
+            value: false
+        - type: add
+          target: maximum_hit_points
+          value:
+            type: field
+            name: hp_roll
+          duration: permanent
+        - type: add
+          target: improvement_points
+          value:
+            type: literal
+            value: 15
+          duration: permanent
+        - type: set
+          target: advanced
+          value:
+            type: literal
+            value: true
+    - id: luck
+      source_text: Luck increases by +1 at levels 2, 5 and 8.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: advanced
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 5
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 8
+      effects:
+        - type: add
+          target: maximum_luck
+          value:
+            type: literal
+            value: 1
+          duration: permanent
+    - id: energy
+      source_text: Energy increases by +1 at levels 2, 4, 7 and 9.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: advanced
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 7
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: level
+                right:
+                  type: literal
+                  value: 9
+      effects:
+        - type: add
+          target: maximum_energy
+          value:
+            type: literal
+            value: 1
+          duration: permanent
+  entry_step: lookup_level
+  exit_step: energy
+- id: procedure.character_improve
+  name: Spend one Improvement Point purchase
+  section_id: section.levelling_up.increasing_your_skills_and_basic_stats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 61
+      printed_page: 59
+      heading: Increasing your Skills and Basic Stats
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 60
+      printed_page: 58
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Each level supplies 15 Improvement Points. The printed profession costs buy +1. A stat
+    or skill may increase at most +5 per level; Hit Points at most +2. Once a stat or skill passes
+    70 the cost doubles. Spare points may be saved until the next level; racial stat maxima and
+    natural skill maximum 80 apply.
+  fields:
+    session_open:
+      type: boolean
+      role: input
+      description: Hero is resolving an open level advancement session.
+    profession:
+      type: string
+      role: input
+      description: Profession ID suffix.
+    race:
+      type: string
+      role: input
+      description: Dwarf, Human, Elf or Halfling; printed stat-maxima key.
+    subject:
+      type: string
+      role: input
+      description: Printed subject from the Improvement Point cost table.
+    value:
+      type: number
+      role: state
+      description: Natural value including unconditioned talent bonuses, or maximum Hit Points.
+      integer: true
+      minimum: 0
+    increased_this_level:
+      type: number
+      role: state
+      description: Per hero, session level and subject; never reset within a session.
+      integer: true
+      minimum: 0
+      maximum: 5
+    improvement_points:
+      type: number
+      role: state
+      description: Shared hero Improvement Points.
+      integer: true
+      minimum: 0
+    base_cost:
+      type: number
+      role: output
+      description: Profession-specific cost for +1.
+      integer: true
+      minimum: 0
+    cost:
+      type: number
+      role: output
+      description: Cost including applicable doubling.
+      integer: true
+      minimum: 0
+    maximum:
+      type: number
+      role: output
+      description: Racial stat maximum or skill maximum.
+      integer: true
+      minimum: 0
+    kind:
+      type: string
+      role: output
+      description: stat, skill or hit_points.
+    valid_subject:
+      type: boolean
+      role: output
+      description: Selection has a numeric cost in the printed matrix.
+    boundary_cost_resolved:
+      type: boolean
+      role: input
+      description: At exactly 70, caller supplies a documented interpretation of doubling.
+    boundary_cost_multiplier:
+      type: number
+      role: input
+      description: 'Supplied interpretation for 70 to 71: one or two.'
+      integer: true
+      minimum: 1
+      maximum: 2
+    hp_limit_resolved:
+      type: boolean
+      role: input
+      description: Caller has explicitly resolved whether +2 HP includes the automatic roll.
+    hp_purchase_limit:
+      type: number
+      role: input
+      description: Remaining per-level purchased-HP ceiling under that supplied interpretation.
+      integer: true
+      minimum: 0
+      maximum: 2
+    improved:
+      type: boolean
+      role: output
+      description: A point was purchased on this call.
+  dependencies:
+    - key: costs
+      object_id: table.character.improvement_costs
+      label: Printed profession costs.
+    - key: maxima
+      object_id: table.character.stat_maxima
+      label: Racial stat maxima.
+    - key: independence
+      object_id: character.skill.stat_independence
+      label: Increasing a basic stat after play begins does not raise a skill.
+  steps:
+    - id: initialize
+      source_text: Select one stat, skill or Hit Point increase.
+      effects:
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: improved
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: kind
+          value:
+            type: literal
+            value: ''
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: maximum
+          value:
+            type: literal
+            value: 0
+    - id: kind_stat
+      source_text: Use the row matching the selected stat, skill or Hit Points.
+      when:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: set
+          target: kind
+          value:
+            type: literal
+            value: stat
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: true
+    - id: kind_skill
+      source_text: Use the row matching the selected stat, skill or Hit Points.
+      when:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Arcane Arts
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Battle Prayers
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: set
+          target: kind
+          value:
+            type: literal
+            value: skill
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: maximum
+          value:
+            type: literal
+            value: 80
+    - id: kind_hit_points
+      source_text: Use the row matching the selected stat, skill or Hit Points.
+      when:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: set
+          target: kind
+          value:
+            type: literal
+            value: hit_points
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: true
+    - id: unavailable
+      source_text: A dash does not offer an improvement for that profession.
+      when:
+        type: any
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: subject
+                right:
+                  type: literal
+                  value: Arcane Arts
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: wizard
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: subject
+                right:
+                  type: literal
+                  value: Battle Prayers
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+      effects:
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: false
+    - id: profession_domain
+      source_text: Only the printed professions have cost columns.
+      when:
+        type: not
+        condition:
+          type: any
+          conditions:
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: barbarian
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: warrior
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: ranger
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: warrior_priest
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: wizard
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: thief
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: rogue
+            - type: compare
+              operator: eq
+              left:
+                type: field
+                name: profession
+              right:
+                type: literal
+                value: alchemist
+      effects:
+        - type: set
+          target: valid_subject
+          value:
+            type: literal
+            value: false
+    - id: cost_str_barbarian
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_str_warrior
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_str_ranger
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_str_warrior_priest
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_str_wizard
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_str_thief
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_str_rogue
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_str_alchemist
+      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_dex_barbarian
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_dex_warrior
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_dex_ranger
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_dex_warrior_priest
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dex_wizard
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_dex_thief
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_dex_rogue
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_dex_alchemist
+      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_con_barbarian
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_con_warrior
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_con_ranger
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_con_warrior_priest
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_con_wizard
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_con_thief
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_con_rogue
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_con_alchemist
+      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_wis_barbarian
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_wis_warrior
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_wis_ranger
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_wis_warrior_priest
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_wis_wizard
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_wis_thief
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_wis_rogue
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_wis_alchemist
+      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_res_barbarian
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_warrior
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_ranger
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_warrior_priest
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_res_wizard
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_thief
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_rogue
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_res_alchemist
+      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_cs_barbarian
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_cs_warrior
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_cs_ranger
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_cs_warrior_priest
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_cs_wizard
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_cs_thief
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_cs_rogue
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_cs_alchemist
+      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_rs_barbarian
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_rs_warrior
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_rs_ranger
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_rs_warrior_priest
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_rs_wizard
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_rs_thief
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_rs_rogue
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_rs_alchemist
+      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_barbarian
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_warrior
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_ranger
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_warrior_priest
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_wizard
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_thief
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_dodge_rogue
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_dodge_alchemist
+      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Dodge
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_pick_lock_barbarian
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_pick_lock_warrior
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_pick_lock_ranger
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_pick_lock_warrior_priest
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_pick_lock_wizard
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_pick_lock_thief
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_pick_lock_rogue
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_pick_lock_alchemist
+      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Pick Lock
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_perception_barbarian
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_perception_warrior
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_perception_ranger
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_perception_warrior_priest
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_perception_wizard
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_perception_thief
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_perception_rogue
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_perception_alchemist
+      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Perception
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_heal_barbarian
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_heal_warrior
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_heal_ranger
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_heal_warrior_priest
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_heal_wizard
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_heal_thief
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_heal_rogue
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_heal_alchemist
+      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Heal
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_arcane_arts_wizard
+      source_text: Read the selected profession cost for Arcane Arts from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Arcane Arts
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_battle_prayers_warrior_priest
+      source_text: Read the selected profession cost for Battle Prayers from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Battle Prayers
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_foraging_barbarian
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_foraging_warrior
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_foraging_ranger
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_foraging_warrior_priest
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_foraging_wizard
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_foraging_thief
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_foraging_rogue
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_foraging_alchemist
+      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Foraging
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_barter_barbarian
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_barter_warrior
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_barter_ranger
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_barter_warrior_priest
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_barter_wizard
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_barter_thief
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 2
+    - id: cost_barter_rogue
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_barter_alchemist
+      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Barter
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_alchemy_barbarian
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_alchemy_warrior
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_alchemy_ranger
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_alchemy_warrior_priest
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_alchemy_wizard
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 3
+    - id: cost_alchemy_thief
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_alchemy_rogue
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 4
+    - id: cost_alchemy_alchemist
+      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Alchemy
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 1
+    - id: cost_hit_points_barbarian
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_hit_points_warrior
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 5
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 5
+    - id: cost_hit_points_ranger
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: cost_hit_points_warrior_priest
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: cost_hit_points_wizard
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: cost_hit_points_thief
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: cost_hit_points_rogue
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: cost_hit_points_alchemist
+      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: Hit points +1
+      effects:
+        - type: invoke
+          dependency: costs
+        - type: set
+          target: base_cost
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: cost
+          value:
+            type: literal
+            value: 10
+    - id: maximum_str
+      source_text: Use the racial maximum for this basic stat.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: STR
+      effects:
+        - type: lookup
+          table_id: table.character.stat_maxima
+          key_column: race
+          key:
+            type: field
+            name: race
+          value_column: str
+          target: maximum
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: maximum_dex
+      source_text: Use the racial maximum for this basic stat.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: DEX
+      effects:
+        - type: lookup
+          table_id: table.character.stat_maxima
+          key_column: race
+          key:
+            type: field
+            name: race
+          value_column: dex
+          target: maximum
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: maximum_con
+      source_text: Use the racial maximum for this basic stat.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: CON
+      effects:
+        - type: lookup
+          table_id: table.character.stat_maxima
+          key_column: race
+          key:
+            type: field
+            name: race
+          value_column: con
+          target: maximum
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: maximum_wis
+      source_text: Use the racial maximum for this basic stat.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: WIS
+      effects:
+        - type: lookup
+          table_id: table.character.stat_maxima
+          key_column: race
+          key:
+            type: field
+            name: race
+          value_column: wis
+          target: maximum
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: maximum_res
+      source_text: Use the racial maximum for this basic stat.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: subject
+            right:
+              type: literal
+              value: RES
+      effects:
+        - type: lookup
+          table_id: table.character.stat_maxima
+          key_column: race
+          key:
+            type: field
+            name: race
+          value_column: res
+          target: maximum
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: double_cost
+      source_text: Once a stat or skill passes 70, the cost is doubled.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: hit_points
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: value
+            right:
+              type: literal
+              value: 70
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: base_cost
+              - type: literal
+                value: 2
+    - id: boundary_cost
+      source_text: The 70-to-71 price depends on the explicit supplied boundary interpretation.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: hit_points
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: value
+            right:
+              type: literal
+              value: 70
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boundary_cost_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: cost
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: base_cost
+              - type: field
+                name: boundary_cost_multiplier
+    - id: unresolved_boundary
+      source_text: The text does not specify whether the increase crossing 70 is already doubled.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: session_open
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: hit_points
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: value
+            right:
+              type: literal
+              value: 70
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boundary_cost_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.character.improvement_seventy_boundary
+    - id: unresolved_hp_limit
+      source_text: The relationship of automatic +1d2 HP and the +2-per-level wording is not explicit.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: session_open
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: valid_subject
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: hit_points
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hp_limit_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.character.level_hit_point_limit
+    - id: check_purchase
+      source_text: Respect available points, per-level limits and natural maxima.
+      effects:
+        - type: require
+          condition: &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: session_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: valid_subject
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: cost
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: improvement_points
+                right:
+                  type: field
+                  name: cost
+              - type: any
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: ne
+                        left:
+                          type: field
+                          name: kind
+                        right:
+                          type: literal
+                          value: hit_points
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: increased_this_level
+                        right:
+                          type: literal
+                          value: 5
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: value
+                        right:
+                          type: field
+                          name: maximum
+                      - type: any
+                        conditions:
+                          - type: compare
+                            operator: ne
+                            left:
+                              type: field
+                              name: value
+                            right:
+                              type: literal
+                              value: 70
+                          - type: compare
+                            operator: eq
+                            left:
+                              type: field
+                              name: boundary_cost_resolved
+                            right:
+                              type: literal
+                              value: true
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: kind
+                        right:
+                          type: literal
+                          value: hit_points
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: hp_limit_resolved
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: increased_this_level
+                        right:
+                          type: field
+                          name: hp_purchase_limit
+    - id: purchase_point
+      source_text: Purchase exactly +1 and retain unspent points.
+      when: *a2
+      effects:
+        - type: add
+          target: improvement_points
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: cost
+          duration: permanent
+        - type: add
+          target: value
+          value:
+            type: literal
+            value: 1
+          duration: permanent
+        - type: add
+          target: increased_this_level
+          value:
+            type: literal
+            value: 1
+          duration: permanent
+        - type: set
+          target: improved
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: purchase_point
+  issues:
+    - issue.character.improvement_seventy_boundary
+    - issue.character.level_hit_point_limit
+- id: procedure.character_level_ability
+  name: Choose level-up talent or perk
+  section_id: section.levelling_up.talents_and_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 62
+      printed_page: 60
+      heading: Talents and Perks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Every time your hero levels up, they may choose a Talent from the category shown in the
+    table. Every other level up, the same goes for a Perk.
+  fields:
+    session_open:
+      type: boolean
+      role: state
+      description: Hero advancement session is open.
+    level:
+      type: number
+      role: input
+      description: New hero level.
+      integer: true
+      minimum: 2
+      maximum: 10
+    profession:
+      type: string
+      role: input
+      description: Profession ID suffix.
+    kind:
+      type: string
+      role: input
+      description: talent or perk.
+    selected_id:
+      type: string
+      role: input
+      description: Chosen existing talent/perk catalogue ID.
+    selected_category:
+      type: string
+      role: input
+      description: Printed category of the selected ability, without Talents/Perks suffix.
+    catalogue_selection_valid:
+      type: boolean
+      role: input
+      description:
+        Caller confirms selected ID, kind, category and prerequisites from the existing ability
+        catalogue.
+    talent_selected:
+      type: boolean
+      role: state
+      description: This session has already granted its talent.
+    perk_selected:
+      type: boolean
+      role: state
+      description: This session has already granted its perk.
+    expected_category:
+      type: string
+      role: output
+      description: Category permitted by profession and level.
+    granted:
+      type: boolean
+      role: output
+      description: Whether a new ability was selected.
+    granted_id:
+      type: string
+      role: output
+      description: Selected ID to apply once in the owning hero ability collection.
+  dependencies:
+    - key: talent_categories
+      object_id: table.character.talent_progression
+      label: Talent choice categories.
+    - key: perk_categories
+      object_id: table.character.perk_progression
+      label: Perk choice categories.
+    - key: talents
+      section_id: section.appendix_ii_talents
+      label: Selected talent and its prerequisite/effects are resolved once from the existing catalogue.
+    - key: perks
+      section_id: section.appendix_i_perks
+      label: Selected perk and its prerequisite/effects are resolved once from the existing catalogue.
+  steps:
+    - id: initialize
+      source_text:
+        Every level may grant a talent; every other level a perk from the printed profession
+        category.
+      effects:
+        - type: set
+          target: expected_category
+          value:
+            type: literal
+            value: None
+        - type: set
+          target: granted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: granted_id
+          value:
+            type: literal
+            value: ''
+    - id: category_barbarian_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: barbarian
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_barbarian_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: barbarian
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_warrior_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: warrior
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_warrior_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: warrior
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_ranger_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: ranger
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_ranger_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: ranger
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_warrior_priest_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: warrior_priest
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_warrior_priest_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: warrior_priest
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_wizard_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: wizard
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_wizard_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: wizard
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_thief_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: thief
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_thief_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: thief
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_rogue_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: rogue
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_rogue_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: rogue
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_alchemist_talent
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+      effects:
+        - type: lookup
+          table_id: table.character.talent_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: alchemist
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: category_alchemist_perk
+      source_text: Read the printed level and profession category.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+      effects:
+        - type: lookup
+          table_id: table.character.perk_progression
+          key_column: level
+          key:
+            type: field
+            name: level
+          value_column: alchemist
+          target: expected_category
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: choose_talent
+      source_text: Apply the selected catalogue ability once; its effects remain a dependency handoff.
+      when:
+        type: all
+        conditions:
+          - &a3
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: session_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: catalogue_selection_valid
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: selected_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: expected_category
+                right:
+                  type: literal
+                  value: None
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: selected_category
+                right:
+                  type: field
+                  name: expected_category
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: talent
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent_selected
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: invoke
+          dependency: talents
+        - type: set
+          target: talent_selected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: granted_id
+          value:
+            type: field
+            name: selected_id
+        - type: set
+          target: granted
+          value:
+            type: literal
+            value: true
+    - id: choose_perk
+      source_text: Apply the selected catalogue ability once; its effects remain a dependency handoff.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: kind
+            right:
+              type: literal
+              value: perk
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: perk_selected
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: invoke
+          dependency: perks
+        - type: set
+          target: perk_selected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: granted_id
+          value:
+            type: field
+            name: selected_id
+        - type: set
+          target: granted
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: choose_perk
+- id: procedure.character_finish_advancement
+  name: Finish advancement and save spare points
+  section_id: section.levelling_up.increasing_your_skills_and_basic_stats
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 61
+      printed_page: 59
+      heading: Increasing your Skills and Basic Stats
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 62
+      printed_page: 60
+      heading: Talents and Perks
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your heroes may save any spare Improvement points until the next time they level up.
+    Talent and Perk choices are optional.
+  fields:
+    session_open:
+      type: boolean
+      role: state
+      description: Current level advancement session.
+    finish:
+      type: boolean
+      role: input
+      description: Hero has completed or declined optional spending and choices.
+    improvement_points:
+      type: number
+      role: state
+      description: Saved points remain unchanged until another level session.
+      integer: true
+      minimum: 0
+  dependencies: []
+  steps:
+    - id: finish
+      source_text: Preserve spare Improvement Points and close the current session.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: session_open
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: finish
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: session_open
+          value:
+            type: literal
+            value: false
+  entry_step: finish
+  exit_step: finish

@@ -1,0 +1,927 @@
+- id: procedure.sanity_loss
+  name: Hero/event Sanity loss and exact-zero handoff
+  section_id: section.psychology.sanity
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 55
+      printed_page: 53
+      heading: Sanity
+      extraction: &a3
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 21
+      printed_page: 19
+      heading: Complexity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All heroes start with 8 Sanity; initial creation remains owned by its existing
+    rule/procedure. Whenever a printed loss situation happens, deduct its source-defined loss from
+    that hero. Each battle with a demon is one battle event, not one enemy hit; contracting
+    disease/getting poisoned are event onsets, not each later check. Once 0 is reached, hand off
+    mental-condition resolution. Overshooting 0 is not defined. Sanity may be omitted under
+    Complexity; a disabled system applies no loss.
+  issues:
+    - issue.phase4.sanity_boundaries
+  unresolved_references:
+    - 'Certain room events: See Exploration Card. Supply the actual card loss amount; no absent card
+      effect is invented.'
+  fields:
+    sanity:
+      type: number
+      role: state
+      description: Current Sanity of this hero; never initialize it again while processing events.
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Supplied use of the optional Sanity system; Complexity permits omission.
+    event_kind:
+      type: string
+      role: input
+      description:
+        'One actual printed situation: terror, trap, head_wound, fear, demon_battle, zero_hp,
+        disease, poison, miscast or room_event.'
+    event_confirmed:
+      type: boolean
+      role: input
+      description:
+        Actual source situation occurred for this hero; failed Fear/Terror check, sprung trap,
+        actual head wound, distinct demon battle, reduction to 0 HP, contracted disease, getting
+        poisoned, miscast or actual applicable room event.
+    sanity_loss_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/distinct source event result marker. Start false for a fresh occurrence, persist
+        true after its numerical loss; not reset by a dungeon turn or an ongoing poison/disease
+        check.
+    sanity_event_allowed:
+      type: boolean
+      role: output
+      description: Current actual positive-Sanity unprocessed event accepted; reset each call.
+    die:
+      type: number
+      role: input
+      description: Actual 1d3 loss roll for this miscast, not a condition-table roll.
+      minimum: 1
+      maximum: 3
+      integer: true
+    room_loss_amount_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual source-backed Exploration Card numerical loss is supplied, not merely requested
+        and not already applied to Sanity.
+    room_sanity_loss:
+      type: number
+      role: input
+      description: Actual card-defined nonnegative loss amount to apply here once; no guessed card value.
+      minimum: 0
+      integer: true
+    sanity_room_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/room-event card-effect request marker. Persist after the handoff; a request alone
+        does not consume the numerical loss result.
+    sanity_condition_pending:
+      type: boolean
+      role: state
+      description:
+        Hero/current exact-zero condition-acquisition episode pending. Carry until its separate
+        condition-resolution owner completes; block later losses while awaiting that result.
+    sanity_condition_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/exact-zero acquisition handoff marker; reset only at the new episode, persist
+        while pending.
+    condition_episode_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/exact-zero episode successful-acquisition marker; persist after count/reset, fresh
+        false only for a distinct later episode.
+    condition_draw_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/episode/distinct draw lookup marker; start false for a genuinely new roll, persist
+        to preserve its selected name.
+    condition_selected:
+      type: boolean
+      role: state
+      description: This episode has an actual selected condition from its persisted table draw.
+    condition_diagnosis_processed:
+      type: boolean
+      role: state
+      description: Hero/episode/draw membership result consumed after duplicate or novel acceptance;
+        replay cannot substitute a different membership outcome.
+    condition_draw_rejected:
+      type: boolean
+      role: state
+      description: Persisted duplicate diagnosis result for this draw; reset only by a genuinely new draw.
+    condition_reroll_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/episode/draw duplicate-reroll request marker; fresh false per distinct new draw,
+        persist after handoff.
+    condition_effect_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/acquisition episode condition-effect handoff marker; persist after request, invoke
+        alone applies no modifier.
+  dependencies:
+    - key: loss_table
+      label: Complete existing structured Sanity loss situations table
+      object_id: table.psychology.sanity_losses
+    - key: condition_resolution
+      label:
+        'Conditions: acquire a mental health condition at exactly 0; duplicate diagnosis rerolls and
+        reset resolved separately'
+      section_id: section.psychology.sanity.conditions
+      object_id: procedure.sanity_condition
+    - key: optional_sanity
+      label: Existing optional Sanity omission rule
+      object_id: core.optional.sanity
+    - key: initial_sanity
+      label: Existing creation-only initial Sanity rule; do not execute per event
+      object_id: character.sanity.initial
+  steps:
+    - id: check_event
+      source:
+        - *a1
+        - *a2
+      source_text: Re-evaluate one hero/event. Disabled, unconfirmed, unknown, replayed or already
+        pending-condition contexts do not apply another loss.
+      effects:
+        - type: set
+          target: sanity_event_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_event
+          source: &a4
+            - *a1
+          source_text:
+            Accept a distinct actual printed loss event only while this hero has positive Sanity
+            and no pending exact-zero diagnosis.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: event_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_loss_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_condition_pending
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 0
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: terror
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: trap
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: head_wound
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: fear
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: demon_battle
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: zero_hp
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: disease
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: poison
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: miscast
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: event_kind
+                    right:
+                      type: literal
+                      value: room_event
+          effects:
+            - type: set
+              target: sanity_event_allowed
+              value:
+                type: literal
+                value: true
+    - id: loss_terror
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Failing a Terror Test
+      source_text: Failing a Terror Test
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: terror
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.terror
+    - id: loss_trap
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Springing a trap
+      source_text: Springing a trap
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: trap
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.trap
+    - id: loss_head_wound
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Character suffers a wound to the head
+      source_text: Character suffers a wound to the head
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: head_wound
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.head_wound
+    - id: loss_fear
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Failing a Fear Test
+      source_text: Failing a Fear Test
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: fear
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.fear
+    - id: loss_demon_battle
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Each battle with a demon
+      source_text: Each battle with a demon
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: demon_battle
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.demon_battle
+    - id: loss_zero_hp
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Being reduced to 0 Hit Points
+      source_text: Being reduced to 0 Hit Points
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: zero_hp
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.zero_hp
+    - id: loss_disease
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Contracting a disease
+      source_text: Contracting a disease
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: disease
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.disease
+    - id: loss_poison
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Getting poisoned
+      source_text: Getting poisoned
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: poison
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.poison
+    - id: loss_miscast
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Sanity
+          extraction: *a3
+          locator:
+            table: Sanity loss situations
+            row: Miscasting a spell
+      source_text: 'Miscasting a spell: -1d3.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: miscast
+      effects:
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.miscast
+    - id: request_room_loss
+      source: *a4
+      source_text:
+        Request the actual applicable Exploration Card loss once. The existing room-event rule
+        records a handoff, not a numerical Sanity mutation.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: room_event
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_loss_amount_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_room_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: sanity_room_handoff_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.loss.room_event
+    - id: apply_room_loss
+      source: *a4
+      source_text: Apply the actually supplied card loss amount here once. Do not duplicate a
+        caller-applied loss or invent a card value.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_event_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_kind
+            right:
+              type: literal
+              value: room_event
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_loss_amount_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: add
+          target: sanity
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: room_sanity_loss
+              - type: literal
+                value: -1
+          duration: immediate
+        - type: set
+          target: sanity_loss_processed
+          value:
+            type: literal
+            value: true
+    - id: below_zero_unknown
+      source:
+        - *a1
+        - &a5
+          document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 55
+          printed_page: 53
+          heading: Conditions
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        The book says reaches 0 and does not define an overshoot, clamp or cascading diagnoses.
+        Retain the numerical loss and explicit unresolved boundary.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: sanity
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.sanity_boundaries
+    - id: exact_zero
+      source:
+        - *a1
+        - *a5
+      source_text:
+        Exactly zero starts a distinct pending acquisition episode only when none is pending.
+        Initialize that new episode markers once; repeated checks while awaiting diagnosis preserve
+        its draw/history state.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_condition_pending
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: sanity_condition_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: condition_episode_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_draw_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_selected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_diagnosis_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_draw_rejected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_reroll_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: condition_effect_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: sanity_condition_handoff_processed
+          value:
+            type: literal
+            value: false
+    - id: condition_handoff
+      source:
+        - *a5
+      source_text: Request the exact-zero condition resolution once. Selection, duplicate rerolls,
+        active-condition count and Sanity reset remain owned by the separate Conditions checkpoint.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_condition_pending
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_condition_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: sanity_condition_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: condition_resolution
+  entry_step: check_event
+  exit_step: condition_handoff

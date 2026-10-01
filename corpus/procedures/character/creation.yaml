@@ -1,0 +1,2160 @@
+- id: procedure.character_creation_reroll
+  name: Character creation stat or Hit Point reroll
+  section_id: section.creating_your_character.choosing_your_species
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 29
+      printed_page: 27
+      heading: Rolling Your Stats
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    You may make 2 rerolls in this process, including when rolling for Hit Points. You may
+    never reroll a reroll, but you may choose the highest result.
+  fields:
+    keep_highest:
+      type: boolean
+      role: input
+      description: Choose the permitted highest-result option; otherwise accept the replacement.
+    creation_open:
+      type: boolean
+      role: input
+      description: Hero creation is still open.
+    already_rerolled:
+      type: boolean
+      role: state
+      description: Per original stat or HP roll; never reset to reroll the same roll.
+    rerolls_used:
+      type: number
+      role: state
+      description: Shared hero-wide creation rerolls used.
+      integer: true
+      minimum: 0
+      maximum: 2
+    original_roll:
+      type: number
+      role: input
+      description: Original supplied d10 stat or d6 HP die.
+      integer: true
+      minimum: 1
+      maximum: 10
+    replacement_roll:
+      type: number
+      role: input
+      description: Supplied replacement die.
+      integer: true
+      minimum: 1
+      maximum: 10
+    die_sides:
+      type: number
+      role: input
+      description: 10 for a stat die or 6 for HP.
+      integer: true
+      minimum: 6
+      maximum: 10
+    accepted_roll:
+      type: number
+      role: state
+      description: Previously accepted roll; unchanged on rejection.
+      integer: true
+      minimum: 1
+      maximum: 10
+    reroll_applied:
+      type: boolean
+      role: output
+      description: Whether this attempt consumed a reroll.
+  dependencies: []
+  steps:
+    - id: check_reroll
+      source_text: Two rerolls in total, including Hit Points; never reroll a reroll.
+      effects:
+        - type: set
+          target: reroll_applied
+          value:
+            type: literal
+            value: false
+        - type: require
+          condition: &a1
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: creation_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_rerolled
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: rerolls_used
+                right:
+                  type: literal
+                  value: 2
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: original_roll
+                right:
+                  type: field
+                  name: die_sides
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: replacement_roll
+                right:
+                  type: field
+                  name: die_sides
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: die_sides
+                    right:
+                      type: literal
+                      value: 6
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: die_sides
+                    right:
+                      type: literal
+                      value: 10
+    - id: accept_reroll
+      source_text: You may choose the highest result.
+      when: *a1
+      effects:
+        - type: set
+          target: accepted_roll
+          value:
+            type: field
+            name: replacement_roll
+        - type: add
+          target: rerolls_used
+          value:
+            type: literal
+            value: 1
+          duration: permanent
+        - type: set
+          target: already_rerolled
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reroll_applied
+          value:
+            type: literal
+            value: true
+    - id: keep_highest
+      source_text: You may choose the highest result.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reroll_applied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: keep_highest
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: accepted_roll
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: field
+                name: original_roll
+              - type: field
+                name: replacement_roll
+  entry_step: check_reroll
+  exit_step: keep_highest
+- id: procedure.character_creation_specialisation
+  name: Allocate character specialisation
+  section_id: section.creating_your_character.choosing_your_species
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 29
+      printed_page: 27
+      heading: Specialisation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Each hero gains an extra 15 points that may be distributed on their stats. However, no
+    stat may have more than 10 points of these 15, so you must divide the points.
+  fields:
+    creation_open:
+      type: boolean
+      role: input
+      description: Hero creation is still open.
+    specialisation_applied:
+      type: boolean
+      role: state
+      description: Per hero; persists across calls.
+    str:
+      type: number
+      role: state
+      description: Rolled STR using the chosen species catalogue.
+      integer: true
+      minimum: 0
+    str_points:
+      type: number
+      role: input
+      description: Chosen specialisation allocation to STR.
+      integer: true
+      minimum: 0
+      maximum: 10
+    con:
+      type: number
+      role: state
+      description: Rolled CON using the chosen species catalogue.
+      integer: true
+      minimum: 0
+    con_points:
+      type: number
+      role: input
+      description: Chosen specialisation allocation to CON.
+      integer: true
+      minimum: 0
+      maximum: 10
+    dex:
+      type: number
+      role: state
+      description: Rolled DEX using the chosen species catalogue.
+      integer: true
+      minimum: 0
+    dex_points:
+      type: number
+      role: input
+      description: Chosen specialisation allocation to DEX.
+      integer: true
+      minimum: 0
+      maximum: 10
+    wis:
+      type: number
+      role: state
+      description: Rolled WIS using the chosen species catalogue.
+      integer: true
+      minimum: 0
+    wis_points:
+      type: number
+      role: input
+      description: Chosen specialisation allocation to WIS.
+      integer: true
+      minimum: 0
+      maximum: 10
+    res:
+      type: number
+      role: state
+      description: Rolled RES using the chosen species catalogue.
+      integer: true
+      minimum: 0
+    res_points:
+      type: number
+      role: input
+      description: Chosen specialisation allocation to RES.
+      integer: true
+      minimum: 0
+      maximum: 10
+  dependencies: []
+  steps:
+    - id: check_allocation
+      source_text: Distribute 15 points, no more than 10 to one stat.
+      effects:
+        - type: require
+          condition: &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: creation_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: specialisation_applied
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: sum
+                  values:
+                    - type: field
+                      name: str_points
+                    - type: field
+                      name: con_points
+                    - type: field
+                      name: dex_points
+                    - type: field
+                      name: wis_points
+                    - type: field
+                      name: res_points
+                right:
+                  type: literal
+                  value: 15
+    - id: allocate
+      source_text: Add the chosen points once to the rolled stats.
+      when: *a2
+      effects:
+        - type: add
+          target: str
+          value:
+            type: field
+            name: str_points
+          duration: permanent
+        - type: add
+          target: con
+          value:
+            type: field
+            name: con_points
+          duration: permanent
+        - type: add
+          target: dex
+          value:
+            type: field
+            name: dex_points
+          duration: permanent
+        - type: add
+          target: wis
+          value:
+            type: field
+            name: wis_points
+          duration: permanent
+        - type: add
+          target: res
+          value:
+            type: field
+            name: res_points
+          duration: permanent
+        - type: set
+          target: specialisation_applied
+          value:
+            type: literal
+            value: true
+  entry_step: check_allocation
+  exit_step: allocate
+- id: procedure.character_creation_skill
+  name: Calculate one starting skill and optional Free Skill
+  section_id: section.creating_your_character.profession_and_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 32
+      printed_page: 30
+      heading: Skills; Free Skill
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Each Skill is calculated as the skill’s basic stat plus a profession-specific modifier.
+    A Skill Level can never be negative. You may choose one skill that has a negative modifier to
+    improve. This Skill Value gains a modifier of +10. Talent skill bonuses do not change the basic
+    stat.
+  fields:
+    creation_open:
+      type: boolean
+      role: input
+      description: Hero creation is still open.
+    base_stat:
+      type: number
+      role: input
+      description: Final basic stat for this skill, after stat-modifying choices.
+      integer: true
+      minimum: 0
+    profession_modifier:
+      type: number
+      role: input
+      description: Modifier from the selected profession skill table.
+      integer: true
+      minimum: -100
+    talent_skill_bonus:
+      type: number
+      role: input
+      description: Supplied skill-only talent modifier.
+      integer: true
+      minimum: -100
+    use_free_skill:
+      type: boolean
+      role: input
+      description: Choose this skill for the optional +10.
+    free_skill_used:
+      type: boolean
+      role: state
+      description: Shared per hero across all skills.
+    skill_recorded:
+      type: boolean
+      role: state
+      description: Per selected skill; prevents applying creation twice.
+    skill_value:
+      type: number
+      role: state
+      description: Resulting skill value.
+      integer: true
+      minimum: 0
+    free_skill_bonus:
+      type: number
+      role: output
+      description: Bonus for this calculation.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: profession
+      section_id: section.creating_your_character.profession_and_talents
+      label: Choose the actual profession skill table and resolve granted talents before supplying
+        modifiers.
+  steps:
+    - id: check_skill
+      source_text: One chosen negative-modifier skill may gain +10.
+      effects:
+        - type: set
+          target: free_skill_bonus
+          value:
+            type: literal
+            value: 0
+        - type: require
+          condition: &a3
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: creation_open
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill_recorded
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: use_free_skill
+                    right:
+                      type: literal
+                      value: false
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: free_skill_used
+                        right:
+                          type: literal
+                          value: false
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: profession_modifier
+                        right:
+                          type: literal
+                          value: 0
+    - id: calculate_skill
+      source_text: Basic stat plus profession modifier; skill bonuses leave the stat unchanged.
+      when: *a3
+      effects:
+        - type: invoke
+          dependency: profession
+    - id: free_skill
+      source_text: Choose one skill with a negative modifier.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: use_free_skill
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: free_skill_bonus
+          value:
+            type: literal
+            value: 10
+        - type: set
+          target: free_skill_used
+          value:
+            type: literal
+            value: true
+    - id: record_skill
+      source_text: A Skill Level can never be negative.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_open
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: skill_recorded
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: use_free_skill
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: free_skill_bonus
+                right:
+                  type: literal
+                  value: 10
+      effects:
+        - type: set
+          target: skill_value
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: literal
+                value: 0
+              - type: sum
+                values:
+                  - type: field
+                    name: base_stat
+                  - type: field
+                    name: profession_modifier
+                  - type: field
+                    name: talent_skill_bonus
+                  - type: field
+                    name: free_skill_bonus
+        - type: set
+          target: skill_recorded
+          value:
+            type: literal
+            value: true
+  entry_step: check_skill
+  exit_step: record_skill
+- id: procedure.character_creation_equipment_wear
+  name: Starting and pre-game equipment wear
+  section_id: section.creating_your_character.starting_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 32
+      printed_page: 30
+      heading: Starting Equipment; Buying Equipment before the Game
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll 1d4 for each piece of equipment and add that damage to the Character Sheet. A
+    piece of equipment will always have at least 1 Point of Durability left. Equipment bought before
+    the game needs no availability roll, but damage is rolled on all things that could potentially
+    be damaged.
+  fields:
+    before_game:
+      type: boolean
+      role: input
+      description: Starting gear or a purchase before play begins.
+    damageable:
+      type: boolean
+      role: input
+      description: Whether this item can be damaged; supplied by its catalogue.
+    wear_applied:
+      type: boolean
+      role: state
+      description: Per individual item; persists across calls.
+    maximum_durability:
+      type: number
+      role: input
+      description: The selected item’s undamaged durability.
+      integer: true
+      minimum: 1
+    wear_roll:
+      type: number
+      role: input
+      description: Supplied 1d4 wear roll.
+      integer: true
+      minimum: 1
+      maximum: 4
+    damage:
+      type: number
+      role: state
+      description: Recorded damage on this item.
+      integer: true
+      minimum: 0
+    durability_remaining:
+      type: number
+      role: state
+      description: Remaining durability on this item.
+      integer: true
+      minimum: 1
+  dependencies: []
+  steps:
+    - id: apply_wear
+      source_text: Roll damage while retaining at least 1 durability.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: before_game
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wear_applied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damageable
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: damage
+          value:
+            type: arithmetic
+            operator: min
+            values:
+              - type: field
+                name: wear_roll
+              - type: arithmetic
+                operator: subtract
+                values:
+                  - type: field
+                    name: maximum_durability
+                  - type: literal
+                    value: 1
+        - type: set
+          target: durability_remaining
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: maximum_durability
+              - type: field
+                name: damage
+        - type: set
+          target: wear_applied
+          value:
+            type: literal
+            value: true
+  entry_step: apply_wear
+  exit_step: apply_wear
+- id: procedure.character_creation
+  name: Character creation sequence
+  section_id: section.creating_your_character
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 29
+      printed_page: 27
+      heading: Creating your Character
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 30
+      printed_page: 28
+      heading: Dwarf; Elf
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 31
+      printed_page: 29
+      heading: Halfling; Human
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 32
+      printed_page: 30
+      heading: Profession and Talents; Starting Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 33
+      printed_page: 31
+      heading: Final Touches
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Choose species; roll stats and Hit Points; specialise; choose profession and talents,
+    skills, spells/prayers and optional background; resolve starting equipment; calculate final
+    values and Party Morale. Baseline resources must be established before applying modifiers;
+    dependency outcomes are supplied, not executed by invocation.
+  fields:
+    phase:
+      type: string
+      role: input
+      description: choose_species, rolls, specialise, profession, equipment, finish; one stage per call.
+    stage:
+      type: string
+      role: state
+      description: new, species, rolled, specialised, profession, equipped, complete.
+    species:
+      type: string
+      role: input
+      description: dwarf, elf, halfling or human.
+    profession:
+      type: string
+      role: input
+      description: Chosen profession ID suffix.
+    species_traits_resolved:
+      type: boolean
+      role: input
+      description: Species grants, restrictions and human random talent resolved from catalogue.
+    rolls_resolved:
+      type: boolean
+      role: input
+      description:
+        All five stat rolls and HP resolved, with shared reroll budget and optional assignment
+        explicitly chosen.
+    specialisation_applied:
+      type: boolean
+      role: input
+      description: Confirmed result of character_creation_specialisation.
+    profession_choices_resolved:
+      type: boolean
+      role: input
+      description:
+        Profession grants, choices, stat/HP/skill effects, spell/prayer selections and optional
+        background resolved once.
+    equipment_resolved:
+      type: boolean
+      role: input
+      description: Starting equipment, backpack exception, purchases, wear, lending and pooling resolved once.
+    creation_complete:
+      type: boolean
+      role: state
+      description: Hero creation has finished; prevents repeat initialization or PM contribution.
+    coins:
+      type: number
+      role: state
+      description: Hero coins; seeded once before background or equipment adjustments.
+      integer: true
+      minimum: 0
+    sanity:
+      type: number
+      role: state
+      description: Hero Sanity; seeded before talents/background.
+      integer: true
+      minimum: 0
+    luck:
+      type: number
+      role: state
+      description: Hero Luck; seeded before talents/background.
+      integer: true
+      minimum: 0
+    level:
+      type: number
+      role: state
+      description: Hero level.
+      integer: true
+      minimum: 0
+    experience:
+      type: number
+      role: state
+      description: Hero XP.
+      integer: true
+      minimum: 0
+    energy:
+      type: number
+      role: state
+      description: Hero Energy; seeded before catalogue exceptions.
+      integer: true
+      minimum: 0
+    res:
+      type: number
+      role: input
+      description: Final RES after creation choices.
+      integer: true
+      minimum: 0
+    party_morale:
+      type: number
+      role: state
+      description: Party total; this hero contributes once.
+      integer: true
+      minimum: 0
+    morale_contribution:
+      type: number
+      role: output
+      description: This hero’s base RES contribution; special ability bonuses are resolved separately.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: species_dwarf
+      object_id: species.dwarf
+      label: Species stats, HP, traits and restrictions.
+    - key: species_elf
+      object_id: species.elf
+      label: Species stats, HP, traits and restrictions.
+    - key: species_halfling
+      object_id: species.halfling
+      label: Species stats, HP, traits and restrictions.
+    - key: species_human
+      object_id: species.human
+      label: Species stats, HP, traits and restrictions.
+    - key: profession_alchemist
+      object_id: profession.alchemist
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_barbarian
+      object_id: profession.barbarian
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_ranger
+      object_id: profession.ranger
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_rogue
+      object_id: profession.rogue
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_thief
+      object_id: profession.thief
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_warrior
+      object_id: profession.warrior
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_warrior_priest
+      object_id: profession.warrior_priest
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: profession_wizard
+      object_id: profession.wizard
+      label: Profession choices, grants, skill tables and starting equipment.
+    - key: reroll
+      object_id: procedure.character_creation_reroll
+      label: Shared creation reroll budget.
+    - key: specialisation
+      object_id: procedure.character_creation_specialisation
+      label: 15-point allocation.
+    - key: skills
+      object_id: procedure.character_creation_skill
+      label: Calculate each skill once.
+    - key: wear
+      object_id: procedure.character_creation_equipment_wear
+      label: Per-item wear, once.
+    - key: background
+      section_id: section.backgrounds
+      label: Optional background selection and its catalogue effects.
+    - key: damage_bonus
+      object_id: character.damage_bonus.lookup
+      label: Preserve undefined lookup domains.
+    - key: natural_armour
+      object_id: character.natural_armour.lookup
+      label: Preserve undefined lookup domains.
+    - key: mana
+      object_id: character.mana.initial
+      label: Wizard starting mana; fractional-pool uncertainty retained.
+    - key: starting_purchases
+      section_id: section.creating_your_character.starting_equipment
+      label: 150 coins; optional lending/pooling; before-game availability waived, wear required;
+        after-start stores use availability and mint condition.
+  steps:
+    - id: check_phase
+      source_text: Creation follows species, stats, specialisation, profession, equipment and final touches.
+      effects:
+        - type: require
+          condition:
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: choose_species
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: rolls
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: specialise
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: profession
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: equipment
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: finish
+    - id: choose_dwarf
+      source_text: Choose species first. Baselines are established before talent and background changes.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 30
+          printed_page: 28
+          heading: dwarf
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose_species
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: new
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: species
+            right:
+              type: literal
+              value: dwarf
+      effects:
+        - type: invoke
+          dependency: species_dwarf
+        - type: set
+          target: coins
+          value:
+            type: literal
+            value: 150
+        - type: set
+          target: sanity
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: luck
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: level
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: experience
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: energy
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: species
+    - id: choose_elf
+      source_text: Choose species first. Baselines are established before talent and background changes.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 30
+          printed_page: 28
+          heading: elf
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose_species
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: new
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: species
+            right:
+              type: literal
+              value: elf
+      effects:
+        - type: invoke
+          dependency: species_elf
+        - type: set
+          target: coins
+          value:
+            type: literal
+            value: 150
+        - type: set
+          target: sanity
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: luck
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: level
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: experience
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: energy
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: species
+    - id: choose_halfling
+      source_text: Choose species first. Baselines are established before talent and background changes.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 31
+          printed_page: 29
+          heading: halfling
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose_species
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: new
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: species
+            right:
+              type: literal
+              value: halfling
+      effects:
+        - type: invoke
+          dependency: species_halfling
+        - type: set
+          target: coins
+          value:
+            type: literal
+            value: 150
+        - type: set
+          target: sanity
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: luck
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: level
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: experience
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: energy
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: species
+    - id: choose_human
+      source_text: Choose species first. Baselines are established before talent and background changes.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 31
+          printed_page: 29
+          heading: human
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose_species
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: new
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: species
+            right:
+              type: literal
+              value: human
+      effects:
+        - type: invoke
+          dependency: species_human
+        - type: set
+          target: coins
+          value:
+            type: literal
+            value: 150
+        - type: set
+          target: sanity
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: luck
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: level
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: experience
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: energy
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: species
+    - id: resolve_rolls
+      source_text:
+        Roll stats and HP. Two rerolls shared across these rolls; optional roll-all-then-assign
+        remains a choice.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Rolling Your Stats; Option; Hit Points
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rolls
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: species
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: species_traits_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rolls_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: reroll
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: rolled
+    - id: specialise
+      source_text: Distribute 15 points, at most 10 to one stat, using the allocation procedure.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Specialisation
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: specialise
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: rolled
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: specialisation_applied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: specialisation
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: specialised
+    - id: choose_alchemist
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: alchemist
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_alchemist
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_barbarian
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: barbarian
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_barbarian
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_ranger
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: ranger
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_ranger
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_rogue
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: rogue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_rogue
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_thief
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: thief
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_thief
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_warrior
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_warrior
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_warrior_priest
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_warrior_priest
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: choose_wizard
+      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Profession and Talents; Skills; Magic Spells and Prayers; Background (optional)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: specialised
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: wizard
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession_choices_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: profession_wizard
+        - type: invoke
+          dependency: skills
+        - type: invoke
+          dependency: background
+        - type: invoke
+          dependency: damage_bonus
+        - type: invoke
+          dependency: natural_armour
+        - type: invoke
+          dependency: mana
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: profession
+    - id: equip
+      source_text: Resolve starting gear, small backpack unless otherwise noted, wear, and optional
+        purchases/lending/pooling.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 32
+          printed_page: 30
+          heading: Starting Equipment
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: equipment
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: profession
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: equipment_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: wear
+        - type: invoke
+          dependency: starting_purchases
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: equipped
+    - id: finish
+      source_text: Divide each hero’s RES by 10 and drop the decimal, then add contributions to Party Morale.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 33
+          printed_page: 31
+          heading: Final Touches; Party Morale
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: finish
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: equipped
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: creation_complete
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: morale_contribution
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: field
+                    name: res
+                  - type: literal
+                    value: 10
+        - type: add
+          target: party_morale
+          value:
+            type: field
+            name: morale_contribution
+          duration: permanent
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: complete
+        - type: set
+          target: creation_complete
+          value:
+            type: literal
+            value: true
+  entry_step: check_phase
+  exit_step: finish
+  issues:
+    - issue.phase4.mana_rounding
+    - issue.phase4.lookup_domain

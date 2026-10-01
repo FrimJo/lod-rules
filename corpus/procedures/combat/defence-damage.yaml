@@ -1,0 +1,3680 @@
+- id: procedure.hero_defence
+  name: hero defence
+  section_id: section.combat.parry_with_a_weapon
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      heading: parry with a weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: One hero defence attempt. Dodge limit is per battle; parry is once per turn. Supplied
+    talent/perk eligibility and modifiers augment, never replace, source restrictions.
+  fields:
+    incoming_hit:
+      type: boolean
+      role: input
+      description: incoming hit
+    through_zoc:
+      type: boolean
+      role: input
+      description: through zoc
+    power_restriction_resolved:
+      type: boolean
+      role: input
+      description: power restriction resolved
+    power_restricted:
+      type: boolean
+      role: input
+      description: power restricted
+    parry_stance:
+      type: boolean
+      role: input
+      description: parry stance
+    shield_ready:
+      type: boolean
+      role: input
+      description: shield ready
+    weapon_ready:
+      type: boolean
+      role: input
+      description: weapon ready
+    aiming:
+      type: boolean
+      role: input
+      description: aiming
+    fast_weapon:
+      type: boolean
+      role: input
+      description: fast weapon
+    exact_shield_result_supplied:
+      type: boolean
+      role: input
+      description: exact shield result supplied
+    exact_shield_success:
+      type: boolean
+      role: input
+      description: exact shield success
+    defence:
+      type: string
+      role: input
+      description: defence
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    cs:
+      type: number
+      role: input
+      description: cs
+    dodge_skill:
+      type: number
+      role: input
+      description: dodge skill
+    dodges_remaining:
+      type: number
+      role: input
+      description: dodges remaining
+    parries_remaining:
+      type: number
+      role: input
+      description: parries remaining
+    talent_modifier:
+      type: number
+      role: input
+      description: talent modifier
+    incoming_damage:
+      type: number
+      role: input
+      description: incoming damage
+    shield_def:
+      type: number
+      role: input
+      description: shield def
+    durability:
+      type: number
+      role: input
+      description: durability
+    defence_eligible:
+      type: boolean
+      role: output
+      description: defence eligible
+    defence_succeeded:
+      type: boolean
+      role: output
+      description: defence succeeded
+    negates_damage:
+      type: boolean
+      role: output
+      description: negates damage
+    hero_prone:
+      type: boolean
+      role: output
+      description: hero prone
+    defence_threshold:
+      type: number
+      role: output
+      description: defence threshold
+    remaining_damage:
+      type: number
+      role: output
+      description: remaining damage
+    shield_damage:
+      type: number
+      role: output
+      description: shield damage
+    dodges_used:
+      type: number
+      role: output
+      description: dodges used
+    parries_used:
+      type: number
+      role: output
+      description: parries used
+    hit_location:
+      type: string
+      role: output
+      description: hit location
+    attacking_or_parrying:
+      type: boolean
+      role: output
+      description: Parry fumble rule input
+  dependencies:
+    - key: damage
+      label: Apply arm protection to supplied spillover
+      object_id: procedure.combat_damage
+  steps:
+    - id: start
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: start
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Defence requires incoming attack through ZOC, resolved Power restriction, and eligible
+        equipment/use count.
+      effects:
+        - type: set
+          target: defence_eligible
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: defence_succeeded
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: negates_damage
+          value:
+            type: literal
+            value: false
+    - id: dodge
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: dodge
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Unused dodge allowed once per battle unless explicit talent/perk grants more. Aiming
+        forbids dodge.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: incoming_hit
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: through_zoc
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restriction_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restricted
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: dodge
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: dodges_remaining
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: aiming
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: defence_eligible
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: dodge_skill
+              - type: field
+                name: talent_modifier
+        - type: set
+          target: dodges_used
+          value:
+            type: literal
+            value: 1
+    - id: dodge_stance
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: dodge stance
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Parry Stance gives +15 Dodge.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: dodge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: defence_threshold
+              - type: literal
+                value: 15
+    - id: weapon
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: weapon
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Weapon parry requires Parry Stance; roll CS, with supplied talent/weapon modifiers.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: incoming_hit
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: through_zoc
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restriction_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restricted
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_ready
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: parries_remaining
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: defence_eligible
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: cs
+              - type: field
+                name: talent_modifier
+        - type: set
+          target: parries_used
+          value:
+            type: literal
+            value: 1
+    - id: shield
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: shield
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Shield parry once per turn at CS-15 outside stance.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: incoming_hit
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: through_zoc
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restriction_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: power_restricted
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shield_ready
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: parries_remaining
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: defence_eligible
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: cs
+              - type: field
+                name: talent_modifier
+              - type: literal
+                value: -15
+        - type: set
+          target: parries_used
+          value:
+            type: literal
+            value: 1
+    - id: shield_stance
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: shield stance
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Shield in Parry Stance instead uses CS+15.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: cs
+              - type: field
+                name: talent_modifier
+              - type: literal
+                value: 15
+    - id: success
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: success
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Dodge uses skill check; weapon parry 95–100 fails even above that skill. Shield
+        equality is not silently resolved.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: defence
+                    right:
+                      type: literal
+                      value: dodge
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: field
+                      name: defence_threshold
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: defence
+                    right:
+                      type: literal
+                      value: weapon
+                  - type: compare
+                    operator: lt
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 95
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: field
+                      name: defence_threshold
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: defence
+                    right:
+                      type: literal
+                      value: shield
+                  - type: compare
+                    operator: lt
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: field
+                      name: defence_threshold
+      effects:
+        - type: set
+          target: defence_succeeded
+          value:
+            type: literal
+            value: true
+    - id: shield_equality
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: shield equality
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Exact shield threshold conflicts with the general check convention; supply a resolution.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: defence_threshold
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: exact_shield_result_supplied
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.combat.shield_threshold
+    - id: shield_equality_supplied
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: shield equality supplied
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Accept supplied resolution only at ambiguous equality.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: defence_threshold
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: exact_shield_result_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: defence_succeeded
+          value:
+            type: field
+            name: exact_shield_success
+    - id: avoid
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: avoid
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Successful dodge/weapon parry negates damage.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_succeeded
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: dodge
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: weapon
+      effects:
+        - type: set
+          target: negates_damage
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: remaining_damage
+          value:
+            type: literal
+            value: 0
+    - id: shield_absorbs
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: shield absorbs
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Shield subtracts DEF; when all damage negated nothing spills.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: incoming_damage
+            right:
+              type: field
+              name: shield_def
+      effects:
+        - type: set
+          target: negates_damage
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: remaining_damage
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: shield_damage
+          value:
+            type: literal
+            value: 0
+    - id: spillover
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: spillover
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Damage exceeding shield DEF damages shield once and spills onto arm, where armour applies.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: incoming_damage
+            right:
+              type: field
+              name: shield_def
+      effects:
+        - type: set
+          target: remaining_damage
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: incoming_damage
+              - type: field
+                name: shield_def
+        - type: set
+          target: shield_damage
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: hit_location
+          value:
+            type: literal
+            value: arms
+        - type: invoke
+          dependency: damage
+    - id: dodge_fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: dodge fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Fumbling dodge causes hero to fall over.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: dodge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: hero_prone
+          value:
+            type: literal
+            value: true
+    - id: weapon_damage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: weapon damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Weapon parry 95–99 inflicts durability damage unless Fast; reuse existing rule.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fast_weapon
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 95
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects: []
+      rule_refs:
+        - character.durability.weapon_parry
+    - id: parry_overlap
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: parry overlap
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: At 100 weapon damage overlaps general fumble; keep unresolved instead of double applying.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fast_weapon
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.durability_overlap
+    - id: shield_fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: shield fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Shield fumble costs one durability.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: attacking_or_parrying
+          value:
+            type: literal
+            value: true
+    - id: shield_fumble_damage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: shield fumble damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Reuse existing shield fumble damage rule.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects: []
+      rule_refs:
+        - character.durability.fumble
+  entry_step: start
+  exit_step: shield_fumble_damage
+  issues:
+    - issue.combat.power_timing
+    - issue.combat.shield_threshold
+    - issue.phase4.durability_overlap
+- id: procedure.thrown_preparation
+  name: thrown preparation
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: throwing potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    Throw a (Tr) preparation at an enemy or square in LOS. Supply all geometric outcomes. A
+    miss scatters; damage remains a handoff.
+  fields:
+    is_thrown_preparation:
+      type: boolean
+      role: input
+      description: is thrown preparation
+    in_los:
+      type: boolean
+      role: input
+      description: in los
+    nonadjacent_obstacle:
+      type: boolean
+      role: input
+      description: nonadjacent obstacle
+    through_door:
+      type: boolean
+      role: input
+      description: through door
+    adjacent_to_door:
+      type: boolean
+      role: input
+      description: adjacent to door
+    target_large:
+      type: boolean
+      role: input
+      description: target large
+    scatter_supplied:
+      type: boolean
+      role: input
+      description: scatter supplied
+    centre_under_large:
+      type: boolean
+      role: input
+      description: centre under large
+    rs:
+      type: number
+      role: input
+      description: rs
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    centre_damage:
+      type: number
+      role: input
+      description: centre damage
+    other_covered_squares:
+      type: number
+      role: input
+      description: other covered squares
+    scatter_square:
+      type: string
+      role: input
+      description: scatter square
+    doorway_scatter_square:
+      type: string
+      role: input
+      description: doorway scatter square
+    threshold:
+      type: number
+      role: output
+      description: threshold
+    damage_for_large:
+      type: number
+      role: output
+      description: damage for large
+    hit:
+      type: boolean
+      role: output
+      description: hit
+    impact_square:
+      type: string
+      role: output
+      description: impact square
+  dependencies:
+    - key: damage
+      label: Preparation damage/effect at supplied impact square
+      object_id: procedure.combat_damage
+  steps:
+    - id: prepare
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: prepare
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Requires (Tr) and target in LOS. Lobbing over models/obstacles is allowed.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: field
+            name: rs
+        - type: set
+          target: hit
+          value:
+            type: literal
+            value: false
+    - id: obstacle
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: obstacle
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: A single -10 for obstacles/models not adjacent to thrower, regardless of count.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: nonadjacent_obstacle
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: threshold
+              - type: literal
+                value: -10
+    - id: door
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: door
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Through door -10 unless directly in either of two front squares.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: through_door
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent_to_door
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: threshold
+              - type: literal
+                value: -10
+    - id: large
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: large
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Large/X-large target gives +10 RS.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_large
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: threshold
+              - type: literal
+                value: 10
+    - id: hit
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: hit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Successful RS hits chosen enemy/square.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: threshold
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: hit
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: impact_square
+          value:
+            type: literal
+            value: target
+    - id: scatter
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: scatter
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Miss hits random adjacent target square; supply random square.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scatter_supplied
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: through_door
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent_to_door
+                right:
+                  type: literal
+                  value: true
+      effects:
+        - type: set
+          target: impact_square
+          value:
+            type: field
+            name: scatter_square
+    - id: door_scatter
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: door scatter
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Nonadjacent doorway miss instead hits random one of two squares in front of door.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scatter_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: through_door
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent_to_door
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: impact_square
+          value:
+            type: field
+            name: doorway_scatter_square
+    - id: large_area
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: large area
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text:
+        Large/X-large covering centre suffers normal centre DMG +1 per other affected square it
+        covers, not repeated centre/adjacent rolls.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: scatter_supplied
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: centre_under_large
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: damage_for_large
+          value:
+            type: sum
+            values:
+              - type: field
+                name: centre_damage
+              - type: field
+                name: other_covered_squares
+    - id: resolve
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 117
+          printed_page: 115
+          heading: resolve
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text:
+        Other models in remaining squares take preparation effect normally. Supply damage-type
+        resolution separately.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_thrown_preparation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_los
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: scatter_supplied
+                right:
+                  type: literal
+                  value: true
+      effects:
+        - type: invoke
+          dependency: damage
+  entry_step: prepare
+  exit_step: resolve
+- id: procedure.combat_damage
+  name: combat damage
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: dealing damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Resolve one supplied hit after defence. Reuse damage and HP rules. Armour durability
+    and struck Quick Slot effects are separate supplied handoffs; never subtract dependency damage
+    twice.
+  fields:
+    hit_resolved:
+      type: boolean
+      role: input
+      description: hit resolved
+    target_is_hero:
+      type: boolean
+      role: input
+      description: target is hero
+    defence_resolved:
+      type: boolean
+      role: input
+      description: defence resolved
+    armour_resolution_supplied:
+      type: boolean
+      role: input
+      description: armour resolution supplied
+    quick_slot_resolution_supplied:
+      type: boolean
+      role: input
+      description: quick slot resolution supplied
+    weapon_damage:
+      type: number
+      role: input
+      description: weapon damage
+    damage_bonus:
+      type: number
+      role: input
+      description: damage bonus
+    natural_armour:
+      type: number
+      role: input
+      description: natural armour
+    armour:
+      type: number
+      role: input
+      description: armour
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    maximum_hp:
+      type: number
+      role: input
+      description: maximum hp
+    location_roll:
+      type: number
+      role: input
+      description: location roll
+      minimum: 1
+      maximum: 6
+      integer: true
+    armour_durability_loss:
+      type: number
+      role: input
+      description: armour durability loss
+    quick_slot_durability_loss:
+      type: number
+      role: input
+      description: quick slot durability loss
+    quick_slot_damage:
+      type: number
+      role: input
+      description: quick slot damage
+    damage_taken:
+      type: number
+      role: output
+      description: damage taken
+    action_points:
+      type: number
+      role: output
+      description: action points
+    dead:
+      type: boolean
+      role: output
+      description: dead
+    knocked_down:
+      type: boolean
+      role: output
+      description: knocked down
+    bleeding_out:
+      type: boolean
+      role: output
+      description: bleeding out
+    can_act:
+      type: boolean
+      role: output
+      description: can act
+    torso_check:
+      type: boolean
+      role: output
+      description: torso check
+    hit_location:
+      type: string
+      role: output
+      description: hit location
+  dependencies:
+    - key: armour
+      label: Outer-layer armour durability
+      object_id: character.durability.armour_damage
+    - key: quick_slots
+      label: Quick Slot hit and potion consequences
+      object_id: character.durability.quick_slot_hit
+    - key: bleeding
+      label: Bleeding out
+      object_id: procedure.bleeding_out
+    - key: wounded_status
+      label: Current HP classification and source-reconciled fresh turn cap; handoff does not reset
+        active-turn AP
+      object_id: procedure.wounded_status
+  steps:
+    - id: damage_formula
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: damage formula
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Weapon DMG + DB - NA - Armour; negative result remains unresolved.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+      effects: []
+      rule_refs:
+        - combat.damage.basic
+        - combat.damage.negative_uncertain
+    - id: apply_hp
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: apply hp
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Subtract only resolved nonnegative damage. No invented zero floor or overkill clamp.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects: []
+      rule_refs:
+        - character.hit_points.loss
+    - id: location_head
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: location head
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hit locations apply only when hitting heroes.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: hit_location
+          value:
+            type: literal
+            value: head
+        - type: set
+          target: torso_check
+          value:
+            type: literal
+            value: false
+    - id: location_arms
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: location arms
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hit locations apply only when hitting heroes.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 2
+      effects:
+        - type: set
+          target: hit_location
+          value:
+            type: literal
+            value: arms
+        - type: set
+          target: torso_check
+          value:
+            type: literal
+            value: false
+    - id: location_torso
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: location torso
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hit locations apply only when hitting heroes.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 3
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: hit_location
+          value:
+            type: literal
+            value: torso
+        - type: set
+          target: torso_check
+          value:
+            type: literal
+            value: true
+    - id: location_legs
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: location legs
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hit locations apply only when hitting heroes.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 6
+      effects:
+        - type: set
+          target: hit_location
+          value:
+            type: literal
+            value: legs
+        - type: set
+          target: torso_check
+          value:
+            type: literal
+            value: false
+    - id: armour
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: armour
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Armour durability uses existing source rule; supply resolved protection/outer-layer and
+        optional durability inputs to that handoff.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: armour
+    - id: quick_slot
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: quick slot
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Any torso hit rolls 1d10; an occupied available slot loses durability, and damaging
+        potion contents affect hero. This handoff does not apply its damage here.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 3
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: location_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: invoke
+          dependency: quick_slots
+    - id: enemy_zero
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: enemy zero
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: An enemy at zero dies.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_is_hero
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects: []
+      rule_refs:
+        - combat.enemy.zero_hp
+    - id: hero_zero
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: hero zero
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: A hero at zero is knocked out and bleeding out.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_is_hero
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects: []
+      rule_refs:
+        - character.hit_points.zero
+    - id: wounded
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: Wounded
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: After actual nonnegative damage leaves positive HP, hand off current Wounded
+        classification and per-turn allowance reconciliation. Do not restore or reset active-turn AP
+        merely because the target took damage.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: hit_points
+                right:
+                  type: literal
+                  value: 0
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: invoke
+          dependency: wounded_status
+    - id: negative_hp
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: negative hp
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Non-poison overkill below zero has no printed clamp; do not invent zero-crossing semantics.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: hit_points
+                right:
+                  type: literal
+                  value: 0
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.zero_and_negative
+    - id: bleeding
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: bleeding
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: At zero hand off rescue, injury and party loss, supplying results explicitly.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_is_hero
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hit_points
+                right:
+                  type: literal
+                  value: 0
+          - type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: sum
+                  values:
+                    - type: field
+                      name: weapon_damage
+                    - type: field
+                      name: damage_bonus
+                - type: sum
+                  values:
+                    - type: field
+                      name: natural_armour
+                    - type: field
+                      name: armour
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: invoke
+          dependency: bleeding
+  entry_step: damage_formula
+  exit_step: bleeding
+  issues:
+    - issue.phase4.damage_floor
+    - issue.phase4.zero_and_negative
+- id: procedure.bleeding_out
+  name: bleeding out
+  section_id: section.combat.bleeding_out
+  source: &a1
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: bleeding out
+      extraction: &a3
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Resolve one bleeding-out checkpoint: initial zero, rescue, after-battle bandage, party
+    loss or explicitly enabled time limit. Full condition lifecycle remains deferred.'
+  fields:
+    phase:
+      type: string
+      role: input
+      description: 'Supplied checkpoint: initial, rescue, after_battle, explicit no_help or timer. A
+        no_help checkpoint supplies actual absence of means, not merely a pending rescue roll.'
+    companion_healing_spell:
+      type: boolean
+      role: input
+      description: companion healing spell
+    own_ready_potion:
+      type: boolean
+      role: input
+      description: own ready potion
+    adjacent_companion_ready_potion:
+      type: boolean
+      role: input
+      description: adjacent companion ready potion
+    battle_over:
+      type: boolean
+      role: input
+      description: battle over
+    standing_companion:
+      type: boolean
+      role: input
+      description: standing companion
+    healer_knocked_out:
+      type: boolean
+      role: input
+      description: healer knocked out
+    all_bleeding_out:
+      type: boolean
+      role: input
+      description: all bleeding out
+    means_to_help:
+      type: boolean
+      role: input
+      description: means to help
+    advanced_rule_enabled:
+      type: boolean
+      role: input
+      description: advanced rule enabled
+    rescue_result_supplied:
+      type: boolean
+      role: input
+      description: rescue result supplied
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    loss:
+      type: number
+      role: input
+      description: loss
+      minimum: 1
+      maximum: 4
+      integer: true
+    selected_value:
+      type: number
+      role: input
+      description: selected value
+    die:
+      type: number
+      role: input
+      description: die
+      minimum: 1
+      maximum: 6
+      integer: true
+    healed_hp:
+      type: number
+      role: input
+      description: healed hp
+    elapsed_turns:
+      type: number
+      role: input
+      description: elapsed turns
+    knocked_down:
+      type: boolean
+      role: output
+      description: knocked down
+    bleeding_out:
+      type: boolean
+      role: output
+      description: bleeding out
+    can_act:
+      type: boolean
+      role: output
+      description: can act
+    quest_lost:
+      type: boolean
+      role: output
+      description: quest lost
+    heroes_die:
+      type: boolean
+      role: output
+      description: heroes die
+    dead:
+      type: boolean
+      role: output
+      description: dead
+    rescue_allowed:
+      type: boolean
+      role: output
+      description: rescue allowed
+    bandage_allowed:
+      type: boolean
+      role: output
+      description: bandage allowed
+    turns:
+      type: number
+      role: output
+      description: turns
+    zero_processed:
+      type: boolean
+      role: state
+      description: Hero/downing-event marker. Fresh event starts false (omitted means unprocessed);
+        persist true across replay. Reset only for a distinct later downing event.
+    timer_processed:
+      type: boolean
+      role: state
+      description: Hero/downing-event marker for the optional supplied timer. Persist across replay,
+        including later elapsed-turn checkpoints; reset only for a distinct later downing event.
+    rescue_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/rescue-or-bandage-attempt marker. Supply false for a distinct attempt and persist
+        true after its handoff; invoke records supplied resolution work, without charging resources
+        or restoring HP.
+    bandage_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/rescue-or-bandage-attempt marker. Supply false for a distinct attempt and persist
+        true after its handoff; invoke records supplied resolution work, without charging resources
+        or restoring HP.
+    untreated_rest_check_requested:
+      type: boolean
+      role: input
+      description:
+        True when the caller also proposes the PDF100 untreated-bleeding rest check as a means
+        of survival. Its overlap with PDF122 no-help death is unresolved; false for the isolated
+        no-help checkpoint.
+  dependencies:
+    - key: healing
+      label: Resolved healing spell or potion from ready slot
+      section_id: section.combat.bleeding_out
+    - key: bandage
+      label: Bandage effect from existing healing rules
+      section_id: section.combat.different_combat_actions
+    - key: death
+      label: Permanent removal and optional next-settlement replacement for this dead hero
+      object_id: procedure.hero_death
+  steps:
+    - id: check_permissions
+      source: *a1
+      source_text:
+        Re-evaluate rescue and bandage permissions for this checkpoint; stale permission from
+        an earlier attempt does not authorize a later handoff.
+      effects:
+        - type: set
+          target: rescue_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: bandage_allowed
+          value:
+            type: literal
+            value: false
+    - id: zero
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: zero
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        At exactly zero incapacitate and apply the supplied randomized permanent injury once
+        per hero/downing event. Persist zero_processed across replay; a distinct later downing event
+        has a fresh marker. Negative-HP entry and injury-target randomization remain unresolved.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: zero_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: zero_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.hit_points.zero
+        - character.hit_points.permanent_injury
+    - id: timer
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: timer
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Only the explicitly enabled advanced rule uses the supplied 1d6+1 turn limit, once per
+        hero/downing event. Persist timer_processed and turns across elapsed-turn checkpoints;
+        replay cannot reroll or extend the limit.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: advanced_rule_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: timer_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: timer_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.hit_points.bleeding_time
+    - id: rescue
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: rescue
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A living bleeding hero may receive a companion spell, own ready potion or adjacent
+        companion ready potion during battle. Record the healing handoff once for the supplied
+        attempt; the handoff neither spends an item nor restores HP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rescue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: battle_over
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: companion_healing_spell
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: own_ready_potion
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent_companion_ready_potion
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_bleeding_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rescue_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: rescue_allowed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: healing
+        - type: set
+          target: rescue_handoff_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.hit_points.rescue
+    - id: healed
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: healed
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        For a living bleeding hero with source-listed rescue means during battle, accept a
+        supplied positive HP result. A handoff alone or zero/negative result cannot wake the hero.
+        Persist the resulting cleared condition; replay cannot reapply healing after rescue.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rescue
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: battle_over
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: companion_healing_spell
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: own_ready_potion
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent_companion_ready_potion
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rescue_result_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: healed_hp
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_bleeding_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: hit_points
+          value:
+            type: field
+            name: healed_hp
+        - type: set
+          target: bleeding_out
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: knocked_down
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: can_act
+          value:
+            type: literal
+            value: true
+    - id: bandage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: bandage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        After battle a standing companion who is not knocked out may bandage a living bleeding
+        hero. Record the bandage handoff once per supplied attempt; actual bandage consumption and
+        healing belong to the referenced resolution.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: after_battle
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: battle_over
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: standing_companion
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: healer_knocked_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: means_to_help
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_bleeding_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bandage_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: bandage_allowed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: bandage
+        - type: set
+          target: bandage_handoff_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.hit_points.after_battle_bandage
+    - id: party_lost
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: party lost
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: All heroes simultaneously bleeding out loses quest and kills party.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: all_bleeding_out
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: dead
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.hit_points.party_loss
+    - id: no_help_rest_boundary
+      source:
+        - *a2
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 100
+          printed_page: 98
+          heading: Bleeding Out and Poisoned Characters
+          extraction: *a3
+      source_text:
+        Do not choose between PDF122 no-means death and the PDF100 untreated-bleeding rest
+        check when the caller proposes both; preserve the source overlap as unresolved.
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: after_battle
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: no_help
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: standing_companion
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: means_to_help
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_bleeding_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: untreated_rest_check_requested
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: unresolved
+          issue_id: issue.rest.untreated_bleeding_no_rescue
+    - id: no_help
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: no help
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        At an explicit no-help checkpoint (including the after-battle checkpoint), a living
+        bleeding hero with standing companions but no means of help dies. The printed no-help
+        sentence does not add a battle-over prerequisite. A proposed untreated-bleeding rest check
+        remains a separate unresolved source overlap.
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: after_battle
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: no_help
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: standing_companion
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: means_to_help
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_bleeding_out
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: untreated_rest_check_requested
+            right:
+              type: literal
+              value: false
+      effects: []
+      rule_refs:
+        - character.hit_points.no_rescue
+    - id: expired
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: expired
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Optional bleeding time limit kills at expiry; elapsed turns and limit are supplied.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: timer
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: advanced_rule_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: elapsed_turns
+            right:
+              type: field
+              name: turns
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bleeding_out
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: dead
+          value:
+            type: literal
+            value: true
+    - id: death_handoff
+      source: *a1
+      source_text:
+        A dead hero is permanently removed; hand off that hero-owned checkpoint and any later
+        player-chosen replacement at the next settlement. Invoke does not create a new hero.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: dead
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: invoke
+          dependency: death
+  entry_step: check_permissions
+  exit_step: death_handoff
+  issues:
+    - issue.rest.untreated_bleeding_no_rescue
+    - issue.phase4.zero_and_negative

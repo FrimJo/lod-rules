@@ -1,0 +1,148 @@
+- id: procedure.hero_death
+  name: Permanent hero removal and optional replacement
+  section_id: section.combat.bleeding_out
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: bleeding out
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A dead hero is permanently removed from the game. The players may choose to add a new
+    level 1 hero to the party the next time the enter a settlement.
+  fields:
+    dead:
+      type: boolean
+      role: state
+      description: The original hero remains dead throughout this procedure; replacement concerns a
+        different new hero.
+    removed_from_game:
+      type: boolean
+      role: state
+      description:
+        Permanent marker owned by this dead hero. Start false and persist true; no resurrection
+        is implied.
+    next_settlement_visit:
+      type: boolean
+      role: input
+      description:
+        Supplied true only at the next settlement entry following this hero death, not any
+        arbitrary later visit.
+    replacement_chosen:
+      type: boolean
+      role: input
+      description: Explicit player choice to add a new hero; false does not automatically create one.
+    replacement_processed:
+      type: boolean
+      role: state
+      description:
+        Lifetime replacement marker owned by this dead hero. Start false and persist true after
+        the chosen replacement checkpoint; replay cannot authorize another replacement.
+    replacement_level:
+      type: number
+      role: output
+      description:
+        Printed level 1 instruction for a distinct new hero; this procedure does not generate
+        its character statistics.
+    can_act:
+      type: boolean
+      role: state
+      description: The permanently removed dead hero cannot act.
+  dependencies: []
+  steps:
+    - id: remove_dead_hero
+      source: *a1
+      source_text: Permanently remove the dead hero once; preserve the original dead identity.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: removed_from_game
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: removed_from_game
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: can_act
+          value:
+            type: literal
+            value: false
+    - id: chosen_replacement
+      source: *a1
+      source_text:
+        Only the explicit player choice at the next settlement entry permits one distinct new
+        level 1 hero. Persist replacement_processed for the dead hero; never change its dead state.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: removed_from_game
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_settlement_visit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: replacement_chosen
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: replacement_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - character.death.replacement
+      effects:
+        - type: set
+          target: replacement_processed
+          value:
+            type: literal
+            value: true
+  entry_step: remove_dead_hero
+  exit_step: chosen_replacement

@@ -1,0 +1,499 @@
+- id: procedure.poison_cure
+  name: Explicit potion or Chapel poison cure
+  section_id: section.combat.different_kinds_of_damage.poison
+  source: &a1
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: Potion of Cure Poison (Antidote)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Poison can be cured by consuming a Cure Poison potion, or by visiting the Chapel of
+    Metheia back in the city. Potion of Cure Poison (Antidote): Weak has 75% success, Standard and
+    Supreme 100%; Supreme also heals 1d3 HP. Actual consumption, quality-specific effects and
+    resource accounting are supplied completed outcomes; this condition checkpoint does not charge
+    or heal again.'
+  see_also:
+    - section.appendix_iii_equipment.general_equipment.alchemy.table
+    - section.alchemy.preparations.potion_of_cure_poison
+    - section.alchemy.drinking_potions
+  unresolved_references:
+    - 'Chapel of Metheia back in the city (PDF122): no dedicated Chapel service/location ID is
+      bound. Do not equate Chapel with Temple or inherit Sick Ward treatment accounting.'
+  issues:
+    - issue.poison.chapel_treatment_route
+  fields:
+    cure_route:
+      type: string
+      role: input
+      description: Printed cure route supplied as potion or chapel.
+    dead:
+      type: boolean
+      role: state
+      description: Original hero dead state; this procedure cannot revive a dead hero.
+    already_poisoned:
+      type: boolean
+      role: state
+      description: Current condition owned by this hero/episode, carried forward into subsequent poison checks.
+    poisoned:
+      type: boolean
+      role: state
+      description: Current hero poison flag, cleared only by a confirmed cure.
+    remaining_poison_rolls:
+      type: number
+      role: state
+      description:
+        Remaining checks for this hero/episode; confirmed removal of all poison effects cancels
+        the sequence.
+      minimum: 0
+      integer: true
+    poison_rolls_due:
+      type: number
+      role: state
+      description: Any pending remaining-check handoff count is cancelled by the confirmed cure.
+    poison_cure_handoff_processed:
+      type: boolean
+      role: state
+      description: Hero/episode/cure-attempt handoff marker. Start false for a distinct attempt and
+        persist true; handoff alone is not consumption or a completed visit.
+    poison_cure_result_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/episode/cure-attempt resolved-result marker. Start false and persist true even for
+        a failed consumed weak potion; replay cannot replace that result with another roll.
+    potion_available:
+      type: boolean
+      role: input
+      description:
+        Supplied owned antidote available for a new request; actual item/action accounting
+        stays with potion resolution.
+    potion_consumed:
+      type: boolean
+      role: input
+      description: Actual consumption already resolved for this attempt, not inferred from invoke.
+    potion_resolution_completed:
+      type: boolean
+      role: input
+      description:
+        Source-backed consumption/resource accounting and the poison-removal outcome have been
+        resolved for this attempt, Supreme 1d3 HP remains a separate item effect and may still
+        require resolution. This checkpoint does not repeat that healing or resource charge.
+    poison_effects_removed:
+      type: boolean
+      role: input
+      description:
+        Supplied outcome from the existing source-backed antidote effects; false for a consumed
+        weak potion failure.
+    back_in_city:
+      type: boolean
+      role: input
+      description:
+        Supplied context for the printed Chapel visit back in the city; no settlement-type
+        alias is inferred.
+    chapel_access_confirmed:
+      type: boolean
+      role: input
+      description: Supplied access to the printed Chapel, without a guessed Temple/Sick Ward equivalence.
+    chapel_visit_completed:
+      type: boolean
+      role: input
+      description: Actual completed Chapel visit, not mere request or service availability.
+        Route/price/AP/day boundaries remain linked review data.
+    poison_cure_allowed:
+      type: boolean
+      role: output
+      description: Current call has an eligible unresolved cure attempt; reset on every invocation.
+    poison_cure_confirmed:
+      type: boolean
+      role: output
+      description: Current call has a confirmed cure effect; reset on every invocation.
+    cured:
+      type: boolean
+      role: state
+      description: Confirmed poison removal; unrelated disease, HP and wake-up state are not changed.
+  dependencies:
+    - key: potion
+      label:
+        Actual antidote consumption and source-backed quality effects; caller supplies completed
+        resource/HP outcomes
+      section_id: section.alchemy.preparations.potion_of_cure_poison
+    - key: chapel
+      label: Chapel of Metheia back in the city — printed visit; service/location routing unresolved
+    - key: standard_potion_effect
+      label: Existing standard antidote poison-removal effect
+      object_id: character.equipment.alchemy.potion_of_cure_poison.cure
+    - key: weak_potion_effect
+      label: Existing weak antidote 75% poison-removal effect
+      object_id: character.equipment.alchemy.potion_of_cure_poison_weak.cure
+    - key: potion_preparation
+      label: Existing antidote preparation description
+      object_id: character.alchemy.preparation.potion_of_cure_poison
+    - key: supreme_potion_bonus
+      label: Existing separate Supreme 1d3 HP instruction
+      object_id: character.alchemy.quality_effect.potion_of_cure_poison.supreme
+    - key: drinking_rule
+      label: Existing drinking-action source rule; resource accounting resolved separately
+      object_id: character.alchemy.drink
+  steps:
+    - id: check_cure
+      source: *a1
+      source_text: Re-evaluate this living poisoned hero and unresolved cure attempt; reject unknown
+        routes, replayed results and dead/unaffected heroes.
+      effects:
+        - type: set
+          target: poison_cure_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: poison_cure_confirmed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_cure
+          source: *a1
+          source_text:
+            Accept an unresolved potion or Chapel attempt for this living poisoned hero. Source
+            completion outcomes remain supplied.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_poisoned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_cure_result_processed
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: cure_route
+                    right:
+                      type: literal
+                      value: potion
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: cure_route
+                    right:
+                      type: literal
+                      value: chapel
+          effects:
+            - type: set
+              target: poison_cure_allowed
+              value:
+                type: literal
+                value: true
+    - id: request_potion
+      source: *a1
+      source_text: Request an available antidote resolution once; invoke does not consume an item or
+        create a cure.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: cure_route
+            right:
+              type: literal
+              value: potion
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: potion_available
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: potion_consumed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: poison_cure_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: potion
+    - id: resolve_potion
+      source: *a1
+      source_text:
+        An actually consumed potion with completed source-quality resolution consumes this
+        attempt result even if Weak fails. Only supplied removal of poison effects confirms a cure.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: cure_route
+            right:
+              type: literal
+              value: potion
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: potion_consumed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: potion_resolution_completed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: poison_cure_result_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poison_cure_confirmed
+          value:
+            type: field
+            name: poison_effects_removed
+    - id: request_chapel
+      source:
+        - *a2
+      source_text:
+        Request the printed Chapel visit once when access back in the city is confirmed. Do not
+        guess a settlement service ID or its price/duration.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: cure_route
+            right:
+              type: literal
+              value: chapel
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: back_in_city
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapel_access_confirmed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapel_visit_completed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: poison_cure_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: chapel
+    - id: resolve_chapel
+      source:
+        - *a2
+      source_text:
+        The actual completed printed Chapel visit back in the city confirms the local poison
+        cure. Administrative route/accounting questions remain unresolved rather than guessed.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_cure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: cure_route
+            right:
+              type: literal
+              value: chapel
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: back_in_city
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapel_access_confirmed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapel_visit_completed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: poison_cure_result_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poison_cure_confirmed
+          value:
+            type: literal
+            value: true
+    - id: clear_poison
+      source: *a1
+      source_text:
+        Confirmed removal clears the current poison condition and cancels remaining checks. Do
+        not restore HP, wake a negative-HP hero, or charge already completed potion/visit resources
+        a second time.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: poison_cure_confirmed
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: already_poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: literal
+            value: 0
+  entry_step: check_cure
+  exit_step: clear_poison

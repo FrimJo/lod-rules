@@ -1,0 +1,661 @@
+- id: procedure.sanity_recovery
+  name: Actual hero Sanity recovery and indulgence accounting
+  section_id: section.psychology.sanity.reducing_insanity
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 55
+      printed_page: 53
+      heading: Reducing Insanity, or Increasing Sanity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Tending to those Memories
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Resting between quests restores 1d3 Sanity up to 8; an actual inn
+    stay of at least one night restores 1d3 per hero. Paid ale or other
+    pleasures cost 1d3 times 100 c and improve Sanity by 1d6. This procedure
+    owns one actual completed hero/event result, with ordinary-rest routes
+    sharing the same event marker. Active-condition maximum conflict, additional
+    recovery ceiling, modified capacities and repetition scope remain
+    unresolved. Herbs, potions, prayers, spells, Talents and Asylum treatment
+    remain separately source-owned.
+  issues:
+    - issue.phase4.sanity_maximum
+    - issue.phase4.sanity_boundaries
+    - issue.sanity.recovery_scope
+  dependencies:
+    - key: ordinary
+      label: Printed between-quest ordinary recovery
+      object_id: character.sanity.recovery
+    - key: inn
+      label: Printed at-least-one-night inn recovery
+      object_id: character.sanity.inn_recovery
+    - key: indulgence
+      label: Printed actual paid indulgence cost and recovery
+      object_id: character.sanity.indulgence
+    - key: context
+      label: Actual completed hero recovery occasion, eligible scope and supplied
+        rolls
+    - key: treatment
+      label: Asylum disorder cure is distinct from point recovery
+      object_id: character.sanity.treatment
+    - key: other_recovery
+      label: Herbs, potions, prayers, spells and Talents have separately source-owned
+        effects; no unnamed value is invented
+  fields:
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Actual applicability of optional Sanity to this hero.
+    sanity_recovery_owner_matches:
+      type: boolean
+      role: input
+      description: This actual recovery event and its marker belong to this hero.
+    recovery_route:
+      type: string
+      role: input
+      description: between_quests, inn or indulgence; source-grounded route, not
+        dungeon Rest recovery.
+    recovery_completed:
+      type: boolean
+      role: input
+      description: Actual source rest/stay/indulgence completed; request, interrupted
+        stay or another hero completion is insufficient.
+    sanity_rest_recovery_processed:
+      type: boolean
+      role: state
+      description: Hero/distinct actual completed recovery-rest marker shared between
+        between_quests and inn routes for the same actual rest. Fresh false only
+        for another source-grounded recovery occasion, not another
+        night/route/replay by itself.
+    sanity_indulgence_processed:
+      type: boolean
+      role: state
+      description: Hero/distinct actual indulgence result marker. Persist after
+        payment/recovery; another eligible actual occasion uses a fresh marker,
+        not unlimited repeated request/rolls.
+    sanity_recovery_input_request_processed:
+      type: boolean
+      role: state
+      description: Hero/current recovery event input handoff marker; request once,
+        reset only for distinct actual event.
+    recovery_rolls_supplied:
+      type: boolean
+      role: input
+      description: Actual relevant recovery roll, and actual cost roll for indulgence,
+        are supplied; no random result invented.
+    sanity_rest_scope_resolved:
+      type: boolean
+      role: input
+      description: 'Actual source eligibility and event scope reconciled: completed
+        between-quest rest or qualifying inn stay, same-rest overlap and
+        per-stay/per-night boundaries.'
+    sanity_indulgence_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual completed paid indulgence eligibility/occasion and payment
+        ownership reconciled, including additional vs ordinary recovery and
+        unspecified repetition frequency.
+    sanity_capacity_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual source capacity is the unmodified ordinary context; false
+        for conflicting active-condition cap or other Talent/potion/spell/Herb
+        modifiers requiring separate source resolution.
+    between_quests:
+      type: boolean
+      role: input
+      description: This actual rest occurred between quests, not a dungeon Rest.
+    nights:
+      type: number
+      role: input
+      description: Actual completed nights in an inn for this stay; not home/stable
+        lodging inferred as an inn.
+      integer: true
+      minimum: 0
+    die:
+      type: number
+      role: input
+      description: Actual ordinary 1d3 recovery result.
+      integer: true
+      minimum: 1
+      maximum: 3
+    cost_die:
+      type: number
+      role: input
+      description: Actual paid-indulgence 1d3 cost result.
+      integer: true
+      minimum: 1
+      maximum: 3
+    recovery_die:
+      type: number
+      role: input
+      description: Actual paid-indulgence 1d6 Sanity result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    sanity:
+      type: number
+      role: state
+      description: Actual current hero Sanity; no creation reset or guessed correction.
+    current_conditions:
+      type: number
+      role: input
+      description: Actual active-condition count; positive retains unresolved source
+        maximum conflict.
+      integer: true
+      minimum: 0
+      maximum: 9
+    coins:
+      type: number
+      role: state
+      description: Actual hero available funds for this uncharged indulgence; other
+        service/lodging charges separately owned.
+  steps:
+    - id: request_inputs
+      source:
+        - *a1
+        - *a2
+      source_text: Request missing actual results/scope once; handoff does not recover
+        or charge.
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_recovery_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: recovery_completed
+                right:
+                  type: literal
+                  value: true
+          - &a5
+            type: any
+            conditions:
+              - type: all
+                conditions:
+                  - &a3
+                    type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: recovery_route
+                        right:
+                          type: literal
+                          value: between_quests
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: recovery_route
+                        right:
+                          type: literal
+                          value: inn
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_rest_recovery_processed
+                    right:
+                      type: literal
+                      value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: recovery_route
+                    right:
+                      type: literal
+                      value: indulgence
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_indulgence_processed
+                    right:
+                      type: literal
+                      value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: recovery_rolls_supplied
+                right:
+                  type: literal
+                  value: false
+              - type: all
+                conditions:
+                  - *a3
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_rest_scope_resolved
+                    right:
+                      type: literal
+                      value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: recovery_route
+                    right:
+                      type: literal
+                      value: indulgence
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_indulgence_scope_resolved
+                    right:
+                      type: literal
+                      value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_recovery_input_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: sanity_recovery_input_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: context
+    - id: maximum_conflict
+      source:
+        - *a1
+        - *a2
+      source_text: Active conditions retain the conflict between 8 and 8 minus active
+        conditions; neither charge nor gain is guessed.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - *a5
+          - &a6
+            type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: recovery_route
+                    right:
+                      type: literal
+                      value: between_quests
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: between_quests
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_rest_scope_resolved
+                    right:
+                      type: literal
+                      value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: recovery_route
+                    right:
+                      type: literal
+                      value: inn
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: nights
+                    right:
+                      type: literal
+                      value: 1
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_rest_scope_resolved
+                    right:
+                      type: literal
+                      value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: recovery_route
+                    right:
+                      type: literal
+                      value: indulgence
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_indulgence_scope_resolved
+                    right:
+                      type: literal
+                      value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.sanity_maximum
+    - id: capacity_context
+      source:
+        - *a1
+        - *a2
+      source_text: Modified capacities and invalid/unresolved Sanity context cannot be
+        silently reset or clamped.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - *a5
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 0
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_capacity_scope_resolved
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: lt
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 8
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.recovery_scope
+    - id: between_quests
+      source:
+        - *a1
+        - *a2
+      source_text: Apply the stable source ordinary-rest rule once for this actual
+        between-quest rest; at-cap recovery still consumes this completed event.
+      when:
+        type: all
+        conditions:
+          - &a7
+            type: all
+            conditions:
+              - *a4
+              - *a5
+              - *a6
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: current_conditions
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_capacity_scope_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: sanity
+                right:
+                  type: literal
+                  value: 8
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_route
+            right:
+              type: literal
+              value: between_quests
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_rolls_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: sanity_rest_recovery_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.recovery
+    - id: inn
+      source:
+        - *a1
+        - *a2
+      source_text: Apply the stable inn rule once for this qualifying completed stay.
+        A second route for this same rest shares the consumed marker.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_route
+            right:
+              type: literal
+              value: inn
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_rolls_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: sanity_rest_recovery_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.inn_recovery
+    - id: indulgence_boundary
+      source:
+        - *a1
+        - *a2
+      source_text: A paid result beyond the ordinary maximum has no source-settled
+        overflow/clamp outcome in this checkpoint; payment and gain remain
+        pending together.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_route
+            right:
+              type: literal
+              value: indulgence
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_rolls_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: sum
+              values:
+                - type: field
+                  name: sanity
+                - type: field
+                  name: recovery_die
+            right:
+              type: literal
+              value: 8
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.recovery_scope
+    - id: indulgence
+      source:
+        - *a1
+        - *a2
+      source_text: Resolve actual cost and Sanity gain together once when
+        source-grounded, affordable and within the uncontested ordinary range.
+        Insufficient funds cannot consume this result.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_route
+            right:
+              type: literal
+              value: indulgence
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: recovery_rolls_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: sum
+              values:
+                - type: field
+                  name: sanity
+                - type: field
+                  name: recovery_die
+            right:
+              type: literal
+              value: 8
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: arithmetic
+              operator: multiply
+              values:
+                - type: field
+                  name: cost_die
+                - type: literal
+                  value: 100
+      effects:
+        - type: set
+          target: sanity_indulgence_processed
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - character.sanity.indulgence
+  entry_step: request_inputs
+  exit_step: indulgence

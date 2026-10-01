@@ -1,0 +1,1354 @@
+- id: procedure.learn_spell
+  name: Learn a new spell
+  section_id: section.magic.learning_new_spells
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 66
+      printed_page: 64
+      heading: Learning New Spells
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Learn a Spell or Prayer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Learning New Spells
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A Wizard may learn spells of their own level or lower in Silver City. The fee is 200 c
+    plus 100 c for each level above 1. Learning takes 3 days; only one spell may be learned between
+    each quest. A found Grimoire waives the fee for that spell.
+  fields:
+    settlement: &a2
+      type: string
+      role: input
+      description: silver_city is required for guilds and Inner Sanctum.
+    profession: &a3
+      type: string
+      role: input
+      description: Stable profession ID suffix.
+    business_allowed: &a4
+      type: boolean
+      role: input
+      description: Supplied settlement visit authorization.
+    leaving_on_quest: &a5
+      type: boolean
+      role: input
+      description: No settlement actions on a quest-departure day.
+    activity_authorized: &a6
+      type: boolean
+      role: input
+      description: Existing settlement procedure reserved the correct activity for this hero and this operation.
+    reserved_activity_points: &a7
+      type: number
+      role: input
+      description: Reserved cost from table.settlement.activities; not charged again here.
+      integer: true
+      minimum: 0
+    completed_activity_days: &a8
+      type: number
+      role: input
+      description: Fully completed days of this same reservation; zero until the first day finishes.
+      integer: true
+      minimum: 0
+    coins: &a9
+      type: number
+      role: state
+      description:
+        Hero or explicitly designated payer balance. Lodging charges belong to the settlement
+        procedure.
+      integer: true
+      minimum: 0
+    hero_level:
+      type: number
+      role: input
+      description: Current hero level.
+      integer: true
+      minimum: 1
+      maximum: 10
+    chosen_level:
+      type: number
+      role: input
+      description: Level of the selected spell from its existing catalogue.
+      integer: true
+      minimum: 1
+      maximum: 10
+    chosen_id:
+      type: string
+      role: input
+      description: Selected canonical spell ID; caller resolves the catalogue selection.
+    catalogue_selection_valid:
+      type: boolean
+      role: input
+      description: Selected ID exists, has the supplied level, and is learnable by this profession.
+    known:
+      type: boolean
+      role: state
+      description: Per chosen spell; whether already learned.
+    learned_since_boundary:
+      type: boolean
+      role: state
+      description:
+        Per hero across all spells since the preceding quest; a new settlement visit does not
+        reset it.
+    grimoire_for_this_spell:
+      type: boolean
+      role: input
+      description: A found Grimoire contains this selected spell; only its learning fee is waived.
+    learning_cost:
+      type: number
+      role: output
+      description: Learning fee; lodging and activity points are accounted separately.
+      integer: true
+      minimum: 0
+    required_activity_points:
+      type: number
+      role: output
+      description: Duration to reserve in existing settlement accounting.
+      integer: true
+      minimum: 0
+    learned:
+      type: boolean
+      role: output
+      description: Whether this call completed learning.
+  dependencies:
+    - &a10
+      key: activity_accounting
+      object_id: procedure.settlement_activities_and_overnight
+      label:
+        Reserve and complete activity days and settle party lodging separately; invocation never
+        deducts Activity Points or lodging again.
+    - &a11
+      key: activities
+      object_id: table.settlement.activities
+      label: 'Source duration: spell 3; prayer 1; Skill Training 1.'
+    - key: learning_rule
+      object_id: character.settlement.guild.wizards.learning
+      label: Existing catalogue learning rule.
+  steps:
+    - id: quote
+      source_text: Learning costs 200 c plus 100 c per level above 1.
+      effects:
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: required_activity_points
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: learning_cost
+          value:
+            type: sum
+            values:
+              - type: literal
+                value: 200
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: literal
+                    value: 100
+                  - type: arithmetic
+                    operator: subtract
+                    values:
+                      - type: field
+                        name: chosen_level
+                      - type: literal
+                        value: 1
+    - id: grimoire_fee
+      source_text: If the wizard found a Grimoire, learning that spell is free; it still takes 3 days.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: grimoire_for_this_spell
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: learning_cost
+          value:
+            type: literal
+            value: 0
+    - id: check_learning
+      source_text:
+        One spell between each quest; the hero must afford it, meet its level, and complete the
+        reserved duration.
+      effects:
+        - type: require
+          condition: &a1
+            type: all
+            conditions:
+              - &a12
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: activity_authorized
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: wizard
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: catalogue_selection_valid
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: chosen_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: chosen_level
+                right:
+                  type: field
+                  name: hero_level
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: learned_since_boundary
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reserved_activity_points
+                right:
+                  type: literal
+                  value: 3
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: completed_activity_days
+                right:
+                  type: literal
+                  value: 3
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: learning_cost
+    - id: learn
+      source_text: Complete the 3-day learning activity once and pay its fee.
+      when: *a1
+      effects:
+        - type: invoke
+          dependency: activity_accounting
+        - type: invoke
+          dependency: activities
+        - type: invoke
+          dependency: learning_rule
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: learning_cost
+          duration: permanent
+        - type: set
+          target: known
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned_since_boundary
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: true
+  entry_step: quote
+  exit_step: learn
+- id: procedure.learn_prayer
+  name: Learn a new prayer
+  section_id: section.prayers.learning_new_prayers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Learning New Prayers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Learn a Spell or Prayer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Learning a New Prayer
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A Warrior Priest may learn prayers of their own level or lower in Silver City. The fee
+    is 200 c plus 100 c for each level above 1. Learning takes 1 day; only one prayer may be learned
+    between each dungeon. The two-day worked schedule conflicts with the explicit one-day rule and
+    remains recorded as an issue.
+  fields:
+    settlement: *a2
+    profession: *a3
+    business_allowed: *a4
+    leaving_on_quest: *a5
+    activity_authorized: *a6
+    reserved_activity_points: *a7
+    completed_activity_days: *a8
+    coins: *a9
+    hero_level:
+      type: number
+      role: input
+      description: Current hero level.
+      integer: true
+      minimum: 1
+      maximum: 10
+    chosen_level:
+      type: number
+      role: input
+      description: Level of the selected prayer from its existing catalogue.
+      integer: true
+      minimum: 1
+      maximum: 10
+    chosen_id:
+      type: string
+      role: input
+      description: Selected canonical prayer ID; caller resolves the catalogue selection.
+    catalogue_selection_valid:
+      type: boolean
+      role: input
+      description: Selected ID exists, has the supplied level, and is learnable by this profession.
+    known:
+      type: boolean
+      role: state
+      description: Per chosen prayer; whether already learned.
+    learned_since_boundary:
+      type: boolean
+      role: state
+      description:
+        Per hero across all prayers since the preceding dungeon; a new settlement visit does
+        not reset it.
+    learning_cost:
+      type: number
+      role: output
+      description: Learning fee; lodging and activity points are accounted separately.
+      integer: true
+      minimum: 0
+    required_activity_points:
+      type: number
+      role: output
+      description: Duration to reserve in existing settlement accounting.
+      integer: true
+      minimum: 0
+    learned:
+      type: boolean
+      role: output
+      description: Whether this call completed learning.
+  dependencies:
+    - *a10
+    - *a11
+    - key: learning_rule
+      object_id: character.settlement.guild.inner_sanctum.learning
+      label: Existing catalogue learning rule.
+  steps:
+    - id: quote
+      source_text: Learning costs 200 c plus 100 c per level above 1.
+      effects:
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: required_activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: learning_cost
+          value:
+            type: sum
+            values:
+              - type: literal
+                value: 200
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: literal
+                    value: 100
+                  - type: arithmetic
+                    operator: subtract
+                    values:
+                      - type: field
+                        name: chosen_level
+                      - type: literal
+                        value: 1
+    - id: check_learning
+      source_text:
+        One prayer between each dungeon; the hero must afford it, meet its level, and complete
+        the reserved duration.
+      effects:
+        - type: require
+          condition: &a13
+            type: all
+            conditions:
+              - *a12
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: catalogue_selection_valid
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: chosen_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: chosen_level
+                right:
+                  type: field
+                  name: hero_level
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: known
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: learned_since_boundary
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reserved_activity_points
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: completed_activity_days
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: learning_cost
+    - id: learn
+      source_text: Complete the 1-day learning activity once and pay its fee.
+      when: *a13
+      effects:
+        - type: invoke
+          dependency: activity_accounting
+        - type: invoke
+          dependency: activities
+        - type: invoke
+          dependency: learning_rule
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: learning_cost
+          duration: permanent
+        - type: set
+          target: known
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned_since_boundary
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: learned
+          value:
+            type: literal
+            value: true
+  entry_step: quote
+  exit_step: learn
+  issues:
+    - issue.settlement.prayer_schedule_duration
+- id: procedure.guild_skill_training
+  name: Guild skill training
+  section_id: section.settlements.skills_training
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Skills Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 60
+      printed_page: 58
+      heading: Stats and Skills Maximum
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 151
+      printed_page: 149
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 154
+      printed_page: 152
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Skill Training
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The appropriate profession may train only the guild’s listed skills. A session grants
+    +3 for 300 c, with one session per skill between two dungeons. Skill Training takes one Activity
+    Point; the Inner Sanctum explicitly states one day. The natural skill maximum remains 80; no
+    partial +1/+2 purchase is specified.
+  fields:
+    settlement: *a2
+    profession: *a3
+    business_allowed: *a4
+    leaving_on_quest: *a5
+    activity_authorized: *a6
+    reserved_activity_points: *a7
+    completed_activity_days: *a8
+    coins: *a9
+    guild:
+      type: string
+      role: input
+      description: dark, fighters, wizards, alchemists, rangers or inner_sanctum.
+    skill:
+      type: string
+      role: input
+      description: Canonical skill name for the selected training.
+    natural_skill:
+      type: number
+      role: state
+      description: Skill including unconditioned talent bonuses, excluding conditional/temporary bonuses.
+      integer: true
+      minimum: 0
+      maximum: 80
+    trained_since_dungeon:
+      type: boolean
+      role: state
+      description: Per hero and skill across all guilds and visits; reset only after a dungeon.
+    training_eligible:
+      type: boolean
+      role: output
+      description: Guild permits this profession and skill.
+    trained:
+      type: boolean
+      role: output
+      description: The session completed on this call.
+  dependencies:
+    - *a10
+    - *a11
+    - key: training_dark
+      object_id: character.settlement.guild.dark.training
+      label: Existing guild access and training catalogue.
+    - key: training_fighters
+      object_id: character.settlement.guild.fighters.training
+      label: Existing guild access and training catalogue.
+    - key: training_wizards
+      object_id: character.settlement.guild.wizards.training
+      label: Existing guild access and training catalogue.
+    - key: training_alchemists
+      object_id: character.settlement.guild.alchemists.training
+      label: Existing guild access and training catalogue.
+    - key: training_rangers
+      object_id: character.settlement.guild.rangers.training
+      label: Existing guild access and training catalogue.
+    - key: training_inner_sanctum
+      object_id: character.settlement.guild.inner_sanctum.training
+      label: Existing guild access and training catalogue.
+    - key: skill_maximum
+      object_id: character.skill.natural_maximum
+      label: Natural skill maximum includes unconditional talent bonuses.
+  steps:
+    - id: initialize
+      source_text: Guilds protect their services and admit the appropriate professions.
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: trained
+          value:
+            type: literal
+            value: false
+    - id: eligibility_dark
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 148
+          printed_page: 146
+          heading: Skill Training
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: dark
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: thief
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: rogue
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: cs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: rs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: pick_locks
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: perception
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: eligibility_fighters
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 151
+          printed_page: 149
+          heading: Skill Training
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: fighters
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: barbarian
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: cs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: heal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: dodge
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: eligibility_wizards
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Skill Training
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: wizards
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: wizard
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: arcane_arts
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: perception
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: heal
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: eligibility_alchemists
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 154
+          printed_page: 152
+          heading: Skill Training
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: alchemists
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: alchemist
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: alchemy
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: heal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: perception
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: eligibility_rangers
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 156
+          printed_page: 154
+          heading: Skill Training
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: rangers
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: ranger
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: cs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: rs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: dodge
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: heal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: foraging
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: eligibility_inner_sanctum
+      source_text: Training is restricted to the listed professions and skills.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Practicing Skills
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: cs
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: dodge
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: skill
+                right:
+                  type: literal
+                  value: battle_prayers
+      effects:
+        - type: set
+          target: training_eligible
+          value:
+            type: literal
+            value: true
+    - id: partial_training_uncertain
+      source_text:
+        The source does not specify partial +1/+2 training or a prorated fee when the full +3
+        exceeds 80.
+      when:
+        type: all
+        conditions:
+          - *a12
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: training_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trained_since_dungeon
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: natural_skill
+                right:
+                  type: literal
+                  value: 78
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: natural_skill
+                right:
+                  type: literal
+                  value: 79
+      effects:
+        - type: unresolved
+          issue_id: issue.guild.training_near_cap
+    - id: check_training
+      source_text:
+        A +3 session costs 300 c, takes one Activity Point, and is limited to one per skill
+        between dungeons. Natural skills cannot exceed 80.
+      effects:
+        - type: require
+          condition: &a14
+            type: all
+            conditions:
+              - *a12
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: training_eligible
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trained_since_dungeon
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reserved_activity_points
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: completed_activity_days
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: literal
+                  value: 300
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: natural_skill
+                right:
+                  type: literal
+                  value: 77
+    - id: train
+      source_text: Complete the reserved training day, pay once, and increase the chosen skill by +3.
+      when: *a14
+      effects:
+        - type: invoke
+          dependency: activity_accounting
+        - type: invoke
+          dependency: activities
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -300
+          duration: permanent
+        - type: add
+          target: natural_skill
+          value:
+            type: literal
+            value: 3
+          duration: permanent
+        - type: set
+          target: trained_since_dungeon
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: trained
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: train
+  issues:
+    - issue.guild.training_near_cap

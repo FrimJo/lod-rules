@@ -1,0 +1,1564 @@
+- id: procedure.mental_condition_treatment
+  name: Owned disorder selection and completed Asylum treatment result
+  section_id: section.settlements.treat_mental_conditions
+  source: &a1
+    - &a8
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Treat Mental Conditions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a9
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        column: Condition/Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Asylum treatment costs 1000 c, attempts one disorder per hero
+    between quests, succeeds on 1–5 on 1d6, and takes five days. Existing
+    settlement service/activity procedures own payment, elapsed/reserved
+    activity days, opportunity consumption and numerical condition-count
+    reduction. Snapshot the actual eligible selected disorder before requesting
+    that service; consume its actual completed result once and synchronize the
+    Sanity count without a second subtraction. Successful disorder removal hands
+    off source-specific effect cleanup. No diagnosis history, Sanity/capacity
+    reset, duplicate charge, guessed stat restoration or new between-quest
+    opportunity is introduced. Actual successful cure clears only the
+    snapshotted disorder active flag once; numerical effect cleanup remains
+    pending.
+  issues:
+    - issue.sanity.mental_treatment_ownership
+    - issue.phase4.sanity_boundaries
+  fields:
+    phase:
+      type: string
+      role: input
+      description: prepare snapshots the actual selected disorder before service;
+        complete consumes the actual completed accounting result.
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Actual optional Sanity applicability for this hero.
+    mental_treatment_owner_matches:
+      type: boolean
+      role: input
+      description: Actual hero/between-quest interval/disorder/service-attempt
+        ownership matches; not another hero, visit or an old service output.
+    mental_selection_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual selected existing active disorder is eligible for this
+        Asylum treatment, including quest-specific exceptions; no blanket
+        curability is inferred.
+    selected_disorder_supplied:
+      type: boolean
+      role: input
+      description: Actual selected disorder for this attempt is supplied.
+    selected_disorder:
+      type: string
+      role: input
+      description: Actual one selected canonical table disorder for this attempt;
+        never change target after the snapshot.
+    mental_treatment_selection_processed:
+      type: boolean
+      role: state
+      description: Hero/actual attempt selection snapshot marker; persist through
+        pending service/result.
+    mental_treatment_disorder:
+      type: string
+      role: state
+      description: Persisted actual selected disorder for this service attempt.
+    mental_conditions_before_treatment:
+      type: number
+      role: state
+      description: Snapshot of actual active count before this attempt, used only to
+        reconcile existing service output.
+      integer: true
+      minimum: 1
+    mental_treatment_result_processed:
+      type: boolean
+      role: state
+      description: Actual completed attempt result consumed once whether success or
+        failure; no marker reset from new day/visit/changed roll.
+    mental_treatment_succeeded:
+      type: boolean
+      role: state
+      description: Persisted actual treatment outcome; true only for completed d6
+        result 1–5.
+    mental_treatment_removal_pending:
+      type: boolean
+      role: state
+      description: Actual successful result awaits source-specific effect cleanup;
+        handoff alone applies no resource restoration.
+    mental_attempt_used:
+      type: boolean
+      role: state
+      description: Existing settlement accounting owns one attempt per hero between
+        quests; consumed even on failure, never reset here.
+    mental_conditions:
+      type: number
+      role: state
+      description: Existing completed settlement service active-condition count; do
+        not subtract again.
+      integer: true
+      minimum: 0
+    current_conditions:
+      type: number
+      role: state
+      description: Sanity subsystem active count; synchronize to the verified service
+        result without another decrement.
+      integer: true
+      minimum: 0
+    mental_accounting_confirmed:
+      type: boolean
+      role: input
+      description: 'Actual same-attempt accounting completion is supplied: eligible
+        service, 1000 c charge, five-day reservation and attempt consumption,
+        with no other count mutation.'
+    service_completed:
+      type: boolean
+      role: input
+      description: Actual completion output of this owned service; a stale/requested
+        service flag does not establish completion.
+    mental_treatment_days_completed:
+      type: number
+      role: input
+      description: Actual completed days in this source five-day service, separately
+        owned by settlement activity accounting.
+      integer: true
+      minimum: 0
+    treatment_roll_supplied:
+      type: boolean
+      role: input
+      description: Actual d6 result of this completed attempt is supplied, not a
+        speculative or replay-substituted roll.
+    treatment_roll:
+      type: number
+      role: input
+      description: Actual completed attempt d6 result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    mental_treatment_trait_removal_processed:
+      type: boolean
+      role: state
+      description: Actual successful snapshotted disorder active flag cleared once;
+        persist after completion. Numeric/capacity/Talent cleanup remains
+        separate.
+    hate:
+      type: boolean
+      role: state
+      description: Actual active Hate disorder owned by this hero; only a successful
+        cure of this snapshotted disorder clears it.
+    acute_stress_active:
+      type: boolean
+      role: state
+      description: Actual active Acute Stress disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    trauma_diagnosed:
+      type: boolean
+      role: state
+      description: Actual active Lingering Trauma disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    fear_of_the_dark:
+      type: boolean
+      role: state
+      description: Actual active Fear of the Dark disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    arachnophobia:
+      type: boolean
+      role: state
+      description: Actual active Arachnophobia disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    jumpy_active:
+      type: boolean
+      role: state
+      description: Actual active Jumpy disorder owned by this hero; only a successful
+        cure of this snapshotted disorder clears it.
+    irrational_fear:
+      type: boolean
+      role: state
+      description: Actual active Irrational Fear disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    claustrophobia:
+      type: boolean
+      role: state
+      description: Actual active Claustrophobia disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    depression_active:
+      type: boolean
+      role: state
+      description: Actual active Depression disorder owned by this hero; only a
+        successful cure of this snapshotted disorder clears it.
+    mental_selection_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-owned attempt request_selection handoff marker;
+        independent of requests in other stages.
+    mental_accounting_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-owned attempt request_service handoff marker; independent
+        of requests in other stages.
+    mental_result_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-owned attempt request_result handoff marker; independent
+        of requests in other stages.
+    mental_treatment_roll_snapshot_processed:
+      type: boolean
+      role: state
+      description: Actual completed attempt roll captured once before count
+        reconciliation; changed replay input cannot substitute another result.
+    mental_treatment_roll:
+      type: number
+      role: state
+      description: Persisted actual completed attempt d6 result, not a subsequent reroll.
+      integer: true
+      minimum: 1
+      maximum: 6
+  dependencies:
+    - key: accounting
+      label: Existing eligible 1000 c/five-day service and between-quest attempt
+        accounting
+      object_id: procedure.settlement_buy_sell_and_service
+    - key: activities
+      label: Existing actual five-day activity/reservation completion
+      object_id: procedure.settlement_activities_and_overnight
+    - key: inputs
+      label: Actual owned selected disorder and same-attempt completed treatment
+        result
+    - key: cleanup
+      label: Actual cured disorder effect cleanup; source-specific
+        stat/capacity/Talent restoration remains unresolved
+      object_id: procedure.mental_condition_cleanup
+    - key: source_treatment
+      label: Existing source treatment cost/duration/limit atom; not executed again
+      object_id: character.sanity.treatment
+    - key: source_result
+      label: Existing source d6 success boundary
+      object_id: character.sanity.treatment_success
+  steps:
+    - id: request_selection
+      source: *a1
+      source_text: Request an actual eligible selected disorder once; no selection or
+        charge is invented.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - &a4
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_system_enabled
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mental_treatment_owner_matches
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mental_treatment_result_processed
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: prepare
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_selection_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_attempt_used
+                right:
+                  type: literal
+                  value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: selected_disorder_supplied
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_selection_scope_resolved
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_selection_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: mental_selection_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: inputs
+    - id: invalid_selection
+      source: *a1
+      source_text: An out-of-list supplied disorder has no canonical table identity in
+        this bounded procedure.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_disorder_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_selection_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: not
+            condition: &a3
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Hate
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Acute Stress
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Lingering Trauma
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Fear of the Dark
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Arachnophobia
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Jumpy
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Irrational Fear
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Claustrophobia
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_disorder
+                  right:
+                    type: literal
+                    value: Depression
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.mental_treatment_ownership
+    - id: snapshot
+      source: *a1
+      source_text: Persist one actual selected active disorder and pre-service count.
+        No later target/roster change may silently replace it.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selected_disorder_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_selection_scope_resolved
+            right:
+              type: literal
+              value: true
+          - *a3
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: current_conditions
+            right:
+              type: field
+              name: mental_conditions
+      effects:
+        - type: set
+          target: mental_treatment_disorder
+          value:
+            type: field
+            name: selected_disorder
+        - type: set
+          target: mental_conditions_before_treatment
+          value:
+            type: field
+            name: current_conditions
+        - type: set
+          target: mental_treatment_selection_processed
+          value:
+            type: literal
+            value: true
+    - id: request_service
+      source: *a1
+      source_text: Hand off selected source treatment once; invocation alone does not
+        pay, pass five days, consume opportunity or cure.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: prepare
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_attempt_used
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_accounting_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: mental_accounting_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: accounting
+    - id: request_result
+      source: *a1
+      source_text: A pending owned selection requests actual completed
+        accounting/result input once, without claiming an attempt happened.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_accounting_confirmed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: treatment_roll_supplied
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_result_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: mental_result_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: inputs
+    - id: snapshot_result
+      source: *a1
+      source_text: Capture the actual completed attempt d6 result once before a
+        delayed count/roster reconciliation. A changed replay roll does not
+        change this result.
+      when:
+        type: all
+        conditions:
+          - &a5
+            type: all
+            conditions:
+              - *a4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: complete
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_selection_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_accounting_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: service_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_attempt_used
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: mental_treatment_days_completed
+                right:
+                  type: literal
+                  value: 5
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: treatment_roll_supplied
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_roll_snapshot_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: mental_treatment_roll
+          value:
+            type: field
+            name: treatment_roll
+        - type: set
+          target: mental_treatment_roll_snapshot_processed
+          value:
+            type: literal
+            value: true
+    - id: count_mismatch
+      source: *a1
+      source_text: Completed service counts must agree with exactly one successful
+        removal or no failure removal; inconsistent roster/accounting remains
+        unresolved.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: mental_treatment_roll
+                    right:
+                      type: literal
+                      value: 5
+                  - type: not
+                    condition:
+                      type: compare
+                      operator: eq
+                      left:
+                        type: field
+                        name: mental_conditions
+                      right: &a7
+                        type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: field
+                            name: mental_conditions_before_treatment
+                          - type: literal
+                            value: 1
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mental_treatment_roll
+                    right:
+                      type: literal
+                      value: 6
+                  - type: not
+                    condition:
+                      type: compare
+                      operator: eq
+                      left:
+                        type: field
+                        name: mental_conditions
+                      right:
+                        type: field
+                        name: mental_conditions_before_treatment
+              - type: not
+                condition: &a6
+                  type: any
+                  conditions:
+                    - type: compare
+                      operator: eq
+                      left:
+                        type: field
+                        name: current_conditions
+                      right:
+                        type: field
+                        name: mental_conditions_before_treatment
+                    - type: compare
+                      operator: eq
+                      left:
+                        type: field
+                        name: current_conditions
+                      right:
+                        type: field
+                        name: mental_conditions
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.mental_treatment_ownership
+    - id: failure
+      source: *a1
+      source_text: An actual completed result 6 consumes this outcome, retains the
+        disorder and does not refund or reset the opportunity.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_conditions
+            right:
+              type: field
+              name: mental_conditions_before_treatment
+          - *a6
+      effects:
+        - type: set
+          target: mental_treatment_succeeded
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_result_processed
+          value:
+            type: literal
+            value: true
+    - id: success
+      source: *a1
+      source_text: An actual completed result 1–5 consumes one successful cure. Adopt
+        the already-reduced service count and hand off the snapshotted disorder
+        effect removal once; no extra numeric subtraction/charge.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: mental_treatment_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_conditions
+            right: *a7
+          - *a6
+      effects:
+        - type: set
+          target: current_conditions
+          value:
+            type: field
+            name: mental_conditions
+        - type: set
+          target: mental_treatment_succeeded
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_result_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: cleanup
+    - id: remove_hate
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Hate disorder flag.
+        Preserve history, other disorders and source-specific numerical
+        restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Hate
+      effects:
+        - type: set
+          target: hate
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_acute_stress_active
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Acute Stress
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Acute Stress
+      effects:
+        - type: set
+          target: acute_stress_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_trauma_diagnosed
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Lingering Trauma
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Lingering Trauma
+      effects:
+        - type: set
+          target: trauma_diagnosed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_fear_of_the_dark
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Fear of the Dark
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Fear of the Dark
+      effects:
+        - type: set
+          target: fear_of_the_dark
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_arachnophobia
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Arachnophobia
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Arachnophobia
+      effects:
+        - type: set
+          target: arachnophobia
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_jumpy_active
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Jumpy disorder flag.
+        Preserve history, other disorders and source-specific numerical
+        restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Jumpy
+      effects:
+        - type: set
+          target: jumpy_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_irrational_fear
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Irrational Fear
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Irrational Fear
+      effects:
+        - type: set
+          target: irrational_fear
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_claustrophobia
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Claustrophobia
+        disorder flag. Preserve history, other disorders and source-specific
+        numerical restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Claustrophobia
+      effects:
+        - type: set
+          target: claustrophobia
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+    - id: remove_depression_active
+      source:
+        - *a8
+        - *a9
+      source_text: Actual successful cure removes only the active Depression disorder
+        flag. Preserve history, other disorders and source-specific numerical
+        restoration uncertainty.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_result_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_trait_removal_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Depression
+      effects:
+        - type: set
+          target: depression_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_trait_removal_processed
+          value:
+            type: literal
+            value: true
+  entry_step: request_selection
+  exit_step: remove_depression_active

@@ -1,0 +1,917 @@
+- id: procedure.hate
+  name: Hate diagnosis onset target and once-only Talent grant
+  section_id: section.psychology.table
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 1 Hate
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a4
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 178
+      printed_page: 176
+      heading: Hate
+      locator:
+        table: Mental Talents
+        row: Hate
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero gains the Hate Talent against the type of enemy last
+    fought. This creature must appear in the Monster List of the Bestiary.
+    Snapshot the actual onset type once; unresolved or ineligible input cannot
+    be replaced by a later fight or free Talent choice. Grant once after
+    supplied Monster List eligibility and resolved ownership. Talent effects and
+    treatment are separately owned.
+  issues:
+    - issue.sanity.hate_target_scope
+  fields:
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Actual applicability of optional Sanity for this hero.
+    hate_owner_matches:
+      type: boolean
+      role: input
+      description: This actual accepted Hate diagnosis belongs to this hero.
+    hate:
+      type: boolean
+      role: state
+      description: Actual active Hate diagnosis, independent of later diagnosis names.
+    phase:
+      type: string
+      role: input
+      description: acquisition is the diagnosis effect checkpoint; other phases do not
+        grant a Talent.
+    last_enemy_type_supplied:
+      type: boolean
+      role: input
+      description: Actual type of enemy last fought at this diagnosis is supplied; not
+        a later fight.
+    last_enemy_type:
+      type: string
+      role: input
+      description: Actual last-fought enemy type at diagnosis onset; no choice or
+        random faction substituted.
+    hate_enemy_snapshot_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis onset enemy snapshot consumed once; persist while
+        external eligibility unresolved.
+    hate_enemy_type:
+      type: string
+      role: state
+      description: Persisted actual enemy type at this diagnosis onset, not a later
+        encounter.
+    hate_enemy_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-diagnosis request for actual onset enemy; request is not a
+        grant.
+    hate_bestiary_membership_supplied:
+      type: boolean
+      role: input
+      description: Actual Monster List eligibility of the persisted enemy is supplied.
+        Bestiary is not present.
+    last_enemy_in_bestiary:
+      type: boolean
+      role: input
+      description: Actual persisted type appears in the Monster List; ignored until
+        supplied.
+    hate_bestiary_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-diagnosis request for missing Monster List evidence.
+    hate_grant_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual diagnosis/talent ownership is reconciled, including already
+        held or overlapping Hate talents; no duplicate stacking inferred.
+    hate_grant_processed:
+      type: boolean
+      role: state
+      description: Once-only completed source grant for this accepted diagnosis; not
+        reset by a new fight/rest/another diagnosis.
+    hate_talent_owned:
+      type: boolean
+      role: state
+      description: This diagnosis has actually granted the Hate Talent; no automatic
+        removal on treatment is inferred.
+    hate_talent_enemy_type:
+      type: string
+      role: state
+      description: Granted Talent target persisted from this diagnosis, not
+        independently chosen.
+  dependencies:
+    - key: source_rule
+      label: Existing diagnosis eligibility and Talent handoff
+      object_id: character.condition.hate
+    - key: enemy
+      label: Actual enemy type last fought at this diagnosis onset
+    - key: monster_list
+      label: Actual persisted enemy eligibility in Monster List
+      external_document: bestiary
+    - key: talent
+      label: Granted Hate Talent attack/defence check contribution
+      object_id: procedure.hate_talent
+    - key: acquisition
+      label: Accepted diagnosis acquisition
+      object_id: procedure.sanity_condition
+  steps:
+    - id: request_enemy
+      source: &a2
+        - *a1
+      source_text: Request the actual onset type once; do not choose a different enemy.
+      when:
+        type: all
+        conditions:
+          - &a3
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: acquisition
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_grant_processed
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_type_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: hate_enemy_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: enemy
+    - id: empty_enemy
+      source: *a2
+      source_text: An empty supplied type does not establish the last-fought type.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_type_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_type
+            right:
+              type: literal
+              value: ''
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.hate_target_scope
+    - id: snapshot
+      source: *a2
+      source_text: Persist the actual diagnosis-onset enemy once, before external
+        eligibility can be delayed.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_type_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: last_enemy_type
+            right:
+              type: literal
+              value: ''
+      effects:
+        - type: set
+          target: hate_enemy_type
+          value:
+            type: field
+            name: last_enemy_type
+        - type: set
+          target: hate_enemy_snapshot_processed
+          value:
+            type: literal
+            value: true
+    - id: request_list
+      source: *a2
+      source_text: Request supplied Monster List evidence once; absent Bestiary
+        provides no invented classification.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_bestiary_membership_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_bestiary_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: hate_bestiary_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: monster_list
+    - id: ineligible
+      source: *a2
+      source_text: The printed requirement excludes this supplied type; no replacement
+        or reroll is specified.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_bestiary_membership_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_in_bestiary
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.hate_target_scope
+    - id: unknown_grant
+      source: *a2
+      source_text: Eligibility alone does not settle already-held or overlapping
+        Talent ownership.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_bestiary_membership_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_in_bestiary
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_grant_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.hate_target_scope
+    - id: grant
+      source: *a2
+      source_text: Grant this source-defined Talent once against the persisted
+        eligible type. Handoff alone does not apply a check modifier.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_enemy_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_bestiary_membership_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_enemy_in_bestiary
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_grant_scope_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hate_talent_enemy_type
+          value:
+            type: field
+            name: hate_enemy_type
+        - type: set
+          target: hate_talent_owned
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hate_grant_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: talent
+  entry_step: request_enemy
+  exit_step: grant
+- id: procedure.hate_talent
+  name: Hate Talent owned attack and parry/dodge check contributions
+  section_id: section.appendix_ii_talents.mental_talents
+  source: &a5
+    - *a4
+  status: extracted
+  confidence: high
+  source_text: Hate grants +5 CS when attacking hated enemies and -5 parry/dodge
+    when struck by them. One enemy may be chosen; the Goblin example includes
+    every enemy with that word in its name. The Talent may be taken several
+    times for different enemies. This checkpoint consumes supplied actual
+    matching and check scope and records dedicated fixed contributions; it does
+    not choose a new diagnosis target, alter base stats, resolve a hit or assume
+    duplicate stacking.
+  issues:
+    - issue.sanity.hate_target_scope
+  fields:
+    hate_talent_owner_matches:
+      type: boolean
+      role: input
+      description: Actual owned Hate Talent/hero/check context; unrelated heroes
+        cannot alter this contribution.
+    hate_talent_owned:
+      type: boolean
+      role: state
+      description: Actual owned Talent, whether source-granted by diagnosis or
+        independently taken. Sanity applicability does not disable another
+        actual Talent.
+    hate_talent_enemy_type:
+      type: string
+      role: state
+      description: Persisted chosen/granted hated type for this Talent instance; other
+        Talent instances separately owned.
+    phase:
+      type: string
+      role: input
+      description: Actual attack, parry or dodge check; unrelated phases do not apply
+        these modifiers.
+    hate_check_confirmed:
+      type: boolean
+      role: input
+      description: This actual relevant check occurs; requests or unrelated turns are
+        not checks.
+    hate_match_supplied:
+      type: boolean
+      role: input
+      description: Actual type/name-word match against this persisted Talent target is
+        supplied; no missing Bestiary names invented.
+    enemy_matches_chosen_enemy:
+      type: boolean
+      role: input
+      description: Actual target match including printed Goblin name-word example; one
+        owned Talent scope, not arbitrary faction membership.
+    struck_by_hated_enemy:
+      type: boolean
+      role: input
+      description: 'Actual source-grounded defence eligibility: struck by those hated
+        enemies. Timing relative to defence is separately resolved.'
+    hate_check_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual check timing, matching and any multiple/overlapping Talent
+        contributions are source-grounded; no duplicate stacking is inferred.
+    hate_check_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-owned actual check unresolved input handoff; fresh false
+        for another actual check.
+    hate_check_applicability_resolved:
+      type: boolean
+      role: output
+      description: Owned actual check contribution is known; false preserves prior
+        contribution while missing input is supplied.
+    hate_combat_skill_modifier:
+      type: number
+      role: state
+      description: Dedicated owned Hate contribution for this current check;
+        recomputed rather than accumulated, never overwrites another modifier or
+        base stat.
+    hate_parry_modifier:
+      type: number
+      role: state
+      description: Dedicated owned Hate contribution for this current check;
+        recomputed rather than accumulated, never overwrites another modifier or
+        base stat.
+    hate_dodge_modifier:
+      type: number
+      role: state
+      description: Dedicated owned Hate contribution for this current check;
+        recomputed rather than accumulated, never overwrites another modifier or
+        base stat.
+  dependencies:
+    - key: selection
+      label: Source enemy choice, name-word matching and different-enemy repeatability
+      object_id: character.talent.hate.selection
+    - key: attack
+      label: Source +5 CS attack contribution; dedicated output avoids a shared
+        modifier slot
+      object_id: character.talent.hate.attack
+    - key: defence
+      label: Source -5 parry/dodge contributions; actual relevant check eligibility
+        supplied
+      object_id: character.talent.hate.defence
+    - key: check_context
+      label: Actual owned Hate enemy/name match and attack/parry/dodge check scope
+    - key: diagnosis
+      label: Diagnosis grants a fixed last-fought eligible target, not the ordinary
+        free choice
+      object_id: procedure.hate
+  steps:
+    - id: report
+      source: *a5
+      source_text: Mark unresolved until the owned actual check context is established.
+      effects:
+        - type: set
+          target: hate_check_applicability_resolved
+          value:
+            type: literal
+            value: false
+    - id: clear_inactive
+      source: *a5
+      source_text: Absent owned Talent/check or unrelated phase clears only this owned
+        current contribution.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_talent_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_talent_owned
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_check_confirmed
+                right:
+                  type: literal
+                  value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: attack
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: parry
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: dodge
+      effects:
+        - type: set
+          target: hate_combat_skill_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_parry_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_dodge_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_check_applicability_resolved
+          value:
+            type: literal
+            value: true
+    - id: request_context
+      source: *a5
+      source_text: Missing match or unresolved check scope requests actual context
+        once without asserting a zero contribution.
+      when:
+        type: all
+        conditions:
+          - &a6
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_talent_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_talent_owned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_check_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: attack
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: parry
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: dodge
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_match_supplied
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hate_check_scope_resolved
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_check_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: hate_check_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: check_context
+    - id: reset_known
+      source: *a5
+      source_text: Recompute the fixed owned contribution for each actual resolved
+        check; replays do not accumulate.
+      when: &a7
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_match_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hate_check_scope_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hate_combat_skill_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_parry_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_dodge_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hate_check_applicability_resolved
+          value:
+            type: literal
+            value: true
+    - id: attack
+      source: *a5
+      source_text: Actual attack against this hated enemy contributes +5 CS only.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: attack
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_matches_chosen_enemy
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hate_combat_skill_modifier
+          value:
+            type: literal
+            value: 5
+    - id: parry
+      source: *a5
+      source_text: Actual eligible parry when struck by this hated enemy contributes
+        -5 only to parry.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: parry
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_matches_chosen_enemy
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: struck_by_hated_enemy
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hate_parry_modifier
+          value:
+            type: literal
+            value: -5
+    - id: dodge
+      source: *a5
+      source_text: Actual eligible dodge when struck by this hated enemy contributes
+        -5 only to dodge.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: dodge
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_matches_chosen_enemy
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: struck_by_hated_enemy
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hate_dodge_modifier
+          value:
+            type: literal
+            value: -5
+  entry_step: report
+  exit_step: dodge

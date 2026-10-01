@@ -1,0 +1,326 @@
+- id: procedure.quest_departure
+  name: Actual accepted quest-instance party departure
+  section_id: section.settlements.leaving_on_a_quest
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Leaving on a quest is done early in the morning, and no other
+    settlement activities are allowed on that day. Existing settlement activity
+    accounting owns occupied days, lodging obligations, departure eligibility
+    and its no-activity day marker. Request source-compliant actual departure
+    once, then record only its matching accepted party/quest occurrence result.
+    Departure is not quest-site arrival, objective progression, completion,
+    payment or an automatic hero recovery/attempt reset.
+  issues:
+    - issue.quest.departure_scope
+  fields:
+    phase:
+      type: string
+      role: input
+      description: depart records actual departure only; acceptance, travel arrival,
+        completion and payment remain separately owned.
+    quest_departure_owner_matches:
+      type: boolean
+      role: input
+      description: Actual party/accepted quest occurrence/departure day/service result
+        matches; not another party or an old departed flag.
+    instance_acceptance_processed:
+      type: boolean
+      role: state
+      description: This actual immutable quest record has been accepted.
+    instance_completed:
+      type: boolean
+      role: state
+      description: Actual completion status of this occurrence; not another occurrence.
+    instance_abandoned:
+      type: boolean
+      role: state
+      description: Actual abandonment status of this occurrence; generic abandonment
+        policy remains separately source-reconciled.
+    instance_departure_processed:
+      type: boolean
+      role: state
+      description: Party/distinct accepted occurrence actual departure marker; persist
+        against changed day/site/input replay.
+    instance_departure_request_processed:
+      type: boolean
+      role: state
+      description: Once-per-owned occurrence request for actual source-compliant
+        departure, independent of acceptance requests.
+    quest_departure_scope_resolved:
+      type: boolean
+      role: input
+      description: Actual source-compliant early-morning departure and no settlement
+        activity that day are confirmed with the existing
+        reservation/lodging/accounting owner.
+    departed:
+      type: boolean
+      role: input
+      description: Actual departure result from this same party/day existing
+        settlement activity procedure; stale flags do not establish this result.
+    leaving_on_quest:
+      type: boolean
+      role: input
+      description: Actual departure is on this accepted quest, not merely travel to
+        another settlement.
+    instance_id:
+      type: string
+      role: state
+      description: Persisted actual accepted quest occurrence identity.
+    departure_instance_id:
+      type: string
+      role: input
+      description: Actual occurrence tied to the supplied party departure result;
+        compare rather than replace accepted identity.
+    settlement:
+      type: string
+      role: input
+      description: Actual departure settlement catalogue key; accepted origin remains
+        immutable and is not guessed to equal every later departure.
+    instance_departure_settlement:
+      type: string
+      role: state
+      description: Persisted actual departure settlement; does not overwrite accepted
+        origin/site.
+    day:
+      type: number
+      role: input
+      description: Actual settlement departure day.
+      integer: true
+      minimum: 0
+    quest_departure_day:
+      type: number
+      role: input
+      description: Existing settlement accounting recorded no-activity quest departure
+        day for this actual result.
+      integer: true
+      minimum: -1
+    instance_departure_day:
+      type: number
+      role: state
+      description: Persisted actual departure day for this occurrence.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: accounting
+      label: Actual source-compliant party/day departure with existing
+        activity/lodging ownership
+      object_id: procedure.settlement_activities_and_overnight
+    - key: acceptance
+      label: Immutable accepted occurrence origin and main/side ownership
+      object_id: procedure.quest_acceptance
+    - key: travel
+      label: Quest-specific route and actual travel/site arrival remain separately
+        supplied
+  steps:
+    - id: request_departure
+      source: *a1
+      source_text: Request actual source-compliant departure once; handoff alone
+        neither leaves nor changes resources/quest progression.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: depart
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_departure_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_acceptance_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_completed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_abandoned
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_departure_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_id
+                right:
+                  type: field
+                  name: departure_instance_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_departure_scope_resolved
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: departed
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: instance_departure_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: instance_departure_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: accounting
+    - id: inconsistent_day
+      source: *a1
+      source_text: A supplied departed flag on another day cannot record this
+        occurrence departure or bypass the no-activity day ownership.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_departure_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: departed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaving_on_quest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: quest_departure_day
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.departure_scope
+    - id: record_departure
+      source: *a1
+      source_text: Persist the actual matching quest departure once after the existing
+        accounting result. Preserve accepted origin/site, statuses, rewards,
+        hero resources and other occurrences.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_departure_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: departed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaving_on_quest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: quest_departure_day
+      effects:
+        - type: set
+          target: instance_departure_day
+          value:
+            type: field
+            name: day
+        - type: set
+          target: instance_departure_settlement
+          value:
+            type: field
+            name: settlement
+        - type: set
+          target: instance_departure_processed
+          value:
+            type: literal
+            value: true
+  entry_step: request_departure
+  exit_step: record_departure

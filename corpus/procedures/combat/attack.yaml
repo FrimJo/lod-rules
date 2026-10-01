@@ -1,0 +1,3508 @@
+- id: procedure.combat_preparation
+  name: combat preparation
+  section_id: section.combat.who_can_fight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: who can fight
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Prepare one supplied attack. Geometry, equipment and resolved talent/perk exceptions
+    are inputs; no enemy behavior or path is generated.
+  fields:
+    mode:
+      type: string
+      role: input
+      description: mode
+    action:
+      type: string
+      role: input
+      description: action
+    adjacent:
+      type: boolean
+      role: input
+      description: adjacent
+    doorway_opposite:
+      type: boolean
+      role: input
+      description: doorway opposite
+    reach_valid:
+      type: boolean
+      role: input
+      description: reach valid
+    in_los:
+      type: boolean
+      role: input
+      description: in los
+    outdoors:
+      type: boolean
+      role: input
+      description: outdoors
+    enemy_adjacent:
+      type: boolean
+      role: input
+      description: enemy adjacent
+    ranged_exception:
+      type: boolean
+      role: input
+      description: ranged exception
+    loaded:
+      type: boolean
+      role: input
+      description: loaded
+    ammunition_available:
+      type: boolean
+      role: input
+      description: ammunition available
+    straight_model_block:
+      type: boolean
+      role: input
+      description: straight model block
+    large_or_flying:
+      type: boolean
+      role: input
+      description: large or flying
+    target_large:
+      type: boolean
+      role: input
+      description: target large
+    from_behind:
+      type: boolean
+      role: input
+      description: from behind
+    target_prone:
+      type: boolean
+      role: input
+      description: target prone
+    height_advantage:
+      type: boolean
+      role: input
+      description: height advantage
+    target_shield:
+      type: boolean
+      role: input
+      description: target shield
+    target_parry:
+      type: boolean
+      role: input
+      description: target parry
+    enemy_power_restriction_resolved:
+      type: boolean
+      role: input
+      description: enemy power restriction resolved
+    enemy_to_hit_suppressed:
+      type: boolean
+      role: input
+      description: enemy to hit suppressed
+    shield_suppressed:
+      type: boolean
+      role: input
+      description: shield suppressed
+    aim_valid:
+      type: boolean
+      role: input
+      description: aim valid
+    charge_path_valid:
+      type: boolean
+      role: input
+      description: charge path valid
+    target_aiming:
+      type: boolean
+      role: input
+      description: target aiming
+    distance:
+      type: number
+      role: input
+      description: distance
+    skill:
+      type: number
+      role: input
+      description: skill
+    enemy_to_hit:
+      type: number
+      role: input
+      description: enemy to hit
+    melee_weapon_modifier:
+      type: number
+      role: input
+      description: melee weapon modifier
+    half_height_obstacles:
+      type: number
+      role: input
+      description: half height obstacles
+    other_modifier:
+      type: number
+      role: input
+      description: other modifier
+    attack_eligible:
+      type: boolean
+      role: output
+      description: attack eligible
+    threshold:
+      type: number
+      role: output
+      description: threshold
+    action_points_spent:
+      type: number
+      role: output
+      description: action points spent
+    action_modifier:
+      type: number
+      role: output
+      description: action modifier
+    position_modifier:
+      type: number
+      role: output
+      description: position modifier
+    height_modifier:
+      type: number
+      role: output
+      description: height modifier
+    shield_modifier:
+      type: number
+      role: output
+      description: shield modifier
+    parry_modifier:
+      type: number
+      role: output
+      description: parry modifier
+    to_hit_modifier:
+      type: number
+      role: output
+      description: to hit modifier
+    obstacle_modifier:
+      type: number
+      role: output
+      description: obstacle modifier
+    aim_modifier:
+      type: number
+      role: output
+      description: aim modifier
+  dependencies: []
+  steps:
+    - id: requirements
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: requirements
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Melee requires adjacency, opposite doorway squares or supplied Reach eligibility.
+        Ranged requires LOS, range, ready weapon and no adjacent enemy unless an explicit exception
+        permits it.
+      effects:
+        - type: set
+          target: attack_eligible
+          value:
+            type: literal
+            value: false
+    - id: eligible
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: eligible
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Standard attacks cost 1 AP. Power and Charge cost 2 AP; charge requires supplied
+        straight/diagonal clear path, empty intervening square and movement into front adjacency.
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mode
+                    right:
+                      type: literal
+                      value: melee
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: adjacent
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: doorway_opposite
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: reach_valid
+                        right:
+                          type: literal
+                          value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mode
+                    right:
+                      type: literal
+                      value: ranged
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: in_los
+                    right:
+                      type: literal
+                      value: true
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: outdoors
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: lte
+                        left:
+                          type: field
+                          name: distance
+                        right:
+                          type: literal
+                          value: 10
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: enemy_adjacent
+                        right:
+                          type: literal
+                          value: false
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: ranged_exception
+                        right:
+                          type: literal
+                          value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: loaded
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ammunition_available
+                    right:
+                      type: literal
+                      value: true
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: straight_model_block
+                        right:
+                          type: literal
+                          value: false
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: large_or_flying
+                        right:
+                          type: literal
+                          value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_power_restriction_resolved
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: action
+                right:
+                  type: literal
+                  value: standard
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mode
+                    right:
+                      type: literal
+                      value: melee
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: action
+                    right:
+                      type: literal
+                      value: power
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mode
+                    right:
+                      type: literal
+                      value: melee
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: action
+                    right:
+                      type: literal
+                      value: charge
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: charge_path_valid
+                    right:
+                      type: literal
+                      value: true
+      effects:
+        - type: set
+          target: attack_eligible
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: action_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: position_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: height_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: shield_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: parry_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: to_hit_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: obstacle_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: aim_modifier
+          value:
+            type: literal
+            value: 0
+    - id: power
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: power
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Power Attack adds +20 CS.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: power
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: action_modifier
+          value:
+            type: literal
+            value: 20
+    - id: charge
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: charge
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Charge adds +10 CS.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: charge
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: action_modifier
+          value:
+            type: literal
+            value: 10
+    - id: behind
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: behind
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Behind adds +20; enemy To Hit is ignored.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: from_behind
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: position_modifier
+          value:
+            type: literal
+            value: 20
+    - id: prone
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: prone
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Close-combat attack against prone enemy adds +30 and ignores To Hit; modifiers are
+        cumulative.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: melee
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_prone
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: position_modifier
+          value:
+            type: sum
+            values:
+              - type: field
+                name: position_modifier
+              - type: literal
+                value: 30
+    - id: height
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: height
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Height +10 CS/RS; not cumulative with large-target shooting bonus.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: height_advantage
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: mode
+                    right:
+                      type: literal
+                      value: ranged
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: target_large
+                    right:
+                      type: literal
+                      value: true
+      effects:
+        - type: set
+          target: height_modifier
+          value:
+            type: literal
+            value: 10
+    - id: shield
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: shield
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Enemy shield imposes -5 unless Power Attack suppresses it.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_shield
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shield_suppressed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: shield_modifier
+          value:
+            type: literal
+            value: -5
+    - id: stance
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: stance
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Enemy Parry Stance imposes -10.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_parry
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: parry_modifier
+          value:
+            type: literal
+            value: -10
+    - id: evasion
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: evasion
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Subtract supplied enemy To Hit except behind, prone in melee or resolved Power Attack
+        suppression.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: from_behind
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_to_hit_suppressed
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mode
+                right:
+                  type: literal
+                  value: ranged
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_prone
+                right:
+                  type: literal
+                  value: false
+      effects:
+        - type: set
+          target: to_hit_modifier
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: enemy_to_hit
+              - type: literal
+                value: -1
+    - id: obstacles
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 113
+          printed_page: 111
+          heading: obstacles
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Ranged half-height obstacles and intersected model squares impose cumulative -10 penalties.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+      effects:
+        - type: set
+          target: obstacle_modifier
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: half_height_obstacles
+              - type: literal
+                value: -10
+    - id: aim
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: aim
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Only a still-valid aim at the same target in the next action adds +10.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: aim_valid
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: aim_modifier
+          value:
+            type: literal
+            value: 10
+    - id: threshold_melee
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: threshold melee
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: All applicable close-combat modifiers are cumulative. Supplied weapon modifier
+        preserves Fast/Slow/BFO/Staff distinctions.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: melee
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: skill
+              - type: field
+                name: action_modifier
+              - type: field
+                name: position_modifier
+              - type: field
+                name: height_modifier
+              - type: field
+                name: shield_modifier
+              - type: field
+                name: parry_modifier
+              - type: field
+                name: to_hit_modifier
+              - type: field
+                name: melee_weapon_modifier
+              - type: field
+                name: other_modifier
+    - id: threshold_ranged
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 115
+          printed_page: 113
+          heading: threshold ranged
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: All applicable ranged modifiers are cumulative.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: skill
+              - type: field
+                name: action_modifier
+              - type: field
+                name: position_modifier
+              - type: field
+                name: height_modifier
+              - type: field
+                name: shield_modifier
+              - type: field
+                name: parry_modifier
+              - type: field
+                name: to_hit_modifier
+              - type: field
+                name: obstacle_modifier
+              - type: field
+                name: aim_modifier
+              - type: field
+                name: other_modifier
+    - id: aiming_target
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: aiming target
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: When attacking an aiming target, ignore all negative modifiers other than cover.
+        Positive modifiers remain cumulative.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_aiming
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: melee
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: skill
+              - type: field
+                name: action_modifier
+              - type: field
+                name: position_modifier
+              - type: field
+                name: height_modifier
+              - type: field
+                name: aim_modifier
+              - type: arithmetic
+                operator: max
+                values:
+                  - type: literal
+                    value: 0
+                  - type: field
+                    name: melee_weapon_modifier
+              - type: arithmetic
+                operator: max
+                values:
+                  - type: literal
+                    value: 0
+                  - type: field
+                    name: other_modifier
+    - id: aiming_target_ranged
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: aiming target ranged
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: When shooting an aiming target retain cover penalties but ignore other negative modifiers.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_aiming
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+      effects:
+        - type: set
+          target: threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: skill
+              - type: field
+                name: position_modifier
+              - type: field
+                name: height_modifier
+              - type: field
+                name: aim_modifier
+              - type: field
+                name: obstacle_modifier
+              - type: arithmetic
+                operator: max
+                values:
+                  - type: literal
+                    value: 0
+                  - type: field
+                    name: other_modifier
+  entry_step: requirements
+  exit_step: aiming_target_ranged
+  issues:
+    - issue.combat.power_timing
+- id: procedure.combat_attack
+  name: combat attack
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: general principles of combat
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Resolve one prepared attack, then hand off defence/damage. Dependency results must be
+    supplied explicitly; invoking them never applies their damage.
+  fields:
+    preparation_supplied:
+      type: boolean
+      role: input
+      description: preparation supplied
+    attack_eligible:
+      type: boolean
+      role: input
+      description: attack eligible
+    is_hero:
+      type: boolean
+      role: input
+      description: is hero
+    target_is_hero:
+      type: boolean
+      role: input
+      description: target is hero
+    large_attacker:
+      type: boolean
+      role: input
+      description: large attacker
+    use_bloodlust:
+      type: boolean
+      role: input
+      description: use bloodlust
+    power_reroll:
+      type: boolean
+      role: input
+      description: power reroll
+    chosen_fast_immunity:
+      type: boolean
+      role: input
+      description: chosen fast immunity
+    magic_weapon:
+      type: boolean
+      role: input
+      description: magic weapon
+    defence_supplied:
+      type: boolean
+      role: input
+      description: defence supplied
+    defence_negates_damage:
+      type: boolean
+      role: input
+      description: defence negates damage
+    passed_models:
+      type: boolean
+      role: input
+      description: passed models
+    incidental_target_supplied:
+      type: boolean
+      role: input
+      description: incidental target supplied
+    action:
+      type: string
+      role: input
+      description: action
+    mode:
+      type: string
+      role: input
+      description: mode
+    incidental_target:
+      type: string
+      role: input
+      description: incidental target
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    threshold:
+      type: number
+      role: input
+      description: threshold
+    damage_roll:
+      type: number
+      role: input
+      description: damage roll
+    second_damage_roll:
+      type: number
+      role: input
+      description: second damage roll
+    maximum_damage:
+      type: number
+      role: input
+      description: maximum damage
+    durability:
+      type: number
+      role: input
+      description: durability
+    hit:
+      type: boolean
+      role: output
+      description: hit
+    bloodlust:
+      type: boolean
+      role: output
+      description: bloodlust
+    maximise_damage:
+      type: boolean
+      role: output
+      description: maximise damage
+    power_exposure:
+      type: boolean
+      role: output
+      description: power exposure
+    charge_shove:
+      type: boolean
+      role: output
+      description: charge shove
+    weapon_unloaded:
+      type: boolean
+      role: output
+      description: weapon unloaded
+    selected_weapon_damage:
+      type: number
+      role: output
+      description: selected weapon damage
+    projectiles_spent:
+      type: number
+      role: output
+      description: projectiles spent
+    damage_target:
+      type: string
+      role: output
+      description: damage target
+    attacking_or_parrying:
+      type: boolean
+      role: output
+      description: attacking or parrying
+    armour_piercing:
+      type: number
+      role: output
+      description: armour piercing
+  dependencies:
+    - key: preparation
+      label: preparation
+      object_id: procedure.combat_preparation
+    - key: shove
+      label: shove
+      object_id: procedure.combat_shove
+    - key: defence
+      label: defence
+      object_id: procedure.hero_defence
+    - key: damage
+      label: damage
+      object_id: procedure.combat_damage
+  steps:
+    - id: prepared
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: prepared
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: No result is fabricated without successful supplied preparation.
+      effects:
+        - type: invoke
+          dependency: preparation
+    - id: attempt
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: attempt
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Roll equal to or below CS/RS. A fumble 100 misses.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: preparation_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_eligible
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hit
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: bloodlust
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: maximise_damage
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: power_exposure
+          value:
+            type: literal
+            value: false
+    - id: shoot
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 116
+          printed_page: 114
+          heading: shoot
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hero Attack diagram removes one projectile and marks ranged weapon unloaded before hit check.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+      effects:
+        - type: set
+          target: projectiles_spent
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: weapon_unloaded
+          value:
+            type: literal
+            value: true
+    - id: power_exposure
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: power exposure
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text:
+        A hero making a Power Attack cannot dodge/parry until next activation; enemies gain +10
+        to hit that hero.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: power
+      effects:
+        - type: set
+          target: power_exposure
+          value:
+            type: literal
+            value: true
+    - id: hit
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: hit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Roll no more than modified skill and below 100 to hit intended target.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: threshold
+      effects:
+        - type: set
+          target: hit
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: damage_target
+          value:
+            type: literal
+            value: intended
+    - id: intervening
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 113
+          printed_page: 111
+          heading: intervening
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Unmodified 90+ shooting past models hits an intervening model, randomized among
+        multiple candidates; supply selection.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mode
+            right:
+              type: literal
+              value: ranged
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: passed_models
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 90
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: incidental_target_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hit
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: damage_target
+          value:
+            type: field
+            name: incidental_target
+    - id: hero_fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: hero fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Hero fumble damages weapon; Fast exception is supplied. Magical overlap stays unresolved.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chosen_fast_immunity
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_weapon
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: attacking_or_parrying
+          value:
+            type: literal
+            value: true
+    - id: fumble_durability
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: fumble durability
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Reuse the existing durability fumble rule.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chosen_fast_immunity
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_weapon
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects: []
+      rule_refs:
+        - character.durability.fumble
+    - id: magic_fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: magic fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Magical/fumble damage overlap is unresolved.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chosen_fast_immunity
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_weapon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.durability_overlap
+    - id: enemy_fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: enemy fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Do not choose between dropping weapon and falling over.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: unresolved
+          issue_id: issue.combat.enemy_fumble
+    - id: normal_damage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: normal damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Supplied weapon damage roll; bonus and protection are applied by damage procedure.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: selected_weapon_damage
+          value:
+            type: field
+            name: damage_roll
+    - id: power_damage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: power damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Power Attack may reroll DMG, keeping last. Large/X-large enemies get AP(2) instead.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: power
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: power_reroll
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_hero
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: large_attacker
+                right:
+                  type: literal
+                  value: false
+      effects:
+        - type: set
+          target: selected_weapon_damage
+          value:
+            type: field
+            name: second_damage_roll
+    - id: large_power
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: large power
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Large and X-large enemies do not reroll; AP(2) is supplied to damage resolution.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: power
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: large_attacker
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: armour_piercing
+          value:
+            type: literal
+            value: 2
+    - id: bloodlust
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: bloodlust
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Heroes 01–05 may roll damage twice and choose highest; enemies ignore Bloodlust.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: use_bloodlust
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: bloodlust
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: selected_weapon_damage
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: field
+                name: damage_roll
+              - type: field
+                name: second_damage_roll
+    - id: power_bloodlust
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: power bloodlust
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Bloodlust during Power Attack automatically maximizes DMG.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: power
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: bloodlust
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: maximise_damage
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: selected_weapon_damage
+          value:
+            type: field
+            name: maximum_damage
+    - id: charge_shove
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: charge shove
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text:
+        Successful charge staggers target even if it parries/dodges or loses no HP. Movement
+        follows shove; follow-up is optional if unrestricted.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action
+            right:
+              type: literal
+              value: charge
+      effects:
+        - type: set
+          target: charge_shove
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: shove
+    - id: defence
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: defence
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hero targets may defend; enemy targets never roll defence.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_is_hero
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: defence
+    - id: damage
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Damage handoff occurs for enemy target or supplied hero defence allowing damage; no
+        damage is applied here.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_is_hero
+                right:
+                  type: literal
+                  value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: defence_supplied
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: defence_negates_damage
+                    right:
+                      type: literal
+                      value: false
+      effects:
+        - type: invoke
+          dependency: damage
+  entry_step: prepared
+  exit_step: damage
+  issues:
+    - issue.combat.enemy_fumble
+    - issue.phase4.durability_overlap
+- id: procedure.combat_aim
+  name: combat aim
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: different combat actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Aim
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text: Spend 1 AP aiming; bonus applies only to the specified target on next action. Aiming
+    prevents dodge and removes negative hit modifiers other than cover when attacked.
+  fields:
+    ranged_weapon:
+      type: boolean
+      role: input
+      description: ranged weapon
+    next_action:
+      type: boolean
+      role: input
+      description: next action
+    same_target:
+      type: boolean
+      role: input
+      description: same target
+    target_left_los:
+      type: boolean
+      role: input
+      description: target left los
+    model_crossed_los:
+      type: boolean
+      role: input
+      description: model crossed los
+    lost_hp:
+      type: boolean
+      role: input
+      description: lost hp
+    overwatch:
+      type: boolean
+      role: input
+      description: overwatch
+    action_points_spent:
+      type: number
+      role: output
+      description: action points spent
+    aim_bonus:
+      type: number
+      role: output
+      description: aim bonus
+    aim_valid:
+      type: boolean
+      role: output
+      description: aim valid
+    can_dodge:
+      type: boolean
+      role: output
+      description: can dodge
+    ignore_noncover_negative_modifiers:
+      type: boolean
+      role: output
+      description: ignore noncover negative modifiers
+  dependencies: []
+  steps:
+    - id: aim
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: aim
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: One AP per shot; cannot aim during Overwatch.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ranged_weapon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: overwatch
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: can_dodge
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: ignore_noncover_negative_modifiers
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: aim_valid
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: aim_bonus
+          value:
+            type: literal
+            value: 0
+    - id: retained
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: retained
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Lose bonus if not fired next action at same target, target leaves LOS, any model
+        crosses LOS or aimer loses HP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ranged_weapon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: overwatch
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_action
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: same_target
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_left_los
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: model_crossed_los
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lost_hp
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: aim_valid
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: aim_bonus
+          value:
+            type: literal
+            value: 10
+  entry_step: aim
+  exit_step: retained
+- id: procedure.combat_shove
+  name: combat shove
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: different combat actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: extracted
+  confidence: high
+  source_text:
+    Resolve a shove with supplied destination geometry; never move more than two models. A
+    successful charge may supply its automatic shove.
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: adjacent
+    target_large:
+      type: boolean
+      role: input
+      description: target large
+    automatic_charge_shove:
+      type: boolean
+      role: input
+      description: automatic charge shove
+    straight_free:
+      type: boolean
+      role: input
+      description: straight free
+    diagonal_free:
+      type: boolean
+      role: input
+      description: diagonal free
+    second_model:
+      type: boolean
+      role: input
+      description: second model
+    second_can_move:
+      type: boolean
+      role: input
+      description: second can move
+    destination_lava_or_chasm:
+      type: boolean
+      role: input
+      description: destination lava or chasm
+    destination_trap:
+      type: boolean
+      role: input
+      description: destination trap
+    roll:
+      type: number
+      role: input
+      description: roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    damage_bonus:
+      type: number
+      role: input
+      description: damage bonus
+    target_dex:
+      type: number
+      role: input
+      description: target dex
+    shove_succeeded:
+      type: boolean
+      role: output
+      description: shove succeeded
+    shover_prone:
+      type: boolean
+      role: output
+      description: shover prone
+    target_prone:
+      type: boolean
+      role: output
+      description: target prone
+    target_removed:
+      type: boolean
+      role: output
+      description: target removed
+    loot_allowed:
+      type: boolean
+      role: output
+      description: loot allowed
+    xp_awarded:
+      type: boolean
+      role: output
+      description: xp awarded
+    follow_up_allowed:
+      type: boolean
+      role: output
+      description: follow up allowed
+    trap_detection_allowed:
+      type: boolean
+      role: output
+      description: trap detection allowed
+    action_points_spent:
+      type: number
+      role: output
+      description: action points spent
+    models_moved:
+      type: number
+      role: output
+      description: models moved
+    destination:
+      type: string
+      role: output
+      description: destination
+  dependencies:
+    - key: trap
+      label: Trap consequences supplied
+      object_id: procedure.trap_resolution
+  steps:
+    - id: attempt
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: attempt
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Shove costs 1 AP; large targets excluded.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_large
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: shove_succeeded
+          value:
+            type: literal
+            value: false
+    - id: charge_cost
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: charge cost
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: A charge already spends its two AP; a resulting automatic shove costs no additional AP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: automatic_charge_shove
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_large
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 0
+    - id: success
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: success
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Roll higher than target DEX, adding DB x10. Charge already supplies success. 100 is a fumble.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: automatic_charge_shove
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: lt
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 100
+                  - type: compare
+                    operator: gt
+                    left:
+                      type: sum
+                      values:
+                        - type: field
+                          name: roll
+                        - type: arithmetic
+                          operator: multiply
+                          values:
+                            - type: field
+                              name: damage_bonus
+                            - type: literal
+                              value: 10
+                    right:
+                      type: field
+                      name: target_dex
+      effects:
+        - type: set
+          target: shove_succeeded
+          value:
+            type: literal
+            value: true
+    - id: fumble
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: A shove fumble causes shover to fall over.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: automatic_charge_shove
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: shover_prone
+          value:
+            type: literal
+            value: true
+    - id: straight
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: straight
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Move straight back when free.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_free
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: models_moved
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: destination
+          value:
+            type: literal
+            value: straight_back
+        - type: set
+          target: follow_up_allowed
+          value:
+            type: literal
+            value: true
+    - id: diagonal
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: diagonal
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: If blocked straight, choose free diagonal behind.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_free
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagonal_free
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: models_moved
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: destination
+          value:
+            type: literal
+            value: diagonal_back
+        - type: set
+          target: follow_up_allowed
+          value:
+            type: literal
+            value: true
+    - id: second
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: second
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: At most two models may move; second model moves straight back if possible.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_free
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagonal_free
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: second_model
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: second_can_move
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: models_moved
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: destination
+          value:
+            type: literal
+            value: straight_back
+        - type: set
+          target: follow_up_allowed
+          value:
+            type: literal
+            value: true
+    - id: blocked
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 111
+          printed_page: 109
+          heading: blocked
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Target falls over when no legal displacement remains.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_free
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diagonal_free
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: second_model
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: second_can_move
+                right:
+                  type: literal
+                  value: false
+      effects:
+        - type: set
+          target: target_prone
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: models_moved
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: follow_up_allowed
+          value:
+            type: literal
+            value: false
+    - id: hazard
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: hazard
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: 'Shoved into lava/chasm: casualty with XP, no loot.'
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: models_moved
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: destination_lava_or_chasm
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: target_removed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: xp_awarded
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: loot_allowed
+          value:
+            type: literal
+            value: false
+    - id: trap
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: trap
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+      source_text: Shoved into trap triggers it without detection/avoidance.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shove_succeeded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: models_moved
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: destination_trap
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: trap_detection_allowed
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: trap
+  entry_step: attempt
+  exit_step: trap

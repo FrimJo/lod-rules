@@ -37,8 +37,9 @@
     search_modifier:
       type: number
       role: output
-      description: Stacked helper modifier; +10 for one helper, +5 for each helper beyond the
-        first, 0 when searching alone.
+      description:
+        Stacked helper modifier; +10 for one helper, +5 for each helper beyond the first, 0
+        when searching alone.
       integer: true
       minimum: 0
       maximum: 99
@@ -49,10 +50,17 @@
       integer: true
       minimum: 1
       maximum: 199
+    search_succeeded:
+      type: boolean
+      role: input
+      description: Supplied successful search check result.
   dependencies:
     - key: core_check
       label: Standard Skill or Stat Check
       object_id: core.check.standard
+    - key: treasure
+      label: Treasure found in Rooms and Corridors
+      object_id: table.treasure.rooms_corridors
   steps:
     - id: search
       source_text: |-
@@ -127,8 +135,32 @@
                 name: search_modifier
         - type: invoke
           dependency: core_check
+    - id: treasure_handoff
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 193
+          printed_page: 191
+          heading: Treasure found in Rooms and Corridors
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: On a supplied successful search, roll on the room/corridor findings table.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: search_succeeded
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: invoke
+          dependency: treasure
   entry_step: search
-  exit_step: roll
+  exit_step: treasure_handoff
   see_also:
     - section.game_basics.skill_and_stat_checks
 - id: procedure.search_furniture
@@ -165,10 +197,12 @@
     - key: furniture_table
       label: Furniture Table
       section_id: section.treasure.searching_furniture
+      object_id: table.treasure.furniture
   steps:
     - id: already_searched_check
-      source_text: Furniture can only be searched once, and not when there are enemies in LOS to
-        any party member.
+      source_text:
+        Furniture can only be searched once, and not when there are enemies in LOS to any party
+        member.
       when:
         type: compare
         operator: eq
@@ -190,8 +224,9 @@
               type: literal
               value: false
     - id: enemies_check
-      source_text: Furniture can only be searched once, and not when there are enemies in LOS to
-        any party member.
+      source_text:
+        Furniture can only be searched once, and not when there are enemies in LOS to any party
+        member.
       when:
         type: compare
         operator: eq
@@ -220,13 +255,31 @@
       effects:
         - type: invoke
           dependency: furniture_table
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_searched
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_in_los
+            right:
+              type: literal
+              value: false
   entry_step: already_searched_check
   exit_step: search
   issues:
     - issue.phase6.furniture_treasure_table_location
   unresolved_references:
-    - >-
-      the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III;
-      the furniture treasure tables are printed in Appendix V)
+    - "the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III; the
+      furniture treasure tables are printed in Appendix V)"
   see_also:
     - section.treasure.searching_furniture

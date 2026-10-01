@@ -1,0 +1,266 @@
+- id: procedure.stun_next_turn
+  name: Consume Stun or Frost next-turn AP loss
+  section_id: section.combat.different_kinds_of_damage.stun
+  source: &a1
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: Stun; Frost Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A stunned hero or enemy loses 1 AP during its next turn. Frost has a 50% chance of
+    causing this loss. Apply the pending effect once after actual next-turn AP initialization.
+    Weapon Stun does not stack; unresolved mixed-source aggregation and zero-AP handling remain
+    explicit boundaries.
+  issues:
+    - issue.stun.ap_and_overlap
+  fields:
+    stun_next_turn_pending:
+      type: boolean
+      role: state
+      description:
+        Target/affected-next-turn pending Stun or Frost AP-loss context, not an aggregate of
+        unspecified overlapping sources.
+    stun_turn_processed:
+      type: boolean
+      role: state
+      description:
+        Target/affected-turn AP-loss marker. Start false for a distinct affected turn, persist
+        after the one AP loss.
+    stun:
+      type: boolean
+      role: state
+      description:
+        Whether this owned pending-next-turn effect applies; not the aggregate status of other
+        stun contexts.
+    next_turn_actions_lost:
+      type: number
+      role: state
+      description: One scheduled AP loss for this target/affected turn; cancelled after actual application.
+    next_turn_started:
+      type: boolean
+      role: input
+      description: Actual affected next turn has begun for this target, not a request.
+    turn_ap_initialized:
+      type: boolean
+      role: input
+      description:
+        Actual AP allowance for this affected turn has been initialized; do not charge stale
+        previous-turn AP.
+    stun_scope_resolved:
+      type: boolean
+      role: input
+      description:
+        This target/affected-turn pending effect has a source-reconciled scope. Weapon-only
+        duplicate effects follow the existing non-stacking weapon rule; mixed-source overlap remains
+        unresolved unless supplied source-grounded reconciliation is available.
+    action_points:
+      type: number
+      role: state
+      description:
+        Actual initialized AP allowance of this target/affected turn; preserve other actors and
+        later turns.
+      minimum: 0
+      integer: true
+    stun_turn_allowed:
+      type: boolean
+      role: output
+      description: Current actual pending AP-loss checkpoint accepted; reset each call.
+  dependencies:
+    - key: weapon_stun
+      label: Existing weapon-specific non-stacking/even damage-roll rule, not a universal stacking rule
+      object_id: combat.weapon.special.stun
+  steps:
+    - id: check_turn
+      source: *a1
+      source_text: Re-evaluate this target and actual initialized affected-turn allowance; no
+        previous-turn or other-target AP is changed.
+      effects:
+        - type: set
+          target: stun_turn_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_turn
+          source: *a1
+          source_text: Only a pending unprocessed effect on its actual initialized next turn is accepted.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stun_next_turn_pending
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stun_turn_processed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: next_turn_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: turn_ap_initialized
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: stun_turn_allowed
+              value:
+                type: literal
+                value: true
+    - id: unknown_overlap
+      source:
+        - *a2
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 179
+          printed_page: 177
+          heading: Weapons — Stun special rule
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Weapon Stun explicitly does not stack; generic Stun/Frost passage does not settle
+        aggregation with different sources. Preserve unresolved supplied scope.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.stun.ap_and_overlap
+    - id: zero_ap_unknown
+      source: *a1
+      source_text:
+        The passage does not specify treatment of an already zero initialized allowance. Do not
+        invent a negative allowance, clamp, or consumed loss.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: action_points
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.stun.ap_and_overlap
+    - id: consume_ap
+      source: *a1
+      source_text:
+        Subtract the source one AP once from the actual initialized positive allowance, then
+        consume only this pending effect and its scheduled loss.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: action_points
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: add
+          target: action_points
+          value:
+            type: literal
+            value: -1
+          duration: immediate
+        - type: set
+          target: stun_turn_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stun_next_turn_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stun
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: next_turn_actions_lost
+          value:
+            type: literal
+            value: 0
+  entry_step: check_turn
+  exit_step: consume_ap

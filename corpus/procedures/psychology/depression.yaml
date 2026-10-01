@@ -1,0 +1,487 @@
+- id: procedure.depression
+  name: Depression once-per-diagnosis Energy-pool reduction
+  section_id: section.psychology.table
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 0 Depression
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Depression reduces the character Energy pool by 2. Capture the actual unmodified
+    capacity at this accepted diagnosis once, and apply the stable source reduction once when that
+    capacity is at least 2 and still matches the source-grounded onset context. Current available
+    Energy is separately owned. A smaller onset pool retains the undefined floor/negative-capacity
+    question, including after later capacity changes. This checkpoint does not cure, replenish
+    Energy, infer restoration after treatment, change Sanity/count or apply a new reduction after
+    rest/growth.
+  issues:
+    - issue.phase4.energy_floor
+    - issue.sanity.depression_capacity_context
+  fields:
+    phase:
+      type: string
+      role: input
+      description: 'Actual diagnosis-effect checkpoint: acquisition. Rest, spending, growth, another
+        diagnosis or replay is not a new Depression onset.'
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Whether this hero uses optional Sanity.
+    depression_diagnosis_matches:
+      type: boolean
+      role: input
+      description: Actual owned Depression diagnosis and hero match this context; independent of the
+        latest other diagnosis or pending acquisition.
+    depression_active:
+      type: boolean
+      role: state
+      description: Actual accepted Depression condition is active; source-completed treatment is
+        separately owned and may clear it.
+    depression_reduction_pending:
+      type: boolean
+      role: state
+      description:
+        This actual accepted diagnosis awaits its once-only source reduction. Initialize true
+        only on a fresh accepted Depression diagnosis, persist while unresolved.
+    depression_effect_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/distinct accepted Depression diagnosis numerical reduction marker; persist after
+        application, never reset by rest, capacity growth or another condition.
+    depression_pool_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual unmodified Energy capacity at this diagnosis onset is supplied, not a later
+        observation, remaining spent Energy or already reduced pool.
+    depression_capacity_context_resolved:
+      type: boolean
+      role: input
+      description:
+        Capacity is source-grounded and unmodified by this still-pending Depression effect.
+        False for already-applied/deferred or other-capacity-change contexts requiring
+        reconciliation.
+    depression_pool_snapshot_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis onset-capacity snapshot captured once; persist so later capacity growth
+        cannot erase the original floor boundary.
+    depression_pool_at_onset:
+      type: number
+      role: state
+      description:
+        Persisted actual unmodified Energy pool at this diagnosis onset; not current remaining
+        Energy.
+      integer: true
+    energy_pool:
+      type: number
+      role: state
+      description:
+        Actual Energy capacity in this checkpoint, using the stable Depression rule field. The
+        caller maps capacity to other existing owners; this is not currently available Energy.
+      integer: true
+    energy:
+      type: number
+      role: state
+      description:
+        Currently available Energy of this hero; never reduced, replenished or clamped by this
+        capacity checkpoint.
+      integer: true
+    depression_capacity_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis request for actual onset capacity handed off once; request alone cannot
+        seed capacity from the ordinary starting value.
+    depression_reduction_this_call:
+      type: boolean
+      role: output
+      description:
+        This call performed the once-only capacity reduction; recomputed each call, not another
+        onset marker.
+    energy_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual currently available Energy is supplied for the separate overflow diagnostic. The
+        certain capacity reduction does not guess or require a remaining-Energy value.
+  dependencies:
+    - key: reduction
+      label: Existing source-backed -2 Energy-pool rule
+      object_id: character.condition.depression
+    - key: floor
+      label: Existing undefined negative-capacity/floor boundary retained against the onset snapshot
+      object_id: character.condition.depression_floor
+    - key: capacity
+      label: Actual owned unmodified Energy capacity at diagnosis onset; not a new starting-Energy
+        initialization
+      section_id: section.character_basics.the_character.energy_e
+    - key: acquisition
+      label: Actual accepted diagnosis and Sanity/count reset, separately owned
+      object_id: procedure.sanity_condition
+    - key: recovery
+      label: Current Energy recovery remains separately resolved using the actual modified capacity
+      object_id: character.energy.quest_return
+  steps:
+    - id: reset_report
+      source: *a1
+      source_text: Recompute whether this call actually reduces capacity; a replay is not another onset.
+      effects:
+        - type: set
+          target: depression_reduction_this_call
+          value:
+            type: literal
+            value: false
+    - id: request_capacity
+      source: *a1
+      source_text:
+        When the actual onset capacity has not been supplied, request it once without inventing
+        a pool, re-running starting Energy or reducing remaining Energy.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: acquisition
+          - &a3
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - &a4
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_diagnosis_matches
+            right:
+              type: literal
+              value: true
+          - &a5
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_active
+            right:
+              type: literal
+              value: true
+          - &a6
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_reduction_pending
+            right:
+              type: literal
+              value: true
+          - &a7
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_effect_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_snapshot_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_capacity_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: depression_capacity_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: capacity
+    - id: capture_capacity
+      source: *a1
+      source_text:
+        Capture one actual supplied source-grounded unmodified onset capacity. Persist this
+        snapshot through replay, pending floor questions and later growth.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - *a6
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_capacity_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_snapshot_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: depression_pool_at_onset
+          value:
+            type: field
+            name: energy_pool
+        - type: set
+          target: depression_pool_snapshot_processed
+          value:
+            type: literal
+            value: true
+    - id: capacity_unknown
+      source: *a1
+      source_text:
+        Already adjusted/delayed/changed capacity does not supply the same unmodified onset
+        context. Preserve its pending reduction and source question rather than subtracting again or
+        rebasing its onset snapshot.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - *a6
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_supplied
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: depression_capacity_context_resolved
+                right:
+                  type: literal
+                  value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: depression_pool_snapshot_processed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: energy_pool
+                    right:
+                      type: field
+                      name: depression_pool_at_onset
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.depression_capacity_context
+    - id: floor
+      source: *a1
+      source_text:
+        An actual onset pool below 2 has an undefined floor/negative-capacity result. Preserve
+        the existing issue without clamp, subtraction or treating later growth as a new diagnosis.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - *a6
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: depression_pool_at_onset
+            right:
+              type: literal
+              value: 2
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.energy_floor
+    - id: reduce_pool
+      source: *a1
+      source_text:
+        For this still-matching unmodified onset capacity of at least 2, subtract the printed
+        two once. Mark this diagnosis consumed without changing current Energy, other conditions,
+        Sanity or count.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - *a6
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_capacity_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_pool_snapshot_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: depression_pool_at_onset
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: energy_pool
+            right:
+              type: field
+              name: depression_pool_at_onset
+      rule_refs:
+        - character.condition.depression
+      effects:
+        - type: set
+          target: depression_effect_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: depression_reduction_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: depression_reduction_this_call
+          value:
+            type: literal
+            value: true
+    - id: available_energy_boundary
+      source: *a1
+      source_text:
+        If available Energy now exceeds the reduced capacity, retain the missing reconciliation
+        question. The source reduction remains consumed; do not silently clamp current Energy or
+        subtract the capacity loss again.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: depression_reduction_this_call
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: energy_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: energy
+            right:
+              type: field
+              name: energy_pool
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.depression_capacity_context
+  entry_step: reset_report
+  exit_step: available_energy_boundary

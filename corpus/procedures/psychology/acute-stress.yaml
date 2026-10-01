@@ -1,0 +1,410 @@
+- id: procedure.acute_stress
+  name: Acute Stress current-quest effects, distinct battles and expiry
+  section_id: section.psychology.table
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Mental conditions table
+      locator:
+        table: Mental conditions table
+        row: 2–3 Acute Stress
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Acute Stress reduces RES by 10 for the rest of the current quest. The hero screams in
+    all battles, alerting every single soul in the dungeon; Threat gains an additional +1 for each
+    battle from now until the end of the quest. Initialize the owned effect once for the accepted
+    diagnosis, count each actual later battle once, and expire only at an actual source-reconciled
+    quest endpoint. This does not cure a diagnosis, reduce the condition count, reset Sanity or
+    choose between the conflicting quest-end definitions.
+  issues:
+    - issue.0004
+    - issue.phase4.sanity_boundaries
+    - issue.sanity.acute_stress_diagnosis_expiry
+  fields:
+    phase:
+      type: string
+      role: input
+      description:
+        'Actual checkpoint: acquisition, battle or quest_end. A request alone is not a battle
+        or completed quest.'
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Whether this hero uses optional Sanity.
+    acquired_condition_name:
+      type: string
+      role: state
+      description:
+        Actual accepted Acute Stress name used only for this diagnosis initialization; a later
+        accepted diagnosis does not cancel an already active owned effect.
+    condition_episode_processed:
+      type: boolean
+      role: state
+      description:
+        Actual successful diagnosis/count/reset checkpoint for effect initialization only.
+        Active battle/expiry guards rely on owned effect state and remain independent of another
+        pending acquisition.
+    acute_stress_quest_matches:
+      type: boolean
+      role: input
+      description: This is the hero and current quest instance that owned the actual Acute Stress
+        diagnosis; do not carry the effect into a later quest.
+    acute_stress_effect_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/current-quest effect initialization marker; persist after application
+        and expiry, fresh false only for a new accepted diagnosis.
+    acute_stress_active:
+      type: boolean
+      role: state
+      description: Owned Acute Stress quest effect is active; its expiry is separate from
+        diagnosis-history and Sanity accounting.
+    acute_stress_expired:
+      type: boolean
+      role: state
+      description: Owned quest effect has expired at a source-reconciled endpoint; replay cannot reactivate it.
+    resolve_modifier:
+      type: number
+      role: state
+      description:
+        Contribution from this Acute Stress diagnosis only, not the hero total RES or other
+        condition contributions. The stable existing rule field is preserved.
+    extra_threat_per_battle:
+      type: number
+      role: state
+      description:
+        Owned Acute Stress contribution of one Threat per actual later battle while this quest
+        effect remains active.
+    screams_during_battles:
+      type: boolean
+      role: state
+      description:
+        Owned Acute Stress screaming/alerting effect in battles for this quest, not other noise
+        sources.
+    battle_started:
+      type: boolean
+      role: input
+      description:
+        One actual distinct battle after this diagnosis has started; a turn, enemy hit, or
+        requested battle is not a fresh battle.
+    acute_stress_battle_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/quest/distinct-battle Threat marker. Start false for a genuinely new
+        battle; persist for all turns, hits and replays within that battle.
+    threat:
+      type: number
+      role: state
+      description:
+        Actual party Threat carried into this distinct battle; add only this hero diagnosis
+        contribution once.
+    quest_end_reached:
+      type: boolean
+      role: input
+      description:
+        Actual supplied quest-end checkpoint has occurred; not merely dungeon exit, completion
+        of an objective, a return request, or a city activity.
+    quest_endpoint_resolved:
+      type: boolean
+      role: input
+      description:
+        The supplied endpoint is source-reconciled for this quest. False for the unresolved
+        reward-receipt/return-before-city-activities conflict in issue.0004.
+  dependencies:
+    - key: acquisition
+      label: Accepted diagnosis and Sanity/count reset, separately owned
+      object_id: procedure.sanity_condition
+    - key: acute_stress_rule
+      label: Existing stable Acute Stress source effect; fields represent this condition contribution
+      object_id: character.condition.acute_stress
+  steps:
+    - id: initialize
+      source: *a1
+      source_text:
+        Apply the accepted Acute Stress diagnosis once to its current quest. Do not apply it
+        before actual diagnosis, to another quest, after expiry or at a supplied completed endpoint.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acquired_condition_name
+            right:
+              type: literal
+              value: Acute Stress
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_episode_processed
+            right:
+              type: literal
+              value: true
+          - &a3
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_quest_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: acquisition
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_effect_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_expired
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_end_reached
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - character.condition.acute_stress
+      effects:
+        - type: set
+          target: acute_stress_effect_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: acute_stress_active
+          value:
+            type: literal
+            value: true
+    - id: endpoint_unknown
+      source: *a1
+      source_text:
+        If an endpoint is supplied without source reconciliation, retain the existing quest-end
+        conflict and do not expire or add a new battle contribution at that checkpoint.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_active
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_end_reached
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_endpoint_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.0004
+    - id: expire
+      source: *a1
+      source_text:
+        At the actual resolved end of this current quest, deactivate only this Acute Stress
+        contribution. Do not change diagnosis history, condition count, Sanity or other modifiers.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: quest_end
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_active
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_effect_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_end_reached
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_endpoint_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: resolve_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: extra_threat_per_battle
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: screams_during_battles
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: acute_stress_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: acute_stress_expired
+          value:
+            type: literal
+            value: true
+    - id: battle
+      source: *a1
+      source_text:
+        For each actual distinct battle after diagnosis while this same quest effect is active,
+        add one additional Threat. Turns, enemy hits, replay and a fresh later quest are not
+        additional battles.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: battle
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_active
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_effect_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_expired
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_end_reached
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: battle_started
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acute_stress_battle_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: add
+          target: threat
+          value:
+            type: literal
+            value: 1
+          duration: immediate
+        - type: set
+          target: acute_stress_battle_processed
+          value:
+            type: literal
+            value: true
+  entry_step: initialize
+  exit_step: battle

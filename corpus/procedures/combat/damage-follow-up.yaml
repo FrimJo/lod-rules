@@ -1,0 +1,2996 @@
+- id: procedure.damage_follow_up
+  name: damage follow up
+  section_id: section.combat.different_kinds_of_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: different kinds of damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: different kinds of damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Resolve one source-defined damage-type checkpoint. Resist rolls, ongoing damage and
+    condition state are supplied. This is not a complete hero-condition state machine.
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: damage type
+    phase:
+      type: string
+      role: input
+      description:
+        'Supplied checkpoint: initial for one distinct source event, next_turn for scheduled
+        elemental/AP effects, after_battle for delayed Disease, ongoing for one Poison check, rest
+        for a condition-specific rest checkpoint, external_cure for a cure handoff. Invoke alone
+        executes no dependency.'
+    damage_resolved:
+      type: boolean
+      role: input
+      description: damage resolved
+    took_damage:
+      type: boolean
+      role: input
+      description: took damage
+    already_poisoned:
+      type: boolean
+      role: state
+      description:
+        Current poisoned-condition checkpoint owned by this target. Infection sets true and
+        explicit 01–05 cure sets false; carry it forward with poisoned and remaining_poison_rolls.
+        Ordinary sequence exhaustion remains a linked source question.
+    con_success:
+      type: boolean
+      role: input
+      description: con success
+    disease_exposed:
+      type: boolean
+      role: input
+      description: disease exposed
+    in_battle:
+      type: boolean
+      role: input
+      description: in battle
+    rest_occurs:
+      type: boolean
+      role: input
+      description: rest occurs
+    frost_stun_result:
+      type: boolean
+      role: input
+      description: Supplied result of the printed 50% Frost stun chance; no invented die selector.
+    damage_before_protection:
+      type: number
+      role: input
+      description:
+        Legacy field name for the supplied halving basis for this Fire/Acidic hit. The source
+        does not explicitly settle whether Acidic halving precedes or follows armour; retain
+        issue.damage_follow_up.continuation_basis rather than deriving this value from protection
+        here.
+      minimum: 0
+    continuation_roll:
+      type: number
+      role: input
+      description: continuation roll
+      minimum: 1
+      maximum: 6
+      integer: true
+    constitution:
+      type: number
+      role: input
+      description: constitution
+    strength:
+      type: number
+      role: input
+      description: strength
+    poison_duration_roll:
+      type: number
+      role: input
+      description: poison duration roll
+      integer: true
+      minimum: 1
+      maximum: 10
+    con_roll:
+      type: number
+      role: input
+      description: con roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    remaining_poison_rolls:
+      type: number
+      role: state
+      description:
+        Remaining future CON checks owned by this target and poison episode. Carry the updated
+        count forward; a processed check consumes one, while 01–05 cancels all remaining checks.
+      minimum: 0
+      integer: true
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    ignore_armour:
+      type: boolean
+      role: output
+      description: ignore armour
+    ignore_natural_armour:
+      type: boolean
+      role: output
+      description: ignore natural armour
+    poisoned:
+      type: boolean
+      role: output
+      description: poisoned
+    diseased:
+      type: boolean
+      role: state
+      description: diseased
+    cured:
+      type: boolean
+      role: output
+      description: cured
+    dead:
+      type: boolean
+      role: output
+      description: dead
+    stun:
+      type: boolean
+      role: state
+      description:
+        Whether this owned pending-next-turn effect applies; not the aggregate status of other
+        stun contexts.
+    next_turn_damage:
+      type: number
+      role: state
+      description:
+        This target/hit scheduled Fire/Acidic damage before its separately resolved next-turn
+        damage handoff; cancelled after the completed continuation.
+    next_turn_actions_lost:
+      type: number
+      role: state
+      description: One scheduled AP loss for this target/affected turn; cancelled after actual application.
+    poison_rolls_due:
+      type: number
+      role: output
+      description: poison rolls due
+    constitution_after:
+      type: number
+      role: output
+      description:
+        Computed episode value after subtracting the rounded-down half loss. Apply only while
+        disease_penalty_active is true; do not treat this historical calculation output as a
+        base-stat restoration.
+    strength_after:
+      type: number
+      role: output
+      description:
+        Computed episode value after subtracting the rounded-down half loss. Apply only while
+        disease_penalty_active is true; do not treat this historical calculation output as a
+        base-stat restoration.
+    hp_lost:
+      type: number
+      role: output
+      description: hp lost
+    expires:
+      type: string
+      role: output
+      description: expires
+    poison_check_processed:
+      type: boolean
+      role: state
+      description:
+        Target/poison-episode/check marker. Supply false for one distinct remaining CON check
+        and persist true on replay; a distinct later check has a fresh marker.
+    poison_check_allowed:
+      type: boolean
+      role: output
+      description:
+        Current invocation accepted one eligible remaining poison check; reset on each ongoing
+        poison invocation.
+    poison_starting_hp:
+      type: number
+      role: output
+      description:
+        HP snapshot before this accepted poison check, used to distinguish reaching zero during
+        rest from already being at or below zero.
+    poison_exposure_processed:
+      type: boolean
+      role: state
+      description:
+        Target/damaging-hit exposure marker. Fresh distinct exposure starts false; persist true
+        after its resist checkpoint, including success. Replays must not reroll or initialize a
+        second episode.
+    poison_exposure_allowed:
+      type: boolean
+      role: output
+      description:
+        Current invocation accepted an eligible unprocessed damaging-hit poison exposure; reset
+        on each initial poison invocation.
+    poison_rest_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Target/poison-episode/rest-attempt marker for this remaining-check handoff. Start false
+        for a distinct rest attempt, persist true after acceptance. Separate from the outer dungeon
+        rest condition marker and from each individual poison_check_processed marker.
+    poison_rest_allowed:
+      type: boolean
+      role: output
+      description: Current invocation accepted one remaining-check rest handoff; reset each rest invocation.
+    disease_exposure_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/exposure-event marker. Start false for a distinct actual exposure; persist true
+        after its supplied resist outcome, including successful resistance or an unresolved
+        additional disease.
+    disease_exposure_allowed:
+      type: boolean
+      role: output
+      description: Current invocation accepts a fresh disease exposure; reset each initial disease call.
+    disease_episode_started:
+      type: boolean
+      role: output
+      description: Current accepted failed exposure starts a new single disease context; reset each
+        initial disease call.
+    disease_penalty_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/disease-episode marker. Initialize false on a new single episode; persist true
+        once its delayed stat-loss output is calculated. Replays must not halve updated values
+        again.
+    disease_penalty_active:
+      type: boolean
+      role: state
+      description:
+        The episode stat-loss output is currently applicable; false before delayed application
+        and after cure. constitution_after/strength_after are episode calculation outputs, not
+        restored base stats.
+    disease_rest_check_chosen:
+      type: boolean
+      role: input
+      description:
+        Explicit choice to take the optional CON check at this actual rest. Declining does not
+        consume a check opportunity.
+    disease_rest_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/disease-episode/rest-attempt marker. Start false for a distinct rest, persist true
+        after the chosen CON check regardless of result.
+    disease_rest_allowed:
+      type: boolean
+      role: output
+      description: Current invocation accepts one optional disease CON check; reset each disease-rest call.
+    elemental_hit_processed:
+      type: boolean
+      role: state
+      description:
+        Target/distinct elemental hit marker. Start false per new Fire, Acidic or Frost hit,
+        persist true after its accepted resolved-hit check; replay cannot reroll continuation or
+        stun.
+    elemental_hit_allowed:
+      type: boolean
+      role: output
+      description: Current initial elemental hit accepted; reset on every initial elemental call.
+    continuation_pending:
+      type: boolean
+      role: state
+      description: This target/hit has its one Fire or Acidic next-turn damage checkpoint pending.
+    continuation_handoff_processed:
+      type: boolean
+      role: state
+      description: Target/hit next-turn damage handoff marker, reset for a distinct accepted Fire/Acidic hit.
+    continuation_result_processed:
+      type: boolean
+      role: state
+      description: Target/hit next-turn resolved-result marker; persist after the one continuation ends.
+    stun_next_turn_pending:
+      type: boolean
+      role: state
+      description:
+        Target/affected-next-turn pending Stun or Frost AP-loss context, not an aggregate of
+        unspecified overlapping sources.
+    stun_turn_processed:
+      type: boolean
+      role: state
+      description:
+        Target/affected-turn AP-loss marker. Start false for a distinct affected turn, persist
+        after the one AP loss.
+    stun_exposure_processed:
+      type: boolean
+      role: state
+      description:
+        Target/distinct supplied stun-effect result marker; start false for a new resolution,
+        persist after success or failure.
+    stun_initial_allowed:
+      type: boolean
+      role: output
+      description: Current initial supplied Stun effect accepted; reset each initial Stun call.
+    stun_effect_resolved:
+      type: boolean
+      role: input
+      description:
+        Actual weapon/special-rule stun outcome has been resolved; invoke or availability alone
+        does not confirm it.
+    stun_effect_confirmed:
+      type: boolean
+      role: input
+      description: Source-backed resolved stun effect, e.g. existing weapon rule even damage roll.
+    magic_result_processed:
+      type: boolean
+      role: state
+      description:
+        Target/distinct magic-damage event completed-result marker. Start false for a fresh
+        event and persist true after ordinary or actually completed creature-specific follow-up.
+    magic_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Target/distinct magic-damage event creature-complication handoff marker. Start false
+        and persist after the request; invoke alone is not completed resolution.
+    magic_scope_resolved:
+      type: boolean
+      role: input
+      description:
+        Source-backed target-specific determination of whether magic has extra complications is
+        supplied. Generic passage gives no numeric creature details; unknown scope remains
+        unresolved.
+    magic_complication_applies:
+      type: boolean
+      role: input
+      description:
+        Supplied source-backed target-specific applicability, not inferred merely from creature
+        family or magic source.
+    magic_complication_resolved:
+      type: boolean
+      role: input
+      description: Actual target-specific magic complication outcome is already resolved by its
+        source-backed owner, including any HP changes. This checkpoint must not apply it again.
+    magic_follow_up_allowed:
+      type: boolean
+      role: output
+      description:
+        Current fresh initial magic follow-up accepted after base damage resolution; reset each
+        initial magic call.
+    magic_checkpoint_complete:
+      type: boolean
+      role: state
+      description:
+        This target/magic event normal path or creature-specific follow-up is complete; not a
+        claim that the absent creature rules were extracted.
+  dependencies:
+    - key: creature_specials
+      label:
+        Source-backed target-specific magic complications and their completed outcomes; generic Magic
+        Damage gives no numeric definitions
+      section_id: section.combat.different_kinds_of_damage.magic_damage
+    - key: remaining_poison
+      label: Explicit ongoing poison CON checkpoints for the supplied remaining rest sequence
+      section_id: section.combat.different_kinds_of_damage
+      object_id: procedure.damage_follow_up
+    - key: poison_rest_death
+      label: Permanent removal checkpoint for the hero dying from poison during rest
+      object_id: procedure.hero_death
+    - key: explicit_poison_cure
+      label: Printed potion or Chapel cure checkpoint with supplied completed resolution
+      object_id: procedure.poison_cure
+    - key: explicit_disease_cure
+      label: Printed disease potion or Sick Ward cure; hero/episode/cure-attempt checkpoint
+      object_id: procedure.disease_cure
+    - key: elemental_next_turn
+      label: The one Fire/Acidic next-turn continuation checkpoint
+      object_id: procedure.elemental_continuation
+    - key: stun_next_turn
+      label: Apply the pending Stun/Frost AP loss once on the actual affected turn
+      object_id: procedure.stun_next_turn
+  steps:
+    - id: acid_protection
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: acid protection
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Acid ignores Natural Armour.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: acidic
+      effects:
+        - type: set
+          target: ignore_natural_armour
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ignore_armour
+          value:
+            type: literal
+            value: false
+    - id: fire_protection
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: fire protection
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Fire ignores armour and Natural Armour.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: fire
+      effects:
+        - type: set
+          target: ignore_natural_armour
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ignore_armour
+          value:
+            type: literal
+            value: true
+    - id: prepare_elemental_hit
+      source: &a1
+        - &a2
+          document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: Acidic Damage; Fire Damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - &a3
+          document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: Fire Damage continuation; Frost Damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Re-evaluate one distinct resolved Fire, Acidic or Frost hit. A replay cannot substitute
+        a continuation die or Frost chance result.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: fire
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: acidic
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: frost
+      effects:
+        - type: set
+          target: elemental_hit_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_elemental_hit
+          source: *a1
+          source_text:
+            Accept a resolved hit once; the target/hit state context is supplied separately for
+            every distinct hit.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: elemental_hit_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: elemental_hit_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: elemental_hit_processed
+              value:
+                type: literal
+                value: true
+    - id: extinguished
+      source:
+        - *a2
+        - *a3
+      source_text: After initial fire/acid resolution, 1–3 ends it.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: fire
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: acidic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: elemental_hit_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: continuation_roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: set
+          target: next_turn_damage
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: expires
+          value:
+            type: literal
+            value: now
+        - type: set
+          target: continuation_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: continuation_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: continuation_result_processed
+          value:
+            type: literal
+            value: false
+    - id: continues
+      source:
+        - *a2
+        - *a3
+      source_text:
+        4–6 causes one further turn at half damage rounded down, minimum 1, then ends. Supply
+        the damage amount being halved; protection is not applied here.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: fire
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: acidic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: elemental_hit_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: continuation_roll
+            right:
+              type: literal
+              value: 4
+      effects:
+        - type: set
+          target: next_turn_damage
+          value:
+            type: arithmetic
+            operator: max
+            values:
+              - type: literal
+                value: 1
+              - type: arithmetic
+                operator: floor
+                values:
+                  - type: arithmetic
+                    operator: divide
+                    values:
+                      - type: field
+                        name: damage_before_protection
+                      - type: literal
+                        value: 2
+        - type: set
+          target: expires
+          value:
+            type: literal
+            value: after next turn
+        - type: set
+          target: continuation_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: continuation_handoff_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: continuation_result_processed
+          value:
+            type: literal
+            value: false
+    - id: frost_no_stun
+      source:
+        - *a3
+      source_text:
+        A fresh resolved Frost hit whose supplied 50% chance result is false schedules no stun
+        for this hit. This context is not the aggregate status of other hits.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: frost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: elemental_hit_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: frost_stun_result
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: stun
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: next_turn_actions_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: stun_next_turn_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stun_turn_processed
+          value:
+            type: literal
+            value: false
+    - id: frost
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: frost
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Frost has 50% chance of stun. Source gives probability, not a die selector; supply result.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: frost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: elemental_hit_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: frost_stun_result
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: stun
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: next_turn_actions_lost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stun_next_turn_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stun_turn_processed
+          value:
+            type: literal
+            value: false
+    - id: prepare_stun
+      source: &a4
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: Stun; Frost Damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Re-evaluate one supplied resolved weapon/special-rule stun result. A replay cannot
+        substitute a new result or recreate an already processed pending turn.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: stun
+      effects:
+        - type: set
+          target: stun_initial_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_stun
+          source: *a4
+          source_text: Accept this distinct actually resolved stun effect once.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stun_effect_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stun_exposure_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: stun_initial_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: stun_exposure_processed
+              value:
+                type: literal
+                value: true
+    - id: stun_no_effect
+      source: *a4
+      source_text: An accepted supplied false stun outcome schedules no AP loss in this effect context.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: stun
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_initial_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_effect_confirmed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: stun
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stun_next_turn_pending
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: next_turn_actions_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: stun_turn_processed
+          value:
+            type: literal
+            value: false
+    - id: stun
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: stun
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        The confirmed supplied stun effect schedules one AP loss during the target next turn;
+        no AP is subtracted in this initial checkpoint.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: stun
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_initial_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_effect_confirmed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: next_turn_actions_lost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: stun
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stun_next_turn_pending
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stun_turn_processed
+          value:
+            type: literal
+            value: false
+    - id: prepare_magic
+      source: &a5
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: Magic Damage
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Damage from spells, prayers, scrolls, magic weapons or items is magic damage. Its
+        generic path works as normal in most cases. Re-evaluate one distinct initial event after its
+        base damage is already resolved, without applying that damage again.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: magic
+      effects:
+        - type: set
+          target: magic_follow_up_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_magic
+          source: *a5
+          source_text:
+            Accept this base-damage-resolved event only while its completed follow-up result is
+            unprocessed.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: magic_result_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: magic_follow_up_allowed
+              value:
+                type: literal
+                value: true
+    - id: magic_scope_unknown
+      source: *a5
+      source_text:
+        Unknown creature-specific applicability cannot be resolved by treating every magic hit
+        as a vulnerability. The source passage defines no numeric extra effects.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: magic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_follow_up_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.magic.creature_complications
+    - id: magic_normal
+      source: *a5
+      source_text:
+        For a source-reconciled ordinary target, the already resolved normal damage needs no
+        additional creature handoff or second HP mutation.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: magic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_follow_up_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_complication_applies
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: magic_result_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: magic_checkpoint_complete
+          value:
+            type: literal
+            value: true
+    - id: magic
+      source: *a5
+      source_text:
+        For a supplied source-backed applicable creature complication, record one handoff only.
+        The generic passage names demons as an example but defines no numeric vulnerability and does
+        not execute any target effect.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: magic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_follow_up_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_complication_applies
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_complication_resolved
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: magic_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: creature_specials
+    - id: magic_completed_complication
+      source: *a5
+      source_text:
+        After the actual source-backed creature complication is supplied complete, persist this
+        event result without repeating its HP or other effects. Invoke alone does not establish
+        completion.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: magic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_follow_up_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_scope_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_complication_applies
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: magic_complication_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: magic_result_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: magic_checkpoint_complete
+          value:
+            type: literal
+            value: true
+    - id: prepare_disease_exposure
+      source: &a6
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: disease
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        For the indicated disease exposure, resolve the supplied modified CON result once.
+        Successful resistance avoids new sickness; disease-specific modifiers remain supplied, not
+        invented.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+      effects:
+        - type: set
+          target: disease_exposure_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: disease_episode_started
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_disease_exposure
+          source: *a6
+          source_text: Accept this living hero/exposure checkpoint once; mark it processed even when
+            resistance succeeds or another active disease leaves an unresolved overlap.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: disease_exposed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: disease_exposure_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: disease_exposure_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: disease_exposure_processed
+              value:
+                type: literal
+                value: true
+    - id: additional_disease_unknown
+      source: *a6
+      source_text:
+        A further failed disease exposure while an effect is active has no defined stacking or
+        episode-identity treatment in this passage. Preserve current disease state and record the
+        boundary rather than halve again or reset the episode.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disease_exposure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diseased
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: con_success
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.disease.concurrent_effects
+    - id: disease
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: disease
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Disease exposure requires modified CON; failure causes disease.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disease_exposure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diseased
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disease_exposed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: con_success
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: diseased
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: disease_episode_started
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: disease_penalty_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: disease_penalty_active
+          value:
+            type: literal
+            value: false
+    - id: disease_penalty
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: disease penalty
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A failed single disease exposure loses half CON and STR (loss rounded down) once after
+        any ongoing battle is over; without an ongoing battle the accepted exposure applies
+        immediately. The computed outputs remain applicable until cured. Persist the episode marker
+        rather than repeatedly halve already-adjusted stats.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: after_battle
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: initial
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: disease_episode_started
+                    right:
+                      type: literal
+                      value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_battle
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diseased
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disease_penalty_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: constitution_after
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: constitution
+              - type: arithmetic
+                operator: floor
+                values:
+                  - type: arithmetic
+                    operator: divide
+                    values:
+                      - type: field
+                        name: constitution
+                      - type: literal
+                        value: 2
+        - type: set
+          target: strength_after
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: strength
+              - type: arithmetic
+                operator: floor
+                values:
+                  - type: arithmetic
+                    operator: divide
+                    values:
+                      - type: field
+                        name: strength
+                      - type: literal
+                        value: 2
+        - type: set
+          target: disease_penalty_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: disease_penalty_active
+          value:
+            type: literal
+            value: true
+    - id: prepare_disease_rest
+      source: *a6
+      source_text:
+        Whenever the party rests in a dungeon, during travel or at an inn, a diseased hero may
+        choose one CON test. Reset current permission and guard the chosen hero/episode/rest
+        checkpoint against reroll.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+      effects:
+        - type: set
+          target: disease_rest_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_disease_rest
+          source: *a6
+          source_text:
+            Only a living diseased hero at an actual rest who chooses the optional CON check may
+            resolve this unprocessed rest checkpoint.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_occurs
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: diseased
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: disease_rest_check_chosen
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: disease_rest_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: disease_rest_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: disease_rest_processed
+              value:
+                type: literal
+                value: true
+    - id: disease_recovery
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: disease recovery
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: On the chosen accepted rest CON result 01–05, the hero is cured and the disease
+        stat-loss output stops applying. Do not guess a numeric restoration across unrelated stat
+        changes. Potion and sick-ward cures remain separately supplied source paths.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disease_rest_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_occurs
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: diseased
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: disease_penalty_active
+          value:
+            type: literal
+            value: false
+    - id: prepare_poison_exposure
+      source: &a7
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A hero or enemy hit by poison must take damage before the supplied modified CON resist
+        outcome can start an episode. Re-evaluate permission and accept this target/damaging-hit
+        checkpoint once; no already-poisoned or dead target starts another episode.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+      effects:
+        - type: set
+          target: poison_exposure_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_poison_exposure
+          source: *a7
+          source_text:
+            Mark the distinct damaging-hit exposure processed even when resisted. Poison modifiers,
+            modified CON outcome and d10 result are supplied; this procedure does not reroll them.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: took_damage
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_poisoned
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_exposure_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: poison_exposure_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: poison_exposure_processed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: remaining_poison_rolls
+              value:
+                type: literal
+                value: 0
+            - type: set
+              target: poison_rolls_due
+              value:
+                type: literal
+                value: 0
+    - id: poison_initial_immune
+      source: *a7
+      source_text: A supplied CON roll of 01–05 beats poison. Do not create an episode from a
+        contradictory supplied failed outcome for that printed cure range.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_exposure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: already_poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: literal
+            value: 0
+    - id: poison
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A failed supplied modified CON outcome after an eligible damaging poison hit creates
+        one episode, with a check at the start of the next turn and checks for the supplied 1d10
+        turns thereafter. Initialize remaining_poison_rolls to d10+1 once; already-poisoned targets
+        cannot be poisoned again until cured.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: initial
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_exposure_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: took_damage
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_poisoned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: con_success
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: poisoned
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: sum
+            values:
+              - type: field
+                name: poison_duration_roll
+              - type: literal
+                value: 1
+        - type: set
+          target: already_poisoned
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: field
+            name: poison_rolls_due
+    - id: prepare_poison_check
+      source: &a8
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        For an ongoing poison checkpoint reset transient permission/loss outputs, then accept
+        one unprocessed remaining check for a living poisoned target. Outcomes and the due turn/rest
+        checkpoint are supplied.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: ongoing
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+      effects:
+        - type: set
+          target: poison_check_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 0
+      substeps:
+        - id: accept_poison_check
+          source: *a8
+          source_text:
+            Persist the target/episode/check marker before resolution and snapshot starting HP. A
+            repeated check or exhausted remaining count cannot apply damage or rest death again.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_poisoned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: remaining_poison_rolls
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_check_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: poison_check_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: poison_check_processed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: poison_starting_hp
+              value:
+                type: field
+                name: hit_points
+    - id: poison_cure
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison cure
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: 01–05 on CON beats poison and cancels remaining rolls.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: ongoing
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_poisoned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: remaining_poison_rolls
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_check_allowed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: cured
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: poisoned
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: already_poisoned
+          value:
+            type: literal
+            value: false
+    - id: poison_loss
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: At start of next turn and 1d10 turns thereafter, failed CON loses 1 HP even below zero.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: ongoing
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_poisoned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: remaining_poison_rolls
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: con_success
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_check_allowed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: hit_points
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: hit_points
+              - type: literal
+                value: 1
+    - id: prepare_poison_rest
+      source: &a9
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison rest
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: If the party rests in a dungeon, while traveling or at an inn, roll all remaining
+        poison CON checks. Re-evaluate this target/episode/rest handoff, with actual rest occurrence
+        supplied; a handoff does not execute checks or spend remaining count.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+      effects:
+        - type: set
+          target: poison_rest_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: literal
+            value: 0
+      substeps:
+        - id: accept_poison_rest
+          source: *a9
+          source_text:
+            Accept the remaining-check handoff once for a living poisoned target with positive
+            remaining count and an actual rest. Persist the rest marker; distinct individual checks
+            use their own fresh markers and carry updated count/HP forward.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_occurs
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: already_poisoned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: remaining_poison_rolls
+                right:
+                  type: literal
+                  value: 0
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_rest_handoff_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: poison_rest_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: poison_rest_handoff_processed
+              value:
+                type: literal
+                value: true
+    - id: poison_rest
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison rest
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Record all currently remaining CON checks during an accepted rest. Explicitly resolve
+        supplied outcomes with this procedure's ongoing checkpoint, one distinct check at a time,
+        carrying count/HP/current condition forward. Stop when the count is exhausted, poison is
+        cured or the target dies. Invoke only records the handoff; replay cannot create another one.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_poisoned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_occurs
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_rest_allowed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: poison_rolls_due
+          value:
+            type: field
+            name: remaining_poison_rolls
+        - type: invoke
+          dependency: remaining_poison
+    - id: poison_rest_death
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: poison rest death
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A failed accepted poison check that reduces this target from 1 HP to zero during rest
+        causes death. Already-zero HP or an ineligible/successful/replayed check does not
+        manufacture that transition.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: ongoing
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_occurs
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_check_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_starting_hp
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hp_lost
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: dead
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: poison_rest_death
+    - id: consume_poison_check
+      source: *a8
+      source_text:
+        A resolved remaining CON check outside the 01–05 cure consumes one remaining check
+        whether it succeeds or fails. Replaying the same check cannot consume another. Exhaustion
+        alone is not asserted to cure poison.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: ongoing
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: poison_check_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: con_roll
+            right:
+              type: literal
+              value: 5
+      effects:
+        - type: set
+          target: remaining_poison_rolls
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: remaining_poison_rolls
+              - type: literal
+                value: 1
+    - id: explicit_poison_cure
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 122
+          printed_page: 120
+          heading: Poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: For the printed potion or Chapel cure, hand off to the explicit
+        hero/episode/cure-attempt procedure. No resource charge or cure is produced by invoke alone.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: external_cure
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_poisoned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: invoke
+          dependency: explicit_poison_cure
+    - id: explicit_disease_cure
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 121
+          printed_page: 119
+          heading: Disease
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Hand off the printed disease potion or Sick Ward cure to the explicit
+        hero/episode/cure-attempt checkpoint. Invoke alone does not remove disease or charge
+        resources.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: external_cure
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: damage_type
+            right:
+              type: literal
+              value: disease
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: diseased
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: invoke
+          dependency: explicit_disease_cure
+    - id: elemental_next_turn
+      source: *a1
+      source_text:
+        Hand off this scheduled Fire/Acidic continuation on the target next turn. Invoke does
+        not itself subtract HP or resolve armour.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: next_turn
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: fire
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: acidic
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continuation_pending
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: elemental_next_turn
+    - id: stun_next_turn
+      source: *a4
+      source_text: Hand off the pending Stun/Frost AP loss on the target next turn. Invoke does not
+        initialize or subtract AP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: next_turn
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: stun
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: damage_type
+                right:
+                  type: literal
+                  value: frost
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stun_next_turn_pending
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: invoke
+          dependency: stun_next_turn
+  entry_step: acid_protection
+  exit_step: stun_next_turn
+  issues:
+    - issue.poison.remaining_check_exhaustion
+    - issue.phase4.zero_and_negative
+    - issue.disease.concurrent_effects
+    - issue.damage_follow_up.continuation_basis
+    - issue.magic.creature_complications
+  unresolved_references:
+    - 'Magic Damage: some creatures like demons suffer further complications. The passage gives no
+      creature-specific definitions or numeric effects; retain supplied source-backed
+      applicability/outcomes, without inventing Bestiary contents or a universal demon
+      vulnerability.'

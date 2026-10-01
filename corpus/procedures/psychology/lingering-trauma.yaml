@@ -1,0 +1,781 @@
+- id: procedure.trauma_selection
+  name: Actual Lingering Trauma trigger-table selection
+  section_id: section.psychology.table_lingering_trauma_table
+  source: &a2
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 4 Lingering Trauma
+        column: Effect
+      extraction: &a1
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Lingering Trauma Table
+      locator:
+        table: Lingering Trauma Table
+      extraction: *a1
+  status: extracted
+  confidence: high
+  source_text: Use the complete 1d6 Lingering Trauma Table for this actual accepted diagnosis. A
+    supplied actual roll selects one persisted trigger once; replay with another die cannot
+    substitute it. The source does not specify the exact time of selection. This checkpoint does not
+    activate a penalty, enter a dungeon, cure a diagnosis or change Sanity/count.
+  issues:
+    - issue.sanity.trauma_scope
+  fields:
+    sanity_system_enabled: &a3
+      type: boolean
+      role: input
+      description: Whether this hero uses optional Sanity.
+    trauma_diagnosis_matches: &a4
+      type: boolean
+      role: input
+      description:
+        This is the same hero and accepted Lingering Trauma diagnosis; do not overwrite another
+        hero or unrelated diagnosis context.
+    trauma_selected: &a5
+      type: boolean
+      role: state
+      description: Actual complete structured-table selection has resolved for this diagnosis.
+    trauma_selection_processed: &a6
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis table selection marker; fresh false only for a new accepted diagnosis,
+        persist to prevent a changed die rerolling the trigger.
+    trauma_roll_supplied:
+      type: boolean
+      role: input
+      description: An actual 1d6 table selection has been supplied; do not invent a roll or
+        source-unspecified selection time.
+    die:
+      type: number
+      role: input
+      description: Actual 1d6 Lingering Trauma selection, distinct from the 1d10 diagnosis roll.
+      minimum: 1
+      maximum: 6
+      integer: true
+    trigger: &a7
+      type: string
+      role: state
+      description: Persisted exact structured-table trigger text selected for this diagnosis.
+    trauma_dungeon_closed: &a8
+      type: boolean
+      role: state
+      description: Owned next-dungeon visit has actually ended; persist after exit, including an
+        untriggered visit. Later recurrence is unresolved, not silently rearmed.
+    trauma_diagnosed: &a9
+      type: boolean
+      role: state
+      description:
+        Actual accepted Lingering Trauma diagnosis owned by this context, initialized only by
+        successful acquisition. Persist independently of later acquired names or pending episodes;
+        this visit expiry does not cure the diagnosis.
+  dependencies:
+    - key: table
+      label: Complete existing 1d6 Lingering Trauma Table
+      object_id: table.psychology.lingering_trauma
+  steps:
+    - id: select
+      source: *a2
+      source_text:
+        For this accepted diagnosis and an actual supplied 1d6 selection before the owned next
+        visit is closed, look up its trigger once without changing any condition effect.
+      when:
+        type: all
+        conditions:
+          - &a10
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - &a11
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosis_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_roll_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_selection_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_closed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - character.sanity.trauma_trigger
+      effects:
+        - type: set
+          target: trauma_selection_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: trauma_selected
+          value:
+            type: literal
+            value: true
+  entry_step: select
+  exit_step: select
+- id: procedure.lingering_trauma
+  name: Lingering Trauma next-dungeon trigger and departure expiry
+  section_id: section.psychology.table
+  source: *a2
+  status: extracted
+  confidence: high
+  source_text: The effect is not evident until the next dungeon after diagnosis and a specific table
+    situation that resembles or reminds the hero of the original situation. Once triggered, Resolve
+    Tests and CS are at -10 until the hero leaves that dungeon. Request separate actual trigger
+    selection, match one source-grounded event in the owned next dungeon, activate once, and clear
+    only the owned contributions at actual departure. Do not infer later-dungeon recurrence,
+    diagnosis removal or Sanity restoration.
+  issues:
+    - issue.sanity.trauma_scope
+  fields:
+    sanity_system_enabled: *a3
+    trauma_diagnosis_matches: *a4
+    trauma_selected: *a5
+    trauma_selection_processed: *a6
+    trauma_selection_request_processed:
+      type: boolean
+      role: state
+      description: Hero/diagnosis request for actual trigger selection handed off once; invoke alone
+        selects nothing.
+    trigger: *a7
+    phase:
+      type: string
+      role: input
+      description: 'Actual checkpoint: acquisition/selection handoff, event or exit.'
+    next_dungeon:
+      type: boolean
+      role: input
+      description:
+        Actual next dungeon after this diagnosis; false for the dungeon where the diagnosis was
+        acquired.
+    trauma_dungeon_matches:
+      type: boolean
+      role: input
+      description:
+        Actual supplied dungeon instance is this diagnosis next dungeon; do not carry an active
+        effect into another instance.
+    trauma_dungeon_context_resolved:
+      type: boolean
+      role: input
+      description: Source-grounded next-dungeon identity is resolved; false for an unknown later
+        visit/recurrence policy.
+    trauma_situation_resolved:
+      type: boolean
+      role: input
+      description: Actual table situation or source-backed reminder has been reconciled; false for
+        unspecified resemblance, without guessing a trigger.
+    event_confirmed:
+      type: boolean
+      role: input
+      description:
+        An actual supplied situation occurred; a requested event or table draw alone does not
+        activate Trauma.
+    trauma_event:
+      type: string
+      role: input
+      description: Canonical selected-table situation matched by this actual source-grounded event;
+        unknown resemblance remains unresolved rather than fuzzy matched.
+    trigger_occurred:
+      type: boolean
+      role: output
+      description:
+        Whether this call actually matched the persisted trigger in the owned next dungeon;
+        recomputed each call, never trusted as a stale supplied true flag.
+    trauma_trigger_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/next-dungeon activation marker; persist across events/turns and exit, so
+        penalties apply only once.
+    active_until_dungeon_exit:
+      type: boolean
+      role: state
+      description:
+        Owned Lingering Trauma effect is active until actually leaving its triggering next
+        dungeon; not a diagnosis-cure flag.
+    trauma_resolve_modifier:
+      type: number
+      role: state
+      description:
+        Contribution from this Lingering Trauma diagnosis only; do not change total RES or
+        another condition contribution.
+    trauma_combat_skill_modifier:
+      type: number
+      role: state
+      description: Contribution from this Lingering Trauma diagnosis only; do not change total CS or
+        another condition contribution.
+    leaves_dungeon:
+      type: boolean
+      role: input
+      description:
+        Actual departure from the owned next dungeon, not objective completion, quest end, room
+        movement or a departure request.
+    trauma_dungeon_closed: *a8
+    trauma_diagnosed: *a9
+  dependencies:
+    - key: selection
+      label: Separate actual 1d6 trigger selection; handoff alone does not select
+      object_id: procedure.trauma_selection
+    - key: acquisition
+      label: Actual accepted diagnosis and Sanity/count reset, separately owned
+      object_id: procedure.sanity_condition
+    - key: activation
+      label: Existing source-backed next-dungeon trigger penalties
+      object_id: character.condition.lingering_trauma
+    - key: expiry
+      label: Existing actual-departure effect expiry, not a cure
+      object_id: character.condition.trauma_expiry
+  steps:
+    - id: check_event
+      source: *a2
+      source_text:
+        Recompute the actual current matched occurrence; a stale trigger_occurred flag cannot
+        activate this diagnosis in another event or dungeon.
+      effects:
+        - type: set
+          target: trigger_occurred
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: match
+          source: *a2
+          source_text:
+            Match the persisted structured-table trigger to an actual source-reconciled situation
+            in this diagnosis next dungeon, before actual departure.
+          when:
+            type: all
+            conditions:
+              - *a10
+              - *a11
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: event
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_selected
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_selection_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: next_dungeon
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_dungeon_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_dungeon_context_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_situation_resolved
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: event_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_dungeon_closed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: leaves_dungeon
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trigger
+                right:
+                  type: field
+                  name: trauma_event
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_diagnosed
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: trigger_occurred
+              value:
+                type: literal
+                value: true
+    - id: selection
+      source: *a2
+      source_text:
+        If this actual diagnosis has no resolved trigger yet, request separate table selection
+        once. No roll, activation or numerical penalty is performed by this handoff.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_selected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_selection_request_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_closed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaves_dungeon
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: trauma_selection_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: selection
+    - id: scope_unknown
+      source: *a2
+      source_text:
+        Unreconciled dungeon identity, unspecified reminder scope or requested recurrence after
+        the next visit closed remains unresolved; no penalty or rearming is inferred.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: event
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_confirmed
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_dungeon_context_resolved
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_situation_resolved
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trauma_dungeon_closed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.trauma_scope
+    - id: activate
+      source: *a2
+      source_text:
+        Once the actual source-grounded selected trigger happens in the next dungeon, apply the
+        existing owned Resolve/CS contributions once and retain them until departure.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: event
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trigger_occurred
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_trigger_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: active_until_dungeon_exit
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_closed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - character.condition.lingering_trauma
+      effects:
+        - type: set
+          target: trauma_trigger_processed
+          value:
+            type: literal
+            value: true
+    - id: departure_scope_unknown
+      source: *a2
+      source_text:
+        An actual departure with unresolved next-dungeon identity preserves the scope issue and
+        the owned effect; do not silently expire it against another or unidentified dungeon.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: exit
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaves_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_context_resolved
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.trauma_scope
+    - id: expire
+      source: *a2
+      source_text: Actual departure from the owned next dungeon clears the active Lingering Trauma
+        contributions only; no diagnosis cure, total-stat restoration, condition-count decrement or
+        Sanity reset.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: exit
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaves_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: active_until_dungeon_exit
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_closed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - character.condition.trauma_expiry
+      effects: []
+    - id: close_visit
+      source: *a2
+      source_text:
+        Record actual departure from the owned next dungeon, including a visit with no trigger.
+        Later recurrence/rearming remains a source question; this marker does not remove the
+        diagnosed condition.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: exit
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: next_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: leaves_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_dungeon_closed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trauma_diagnosed
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: trauma_dungeon_closed
+          value:
+            type: literal
+            value: true
+  entry_step: check_event
+  exit_step: close_visit

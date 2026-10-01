@@ -1,0 +1,541 @@
+- id: procedure.rest_bleeding_check
+  name: Rest — untreated bleeding-out hero
+  section_id: section.into_the_dungeons.rest.bleeding_out_and_poisoned_characters
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Bleeding Out and Poisoned Characters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+    rest or die. If successful, the hero regains 1d4 HP (regardless of equipment
+    and talents).
+  fields:
+    rest_attempt_started:
+      type: boolean
+      role: input
+      description: Supplied accepted-attempt checkpoint; a rejected rest does not
+        perform condition checks.
+    rest_completed:
+      type: boolean
+      role: input
+      description: Current party completion outcome; early interruption leaves
+        condition-check timing source-unresolved.
+    untreated_bleeding_out:
+      type: boolean
+      role: input
+      description: Supplied applicable condition for this identified hero.
+    bleeding_rest_processed:
+      type: boolean
+      role: state
+      description: Hero/attempt-owned evaluation checkpoint; retain on replay,
+        initialize false for a distinct rest attempt.
+    condition_checks_allowed:
+      type: boolean
+      role: output
+      description: Permission for this invocation; only a completed accepted rest has
+        source-defined applicability without resolving interrupted-rest timing.
+    constitution:
+      type: number
+      role: input
+      description: Supplied hero CON for this check, before the printed +10.
+    roll:
+      type: number
+      role: input
+      description: Supplied percentile CON-test roll, separate from the recovery d4.
+      integer: true
+      minimum: 1
+      maximum: 100
+    effective_value:
+      type: number
+      role: output
+      description: CON+10 target supplied to existing standard-check rules.
+    outcome:
+      type: string
+      role: output
+      description: Success or failure from existing percentile rules, including
+        automatic 91–100 failure.
+    bleeding_hp_die:
+      type: number
+      role: input
+      description: Supplied printed 1d4 HP recovery die; equipment/talent HP
+        adjustments are not applied.
+      integer: true
+      minimum: 1
+      maximum: 4
+    hit_points:
+      type: number
+      role: state
+      description: HP of this hero.
+    maximum_hp:
+      type: number
+      role: input
+      description: Recorded hero maximum; above-maximum recovery stays source-unresolved.
+    dead:
+      type: boolean
+      role: state
+      description: Hero death; a failed check sets true. This procedure does not clear
+        bleeding status or infer revival transitions.
+  dependencies:
+    - key: constitution_check_1
+      label: core.check.standard
+      object_id: core.check.standard
+    - key: constitution_check_2
+      label: core.check.success
+      object_id: core.check.success
+    - key: constitution_check_3
+      label: core.check.automatic_failure
+      object_id: core.check.automatic_failure
+  steps:
+    - id: check_timing
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      effects:
+        - type: set
+          target: condition_checks_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: interrupted_timing_unknown
+          source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+            rest or die. If successful, the hero regains 1d4 HP (regardless of
+            equipment and talents).
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: untreated_bleeding_out
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bleeding_rest_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: unresolved
+              issue_id: issue.rest.condition_check_timing
+        - id: accept_condition_check
+          source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+            rest or die. If successful, the hero regains 1d4 HP (regardless of
+            equipment and talents).
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: untreated_bleeding_out
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bleeding_rest_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: condition_checks_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: bleeding_rest_processed
+              value:
+                type: literal
+                value: true
+    - id: prepare_con_test
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: condition_checks_allowed
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: effective_value
+          value:
+            type: sum
+            values:
+              - type: field
+                name: constitution
+              - type: literal
+                value: 10
+    - id: con_test
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: condition_checks_allowed
+        right:
+          type: literal
+          value: true
+      rule_refs:
+        - core.check.standard
+        - core.check.success
+        - core.check.automatic_failure
+      effects: []
+    - id: failed_check
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_checks_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: outcome
+            right:
+              type: literal
+              value: failure
+      effects:
+        - type: set
+          target: dead
+          value:
+            type: literal
+            value: true
+    - id: hp_overflow_unresolved
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_checks_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: outcome
+            right:
+              type: literal
+              value: success
+          - type: compare
+            operator: gt
+            left:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: bleeding_hp_die
+            right:
+              type: field
+              name: maximum_hp
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.recovery_bounds
+    - id: successful_recovery
+      source_text: An untreated bleeding-out hero must pass a CON+10 test during the
+        rest or die. If successful, the hero regains 1d4 HP (regardless of
+        equipment and talents).
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: condition_checks_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: outcome
+            right:
+              type: literal
+              value: success
+          - type: compare
+            operator: lte
+            left:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: bleeding_hp_die
+            right:
+              type: field
+              name: maximum_hp
+      effects:
+        - type: add
+          target: hit_points
+          value:
+            type: field
+            name: bleeding_hp_die
+          duration: immediate
+  entry_step: check_timing
+  exit_step: successful_recovery
+  issues:
+    - issue.rest.condition_check_timing
+    - issue.phase4.recovery_bounds
+    - issue.rest.untreated_bleeding_no_rescue
+- id: procedure.rest_poison_checks
+  name: Rest — remaining Poison Tests
+  section_id: section.into_the_dungeons.rest.bleeding_out_and_poisoned_characters
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: A poisoned hero will have to make the remaining Poison Tests during the rest.
+  fields:
+    rest_attempt_started:
+      type: boolean
+      role: input
+      description: Supplied accepted-attempt checkpoint; a rejected rest does not
+        perform condition checks.
+    rest_completed:
+      type: boolean
+      role: input
+      description: Current party completion outcome; early interruption leaves
+        condition-check timing source-unresolved.
+    poisoned:
+      type: boolean
+      role: input
+      description: Supplied applicable condition for this identified hero.
+    poison_rest_processed:
+      type: boolean
+      role: state
+      description: Hero/attempt-owned evaluation checkpoint; retain on replay,
+        initialize false for a distinct rest attempt.
+    condition_checks_allowed:
+      type: boolean
+      role: output
+      description: Permission for this invocation; only a completed accepted rest has
+        source-defined applicability without resolving interrupted-rest timing.
+    remaining_poison_rolls:
+      type: number
+      role: input
+      description: Supplied remaining count from this hero’s existing poison context.
+      integer: true
+      minimum: 0
+    poison_tests_due:
+      type: number
+      role: output
+      description: All remaining Poison Tests required by this rest; outcomes and
+        resulting HP are supplied through the existing poison follow-up handoff.
+  dependencies:
+    - key: poison_follow_up
+      label: Remaining poison rolls through existing damage follow-up, with supplied
+        poison/rest context and outcomes
+      object_id: procedure.damage_follow_up
+  steps:
+    - id: check_timing
+      source_text: A poisoned hero will have to make the remaining Poison Tests during
+        the rest.
+      effects:
+        - type: set
+          target: condition_checks_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: interrupted_timing_unknown
+          source_text: A poisoned hero will have to make the remaining Poison Tests during
+            the rest.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poisoned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_rest_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: unresolved
+              issue_id: issue.rest.condition_check_timing
+        - id: accept_condition_check
+          source_text: A poisoned hero will have to make the remaining Poison Tests during
+            the rest.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_completed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poisoned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: poison_rest_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: condition_checks_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: poison_rest_processed
+              value:
+                type: literal
+                value: true
+    - id: remaining_tests
+      source_text: A poisoned hero will have to make the remaining Poison Tests during
+        the rest.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: condition_checks_allowed
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: poison_tests_due
+          value:
+            type: field
+            name: remaining_poison_rolls
+      substeps:
+        - id: resolve_remaining_poison
+          source_text: A poisoned hero will have to make the remaining Poison Tests during
+            the rest.
+          when:
+            type: compare
+            operator: gt
+            left:
+              type: field
+              name: remaining_poison_rolls
+            right:
+              type: literal
+              value: 0
+          effects:
+            - type: invoke
+              dependency: poison_follow_up
+  entry_step: check_timing
+  exit_step: remaining_tests
+  issues:
+    - issue.rest.condition_check_timing

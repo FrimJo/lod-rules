@@ -1,0 +1,323 @@
+- id: procedure.wounded_status
+  name: Reconcile Wounded condition and fresh turn allowance
+  section_id: section.combat.wounded
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Wounded
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero or enemy losing 50% of HP rounded up is wounded and may use only 1 AP per turn
+    while the condition remains. Re-evaluate current HP, including after healing; do not refund AP
+    in an already active turn. Apply the cap once to an actual fresh initialized allowance,
+    preserving lower allowances. Mid-turn accounting and other modifier order remain explicit source
+    boundaries.
+  issues:
+    - issue.wounded.turn_allowance
+  fields:
+    maximum_hp:
+      type: number
+      role: input
+      description: Supplied current maximum HP for this hero/enemy, including separately resolved stat changes.
+      minimum: 1
+      integer: true
+    hit_points:
+      type: number
+      role: state
+      description:
+        Current supplied HP after separately resolved damage or healing; this checkpoint does
+        not change it.
+    wounded:
+      type: boolean
+      role: state
+      description: Whether current HP loss meets the source rounded-up half threshold; recomputed every call.
+    dead:
+      type: boolean
+      role: state
+      description: Actual target death state; Wounded cannot grant AP to a dead target.
+    can_act:
+      type: boolean
+      role: state
+      description:
+        Actual target permission after separately resolved incapacity; Wounded classification
+        does not revive or wake it.
+    turn_start:
+      type: boolean
+      role: input
+      description: Actual fresh turn allowance checkpoint for this target, not merely HP change during a turn.
+    turn_ap_initialized:
+      type: boolean
+      role: input
+      description: Source-backed actual allowance initialized by its existing owner, not stale previous-turn AP.
+    actions_spent_this_turn:
+      type: number
+      role: input
+      description: Actual actions already spent in this turn; mid-turn wounded accounting is unresolved.
+      minimum: 0
+      integer: true
+    wounded_ap_context_resolved:
+      type: boolean
+      role: input
+      description:
+        Supplied source-reconciled timing and allowance context; false for unresolved modifier
+        order or other mixed context. No universal Wounded/Stun precedence is inferred.
+    wounded_turn_processed:
+      type: boolean
+      role: state
+      description: Target/distinct-turn cap marker. Start false for a new actual turn, persist after
+        application; HP changes do not reset it.
+    action_points:
+      type: number
+      role: state
+      description: Actual initialized remaining allowance; cap never raises zero or another lower allowance.
+      minimum: 0
+      integer: true
+    wounded_turn_allowed:
+      type: boolean
+      role: output
+      description: Current fresh unspent affected-turn checkpoint accepted; reset every call.
+  dependencies:
+    - key: wounded_rule
+      label:
+        Existing stable rounded-up threshold rule; classification/limit source, not an automatic AP
+        setter here
+      object_id: character.hit_points.wounded
+    - key: normal_allowance
+      label:
+        Existing base allocation remains separately owned; this checkpoint does not refund an active
+        turn
+      object_id: core.action_points.allocation
+    - key: stun
+      label: Existing actual affected-turn Stun/Frost loss; precedence is not inferred
+      object_id: procedure.stun_next_turn
+  steps:
+    - id: classify
+      source: *a1
+      source_text:
+        Recompute current Wounded threshold after supplied damage/healing. This flag alone
+        gives no permission to act or numerical HP/AP restoration.
+      effects:
+        - type: set
+          target: wounded
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: wounded_turn_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: threshold_met
+          source: *a1
+          source_text:
+            Lost HP of at least half the current maximum, rounded up, meets the Wounded condition
+            for either a hero or enemy.
+          when:
+            type: compare
+            operator: gte
+            left:
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: field
+                  name: maximum_hp
+                - type: field
+                  name: hit_points
+            right:
+              type: arithmetic
+              operator: ceil
+              values:
+                - type: arithmetic
+                  operator: divide
+                  values:
+                    - type: field
+                      name: maximum_hp
+                    - type: literal
+                      value: 2
+          effects:
+            - type: set
+              target: wounded
+              value:
+                type: literal
+                value: true
+    - id: accept_turn
+      source: *a1
+      source_text:
+        Only an actual fresh initialized turn of a living, acting positive-HP target can apply
+        the still-pending per-turn cap.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dead
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: can_act
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: turn_start
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: turn_ap_initialized
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_turn_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: wounded_turn_allowed
+          value:
+            type: literal
+            value: true
+    - id: mid_turn_unknown
+      source: *a1
+      source_text:
+        The passage does not state how actions already spent affect mid-turn onset or healing
+        refunds. Record the boundary rather than reset AP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: actions_spent_this_turn
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.wounded.turn_allowance
+    - id: context_unknown
+      source: *a1
+      source_text:
+        The passage does not define ordering with other allowance/loss modifiers; preserve
+        unresolved supplied context.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_ap_context_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.wounded.turn_allowance
+    - id: cap_allowance
+      source: *a1
+      source_text:
+        For the actual unspent source-reconciled allowance, only one AP may be used. Preserve
+        an already lower allowance and persist the turn marker; no replay can refill spent AP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_turn_allowed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actions_spent_this_turn
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wounded_ap_context_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: action_points
+          value:
+            type: arithmetic
+            operator: min
+            values:
+              - type: field
+                name: action_points
+              - type: literal
+                value: 1
+        - type: set
+          target: wounded_turn_processed
+          value:
+            type: literal
+            value: true
+  entry_step: classify
+  exit_step: cap_allowance

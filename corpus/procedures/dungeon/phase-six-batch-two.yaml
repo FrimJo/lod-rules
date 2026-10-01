@@ -1,0 +1,1444 @@
+- id: procedure.wandering_monster
+  name: Wandering monster movement and reveal
+  section_id: section.into_the_dungeons.wandering_monsters
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After heroes act, the token moves 4 squares. A d6 roll of 1 moves back or through a
+    random door away from the heroes; 2–6 moves towards them. If it enters a room with LOS to heroes
+    within 10 squares, reveal quest-specific monsters and set initiative.
+  fields:
+    direction_roll:
+      type: number
+      role: input
+      description: Supplied d6 direction roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+    route:
+      type: string
+      role: input
+      description: Caller supplied route chosen for movement.
+    distance:
+      type: number
+      role: input
+      description: Distance from token to heroes.
+      integer: true
+      minimum: 0
+    heroes_in_los:
+      type: boolean
+      role: input
+      description: Heroes are in line of sight.
+    door_state:
+      type: string
+      role: state
+      description: Door state supplied by caller.
+    door_roll:
+      type: number
+      role: input
+      description: 'Supplied next-turn d6 passage roll: ordinary 2–6, sealed/wedged 5–6.'
+      integer: true
+      minimum: 1
+      maximum: 6
+    door_held_previous_turn:
+      type: boolean
+      role: input
+      description: The token was stopped at this door on the previous turn and now makes the pass roll.
+    chasm:
+      type: boolean
+      role: input
+      description: Token is at a chasm.
+    cross_chasm:
+      type: boolean
+      role: input
+      description: Token crosses on this turn.
+    movement_squares:
+      type: number
+      role: output
+      description:
+        Four-square movement allowance; actual path and distance to an obstacle are supplied
+        geometry.
+      integer: true
+      minimum: 0
+      maximum: 4
+    movement_stops:
+      type: boolean
+      role: state
+      description: Movement stops this turn.
+    reveal_monsters:
+      type: boolean
+      role: state
+      description: Quest monsters should be placed.
+    heroes_finished:
+      type: boolean
+      role: input
+      description: All heroes have performed their actions.
+    new_token:
+      type: boolean
+      role: input
+      description: New wandering monster token must be placed.
+    placement:
+      type: string
+      role: output
+      description: Initial placement on the start tile just outside the door.
+    entered_room:
+      type: boolean
+      role: input
+      description: Supplied geometry says token entered a room this turn.
+    closed_door_blocks_los:
+      type: boolean
+      role: input
+      description: A closed door lies between token and heroes.
+    direction:
+      type: string
+      role: output
+      description: Direction selected by the d6.
+    waiting_at_door:
+      type: boolean
+      role: state
+      description: Token remains at the closed door until passage succeeds.
+    seal_broken:
+      type: boolean
+      role: state
+      description: Seal broken when passage succeeds.
+    chasm_held_previous_turn:
+      type: boolean
+      role: input
+      description: Token reached this chasm during an earlier turn.
+    crossed_chasm:
+      type: boolean
+      role: state
+      description: This chasm has been crossed; returning across it is forbidden.
+    cross_back_requested:
+      type: boolean
+      role: input
+      description: Supplied route would cross back over the same chasm.
+  dependencies:
+    - key: quest_monster_table
+      label: Quest-specific Monster Table
+      section_id: section.quest_book_i
+    - key: initiative
+      label: Initiative tokens
+      section_id: section.into_the_dungeons.initiative
+      object_id: procedure.initiative
+    - key: iron_wedges
+      label: Iron Wedges equipment
+      object_id: equipment.general.iron_wedges
+  steps:
+    - id: placement
+      source_text: Place the token on the start tile, just outside the door.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: new_token
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: start_tile_outside_door
+    - id: move_after_heroes
+      source_text:
+        When heroes have performed all their actions, the token moves into the first room. It
+        always moves 4 squares.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_finished
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: movement_squares
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: movement_stops
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reveal_monsters
+          value:
+            type: literal
+            value: false
+    - id: choose_direction
+      source_text:
+        On a 1 move back or through a random door away from heroes; on 2–6 move towards heroes.
+        Repeat the roll each turn.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: heroes_finished
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_held_previous_turn
+            right:
+              type: literal
+              value: false
+      effects: []
+      substeps:
+        - id: away
+          source_text: On 1 move back or through a random door away from heroes.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: direction_roll
+            right:
+              type: literal
+              value: 1
+          effects:
+            - type: set
+              target: direction
+              value:
+                type: literal
+                value: away
+        - id: toward
+          source_text: On 2–6 move towards heroes.
+          when:
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: direction_roll
+            right:
+              type: literal
+              value: 2
+          effects:
+            - type: set
+              target: direction
+              value:
+                type: literal
+                value: toward
+    - id: obstacles
+      source_text: Closed doors and chasms stop movement.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: heroes_finished
+        right:
+          type: literal
+          value: true
+      effects: []
+      substeps:
+        - id: closed_door
+          source_text: Remain at the closed door until it can be passed.
+          when:
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_state
+                right:
+                  type: literal
+                  value: closed
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_state
+                right:
+                  type: literal
+                  value: iron_wedged
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_state
+                right:
+                  type: literal
+                  value: magically_sealed
+          effects:
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: waiting_at_door
+              value:
+                type: literal
+                value: true
+        - id: break_seal
+          source_text: A successful 5–6 passage breaks the magical seal.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_state
+                right:
+                  type: literal
+                  value: magically_sealed
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_held_previous_turn
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: door_roll
+                right:
+                  type: literal
+                  value: 5
+          effects:
+            - type: set
+              target: seal_broken
+              value:
+                type: literal
+                value: true
+        - id: door_passes
+          source_text:
+            On a later turn ordinary doors pass on 2–6; sealed or wedged doors on 5–6. The seal is
+            broken.
+          when:
+            type: all
+            conditions:
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: door_state
+                    right:
+                      type: literal
+                      value: closed
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: door_state
+                    right:
+                      type: literal
+                      value: iron_wedged
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: door_state
+                    right:
+                      type: literal
+                      value: magically_sealed
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_held_previous_turn
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: door_state
+                        right:
+                          type: literal
+                          value: closed
+                      - type: compare
+                        operator: gte
+                        left:
+                          type: field
+                          name: door_roll
+                        right:
+                          type: literal
+                          value: 2
+                  - type: all
+                    conditions:
+                      - type: any
+                        conditions:
+                          - type: compare
+                            operator: eq
+                            left:
+                              type: field
+                              name: door_state
+                            right:
+                              type: literal
+                              value: iron_wedged
+                          - type: compare
+                            operator: eq
+                            left:
+                              type: field
+                              name: door_state
+                            right:
+                              type: literal
+                              value: magically_sealed
+                      - type: compare
+                        operator: gte
+                        left:
+                          type: field
+                          name: door_roll
+                        right:
+                          type: literal
+                          value: 5
+          effects:
+            - type: set
+              target: door_state
+              value:
+                type: literal
+                value: open
+            - type: set
+              target: waiting_at_door
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: false
+        - id: chasm_arrival
+          source_text: Reaching a chasm stops movement this turn.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm_held_previous_turn
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: true
+        - id: chasm_wait
+          source_text: Remain at the chasm until the next-turn direction takes the token across.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm_held_previous_turn
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: cross_chasm
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: crossed_chasm
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: true
+        - id: chasm_crossing
+          source_text:
+            On the following turn, crossing ends movement on the far side. Movement resumes on the
+            turn after that.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: chasm_held_previous_turn
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: cross_chasm
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: crossed_chasm
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: crossed_chasm
+              value:
+                type: literal
+                value: true
+        - id: no_crossing_back
+          source_text: The token never goes back across the chasm again.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: crossed_chasm
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: cross_back_requested
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: movement_stops
+              value:
+                type: literal
+                value: true
+            - type: require
+              condition:
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: cross_back_requested
+                right:
+                  type: literal
+                  value: false
+    - id: reveal
+      source_text:
+        When entering a room, reveal within 10 squares and LOS. Closed doors block LOS. Place
+        monsters as close to the token as possible, then determine initiative.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: heroes_finished
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: entered_room
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: distance
+            right:
+              type: literal
+              value: 10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: heroes_in_los
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: closed_door_blocks_los
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: waiting_at_door
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: reveal_monsters
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: quest_monster_table
+        - type: invoke
+          dependency: initiative
+  entry_step: placement
+  exit_step: reveal
+  unresolved_references:
+    - Iron Wedges equipment text requires 6 AP for an enemy to pass; this heading says a 5–6 roll
+      opens passage. Preserve both pending review.
+    - Movement geometry and exact route require supplied spatial facts.
+  see_also:
+    - section.into_the_dungeons.wandering_monsters
+    - section.into_the_dungeons.obstacles
+  issues:
+    - issue.phase6.iron_wedges_movement
+- id: procedure.trap_resolution
+  name: Detecting, triggering and disarming traps
+  section_id: section.into_the_dungeons.triggering_a_trap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Triggering a Trap
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 99
+      pdf_page: 101
+      heading: Traps in Doors and Chests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Disarming a Trap
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Threat or Search triggers draw a trap card and randomise who triggered it. Successful
+    Perception avoids it and leaves it in place; failure triggers card effects. Disarming takes 2 AP
+    with Pick Lock, no Lock Picks; success removes it and failure sets it off.
+  fields:
+    perception_succeeded:
+      type: boolean
+      role: input
+      description: Supplied Perception result.
+    disarm_attempted:
+      type: boolean
+      role: input
+      description: Actor attempts to disarm.
+    disarm_succeeded:
+      type: boolean
+      role: input
+      description: Supplied Pick Lock result.
+    deliberate_trigger:
+      type: boolean
+      role: input
+      description: Actor deliberately triggers detected trap.
+    trap_detected:
+      type: boolean
+      role: state
+      description: Trap has been detected.
+    trap_removed:
+      type: boolean
+      role: state
+      description: Trap removed by disarming.
+    trap_triggered:
+      type: boolean
+      role: state
+      description: Trap is triggered.
+    is_mimic:
+      type: boolean
+      role: input
+      description: Trap is a Mimic.
+    hero_attacked_mimic:
+      type: boolean
+      role: input
+      description: A hero attacked the Mimic first.
+    actor_is_lower_undead:
+      type: boolean
+      role: input
+      description: Actor is Lower Undead.
+    door_or_chest:
+      type: boolean
+      role: input
+      description: Trap is in a door or chest.
+    initial_check:
+      type: boolean
+      role: input
+      description: New trap from Threat/Search or an opening attempt; not an already detected trap.
+    actor_is_enemy:
+      type: boolean
+      role: input
+      description: Actor is an enemy.
+    forced_entry:
+      type: boolean
+      role: input
+      description: A shove or monster special rule forces entry into a trapped square.
+    enters_trapped_square:
+      type: boolean
+      role: input
+      description: Supplied geometry places actor in a marked trapped square.
+    card_data_supplied:
+      type: boolean
+      role: input
+      description: Card-specific target and consequence data has been supplied.
+    card_allows_save:
+      type: boolean
+      role: input
+      description: Card explicitly permits a saving throw.
+    affected_actors:
+      type: string
+      role: input
+      description: Card-supplied affected actors; may include actors besides the opener.
+    victim_selection:
+      type: string
+      role: output
+      description: Random hero for Threat/Search; opener for door/chest; entrant for marked square.
+    action_points_spent:
+      type: number
+      role: output
+      description: Known disarm or deliberate door/chest triggering cost.
+    mimic_can_attack:
+      type: boolean
+      role: output
+      description: Detected Mimic cannot attack until a hero attacks it first.
+    enemy_avoids_square:
+      type: boolean
+      role: output
+      description: Enemies avoid traps except Lower Undead or forced entry.
+    opening_eligible:
+      type: boolean
+      role: output
+      description: Trap no longer prevents opening; lock is a separate supplied condition.
+    saving_throw_allowed:
+      type: boolean
+      role: output
+      description: No saving throw unless the card says otherwise.
+    resolved_affected_actors:
+      type: string
+      role: output
+      description: Affected actors supplied by the trap card.
+    card_effects_resolved:
+      type: boolean
+      role: state
+      description: Supplied card consequences have already been handled; a triggered trap is no longer active.
+  dependencies:
+    - key: trap_card
+      label: Trap card supplies identity, modifiers, targets, damage and effects
+    - key: perception_roll
+      label: Perception roll and applicable modifiers
+    - key: pick_lock_roll
+      label: Pick Lock roll with printed trap modifier
+    - key: trap_disarming_kit
+      label: Trap Disarming Kit equipment
+      object_id: equipment.tool.trap_disarming_kit
+  steps:
+    - id: draw_card
+      source_text: Threat/Search draws a card and randomises the victim; a door/chest trap affects the opener.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: initial_check
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: invoke
+          dependency: trap_card
+    - id: random_victim
+      source_text: Randomise who triggered a Threat/Search trap.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: initial_check
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_or_chest
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: victim_selection
+          value:
+            type: literal
+            value: random_hero
+    - id: opener
+      source_text: The hero attempting to open makes the Perception Roll.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: initial_check
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_or_chest
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: victim_selection
+          value:
+            type: literal
+            value: opener
+    - id: perception
+      source_text: Successful Perception detects the trap without setting it off; failure triggers it.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: initial_check
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_removed
+            right:
+              type: literal
+              value: false
+      effects: []
+      substeps:
+        - id: avoid
+          source_text: Successful Perception leaves the trap in place until triggered or disarmed.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: perception_succeeded
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: trap_detected
+              value:
+                type: literal
+                value: true
+        - id: perception_failure
+          source_text: Failure triggers the card consequences.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: perception_succeeded
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: set
+              target: trap_triggered
+              value:
+                type: literal
+                value: true
+    - id: disarm
+      source_text: Disarming takes 2 AP using Pick Lock; no Lock Picks required.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_detected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_removed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_triggered
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disarm_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_mimic
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 2
+        - type: invoke
+          dependency: pick_lock_roll
+      substeps:
+        - id: disarmed
+          source_text: Success removes the trap.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: disarm_succeeded
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: trap_removed
+              value:
+                type: literal
+                value: true
+        - id: disarm_failed
+          source_text: Failure sets the trap off.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: disarm_succeeded
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: set
+              target: trap_triggered
+              value:
+                type: literal
+                value: true
+    - id: deliberate
+      source_text: A detected door/chest trap can deliberately be set off for 2 AP.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_or_chest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_detected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_removed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_triggered
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_mimic
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: disarm_attempted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: deliberate_trigger
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: trap_triggered
+          value:
+            type: literal
+            value: true
+    - id: special_cases
+      source_text:
+        Enemies avoid trapped squares except Lower Undead; heroes and enemies can be shoved
+        into traps. Detected Mimics cannot attack until a hero attacks first.
+      effects:
+        - type: set
+          target: enemy_avoids_square
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mimic_can_attack
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: enemy_avoids
+          source_text: Enemies avoid traps unless Lower Undead or forced into them.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: actor_is_enemy
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: actor_is_lower_undead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: forced_entry
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: enemy_avoids_square
+              value:
+                type: literal
+                value: true
+        - id: square_entry
+          source_text:
+            Anyone entering a marked square triggers the trap. Lower Undead treat it as normal;
+            forced entry also triggers it.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_or_chest
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: enters_trapped_square
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_removed
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: enemy_avoids_square
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_triggered
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: victim_selection
+              value:
+                type: literal
+                value: entrant
+            - type: set
+              target: trap_triggered
+              value:
+                type: literal
+                value: true
+        - id: mimic_attacks
+          source_text: A detected Mimic cannot attack unless a hero attacks first.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_mimic
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: trap_detected
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hero_attacked_mimic
+                    right:
+                      type: literal
+                      value: true
+          effects:
+            - type: set
+              target: mimic_can_attack
+              value:
+                type: literal
+                value: true
+    - id: card_consequences
+      source_text:
+        Card specifies affected actors and consequences. Unless otherwise noted there are no
+        saving throws.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: trap_triggered
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_mimic
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: card_effects_resolved
+            right:
+              type: literal
+              value: false
+      effects: []
+      substeps:
+        - id: missing_card
+          source_text: Card-specific damage, targets and modifiers cannot be invented.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: card_data_supplied
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: unresolved
+              issue_id: issue.phase6.trap_resolution_deferred
+        - id: supplied_card
+          source_text:
+            Use the supplied card targets and saving-throw exception; resolve damage through the
+            card handoff.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: card_data_supplied
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: resolved_affected_actors
+              value:
+                type: field
+                name: affected_actors
+            - type: set
+              target: saving_throw_allowed
+              value:
+                type: field
+                name: card_allows_save
+            - type: invoke
+              dependency: trap_card
+            - type: set
+              target: card_effects_resolved
+              value:
+                type: literal
+                value: true
+    - id: mimic_interaction
+      source_text: These paragraphs define when a detected Mimic can attack, but do not define
+        device-style disarming or deliberately setting it off; its card is required.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_mimic
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: trap_detected
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: disarm_attempted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: deliberate_trigger
+                right:
+                  type: literal
+                  value: true
+      effects:
+        - type: unresolved
+          issue_id: issue.phase6.trap_resolution_deferred
+    - id: opening_eligibility
+      source_text:
+        A detected trap prevents opening until disarmed or triggered; locks remain a separate
+        requirement.
+      effects:
+        - type: set
+          target: opening_eligible
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: trap_dealt_with
+          source_text:
+            After triggering or disarming, the door/chest can be opened as part of the action,
+            subject to its lock.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: door_or_chest
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: is_mimic
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: trap_removed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: trap_triggered
+                    right:
+                      type: literal
+                      value: true
+          effects:
+            - type: set
+              target: opening_eligible
+              value:
+                type: literal
+                value: true
+  entry_step: draw_card
+  exit_step: opening_eligibility
+  issues:
+    - issue.phase6.trap_resolution_deferred
+  unresolved_references:
+    - Trap-card modifiers, affected actors, damage and monster characteristics are supplied inputs
+      or unresolved.
+    - Detected Mimic disarming/deliberate-trigger interactions are not defined here; resolve from
+      its card, without assuming it behaves as an ordinary device.
+  see_also:
+    - section.into_the_dungeons.triggering_a_trap
+    - section.into_the_dungeons.disarming_a_trap
+    - section.into_the_dungeons.opening_a_door_or_chest

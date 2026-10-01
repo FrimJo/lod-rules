@@ -1,0 +1,884 @@
+- id: procedure.closing_portal_reading_attempt
+  name: Closing the Portal reading, actual restart, interruption and closure
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — reading the scroll
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Initial actual eligible stationary objective-room reading lasts
+    1d6+1. Persist duration once. Any interruption or movement resets progress
+    and requires starting over. Restart only on an actual new start-over event
+    with supplied unresolved duration context. Count each actual complete
+    chronological reading turn once, inspect its interruptions before progress,
+    and seal the portal at the required uninterrupted duration. Closure stops
+    reading and still requires all demons to be killed. No first spawn phase,
+    within-turn spawn ordering, universal restart dice policy, chest collection
+    or reward is invented.
+  issues:
+    - issue.quest.portal_ritual_boundaries
+  fields:
+    hero_in_objective_room:
+      type: boolean
+      role: input
+      description: hero in objective room
+    ritual_eligibility_supplied:
+      type: boolean
+      role: input
+      description: Supplied unresolved eligibility judgment; very limited Arcane Arts
+        skills have no printed threshold.
+    reader_stationary:
+      type: boolean
+      role: input
+      description: reader stationary
+    duration_die:
+      type: number
+      role: input
+      description: duration die
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    reading_allowed:
+      type: boolean
+      role: state
+      description: reading allowed
+    required_turns:
+      type: number
+      role: state
+      description: required turns
+      integer: true
+    reading_position:
+      type: string
+      role: output
+      description: reading position
+    must_remain_stationary:
+      type: boolean
+      role: output
+      description: must remain stationary
+    reading_active:
+      type: boolean
+      role: state
+      description: reading active
+    interrupted_other_way:
+      type: boolean
+      role: input
+      description: interrupted other way
+    reader_wounded:
+      type: boolean
+      role: input
+      description: reader wounded
+    reader_dodged:
+      type: boolean
+      role: input
+      description: reader dodged
+    reader_parried:
+      type: boolean
+      role: input
+      description: reader parried
+    restart_required:
+      type: boolean
+      role: state
+      description: restart required
+    reading_progress_turns:
+      type: number
+      role: state
+      description: reading progress turns
+      integer: true
+    phase:
+      type: string
+      role: input
+      description: start, interruption, restart or reading_turn; spawn ordering and
+        aftermath remain separate.
+    portal_reader_owner_matches:
+      type: boolean
+      role: input
+      description: Actual quest occurrence and reader ownership confirmed.
+    instance_quest_id:
+      type: string
+      role: state
+      description: Accepted immutable quest catalogue ID.
+    portal_attempt_started:
+      type: boolean
+      role: state
+      description: Persist once for this actual reading attempt; replay cannot reseed
+        its duration. A later actual restart needs separately reconciled
+        duration context.
+    portal_open:
+      type: boolean
+      role: state
+      description: Owned actual quest portal state; successful actual reading closes
+        it once.
+    duration_supplied:
+      type: boolean
+      role: input
+      description: Actual initial d6 result available; absent dice are not generated.
+    restart_event_supplied:
+      type: boolean
+      role: input
+      description: Actual start-over event supplied after interruption, not a phase
+        change alone.
+    restart_duration_context_resolved:
+      type: boolean
+      role: input
+      description: Actual restart duration context supplied; the book does not choose
+        retain/reroll policy.
+    completed_reading_turn:
+      type: boolean
+      role: input
+      description: An actual complete reading turn has elapsed; requesting a turn or
+        starting to read is insufficient.
+    reading_turn_context_resolved:
+      type: boolean
+      role: input
+      description: Actual reading turn boundaries and chronological ordering supplied,
+        including any interruption during this completed turn.
+    actual_restart_event:
+      type: number
+      role: input
+      description: Actual chronological start-over event index for this
+        occurrence/reader; strictly newer than the consumed event.
+      integer: true
+      minimum: 1
+    last_restart_event:
+      type: number
+      role: state
+      description: Persist latest consumed actual restart event; caller starts at0,
+        never resets on phase replay.
+      integer: true
+      minimum: 0
+    actual_restart_duration:
+      type: number
+      role: input
+      description: Actual source-reconciled restart duration 2..7, without a universal
+        retained/rerolled policy.
+      integer: true
+      minimum: 2
+      maximum: 7
+    actual_reading_turn:
+      type: number
+      role: input
+      description: Actual chronological reading turn index for this occurrence/reader;
+        not a fabricated global clock.
+      integer: true
+      minimum: 1
+    last_reading_turn:
+      type: number
+      role: state
+      description: Persist latest consumed actual completed reading turn, initially0.
+        Restart does not reset it or permit same-turn double counting.
+      integer: true
+      minimum: 0
+    valid_reading_attempt:
+      type: boolean
+      role: state
+      description: Owned current reading validity/interruption used by the source
+        closure rule.
+    reading_interrupted:
+      type: boolean
+      role: state
+      description: Owned current reading validity/interruption used by the source
+        closure rule.
+    portal_closed:
+      type: boolean
+      role: output
+      description: portal closed
+    remaining_demons_must_be_killed:
+      type: boolean
+      role: output
+      description: remaining demons must be killed
+  dependencies:
+    - key: duration
+      label: Actual initial reading duration d6; request does not roll or start
+        reading.
+    - key: quest
+      label: Canonical quest occurrence
+      object_id: quest.chamber_of_reverence.closing_portal
+  steps:
+    - id: missing_duration
+      source: *a1
+      source_text: An actual first-attempt d6 is required; no duration or restart
+        policy is inferred.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - &a3
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: portal_reader_owner_matches
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: instance_quest_id
+                    right:
+                      type: literal
+                      value: quest.chamber_of_reverence.closing_portal
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: portal_open
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: start
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_attempt_started
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hero_in_objective_room
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: ritual_eligibility_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reader_stationary
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: duration_supplied
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: invoke
+          dependency: duration
+    - id: start
+      source: *a1
+      source_text: Reading can be done from anywhere in the room. Roll 1d6+1 for
+        duration. They must hold still while reading it.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: duration_supplied
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - core.quest.closing_portal.ritual_start
+      effects:
+        - type: set
+          target: portal_attempt_started
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reading_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reading_progress_turns
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: restart_required
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: valid_reading_attempt
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reading_interrupted
+          value:
+            type: literal
+            value: false
+    - id: consume_interrupted_turn
+      source: *a1
+      source_text: An actually completed interrupted reading turn cannot be counted
+        again after start-over; preserve its supplied chronological identity
+        without granting reading progress.
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: all
+            conditions:
+              - *a3
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: interruption
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: reading_turn
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: reading_active
+                    right:
+                      type: literal
+                      value: true
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: interrupted_other_way
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: reader_wounded
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: reader_dodged
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: reader_parried
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: reader_stationary
+                        right:
+                          type: literal
+                          value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: reading_turn
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completed_reading_turn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reading_turn_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: actual_reading_turn
+            right:
+              type: field
+              name: last_reading_turn
+      effects:
+        - type: set
+          target: last_reading_turn
+          value:
+            type: field
+            name: actual_reading_turn
+    - id: interruption
+      source: *a1
+      source_text: If the character is interrupted in any way (wounded, dodges, or
+        parries), they have to start over. They must hold still while reading.
+      when: *a4
+      rule_refs:
+        - core.quest.closing_portal.ritual_interruption
+      effects:
+        - type: set
+          target: reading_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reading_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: valid_reading_attempt
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reading_interrupted
+          value:
+            type: literal
+            value: true
+    - id: unresolved_restart
+      source: *a1
+      source_text: Start-over duration policy is absent; pending context cannot resume
+        reading or choose a roll.
+      when:
+        type: all
+        conditions:
+          - &a5
+            type: all
+            conditions:
+              - &a6
+                type: all
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: portal_reader_owner_matches
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: instance_quest_id
+                        right:
+                          type: literal
+                          value: quest.chamber_of_reverence.closing_portal
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: portal_open
+                        right:
+                          type: literal
+                          value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hero_in_objective_room
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ritual_eligibility_supplied
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: reader_stationary
+                    right:
+                      type: literal
+                      value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: restart
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: restart_required
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reading_active
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: restart_event_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: actual_restart_event
+                right:
+                  type: field
+                  name: last_restart_event
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: restart_duration_context_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.portal_ritual_boundaries
+    - id: restart
+      source: *a1
+      source_text: Actual source start-over resets progress only after duration
+        context is supplied, without choosing a universal dice policy.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: restart_duration_context_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: required_turns
+          value:
+            type: field
+            name: actual_restart_duration
+        - type: set
+          target: last_restart_event
+          value:
+            type: field
+            name: actual_restart_event
+        - type: set
+          target: reading_progress_turns
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: reading_active
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reading_allowed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: restart_required
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: valid_reading_attempt
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reading_interrupted
+          value:
+            type: literal
+            value: false
+    - id: unresolved_turn_context
+      source: *a1
+      source_text: The source does not define within-turn boundaries; unresolved
+        actual context cannot advance or close reading.
+      when:
+        type: all
+        conditions:
+          - &a7
+            type: all
+            conditions:
+              - *a6
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: reading_turn
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_attempt_started
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: reading_active
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: valid_reading_attempt
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: restart_required
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: completed_reading_turn
+                right:
+                  type: literal
+                  value: true
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: reader_wounded
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: reader_dodged
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: reader_parried
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: interrupted_other_way
+                    right:
+                      type: literal
+                      value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reading_turn_context_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.portal_ritual_boundaries
+    - id: reading_turn
+      source: *a1
+      source_text: Count one actually completed uninterrupted stationary turn once,
+        after interruption checks. Preserve chronological consumption across
+        restarts.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reading_turn_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: actual_reading_turn
+            right:
+              type: field
+              name: last_reading_turn
+      effects:
+        - type: set
+          target: reading_progress_turns
+          value:
+            type: sum
+            values:
+              - type: field
+                name: reading_progress_turns
+              - type: literal
+                value: 1
+        - type: set
+          target: last_reading_turn
+          value:
+            type: field
+            name: actual_reading_turn
+        - type: set
+          target: reading_interrupted
+          value:
+            type: literal
+            value: false
+    - id: closure
+      source: *a1
+      source_text: Seal only at the actual completed uninterrupted reading duration;
+        all remaining demons still must be killed.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reading_turn_context_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_reading_turn
+            right:
+              type: field
+              name: last_reading_turn
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: reading_progress_turns
+            right:
+              type: field
+              name: required_turns
+      rule_refs:
+        - core.quest.closing_portal.portal_closure
+      effects:
+        - type: set
+          target: portal_open
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reading_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reading_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: valid_reading_attempt
+          value:
+            type: literal
+            value: false
+  entry_step: missing_duration
+  exit_step: closure

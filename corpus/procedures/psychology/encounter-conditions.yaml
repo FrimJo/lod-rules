@@ -1,0 +1,1228 @@
+- id: procedure.arachnophobia
+  name: Arachnophobia actual encounter classification and Terror handoff
+  section_id: section.psychology.table
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 6 Arachnophobia
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The hero finds all kinds of spiders terrifying; treat all encounters as causing Terror.
+    Known actual spider encounters produce an owned Terror contribution and separately resolved
+    reaction handoff once. Unknown creature classification requests actual input; non-spider scope
+    retains the existing all-encounters ambiguity without asserting either Terror or harmlessness.
+    Other sources of Fear/Terror, test timing, reactions, immunity, Sanity loss and cure remain
+    separately owned.
+  issues:
+    - issue.phase4.arachnophobia_scope
+    - issue.sanity.condition_encounter_resolution
+  unresolved_references:
+    - 'Terror: source classification is preserved, but a canonical reaction resolver is not bound
+      here; actual timing/eligibility/resolution is supplied separately.'
+  fields:
+    sanity_system_enabled: &a6
+      type: boolean
+      role: input
+      description:
+        Actual supplied applicability of the optional Sanity-table condition rule; source-owned
+        treatment/trait exceptions remain separate.
+    arachnophobia_owner_matches:
+      type: boolean
+      role: input
+      description:
+        This is the owned hero/Arachnophobia/current-encounter context, not another hero or a
+        natural monster ability.
+    arachnophobia:
+      type: boolean
+      role: state
+      description:
+        Actual active Arachnophobia condition; accepted diagnosis may set it, actual removal
+        separately owned. Persist independently of later diagnosis names.
+    encounter_confirmed:
+      type: boolean
+      role: input
+      description:
+        This actual encounter occurred for this hero; requests, hits and observations do not
+        create a new encounter.
+    spider_classification_supplied:
+      type: boolean
+      role: input
+      description: Actual spider/non-spider classification is supplied; do not invent missing creature taxonomy.
+    spider_encounter:
+      type: boolean
+      role: input
+      description: Actual current encounter includes the source spider scope, all kinds of spiders;
+        ignored when classification is unsupplied.
+    arachnophobia_encounter_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/condition/distinct-encounter known classification consumed; fresh false only for a
+        new actual encounter, persist against replay/substituted classification. Ambiguous
+        non-spider scope remains unconsumed.
+    arachnophobia_causes_terror:
+      type: boolean
+      role: state
+      description:
+        Owned Arachnophobia source contribution for this encounter only; not global/natural
+        Terror, Fear or an already resolved test result.
+    arachnophobia_applicability_resolved:
+      type: boolean
+      role: output
+      description: This owned current encounter contribution is known; false for unknown
+        taxonomy/non-spider scope or another owner, never an assertion that a non-spider is
+        harmless.
+    arachnophobia_classification_request_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/condition/encounter actual-taxonomy request marker; persist after handoff, fresh
+        false for a distinct actual encounter.
+    encounter_resolution_scope_resolved: &a7
+      type: boolean
+      role: input
+      description:
+        Actual source-grounded reaction context permits this handoff. False for unresolved
+        combined Fear/Terror causes, immunity, test timing or resolver scope; no ordering or test
+        count is invented.
+    arachnophobia_terror_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/condition/actual source-grounded encounter reaction request marker; persist after
+        request. Handoff alone performs no test, AP/HP loss, flight, immunity or Sanity/morale
+        change.
+  dependencies:
+    - key: source_rule
+      label:
+        Existing known-spider source fact, using a dedicated owned procedure output rather than its
+        legacy causes_terror field
+      object_id: character.condition.arachnophobia
+    - key: other_encounters
+      label: Existing unresolved all-encounters scope, not a silent spider-only restriction
+      object_id: character.condition.arachnophobia_other_encounters
+    - key: classification
+      label: Actual spider/non-spider classification for this owned encounter
+    - key: terror
+      label: Terror resolution for this source-classified encounter
+    - key: acquisition
+      label: Actual accepted Arachnophobia diagnosis; handoff alone performs no test
+      object_id: procedure.sanity_condition
+  steps:
+    - id: check_context
+      source: *a1
+      source_text: Re-evaluate only the owned current source contribution. Missing/ambiguous
+        classification is explicitly unresolved, and a removed condition or absent actual encounter
+        cannot erase natural monster Terror.
+      effects:
+        - type: set
+          target: arachnophobia_applicability_resolved
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: clear_inapplicable
+          source: *a1
+          source_text:
+            When this owned condition/rule is inactive or no actual encounter is present, clear
+            only its source contribution without curing or changing other causes.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: arachnophobia_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_system_enabled
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: arachnophobia
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: encounter_confirmed
+                    right:
+                      type: literal
+                      value: false
+          effects:
+            - type: set
+              target: arachnophobia_causes_terror
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: arachnophobia_applicability_resolved
+              value:
+                type: literal
+                value: true
+        - id: clear_fresh
+          source: *a1
+          source_text:
+            A fresh actual encounter starts without an asserted Arachnophobia contribution until
+            source classification resolves; false remains tagged unresolved when input is
+            missing/ambiguous.
+          when:
+            type: all
+            conditions:
+              - &a2
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: arachnophobia_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - &a3
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - &a4
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: arachnophobia
+                right:
+                  type: literal
+                  value: true
+              - &a5
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: encounter_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: arachnophobia_encounter_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: arachnophobia_causes_terror
+              value:
+                type: literal
+                value: false
+        - id: preserve_consumed
+          source: *a1
+          source_text:
+            A consumed actual encounter keeps its original owned classification; substituted
+            taxonomy on replay does not reroute the source result.
+          when:
+            type: all
+            conditions:
+              - *a2
+              - *a3
+              - *a4
+              - *a5
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: arachnophobia_encounter_processed
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: arachnophobia_applicability_resolved
+              value:
+                type: literal
+                value: true
+    - id: request_classification
+      source: *a1
+      source_text:
+        Request actual unsupplied spider classification once for this fresh actual encounter;
+        no absent creature taxonomy or enemy stats are invented.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_encounter_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spider_classification_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_classification_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: arachnophobia_classification_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: classification
+    - id: other_encounters
+      source: *a1
+      source_text:
+        A supplied actual non-spider encounter preserves the original all-encounters ambiguity,
+        leaving source applicability unresolved and unconsumed rather than universally narrowing or
+        extending it.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_encounter_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spider_classification_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spider_encounter
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.arachnophobia_scope
+    - id: classify_spider
+      source: *a1
+      source_text:
+        All actual known kinds of spiders fall within the certain source scope. Set only this
+        condition Terror contribution once, retaining Fear as a distinct concept.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_encounter_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spider_classification_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spider_encounter
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: arachnophobia_causes_terror
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arachnophobia_applicability_resolved
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: arachnophobia_encounter_processed
+          value:
+            type: literal
+            value: true
+    - id: reaction_unknown
+      source: *a1
+      source_text:
+        Known source Terror with unresolved combined causes/immunity/test timing remains a raw
+        contribution; no reaction priority, test or repeated resource loss is guessed.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_applicability_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_causes_terror
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_terror_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: encounter_resolution_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.condition_encounter_resolution
+    - id: request_terror
+      source: *a1
+      source_text:
+        Hand off one source-grounded reaction request for this actual classified encounter.
+        Invocation alone does not roll, fail, flee, change AP/HP or lose Sanity/morale.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - *a3
+          - *a4
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_applicability_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_causes_terror
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia_terror_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: encounter_resolution_scope_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: arachnophobia_terror_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: terror
+  entry_step: check_context
+  exit_step: request_terror
+- id: procedure.irrational_fear
+  name: Irrational Fear persisted faction and actual monster applicability
+  section_id: section.psychology.table
+  source: &a8
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 8 Irrational Fear
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Randomize once for this actual diagnosis between Orcs and Goblins, Beasts, Undead,
+    Reptiles or Dark Elves; all monsters from that faction cause Fear to this hero. The actual
+    completed result is supplied and persisted without inventing a die/table, weights or later
+    rerolls. Classify each actual monster occurrence from supplied membership in that persisted
+    faction, preserving natural Fear/Terror and separate reaction scope. Handoffs do not perform
+    tests, lose resources, cure, alter Sanity/count or invent creature content.
+  issues:
+    - issue.sanity.irrational_fear_selection
+    - issue.sanity.condition_encounter_resolution
+  unresolved_references:
+    - 'Randomize between the five printed factions: the selection method/weights are not specified.'
+    - 'Fear: actual reaction timing/eligibility/resolution is supplied separately; no canonical
+      resolver id is invented.'
+  fields:
+    sanity_system_enabled: *a6
+    irrational_fear_owner_matches:
+      type: boolean
+      role: input
+      description:
+        Owned hero/accepted Irrational Fear/current monster context, independent of latest
+        other diagnosis or natural monster Fear.
+    irrational_fear:
+      type: boolean
+      role: state
+      description: Actual active Irrational Fear condition; actual removal separately owned.
+    phase:
+      type: string
+      role: input
+      description:
+        'Actual checkpoint: selection or encounter. A new monster does not rerandomize the
+        diagnosis faction.'
+    faction_selection_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual completed randomized faction selection is supplied; not merely a proposal or a
+        selection request. Exact method/weights are unspecified.
+    selected_faction:
+      type: string
+      role: input
+      description:
+        'Actual selected printed value: Orcs and Goblins, Beasts, Undead, Reptiles or Dark
+        Elves. No die-to-faction table is invented.'
+    irrational_fear_faction:
+      type: string
+      role: state
+      description:
+        Persisted one actually selected printed faction for this diagnosis; replay with another
+        input cannot replace it.
+    irrational_fear_faction_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis actual valid randomized selection consumed once; fresh false only for a
+        new accepted diagnosis.
+    irrational_fear_selection_request_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis faction-selection request handed off once; invocation chooses no faction
+        or weights.
+    monster_confirmed:
+      type: boolean
+      role: input
+      description:
+        An actual monster is present in this owned occurrence; all monsters in the selected
+        faction qualify, not just one member of an encounter.
+    monster_faction_membership_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual monster membership in the persisted selected faction is supplied; no unavailable
+        creature data is guessed.
+    matches_faction:
+      type: boolean
+      role: input
+      description:
+        Actual membership result for this monster and the persisted selected faction, not the
+        current changed selection input.
+    irrational_fear_monster_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/distinct actual monster-occurrence classification marker; consume both
+        matches/nonmatches, fresh false for another actual monster. It does not itself reset an
+        encounter reaction marker.
+    irrational_fear_causes_fear:
+      type: boolean
+      role: state
+      description: Owned condition source Fear contribution for this monster occurrence only, not
+        global/natural Fear or Terror and not a test result.
+    irrational_fear_applicability_resolved:
+      type: boolean
+      role: output
+      description:
+        Current owned source contribution is known; false for unsupplied selection/membership
+        or another owner.
+    irrational_fear_membership_request_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/monster-occurrence actual membership input request marker; persist after
+        request, fresh false for a new actual monster.
+    encounter_resolution_scope_resolved: *a7
+    irrational_fear_handoff_processed:
+      type: boolean
+      role: state
+      description:
+        Actual source-grounded hero/encounter reaction request marker; persist across monsters
+        when the same reaction context remains. New monster classification alone cannot create extra
+        reaction tests; invocation alone has no resource effects.
+  dependencies:
+    - key: source_rule
+      label:
+        Existing five-faction Fear source fact; dedicated output avoids its legacy causes_fear field,
+        also used by scenario rules
+      object_id: character.condition.irrational_fear
+    - key: selection
+      label: Actual randomized selection among the five printed factions; method not specified
+    - key: membership
+      label: Actual monster membership in this diagnosis persisted selected faction
+    - key: fear
+      label: Fear resolution for this source-classified monster context
+    - key: acquisition
+      label: Actual accepted diagnosis; handoff alone does not select a faction or test Fear
+      object_id: procedure.sanity_condition
+  steps:
+    - id: check_context
+      source: *a8
+      source_text:
+        Re-evaluate only this owned current contribution; inactive/absent context clears it,
+        while a fresh monster needs actual membership and a consumed classification cannot be
+        substituted on replay.
+      effects:
+        - type: set
+          target: irrational_fear_applicability_resolved
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: clear_inapplicable
+          source: *a8
+          source_text:
+            Clear only the owned source contribution when this condition/rule is inactive or no
+            actual monster is present; do not erase natural Fear or Terror.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: irrational_fear_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: sanity_system_enabled
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: irrational_fear
+                    right:
+                      type: literal
+                      value: false
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: phase
+                        right:
+                          type: literal
+                          value: encounter
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: monster_confirmed
+                        right:
+                          type: literal
+                          value: false
+          effects:
+            - type: set
+              target: irrational_fear_causes_fear
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: irrational_fear_applicability_resolved
+              value:
+                type: literal
+                value: true
+        - id: clear_fresh
+          source: *a8
+          source_text:
+            A fresh actual monster starts unclassified until actual persisted-faction membership
+            resolves.
+          when:
+            type: all
+            conditions:
+              - &a9
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: encounter
+              - &a10
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: irrational_fear_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - &a11
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - &a12
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: irrational_fear
+                right:
+                  type: literal
+                  value: true
+              - &a13
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: monster_confirmed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: irrational_fear_monster_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: irrational_fear_causes_fear
+              value:
+                type: literal
+                value: false
+        - id: preserve_consumed
+          source: *a8
+          source_text:
+            Retain the original consumed classification for this monster, regardless of changed
+            membership/selection inputs on replay.
+          when:
+            type: all
+            conditions:
+              - *a9
+              - *a10
+              - *a11
+              - *a12
+              - *a13
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: irrational_fear_monster_processed
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: irrational_fear_applicability_resolved
+              value:
+                type: literal
+                value: true
+    - id: request_selection
+      source: *a8
+      source_text:
+        Request an actual randomized faction selection once for the accepted diagnosis; no
+        equal-weight die, fabricated table or per-monster rerandomization.
+      when:
+        type: all
+        conditions:
+          - *a10
+          - *a11
+          - *a12
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_faction_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_selection_request_processed
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: encounter
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: phase
+                    right:
+                      type: literal
+                      value: selection
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: faction_selection_supplied
+                    right:
+                      type: literal
+                      value: false
+      effects:
+        - type: set
+          target: irrational_fear_selection_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: selection
+    - id: invalid_selection
+      source: *a8
+      source_text:
+        A supplied completed result outside the five printed labels cannot select a faction or
+        create Fear; preserve the unresolved method/input boundary.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: selection
+          - *a10
+          - *a11
+          - *a12
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_faction_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: faction_selection_supplied
+            right:
+              type: literal
+              value: true
+          - type: not
+            condition: &a14
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_faction
+                  right:
+                    type: literal
+                    value: Orcs and Goblins
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_faction
+                  right:
+                    type: literal
+                    value: Beasts
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_faction
+                  right:
+                    type: literal
+                    value: Undead
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_faction
+                  right:
+                    type: literal
+                    value: Reptiles
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: selected_faction
+                  right:
+                    type: literal
+                    value: Dark Elves
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.irrational_fear_selection
+    - id: select
+      source: *a8
+      source_text:
+        Persist one actual completed randomized result among the five printed faction labels.
+        Replays, a changed input and later monsters cannot replace it.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: selection
+          - *a10
+          - *a11
+          - *a12
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_faction_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: faction_selection_supplied
+            right:
+              type: literal
+              value: true
+          - *a14
+      effects:
+        - type: set
+          target: irrational_fear_faction
+          value:
+            type: field
+            name: selected_faction
+        - type: set
+          target: irrational_fear_faction_processed
+          value:
+            type: literal
+            value: true
+    - id: request_membership
+      source: *a8
+      source_text:
+        After actual selection, request missing actual monster membership once; do not invent
+        unavailable taxonomy or let current selection input replace the persisted faction.
+      when:
+        type: all
+        conditions:
+          - *a9
+          - *a10
+          - *a11
+          - *a12
+          - *a13
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_faction_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_monster_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: monster_faction_membership_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_membership_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: irrational_fear_membership_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: membership
+    - id: classify
+      source: *a8
+      source_text:
+        Consume this actual monster membership result once for the persisted faction. Matching
+        monsters produce only the owned Fear contribution; nonmatches do not erase natural Fear or
+        Terror.
+      when:
+        type: all
+        conditions:
+          - *a9
+          - *a10
+          - *a11
+          - *a12
+          - *a13
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_faction_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_monster_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: monster_faction_membership_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: irrational_fear_causes_fear
+          value:
+            type: field
+            name: matches_faction
+        - type: set
+          target: irrational_fear_applicability_resolved
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: irrational_fear_monster_processed
+          value:
+            type: literal
+            value: true
+    - id: reaction_unknown
+      source: *a8
+      source_text:
+        A known source Fear contribution with unresolved combined causes/immunity/test timing
+        remains raw; no priority, test count or resource loss is invented.
+      when:
+        type: all
+        conditions:
+          - *a9
+          - *a10
+          - *a11
+          - *a12
+          - *a13
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_applicability_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_causes_fear
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: encounter_resolution_scope_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.condition_encounter_resolution
+    - id: request_fear
+      source: *a8
+      source_text:
+        Request one actual source-grounded reaction context. A distinct monster classification
+        does not reset this reaction marker or demand an extra test within the same unresolved
+        encounter scope.
+      when:
+        type: all
+        conditions:
+          - *a9
+          - *a10
+          - *a11
+          - *a12
+          - *a13
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_applicability_resolved
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_causes_fear
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear_handoff_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: encounter_resolution_scope_resolved
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: irrational_fear_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: fear
+  entry_step: check_context
+  exit_step: request_fear

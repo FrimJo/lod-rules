@@ -1,0 +1,488 @@
+- id: procedure.mental_condition_cleanup
+  name: Cured disorder owned current contribution cleanup
+  section_id: section.settlements.treat_mental_conditions
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Treat Mental Conditions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: After an actual completed successful cure has removed the
+    snapshotted active disorder, clear only owned current Fear of the Dark,
+    Claustrophobia, Arachnophobia, Irrational Fear or Jumpy
+    contributions/reports once. Do not undo past Threat, events, completed
+    reactions or natural Fear/Terror. Hate Talent removal, Depression pool
+    restoration, and cure precedence over Acute Stress/Trauma explicit durations
+    remain unresolved; pending status is retained. No Sanity/count, payment,
+    history or base-stat mutation is made.
+  issues:
+    - issue.sanity.cure_lasting_effects
+  fields:
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Actual owned completed cure sanity_system_enabled; markers persist
+        for this one treatment, not a new quest/event.
+    mental_treatment_owner_matches:
+      type: boolean
+      role: input
+      description: Actual owned completed cure mental_treatment_owner_matches; markers
+        persist for this one treatment, not a new quest/event.
+    mental_treatment_result_processed:
+      type: boolean
+      role: state
+      description: Actual owned completed cure mental_treatment_result_processed;
+        markers persist for this one treatment, not a new quest/event.
+    mental_treatment_succeeded:
+      type: boolean
+      role: state
+      description: Actual owned completed cure mental_treatment_succeeded; markers
+        persist for this one treatment, not a new quest/event.
+    mental_treatment_trait_removal_processed:
+      type: boolean
+      role: state
+      description: Actual owned completed cure
+        mental_treatment_trait_removal_processed; markers persist for this one
+        treatment, not a new quest/event.
+    mental_treatment_removal_pending:
+      type: boolean
+      role: state
+      description: Actual owned completed cure mental_treatment_removal_pending;
+        markers persist for this one treatment, not a new quest/event.
+    mental_treatment_cleanup_processed:
+      type: boolean
+      role: state
+      description: Actual owned completed cure mental_treatment_cleanup_processed;
+        markers persist for this one treatment, not a new quest/event.
+    mental_treatment_disorder:
+      type: string
+      role: state
+      description: Actual treatment snapshotted disorder; no changed input selection
+        is used.
+    fear_of_the_dark:
+      type: boolean
+      role: state
+      description: Actual active Fear of the Dark flag already removed by this
+        successful cure.
+    resolve_test_modifier:
+      type: number
+      role: state
+      description: Dedicated owned Fear of the Dark current contribution/report only;
+        never another modifier, natural ability or past event.
+    claustrophobia:
+      type: boolean
+      role: state
+      description: Actual active Claustrophobia flag already removed by this
+        successful cure.
+    claustrophobia_skill_stat_modifier:
+      type: number
+      role: state
+      description: Dedicated owned Claustrophobia current contribution/report only;
+        never another modifier, natural ability or past event.
+    arachnophobia:
+      type: boolean
+      role: state
+      description: Actual active Arachnophobia flag already removed by this successful cure.
+    arachnophobia_causes_terror:
+      type: boolean
+      role: state
+      description: Dedicated owned Arachnophobia current contribution/report only;
+        never another modifier, natural ability or past event.
+    irrational_fear:
+      type: boolean
+      role: state
+      description: Actual active Irrational Fear flag already removed by this
+        successful cure.
+    irrational_fear_causes_fear:
+      type: boolean
+      role: state
+      description: Dedicated owned Irrational Fear current contribution/report only;
+        never another modifier, natural ability or past event.
+    jumpy_active:
+      type: boolean
+      role: state
+      description: Actual active Jumpy flag already removed by this successful cure.
+    jumpy_scream_this_call:
+      type: boolean
+      role: state
+      description: Dedicated owned Jumpy current contribution/report only; never
+        another modifier, natural ability or past event.
+    jumpy_startle_this_call:
+      type: boolean
+      role: state
+      description: Dedicated owned Jumpy current contribution/report only; never
+        another modifier, natural ability or past event.
+    jumpy_alert_this_call:
+      type: boolean
+      role: state
+      description: Dedicated owned Jumpy current contribution/report only; never
+        another modifier, natural ability or past event.
+  dependencies:
+    - key: treatment
+      label: Actual completed selected-disorder cure and accounting
+      object_id: procedure.mental_condition_treatment
+    - key: fear_of_the_dark
+      label: Separately owned fear_of_the_dark effect lifecycle
+      object_id: procedure.fear_of_the_dark
+    - key: claustrophobia
+      label: Separately owned claustrophobia effect lifecycle
+      object_id: procedure.claustrophobia
+    - key: arachnophobia
+      label: Separately owned arachnophobia effect lifecycle
+      object_id: procedure.arachnophobia
+    - key: irrational_fear
+      label: Separately owned irrational_fear effect lifecycle
+      object_id: procedure.irrational_fear
+    - key: jumpy
+      label: Separately owned jumpy effect lifecycle
+      object_id: procedure.jumpy
+    - key: hate
+      label: Separately owned hate effect lifecycle
+      object_id: procedure.hate
+    - key: depression
+      label: Separately owned depression effect lifecycle
+      object_id: procedure.depression
+    - key: acute_stress
+      label: Separately owned acute_stress effect lifecycle
+      object_id: procedure.acute_stress
+    - key: lingering_trauma
+      label: Separately owned lingering_trauma effect lifecycle
+      object_id: procedure.lingering_trauma
+  steps:
+    - id: fear_dark
+      source: *a1
+      source_text: Once the actual Fear of the Dark disorder is cured, clear only its
+        owned current contribution/report. Preserve base stats, natural causes,
+        history and past Threat/events.
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: sanity_system_enabled
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_result_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_succeeded
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_trait_removal_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_removal_pending
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_cleanup_processed
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Fear of the Dark
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fear_of_the_dark
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: resolve_test_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: mental_treatment_cleanup_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+    - id: claustrophobia
+      source: *a1
+      source_text: Once the actual Claustrophobia disorder is cured, clear only its
+        owned current contribution/report. Preserve base stats, natural causes,
+        history and past Threat/events.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Claustrophobia
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: claustrophobia
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: claustrophobia_skill_stat_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: mental_treatment_cleanup_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+    - id: arachnophobia
+      source: *a1
+      source_text: Once the actual Arachnophobia disorder is cured, clear only its
+        owned current contribution/report. Preserve base stats, natural causes,
+        history and past Threat/events.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Arachnophobia
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arachnophobia
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: arachnophobia_causes_terror
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_cleanup_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+    - id: irrational_fear
+      source: *a1
+      source_text: Once the actual Irrational Fear disorder is cured, clear only its
+        owned current contribution/report. Preserve base stats, natural causes,
+        history and past Threat/events.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Irrational Fear
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: irrational_fear
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: irrational_fear_causes_fear
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_cleanup_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+    - id: jumpy
+      source: *a1
+      source_text: Once the actual Jumpy disorder is cured, clear only its owned
+        current contribution/report. Preserve base stats, natural causes,
+        history and past Threat/events.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: mental_treatment_disorder
+            right:
+              type: literal
+              value: Jumpy
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_active
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: jumpy_scream_this_call
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: jumpy_startle_this_call
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: jumpy_alert_this_call
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: mental_treatment_cleanup_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: mental_treatment_removal_pending
+          value:
+            type: literal
+            value: false
+    - id: lasting_effects
+      source: *a1
+      source_text: Hate grants a Talent, Depression changes a pool, and Acute
+        Stress/Trauma have explicit quest/dungeon durations. Cure alone does not
+        settle their lasting-effect restoration or precedence; preserve pending
+        state without guessed deletion/undo.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_disorder
+                right:
+                  type: literal
+                  value: Hate
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_disorder
+                right:
+                  type: literal
+                  value: Depression
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_disorder
+                right:
+                  type: literal
+                  value: Acute Stress
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: mental_treatment_disorder
+                right:
+                  type: literal
+                  value: Lingering Trauma
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.cure_lasting_effects
+  entry_step: fear_dark
+  exit_step: lasting_effects

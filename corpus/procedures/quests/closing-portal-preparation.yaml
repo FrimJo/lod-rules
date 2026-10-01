@@ -1,0 +1,1076 @@
+- id: procedure.closing_portal_preparation
+  name: Closing the Portal quest and objective-room preparation
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      heading: Closing the Portal — setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Initialize Silver City, eight corridors/eight rooms, supplied
+    ritual scroll and advertised300c once. Actual initial d6 initializes
+    current/start/minimum Threat once, maximum20. Actual objective entry records
+    portal/hero geometry and requests exactly two independently owned initial
+    groups and actual random placement once; a request does not resolve
+    quantities, place actors or execute battle.
+  fields:
+    instance_quest_id:
+      type: string
+      role: state
+      description: Immutable accepted catalogue quest ID.
+    portal_owner_matches:
+      type: boolean
+      role: input
+      description: Actual party/Closing the Portal occurrence and current preparation
+        or group event ownership confirmed.
+    phase:
+      type: string
+      role: input
+      description: setup or objective_room.
+    portal_setup_processed:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_threat_initialized:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_threat_request_processed:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_objective_processed:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_group_one_requested:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_group_two_requested:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_placement_requested:
+      type: boolean
+      role: state
+      description: Once-only owned quest occurrence marker; never reset on phase replay.
+    portal_threat_roll_supplied:
+      type: boolean
+      role: input
+      description: Actual initial Threat roll available or actual objective entry, not
+        a request.
+    objective_room_entered:
+      type: boolean
+      role: input
+      description: Actual initial Threat roll available or actual objective entry, not
+        a request.
+    portal_threat_roll:
+      type: number
+      role: input
+      description: Actual initial d6 result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    threat:
+      type: number
+      role: state
+      description: Owned quest Threat value; replay cannot reseed later current Threat.
+      integer: true
+    portal_start_threat:
+      type: number
+      role: state
+      description: Owned quest Threat value; replay cannot reseed later current Threat.
+      integer: true
+    portal_minimum_threat:
+      type: number
+      role: state
+      description: Owned quest Threat value; replay cannot reseed later current Threat.
+      integer: true
+    portal_maximum_threat:
+      type: number
+      role: state
+      description: Owned quest Threat value; replay cannot reseed later current Threat.
+      integer: true
+    location:
+      type: string
+      role: output
+      description: location
+    corridors:
+      type: number
+      role: output
+      description: corridors
+      integer: true
+    rooms:
+      type: number
+      role: output
+      description: rooms
+      integer: true
+    advertised_reward_per_hero:
+      type: number
+      role: output
+      description: advertised reward per hero
+      integer: true
+    ritual_scroll_supplied:
+      type: boolean
+      role: output
+      description: ritual scroll supplied
+    initial_demon_table_rolls:
+      type: number
+      role: output
+      description: initial demon table rolls
+      integer: true
+    initial_demon_placement:
+      type: string
+      role: output
+      description: initial demon placement
+    hero_entry:
+      type: string
+      role: output
+      description: hero entry
+    portal_position:
+      type: string
+      role: output
+      description: portal position
+  dependencies:
+    - key: quest
+      label: Canonical Closing the Portal
+      object_id: quest.chamber_of_reverence.closing_portal
+    - key: threat
+      label: Actual initial d6 Threat
+      object_id: table.quest.closing_portal.threat
+    - key: group_one
+      label: Actual first initial demon group; distinct owned state
+      object_id: procedure.closing_portal_demon_group
+    - key: group_two
+      label: Actual second initial demon group; distinct owned state
+      object_id: procedure.closing_portal_demon_group
+    - key: placement
+      label: Actual random initial demon placement; source gives no coordinate
+        selection algorithm
+  steps:
+    - id: setup
+      source: *a1
+      source_text: 'The wizard provides the team with a scroll which could be cast by
+        one with very limited skills in the Arcane Arts. Quest Location: In
+        Silver City. Number of Tiles: 8 corridors, 8 rooms. Reward: 300 c per
+        hero.'
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: portal_owner_matches
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: instance_quest_id
+                right:
+                  type: literal
+                  value: quest.chamber_of_reverence.closing_portal
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: setup
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_setup_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.closing_portal.setup
+      effects:
+        - type: set
+          target: portal_setup_processed
+          value:
+            type: literal
+            value: true
+    - id: request_threat
+      source: *a1
+      source_text: Request the actual initial d6 once without inferring it from
+        current Threat.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: setup
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_threat_initialized
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_threat_roll_supplied
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_threat_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: portal_threat_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: threat
+    - id: initial_threat
+      source: *a1
+      source_text: Initial d6, minimum same as start, maximum20; preserve later
+        current Threat on replay.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: setup
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_threat_initialized
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_threat_roll_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: threat
+          value:
+            type: field
+            name: portal_threat_roll
+        - type: set
+          target: portal_start_threat
+          value:
+            type: field
+            name: portal_threat_roll
+        - type: set
+          target: portal_minimum_threat
+          value:
+            type: field
+            name: portal_threat_roll
+        - type: set
+          target: portal_maximum_threat
+          value:
+            type: literal
+            value: 20
+        - type: set
+          target: portal_threat_initialized
+          value:
+            type: literal
+            value: true
+    - id: objective_setup
+      source: *a1
+      source_text: In the centre of the room over a large summoning circle is a
+        shimmering bubble. Roll twice on the special rules Encounter Table and
+        place demons randomly in the room. Heroes enter centred along the long
+        side.
+      when:
+        type: all
+        conditions:
+          - &a3
+            type: all
+            conditions:
+              - *a2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: objective_room
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: objective_room_entered
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_objective_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.closing_portal.objective_setup
+      effects:
+        - type: set
+          target: portal_objective_processed
+          value:
+            type: literal
+            value: true
+    - id: first_group
+      source: *a1
+      source_text: Hand off this actual objective-room preparation once; requests do
+        not resolve dice or placement.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_objective_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_group_one_requested
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: portal_group_one_requested
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: group_one
+    - id: second_group
+      source: *a1
+      source_text: Hand off this actual objective-room preparation once; requests do
+        not resolve dice or placement.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_objective_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_group_two_requested
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: portal_group_two_requested
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: group_two
+    - id: placement
+      source: *a1
+      source_text: Hand off this actual objective-room preparation once; requests do
+        not resolve dice or placement.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_objective_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: portal_placement_requested
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: portal_placement_requested
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: placement
+  entry_step: setup
+  exit_step: placement
+- id: procedure.closing_portal_demon_group
+  name: Closing the Portal initial or replacement demon group
+  section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: For one separately owned actual initial group (first or second) or
+    actual encounter result multiple10, persist a single demon-type d6 selection
+    and resolve its printed group quantity once. Initial groups and replacement
+    groups use d6 quantities for types1–4 and d3 for5/6. Later spawning uses one
+    demon and cannot enter this group procedure. Missing quantity retains the
+    selected type; replay cannot change species, quantity or duplicate actors.
+    Demon statistics/Cursed Weapons and actual placement/battle remain
+    dependencies.
+  fields:
+    instance_quest_id:
+      type: string
+      role: state
+      description: Immutable accepted catalogue quest ID.
+    portal_owner_matches:
+      type: boolean
+      role: input
+      description: Actual party/Closing the Portal occurrence and current preparation
+        or group event ownership confirmed.
+    group_context:
+      type: string
+      role: input
+      description: initial or replacement only; never single_spawn.
+    initial_group_authorized:
+      type: boolean
+      role: input
+      description: Actual objective entry and first/second initial-group ownership are
+        confirmed, not merely a handoff request.
+    initial_group_index:
+      type: number
+      role: input
+      description: Actual first or second source group.
+      integer: true
+      minimum: 1
+      maximum: 2
+    encounter_result:
+      type: number
+      role: input
+      description: Actual encounter-table result for replacement.
+      integer: true
+      minimum: 1
+    group_context_processed:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    demon_encounter:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    group_encounter:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    group_selection_processed:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    group_resolved:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    group_request_processed:
+      type: boolean
+      role: state
+      description: Owned actual group marker; each initial/replacement occurrence uses
+        distinct state, never phase-reset.
+    demon_table_rolls:
+      type: number
+      role: state
+      description: One selected group table roll.
+      integer: true
+    demon_type_supplied:
+      type: boolean
+      role: input
+      description: Actual supplied dice result, not a request.
+    group_quantity_supplied:
+      type: boolean
+      role: input
+      description: Actual supplied dice result, not a request.
+    actual_demon_type_roll:
+      type: number
+      role: input
+      description: Actual initial demon-table d6.
+      integer: true
+      minimum: 1
+      maximum: 6
+    actual_group_quantity:
+      type: number
+      role: input
+      description: Actual selected quantity die result; per-branch guards enforce d6 or d3.
+      integer: true
+      minimum: 1
+      maximum: 6
+    demon_type_roll:
+      type: number
+      role: state
+      description: Persisted working demon type d6; never replaced by replay input.
+      integer: true
+      minimum: 1
+      maximum: 6
+    group_quantity_roll:
+      type: number
+      role: state
+      description: Owned working selected quantity result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    demon_type:
+      type: string
+      role: output
+      description: demon type
+    demon_weapon:
+      type: string
+      role: output
+      description: demon weapon
+    demon_armour:
+      type: number
+      role: output
+      description: demon armour
+      integer: true
+    demon_count:
+      type: number
+      role: output
+      description: demon count
+      integer: true
+  dependencies:
+    - key: demons
+      label: Actual selected demon type and quantity
+      object_id: table.quest.closing_portal.demons
+    - key: statistics
+      label: Actual demon statistics and Cursed Weapons mechanics, unavailable in this
+        quest
+  steps:
+    - id: initial_context
+      source: *a1
+      source_text: Authorize one of the two actual initial groups.
+      when:
+        type: all
+        conditions:
+          - &a5
+            type: all
+            conditions:
+              - &a4
+                type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: portal_owner_matches
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: instance_quest_id
+                    right:
+                      type: literal
+                      value: quest.chamber_of_reverence.closing_portal
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: group_context
+                right:
+                  type: literal
+                  value: initial
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: initial_group_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_group_index
+                    right:
+                      type: literal
+                      value: 1
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: initial_group_index
+                    right:
+                      type: literal
+                      value: 2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_context_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: group_context_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: demon_encounter
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: group_encounter
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: demon_table_rolls
+          value:
+            type: literal
+            value: 1
+    - id: replacement_context
+      source: *a1
+      source_text: All encounter results of even 10s (10, 20, 30...) result in an
+        encounter with random demons.
+      when:
+        type: all
+        conditions:
+          - &a6
+            type: all
+            conditions:
+              - *a4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: group_context
+                right:
+                  type: literal
+                  value: replacement
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: encounter_result
+                    right:
+                      type: literal
+                      value: 10
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: encounter_result
+                    right:
+                      type: arithmetic
+                      operator: multiply
+                      values:
+                        - type: arithmetic
+                          operator: floor
+                          values:
+                            - type: arithmetic
+                              operator: divide
+                              values:
+                                - type: field
+                                  name: encounter_result
+                                - type: literal
+                                  value: 10
+                        - type: literal
+                          value: 10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_context_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.closing_portal.encounter_replacement
+      effects:
+        - type: set
+          target: group_context_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: group_encounter
+          value:
+            type: literal
+            value: true
+    - id: request_group
+      source: *a1
+      source_text: Request unresolved actual dice once; table lookup is not a
+        generated group.
+      when:
+        type: all
+        conditions:
+          - &a7
+            type: all
+            conditions:
+              - type: any
+                conditions:
+                  - *a5
+                  - *a6
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: group_context_processed
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: group_resolved
+                right:
+                  type: literal
+                  value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: demon_type_supplied
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: group_quantity_supplied
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_request_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: group_request_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: demons
+    - id: snapshot_type
+      source: *a1
+      source_text: Persist selected actual type before delayed quantity resolution.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_selection_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: demon_type_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: demon_type_roll
+          value:
+            type: field
+            name: actual_demon_type_roll
+        - type: set
+          target: group_selection_processed
+          value:
+            type: literal
+            value: true
+    - id: actual_quantity
+      source: *a1
+      source_text: Copy actual supplied result to owned working state without changing
+        supplied inputs.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_quantity_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: group_quantity_roll
+          value:
+            type: field
+            name: actual_group_quantity
+    - id: group_1
+      source: *a1
+      source_text: Resolve only the selected type and its actual quantity within the
+        printed dice bounds once.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: all
+            conditions:
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: demon_type_roll
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: demon_type_roll
+                right:
+                  type: literal
+                  value: 4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_quantity_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 6
+      rule_refs:
+        - core.quest.closing_portal.demon_type_1
+        - core.quest.closing_portal.demon_group_1
+      effects:
+        - type: set
+          target: group_resolved
+          value:
+            type: literal
+            value: true
+    - id: group_2
+      source: *a1
+      source_text: Resolve only the selected type and its actual quantity within the
+        printed dice bounds once.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: demon_type_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_quantity_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 3
+      rule_refs:
+        - core.quest.closing_portal.demon_type_2
+        - core.quest.closing_portal.demon_group_2
+      effects:
+        - type: set
+          target: group_resolved
+          value:
+            type: literal
+            value: true
+    - id: group_3
+      source: *a1
+      source_text: Resolve only the selected type and its actual quantity within the
+        printed dice bounds once.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_selection_processed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: demon_type_roll
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_quantity_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: actual_group_quantity
+            right:
+              type: literal
+              value: 3
+      rule_refs:
+        - core.quest.closing_portal.demon_type_3
+        - core.quest.closing_portal.demon_group_3
+      effects:
+        - type: set
+          target: group_resolved
+          value:
+            type: literal
+            value: true
+  issues:
+    - issue.quest.portal_ritual_boundaries
+  entry_step: initial_context
+  exit_step: group_3

@@ -1,0 +1,373 @@
+- id: procedure.jumpy
+  name: Jumpy actual Scenario-roll Threat and unsuspecting-noise behavior
+  section_id: section.psychology.table
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 57
+      printed_page: 55
+      heading: Psychology table
+      locator:
+        table: Mental conditions table
+        row: 7 Jumpy
+        column: Effect
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Every unsuspecting noise makes the hero jump and scream, startling companions and
+    alerting all dungeon dwellers. An actual Scenario roll of 10 spooks the hero and increases
+    Threat by 2. Resolve each actual Scenario result once, including results with no Jumpy increase,
+    and report the qualitative behavior once for each actual noise. No numeric Threat increase for
+    arbitrary noise, new Scenario roll, ordinary Threat roll, quest-maximum effect, cure or
+    diagnosis/Sanity mutation is performed here.
+  issues:
+    - issue.sanity.jumpy_threat_order
+  fields:
+    phase:
+      type: string
+      role: input
+      description:
+        'Actual checkpoint: scenario or noise. Diagnosis acquisition alone performs no Scenario
+        roll or Threat change.'
+    sanity_system_enabled:
+      type: boolean
+      role: input
+      description: Whether this hero uses optional Sanity.
+    jumpy_diagnosis_matches:
+      type: boolean
+      role: input
+      description:
+        This is the same hero and active accepted Jumpy diagnosis; do not overwrite another
+        hero or condition context.
+    jumpy_active:
+      type: boolean
+      role: state
+      description:
+        Actual Jumpy condition remains active. Separately completed treatment may clear it;
+        this checkpoint never cures or changes diagnosis count. Persist independently of later
+        diagnosis names or another pending acquisition episode.
+    scenario_roll_confirmed:
+      type: boolean
+      role: input
+      description:
+        Actual Scenario die was rolled in its valid source context; a request, noise, enemy hit
+        or repeated observation alone is not a fresh roll.
+    scenario_roll:
+      type: number
+      role: input
+      description:
+        Actual d10 Scenario result; 10 is the printed 0 face. Preserve this result for its
+        owned roll.
+      minimum: 1
+      maximum: 10
+      integer: true
+    jumpy_scenario_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/distinct-Scenario-roll result marker, consumed for every actual result
+        including 1–9; fresh false only for a new actual roll, persist against replay/substituted
+        result.
+    jumpy_threat_context_resolved:
+      type: boolean
+      role: input
+      description:
+        The actual +2 contribution context is source-grounded; false for unresolved ordering
+        with the ordinary Threat roll, quest maximum or multiple Jumpy heroes. No universal
+        precedence/aggregation is inferred.
+    threat:
+      type: number
+      role: state
+      description: Actual party Threat in this resolved one-hero contribution context; ordinary
+        Scenario/Threat checks and quest maximum effects remain separately owned.
+    unsuspecting_noise_confirmed:
+      type: boolean
+      role: input
+      description:
+        An actual unsuspecting noise spooked this hero; not a fabricated noise or a request.
+        Arbitrary noise has no printed numerical Threat increase.
+    jumpy_noise_processed:
+      type: boolean
+      role: state
+      description:
+        Hero/diagnosis/distinct-unsuspecting-noise marker; fresh false only for a new actual
+        noise, persist so replay reports no new scream.
+    jumpy_scream_this_call:
+      type: boolean
+      role: output
+      description:
+        This actual owned source occurrence makes the hero jump and scream. Recomputed each
+        call; false means no new occurrence, not reversal of previous alerting.
+    jumpy_startle_this_call:
+      type: boolean
+      role: output
+      description:
+        This actual scream startles companions; no invented penalty, action loss or morale
+        change. Recomputed each call; false means no new occurrence, not reversal of previous
+        alerting.
+    jumpy_alert_this_call:
+      type: boolean
+      role: output
+      description:
+        This actual scream alerts dungeon dwellers to presence; no invented movement, spawn or
+        battle. Recomputed each call; false means no new occurrence, not reversal of previous
+        alerting.
+  dependencies:
+    - key: scenario
+      label: Existing ordinary Scenario die and Threat-roll trigger remain separately resolved; no
+        ordering chosen here
+      object_id: procedure.scenario_die
+    - key: threat_roll
+      label:
+        Existing ordinary Threat roll remains separately owned; no comparison or decrease is repeated
+        here
+      object_id: procedure.threat_roll
+    - key: acquisition
+      label: Actual Jumpy diagnosis/count/reset, separately owned
+      object_id: procedure.sanity_condition
+  steps:
+    - id: reset_report
+      source: *a1
+      source_text:
+        Report only a new actual occurrence in this call; clearing output flags does not undo
+        an earlier scream or alert the dungeon back to unawareness.
+      effects:
+        - type: set
+          target: jumpy_scream_this_call
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: jumpy_startle_this_call
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: jumpy_alert_this_call
+          value:
+            type: literal
+            value: false
+    - id: context_unknown
+      source: *a1
+      source_text:
+        The +2 amount is printed, but unresolved order/aggregation/quest-maximum context is not
+        resolved by a guess. Preserve the input Threat and unconsumed actual roll for source
+        reconciliation.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: scenario
+          - &a2
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanity_system_enabled
+            right:
+              type: literal
+              value: true
+          - &a3
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_diagnosis_matches
+            right:
+              type: literal
+              value: true
+          - &a4
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_active
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scenario_roll_confirmed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_scenario_processed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scenario_roll
+            right:
+              type: literal
+              value: 10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_threat_context_resolved
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.sanity.jumpy_threat_order
+    - id: resolve_roll
+      source: *a1
+      source_text:
+        Consume one actual Scenario result for this active diagnosis. The stable source rule
+        adds +2 only on 10; consumed 1–9 cannot be replaced with 10 on replay.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: scenario
+          - *a2
+          - *a3
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: scenario_roll_confirmed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_scenario_processed
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: scenario_roll
+                right:
+                  type: literal
+                  value: 10
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: jumpy_threat_context_resolved
+                right:
+                  type: literal
+                  value: true
+      rule_refs:
+        - character.condition.jumpy
+      effects:
+        - type: set
+          target: jumpy_scenario_processed
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: scream
+          source: *a1
+          source_text:
+            On this actual resolved Scenario 10, report the printed scream/startle/alert behavior
+            without invoking an invented enemy reaction.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: scenario_roll
+            right:
+              type: literal
+              value: 10
+          effects:
+            - &a5
+              type: set
+              target: jumpy_scream_this_call
+              value:
+                type: literal
+                value: true
+            - &a6
+              type: set
+              target: jumpy_startle_this_call
+              value:
+                type: literal
+                value: true
+            - &a7
+              type: set
+              target: jumpy_alert_this_call
+              value:
+                type: literal
+                value: true
+    - id: noise
+      source: *a1
+      source_text:
+        An actual unsuspecting noise makes this hero jump/scream and startles/alerts others.
+        Report once for the distinct noise; the source gives no separate numeric Threat amount for
+        arbitrary noise.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: noise
+          - *a2
+          - *a3
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: unsuspecting_noise_confirmed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: jumpy_noise_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: jumpy_noise_processed
+          value:
+            type: literal
+            value: true
+        - *a5
+        - *a6
+        - *a7
+  entry_step: reset_report
+  exit_step: noise

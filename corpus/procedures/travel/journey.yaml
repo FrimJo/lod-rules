@@ -1,0 +1,1860 @@
+- id: procedure.travel_daily_movement
+  name: Daily world-map movement
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The party chooses its route. Entering a road hex costs 1 Movement Point; an off-road
+    hex costs 1.5. A desert hex costs 2, unless all heroes have camels, in which case it costs 1.5.
+    A walking party or a party with a wagon or mule has 3 Movement Points; a party where all members
+    ride horses or camels has 6 Movement Points.
+  fields:
+    day:
+      type: number
+      role: input
+      description:
+        Supplied monotonically increasing travel day; the stored movement_day prevents repeated
+        steps from replenishing the allowance.
+      integer: true
+      minimum: 0
+    movement_day:
+      type: number
+      role: state
+      description: movement day
+      integer: true
+      minimum: -1
+    event_day:
+      type: number
+      role: state
+      description: event day
+      integer: true
+      minimum: -1
+    movement_points:
+      type: number
+      role: state
+      description: movement points
+      minimum: 0
+      maximum: 6
+    hex_index:
+      type: number
+      role: state
+      description: hex index
+      minimum: 0
+    terrain:
+      type: string
+      role: input
+      description: 'Entering hex: road, off_road or desert. Ancient Lands hexes are desert.'
+    transport_mode:
+      type: string
+      role: input
+      description: walking, wagon_or_mule, all_riding_horses_or_camels, or all_camels; eligibility is supplied.
+    route_legal:
+      type: boolean
+      role: input
+      description: Supplied World Map route adjacency and entry legality; no map geometry is invented.
+    terrain_cost:
+      type: number
+      role: output
+      description: terrain cost
+    entered_hex:
+      type: boolean
+      role: output
+      description: entered hex
+  dependencies:
+    - key: route_and_terrain
+      label: World Map route and terrain lookup
+    - key: transport_eligibility
+      label: Determine party transport eligibility
+  steps:
+    - id: determine_allowance
+      source_text: Establish the allowance once for each day, after the daily event check.
+      effects:
+        - type: set
+          target: entered_hex
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: terrain_cost
+          value:
+            type: literal
+            value: 0
+        - type: invoke
+          dependency: transport_eligibility
+        - type: require
+          condition: &a1
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: walking
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: wagon_or_mule
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: all_riding_horses_or_camels
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: all_camels
+        - type: require
+          condition: &a2
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: road
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: off_road
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: desert
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_day
+            right:
+              type: field
+              name: day
+    - id: walking_allowance
+      source_text: 'Walking, wagon or mule: 3 Movement Points.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: movement_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_day
+            right:
+              type: field
+              name: day
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: walking
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: wagon_or_mule
+      effects:
+        - type: set
+          target: movement_points
+          value:
+            type: literal
+            value: 3
+        - type: set
+          target: movement_day
+          value:
+            type: field
+            name: day
+    - id: riding_allowance
+      source_text: 'All members riding horses or camels: 6 Movement Points.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: movement_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_day
+            right:
+              type: field
+              name: day
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: all_riding_horses_or_camels
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: transport_mode
+                right:
+                  type: literal
+                  value: all_camels
+      effects:
+        - type: set
+          target: movement_points
+          value:
+            type: literal
+            value: 6
+        - type: set
+          target: movement_day
+          value:
+            type: field
+            name: day
+    - id: road_cost
+      source_text: Entering a road hex costs 1.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: terrain
+        right:
+          type: literal
+          value: road
+      effects:
+        - type: set
+          target: terrain_cost
+          value:
+            type: literal
+            value: 1
+    - id: offroad_cost
+      source_text: Entering an off-road hex costs 1.5.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: terrain
+        right:
+          type: literal
+          value: off_road
+      effects:
+        - type: set
+          target: terrain_cost
+          value:
+            type: literal
+            value: 1.5
+    - id: desert_cost
+      source_text: Entering a desert hex costs 2.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: terrain
+        right:
+          type: literal
+          value: desert
+      effects:
+        - type: set
+          target: terrain_cost
+          value:
+            type: literal
+            value: 2
+    - id: camel_desert_cost
+      source_text: If all heroes have camels, desert entry costs 1.5.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: terrain
+            right:
+              type: literal
+              value: desert
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transport_mode
+            right:
+              type: literal
+              value: all_camels
+      effects:
+        - type: set
+          target: terrain_cost
+          value:
+            type: literal
+            value: 1.5
+    - id: check_entry
+      source_text: Spend the cost of the entering hex; route geometry and eligibility are supplied.
+      effects:
+        - type: invoke
+          dependency: route_and_terrain
+        - type: require
+          condition: &a3
+            type: all
+            conditions:
+              - *a1
+              - *a2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: route_legal
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: movement_day
+                right:
+                  type: field
+                  name: day
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: event_day
+                right:
+                  type: field
+                  name: day
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: movement_points
+                right:
+                  type: field
+                  name: terrain_cost
+    - id: enter_hex
+      source_text: Spend Movement Points and advance only for a legal entry with sufficient allowance.
+      when: *a3
+      effects:
+        - type: set
+          target: movement_points
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: movement_points
+              - type: field
+                name: terrain_cost
+        - type: set
+          target: hex_index
+          value:
+            type: sum
+            values:
+              - type: field
+                name: hex_index
+              - type: literal
+                value: 1
+        - type: set
+          target: entered_hex
+          value:
+            type: literal
+            value: true
+  entry_step: determine_allowance
+  exit_step: enter_hex
+- id: procedure.travel_food_and_rest
+  name: Travel food and daily rest
+  section_id: section.travelling_and_skirmishes.rations_and_resting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 126
+      printed_page: 124
+      heading: Rations and Resting
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 127
+      printed_page: 125
+      heading: Rations and Resting
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 184
+      printed_page: 182
+      heading: 'Miscellaneous: Bed Roll'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Outside the Ancient Lands the party requires one ration per day, not one per hero. In
+    the Ancient Lands each hero needs two rations and Foraging is forbidden. Instead of rations,
+    attempt Foraging once per day (+10 in trees, -10 on road). Failure causes noncumulative
+    temporary Constitution loss of half (RDD) and Party Morale -4 until eating again. Once per day
+    rest restores 1d6 HP and each Energy Point on 1–3 on 1d6; a bed roll restores all Energy. Food,
+    per-hero hunger and per-hero rest are separate phases sharing the party food result.
+  fields:
+    phase:
+      type: string
+      role: input
+      description:
+        food resolves party supplies and morale once; hero applies that shared food result to
+        one hero; rest recovers one hero. Pass each hero’s separate state for hero/rest, sharing
+        party fields.
+    food_choice:
+      type: string
+      role: input
+      description: food choice
+    terrain:
+      type: string
+      role: input
+      description: terrain
+    day:
+      type: number
+      role: input
+      description: day
+      integer: true
+      minimum: 0
+    party_size:
+      type: number
+      role: input
+      description: party size
+      integer: true
+      minimum: 1
+    food_day:
+      type: number
+      role: state
+      description: food day
+      integer: true
+      minimum: -1
+    hero_food_day:
+      type: number
+      role: state
+      description: hero food day
+      integer: true
+      minimum: -1
+    hero_rest_day:
+      type: number
+      role: state
+      description: hero rest day
+      integer: true
+      minimum: -1
+    forage_day:
+      type: number
+      role: state
+      description: forage day
+      integer: true
+      minimum: -1
+    rations_available:
+      type: number
+      role: state
+      description: rations available
+      integer: true
+      minimum: 0
+    constitution:
+      type: number
+      role: state
+      description: constitution
+    hunger_constitution_loss:
+      type: number
+      role: state
+      description: hunger constitution loss
+    party_morale:
+      type: number
+      role: state
+      description: party morale
+    hit_points:
+      type: number
+      role: state
+      description: hit points
+    energy:
+      type: number
+      role: state
+      description: energy
+    party_fed:
+      type: boolean
+      role: state
+      description: party fed
+    hunger_morale_active:
+      type: boolean
+      role: state
+      description: hunger morale active
+    hungry:
+      type: boolean
+      role: state
+      description: hungry
+    foraging_skill:
+      type: number
+      role: input
+      description: foraging skill
+    equipment_foraging_modifier:
+      type: number
+      role: input
+      description: equipment foraging modifier
+    maximum_hit_points:
+      type: number
+      role: input
+      description: maximum hit points
+    maximum_energy:
+      type: number
+      role: input
+      description: maximum energy
+    foraging_roll:
+      type: number
+      role: input
+      description: foraging roll
+      integer: true
+      minimum: 1
+      maximum: 100
+    hp_roll:
+      type: number
+      role: input
+      description: hp roll
+      integer: true
+      minimum: 1
+      maximum: 6
+    energy_successes:
+      type: number
+      role: input
+      description: Supplied count of Energy recovery d6 rolls showing 1–3; at most maximum_energy.
+        Dependency outcomes are supplied, not executed by invoke.
+      integer: true
+      minimum: 0
+    bedroll:
+      type: boolean
+      role: input
+      description: bedroll
+    at_settlement:
+      type: boolean
+      role: input
+      description: at settlement
+    food_required:
+      type: number
+      role: output
+      description: food required
+    foraging_target:
+      type: number
+      role: output
+      description: foraging target
+    has_trees:
+      type: boolean
+      role: input
+      description: Whether the current hex has trees, independently of whether a road also crosses it.
+  dependencies:
+    - key: foraging_check
+      label: Foraging Skill check
+      object_id: core.check.standard
+    - key: bedroll
+      label: Bed Roll Energy recovery
+      object_id: character.equipment.general.bed_roll.rest
+  steps:
+    - id: determine_food_requirement
+      source_text: The party requires one ration per day outside the Ancient Lands.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: phase
+        right:
+          type: literal
+          value: food
+      effects:
+        - type: set
+          target: food_required
+          value:
+            type: literal
+            value: 1
+    - id: ancient_food_requirement
+      source_text: Each hero requires two rations in the Ancient Lands.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: food
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: terrain
+            right:
+              type: literal
+              value: ancient_lands
+      effects:
+        - type: set
+          target: food_required
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: 2
+              - type: field
+                name: party_size
+    - id: reject_ancient_foraging
+      source_text: Foraging is impossible in the Ancient Lands.
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: food
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: food_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: food_choice
+            right:
+              type: literal
+              value: forage
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: ne
+            left:
+              type: field
+              name: terrain
+            right:
+              type: literal
+              value: ancient_lands
+    - id: consume_rations
+      source_text: Consume the daily ration requirement once for the party.
+      when:
+        type: all
+        conditions:
+          - &a5
+            type: all
+            conditions:
+              - *a4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: food_choice
+                right:
+                  type: literal
+                  value: rations
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: rations_available
+            right:
+              type: field
+              name: food_required
+      effects:
+        - type: set
+          target: rations_available
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: rations_available
+              - type: field
+                name: food_required
+        - type: set
+          target: party_fed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: food_day
+          value:
+            type: field
+            name: day
+    - id: no_rations
+      source_text: Without rations the party goes hungry.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rations_available
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: set
+          target: party_fed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: food_day
+          value:
+            type: field
+            name: day
+    - id: partial_ancient_rations
+      source_text: The book does not specify allocating an insufficient Ancient Lands supply among
+        individual heroes.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: rations_available
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: rations_available
+            right:
+              type: field
+              name: food_required
+      effects:
+        - type: unresolved
+          issue_id: issue.travel.partial_rations
+    - id: foraging_target
+      source_text: Foraging may be chosen instead of rations. Supplied equipment modifiers remain distinct.
+      when: &a6
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: food_choice
+            right:
+              type: literal
+              value: forage
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: terrain
+            right:
+              type: literal
+              value: ancient_lands
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: day
+            right:
+              type: field
+              name: forage_day
+      effects:
+        - type: set
+          target: foraging_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: foraging_skill
+              - type: field
+                name: equipment_foraging_modifier
+    - id: trees_modifier
+      source_text: A hex with trees grants +10.
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: trees
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: has_trees
+                right:
+                  type: literal
+                  value: true
+      effects:
+        - type: set
+          target: foraging_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: foraging_target
+              - type: literal
+                value: 10
+    - id: road_modifier
+      source_text: A road hex imposes -10.
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: terrain
+            right:
+              type: literal
+              value: road
+      effects:
+        - type: set
+          target: foraging_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: foraging_target
+              - type: literal
+                value: -10
+    - id: foraging_attempt
+      source_text: Try Foraging once per day; a supplied roll is resolved against the target.
+      when: *a6
+      effects:
+        - type: invoke
+          dependency: foraging_check
+        - type: set
+          target: party_fed
+          value:
+            type: literal
+            value: false
+    - id: foraging_success
+      source_text: Success feeds each character for the day.
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: foraging_roll
+            right:
+              type: field
+              name: foraging_target
+      effects:
+        - type: set
+          target: party_fed
+          value:
+            type: literal
+            value: true
+    - id: finish_foraging
+      source_text: The attempt consumes the day’s Foraging opportunity, whether it succeeds or fails.
+      when: *a6
+      effects:
+        - type: set
+          target: forage_day
+          value:
+            type: field
+            name: day
+        - type: set
+          target: food_day
+          value:
+            type: field
+            name: day
+    - id: hunger_morale
+      source_text: Hunger temporarily lowers Party Morale by 4, noncumulatively.
+      when:
+        type: all
+        conditions:
+          - &a7
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: food
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: food_day
+                right:
+                  type: field
+                  name: day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: party_fed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hunger_morale_active
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: party_morale
+          value:
+            type: sum
+            values:
+              - type: field
+                name: party_morale
+              - type: literal
+                value: -4
+        - type: set
+          target: hunger_morale_active
+          value:
+            type: literal
+            value: true
+    - id: restore_morale
+      source_text: The temporary loss ends when the party eats again.
+      when:
+        type: all
+        conditions:
+          - *a7
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: party_fed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hunger_morale_active
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: party_morale
+          value:
+            type: sum
+            values:
+              - type: field
+                name: party_morale
+              - type: literal
+                value: 4
+        - type: set
+          target: hunger_morale_active
+          value:
+            type: literal
+            value: false
+    - id: apply_hunger
+      source_text:
+        Lose half Constitution (RDD), storing the temporary loss so it can be restored without
+        overwriting other changes.
+      when:
+        type: all
+        conditions:
+          - &a8
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: hero
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: food_day
+                right:
+                  type: field
+                  name: day
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: hero_food_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: party_fed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hungry
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: hunger_constitution_loss
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: field
+                    name: constitution
+                  - type: literal
+                    value: 2
+        - type: set
+          target: constitution
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: constitution
+              - type: field
+                name: hunger_constitution_loss
+        - type: set
+          target: hungry
+          value:
+            type: literal
+            value: true
+    - id: restore_constitution
+      source_text: Eating ends the temporary hunger loss.
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: party_fed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hungry
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: constitution
+          value:
+            type: sum
+            values:
+              - type: field
+                name: constitution
+              - type: field
+                name: hunger_constitution_loss
+        - type: set
+          target: hunger_constitution_loss
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hungry
+          value:
+            type: literal
+            value: false
+    - id: record_hero_food
+      source_text: Repeated hunger is noncumulative.
+      when: *a8
+      effects:
+        - type: set
+          target: hero_food_day
+          value:
+            type: field
+            name: day
+    - id: hp_recovery_boundary
+      source_text: The source does not settle recovery above maximum HP.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: rest
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: at_settlement
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: hero_rest_day
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: maximum_hit_points
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: hp_roll
+      effects:
+        - type: unresolved
+          issue_id: issue.phase4.recovery_bounds
+    - id: check_energy_results
+      source_text: Each Energy Point uses a supplied d6 result; count only results 1–3.
+      when:
+        type: all
+        conditions:
+          - &a9
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: rest
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: at_settlement
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: hero_rest_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bedroll
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: lte
+            left:
+              type: field
+              name: energy_successes
+            right:
+              type: field
+              name: maximum_energy
+    - id: ordinary_energy
+      source_text: Regain the supplied successful Energy rolls, capped by maximum.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a9
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bedroll
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: energy_successes
+                right:
+                  type: field
+                  name: maximum_energy
+          - &a10
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_hit_points
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: hp_roll
+      effects:
+        - type: set
+          target: energy
+          value:
+            type: arithmetic
+            operator: min
+            values:
+              - type: field
+                name: maximum_energy
+              - type: sum
+                values:
+                  - type: field
+                    name: energy
+                  - type: field
+                    name: energy_successes
+    - id: bedroll_energy
+      source_text: The Bed Roll restores all Energy Points.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a9
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bedroll
+                right:
+                  type: literal
+                  value: true
+          - *a10
+      effects:
+        - type: invoke
+          dependency: bedroll
+        - type: set
+          target: energy
+          value:
+            type: field
+            name: maximum_energy
+    - id: recover_at_rest
+      source_text:
+        Once per day regain 1d6 HP. Above-maximum recovery remains the existing unresolved
+        source boundary; settlement lodging uses separate rules.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - *a9
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bedroll
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: energy_successes
+                    right:
+                      type: field
+                      name: maximum_energy
+          - *a10
+      effects:
+        - type: set
+          target: hit_points
+          value:
+            type: sum
+            values:
+              - type: field
+                name: hit_points
+              - type: field
+                name: hp_roll
+        - type: set
+          target: hero_rest_day
+          value:
+            type: field
+            name: day
+  entry_step: determine_food_requirement
+  exit_step: recover_at_rest
+  issues:
+    - issue.travel.partial_rations
+    - issue.phase4.recovery_bounds
+- id: procedure.travel_event_check
+  name: Daily travel event check
+  section_id: section.travelling_and_skirmishes.events
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: At the start of each day before moving, roll 1d12. While off-road, 11-12 triggers a
+    Wilderness Event. While on a road or in the desert, 10-12 triggers a Road Event or Desert Event.
+  fields:
+    terrain:
+      type: string
+      role: input
+      description: Current travel terrain, used to select the printed event threshold and event deck.
+    event_roll:
+      type: number
+      role: input
+      integer: true
+      minimum: 1
+      maximum: 12
+      description: Supplied d12 result.
+    day:
+      type: number
+      role: input
+      description: day
+      integer: true
+      minimum: 0
+    event_day:
+      type: number
+      role: state
+      description: event day
+      integer: true
+      minimum: -1
+    movement_started:
+      type: boolean
+      role: input
+      description: movement started
+    event_deck:
+      type: string
+      role: output
+      description: event deck
+    event_triggered:
+      type: boolean
+      role: output
+      description: event triggered
+  dependencies:
+    - key: draw_travel_event
+      label: Draw the applicable Wilderness, Road, or Desert Event Card
+  steps:
+    - id: check_before_movement
+      source_text: At the start of each day before moving, the party must roll 1d12.
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: movement_started
+            right:
+              type: literal
+              value: false
+        - type: require
+          condition: &a11
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: road
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: off_road
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: desert
+    - id: reset_event_result
+      source_text: Resolve once at the start of the day.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - &a12
+            type: all
+            conditions:
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: day
+                right:
+                  type: field
+                  name: event_day
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: movement_started
+                right:
+                  type: literal
+                  value: false
+      effects:
+        - type: set
+          target: event_triggered
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: event_deck
+          value:
+            type: literal
+            value: none
+    - id: offroad_event
+      source_text:
+        While being off-road, a result of 11-12 will result in an Event. Draw a Wilderness
+        Event Card.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: all
+            conditions:
+              - *a12
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: terrain
+                    right:
+                      type: literal
+                      value: off_road
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: event_roll
+                    right:
+                      type: literal
+                      value: 11
+      effects:
+        - type: set
+          target: event_triggered
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: event_deck
+          value:
+            type: literal
+            value: Wilderness
+        - type: invoke
+          dependency: draw_travel_event
+    - id: road_or_desert_event
+      source_text:
+        While on a road or in the desert, a result of 10-12 will result in an Event. Draw a
+        Road Event or Desert Event Card.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: all
+            conditions:
+              - *a12
+              - type: all
+                conditions:
+                  - type: any
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: terrain
+                        right:
+                          type: literal
+                          value: road
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: terrain
+                        right:
+                          type: literal
+                          value: desert
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: event_roll
+                    right:
+                      type: literal
+                      value: 10
+      effects:
+        - type: set
+          target: event_triggered
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: draw_travel_event
+    - id: road_deck
+      source_text: Road events use Road Event Cards.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: all
+            conditions:
+              - *a12
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: event_triggered
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: road
+      effects:
+        - type: set
+          target: event_deck
+          value:
+            type: literal
+            value: Road
+    - id: desert_deck
+      source_text: Desert events use Desert Event Cards.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: all
+            conditions:
+              - *a12
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: event_triggered
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: terrain
+                right:
+                  type: literal
+                  value: desert
+      effects:
+        - type: set
+          target: event_deck
+          value:
+            type: literal
+            value: Desert
+    - id: record_event_day
+      source_text: The daily check precedes movement.
+      when:
+        type: all
+        conditions:
+          - *a11
+          - *a12
+      effects:
+        - type: set
+          target: event_day
+          value:
+            type: field
+            name: day
+  entry_step: check_before_movement
+  exit_step: record_event_day
+- id: procedure.travel_skirmish_setup
+  name: Outdoor skirmish setup
+  section_id: section.travelling_and_skirmishes.skirmishes
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 127
+      printed_page: 125
+      heading: Skirmishes
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 128
+      printed_page: 126
+      heading: Setup
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Follow the event or mini-quest setup instructions. Normally place the party as close to
+    the centre as possible and randomly place enemies the number of squares from the edges specified
+    by the Event card (such as 1d6, 1d8, or 1d10). Use the Obstacles Table for terrain effects.
+    Combat applies. Threat level and scenario dice are not in effect during skirmishes. Optional 3d
+    terrain treats squares as inches and gives the party no benefits.
+  fields:
+    setup_instructions:
+      type: string
+      role: input
+      description: Supplied event/mini-quest setup, enemy edge distances and adversary selection.
+    terrain_map:
+      type: string
+      role: input
+      description: Supplied outdoor tile/map geometry and terrain.
+    threat_enabled:
+      type: boolean
+      role: output
+      description: threat enabled
+    scenario_dice_enabled:
+      type: boolean
+      role: output
+      description: scenario dice enabled
+    party_placement:
+      type: string
+      role: output
+      description: party placement
+    enemy_placement:
+      type: string
+      role: output
+      description: enemy placement
+    distance_unit:
+      type: string
+      role: output
+      description: distance unit
+    use_3d_terrain:
+      type: boolean
+      role: input
+      description: use 3d terrain
+  dependencies:
+    - key: combat
+      label: Existing combat procedures
+      object_id: procedure.combat_preparation
+    - key: geometry
+      label: Outdoor map geometry and placement
+    - key: adversaries
+      label: Event or mini-quest adversary instructions and statistics
+    - key: obstacles
+      label: Outdoor Obstacles Table
+      object_id: table.travel.obstacles
+  steps:
+    - id: require_supplied_setup
+      source_text: The event or mini-quest supplies setup and adversaries; terrain geometry must be supplied.
+      effects:
+        - type: require
+          condition: &a13
+            type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: setup_instructions
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: terrain_map
+                right:
+                  type: literal
+                  value: ''
+    - id: apply_setup_instructions
+      source_text:
+        Follow the instructions for setting up the party and adversaries. Normally the party is
+        placed as close to the centre as possible, and enemies are randomly placed the number of
+        squares from the edges as specified by the Event card.
+      effects:
+        - type: set
+          target: party_placement
+          value:
+            type: literal
+            value: as close to centre as possible, unless setup instructions override
+        - type: set
+          target: enemy_placement
+          value:
+            type: literal
+            value: randomly from edges at card-specified distance
+        - type: invoke
+          dependency: geometry
+        - type: invoke
+          dependency: adversaries
+      when: *a13
+    - id: apply_obstacles
+      source_text:
+        Use the Obstacles Table to determine what effect the terrain has on movement, shooting
+        and LOS.
+      effects:
+        - type: invoke
+          dependency: obstacles
+      when: *a13
+    - id: resolve_skirmish
+      source_text:
+        Combat is enacted as described in the Combat chapter. Threat level and scenario dice
+        are not in effect during skirmishes.
+      effects:
+        - type: set
+          target: threat_enabled
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: scenario_dice_enabled
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: distance_unit
+          value:
+            type: literal
+            value: squares
+        - type: invoke
+          dependency: combat
+      when: *a13
+    - id: three_dimensional_terrain
+      source_text: With optional 3d terrain use inches for squares, without giving the party benefits.
+      when:
+        type: all
+        conditions:
+          - *a13
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: use_3d_terrain
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: distance_unit
+          value:
+            type: literal
+            value: inches
+  entry_step: require_supplied_setup
+  exit_step: three_dimensional_terrain

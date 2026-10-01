@@ -13,31 +13,55 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: |-
-    If there are no enemies on the same tile as the heroes, or on any adjacent tiles, the party
-    may take a short rest. All heroes must be on the same tile. This costs one ration of food
-    and you may freely arrange the heroes as you see fit on the tile before the rest begins.
-    Any Wandering Monster on the map may then make 3 consecutive moves. If any Wandering
-    Monster spots the party, the rest is interrupted, and battle ensues. However, before the
-    monsters show up, the party has had time to do at least some things. The food is still
-    consumed, and the party may make free adjustments to their equipment before the battle. If
-    the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and possibly some
-    energy. Roll 1d6 per Energy Point and a result of 1-3 will replenish that Energy Point. All
-    heroes may freely rearrange their equipment during the rest and alchemists may mix potions.
-    Party Morale is increased by +2. Then, roll 1d100 to determine if the party is ambushed
-    during the rest. The risk for ambush is (5 + Threat level) % during the first rest. For
+  source_text: >-
+    If there are no enemies on the same tile as the heroes, or on any adjacent
+    tiles, the party
+
+    may take a short rest. All heroes must be on the same tile. This costs one
+    ration of food
+
+    and you may freely arrange the heroes as you see fit on the tile before the
+    rest begins.
+
+    Any Wandering Monster on the map may then make 3 consecutive moves. If any
+    Wandering
+
+    Monster spots the party, the rest is interrupted, and battle ensues.
+    However, before the
+
+    monsters show up, the party has had time to do at least some things. The
+    food is still
+
+    consumed, and the party may make free adjustments to their equipment before
+    the battle. If
+
+    the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and
+    possibly some
+
+    energy. Roll 1d6 per Energy Point and a result of 1-3 will replenish that
+    Energy Point. All
+
+    heroes may freely rearrange their equipment during the rest and alchemists
+    may mix potions.
+
+    Party Morale is increased by +2. Then, roll 1d100 to determine if the party
+    is ambushed
+
+    during the rest. The risk for ambush is (5 + Threat level) % during the
+    first rest. For
+
     every rest after the first, the risk is increased by 10% (max 70%).
   fields:
     wandering_monster_spots_party:
       type: boolean
       role: input
-      description: Set when any Wandering Monster spots the party during its three moves; the rest
-        is interrupted and battle ensues.
+      description: Set when any Wandering Monster spots the party during its three
+        moves; the rest is interrupted and battle ensues.
     rests_taken:
       type: number
       role: input
-      description: Count of rests taken this dungeon run including this one; the first rest has the
-        lowest ambush risk.
+      description: Count of rests taken this dungeon run including this one; the first
+        rest has the lowest ambush risk.
       integer: true
       minimum: 1
       maximum: 99
@@ -76,15 +100,60 @@
     ambush_risk:
       type: number
       role: output
-      description: Ambush chance in percent; (5 + Threat level) for the first rest, +10 per rest
-        after the first, max 70.
+      description: Ambush chance in percent; (5 + Threat level) for the first rest,
+        +10 per rest after the first, max 70.
       integer: true
       minimum: 0
       maximum: 70
+    enemy_bonus_tokens:
+      type: number
+      role: output
+      description: Rest ambush grants three extra enemy tokens unless door is barred.
+    rest_completed:
+      type: boolean
+      role: output
+      description: Current rest attempt completes only when no Wandering Monster spots
+        the party during its three moves. This is a party rest-attempt
+        checkpoint, not a per-hero recovery mutation or a halt instruction.
+    all_heroes_on_same_tile:
+      type: boolean
+      role: input
+      description: 'Supplied party geometry: every hero is on the same tile before the
+        attempt.'
+    enemies_on_rest_tile:
+      type: boolean
+      role: input
+      description: 'Supplied geometry: at least one enemy is on the heroes’ tile.'
+    enemies_on_adjacent_tiles:
+      type: boolean
+      role: input
+      description: 'Supplied geometry: at least one enemy is on any adjacent tile.'
+    rest_attempt_processed:
+      type: boolean
+      role: state
+      description: Party-owned bookkeeping for this one rest attempt. Supply false for
+        a distinct new attempt; retain true when replaying an already processed
+        attempt. This prevents duplicate processing, not a source restriction on
+        later legal rests.
+    rest_execution_allowed:
+      type: boolean
+      role: output
+      description: Current invocation may execute the checklist only when source entry
+        prerequisites pass and this attempt has not already been processed.
+        Reset on every invocation.
+    starting_morale:
+      type: number
+      role: input
+      description: Party Morale start value supplied from the party record; the rest
+        bonus is capped at this value.
+      integer: true
+      minimum: 0
+      maximum: 99
   dependencies:
     - key: wandering_monsters
       label: Move Wandering Monsters
       section_id: section.into_the_dungeons.wandering_monsters
+      object_id: procedure.wandering_monster
     - key: battle_lifecycle
       label: Battle lifecycle
       object_id: state_machine.battle
@@ -94,13 +163,123 @@
     - key: alchemy_brewing
       label: Alchemy (mixing potions)
       section_id: section.alchemy
+    - key: initiative
+      label: Prepare ambush initiative with supplied normal model counts and the rest
+        bonus
+      object_id: procedure.initiative
+    - key: seal_door_spell
+      label: Seal Door restrictions
+      object_id: spell.seal_door
+    - key: alchemy_mixing
+      label: Alchemy mixing conditions
+      object_id: character.alchemy.mix
+    - key: hero_hp_recovery
+      label: HP recovery for each hero with a distinct hero/attempt context
+      object_id: procedure.rest_hp_recovery
+    - key: hero_energy_point_recovery
+      label: Energy recovery with a distinct context for each lost point of each hero
+      object_id: procedure.rest_energy_point_recovery
+    - key: hero_mana_recovery
+      label: Mana recovery for each hero with a distinct hero/attempt context
+      object_id: procedure.rest_mana_recovery
+    - key: untreated_bleeding_rest
+      label: Rest bleeding check; source does not specify checklist placement or
+        early-interruption applicability
+      object_id: procedure.rest_bleeding_check
+    - key: remaining_poison_rest
+      label: Rest Poison Tests; source does not specify checklist placement or
+        early-interruption applicability
+      object_id: procedure.rest_poison_checks
   steps:
+    - id: check_eligibility
+      source_text: If there are no enemies on the same tile as the heroes, or on any
+        adjacent tiles, the party may take a short rest. All heroes must be on
+        the same tile. This costs one ration of food.
+      effects:
+        - type: set
+          target: rest_execution_allowed
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: accept_attempt
+          source_text: This costs one ration of food and you may freely arrange the heroes
+            as you see fit on the tile before the rest begins.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_heroes_on_same_tile
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: enemies_on_rest_tile
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: enemies_on_adjacent_tiles
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: party_rations
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: rest_attempt_processed
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: rest_execution_allowed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: rest_attempt_processed
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: rest_completed
+              value:
+                type: literal
+                value: false
     - id: arrange
       source_text: Arrange heroes on the tile as you see fit.
       effects: []
+      when: &a1
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: rest_execution_allowed
+        right:
+          type: literal
+          value: true
     - id: bar_door
       source_text: Bar the door (optional).
       effects: []
+      when: *a1
     - id: deduct_ration
       source_text: Deduct 1 ration of food from the party.
       effects:
@@ -110,22 +289,55 @@
             type: literal
             value: -1
           duration: immediate
+      when: *a1
     - id: rearrange_gear
-      source_text: |-
-        Re-arrange your gear on each of your heroes if needed, and maybe also exchange gear
+      source_text: >-
+        Re-arrange your gear on each of your heroes if needed, and maybe also
+        exchange gear
+
         between heroes.
       effects: []
+      when: *a1
     - id: move_monsters
       source_text: Move Wandering Monsters 3 times.
       effects:
+        - type: set
+          target: rest_completed
+          value:
+            type: literal
+            value: false
         - type: invoke
           dependency: wandering_monsters
       substeps:
+        - id: completed
+          source_text: If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit
+            Points and possibly some energy.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: wandering_monster_spots_party
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: set
+              target: rest_completed
+              value:
+                type: literal
+                value: true
         - id: interrupted
-          source_text: |-
-            If any Wandering Monster spots the party, the rest is interrupted, and battle
-            ensues. However, before the monsters show up, the party has had time to do at least
-            some things. The food is still consumed, and the party may make free adjustments to
+          source_text: >-
+            If any Wandering Monster spots the party, the rest is interrupted,
+            and battle
+
+            ensues. However, before the monsters show up, the party has had time
+            to do at least
+
+            some things. The food is still consumed, and the party may make free
+            adjustments to
+
             their equipment before the battle.
           when:
             type: compare
@@ -139,35 +351,117 @@
           effects:
             - type: invoke
               dependency: battle_lifecycle
+      when: *a1
     - id: increase_morale
       source_text: Increase Party Morale by +2 (up to start value).
       effects:
-        - type: add
+        - type: set
           target: party_morale
           value:
-            type: literal
-            value: 2
-          duration: immediate
+            type: arithmetic
+            operator: min
+            values:
+              - type: field
+                name: starting_morale
+              - type: sum
+                values:
+                  - type: field
+                    name: party_morale
+                  - type: literal
+                    value: 2
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
     - id: increase_hp
-      source_text: Increase HP by 1d6 for each character (this may vary with equipment and talents).
-      effects: []
+      source_text: Increase HP by 1d6 for each character (this may vary with equipment
+        and talents).
+      effects:
+        - type: invoke
+          dependency: hero_hp_recovery
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
     - id: regain_energy
-      source_text: |-
-        Roll for each lost Energy Point. 50% chance to regain each point (This may vary with
+      source_text: >-
+        Roll for each lost Energy Point. 50% chance to regain each point (This
+        may vary with
+
         Talents and Equipment).
-      effects: []
+      effects:
+        - type: invoke
+          dependency: hero_energy_point_recovery
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
     - id: regain_mana
       source_text: Wizards regain all Mana.
-      effects: []
+      effects:
+        - type: invoke
+          dependency: hero_mana_recovery
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
     - id: brew_potions
       source_text: Brew potions if you wish.
       effects:
         - type: invoke
           dependency: alchemy_brewing
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
     - id: ambush_roll
-      source_text: |-
-        Then, roll 1d100 to determine if the party is ambushed during the rest. The risk for
-        ambush is (5 + Threat level) % during the first rest. For every rest after the first,
+      source_text: >-
+        Then, roll 1d100 to determine if the party is ambushed during the rest.
+        The risk for
+
+        ambush is (5 + Threat level) % during the first rest. For every rest
+        after the first,
+
         the risk is increased by 10% (max 70%).
       effects:
         - type: set
@@ -198,10 +492,16 @@
                         value: 10
       substeps:
         - id: ambushed
-          source_text: |-
-            If the party is ambushed, roll on the encounter table, and place the enemies just
-            outside the door the heroes entered through. Randomize one hero that is awake and
-            ready. The other heroes start the fight prone. The enemies start with 3 extra
+          source_text: >-
+            If the party is ambushed, roll on the encounter table, and place the
+            enemies just
+
+            outside the door the heroes entered through. Randomize one hero that
+            is awake and
+
+            ready. The other heroes start the fight prone. The enemies start
+            with 3 extra
+
             initiative tokens.
           when:
             type: compare
@@ -215,10 +515,19 @@
           effects:
             - type: invoke
               dependency: encounter_table
+            - type: set
+              target: enemy_bonus_tokens
+              value:
+                type: literal
+                value: 3
         - id: barred_door_defence
-          source_text: |-
-            If the party bars the door with iron wedges or a Seal door spell, the door still
-            opens but all heroes start the fight standing up and the monsters have only their
+          source_text: >-
+            If the party bars the door with iron wedges or a Seal door spell,
+            the door still
+
+            opens but all heroes start the fight standing up and the monsters
+            have only their
+
             normal initiative tokens.
           when:
             type: all
@@ -239,10 +548,44 @@
                 right:
                   type: field
                   name: ambush_risk
-          effects: []
-  entry_step: arrange
+          effects:
+            - type: set
+              target: enemy_bonus_tokens
+              value:
+                type: literal
+                value: 0
+        - id: ambush_initiative
+          source_text: The enemies start with 3 extra initiative tokens; barred doors give
+            only normal tokens. Supply this outcome to initiative preparation.
+          when:
+            type: compare
+            operator: lte
+            left:
+              type: field
+              name: ambush_roll
+            right:
+              type: field
+              name: ambush_risk
+          effects:
+            - type: invoke
+              dependency: initiative
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
+  entry_step: check_eligibility
   exit_step: ambush_roll
-  issues: []
+  issues:
+    - issue.phase4.short_rest_morale
+    - issue.rest.condition_check_timing
   see_also:
     - section.into_the_dungeons.wandering_monsters
     - section.psychology.party_morale
