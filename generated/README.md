@@ -23,3 +23,7 @@ dependency-graph.json
 search-documents.jsonl
 lod-rules.sqlite
 ```
+
+`npm run retrieve -- build` already writes an early retrieval slice to `retrieval/`
+(`search-documents.jsonl`, `retrieval.sqlite`, `manifest.json`). See
+[docs/retrieval.md](../docs/retrieval.md).
