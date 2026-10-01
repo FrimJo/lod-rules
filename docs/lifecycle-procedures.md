@@ -1,287 +1,166 @@
-# Phase 6 — Procedures and state machines
+# Lifecycle source inventory — Package F
 
-## Status and boundaries
+Package F / Phase 6 Batch 7 starts after Package E catalogue acceptance. This is
+a mapped starting inventory, not a completed source audit or independent review.
+Each pending heading requires direct PDF reconciliation, including run-in headings
+and continuation text; later discoveries must extend this inventory. Existing rules,
+catalogues and earlier procedures are reused, with stable IDs.
 
-Phase 6 has started; it is not complete. This document records the approved batch order, the
-units extracted so far, and what remains deferred. Extraction does not imply independent
-review. Phase 5 Batches 1–6 are extracted in their own
-ledger; later catalogue work is not a prerequisite for these units: procedures bind to mapped sections, and
-dependency targets that do not exist yet are recorded as `unresolved_references` or open
-issues instead of being invented.
+## State ownership and interpreter contract
 
-## Batch plan
+- Hero state: HP, Mana, Energy, wounds, disease/poison and mental conditions, personal
+  quest progress and hero-specific rewards. Distinct heroes require distinct supplied
+  state contexts; a party rule must not overwrite every hero through one unowned field.
+- Party state: rations, morale, shared quest choices and group-owned resources.
+- Quest-instance state: accepted/progress/completion/abandonment checkpoints and
+  consumed rewards. A legal repeat starts a distinct instance; duplicate completion
+  within one instance must not repeat resource mutations. Personal-quest one-time
+  limits must come from the source rather than generic repeatability.
+- Visit state: settlement and estate visit checkpoints, completed durations and
+  once-per-visit activities; reuse travel/settlement accounting.
+- Estate state: ownership, restrictions, furnishing, ghost events and persistent
+  quest consequences. Separate persistent estate history from the current visit.
 
-| Batch | Scope                                                                              | Status    |
-| ----- | ---------------------------------------------------------------------------------- | --------- |
-| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted |
-| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted |
-| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted |
-| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted |
-| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted |
-| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted |
-| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | Pending   |
+`invoke` records a handoff; it does not execute another object. A failed `require`
+stops its current effect list but does not halt later procedure steps. Consequential
+steps therefore need explicit guards. Dice, unavailable external outcomes and geometry
+remain supplied inputs. Use procedures for ordered actions and state machines only
+where the source defines states and legal transitions. Do not introduce a game runtime.
 
-State machines are added only where the source genuinely governs transitions by current state;
-every other candidate stays a plain procedure. `procedure.dungeon_turn` and
-`procedure.thief_treasure_choice` predate this phase (Phase 3 pilot).
+## Starting heading inventory
 
-## Schemas and tooling added
+| Section                                                                              | PDF range | Printed range from source map | Existing quest records                                 | Disposition                                                                                                                                                     |
+| ------------------------------------------------------------------------------------ | --------- | ----------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `section.buying_an_estate`                                                           | 160–166   | 158–164                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising`                                               | 224–236   | 222–234                       | `quest.dead_rising.campaign`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.lair_of_the_spider_queen`                                      | 237–242   | 235–240                       | `quest.spider_queen.campaign`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.random_quests`                                                 | 243–243   | 241–241                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands`                                 | 263–272   | 261–270                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests`                                                   | 273–279   | 271–277                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.1_wanderlust`                                                   | 42–42     | 40–40                         | `quest.background.wanderlust`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.3_fables`                                                       | 42–42     | 40–40                         | `quest.background.fables`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.2_the_well`                                                     | 42–42     | 40–40                         | `quest.background.the_well`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.4_the_heirloom`                                                 | 43–43     | 41–41                         | `quest.background.the_heirloom`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.5_arachnophobia`                                                | 43–43     | 41–41                         | `quest.background.arachnophobia`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.6_the_lost_brother`                                             | 43–44     | 41–42                         | `quest.background.the_lost_brother`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.9_poverty`                                                      | 44–45     | 42–43                         | `quest.background.poverty`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.7_revenge`                                                      | 44–44     | 42–42                         | `quest.background.revenge_bandits`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.11_the_fraud`                                                   | 45–46     | 43–44                         | `quest.background.the_fraud`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.10_proving_your_worth`                                          | 45–45     | 43–43                         | `quest.background.proving_your_worth`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.13_sworn_enemy`                                                 | 47–47     | 45–45                         | `quest.background.sworn_enemy`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.15_troll_slayer`                                                | 47–47     | 45–45                         | `quest.background.troll_slayer`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.16_revenge`                                                     | 47–47     | 45–45                         | `quest.background.revenge_minotaur`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.14_the_family_keep`                                             | 47–47     | 45–45                         | `quest.background.the_family_keep`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.backgrounds.17_a_new_home`                                                  | 47–48     | 45–46                         | `quest.background.a_new_home`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.into_the_dungeons.generating_the_dungeon`                                   | 88–88     | 86–86                         | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.into_the_dungeons.rest`                                                     | 100–100   | 98–98                         | —                                                      | Interruption, entry, attempt accounting and standard hero/point recovery source-reconciled; condition and modified-recovery paths pending.                      |
+| `section.into_the_dungeons.rest.bleeding_out_and_poisoned_characters`                | 100–100   | 98–98                         | —                                                      | Own run-in heading source-reconciled with two procedures; interrupted timing remains explicitly unresolved.                                                     |
+| `section.combat.different_kinds_of_damage`                                           | 121–122   | 119–120                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.combat.different_kinds_of_damage.acidic_damage`                             | 121–121   | 119–119                       | —                                                      | Bounded hit/one-turn procedure reconciled; armour/halving basis unresolved.                                                                                     |
+| `section.combat.different_kinds_of_damage.fire_damage`                               | 121–122   | 119–120                       | —                                                      | Bounded hit/one-turn procedure reconciled; overlapping hit contexts remain supplied.                                                                            |
+| `section.combat.different_kinds_of_damage.frost_damage`                              | 122–122   | 120–120                       | —                                                      | Bounded initial and affected-turn procedure component reconciled; AP/overlap source boundaries retained.                                                        |
+| `section.combat.different_kinds_of_damage.stun`                                      | 122–122   | 120–120                       | —                                                      | Bounded resolved-effect and affected-turn AP-loss procedures reconciled; other components pending.                                                              |
+| `section.combat.different_kinds_of_damage.magic_damage`                              | 122–122   | 120–120                       | —                                                      | Bounded ordinary/exception follow-up reconciled; creature-specific numeric details remain supplied.                                                             |
+| `section.combat.different_kinds_of_damage.disease`                                   | 121–121   | 119–119                       | —                                                      | Bounded procedure component reconciled, including potion/Sick Ward cures; other components pending.                                                             |
+| `section.combat.different_kinds_of_damage.poison`                                    | 122–122   | 120–120                       | —                                                      | Procedure component source-reconciled, including explicit cures; Chapel routing and other source boundaries retained.                                           |
+| `section.combat.bleeding_out`                                                        | 122–122   | 120–120                       | —                                                      | Guarded lifecycle checkpoints source-reconciled, including removal/replacement; source overlap retained.                                                        |
+| `section.travelling_and_skirmishes.rations_and_resting`                              | 126–126   | 124–124                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.settlements.cure_disease_and_poison`                                        | 144–144   | 142–142                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.psychology.sanity`                                                          | 55–55     | 53–53                         | —                                                      | Bounded hero/event loss and exact-zero handoff reconciled; Conditions/recovery remain separate pending units.                                                   |
+| `section.psychology.sanity.conditions`                                               | 55–55     | 53–53                         | `procedure.sanity_condition`                           | Acquisition, duplicate rerolls and positive reset reconciled; historical diagnosis and exhausted/nonpositive boundaries unresolved.                             |
+| `section.settlements.treat_mental_conditions`                                        | 147–147   | 145–145                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.settlements.rest_and_recuperation`                                          | 147–147   | 145–145                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.staying_at_the_house`                                      | 160–160   | 158–158                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.buying_the_house`                                          | 160–160   | 158–158                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.furnishing_the_manor`                                      | 161–161   | 159–159                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.ghostly_events_table`                                      | 162–162   | 160–160                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.side_quest_the_grieving_mother`                            | 164–165   | 162–163                       | `quest.estate.grieving_mother`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.buying_an_estate.the_dark_gods`                                             | 166–166   | 164–164                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.introduction.reading_the_quests`                               | 222–222   | 220–220                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.introduction.first_blood_introductory_quest`                   | 223–223   | 221–221                       | `quest.first_blood`                                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_1_spring_cleaning`                       | 224–226   | 222–224                       | `quest.dead_rising.spring_cleaning`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_2_the_dead_rising`                       | 227–228   | 225–226                       | `quest.dead_rising.the_dead_rising`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_3_highwaymen`                            | 229–230   | 227–228                       | `quest.dead_rising.highwaymen`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_4_the_burning_village`                   | 231–231   | 229–229                       | `quest.dead_rising.burning_village`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_5_the_apprentice`                        | 232–233   | 230–231                       | `quest.dead_rising.apprentice`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_6a_sacrifice`                            | 234–234   | 232–232                       | `quest.dead_rising.sacrifice`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_dead_rising.quest_6b_the_master`                           | 235–236   | 233–234                       | `quest.dead_rising.master`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance`                 | 238–239   | 236–237                       | `quest.spider_queen.entrance`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.lair_of_the_spider_queen.level_2_the_basement`                 | 239–240   | 237–238                       | `quest.spider_queen.basement`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen` | 241–242   | 239–240                       | `quest.spider_queen.tomb`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_lava_river.quest_1_stop_the_heretics`                      | 244–245   | 242–243                       | `quest.lava_river.stop_heretics`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_lava_river.quest_2_the_master_alchemist`                   | 246–246   | 244–244                       | `quest.lava_river.master_alchemist`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster`                  | 247–248   | 245–246                       | `quest.lava_river.preventing_disaster`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners`            | 249–250   | 247–248                       | `quest.bandits_hideout.rescuing_prisoners`             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house`                | 251–252   | 249–250                       | `quest.bandits_hideout.pleasure_house`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water`                 | 253–253   | 251–251                       | `quest.fountain_room.cleansing_water`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_fountain_room.quest_2_baptising`                           | 254–254   | 252–252                       | `quest.fountain_room.baptising`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic`          | 255–255   | 253–253                       | `procedure.returning_relic`                            | Source-local lifecycle extracted with supplied opportunity scope and explicit Luck/maximum/entitlement boundaries; independent review pending.                  |
+| `section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend`            | 256–256   | 254–254                       | `procedure.slaying_fiend`                              | Setup, prior-wound selection/result, placement and defeat-gated aftermath/treasure handoff reconciled; gold/ability/collection boundaries explicit.             |
+| `section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal`           | 257–258   | 255–256                       | `procedure.closing_portal_reading_attempt`             | Source-local preparation/groups, reading/restart/closure, spawn and aftermath/payment extracted within supplied-context boundaries; independent review pending. |
+| `section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom`        | 259–260   | 257–258                       | `quest.great_crypt.family_heirloom`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_great_crypt.quest_2_stopping_the_necromancer`              | 261–261   | 259–259                       | `quest.great_crypt.stopping_necromancer`               | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.the_great_crypt.quest_3_tomb_raiders`                          | 262–262   | 260–260                       | `quest.great_crypt.tomb_raiders`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu`           | 264–265   | 262–263                       | `quest.ancient_lands.pyramid_xanthu`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant`          | 266–267   | 264–265                       | `quest.ancient_lands.hierophant`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair`               | 268–269   | 266–267                       | `quest.ancient_lands.temple_despair`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep`              | 270–270   | 268–268                       | `quest.ancient_lands.amenhotep`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba`                  | 271–272   | 269–270                       | `quest.ancient_lands.khaba`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_1_the_missing_brother`                  | 274–274   | 272–272                       | `quest.side.missing_brother`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_2_slay_the_beast`                       | 275–276   | 273–274                       | `quest.side.slay_beast`                                | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_3_the_mapmaker`                         | 276–276   | 274–274                       | `quest.side.mapmaker`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_4_go_fetch`                             | 277–277   | 275–275                       | `quest.side.go_fetch`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_5_manhunt`                              | 278–278   | 276–276                       | `quest.side.manhunt`                                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.quest_book_i.side_quests.side_quest_6_mushrooms`                            | 279–279   | 277–277                       | `quest.side.mushrooms`                                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
+| `section.combat.wounded`                                                             | 121–121   | 119–119                       | —                                                      | Current HP classification and fresh-turn cap reconciled; active-turn timing/order unresolved.                                                                   |
+| `section.combat.bleeding_out.advanced_rule`                                          | 122–122   | 120–120                       | —                                                      | Guarded optional timer initialization and supplied expiry source-reconciled; elapsed timing supplied.                                                           |
+| `section.psychology.sanity.reducing_insanity`                                        | 55–55     | 53–53                         | `procedure.sanity_recovery`                            | Ordinary and paid recovery source-reconciled with cap/overlap/frequency ambiguities retained; generic recovery dependencies explicit.                           |
+| `section.psychology.table`                                                           | 57–57     | 55–55                         | Nine condition lifecycles plus trigger-table selection | Nine condition lifecycles and current-contribution cure cleanup reconciled; lasting effects remain explicitly unresolved; independent review pending.           |
+| `section.psychology.table_lingering_trauma_table`                                    | 57–57     | 55–55                         | `procedure.trauma_selection`                           | Complete six-row actual supplied selection reconciled once per diagnosis; exact selection timing unresolved.                                                    |
+| `section.settlements.leaving_on_a_quest`                                             | 133–133   | 131–131                       | `procedure.quest_departure`                            | Actual accepted party/occurrence departure reconciled; rule component mapped, source-specific travel/progression separate.                                      |
 
-- `schemas/state-machine.schema.json` — state machines with per-transition `source_text`
-  (documented triggers) and optional per-transition provenance. Registered as the
-  `stateMachines` schema root; loaded from `corpus/state-machines/`.
-- `scripts/validate/pilot.ts` — state-machine integrity: namespace, unique states, resolvable
-  initial state and transition targets, reachability from the initial state, terminal states
-  without outgoing transitions, `enter` bindings, provenance. Procedure dependencies may now
-  bind `object_id` to a state machine.
-- No interpreter changes: state machines are structural records, not executed.
+## First bounded unit
 
-## Evidence ledger
+Rest, PDF100 / printed98: inspect the rendered eleven-step checklist and existing
+`procedure.rest`. Guard recovery, brewing and the later ambush check against the
+wandering-monster interruption checkpoint. Preserve consumed food and equipment
+adjustment before battle. Establish source prerequisites and party/hero ownership,
+then test interruption before recovery, completed recovery, later ambush and rejected
+rest. Do not change interpreter semantics to simulate a procedure-wide halt.
 
-- Batches 1–4 are complete within their approved extraction scope, with explicit source
-  limitations retained below. Batch 5 covers travel and bounded settlement workflows. Phase 6 remains in progress.
-- PDF 101 (printed 99), rendered: all ten numeric Door Table outcomes preserve printed 0 as 10.
-  `procedure.locked_door_and_close` handles force/crowbar damage, Threat, exact/excess HP,
-  picking success/failure/fumble, jammed locks and door-only closing. Crowbar effects occur before
-  the unresolved AP marker; no zero AP cost is invented. Fumbles also break the pick. Explicit
-  guards prevent invalid branches and prevent zero HP from reopening a just-closed door.
-- `procedure.open_door_or_chest` records the 1 AP cost, requires supplied adjacency, invokes
-  the trap and lock handoffs, and guards reveal against surviving locks/traps. Encounters are
-  door-only. Fixtures explicitly pass successful dependency outcomes; invocation does not run
-  a dependency. Existing opening, rest, scenario-die and dungeon-turn targets are bound, with
-  obsolete trap-heading/locked-procedure unresolved references removed.
-- PDF 92 (printed 90), rendered: `procedure.wandering_monster` records initial start-tile
-  placement, post-hero timing and supplied direction/route geometry. Closed doors retain the
-  token until an ordinary 2–6 or sealed/wedged 5–6 passage succeeds. Successful magical passage
-  breaks its seal. Chasm arrival, next-turn crossing and following-turn movement are distinct;
-  crossing back is forbidden. Reveal requires room entry, LOS unobstructed by a closed door,
-  and distance at most ten. Four squares is an allowance, not an invented geometric path length.
-- PDF 92 and 101, rendered: `procedure.trap_resolution` distinguishes random Threat/Search
-  victims from openers, persists detected traps, spends 2 AP on disarming or deliberate door/chest
-  triggering, and reports opening eligibility separately from locks. Mimic attack restrictions,
-  Lower Undead, forced square entry, card-supplied affected actors and saving-throw exceptions
-  are explicit. Resolved card consequences are not applied again on later entries.
-- Verification: thirteen Batch 2 YAML trace fixtures plus 51 independent outcome/trace tests in
-  `tests/rules/phase-six-batch-two.test.ts`. These include every Door Table outcome, thresholds,
-  repeated blocked turns, all chasm stages, LOS/distance boundaries, traps, Mimics, missing data
-  and composed opening with supplied results. Tests are source-backed derived cases, not independent review.
-- Retained source limitations: `issue.phase6.crowbar_action_cost`,
-  `issue.phase6.iron_wedges_movement`, and `issue.phase6.trap_resolution_deferred` (now scoped to
-  unavailable card content and undefined card interactions). Detected-Mimic device-style
-  disarming/deliberate-trigger behavior is not inferred. Monster selection and initiative remain
-  handoffs; route geometry and dice are supplied. Interrupted-rest execution remains outside
-  Batch 2, and the interpreter semantics are unchanged.
+Package acceptance remains pending: conditions, rest, every quest lifecycle and estate
+lifecycle need bounded source evidence and legal/illegal/repeated/exactly-once trace
+checks. No pending row is marked extracted or reviewed by this starting inventory.
 
-- PDF 89 (printed 88, folio misprint noted in `pages.yaml`) and PDF 91 (printed 89):
-  `procedure.scenario_die` and `procedure.threat_roll`, including the natural-20 reduction,
-  the in-battle/not-in-battle branch, and the table-driven decrease. The threat tables are
-  invoked as section-bound dependencies, not extracted as table objects. The worked example
-  (threat 9, roll 7, row 16, level down to 3) is a `source_example` fixture. The failed-roll
-  case has no general rule text; the example sentence alone is recorded under
-  `issue.phase6.failed_threat_roll_increase` and the procedure surfaces it as an unresolved
-  effect.
-- PDF 101 (printed 99): `procedure.open_door_or_chest` — the printed four-step sequence with
-  the trapped branch. Trap-card resolution remains dependency-bound. Open issues:
-  `issue.phase6.door_open_threat_source` (step-1 increase versus the "instant a door is
-  opened" list entry), `issue.phase6.trap_resolution_deferred`,
-  `issue.phase6.furniture_treasure_table_location`.
-- PDF 100 (printed 98): `procedure.rest` — the printed eleven-point checklist with the
-  ambush-risk computation `(5 + Threat level)%, +10% per rest after the first, max 70%`, the
-  three wandering-monster moves, and the interruption branch that hands off to
-  `state_machine.battle`. Rest-regain quantities stay with the Phase 4 recovery rules; the
-  procedure does not restate them. The original extraction left interruption guards incomplete;
-  Package F now explicitly guards checklist steps6–11 with a current-attempt completion
-  checkpoint. Entry eligibility, attempt accounting and standard hero/point recovery are
-  now guarded and trace-tested. Interpreter semantics remain unchanged. Bleeding/poison
-  condition checks and modified recovery remain pending in the lifecycle inventory.
-- PDF 99 (printed 97): `procedure.search_room_or_corridor` (+10 first helper, +5 each
-  additional, roll on the highest PER, once per room) and `procedure.search_furniture` (one
-  action, no roll, once only, not with enemies in LOS). The Perception Roll invokes
-  `core.check.standard`. The Furniture Table binding stays section-level; see
-  `issue.phase6.furniture_treasure_table_location`.
-- PDF 106–107 and PDF 109 (printed 104–107): `state_machine.battle` —
-  `not_in_battle → battle_setup → battle_active → battle_ended` with initiation, token-bag
-  setup, the activation loop, and the printed all-enemies-dead end condition. Only the
-  all-enemies-dead end condition is printed on the extracted pages; other end conditions
-  (fleeing, quest endpoints) are recorded as an unresolved reference rather than invented.
-  This overlaps `core.battle.end` (Phase 4) deliberately: the rule states the end condition,
-  the state machine places it as a transition. `issue.0001` (dungeon-turn battle endpoints)
-  remains open for independent review against this record.
+## Rest interruption checkpoint — PDF100 / printed98
 
-## Batch 3 evidence
+The rendered checklist prints steps1–4 in bold as actions done even when detected
+by a Wandering Monster. Food is consumed and equipment may be adjusted before
+battle. Detection during the three wandering-monster moves interrupts the rest;
+steps6–11 require uninterrupted completion. The existing procedure incorrectly
+continued into morale and ambush handling after the battle handoff.
 
-| Unit                      | Source and IDs                                                                                                | Verification and boundaries                                                                                                                                                                                                                                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layout and cards          | PDF 86–87, printed 84–85; `core.dungeon.*` in `dungeon-setup.yaml`                                            | Tile alignment, furniture-free doors, quest overrides, card fields and alternative playing cards. Missing card contents/room lookup are supplied inputs. B-card guidance conflicts across PDF 87–88 and remains unresolved.                                                                                                             |
-| Generation and routes     | PDF 88, printed 86; `procedure.dungeon_generation`, `.dungeon_route`                                          | Separate selection, objective in shuffled bottom half, bottom-dealt branches, partial/total dead ends and exhausted routes. Card order and geometry supplied. Odd initial pile split remains unresolved rather than rounded arbitrarily. Abandoning/Finishing Quest text stays quest-lifecycle scope.                                   |
-| Initial setup             | PDF 88; `procedure.initial_setup`                                                                             | Starting tile, unlocked/no-Threat entrance, Scenario Dice delayed until passing door, grass-side World Map exit. Opening and dungeon-turn procedures explicitly bind these exceptions; traps are not silently exempted.                                                                                                                 |
-| Encounters                | PDF 106, printed 104; `procedure.encounters`                                                                  | Inclusive room/corridor thresholds, first +10 streak increase, cap 70, supplied room modifiers and highest-party-level encounter modifier. Quest selection overrides, supplied Bestiary outcome, placement constraints and immediate turn ending. Frequency of later streak increases is not explicit; require supplied interpretation. |
-| Initiative and activation | PDF 106–107 and activation-order heading on PDF 118; `procedure.initiative`, `.activation`, `.enemy_priority` | Hidden bag/card order, first-turn bashing/hearing bonuses and cancellation, persistent named-monster tokens, hero choice, six enemy priorities and random ties. Dead/knocked-out/already-acted models cannot gain ordinary activations. Time Freeze explicitly permits an extra hero activation; extra tokens alone never do.           |
-| Overwatch                 | PDF 107, printed 105; `procedure.overwatch`                                                                   | Eligibility, token withholding, Energy, ranged interruption/resumption and reload/idle restriction, melee ZOC response and charge result. Attack outcome is supplied. Unspecified repeat-response/melee second-action policy remains a review issue.                                                                                    |
+`procedure.rest` now resets `rest_completed` for the current supplied attempt and
+sets it true only when the supplied spotting result is false. Each later checklist
+step has an explicit completion guard. An early interruption keeps the single food
+deduction and gear-adjustment step, hands off to battle and skips morale, hero-recovery
+steps, brewing and later ambush. A later ambush occurs after the completed recovery
+checkpoint and preserves the printed barred-door initiative distinction. `invoke`
+remains a handoff; no interpreter-wide stop or nested execution was introduced.
 
-Six sourced YAML traces are in `tests/examples/dungeon/batch-three.yaml`; additional independent
-outcome/trace boundaries are in `tests/rules/dungeon-batch-three.test.ts`. Spell exceptions are
-also checked in `magic-foundations.test.ts`. Composed tests supply dependency outcomes explicitly:
-invocation remains a recorded handoff. Requirements do not halt a whole procedure, so consequential
-steps have their own eligibility guards. The interpreter was not made a gameplay runtime.
+The party owns food, morale and the attempt completion checkpoint. Hero recovery
+remains in existing recovery rules and is not silently executed by these placeholder
+steps. Six derived regressions assert steps, events, resource changes and trace:
+interruption with either door state, resetting stale completion, completed rest,
+and later ambush with either door state. Earlier completed/ambushed YAML fixtures
+now include the checkpoint and its applied step. These are derived tests, not source
+worked examples or independent review.
 
-Existing opening, wandering-monster, rest, dungeon-turn and `state_machine.battle` IDs are
-preserved. Battle setup/active states bind initiative/activation, but the state machine remains
-structural. Rest supplies its printed three extra enemy tokens (zero with a barred door);
-rest interruption execution stays deferred. Combat attacks are added in Batch 4 below. Full enemy behaviour, optional
-dungeon-event tables and quest lifecycle execution remain later batches. No independent review
-or whole-phase completion is claimed.
-
-## Verification
-
-Batch 3 completion gate: 209 canonical files validate; 1,107 tests pass with two optional
-provider integration tests skipped; lint passes. Coverage was regenerated from YAML. No commit
-or independent review is claimed.
-
-Historical Batch 2 completion gate: 196 canonical files validate; 980 tests pass with two optional provider
-integration tests skipped; lint passes. The generated coverage report was rebuilt. No independent
-review or Phase 6 completion is claimed, and no commit was made.
-
-Historical Batch 1 gate: 183 canonical files validate; 781 tests pass; lint passes. Its
-state-machine and initial dungeon-loop fixtures remain in `tests/schema/phase-six.test.ts` and
-`tests/examples/dungeon/phase-six.yaml`; Batch 2 extends the checks without changing interpreter
-semantics or executing interrupted rests.
-
-## Batch 3 source-audit checkpoint — 28 September 2026
-
-All six ledger units were checked against PDF 86–88, 106–107 and the activation-order
-heading on PDF 118. This is a source audit, not independent review; records remain extracted.
-
-| Unit                  | Disposition                                                                                                                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layout/cards          | Rendered PDF 86–87 confirms aligned squares, furniture-free doors, quest overrides and card fields. B-card inclusion conflict retained.                                                                  |
-| Generation/routes     | Rendered PDF 88 confirms separately selected cards, bottom-half objective, bottom-dealt branches and dead-end routes. Odd pile size remains unresolved.                                                  |
-| Initial setup         | PDF 88 confirms unlocked/no-Threat entrance and Scenario Dice delayed until entry; opening and dungeon-turn guards preserve the exception without inventing a trap exemption.                            |
-| Encounters            | PDF 106 confirms 50/30 thresholds, four-empty-tile +10, 70 cap, room modifiers, highest-party-level selection and immediate turn end. Later streak frequency remains supplied rather than inferred.      |
-| Initiative/activation | PDF 106–107 and 118 confirm first-turn bashing/hearing, persistent named tokens, one ordinary activation and six priorities. Time Freeze retains its separate spell-backed exception.                    |
-| Overwatch             | PDF 107 confirms token withholding, loaded/ready weapon, Energy, no aim, ranged resume/reload-or-idle, and charge hit/miss consequences. Repeated-response and melee completion ambiguities remain open. |
-
-Integration check: opening binds encounters; wandering reveal binds initiative; rest supplies
-three extra enemy tokens or zero behind a barred door; battle setup/active states bind
-initiative/activation. Dependency invocations remain recorded handoffs with supplied outcomes.
-No new Batch 3 mechanical discrepancy was identified. Interrupted-rest execution, unavailable
-cards/Bestiary and geometry remain outside scope. Existing boundary/composition tests are rerun
-at the checkpoint gate; their passing does not establish independent review.
-
-## Batch 4 — combat resolution
-
-| Unit                              | Source and evidence                                                                                                      | Boundaries                                                                                                                                                                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Attack preparation, aim and shove | PDF 109–116; `procedure.combat_preparation`, `combat_aim`, `combat_shove`, `combat_attack`; both PDF 115 modifier tables | Supplied geometry, stats, weapon/talent modifiers and Power Attack restriction resolution. Behind/prone, range, cumulative cover, aim interruptions, strict shove threshold, Bloodlust and Power reroll/maximization are separate branches. |
-| Hero defence                      | PDF 112, 120; `procedure.hero_defence`                                                                                   | ZOC, usage limits, stance, shield arm spillover, Fast and fumble overlap. Exact shield-threshold wording is unresolved rather than silently made inclusive.                                                                                 |
-| Thrown preparations               | PDF 117; `procedure.thrown_preparation`                                                                                  | LOS, one obstacle penalty, doorway exception/scatter and large-area centre-plus-covered-squares. Supplied impact geometry; no invented range or random-direction distribution.                                                              |
-| Damage                            | PDF 121–122; `procedure.combat_damage`, `damage_follow_up`, `table.combat.hit_location`                                  | Existing damage/HP/durability rules reused; Quick Slots and armour remain recorded handoffs. Fire/acid continuation, Frost stun probability, disease, poison and magic consequences use supplied checkpoints; no full condition runtime.    |
-| Bleeding out                      | PDF 122; `procedure.bleeding_out`                                                                                        | Initial injury, supplied rescue, post-battle bandage, party loss and separately enabled timer. Existing unresolved negative-HP and injury-selection semantics retained.                                                                     |
-| Worked example                    | PDF 124; `tests/examples/combat/worked-example.yaml`                                                                     | Charge threshold 50, damage 4 and final threshold 20 are source-example fixtures. Behavior, wounded, Frenzy and negative-HP conflicts remain `issue.combat.example_conflicts`.                                                              |
-
-`tests/rules/combat-procedures.test.ts` supplies outcomes explicitly and checks numerical boundaries,
-invalid eligibility, missing inputs, shield/weapon consequences, scatter, Quick Slots, rescue and
-single application of damage. Activation exposes a combat dependency; both Overwatch attack
-handoffs and thrown-alchemy rules bind actual procedures. Existing IDs and interpreter semantics
-are unchanged. Enemy decision-making, unavailable stats/cards, pathfinding and condition lifecycle
-remain deferred. Reviewed sections remain zero. Source-audit gate: 209 files validated, 1,109 tests
-passed (two optional provider tests skipped), regenerated coverage, lint and diff checks passed.
-
-Batch 4 checkpoint gate: 214 canonical files validated; 1,150 tests passed with two optional
-provider integrations skipped; coverage regenerated; lint and diff checks passed. The full suite
-used two workers to avoid an unrelated provider-test timeout. Later Batch 5 integration also adds
-an activation → preparation → attack → damage composition test with exactly one HP loss, a
-zero-extra-AP charge shove check, and a party-loss guard against rescue. Attack dependencies are
-recorded handoffs, not automatically executed. No interpreter or schema extension was needed.
-
-Final integration gate with Phase 5 Batch 5: 223 canonical files validate; 1,366 tests pass
-with two optional provider integrations skipped; coverage, lint and diff checks pass.
-
-## Historical Batch 5 — initial travel and settlement workflows
-
-- PDF 126–131: `procedure.travel_daily_movement`, `travel_food_and_rest`,
-  `travel_event_check` and `travel_skirmish_setup` preserve fractional terrain costs, transport
-  eligibility handoffs, food/foraging and hunger exceptions, daily event thresholds, structured
-  obstacle-table dependency and skirmish setup. Routes, map geometry, event cards, adversaries and
-  combat outcomes remain supplied. Skirmishes explicitly exclude Threat and Scenario Dice.
-- PDF 132–147: `procedure.settlement_arrival`, `settlement_activities_and_overnight` and
-  `settlement_buy_sell_and_service` preserve arrival/quest choices, rejection limits, per-hero
-  Activity Point budgets, multi-day occupancy, party-wide overnight charges, service guards,
-  availability failure locks, local/event price handling and catalogue-backed repair/identification
-  handoffs. Existing recovery, Sanity and equipment repair rules remain the effect records; these
-  procedures do not apply them again.
-- Source-audit findings: combat PDF 109–122 and 124 matched existing extraction and caller bindings;
-  source conflicts remain in review. Treasure PDF 108 and 193–215 matched existing findings, nested
-  rolls, caller bindings, legendary restrictions and naming gaps; the printed overlap at settlement
-  event result 5 is preserved in the table rather than normalized.
-- Sixteen boundary/composition cases are in `tests/rules/travel-settlement.test.ts`. The existing
-  `tests/tables/phase-five-settlement-catalogues.test.ts` checks catalogue endpoints and overlap.
-  Calls remain handoffs; no interpreter or gameplay runtime behavior was added.
-- Limitations: settlement tables were transcribed from PDF text extraction and were not visually
-  checked against rendered pages in this increment. Full execution of settlement services, daily
-  lodging payment/recovery arithmetic, skirmish geometry/card contents, and estate lifecycle remain
-  bounded dependencies or later work.
-
-Historical Batch 5 verification: 231 canonical files validate; 1,412 tests pass with two optional provider
-integrations skipped; coverage regenerated for 695 rows/sections; lint and `git diff --check` pass.
-No independent review or Phase 6 completion is claimed.
-
-### Batch 5 reconciliation — Packages B/C
-
-The original checkpoint contained placeholder movement, food, activity/lodging and
-purchase-lock effects. Packages B/C replace those with actual guarded arithmetic,
-daily/visit markers and composed traces. See [the accounting ledger](travel-settlement-accounting.md)
-for state ownership, source evidence and unresolved boundaries. Batch 5 is extracted
-within this bounded scope; independent review and later lifecycle work remain pending.
-
-The [combat/treasure source checkpoint](combat-treasure-source-audit.md) includes
-rendered-page evidence and corrected disease eligibility/recovery, with 1,417 tests
-passing at that checkpoint. The settlement trinket overlap belongs to the nested
-selector inside event 4; outer event 5 is Sale. Neither this audit nor passing tests
-marks material independently reviewed.
-
-### Package B travel accounting
-
-Travel now applies movement, food, hunger and rest resource changes with daily markers
-and independently guarded steps. The complete outdoor obstacle matrix is extracted.
-See [travel-settlement-accounting.md](travel-settlement-accounting.md) for state ownership,
-regressions and the retained HP-overflow/partial-ration boundaries. Package C completes settlement accounting within the documented scope.
-
-## Batch 6 — Character and guild procedures
-
-The [heading-level source inventory](character-guild-procedures.md) records all Batch 6
-dispositions, 20 added procedures, three advancement matrices, supplied outcomes and
-state ownership. Creation, advancement, learning and guild activities have guarded
-prerequisites, attempt limits, completed durations and exact resource accounting.
-Five new source ambiguities remain explicit. Supporting independent source checks
-do not establish formal Phase 9 review status.
-
-Package D gate: 248 canonical files validate; 1,697 tests pass with two optional
-provider tests skipped; coverage regeneration, lint and diff checks pass. Phase 6
-remains incomplete; quest and estate lifecycle work follows Package E.
-
-## Batch 7 — Lifecycle models (in progress)
-
-Package E catalogue acceptance is recorded in the quest inventory: all 124 catalogue
-entries have source dispositions, with 403 canonical files validated and 2482 passing
-tests (two optional provider skips). Batch 7 starts with a heading-level lifecycle
-inventory for hero conditions, interrupted rest, quest acceptance/progression/
-completion/abandonment and estate lifecycle. Ordered actions use procedures; state
-machines require source-defined transitions. Preserve the existing `invoke` handoff
-and failed-`require` semantics; guard consequential steps and exactly-once mutations.
-Hero, party, quest-instance, visit and estate ownership must be documented before
-composing resource changes. No Batch 7 lifecycle is declared complete by this handoff.
-
-The [lifecycle starting inventory](lifecycle-procedures.md) maps 75 pending headings
-and documents hero, party, quest-instance, visit and estate ownership. It does not
-claim a completed source audit. First bounded unit: Rest, PDF100 / printed98, with
-explicit interruption guards and preserved interpreter semantics.
-
-Package F Rest interruption unit: rendered PDF100 / printed98 preserves food and
-equipment adjustments before early interruption and guards the later checklist.
-The [lifecycle inventory](lifecycle-procedures.md) documents the source boundary and
-remaining Rest work. Six new derived trace regressions cover early interruption,
-stale completion and completed recovery before a later ambush.
+This bounded correction does not close Rest or Package F. Follow-up work must guard
+entry prerequisites, compose each hero’s recovery/condition checks, enforce the
+printed morale cap and protect resource changes against duplicate processing within
+one attempt. Source timing of bleeding/poison checks must be inspected and any
+undefined interrupted-rest timing recorded as uncertainty rather than guessed.
 
 Rest interruption gate (1 October): validation passes for 403 canonical files;
 2488 tests pass with two optional provider tests skipped; coverage regeneration,
@@ -290,30 +169,173 @@ fixture type and all six pass. Coverage remains 345/666 extracted (52%), zero
 independently reviewed. Next bounded Rest work: entry eligibility and duplicate-
 attempt resource protection, followed by per-hero recovery and condition checks.
 
-Rest entry/accounting unit gate (1 October): 403 canonical files validate; 2499 tests
-pass (two optional provider skips); coverage regeneration, lint and diff checks pass.
-Source prerequisites and attempt-owned duplicate protection now guard every checklist
-step, with the supplied start-value morale cap. The existing +1/+2 morale conflict
-remains unresolved. Next: per-hero recovery, per-lost-point Energy and condition checks.
+## Rest entry and attempt accounting — PDF100 / printed98
 
-Rest standard hero/point recovery gate (1 October): 404 canonical files validate;
-2519 tests pass (two optional provider skips); coverage regeneration, lint and diff
-checks pass. Three new procedures raise the stored procedure count to 58. Twenty
-new derived regressions and the existing party traces preserve explicit handoffs,
-hero/attempt/point ownership and exactly-once resource changes. HP overflow and
-short-rest morale conflicts remain linked unresolved issues. Next bounded source
-unit: PDF100’s Bleeding Out and Poisoned Characters passage, including its timing
-under interrupted rest. Rest and Package F remain incomplete.
+Rendered source prerequisites require all heroes on the same tile, no enemy on that
+tile or adjacent tiles, and the printed one party ration. The procedure now checks
+these supplied geometry/resource facts before the checklist. It explicitly guards
+every consequential step with `rest_execution_allowed`; failed prerequisites cannot
+charge food, increase morale or invoke later handoffs even though procedure walking
+continues. Unspecified geometry and a missing attempt marker do not grant entry.
 
-Rest-specific condition passage gate (1 October): rendered PDF100 / printed98
-adds the previously unmapped Bleeding Out and Poisoned Characters child heading,
-two procedures and 19 derived tests. The heading’s own component extraction is
-complete with source timing uncertainty retained; full Rest/lifecycle acceptance
-remains pending. A follow-up rendered PDF122 comparison records the unresolved
-no-rescue/untreated-rest overlap. Both bounded gates validate 405 canonical files
-and pass 2538 tests (two optional provider skips), lint and diff checks; coverage
-regeneration passes for the new mapping. Current coverage: 346/667 extracted (52%),
-zero independently reviewed. Next unit: Bleeding out, PDF122 / printed120.
+`rest_attempt_processed` is party-owned bookkeeping for one identified attempt,
+retained when reprocessing that context. It is not a rulebook limit on later rests.
+A distinct legal rest supplies a fresh context with this marker false and its own
+`rests_taken` count. Replaying a processed context resets the invocation permission
+but preserves food, morale and the completed/interrupted outcome without repeating
+wandering movement, brewing, encounter or initiative handoffs. The printed +2 morale
+is now capped at the supplied party start value. The rest count remains supplied;
+this unit does not increment it again.
+
+Eleven additional derived regressions cover split party, same-tile and adjacent-tile
+enemies, no ration, replay of both interrupted/completed attempts, a distinct second
+rest with increased risk, three morale cap boundaries and consuming the last ration.
+The earlier six interruption regressions and both YAML traces include the entry
+checkpoint. State ownership and legal repetition remain explicit. Per-hero recovery,
+bleeding/poison checks and recovery outcome timing remain pending; Package F is open.
+
+Rest entry/accounting gate (1 October): validation passes for 403 canonical files;
+2499 tests pass (two optional provider skips); all 17 Rest regressions pass again
+after static type narrowing; coverage regeneration, lint and diff checks pass.
+Coverage remains 345/666 extracted (52%) and zero independently reviewed.
+
+The procedure follows PDF100’s +2 morale checklist. The conflicting +1 short-rest
+entry remains `issue.phase4.short_rest_morale`; this unit does not combine the two
+values or resolve that source conflict. HP overflow likewise remains
+`issue.phase4.recovery_bounds`. Next bounded unit: per-hero HP/Mana recovery and
+per-lost-point Energy recovery, reusing existing recovery rules and documenting
+hero/attempt/point ownership and explicit composed handoffs. Untreated bleeding
+uses its separate source check and 1d4 HP outcome; poisoned heroes take remaining
+Poison Tests. Their timing under interruption must be reconciled before full Rest
+lifecycle acceptance.
+
+## Hero and lost-point recovery — PDF100 / printed98
+
+The rendered checklist gives one ordinary HP die per hero, one Energy die per lost
+point (1–3 replenishes it), and full Mana restoration. Three source-bound helpers
+reuse the existing recovery rules: `procedure.rest_hp_recovery`,
+`procedure.rest_energy_point_recovery` and `procedure.rest_mana_recovery`. Party
+checklist steps7–9 now record those handoffs in order; `invoke` does not execute
+children or share a single hero state across the party.
+
+The caller supplies the current party completion checkpoint to each identified hero’s
+context. HP and Mana processed markers belong to that hero/attempt. Energy carries
+updated hero Energy between distinct point contexts; each point marker belongs to
+the original lost-point snapshot and that attempt. Both successful and failed rolls
+consume their point calculation, so replay cannot reroll a failure. A new attempt
+uses new markers; replay retains them. These are bookkeeping fields, not new game
+limits or automatic state-machine transitions.
+
+HP checks overflow against the original HP before applying the ordinary recovery
+rule. The existing ambiguity returns unresolved without inventing a maximum clamp;
+processing records evaluation even when that source result is unresolved. Ordinary
+HP is excluded for untreated bleeding-out heroes and when supplied equipment/talent
+modifications make the standard 1d6 result inapplicable. Energy likewise requires
+supplied standard applicability. Those separate paths remain pending rather than
+silently receiving standard recovery. Mana uses the supplied hero maximum, including
+zero, with duplicate restoration protected after later Mana use in the same attempt.
+
+Twenty derived regressions cover die boundaries, failed-point replay, interrupted
+recovery, modified/bleeding exclusions, HP maximum/overflow and a two-hero trace.
+That trace explicitly resolves HP for each hero, original lost points, then Mana,
+while party food and morale change only in the parent procedure. Parent handoffs
+alone do not mutate hero resources. Four existing recovery-rule source references
+are now marked visually verified after the PDF100 rendering; no independent review
+is claimed. The HP overflow and short-rest morale issues link the consuming helpers.
+Bleeding/poison checks and their undefined interruption timing remain the next unit.
+
+Hero/point recovery gate (1 October): 404 canonical files validate; 2519 tests pass
+(two optional provider skips); the 20 new recovery regressions pass after narrowing
+composed state types; coverage regeneration, lint and diff checks pass. Stored
+procedures now total 58; no new rules, entities, tables or YAML fixtures were added
+by this bounded unit. Coverage remains 345/666 extracted (52%), zero independently
+reviewed. Next: Bleeding Out and Poisoned Characters, PDF100 / printed98. That
+mechanical passage has not yet been represented in Rest-specific procedures; its
+source CON+10 / 1d4 HP and remaining-Poison-Test instructions must not be omitted.
+
+## Bleeding Out and Poisoned Characters — PDF100 / printed98
+
+Rendered source reconciliation found an unmapped run-in heading. Its new stable
+child section and coverage row preserve the parent Rest ID and the section/coverage
+bijection. `procedure.rest_bleeding_check` and `procedure.rest_poison_checks` represent
+the own-heading mechanics; there is no separately printed table, example, glossary
+definition or entity catalogue. Procedure ownership carries these facts rather than
+duplicating them as new rules. This adds one canonical section; historical denominator
+counts remain unchanged. The starting lifecycle inventory now has 76 headings.
+
+An untreated bleeding-out hero takes a CON+10 test. The procedure uses existing
+percentile success/failure and automatic-failure rules. Failure sets hero death;
+success adds the printed 1d4 HP without equipment/talent HP bonuses. It preserves
+the existing above-maximum recovery ambiguity and does not clear bleeding state
+or invent a revival transition. Hero/attempt processing prevents replay from
+rerolling either a success or failure.
+
+A poisoned hero’s remaining test count is preserved as `poison_tests_due`, with
+one explicit handoff to existing `procedure.damage_follow_up` when the count is
+positive. Supply that existing procedure’s poison/rest context (`damage_type: poison`,
+`phase: rest`, `already_poisoned: true`, `rest_occurs: true`, and the remaining count)
+and each returned outcome explicitly. This handoff does not reduce the count,
+mutate HP or execute nested procedures automatically. A processed hero/attempt
+does not issue the handoff again. Zero remaining tests causes no handoff.
+
+The source says these checks occur “during the rest” but omits them from the
+eleven-point checklist. It does not settle early-interruption applicability or
+placement relative to ordinary recovery and later ambush. New issue
+`issue.rest.condition_check_timing` records that boundary. Completed accepted
+rests perform applicable checks; interrupted applicable cases return unresolved
+without HP/death/poison outcomes. A rejected rest and heroes without these
+conditions do not trigger the timing issue. The parent binds both helpers as
+dependencies without inventing an ordered checklist position.
+
+Nineteen derived tests cover all four d4 outcomes, CON+10 boundary and automatic
+failure, replay, overflow, unchanged HP bonuses, remaining Poison Tests and the
+interruption boundary. An explicit parent/child trace preserves consumed party
+food while the affected child’s timing stays unresolved. This is extraction and
+regression evidence, not independent review or full Rest/Package F acceptance.
+
+Rest condition-heading gate (1 October): 405 canonical files validate; 2538 tests
+pass (two optional provider skips); coverage regeneration, lint and diff checks
+pass. The newly mapped child increases canonical sections from 666 to 667; current
+coverage is 346/667 extracted (52%), zero independently reviewed. Procedure count
+is 60. The 124-entry Package E acceptance scope remains unchanged.
+
+### No-rescue overlap discovered in the next source unit
+
+Rendered PDF121–122 / printed119–120 was inspected to establish the next hero-condition
+unit. PDF122’s no-means-to-help death endpoint overlaps the untreated-rest CON+10
+possibility on PDF100 without defining their relationship. New issue
+`issue.rest.untreated_bleeding_no_rescue` links both instructions and the consuming
+Rest helper. That helper represents the PDF100-local instruction; it does not
+resolve the combined no-rescue case or create precedence. Both outcomes must remain
+visible before full hero-condition composition. Next unit: source-defined bleeding,
+rescue, death and replacement checkpoints on PDF122, with this overlap preserved.
+
+No-rescue boundary gate (1 October): 405 canonical files validate; 2538 tests pass
+(two optional provider skips); lint and diff checks pass. Coverage generation for
+the condition heading passed at its separate unit gate. Current review inventory
+has 109 records: 101 unresolved and eight resolved. Printed labels 100→98, 121→119 and
+122→120 were confirmed in `pages.yaml`, not derived from an offset.
+
+Next bounded lifecycle unit is Bleeding out, PDF122 / printed120: zero-HP
+incapacity, source-listed rescue eligibility, after-battle bandaging restrictions,
+party-loss/no-rescue endpoints, permanent injury, optional bleeding timer and
+permanent death/replacement. Existing rules are reused; their source-defined
+state boundaries and the newly recorded untreated-rest overlap require guarded
+composition rather than an inferred priority between passages.
+
+Bleeding entry ownership unit (1 October): rendered PDF122 / printed120 confirms
+exact-zero incapacity, supplied d4 permanent loss and the optional d6+1 timer. The
+existing `procedure.bleeding_out` now persists `zero_processed` and
+`timer_processed` per hero/downing event. Callers supply both markers as false for
+a fresh event and carry them forward on replay, with the selected statistic and
+turn limit; a distinct later event resets them. An already dead hero cannot enter
+these checkpoints. The procedure does not select an injury target or redefine
+negative HP: `issue.phase4.zero_and_negative` remains unresolved.
+
+Eleven derived regressions assert rule order, all four injury values, replay, a
+distinct later event, exact-zero boundaries, disabled timer and permanent-death
+entry rejection. Rescue/bandage permissions, terminal endpoints and replacement
+remain pending; this bounded change does not accept the whole bleeding heading.
 
 Bleeding entry replay gate (1 October): 405 canonical files validate; 2549 tests
 pass (two optional provider skips); lint and diff checks pass. Eleven new derived
@@ -323,6 +345,26 @@ existing bleeding procedure remains partially reconciled: next are rescue and
 bandage permissions, terminal death endpoints and optional replacement at the
 next settlement. Package F and comprehensive Phases 7–12 remain unfinished.
 
+Bleeding rescue/bandage unit (1 October): direct rendered PDF122 / printed120
+reconciliation retains all three printed means of rescue during battle: companion
+Healing Spell, the hero's own ready-slot Healing Potion, or an adjacent companion's
+ready-slot Healing Potion. `procedure.bleeding_out` requires a living, bleeding
+target for rescue and bandaging; it clears stale permission flags on every call.
+After battle, a standing companion who is not knocked out may bandage.
+
+`rescue_handoff_processed` and `bandage_handoff_processed` belong to a hero and
+a specific attempt. Callers start a distinct attempt with false and persist true
+after its handoff. A zero-HP healing result may justify another distinct attempt;
+replay of the same attempt produces no duplicate handoff. Handoffs do not spend
+potions/bandages or restore HP. A later supplied positive result may clear the
+bleeding/knocked-down condition during battle; carrying that resulting condition
+forward prevents duplicate healing. Post-battle bandage resolution remains a
+separate dependency. Terminal death/no-help/optional-expiry and next-settlement
+replacement reconciliation remain pending, including the untreated-rest overlap.
+Nineteen derived regressions cover the three means, delayed resolution, replay,
+distinct attempts, nonpositive healing, rejected target/timing/party contexts and
+bandager restrictions. These are extraction tests, not independent review.
+
 Bleeding rescue/bandage gate (1 October): 405 canonical files validate; 2568 tests
 pass (two optional provider skips); lint and diff checks pass. Nineteen new derived
 regressions verify the printed rescue methods, living/bleeding target guards,
@@ -331,6 +373,32 @@ Coverage remains 346/667 extracted with zero independently reviewed. Next bounde
 unit: terminal party-loss/no-help/optional timer-expiry endpoints, permanent
 death and optional next-settlement replacement, retaining the untreated-rest
 source overlap. Package F and comprehensive Phases 7–12 remain unfinished.
+
+Bleeding terminal/removal unit (1 October): rendered PDF122 / printed120
+reconciliation guards no-help and optional expiry against a living bleeding
+hero. Simultaneous party bleeding sets quest loss and death for each supplied
+hero. The proposed PDF100 untreated-rest check in the no-help context produces
+`issue.rest.untreated_bleeding_no_rescue` without choosing a death/recovery order.
+Timer expiry uses supplied elapsed turns and a persisted supplied d6+1 limit;
+this procedure does not invent where the timer starts or decrement it.
+
+A death handoff invokes `procedure.hero_death`; callers explicitly run it for
+each dead hero. Its `removed_from_game` marker is permanent and its
+`replacement_processed` marker belongs to that original dead hero for life.
+The player must choose replacement at the supplied next settlement entry.
+The resulting level-1 instruction concerns a distinct new hero; the old hero
+remains dead and removed. These markers prevent repeated removal or duplicate
+replacement authorization, and no character statistics are generated. Eighteen
+new derived tests cover terminal boundaries, healthy-target exclusions, source
+overlap, removal/replacement eligibility and explicit composition. Together
+with entry/rescue tests, the bounded bleeding lifecycle is source-reconciled;
+other component coverage and independent review remain pending.
+
+The no-help sentence does not specify a battle-over prerequisite. An explicit
+`phase: no_help` checkpoint therefore accepts supplied absence of means during
+or after battle, as well as the existing after-battle checkpoint. A pending
+rescue roll alone is not proof of absent means. Two derived boundary regressions
+verify both battle states; the same untreated-rest ambiguity guard applies.
 
 Bleeding terminal/removal gate (1 October): 406 canonical files validate; 2586
 tests pass (two optional provider skips); coverage generation, lint and diff
@@ -343,6 +411,40 @@ coverage is 346/667 extracted, zero independently reviewed; other component
 coverage is not promoted by this bounded lifecycle unit. Next bounded unit:
 Poison on PDF122 / printed120, including remaining-roll ownership and rest/death
 checkpoints. Package F and comprehensive Phases 7–12 remain unfinished.
+
+Poison remaining-check unit (1 October): direct rendered PDF122 / printed120
+reconciliation adds target/poison-episode/check ownership to the existing
+`procedure.damage_follow_up` ongoing checkpoint. Supply
+`poison_check_processed: false` for one distinct due CON check and persist true
+on replay. Outcomes (`con_roll`, `con_success`) and whether the check occurs
+during rest remain supplied. Carry the updated `remaining_poison_rolls` forward
+for the next check; an ordinary success or failure consumes one, while 01–05
+cures and cancels every remaining check. Count exhaustion alone is not asserted
+to cure the condition. The procedure does not supply poison modifiers or outcomes.
+
+The accepted check snapshots `poison_starting_hp`; only a failed check reducing
+HP from 1 to 0 during rest enters the printed rest-death checkpoint. A replay,
+successful check, already-zero HP or exhausted remaining count cannot manufacture
+that transition. Poison still continues into negative HP as printed; no HP floor
+or generic negative-HP death is introduced. The broader zero/negative-HP source
+boundary remains recorded in `issue.phase4.zero_and_negative`.
+
+Initial damaging-hit exposure/episode creation, complete all-remaining-check rest
+composition and potion/Chapel cure handoffs remain pending. This bounded
+remaining-check change does not accept the entire Poison heading or Package F.
+
+`issue.poison.remaining_check_exhaustion` records the remaining source question:
+the finite sequence and explicit cures are defined, but whether ordinary sequence
+exhaustion clears the condition for re-poisoning is not separately stated. The
+procedure consumes the printed checks without assigning a cured flag or asserting
+a perpetual condition; later condition status remains a review boundary.
+
+Source-map loopback for Poison: direct rendered PDF122 corrects the parent
+Different Kinds of Damage range to PDF121–122 / printed119–120 and adds its own
+Poison child heading. The lifecycle starting inventory now contains 77 headings.
+The child remains extracting; procedures are partial and other component
+dispositions reflect the actual passage. Parent/child IDs and coverage rows
+remain one-to-one, without claiming independent review or full lifecycle acceptance.
 
 Poison remaining-check / source-map loopback gate (1 October): 406 canonical
 files validate; 2605 tests pass (two optional provider skips); coverage generation,
@@ -357,6 +459,30 @@ Poison initial damaging-hit exposure and episode initialization on PDF122, then
 all-remaining-check rest composition and explicit potion/Chapel cure handoffs.
 Package F and comprehensive Phases 7–12 remain unfinished.
 
+Poison exposure/episode unit (1 October): rendered PDF122 / printed120 confirms
+a damaging poison hit before the modified CON outcome may start an episode,
+and forbids being poisoned again until cured. The existing procedure accepts
+one eligible target/damaging-hit checkpoint with
+`poison_exposure_processed: false`, then persists true even when resisted.
+Permission is reset per invocation; unresolved damage, a non-damaging hit,
+an already-poisoned target or a dead target cannot initialize another episode.
+
+A failed supplied modified CON outcome outside 01–05 sets the current condition
+(`already_poisoned` and `poisoned`) and initializes both remaining/due check counts
+to the supplied d10 plus one. The printed sequence is the start of the next turn
+and checks for d10 turns after that; no initial-exposure HP loss is invented.
+The d10 field now enforces 1–10. Resisted exposure retains zero future checks
+instead of a stale prior count. A supplied 01–05 CON result cannot infect through
+a contradictory supplied failure. Explicit 01–05 cure clears the current state
+so a distinct later damaging hit may create a fresh episode; ordinary sequence
+exhaustion still has its linked condition-status review boundary.
+
+Nineteen derived regressions cover d10 bounds/counts, replay of failure and
+resistance, all five immune results, eligibility, stale permission/counts,
+distinct later exposures and cure-then-reinfection composition. Complete rest
+composition and potion/Chapel cure handoffs remain pending; Poison's component
+coverage stays partial, with no independent review claimed.
+
 Poison initial-exposure/episode gate (1 October): 406 canonical files validate;
 2624 tests pass (two optional provider skips); coverage generation, lint and
 diff checks pass. Nineteen new derived regressions verify damaging-hit
@@ -367,6 +493,40 @@ canonical sections are extracted and zero independently reviewed. Review
 inventory remains 110 records (102 unresolved/eight resolved). Next bounded
 unit: all-remaining-check poison rest composition on PDF122 / printed120, then
 explicit potion/Chapel cure handoffs. Package F and Phases 7–12 remain unfinished.
+
+Poison rest-sequence unit (1 October): rendered PDF122 / printed120 requires
+all remaining CON checks when the party rests in a dungeon, while traveling or
+at an inn. The existing `procedure.damage_follow_up` rest checkpoint now accepts
+a living poisoned hero with positive remaining count and an actual supplied
+rest once per hero/episode/attempt, using `poison_rest_handoff_processed`. This
+marker is separate from the outer dungeon-rest marker and each individual
+`poison_check_processed` marker. Replay clears transient permission/due output
+and cannot start another sequence; a distinct source-eligible context has a
+fresh rest marker. The handoff does not mutate HP or consume the remaining count.
+
+Resolve accepted sequences explicitly through the existing ongoing checkpoint,
+one supplied CON outcome at a time. Carry HP, remaining count, current condition
+and death state forward; each distinct check starts with a fresh check marker.
+Stop at count exhaustion, explicit cure or death. A death during rest hands off
+to `procedure.hero_death`; the caller executes permanent removal separately.
+The interrupted-rest timing issue and post-sequence condition-status issue remain
+unresolved, and no generic below-zero HP death or automatic exhaustion cure is
+introduced.
+
+Dependency-cycle disposition for `procedure.damage_follow_up`'s
+`remaining_poison` self-target: source-defined bounded repetition, not recursive
+rest execution. The edge records re-entry into the **ongoing** checkpoint from
+the one-time **rest** handoff. Ordinary accepted checks decrement the finite
+count; 01–05 cancels it; death/cure reject further checks. `invoke` does not execute
+a loop. This origin and its source/guards must remain visible in the Phase 7 graph
+audit rather than being discarded as a generic self-cycle.
+
+Seventeen derived regressions cover positive/zero counts, replay, excluded
+contexts, supplied context ownership, all three printed rest locations, ordinary
+success/failure sequences, mid-sequence cure, death/removal, the eleven-check
+maximum initial sequence, rejected replay composition and explicit dungeon-rest
+helper composition. Full Poison procedure acceptance still requires the printed
+potion/Chapel cures; independent review remains pending.
 
 Poison all-remaining-check rest gate (1 October): 406 canonical files validate;
 2641 tests pass (two optional provider skips); coverage generation, lint and
@@ -381,6 +541,51 @@ procedure component remains partial pending explicit potion/Chapel cure
 handoffs. Coverage remains 346/668 extracted, zero independently reviewed.
 Next bounded unit: those printed cures on PDF122 / printed120 and their existing
 equipment/settlement links. Package F and comprehensive Phases 7–12 remain unfinished.
+
+Poison explicit-cure unit (1 October): rendered PDF122 / printed120 and the
+existing antidote entry on rendered PDF80 / printed78 source-reconcile
+`procedure.poison_cure`. It records a once-per-hero/episode/attempt potion or
+Chapel handoff; actual consumption and quality-specific poison-removal outcomes
+are supplied from the existing catalogue, while a Chapel visit must actually be
+completed back in the city. Replay of a failed consumed Weak potion cannot
+replace its result with a successful reroll; a distinct later actual use has
+fresh attempt markers. Invoke alone does not consume, pay or cure.
+
+Confirmed removal clears current poison flags and cancels pending checks. It
+does not restore prior HP loss, wake a negative-HP hero, revive the dead or charge
+completed resources again. The Supreme potion's separate 1d3 HP instruction
+remains with its existing item-effect resolver; known poison removal can occur
+while that bonus still needs resolution. The bounded condition checkpoint neither
+drops nor doubles that separate effect. Nineteen derived tests cover completed
+and pending resolution, standard/weak effects, 75/76 boundaries, failed-result
+replay, distinct attempts, Supreme metadata/HP preservation, Chapel context and
+completion, rejected targets/routes and the parent damage-follow-up handoff.
+
+`issue.poison.chapel_treatment_route` records a direct rendered comparison:
+PDF122 names Chapel of Metheia, PDF134's Available Actions row assigns Cure Poison
+only to Sick Wards, and PDF144's prose names Sick Ward or Temple of Metheia for
+most illnesses at 100 c / one day. Chapel and Temple are not silently equated.
+No Chapel location ID, Activity Point cost, price or duration is invented; the
+printed completed-visit effect remains representable with an unbound labelled
+dependency and original wording in unresolved_references.
+
+The Poison procedure component is extracted within this bounded unit with
+exposure, remaining checks, rest sequences and explicit cures. Other component
+coverage and independent review remain pending. The heading's previous entity
+not-applicable disposition is corrected to not-started: its named antidote links
+to existing equipment, while the Chapel needs catalogue/source reconciliation;
+no new entity is extracted during this Phase 6 unit.
+
+Settlement treatment integration: the existing
+`procedure.settlement_buy_sell_and_service` successful `cure_poison_result`
+now carries the same current poison state forward by clearing both poison flags
+and cancelling remaining/due checks. The existing service remains the sole
+owner of its 100 c fee, activity/visit eligibility and once-per-treatment
+accounting; these known service inputs are not applied to the unbound Chapel
+route. Three additional derived regressions verify successful treatment then
+ignored future damage, failed treatment with retained condition, and an
+ineligible attempt with no charge/cure. Other illnesses and prior HP loss remain
+unaffected. The explicit-cure test file now has 22 derived regressions.
 
 Poison explicit-cure / settlement-integration gate (1 October): 407 canonical
 files validate; 2663 tests pass (two optional provider skips); coverage
@@ -414,6 +619,8 @@ and independent review remain pending. issue.disease.concurrent_effects records
 unspecified overlapping illnesses and stat-modifier composition. Derived evidence:
 tests/rules/disease-lifecycle.test.ts (22 regressions). Package F and
 comprehensive Phases 7–12 remain unfinished.
+
+The lifecycle starting inventory now contains 78 headings after the Disease source-map loopback.
 
 Disease exposure / optional-rest gate (1 October): 407 canonical files validate;
 2685 tests pass (two optional provider skips). Coverage regeneration, lint and
@@ -1194,10 +1401,20 @@ Slaying the Fiend lifecycle final gate (1 October): 426 canonical files validate
 
 Closing the Portal bounded reading checkpoint (1 October): `procedure.closing_portal_reading_attempt` cites visually inspected PDF257/printed255. It snapshots initial actual d6+1 duration once for an owned reader/quest occurrence, requires supplied eligibility and stationary objective-room presence, and resets progress/stops reading on every printed interruption or movement. Replay cannot restart or reseed an attempt. The existing ritual-boundaries issue retains undefined eligibility and restart dice policy. Procedure coverage remains mapped: actual restart, turn progression/closure, spawning, initial groups/Threat, defeat/chests and outside reward remain next units. No independent review; Package F and Phases 7–12 remain unfinished.
 
+Closing the Portal reading checkpoint final gate (1 October): 427 canonical files validate; 3236 tests pass with two optional provider skips, including 19 new derived reading/interruption regressions. Coverage regenerated at 710 rows; extraction/review section totals are unchanged. All lint and whitespace checks pass. There are now 86 procedures; review dispositions are unchanged. No commits made. Next bounded work remains actual ritual restart and turn progression/closure, followed by source-scoped demon spawning and aftermath.
+
 Closing the Portal reading progression (1 October): the same `procedure.closing_portal_reading_attempt` now handles actual new start-over events with supplied 2..7 duration context, preserving unresolved retain/reroll policy. It counts actual completed chronological reading turns once, consumes interrupted completed turns without progress, checks all interruptions before advancement and closes only at the required uninterrupted duration. Closure stops reading and requires killing all remaining demons; it does not spawn, collect or pay. Fifty source-derived regressions include every duration, completion-turn interruption, actual restart, chronological/replay guards, unresolved context and applied source-rule traces. Visually inspected PDF257/printed255. Procedure coverage stays mapped pending initial Threat/groups, encounter replacement, spawning and aftermath/payment. No independent review; Package F and Phases 7–12 remain unfinished.
+
+Closing the Portal reading progression final gate (1 October): 427 canonical files validate; 3267 tests pass with two optional provider skips. The expanded reading fixture contains 50 tests (31 added this unit). Coverage regenerated at 710 rows, with this quest procedure component corrected from not_started to mapped to reflect bounded work; the 18 source-map/report tests pass again after that correction. Whole-suite, lint and whitespace gates pass. There are 86 procedures and 130 review records (122 unresolved, eight resolved); zero independently reviewed sections. No commits made. Next source unit: Closing the Portal initial Threat/objective groups and encounter replacement, then schedule-supplied single-demon spawning and separate defeat/treasure/outside payment.
 
 Closing the Portal preparation and groups (1 October): `procedure.closing_portal_preparation` and `procedure.closing_portal_demon_group` cite visually inspected PDF257/printed255. Quest setup preserves Silver City,8+8 tiles, supplied ritual scroll and advertised300c without crediting coins. Initial actual d6 Threat initializes once, minimum=start and maximum20. Actual objective entry preserves portal/hero geometry and separately requests two initial groups plus actual random placement once. The group procedure accepts actual first/second initial ownership or a multiple10 replacement encounter, snapshots type before delayed quantity, and checks d6/d3 bounds before selected source-rule execution. Each actual group owns separate state; later one-demon spawns cannot use group quantities. Source statistics/Cursed Weapons, actual coordinate placement and battle remain explicit dependencies. Reading lifecycle stays separate. Procedure coverage remains mapped pending schedule-supplied single spawns and distinct final-demon/treasure/outside-payment gates. No independent review; Package F and Phases 7–12 remain unfinished.
 
+Closing the Portal preparation/groups final gate (1 October): 428 canonical files validate; 3336 tests pass with two optional provider skips, including 69 new preparation/group regressions. Coverage regenerated at 710 rows; this quest remains procedure-mapped pending spawning/aftermath/payment, and section extraction/review totals are unchanged. All lint and whitespace gates pass. There are 88 procedures and 130 review records (122 unresolved, eight resolved). No commits made. Next source unit: actual schedule-supplied single-demon spawning, then final-demon/treasure and outside-payment gates.
+
 Closing the Portal spawning and aftermath (1 October): visually inspected PDF257/printed255 and PDF258/printed256. `procedure.closing_portal_single_spawn` requires actual supplied every-other-turn schedule and event ordering, consumes each chronological emergence once, resolves type-only d6 and ignores group quantities. Pending already-emerged type may resolve after closure without another spawn; later events cannot overwrite pending earlier ones. `procedure.closing_portal_aftermath` separately gates two unlocked/untrapped objective-chest handoffs on actual closure and final-demon death, and credits300c once to each actual owned hero back outside. Twenty-seven derived regressions cover all six types, pending resolution/replay/closed/unknown order, final-demon/loot/payment guards, independent hero and party markers, and composed reading-closure/treasure/reward trace. Together with preparation/groups and reading, this source-local lifecycle component is extracted within supplied-context boundaries. Remaining source dispositions: first spawn phase, same-turn order, restart duration/eligibility, actual random coordinates and unavailable statistics/Cursed Weapons/battle, actual chest content/collection, missing/dead/replacement hero entitlement and unspecified generic completion/abandonment. The latter aftermath boundary is recorded in `issue.quest.portal_aftermath_scope`; existing ritual ambiguity remains unresolved. No independent review; Package F and Phases 7–12 remain unfinished. Next quest lifecycle source unit: Returning the Relic (PDF255).
 
+Closing the Portal bounded lifecycle final gate (1 October): 429 canonical files validate; 3363 tests pass with two optional provider skips, including27 new spawn/aftermath tests. Three composed-fixture state reads were narrowed explicitly to booleans for strict TypeScript; all27 affected tests and lint pass after that repair. Coverage regenerated at710 rows; the quest lifecycle component is now extracted within its explicit source/supplied-context boundaries. Section extraction totals remain346/675 and independently reviewed remains0. There are90 procedures and131 review records (123 unresolved, eight resolved). All validation, coverage, test, lint and whitespace gates pass. No commits made. Next bounded Package F source unit: Returning the Relic, PDF255/printed253.
+
 Returning the Relic lifecycle (1 October): `procedure.returning_relic` cites visually inspected PDF255/printed253. It preserves Random/8+8 setup, actual initial d4+1 Threat/minimum=start/max20 once, quest-owned Luck nullification until actual stone return without changing numeric Luck, and actual distinct Scenario8–10 handoffs. Actual objective entry records short-side heroes/far-end statue and requests two encounters/random placement once. Refit requires all enemies dead, actual hero in front, actual distinct turn and supplied unresolved party/hero opportunity scope. Pending actual DEX result cannot be replaced by a later turn or mismatched owner; success returns stone and ends only its nullification, failure consumes opportunity and raises Threat1 once below20. At maximum20 raw+1 remains pending source accounting. Actual home arrival after return credits300c once per actual owned hero. Thirty-two derived regressions cover setup faces, all Scenario faces, objective handoff, failed/successful/pending/replayed/mismatched attempts, maximum boundary, unchanged Luck/other curses and independent home payments. `issue.quest.relic_lifecycle_scope` preserves scope, maximum, failed/abandoned-quest curse expiry, generic completion and hero-entitlement ambiguities. No source-local chests/XP invented; no independent review. Lifecycle component extracted within those bounded source/supplied-context dispositions; Package F and Phases 7–12 remain unfinished. Next source unit: Retrieving the Family Heirloom, PDF259–260.
+
+Returning the Relic lifecycle final gate (1 October):430 canonical files validate;3395 tests pass with two optional provider skips, including32 new source-derived lifecycle regressions. Coverage regenerated at710 rows; this quest procedure component is extracted within explicit supplied-context/source-boundary dispositions, with no independent review. There are91 procedures and132 review records (124 unresolved, eight resolved). All validation, coverage, full-suite, lint and whitespace gates pass. No commits made. Next Package F source unit: Retrieving the Family Heirloom, PDF259–260/printed257–258.

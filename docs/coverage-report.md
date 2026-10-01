@@ -7,18 +7,25 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 605 / 605 | 100% |
-| extracted | 72 / 605 | 12% |
-| reviewed | 0 / 605 | 0% |
+| mapped | 675 / 675 | 100% |
+| extracted | 346 / 675 | 51% |
+| reviewed | 0 / 675 | 0% |
 
-Total sections tracked: 605
+Total sections tracked: 675
 
-12 compatibility redirects are excluded from all extraction counts above and below.
+35 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
 | Preserved ID | Canonical section |
 | --- | --- |
+| section.magic.casting_spells.table_3 | section.magic.casting_spells.table_2 |
+| section.settlements.settlement_events.table_2 | section.settlements.settlement_events.table |
+| section.settlements.settlement_events.table_3 | section.settlements.settlement_events.table |
+| section.settlements.settlement_events.table_4 | section.settlements.settlement_events.table |
+| section.settlements.arena_fighting.table_4 | section.settlements.arena_fighting.table |
+| section.settlements.arena_fighting.table_5 | section.settlements.arena_fighting.table |
+| section.the_dark_guild.buying_special_equipment.table_2 | section.the_dark_guild.buying_special_equipment.table |
 | section.appendix_i_perks.combat_perks.table_2 | section.appendix_i_perks.combat_perks.table |
 | section.appendix_i_perks.common_perks.table_2 | section.appendix_i_perks.common_perks.table |
 | section.appendix_ii_talents.physical_talents.table_2 | section.appendix_ii_talents.physical_talents.table |
@@ -31,6 +38,22 @@ Total sections tracked: 605
 | section.appendix_ii_talents.table_3 | section.appendix_ii_talents.table |
 | section.appendix_ii_talents.sneaky_talents.table_2 | section.appendix_ii_talents.sneaky_talents.table |
 | section.appendix_iii_equipment.armour_and_shields.table_3 | section.appendix_iii_equipment.armour_and_shields.table |
+| section.appendix_iv_spells.table | section.appendix_iv_spells.level_1 |
+| section.appendix_iv_spells.table_2 | section.appendix_iv_spells.level_1 |
+| section.appendix_iv_spells.table_3 | section.appendix_iv_spells.level_1 |
+| section.appendix_iv_spells.table_4 | section.appendix_iv_spells.level_1 |
+| section.appendix_iv_spells.table_5 | section.appendix_iv_spells.level_3 |
+| section.appendix_iv_spells.table_6 | section.appendix_iv_spells.level_3 |
+| section.appendix_iv_spells.table_7 | section.appendix_iv_spells.level_4 |
+| section.appendix_iv_spells.table_8 | section.appendix_iv_spells.level_4 |
+| section.appendix_iv_spells.table_9 | section.appendix_iv_spells.level_5 |
+| section.appendix_iv_spells.table_10 | section.appendix_iv_spells.level_6 |
+| section.appendix_v_treasures.table_2 | section.appendix_v_treasures.table |
+| section.appendix_v_treasures.table_3 | section.appendix_v_treasures.table |
+| section.appendix_v_treasures.table_4 | section.appendix_v_treasures.table |
+| section.appendix_v_treasures.table_5 | section.appendix_v_treasures.table |
+| section.appendix_v_treasures.table_6 | section.appendix_v_treasures.table |
+| section.appendix_v_treasures.table_8 | section.appendix_v_treasures.table_magic_armours_and_shields |
 
 ## Nodes by kind
 
@@ -39,11 +62,11 @@ Total sections tracked: 605
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 306 |
+| subsection | 383 |
 | appendix | 5 |
-| table | 191 |
+| table | 183 |
 | example | 3 |
-| optional_rule | 2 |
+| optional_rule | 3 |
 | scenario_rule | 37 |
 
 ## Unprocessed sections
@@ -54,169 +77,32 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 341 | 253 |
-| rules | 92 | 323 | 190 |
-| tables | 48 | 482 | 75 |
-| examples | 12 | 350 | 243 |
-| procedures | 11 | 368 | 226 |
-| entities | 48 | 523 | 34 |
+| glossary | 11 | 411 | 253 |
+| rules | 359 | 160 | 156 |
+| tables | 201 | 339 | 135 |
+| examples | 14 | 411 | 250 |
+| procedures | 84 | 377 | 214 |
+| entities | 230 | 332 | 113 |
 
 ## Remaining tables
 
-150 of this kind still need their contents extracted.
+13 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
 | section.front_matter.index_of_art.table | Index of Art table | 9 |
-| section.buying_an_estate.ghostly_events_table | Ghostly Events Table | 160 |
 | section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
 | section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
 | section.creating_your_character.choosing_your_species.table | Choosing Your Species table | 27 |
-| section.equipment.coins.table | Coins table | 49 |
-| section.levelling_up.increasing_your_skills_and_basic_stats.table | Increasing your Skills and Basic Stats table | 59 |
-| section.levelling_up.talents_and_perks.table_talents | Talents | 60 |
-| section.levelling_up.talents_and_perks.table_perks | Perks | 60 |
-| section.magic.casting_spells.table | Casting Spells table | 63 |
-| section.magic.casting_spells.table_2 | Casting Spells table 2 | 63 |
-| section.magic.casting_spells.table_3 | Casting Spells table 3 | 63 |
-| section.alchemy.table | Alchemy table | 71 |
-| section.alchemy.table_2 | Alchemy table 2 | 73 |
 | section.into_the_dungeons.table | Into the Dungeons table | 89 |
 | section.into_the_dungeons.table_2 | Into the Dungeons table 2 | 89 |
 | section.into_the_dungeons.table_3 | Into the Dungeons table 3 | 89 |
 | section.into_the_dungeons.table_4 | Into the Dungeons table 4 | 92-96 |
-| section.into_the_dungeons.opening_a_door_or_chest.table | Opening a Door or Chest table | 99 |
 | section.into_the_dungeons.table_red_levers | Red Levers | 102 |
 | section.into_the_dungeons.table_5 | Into the Dungeons table 5 | 103 |
-| section.combat.hero_attacking.table | Hero Attacking table | 113 |
 | section.combat.detailed_acting_with_enemies.table | Detailed acting with enemies table | 117 |
 | section.combat.detailed_acting_with_enemies.table_2 | Detailed acting with enemies table 2 | 117 |
-| section.combat.different_kinds_of_damage.table | Different Kinds of Damage table | 119 |
-| section.travelling_and_skirmishes.table | Travelling and Skirmishes table | 126 |
-| section.travelling_and_skirmishes.table_2 | Travelling and Skirmishes table 2 | 128 |
-| section.settlements.general.table | General table | 130 |
-| section.settlements.general.table_2 | General table 2 | 130 |
-| section.settlements.table | Settlements table | 131 |
-| section.settlements.activities_in_a_settlement.table | Activities in a Settlement table | 131 |
-| section.settlements.table_2 | Settlements table 2 | 132 |
-| section.settlements.settlement_events.table | Settlement Events table | 133 |
-| section.settlements.settlement_events.table_2 | Settlement Events table 2 | 133 |
-| section.settlements.settlement_events.table_3 | Settlement Events table 3 | 133 |
-| section.settlements.settlement_events.table_4 | Settlement Events table 4 | 133 |
-| section.settlements.arena_fighting.table | Arena Fighting table | 139 |
-| section.settlements.arena_fighting.table_2 | Arena Fighting table 2 | 139 |
-| section.settlements.arena_fighting.table_3 | Arena Fighting table 3 | 139 |
-| section.settlements.arena_fighting.table_4 | Arena Fighting table 4 | 139 |
-| section.settlements.arena_fighting.table_5 | Arena Fighting table 5 | 139 |
-| section.settlements.table_3 | Settlements table 3 | 140 |
-| section.settlements.table_4 | Settlements table 4 | 140 |
-| section.settlements.banking.table | Banking table | 141 |
-| section.settlements.fortune_teller.table | Fortune Teller table | 143 |
-| section.settlements.gambling.table | Gambling table | 143 |
-| section.settlements.learn_a_spell_or_prayer.table | Learn a Spell or Prayer table | 144 |
-| section.settlements.level_up.table | Level Up table | 144 |
-| section.the_dark_guild.buying_special_equipment.table | Buying Special Equipment table | 146 |
-| section.the_dark_guild.buying_special_equipment.table_2 | Buying Special Equipment table 2 | 146 |
-| section.the_dark_guild.table | The Dark Guild table | 147 |
-| section.fighters_guild.table | Fighters’ Guild table | 149 |
-| section.fighters_guild.buying_special_equipment.table | Buying Special Equipment table | 150 |
-| section.wizards_guild.table | Wizards’ Guild table | 151 |
-| section.alchemists_guild.table | Alchemists’ Guild table | 152 |
-| section.rangers_guild.table | Rangers’ Guild table | 154 |
-| section.the_inner_sanctum.buying_special_equipment.table | Buying Special Equipment table | 156 |
-| section.the_inner_sanctum.crusades.table | Crusades table | 157 |
-| section.appendix_iii_equipment.general_equipment.consumables.table | Consumables table | 180 |
-| section.appendix_iii_equipment.general_equipment.jewellery.table | Jewellery table | 180 |
-| section.appendix_iii_equipment.general_equipment.tools.table | Tools table | 183 |
 | section.appendix_iii_equipment.general_equipment.table | General Equipment table | 184 |
-| section.appendix_iv_spells.table | Appendix IV: Spells table | 185 |
-| section.appendix_iv_spells.table_2 | Appendix IV: Spells table 2 | 185 |
-| section.appendix_iv_spells.table_3 | Appendix IV: Spells table 3 | 185 |
-| section.appendix_iv_spells.table_4 | Appendix IV: Spells table 4 | 185 |
-| section.appendix_iv_spells.table_5 | Appendix IV: Spells table 5 | 187 |
-| section.appendix_iv_spells.table_6 | Appendix IV: Spells table 6 | 187 |
-| section.appendix_iv_spells.table_7 | Appendix IV: Spells table 7 | 188 |
-| section.appendix_iv_spells.table_8 | Appendix IV: Spells table 8 | 188 |
-| section.appendix_iv_spells.table_9 | Appendix IV: Spells table 9 | 189 |
-| section.appendix_iv_spells.table_10 | Appendix IV: Spells table 10 | 190 |
-| section.appendix_v_treasures.treasure_found_in_rooms_and_corridors.table | Treasure found in Rooms and Corridors table | 191 |
-| section.appendix_v_treasures.table | Appendix V: Treasures table | 192 |
-| section.appendix_v_treasures.table_2 | Appendix V: Treasures table 2 | 192 |
-| section.appendix_v_treasures.table_3 | Appendix V: Treasures table 3 | 192 |
-| section.appendix_v_treasures.table_4 | Appendix V: Treasures table 4 | 193 |
-| section.appendix_v_treasures.table_5 | Appendix V: Treasures table 5 | 193 |
-| section.appendix_v_treasures.table_6 | Appendix V: Treasures table 6 | 193 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table_t1 | Table T1 | 194 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table_t4 | Table T4 | 194 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table_t2 | Table T2 | 194 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table_t5 | Table T5 | 194 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table_t3 | Table T3 | 194 |
-| section.appendix_v_treasures.treasure_found_on_defeated_enemies.table | Treasure Found on Defeated Enemies table | 194 |
-| section.appendix_v_treasures.tables_of_potions.table_weak_or_supreme_potions | Weak or Supreme potions | 195 |
-| section.appendix_v_treasures.ingredients_and_parts.table_of_ingredients | Table of Ingredients | 196 |
-| section.appendix_v_treasures.ingredients_and_parts.table_of_parts | Table of Parts | 196 |
-| section.appendix_v_treasures.table_7 | Appendix V: Treasures table 7 | 197 |
-| section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons | Magic Weapons | 198 |
-| section.appendix_v_treasures.table_magic_armours_and_shields | Magic Armours and Shields | 199 |
-| section.appendix_v_treasures.table_8 | Appendix V: Treasures table 8 | 199 |
-| section.appendix_v_treasures.table_magic_item | Magic Item | 199 |
-| section.appendix_v_treasures.table_9 | Appendix V: Treasures table 9 | 200 |
-| section.appendix_v_treasures.table_10 | Appendix V: Treasures table 10 | 200 |
-| section.quest_book_i.the_dead_rising.quest_1_spring_cleaning.table | Quest 1: Spring Cleaning table | 222 |
-| section.quest_book_i.the_dead_rising.table_quest_specific_encounter_table | Quest-Specific Encounter Table | 223 |
-| section.quest_book_i.the_dead_rising.table | The Dead Rising table | 223 |
-| section.quest_book_i.the_dead_rising.quest_2_the_dead_rising.table | Quest 2: The Dead Rising table | 225 |
-| section.quest_book_i.the_dead_rising.table_2 | The Dead Rising table 2 | 226 |
-| section.quest_book_i.the_dead_rising.quest_3_highwaymen.table | Quest 3: Highwaymen table | 227 |
-| section.quest_book_i.the_dead_rising.quest_4_the_burning_village.table | Quest 4: The Burning Village table | 229 |
-| section.quest_book_i.the_dead_rising.quest_5_the_apprentice.table | Quest 5: The Apprentice table | 230 |
-| section.quest_book_i.the_dead_rising.quest_5_the_apprentice.table_emil_the_caretaker | Emil the Caretaker | 230 |
-| section.quest_book_i.the_dead_rising.table_imgrahil_the_apprentice | Imgrahil the Apprentice | 231 |
-| section.quest_book_i.the_dead_rising.quest_6a_sacrifice.table | Quest 6A: Sacrifice table | 232 |
-| section.quest_book_i.the_dead_rising.quest_6b_the_master.table | Quest 6B: The Master table | 233 |
-| section.quest_book_i.the_dead_rising.table_the_master | The Master | 234 |
-| section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance.table | Level 1: The Entrance table | 236 |
-| section.quest_book_i.lair_of_the_spider_queen.level_2_the_basement.table | Level 2: The Basement table | 237 |
-| section.quest_book_i.lair_of_the_spider_queen.table | Lair of the Spider Queen table | 238 |
-| section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen.table | Level 3: The Tomb of the Spider Queen table | 239 |
-| section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen.table_belua | Belua | 239 |
-| section.quest_book_i.random_quests.table | Random Quests table | 241 |
-| section.quest_book_i.the_lava_river.quest_1_stop_the_heretics.table | Quest 1: Stop the Heretics table | 242 |
-| section.quest_book_i.the_lava_river.quest_1_stop_the_heretics.table_2 | Quest 1: Stop the Heretics table 2 | 242 |
-| section.quest_book_i.the_lava_river.quest_1_stop_the_heretics.table_3 | Quest 1: Stop the Heretics table 3 | 242 |
-| section.quest_book_i.the_lava_river.quest_2_the_master_alchemist.table | Quest 2: The Master Alchemist table | 244 |
-| section.quest_book_i.the_lava_river.quest_2_the_master_alchemist.table_2 | Quest 2: The Master Alchemist table 2 | 244 |
-| section.quest_book_i.the_lava_river.quest_2_the_master_alchemist.table_3 | Quest 2: The Master Alchemist table 3 | 244 |
-| section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster.table | Quest 3: Preventing a Disaster table | 245 |
-| section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners.table_briggo | Briggo | 247 |
-| section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners.table_gorm | Gorm | 247 |
-| section.quest_book_i.the_bandits_hideout.table | The Bandits’ Hideout table | 248 |
-| section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house.table | Quest 2: The Pleasure House table | 249 |
-| section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house.table_madame_isabelle | Madame Isabelle | 249 |
-| section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water.table | Quest 1: Cleansing the Water table | 251 |
-| section.quest_book_i.the_fountain_room.quest_2_baptising.table | Quest 2: Baptising table | 252 |
-| section.quest_book_i.the_fountain_room.quest_2_baptising.table_gaul_the_mauler | Gaul the Mauler | 252 |
-| section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic.table | Quest 1: Returning the Relic table | 253 |
-| section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic.table_2 | Quest 1: Returning the Relic table 2 | 253 |
-| section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend.table | Quest 2: Slaying the Fiend table | 254 |
-| section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend.table_2 | Quest 2: Slaying the Fiend table 2 | 254 |
-| section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend.table_molgor_the_fiend_of_summerhall | Molgor, the Fiend of Summerhall | 254 |
-| section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal.table | Quest 3: Closing the Portal table | 255 |
-| section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal.table_2 | Quest 3: Closing the Portal table 2 | 255 |
-| section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal.table_3 | Quest 3: Closing the Portal table 3 | 255 |
-| section.quest_book_i.the_great_crypt.table | The Great Crypt table | 257 |
-| section.quest_book_i.the_great_crypt.quest_2_stopping_the_necromancer.table | Quest 2: Stopping the Necromancer table | 259 |
-| section.quest_book_i.the_great_crypt.quest_2_stopping_the_necromancer.table_ragnalf_the_mad | Ragnalf the Mad | 259 |
-| section.quest_book_i.the_great_crypt.quest_3_tomb_raiders.table | Quest 3: Tomb Raiders table | 260 |
-| section.quest_book_i.quests_into_the_ancient_lands.table | Quests into the Ancient Lands table | 262 |
-| section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant.table | Tomb of the Hierophant table | 264 |
-| section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair.table | Temple of Despair table | 266 |
-| section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep.table | Halls of Amenhotep table | 268 |
-| section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba.table | Crypt of Khaba table | 269 |
-| section.quest_book_i.side_quests.table | Side Quests table | 271 |
-| section.quest_book_i.side_quests.side_quest_2_slay_the_beast.table | Side Quest 2: Slay the beast! table | 273 |
-| section.quest_book_i.side_quests.side_quest_3_the_mapmaker.table_the_mapmaker | The Mapmaker | 274 |
-| section.quest_book_i.side_quests.side_quest_5_manhunt.table | Side Quest 5: Manhunt table | 276 |
 
 ## Remaining examples
 
@@ -242,6 +128,7 @@ None. Every node in the structural map has been mapped.
 | section.combat | bestiary |
 | section.travelling_and_skirmishes | quest_book_ii |
 | section.settlements | quest_book_ii, companions_compendium |
+| section.alchemists_guild | false_prophet |
 | section.quest_book_i.introduction | quest_book_ii |
 | section.quest_book_i.lair_of_the_spider_queen | bestiary |
 | section.introduction.game_components | bestiary, charts_compendium, quest_book_ii |
@@ -256,3 +143,4 @@ None. Every node in the structural map has been mapped.
 | section.settlements.freyfell | companions_compendium |
 | section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance | bestiary |
 | section.psychology.table | bestiary |
+| section.alchemists_guild.table | false_prophet |

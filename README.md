@@ -12,22 +12,40 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-Phases 0–3 are complete. Phase 4 reusable core mechanics are extracted and tested;
-independent review remains distinct from extraction status. The corpus now contains 204 rules,
-17 entities, 14 tables, two procedures, and 321 executable YAML fixtures. The source map covers
-all 286 pages with 606 canonical nodes and three compatibility redirects. The glossary contains
-68 terms and 110 lookup forms.
+As of 1 October 2026, Phases 0–3 are complete and Phase 4 reusable core mechanics are
+extracted and tested across all 21 priority areas. Phases 5 and 6 are in progress:
 
-The 26 review records retain all original concerns: six are resolved and 20 remain unresolved.
-Undefined boundaries and conflicting passages produce explicit unresolved results. Larger
-chapters retain partial coverage, and no newly extracted record is marked independently reviewed.
+- **Phase 5 — entities and tables:** Batches 1–6 are extracted within scope. Settlement,
+  guild and estate evidence and source boundaries are in the
+  [Package A inventory](docs/package-a-completion-inventory.md). Batch 7 is accepted within catalogue scope; [quest/scenario source evidence](docs/quest-scenario-inventory.md) records all 124 inventory dispositions.
+- **Phase 6 — procedures and state machines:** Batches 1–6 are extracted within scope.
+  [Travel and settlement accounting](docs/travel-settlement-accounting.md) records the
+  composed effects and unresolved source boundaries. [Character and guild procedures](docs/character-guild-procedures.md) records Batch 6. Batch 7 remains pending.
+- **Phase 4.x — optional semantic decisions:** provider adapters, evaluation, caching and
+  shadow comparisons exist. Calibration and production-provider selection remain pending.
+- **Phases 7–12:** references, executable examples and review records provide groundwork for
+  Phases 7–9. The full graph, full-book example/review/coverage passes, compiled artifacts and
+  retrieval corpus remain unfinished. `build:corpus` is still a stub.
 
-See [docs/phase-4-core-mechanics.md](docs/phase-4-core-mechanics.md) for the 21-area audit,
-[docs/phase-3-pilot.md](docs/phase-3-pilot.md) for the historical pilot audit,
-[docs/ontology.md](docs/ontology.md) for the Phase 2 boundary,
-[LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) for the full plan, and
-[docs/coverage-report.md](docs/coverage-report.md) for remaining coverage.
-Phase 5 entity catalogues and Phase 6 full procedures remain deferred.
+The current corpus contains 1,530 rules, 669 entities, 213 tables, 60 procedures, one state
+machine and 475 executable YAML fixtures. The glossary contains 68 terms and 110 lookup forms.
+The source map covers all 286 pages and tracks 667 canonical sections plus 35 compatibility
+redirects. Coverage records 346 sections extracted (52%) and zero independently reviewed;
+component extraction can be partial within other sections. Of 109 review records, eight are
+resolved and 101 remain unresolved. Extraction and passing tests do not imply independent review.
+
+Next: Phase 6 Batch 7, conditions, interrupted rest, quest and estate lifecycle.
+Packages A–D are implemented within their documented source boundaries.
+The [settlement catalogue reconciliation](docs/settlement-source-reconciliation.md) records Package A. The
+[combat/treasure source checkpoint](docs/combat-treasure-source-audit.md) is complete;
+independent review remains separate.
+
+See the [phase status and next steps](LOD_RULES_CORPUS_PLAN.md#current-status--28-september-2026),
+[Phase 5 ledger](docs/phase-5-entities-and-tables.md),
+[Phase 6 ledger](docs/phase-6-procedures-and-state-machines.md), and generated
+[coverage report](docs/coverage-report.md). The [Phase 4 audit](docs/phase-4-core-mechanics.md)
+and [Phase 3 pilot audit](docs/phase-3-pilot.md) preserve historical milestone counts;
+[ontology](docs/ontology.md) records the Phase 2 scope.
 
 ## Commands
 
@@ -46,7 +64,21 @@ npx tsx scripts/extract/inspect-pdf.ts
 
 # Score the gold set against fields already stored on each rule.
 npm run decisions -- evaluate --provider structural
+
+# Early Phase 12 retrieval: search, exact ids, aliases, relations, review issues.
+npm run retrieve -- search "how do I open a locked door"
+npm run retrieve -- build   # generated/retrieval/ (JSONL, SQLite, manifest)
+
+# Question → Laya/Jev analysis → evidence → grounded LLM prompt (LLM injected).
+npm run ask -- "How many hit points does Molgor have?" --analyzer laya
 ```
+
+[docs/retrieval.md](docs/retrieval.md) explains how an LLM client should query the corpus.
+
+[clients/web/](clients/web/README.md) is a TanStack Start web client that answers rules
+questions in a browser. It runs the same `ask()` pipeline on the server, streams an
+OpenAI answer, and shows the evidence and citation check. It is a consumer with its own
+`package.json` and is excluded from the root checks.
 
 ## Layout
 

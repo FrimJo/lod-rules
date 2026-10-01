@@ -54,3 +54,8 @@ objects. They are not registered in the global id table.
 Terminology that the rulebook distinguishes must stay distinguished in ids. `term.battle`
 and `term.combat` are separate entries. Do not collapse them because they look like
 synonyms in other games.
+
+Quest-local actors use `quest_actor.<campaign-or-quest>.<name>`. These catalogue
+entities require a real `quest_id` owner and a category (for example, `enemy`).
+Statistics printed in the canonical PDF remain typed tables; references to absent
+standard monster statistics remain unresolved.

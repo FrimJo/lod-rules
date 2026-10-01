@@ -1,287 +1,152 @@
-# Phase 6 — Procedures and state machines
+# Complete the rulebook corpus through Phase 12
 
-## Status and boundaries
+## 1. Goal and completion standard
 
-Phase 6 has started; it is not complete. This document records the approved batch order, the
-units extracted so far, and what remains deferred. Extraction does not imply independent
-review. Phase 5 Batches 1–6 are extracted in their own
-ledger; later catalogue work is not a prerequisite for these units: procedures bind to mapped sections, and
-dependency targets that do not exist yet are recorded as `unresolved_references` or open
-issues instead of being invented.
+Finish the remaining extraction, independently review the source coverage, and compile a reproducible corpus with usable retrieval tooling.
 
-## Batch plan
+The historical latest extraction checkpoint is **333 validated canonical files, 2,116 passing tests, 319 of 665 sections extracted, and zero independently reviewed sections**. The fresh 30 September baseline validates 333 canonical files and confirms 319 of 665 extracted sections (35 compatibility redirects excluded). Packages A–D are complete within their documented boundaries. Fresh unit gate results are recorded in the quest inventory; historical test counts are not fresh validation. Phases 0–3 do not need to be restarted; subsequent audits may still uncover corrections.
 
-| Batch | Scope                                                                              | Status    |
-| ----- | ---------------------------------------------------------------------------------- | --------- |
-| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted |
-| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted |
-| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted |
-| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted |
-| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted |
-| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted |
-| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | Pending   |
+The portal checkpoint validated **341 canonical files**, passed **2,178 tests** (two optional provider tests skipped), and recorded **325/665 sections extracted, zero independently reviewed**. The Great Crypt unit gate validated **352 canonical files**, passed **2,233 tests** (two optional provider tests skipped), and recorded **329/665 sections extracted, zero independently reviewed**. The Temple of Despair gate validates **367 canonical files**, passes **2,310 tests** (two optional provider tests skipped), and records **332/665 sections extracted, zero independently reviewed**. The Halls of Amenhotep gate (1 October) validates **371 canonical files**, passes **2,326 tests** (two optional provider tests skipped), and records **333/665 sections extracted, zero independently reviewed**. The Crypt of Khaba gate (1 October) validates **376 canonical files**, passes **2,348 tests** (two optional provider tests skipped), and records **334/665 sections extracted, zero independently reviewed**. The Missing Brother gate (1 October) validates **381 canonical files**, passes **2,377 tests** (two optional provider tests skipped), and records **335/665 sections extracted, zero independently reviewed**. The Slay the Beast gate (1 October) validates **384 canonical files**, passes **2,404 tests** (two optional provider tests skipped), and records **336/665 sections extracted, zero independently reviewed**. The Mapmaker gate (1 October) validates **388 canonical files**, passes **2,410 tests** (two optional provider tests skipped), and records **337/665 sections extracted, zero independently reviewed**. The Go Fetch gate (1 October) validates **392 canonical files**, passes **2,434 tests** (two optional provider tests skipped), and records **338/666 sections extracted, zero independently reviewed**. Its newly mapped shield-condition table increases the canonical section denominator by one; historical counts remain unchanged. The Mushrooms gate (1 October) validates **399 canonical files**, passes **2,465 tests** (two optional provider tests skipped), and records **339/666 sections extracted, zero independently reviewed**. All six Side Quest units are catalogue-extracted. The introduction/Chamber-parent reconciliation gate validates **399 canonical files**, passes **2,466 tests** (two optional provider tests skipped), and records **340/666 sections extracted, zero independently reviewed**. The Great Crypt and Fountain Room parent gates (1 October) each validate **399 canonical files** and pass **2,466 tests** (two optional provider tests skipped). The Lava River and Bandits’ Hideout parent gates (1 October) each validate **399 canonical files** and pass **2,466 tests** (two optional provider tests skipped). The latest coverage is **344/666 sections extracted, zero independently reviewed**. The PDF42 personal-quest reconciliation gate reuses Wanderlust, The Well and Fables, validates **399 canonical files** and passes **2,466 tests** (two optional provider tests skipped), with coverage unchanged. The PDF43 Heirloom/Arachnophobia gate validates **400 canonical files**, passes **2,466 tests** (two optional provider tests skipped), and adds the missing quest-bound Great Aunt’s sword equipment record while preserving the source conflict. Coverage remains **344/666 extracted, zero independently reviewed**. The Lost Brother reconciliation gate validates **401 canonical files** and passes **2,467 tests** (two optional provider tests skipped), adding a quest actor and the printed body-release exception while keeping the skirmish/burial issue open. Coverage remains **344/666 extracted, zero independently reviewed**. Bandit Revenge/Poverty and Proving Your Worth/The Fraud passed separate gates with **401 canonical files**; the latest suite passes **2,476 tests** (two optional provider tests skipped). Proving Your Worth’s source range was corrected to PDF45 using the rendered columns. Coverage remains **344/666 extracted, zero independently reviewed**. The final PDF47–48 personal catalogue gate validates **402 canonical files** and passes **2,480 tests** (two optional provider tests skipped), adding two quest enemy actors and a Bergmeister Estate catalogue link. All fifteen personal quest catalogue records are reconciled; the missing Minotaur reward stays unresolved. Coverage remains **344/666 extracted, zero independently reviewed**. The Dead Rising and Spider Queen parent component gates passed separately; the latest validates **403 canonical files** and passes **2,480 tests** (two optional provider tests skipped). The Spider Queen’s elderly wizard now has a source-bound actor record. Coverage remains **344/666 extracted, zero independently reviewed**; ordered campaign lifecycle is pending. Divider/introduction and Random Quests passed separate component gates with **403 canonical files** and **2,481 passing tests** (two optional provider tests skipped). PDF221’s missing folio is represented by null labels, and the unspecified second-stage quest selector is recorded as an unresolved boundary. Latest coverage is **345/666 extracted (52%), zero independently reviewed**. Ancient Lands and Side Quests parent components passed separate gates with **403 canonical files** and **2,481 passing tests** (two optional provider tests skipped). All 108 canonical Quest Book I sections occur in the 124-row inventory, alongside fifteen personal quests and the estate quest. That historical ownership checkpoint found stale component flags. The subsequent Package E acceptance below reconciles them and corrects the Random Quests scope defect; its final gate validates **403 canonical files** and passes **2,482 tests** (two optional provider skips). Package E is accepted within catalogue scope; Package F is next.
 
-State machines are added only where the source genuinely governs transitions by current state;
-every other candidate stays a plain procedure. `procedure.dungeon_turn` and
-`procedure.thief_treasure_choice` predate this phase (Phase 3 pilot).
+Completion means:
 
-## Schemas and tooling added
+- Every source section and applicable component has extraction evidence or a justified exclusion.
+- Every mechanically meaningful passage has structured representation, including explicit uncertainty where the source cannot determine an answer.
+- Independent review has checked that representation against the PDF.
+- Internal references resolve; unavailable external material remains identified.
+- JSON, SQLite, graph and retrieval artifacts reproduce the validated corpus without losing provenance.
 
-- `schemas/state-machine.schema.json` — state machines with per-transition `source_text`
-  (documented triggers) and optional per-transition provenance. Registered as the
-  `stateMachines` schema root; loaded from `corpus/state-machines/`.
-- `scripts/validate/pilot.ts` — state-machine integrity: namespace, unique states, resolvable
-  initial state and transition targets, reachability from the initial state, terminal states
-  without outgoing transitions, `enter` bindings, provenance. Procedure dependencies may now
-  bind `object_id` to a state machine.
-- No interpreter changes: state machines are structural records, not executed.
+**Chosen defaults:** core Phases 0–12 are required. Semantic-provider calibration and vector indexing remain optional. Independent review uses a different human or agent from the extractor, with recorded evidence. Preserve existing work and IDs; do not commit unless requested.
 
-## Evidence ledger
+## 2. Finish the remaining extraction batches
 
-- Batches 1–4 are complete within their approved extraction scope, with explicit source
-  limitations retained below. Batch 5 covers travel and bounded settlement workflows. Phase 6 remains in progress.
-- PDF 101 (printed 99), rendered: all ten numeric Door Table outcomes preserve printed 0 as 10.
-  `procedure.locked_door_and_close` handles force/crowbar damage, Threat, exact/excess HP,
-  picking success/failure/fumble, jammed locks and door-only closing. Crowbar effects occur before
-  the unresolved AP marker; no zero AP cost is invented. Fumbles also break the pick. Explicit
-  guards prevent invalid branches and prevent zero HP from reopening a just-closed door.
-- `procedure.open_door_or_chest` records the 1 AP cost, requires supplied adjacency, invokes
-  the trap and lock handoffs, and guards reveal against surviving locks/traps. Encounters are
-  door-only. Fixtures explicitly pass successful dependency outcomes; invocation does not run
-  a dependency. Existing opening, rest, scenario-die and dungeon-turn targets are bound, with
-  obsolete trap-heading/locked-procedure unresolved references removed.
-- PDF 92 (printed 90), rendered: `procedure.wandering_monster` records initial start-tile
-  placement, post-hero timing and supplied direction/route geometry. Closed doors retain the
-  token until an ordinary 2–6 or sealed/wedged 5–6 passage succeeds. Successful magical passage
-  breaks its seal. Chasm arrival, next-turn crossing and following-turn movement are distinct;
-  crossing back is forbidden. Reveal requires room entry, LOS unobstructed by a closed door,
-  and distance at most ten. Four squares is an allowance, not an invented geometric path length.
-- PDF 92 and 101, rendered: `procedure.trap_resolution` distinguishes random Threat/Search
-  victims from openers, persists detected traps, spends 2 AP on disarming or deliberate door/chest
-  triggering, and reports opening eligibility separately from locks. Mimic attack restrictions,
-  Lower Undead, forced square entry, card-supplied affected actors and saving-throw exceptions
-  are explicit. Resolved card consequences are not applied again on later entries.
-- Verification: thirteen Batch 2 YAML trace fixtures plus 51 independent outcome/trace tests in
-  `tests/rules/phase-six-batch-two.test.ts`. These include every Door Table outcome, thresholds,
-  repeated blocked turns, all chasm stages, LOS/distance boundaries, traps, Mimics, missing data
-  and composed opening with supplied results. Tests are source-backed derived cases, not independent review.
-- Retained source limitations: `issue.phase6.crowbar_action_cost`,
-  `issue.phase6.iron_wedges_movement`, and `issue.phase6.trap_resolution_deferred` (now scoped to
-  unavailable card content and undefined card interactions). Detected-Mimic device-style
-  disarming/deliberate-trigger behavior is not inferred. Monster selection and initiative remain
-  handoffs; route geometry and dice are supplied. Interrupted-rest execution remains outside
-  Batch 2, and the interpreter semantics are unchanged.
+Implement these packages sequentially. Each package starts with a heading-level inventory and finishes its acceptance gate before advancing. Work within headings, tables or closely related 1–4 page units.
 
-- PDF 89 (printed 88, folio misprint noted in `pages.yaml`) and PDF 91 (printed 89):
-  `procedure.scenario_die` and `procedure.threat_roll`, including the natural-20 reduction,
-  the in-battle/not-in-battle branch, and the table-driven decrease. The threat tables are
-  invoked as section-bound dependencies, not extracted as table objects. The worked example
-  (threat 9, roll 7, row 16, level down to 3) is a `source_example` fixture. The failed-roll
-  case has no general rule text; the example sentence alone is recorded under
-  `issue.phase6.failed_threat_roll_increase` and the procedure surfaces it as an unresolved
-  effect.
-- PDF 101 (printed 99): `procedure.open_door_or_chest` — the printed four-step sequence with
-  the trapped branch. Trap-card resolution remains dependency-bound. Open issues:
-  `issue.phase6.door_open_threat_source` (step-1 increase versus the "instant a door is
-  opened" list entry), `issue.phase6.trap_resolution_deferred`,
-  `issue.phase6.furniture_treasure_table_location`.
-- PDF 100 (printed 98): `procedure.rest` — the printed eleven-point checklist with the
-  ambush-risk computation `(5 + Threat level)%, +10% per rest after the first, max 70%`, the
-  three wandering-monster moves, and the interruption branch that hands off to
-  `state_machine.battle`. Rest-regain quantities stay with the Phase 4 recovery rules; the
-  procedure does not restate them. The original extraction left interruption guards incomplete;
-  Package F now explicitly guards checklist steps6–11 with a current-attempt completion
-  checkpoint. Entry eligibility, attempt accounting and standard hero/point recovery are
-  now guarded and trace-tested. Interpreter semantics remain unchanged. Bleeding/poison
-  condition checks and modified recovery remain pending in the lifecycle inventory.
-- PDF 99 (printed 97): `procedure.search_room_or_corridor` (+10 first helper, +5 each
-  additional, roll on the highest PER, once per room) and `procedure.search_furniture` (one
-  action, no roll, once only, not with enemies in LOS). The Perception Roll invokes
-  `core.check.standard`. The Furniture Table binding stays section-level; see
-  `issue.phase6.furniture_treasure_table_location`.
-- PDF 106–107 and PDF 109 (printed 104–107): `state_machine.battle` —
-  `not_in_battle → battle_setup → battle_active → battle_ended` with initiation, token-bag
-  setup, the activation loop, and the printed all-enemies-dead end condition. Only the
-  all-enemies-dead end condition is printed on the extracted pages; other end conditions
-  (fleeing, quest endpoints) are recorded as an unresolved reference rather than invented.
-  This overlaps `core.battle.end` (Phase 4) deliberately: the rule states the end condition,
-  the state machine places it as a transition. `issue.0001` (dungeon-turn battle endpoints)
-  remains open for independent review against this record.
+| Package                                                 | Implementation                                                                                                                                                                                                                                                                                                                                           | Acceptance                                                                                                                                                                                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D — Phase 6 Batch 6: character and guild procedures** | Character creation; advancement; learning spells/prayers; training; guild membership and activities. Reuse existing species, profession, background, ability and service catalogues. Model prerequisites, choices, costs, duration, attempt limits and success/failure consequences. Compose with settlement activity accounting without charging twice. | Source inventory has a disposition for every heading. Tests demonstrate successful, rejected, repeated and incomplete actions, including exact resource changes and completed-duration requirements.                                |
+| **E — Phase 5 Batch 7: quest/scenario catalogues**      | Inventory Quest Book I, existing background/personal quests, and the estate side quest on PDF 164–165. Extract objectives, setup, branching, rewards, local entities, tables and exceptions. Structure mechanically relevant maps and diagrams from rendered evidence.                                                                                   | Every quest heading, table and mechanical visual is accounted for. Quest rules remain scenario-scoped. Statistics printed in this PDF are extracted; references to absent books remain external. Existing pilot records are reused. |
+| **F — Phase 6 Batch 7: lifecycle models**               | Hero conditions, interrupted rest, quest acceptance/progression/completion/abandonment, and estate lifecycle. Use procedures for ordered actions and state machines where current state determines legal transitions. Bind the newly completed quest catalogues and existing combat/settlement procedures.                                               | Tests cover legal and illegal transitions, repeated completion/rewards, interruption before recovery, condition application/removal and estate restrictions. Full composed traces preserve each resource mutation exactly once.     |
 
-## Batch 3 evidence
+Implementation constraints for all three:
 
-| Unit                      | Source and IDs                                                                                                | Verification and boundaries                                                                                                                                                                                                                                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layout and cards          | PDF 86–87, printed 84–85; `core.dungeon.*` in `dungeon-setup.yaml`                                            | Tile alignment, furniture-free doors, quest overrides, card fields and alternative playing cards. Missing card contents/room lookup are supplied inputs. B-card guidance conflicts across PDF 87–88 and remains unresolved.                                                                                                             |
-| Generation and routes     | PDF 88, printed 86; `procedure.dungeon_generation`, `.dungeon_route`                                          | Separate selection, objective in shuffled bottom half, bottom-dealt branches, partial/total dead ends and exhausted routes. Card order and geometry supplied. Odd initial pile split remains unresolved rather than rounded arbitrarily. Abandoning/Finishing Quest text stays quest-lifecycle scope.                                   |
-| Initial setup             | PDF 88; `procedure.initial_setup`                                                                             | Starting tile, unlocked/no-Threat entrance, Scenario Dice delayed until passing door, grass-side World Map exit. Opening and dungeon-turn procedures explicitly bind these exceptions; traps are not silently exempted.                                                                                                                 |
-| Encounters                | PDF 106, printed 104; `procedure.encounters`                                                                  | Inclusive room/corridor thresholds, first +10 streak increase, cap 70, supplied room modifiers and highest-party-level encounter modifier. Quest selection overrides, supplied Bestiary outcome, placement constraints and immediate turn ending. Frequency of later streak increases is not explicit; require supplied interpretation. |
-| Initiative and activation | PDF 106–107 and activation-order heading on PDF 118; `procedure.initiative`, `.activation`, `.enemy_priority` | Hidden bag/card order, first-turn bashing/hearing bonuses and cancellation, persistent named-monster tokens, hero choice, six enemy priorities and random ties. Dead/knocked-out/already-acted models cannot gain ordinary activations. Time Freeze explicitly permits an extra hero activation; extra tokens alone never do.           |
-| Overwatch                 | PDF 107, printed 105; `procedure.overwatch`                                                                   | Eligibility, token withholding, Energy, ranged interruption/resumption and reload/idle restriction, melee ZOC response and charge result. Attack outcome is supplied. Unspecified repeat-response/melee second-action policy remains a review issue.                                                                                    |
+- Preserve the test interpreter’s existing meaning: `invoke` records a dependency handoff; failed `require` does not automatically halt a procedure.
+- Guard consequential steps explicitly. Represent interrupted rest with explicit state and guarded recovery, rather than globally changing interpreter semantics.
+- Keep hero, party, visit, quest and estate state ownership documented.
+- Supply dice, geometry and unavailable external outcomes explicitly.
+- Add schema capabilities only when a demonstrated source requirement cannot fit the existing model; update types, validators and fixtures together.
 
-Six sourced YAML traces are in `tests/examples/dungeon/batch-three.yaml`; additional independent
-outcome/trace boundaries are in `tests/rules/dungeon-batch-three.test.ts`. Spell exceptions are
-also checked in `magic-foundations.test.ts`. Composed tests supply dependency outcomes explicitly:
-invocation remains a recorded handoff. Requirements do not halt a whole procedure, so consequential
-steps have their own eligibility guards. The interpreter was not made a gameplay runtime.
+**Immediate implementation:** Package E is accepted within catalogue scope. Its inventory accounts for all 124 entries, including source continuations, structured tables, mechanical visuals, parent headings and fifteen personal quests. Start Package F with conditions, interrupted rest, quest and estate lifecycle. Completed campaign, personal and estate catalogue records are reused. Independent review and comprehensive Phases 7–12 remain required.
 
-Existing opening, wandering-monster, rest, dungeon-turn and `state_machine.battle` IDs are
-preserved. Battle setup/active states bind initiative/activation, but the state machine remains
-structural. Rest supplies its printed three extra enemy tokens (zero with a barred door);
-rest interruption execution stays deferred. Combat attacks are added in Batch 4 below. Full enemy behaviour, optional
-dungeon-event tables and quest lifecycle execution remain later batches. No independent review
-or whole-phase completion is claimed.
+## 3. Complete the comprehensive passes
 
-## Verification
+These phases form a correction loop. Omissions discovered during full-book reconciliation return to extraction, dependency checks, examples and independent review before closure.
 
-Batch 3 completion gate: 209 canonical files validate; 1,107 tests pass with two optional
-provider integration tests skipped; lint passes. Coverage was regenerated from YAML. No commit
-or independent review is claimed.
+### Phase 7 — Dependencies and precedence
 
-Historical Batch 2 completion gate: 196 canonical files validate; 980 tests pass with two optional provider
-integration tests skipped; lint passes. The generated coverage report was rebuilt. No independent
-review or Phase 6 completion is claimed, and no commit was made.
+- Derive a typed graph from existing references, dependencies, table/entity links and overrides.
+- Add source-backed canonical relationships for distinctions not currently expressible, particularly `summary_of` and `expanded_by`. Do not duplicate relationships already encoded elsewhere.
+- Preserve edge direction, relationship type, originating object/field and provenance.
+- Report dangling references, unresolved pointers, cycles, duplicate candidates and potentially conflicting relationships. Classify legitimate reference cycles separately from problematic execution or precedence cycles.
+- Provide forward and reverse traversal so tooling can answer “what could affect this rule?”
+- Never infer that later text overrides earlier text solely because it is later or more detailed.
 
-Historical Batch 1 gate: 183 canonical files validate; 781 tests pass; lint passes. Its
-state-machine and initial dungeon-loop fixtures remain in `tests/schema/phase-six.test.ts` and
-`tests/examples/dungeon/phase-six.yaml`; Batch 2 extends the checks without changing interpreter
-semantics or executing interrupted rests.
+**Exit:** every unresolved pointer and graph anomaly has a recorded disposition; actual internal ID references resolve; overrides and external boundaries are discoverable.
 
-## Batch 3 source-audit checkpoint — 28 September 2026
+### Phase 8 — Worked examples and diagrams
 
-All six ledger units were checked against PDF 86–88, 106–107 and the activation-order
-heading on PDF 118. This is a source audit, not independent review; records remain extracted.
+- Inventory examples throughout prose, captions, tables and diagrams—not only nodes already labelled `example`.
+- Classify each as executable, descriptive, source-conflicted or dependent on missing information.
+- Convert executable examples into fixtures asserting both outcome and applied-rule trace.
+- Keep source examples distinct from derived boundary cases. Preserve contradictory example results as review evidence rather than adjusting expected values to match the implementation.
 
-| Unit                  | Disposition                                                                                                                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layout/cards          | Rendered PDF 86–87 confirms aligned squares, furniture-free doors, quest overrides and card fields. B-card inclusion conflict retained.                                                                  |
-| Generation/routes     | Rendered PDF 88 confirms separately selected cards, bottom-half objective, bottom-dealt branches and dead-end routes. Odd pile size remains unresolved.                                                  |
-| Initial setup         | PDF 88 confirms unlocked/no-Threat entrance and Scenario Dice delayed until entry; opening and dungeon-turn guards preserve the exception without inventing a trap exemption.                            |
-| Encounters            | PDF 106 confirms 50/30 thresholds, four-empty-tile +10, 70 cap, room modifiers, highest-party-level selection and immediate turn end. Later streak frequency remains supplied rather than inferred.      |
-| Initiative/activation | PDF 106–107 and 118 confirm first-turn bashing/hearing, persistent named tokens, one ordinary activation and six priorities. Time Freeze retains its separate spell-backed exception.                    |
-| Overwatch             | PDF 107 confirms token withholding, loaded/ready weapon, Energy, no aim, ranged resume/reload-or-idle, and charge hit/miss consequences. Repeated-response and melee completion ambiguities remain open. |
+**Exit:** every identified example has provenance and a disposition; all executable examples have passing outcome-and-trace checks.
 
-Integration check: opening binds encounters; wandering reveal binds initiative; rest supplies
-three extra enemy tokens or zero behind a barred door; battle setup/active states bind
-initiative/activation. Dependency invocations remain recorded handoffs with supplied outcomes.
-No new Batch 3 mechanical discrepancy was identified. Interrupted-rest execution, unavailable
-cards/Bestiary and geometry remain outside scope. Existing boundary/composition tests are rerun
-at the checkpoint gate; their passing does not establish independent review.
+### Phase 9 — Independent review and uncertainty audit
 
-## Batch 4 — combat resolution
+- Add schema-validated review records identifying reviewer, source scope, examined object IDs, findings, disposition and the reviewed corpus revision or content digest.
+- Require a reviewer distinct from the extractor to compare directly with the PDF. Tests and prior extraction audits are supporting evidence, not substitutes.
+- Correct transcription/modeling errors and independently verify the repairs.
+- Retain genuine ambiguity, contradictory text, typos, undefined behavior and absent-source dependencies.
+- Permit `reviewed` status only when applicable review evidence exists. Subsequent material edits invalidate the affected review evidence until rechecked.
 
-| Unit                              | Source and evidence                                                                                                      | Boundaries                                                                                                                                                                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Attack preparation, aim and shove | PDF 109–116; `procedure.combat_preparation`, `combat_aim`, `combat_shove`, `combat_attack`; both PDF 115 modifier tables | Supplied geometry, stats, weapon/talent modifiers and Power Attack restriction resolution. Behind/prone, range, cumulative cover, aim interruptions, strict shove threshold, Bloodlust and Power reroll/maximization are separate branches. |
-| Hero defence                      | PDF 112, 120; `procedure.hero_defence`                                                                                   | ZOC, usage limits, stance, shield arm spillover, Fast and fumble overlap. Exact shield-threshold wording is unresolved rather than silently made inclusive.                                                                                 |
-| Thrown preparations               | PDF 117; `procedure.thrown_preparation`                                                                                  | LOS, one obstacle penalty, doorway exception/scatter and large-area centre-plus-covered-squares. Supplied impact geometry; no invented range or random-direction distribution.                                                              |
-| Damage                            | PDF 121–122; `procedure.combat_damage`, `damage_follow_up`, `table.combat.hit_location`                                  | Existing damage/HP/durability rules reused; Quick Slots and armour remain recorded handoffs. Fire/acid continuation, Frost stun probability, disease, poison and magic consequences use supplied checkpoints; no full condition runtime.    |
-| Bleeding out                      | PDF 122; `procedure.bleeding_out`                                                                                        | Initial injury, supplied rescue, post-battle bandage, party loss and separately enabled timer. Existing unresolved negative-HP and injury-selection semantics retained.                                                                     |
-| Worked example                    | PDF 124; `tests/examples/combat/worked-example.yaml`                                                                     | Charge threshold 50, damage 4 and final threshold 20 are source-example fixtures. Behavior, wounded, Frenzy and negative-HP conflicts remain `issue.combat.example_conflicts`.                                                              |
+**Exit:** every completed review unit has evidence; no known uncertainty exists only in informal notes. An unresolved source issue may remain after successful review.
 
-`tests/rules/combat-procedures.test.ts` supplies outcomes explicitly and checks numerical boundaries,
-invalid eligibility, missing inputs, shield/weapon consequences, scatter, Quick Slots, rescue and
-single application of damage. Activation exposes a combat dependency; both Overwatch attack
-handoffs and thrown-alchemy rules bind actual procedures. Existing IDs and interpreter semantics
-are unchanged. Enemy decision-making, unavailable stats/cards, pathfinding and condition lifecycle
-remain deferred. Reviewed sections remain zero. Source-audit gate: 209 files validated, 1,109 tests
-passed (two optional provider tests skipped), regenerated coverage, lint and diff checks passed.
+### Phase 10 — Full-book reconciliation
 
-Batch 4 checkpoint gate: 214 canonical files validated; 1,150 tests passed with two optional
-provider integrations skipped; coverage regenerated; lint and diff checks passed. The full suite
-used two workers to avoid an unrelated provider-test timeout. Later Batch 5 integration also adds
-an activation → preparation → attack → damage composition test with exactly one HP loss, a
-zero-extra-AP charge shove check, and a party-loss guard against rescue. Attack dependencies are
-recorded handoffs, not automatically executed. No interpreter or schema extension was needed.
+- Audit all 286 pages and every canonical section, including front matter, appendices, captions, optional rules and quest material.
+- Use dependency-friendly chapter order: basics → characters/progression → equipment/psychology → magic/alchemy/prayers → dungeon/combat → travel/settlements → appendices → quests.
+- Reconcile each component against actual objects. A “remaining table” may be a missing extraction, an already represented table with incorrect coverage, or non-mechanical content; determine which from the PDF.
+- Record explicit reasons for non-applicable components and exclusions. Preserve section/coverage bijection and compatibility redirects.
+- Extract omissions in bounded units, then repeat affected Phase 7–9 checks.
 
-Final integration gate with Phase 5 Batch 5: 223 canonical files validate; 1,366 tests pass
-with two optional provider integrations skipped; coverage, lint and diff checks pass.
+**Exit:** no unexplained coverage gaps remain, and every applicable component has extraction and independent-review evidence. Do not manufacture a 100% result by marking unresolved extraction work non-applicable.
 
-## Historical Batch 5 — initial travel and settlement workflows
+## 4. Compile and make the corpus retrievable
 
-- PDF 126–131: `procedure.travel_daily_movement`, `travel_food_and_rest`,
-  `travel_event_check` and `travel_skirmish_setup` preserve fractional terrain costs, transport
-  eligibility handoffs, food/foraging and hunger exceptions, daily event thresholds, structured
-  obstacle-table dependency and skirmish setup. Routes, map geometry, event cards, adversaries and
-  combat outcomes remain supplied. Skirmishes explicitly exclude Threat and Scenario Dice.
-- PDF 132–147: `procedure.settlement_arrival`, `settlement_activities_and_overnight` and
-  `settlement_buy_sell_and_service` preserve arrival/quest choices, rejection limits, per-hero
-  Activity Point budgets, multi-day occupancy, party-wide overnight charges, service guards,
-  availability failure locks, local/event price handling and catalogue-backed repair/identification
-  handoffs. Existing recovery, Sanity and equipment repair rules remain the effect records; these
-  procedures do not apply them again.
-- Source-audit findings: combat PDF 109–122 and 124 matched existing extraction and caller bindings;
-  source conflicts remain in review. Treasure PDF 108 and 193–215 matched existing findings, nested
-  rolls, caller bindings, legendary restrictions and naming gaps; the printed overlap at settlement
-  event result 5 is preserved in the table rather than normalized.
-- Sixteen boundary/composition cases are in `tests/rules/travel-settlement.test.ts`. The existing
-  `tests/tables/phase-five-settlement-catalogues.test.ts` checks catalogue endpoints and overlap.
-  Calls remain handoffs; no interpreter or gameplay runtime behavior was added.
-- Limitations: settlement tables were transcribed from PDF text extraction and were not visually
-  checked against rendered pages in this increment. Full execution of settlement services, daily
-  lodging payment/recovery arithmetic, skirmish geometry/card contents, and estate lifecycle remain
-  bounded dependencies or later work.
+### Phase 11 — Deterministic compilation
 
-Historical Batch 5 verification: 231 canonical files validate; 1,412 tests pass with two optional provider
-integrations skipped; coverage regenerated for 695 rows/sections; lint and `git diff --check` pass.
-No independent review or Phase 6 completion is claimed.
+Replace the existing `build:corpus` stub only after the completeness gate.
 
-### Batch 5 reconciliation — Packages B/C
+- Reuse schema-validated loading and integrity checks across the entire corpus: mechanics, terms, aliases, sources, sections, issues, relationships, review evidence and fixtures.
+- Generate the planned JSON bundles and dependency graph, adding bundles for procedures, state machines and supporting records so no canonical record class disappears.
+- Generate SQLite with complete record payloads and indexed relationships, table rows, procedure steps and provenance. Use the repository’s Node 24 toolchain and built-in SQLite support; pin the supported build environment.
+- Preserve canonical IDs, source order where meaningful, unresolved issues and external dependency markers.
+- Produce a versioned manifest containing input fingerprints, record counts and output checksums. Exclude wall-clock timestamps and machine-specific paths from deterministic payloads.
+- Validate before publishing outputs. Build into staging, verify the complete set, and retain the previous successful artifacts if generation fails.
 
-The original checkpoint contained placeholder movement, food, activity/lodging and
-purchase-lock effects. Packages B/C replace those with actual guarded arithmetic,
-daily/visit markers and composed traces. See [the accounting ledger](travel-settlement-accounting.md)
-for state ownership, source evidence and unresolved boundaries. Batch 5 is extracted
-within this bounded scope; independent review and later lifecycle work remain pending.
+**Tests:** repeat-build checksum equality in the pinned environment; JSON/SQLite record equivalence; provenance round trips; graph traversal; invalid-input rejection; interrupted/failed build preserving previous output.
 
-The [combat/treasure source checkpoint](combat-treasure-source-audit.md) includes
-rendered-page evidence and corrected disease eligibility/recovery, with 1,417 tests
-passing at that checkpoint. The settlement trinket overlap belongs to the nested
-selector inside event 4; outer event 5 is Sale. Neither this audit nor passing tests
-marks material independently reviewed.
+### Phase 12 — Retrieval corpus and local tooling
 
-### Package B travel accounting
+- Generate retrieval documents from validated records for rules, entities, tables, procedures, state machines, terms and issues.
+- Include stable IDs, titles, source-grounded text, scope, relationships, citations, review status and uncertainty.
+- Provide local CLI/library capabilities for exact ID lookup, alias lookup, metadata filtering, directed graph expansion and lexical search. Use the compiled SQLite index for lexical retrieval.
+- Return structured records and source references. Keep conflicting rules and unavailable-source notices visible when relevant.
+- Keep complete tables in structured artifacts; retrieval summaries must point back to those records rather than replace them.
 
-Travel now applies movement, food, hunger and rest resource changes with daily markers
-and independently guarded steps. The complete outdoor obstacle matrix is extracted.
-See [travel-settlement-accounting.md](travel-settlement-accounting.md) for state ownership,
-regressions and the retained HP-overflow/partial-ration boundaries. Package C completes settlement accounting within the documented scope.
+**Tests:** a fixed query suite covering terminology, combat modifiers, optional rules, service eligibility, quest-local exceptions, conflicting passages and missing external material. Exact IDs and aliases must resolve reliably; lexical cases must retrieve their expected records within a documented result limit. Every hit must retain provenance.
 
-## Batch 6 — Character and guild procedures
+No application, API server, gameplay runtime, embedding service or production-provider selection is required.
 
-The [heading-level source inventory](character-guild-procedures.md) records all Batch 6
-dispositions, 20 added procedures, three advancement matrices, supplied outcomes and
-state ownership. Creation, advancement, learning and guild activities have guarded
-prerequisites, attempt limits, completed durations and exact resource accounting.
-Five new source ambiguities remain explicit. Supporting independent source checks
-do not establish formal Phase 9 review status.
+## 5. Shared gates and final closure
 
-Package D gate: 248 canonical files validate; 1,697 tests pass with two optional
-provider tests skipped; coverage regeneration, lint and diff checks pass. Phase 6
-remains incomplete; quest and estate lifecycle work follows Package E.
+After every extraction or tooling package:
 
-## Batch 7 — Lifecycle models (in progress)
+1. Run `npm run validate`, the full test suite, coverage regeneration when coverage changes, `npm run lint`, and `git diff --check`.
+2. Record source scope, delivered objects, regression evidence, unresolved boundaries and gate results.
+3. Update live status summaries and relevant ledgers; preserve historical checkpoint counts.
+4. Advance only when the package inventory is complete. Passing tests alone does not close extraction.
 
-Package E catalogue acceptance is recorded in the quest inventory: all 124 catalogue
-entries have source dispositions, with 403 canonical files validated and 2482 passing
-tests (two optional provider skips). Batch 7 starts with a heading-level lifecycle
-inventory for hero conditions, interrupted rest, quest acceptance/progression/
-completion/abandonment and estate lifecycle. Ordered actions use procedures; state
-machines require source-defined transitions. Preserve the existing `invoke` handoff
-and failed-`require` semantics; guard consequential steps and exactly-once mutations.
-Hero, party, quest-instance, visit and estate ownership must be documented before
-composing resource changes. No Batch 7 lifecycle is declared complete by this handoff.
+For final release readiness:
 
-The [lifecycle starting inventory](lifecycle-procedures.md) maps 75 pending headings
-and documents hero, party, quest-instance, visit and estate ownership. It does not
-claim a completed source audit. First bounded unit: Rest, PDF100 / printed98, with
-explicit interruption guards and preserved interpreter semantics.
+- Run the complete validation, example, review-evidence and coverage checks.
+- Build twice from identical inputs and compare artifacts.
+- Exercise representative queries against both JSON and SQLite, then run retrieval acceptance tests.
+- Verify that the documented commands reproduce the outputs in a clean checkout with the declared toolchain.
+- Update the master plan to distinguish completed core phases from optional deferred work and remaining genuine source uncertainties.
 
-Package F Rest interruption unit: rendered PDF100 / printed98 preserves food and
-equipment adjustments before early interruption and guards the later checklist.
-The [lifecycle inventory](lifecycle-procedures.md) documents the source boundary and
-remaining Rest work. Six new derived trace regressions cover early interruption,
-stale completion and completed recovery before a later ambush.
+The target is **zero unexplained omissions or integrity failures**, not zero unresolved rulebook ambiguities.
+
+## Current handoff — Package E accepted, Package F next
+
+The 1 October Package E acceptance in the quest inventory accounts for all 124
+entries, with no pending catalogue component flags: 108 Quest Book I sections,
+fifteen personal quests and the estate side quest. All scoped records are extracted
+and sourced (437 rules, 59 complete rendered-source tables, 129 entities). The latest
+gate validates 403 canonical files and passes 2482 tests (two optional provider skips),
+coverage regeneration, lint and diff checks. Coverage remains 345/666 extracted,
+zero independently reviewed. Historical checkpoints above remain unchanged.
+
+Immediate work is Package F: create a heading-level lifecycle inventory, then model
+conditions, interrupted rest, quest acceptance/progression/completion/abandonment and
+estate lifecycle in bounded source units. Preserve interpreter semantics and document
+state ownership; explicitly guard consequential steps and exactly-once resource changes.
+Comprehensive Phases 7–12 and final clean-checkout reproducibility remain required.
+
+Package F has a [75-heading starting inventory](lifecycle-procedures.md) and documented
+state ownership. All lifecycle rows remain pending direct source reconciliation.
+The first bounded unit is Rest, PDF100 / printed98.
 
 Rest interruption gate (1 October): validation passes for 403 canonical files;
 2488 tests pass with two optional provider tests skipped; coverage regeneration,
@@ -290,30 +155,28 @@ fixture type and all six pass. Coverage remains 345/666 extracted (52%), zero
 independently reviewed. Next bounded Rest work: entry eligibility and duplicate-
 attempt resource protection, followed by per-hero recovery and condition checks.
 
-Rest entry/accounting unit gate (1 October): 403 canonical files validate; 2499 tests
-pass (two optional provider skips); coverage regeneration, lint and diff checks pass.
-Source prerequisites and attempt-owned duplicate protection now guard every checklist
-step, with the supplied start-value morale cap. The existing +1/+2 morale conflict
-remains unresolved. Next: per-hero recovery, per-lost-point Energy and condition checks.
+Package F Rest entry/accounting gate validates 403 canonical files and passes 2499
+tests (two optional provider skips), coverage regeneration, lint and diff checks.
+It preserves legal subsequent rests while rejecting ineligible or already processed
+attempts, and applies the printed morale cap without resolving the +1/+2 source
+conflict. Next: hero-owned recovery and condition checks. Full Package F acceptance
+and comprehensive Phases 7–12 remain required.
 
-Rest standard hero/point recovery gate (1 October): 404 canonical files validate;
-2519 tests pass (two optional provider skips); coverage regeneration, lint and diff
-checks pass. Three new procedures raise the stored procedure count to 58. Twenty
-new derived regressions and the existing party traces preserve explicit handoffs,
-hero/attempt/point ownership and exactly-once resource changes. HP overflow and
-short-rest morale conflicts remain linked unresolved issues. Next bounded source
-unit: PDF100’s Bleeding Out and Poisoned Characters passage, including its timing
-under interrupted rest. Rest and Package F remain incomplete.
+Package F standard hero/point recovery gate validates 404 canonical files and passes
+2519 tests (two optional provider skips), coverage regeneration, lint and diff checks.
+Three new guarded procedures reuse existing HP/Energy/Mana rules with explicit
+hero/attempt/point ownership and applied-rule traces. Next bounded source unit:
+Rest-specific Bleeding Out and Poisoned Characters, PDF100 / printed98, including
+interruption timing. Rest, Package F and comprehensive Phases 7–12 remain unfinished.
 
-Rest-specific condition passage gate (1 October): rendered PDF100 / printed98
-adds the previously unmapped Bleeding Out and Poisoned Characters child heading,
-two procedures and 19 derived tests. The heading’s own component extraction is
-complete with source timing uncertainty retained; full Rest/lifecycle acceptance
-remains pending. A follow-up rendered PDF122 comparison records the unresolved
-no-rescue/untreated-rest overlap. Both bounded gates validate 405 canonical files
-and pass 2538 tests (two optional provider skips), lint and diff checks; coverage
-regeneration passes for the new mapping. Current coverage: 346/667 extracted (52%),
-zero independently reviewed. Next unit: Bleeding out, PDF122 / printed120.
+Package F Rest condition-heading and no-rescue boundary gates validate 405 canonical
+files and pass 2538 tests (two optional provider skips), lint and diff checks, with
+coverage regeneration for the new heading. Two new procedures bring the total to 60.
+The lifecycle inventory has 76 headings, including the newly mapped run-in heading.
+Current coverage is 346/667 extracted (52%), zero independently reviewed; review
+inventory is 109 records, 101 unresolved/eight resolved. Historical counts stay intact.
+Next source unit is Bleeding out, PDF122 / printed120, including rescue/death and
+replacement checkpoints. Rest, Package F and Phases 7–12 remain unfinished.
 
 Bleeding entry replay gate (1 October): 405 canonical files validate; 2549 tests
 pass (two optional provider skips); lint and diff checks pass. Eleven new derived
@@ -1194,10 +1057,20 @@ Slaying the Fiend lifecycle final gate (1 October): 426 canonical files validate
 
 Closing the Portal bounded reading checkpoint (1 October): `procedure.closing_portal_reading_attempt` cites visually inspected PDF257/printed255. It snapshots initial actual d6+1 duration once for an owned reader/quest occurrence, requires supplied eligibility and stationary objective-room presence, and resets progress/stops reading on every printed interruption or movement. Replay cannot restart or reseed an attempt. The existing ritual-boundaries issue retains undefined eligibility and restart dice policy. Procedure coverage remains mapped: actual restart, turn progression/closure, spawning, initial groups/Threat, defeat/chests and outside reward remain next units. No independent review; Package F and Phases 7–12 remain unfinished.
 
+Closing the Portal reading checkpoint final gate (1 October): 427 canonical files validate; 3236 tests pass with two optional provider skips, including 19 new derived reading/interruption regressions. Coverage regenerated at 710 rows; extraction/review section totals are unchanged. All lint and whitespace checks pass. There are now 86 procedures; review dispositions are unchanged. No commits made. Next bounded work remains actual ritual restart and turn progression/closure, followed by source-scoped demon spawning and aftermath.
+
 Closing the Portal reading progression (1 October): the same `procedure.closing_portal_reading_attempt` now handles actual new start-over events with supplied 2..7 duration context, preserving unresolved retain/reroll policy. It counts actual completed chronological reading turns once, consumes interrupted completed turns without progress, checks all interruptions before advancement and closes only at the required uninterrupted duration. Closure stops reading and requires killing all remaining demons; it does not spawn, collect or pay. Fifty source-derived regressions include every duration, completion-turn interruption, actual restart, chronological/replay guards, unresolved context and applied source-rule traces. Visually inspected PDF257/printed255. Procedure coverage stays mapped pending initial Threat/groups, encounter replacement, spawning and aftermath/payment. No independent review; Package F and Phases 7–12 remain unfinished.
+
+Closing the Portal reading progression final gate (1 October): 427 canonical files validate; 3267 tests pass with two optional provider skips. The expanded reading fixture contains 50 tests (31 added this unit). Coverage regenerated at 710 rows, with this quest procedure component corrected from not_started to mapped to reflect bounded work; the 18 source-map/report tests pass again after that correction. Whole-suite, lint and whitespace gates pass. There are 86 procedures and 130 review records (122 unresolved, eight resolved); zero independently reviewed sections. No commits made. Next source unit: Closing the Portal initial Threat/objective groups and encounter replacement, then schedule-supplied single-demon spawning and separate defeat/treasure/outside payment.
 
 Closing the Portal preparation and groups (1 October): `procedure.closing_portal_preparation` and `procedure.closing_portal_demon_group` cite visually inspected PDF257/printed255. Quest setup preserves Silver City,8+8 tiles, supplied ritual scroll and advertised300c without crediting coins. Initial actual d6 Threat initializes once, minimum=start and maximum20. Actual objective entry preserves portal/hero geometry and separately requests two initial groups plus actual random placement once. The group procedure accepts actual first/second initial ownership or a multiple10 replacement encounter, snapshots type before delayed quantity, and checks d6/d3 bounds before selected source-rule execution. Each actual group owns separate state; later one-demon spawns cannot use group quantities. Source statistics/Cursed Weapons, actual coordinate placement and battle remain explicit dependencies. Reading lifecycle stays separate. Procedure coverage remains mapped pending schedule-supplied single spawns and distinct final-demon/treasure/outside-payment gates. No independent review; Package F and Phases 7–12 remain unfinished.
 
+Closing the Portal preparation/groups final gate (1 October): 428 canonical files validate; 3336 tests pass with two optional provider skips, including 69 new preparation/group regressions. Coverage regenerated at 710 rows; this quest remains procedure-mapped pending spawning/aftermath/payment, and section extraction/review totals are unchanged. All lint and whitespace gates pass. There are 88 procedures and 130 review records (122 unresolved, eight resolved). No commits made. Next source unit: actual schedule-supplied single-demon spawning, then final-demon/treasure and outside-payment gates.
+
 Closing the Portal spawning and aftermath (1 October): visually inspected PDF257/printed255 and PDF258/printed256. `procedure.closing_portal_single_spawn` requires actual supplied every-other-turn schedule and event ordering, consumes each chronological emergence once, resolves type-only d6 and ignores group quantities. Pending already-emerged type may resolve after closure without another spawn; later events cannot overwrite pending earlier ones. `procedure.closing_portal_aftermath` separately gates two unlocked/untrapped objective-chest handoffs on actual closure and final-demon death, and credits300c once to each actual owned hero back outside. Twenty-seven derived regressions cover all six types, pending resolution/replay/closed/unknown order, final-demon/loot/payment guards, independent hero and party markers, and composed reading-closure/treasure/reward trace. Together with preparation/groups and reading, this source-local lifecycle component is extracted within supplied-context boundaries. Remaining source dispositions: first spawn phase, same-turn order, restart duration/eligibility, actual random coordinates and unavailable statistics/Cursed Weapons/battle, actual chest content/collection, missing/dead/replacement hero entitlement and unspecified generic completion/abandonment. The latter aftermath boundary is recorded in `issue.quest.portal_aftermath_scope`; existing ritual ambiguity remains unresolved. No independent review; Package F and Phases 7–12 remain unfinished. Next quest lifecycle source unit: Returning the Relic (PDF255).
 
+Closing the Portal bounded lifecycle final gate (1 October): 429 canonical files validate; 3363 tests pass with two optional provider skips, including27 new spawn/aftermath tests. Three composed-fixture state reads were narrowed explicitly to booleans for strict TypeScript; all27 affected tests and lint pass after that repair. Coverage regenerated at710 rows; the quest lifecycle component is now extracted within its explicit source/supplied-context boundaries. Section extraction totals remain346/675 and independently reviewed remains0. There are90 procedures and131 review records (123 unresolved, eight resolved). All validation, coverage, test, lint and whitespace gates pass. No commits made. Next bounded Package F source unit: Returning the Relic, PDF255/printed253.
+
 Returning the Relic lifecycle (1 October): `procedure.returning_relic` cites visually inspected PDF255/printed253. It preserves Random/8+8 setup, actual initial d4+1 Threat/minimum=start/max20 once, quest-owned Luck nullification until actual stone return without changing numeric Luck, and actual distinct Scenario8–10 handoffs. Actual objective entry records short-side heroes/far-end statue and requests two encounters/random placement once. Refit requires all enemies dead, actual hero in front, actual distinct turn and supplied unresolved party/hero opportunity scope. Pending actual DEX result cannot be replaced by a later turn or mismatched owner; success returns stone and ends only its nullification, failure consumes opportunity and raises Threat1 once below20. At maximum20 raw+1 remains pending source accounting. Actual home arrival after return credits300c once per actual owned hero. Thirty-two derived regressions cover setup faces, all Scenario faces, objective handoff, failed/successful/pending/replayed/mismatched attempts, maximum boundary, unchanged Luck/other curses and independent home payments. `issue.quest.relic_lifecycle_scope` preserves scope, maximum, failed/abandoned-quest curse expiry, generic completion and hero-entitlement ambiguities. No source-local chests/XP invented; no independent review. Lifecycle component extracted within those bounded source/supplied-context dispositions; Package F and Phases 7–12 remain unfinished. Next source unit: Retrieving the Family Heirloom, PDF259–260.
+
+Returning the Relic lifecycle final gate (1 October):430 canonical files validate;3395 tests pass with two optional provider skips, including32 new source-derived lifecycle regressions. Coverage regenerated at710 rows; this quest procedure component is extracted within explicit supplied-context/source-boundary dispositions, with no independent review. There are91 procedures and132 review records (124 unresolved, eight resolved). All validation, coverage, full-suite, lint and whitespace gates pass. No commits made. Next Package F source unit: Retrieving the Family Heirloom, PDF259–260/printed257–258.

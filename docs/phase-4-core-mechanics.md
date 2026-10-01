@@ -1,5 +1,11 @@
 # Phase 4 — Reusable core mechanics
 
+This is the historical Phase 4 milestone audit. Counts and deferred work below describe
+that milestone, not the current corpus. Phase 5 catalogues and Phase 6 procedures have since
+started; see their [catalogue ledger](phase-5-entities-and-tables.md),
+[procedure ledger](phase-6-procedures-and-state-machines.md), and the
+[current project status](../README.md#status).
+
 Phases 0–3 are complete. Phase 4 is extracted and tested across all 21 priority areas below.
 This is an extraction audit, not an independent review: new records remain `extracted`,
 and larger source headings retain partial coverage. No runtime or build outputs were added.
