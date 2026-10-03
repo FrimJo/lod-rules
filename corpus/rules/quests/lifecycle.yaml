@@ -1,0 +1,104 @@
+- id: core.quest_lifecycle.abandon_layout
+  name: Abandoning a dungeon quest preserves its layout
+  source_text: If you must abandon your quest, note down the layout so that you can come back and
+    finish what you have started.
+  fields:
+    saved_layout_required:
+      type: boolean
+      role: output
+      description: Record the actual dungeon layout before resumable abandonment.
+  effects:
+    - type: set
+      target: saved_layout_required
+      value:
+        type: literal
+        value: true
+  section_id: section.into_the_dungeons.generating_the_dungeon
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 88
+      printed_page: 86
+      heading: Abandoning your Quest; Finishing your Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  type: constraint
+  scope: quest
+- id: core.quest_lifecycle.return_checks
+  name: Return to the same unfinished dungeon quest
+  source_text: The dungeon will be repopulated when you return, and you must check for locked doors
+    and encounters once again.
+  fields:
+    repopulate_required:
+      type: boolean
+      role: output
+      description: Source-defined requirement for this actual return visit.
+    fresh_locked_door_checks_required:
+      type: boolean
+      role: output
+      description: Source-defined requirement for this actual return visit.
+    fresh_encounter_checks_required:
+      type: boolean
+      role: output
+      description: Source-defined requirement for this actual return visit.
+  effects:
+    - type: set
+      target: repopulate_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: fresh_locked_door_checks_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: fresh_encounter_checks_required
+      value:
+        type: literal
+        value: true
+  section_id: section.into_the_dungeons.generating_the_dungeon
+  source: *a1
+  status: extracted
+  confidence: high
+  type: constraint
+  scope: quest
+- id: core.quest_lifecycle.finish_exit
+  name: Accomplished dungeon quest permits leaving without retracing
+  source_text:
+    Once you have accomplished what you were tasked to do, you may leave the dungeon. There
+    is no need to trace your way back to the entrance.
+  fields:
+    task_accomplished:
+      type: boolean
+      role: input
+      description: Actual source-specific task achieved; request or boss appearance does not establish this.
+    leave_without_retracing_allowed:
+      type: boolean
+      role: output
+      description: Permission, not actual departure.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: task_accomplished
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: leave_without_retracing_allowed
+      value:
+        type: literal
+        value: true
+  section_id: section.into_the_dungeons.generating_the_dungeon
+  source: *a1
+  status: extracted
+  confidence: high
+  type: constraint
+  scope: quest

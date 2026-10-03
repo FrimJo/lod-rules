@@ -1,0 +1,856 @@
+- id: procedure.estate_ownership
+  name: Estate purchase, lodging and owned equipment storage
+  section_id: section.buying_an_estate.buying_the_house
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: Buying the House; Staying at the House
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The party pays 4000 c in Silver City for the key. Key holders may stay between quests
+    without daily inn cost, use normal resting rules, and store excess equipment at the house.
+  fields:
+    party_id:
+      type: string
+      role: input
+      description: party id
+    estate_party_id:
+      type: string
+      role: state
+      description: estate party id
+    phase:
+      type: string
+      role: input
+      description: phase
+    location:
+      type: string
+      role: input
+      description: location
+    item_id:
+      type: string
+      role: input
+      description: item id
+    transaction_id:
+      type: string
+      role: input
+      description: transaction id
+    estate_key:
+      type: boolean
+      role: state
+      description: estate key
+    lodging_requested:
+      type: boolean
+      role: state
+      description: lodging requested
+    lodging_completed:
+      type: boolean
+      role: state
+      description: lodging completed
+    between_quests:
+      type: boolean
+      role: input
+      description: between quests
+    actual_purchase:
+      type: boolean
+      role: input
+      description: actual purchase
+    actual_stay:
+      type: boolean
+      role: input
+      description: actual stay
+    actual_storage:
+      type: boolean
+      role: input
+      description: actual storage
+    actual_retrieval:
+      type: boolean
+      role: input
+      description: actual retrieval
+    rest_completed:
+      type: boolean
+      role: input
+      description: rest completed
+    rest_result_owner_matches:
+      type: boolean
+      role: input
+      description: rest result owner matches
+    coins:
+      type: number
+      role: state
+      description: coins
+    storage_item_id:
+      type: string
+      role: state
+      description: storage item id
+    storage_transaction_id:
+      type: string
+      role: state
+      description: storage transaction id
+    item_stored:
+      type: boolean
+      role: state
+      description: item stored
+    purchase_cost:
+      type: number
+      role: output
+      description: purchase cost
+    purchase_location:
+      type: string
+      role: output
+      description: purchase location
+    requires_key:
+      type: boolean
+      role: output
+      description: requires key
+    daily_lodging_cost:
+      type: number
+      role: output
+      description: daily lodging cost
+    normal_between_quest_rest:
+      type: boolean
+      role: output
+      description: normal between quest rest
+    excess_equipment_storage:
+      type: boolean
+      role: output
+      description: excess equipment storage
+    hero_id:
+      type: string
+      role: input
+      description: hero id
+    stay_id:
+      type: string
+      role: input
+      description: stay id
+    result_stay_id:
+      type: string
+      role: input
+      description: result stay id
+    result_party_id:
+      type: string
+      role: input
+      description: result party id
+    result_hero_id:
+      type: string
+      role: input
+      description: result hero id
+    pending_stay_id:
+      type: string
+      role: state
+      description: pending stay id
+    pending_stay_hero:
+      type: string
+      role: state
+      description: pending stay hero
+    permanent_storage_item_id:
+      type: string
+      role: state
+      description: permanent storage item id
+    stay_sequence:
+      type: number
+      role: input
+      description: stay sequence
+    visit_id:
+      type: number
+      role: input
+      description: visit id
+    day:
+      type: number
+      role: input
+      description: day
+    result_visit_id:
+      type: number
+      role: input
+      description: result visit id
+    result_day:
+      type: number
+      role: input
+      description: result day
+    result_hero_recovery_day:
+      type: number
+      role: input
+      description: result hero recovery day
+    transfer_sequence:
+      type: number
+      role: input
+      description: transfer sequence
+    pending_stay_sequence:
+      type: number
+      role: state
+      description: pending stay sequence
+    completed_stay_sequence:
+      type: number
+      role: state
+      description: completed stay sequence
+    pending_visit_id:
+      type: number
+      role: state
+      description: pending visit id
+    pending_day:
+      type: number
+      role: state
+      description: pending day
+    last_transfer_sequence:
+      type: number
+      role: state
+      description: last transfer sequence
+    actual_at_estate:
+      type: boolean
+      role: input
+      description: actual at estate
+  dependencies:
+    - key: rest
+      label: Normal between-quest rest; execute the actual settlement rest dependency before recovery
+      object_id: procedure.settlement_activities_and_overnight
+  steps:
+    - id: purchase
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Buying the House; Staying at the House
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        In Silver City the actual party pays 4000 c once for the estate key; insufficient funds
+        cannot create ownership.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: purchase
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_purchase
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: estate_key
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: Silver City
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: party_id
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: literal
+              value: 4000
+      rule_refs:
+        - character.settlement.estate.purchase
+      effects:
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -4000
+          duration: permanent
+        - type: set
+          target: estate_party_id
+          value:
+            type: field
+            name: party_id
+        - type: set
+          target: estate_key
+          value:
+            type: literal
+            value: true
+    - id: lodging
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Buying the House; Staying at the House
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Key-owning party staying between quests owes no daily inn cost and requests normal
+        rest. Requesting does not restore resources.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: field
+                  name: estate_party_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: stay
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: estate_key
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: between_quests
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_stay
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_at_estate
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_requested
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: lodging_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stay_sequence
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: completed_stay_sequence
+                - type: literal
+                  value: 1
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: stay_id
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: hero_id
+            right:
+              type: literal
+              value: ''
+      rule_refs:
+        - character.settlement.estate.lodging
+      effects:
+        - type: set
+          target: lodging_requested
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: lodging_completed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: pending_stay_id
+          value:
+            type: field
+            name: stay_id
+        - type: set
+          target: pending_stay_hero
+          value:
+            type: field
+            name: hero_id
+        - type: set
+          target: pending_stay_sequence
+          value:
+            type: field
+            name: stay_sequence
+        - type: set
+          target: pending_visit_id
+          value:
+            type: field
+            name: visit_id
+        - type: set
+          target: pending_day
+          value:
+            type: field
+            name: day
+        - type: invoke
+          dependency: rest
+    - id: rest_result
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Buying the House; Staying at the House
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        A completed matching owned rest closes this lodging checkpoint without duplicating
+        dependency recovery.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: field
+                  name: estate_party_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: rest_result
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lodging_requested
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: lodging_completed
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rest_completed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_party_id
+            right:
+              type: field
+              name: estate_party_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_stay_id
+            right:
+              type: field
+              name: pending_stay_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_hero_id
+            right:
+              type: field
+              name: pending_stay_hero
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_visit_id
+            right:
+              type: field
+              name: pending_visit_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_day
+            right:
+              type: field
+              name: pending_day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_hero_recovery_day
+            right:
+              type: field
+              name: pending_day
+      rule_refs: []
+      effects:
+        - type: set
+          target: lodging_completed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: completed_stay_sequence
+          value:
+            type: field
+            name: pending_stay_sequence
+    - id: store
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Buying the House; Staying at the House
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        An actual owned equipment transfer stores this distinct item at the estate; checkpoint
+        state is per physical item, not the whole party inventory.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: field
+                  name: estate_party_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: store
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: estate_key
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: between_quests
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_storage
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_stored
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: item_id
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: transaction_id
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_at_estate
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transfer_sequence
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: last_transfer_sequence
+                - type: literal
+                  value: 1
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: permanent_storage_item_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: permanent_storage_item_id
+                right:
+                  type: field
+                  name: item_id
+      rule_refs: []
+      effects:
+        - type: set
+          target: storage_item_id
+          value:
+            type: field
+            name: item_id
+        - type: set
+          target: storage_transaction_id
+          value:
+            type: field
+            name: transaction_id
+        - type: set
+          target: item_stored
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: last_transfer_sequence
+          value:
+            type: field
+            name: transfer_sequence
+        - type: set
+          target: permanent_storage_item_id
+          value:
+            type: field
+            name: item_id
+    - id: retrieve
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Buying the House; Staying at the House
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Only the actual stored item may be retrieved by its owning party; an unrelated item
+        cannot clear storage.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_id
+                right:
+                  type: field
+                  name: estate_party_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: retrieve
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: estate_key
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_stored
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_retrieval
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: storage_item_id
+            right:
+              type: field
+              name: item_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_at_estate
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: transfer_sequence
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: last_transfer_sequence
+                - type: literal
+                  value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: permanent_storage_item_id
+            right:
+              type: field
+              name: item_id
+      rule_refs: []
+      effects:
+        - type: set
+          target: item_stored
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: last_transfer_sequence
+          value:
+            type: field
+            name: transfer_sequence
+  entry_step: purchase
+  exit_step: retrieve

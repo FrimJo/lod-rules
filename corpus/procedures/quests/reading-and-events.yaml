@@ -1,0 +1,293 @@
+- id: procedure.quest_reading_and_events
+  name: Owned quest reading, aftermath finding and upward Threat event checkpoints
+  section_id: section.quest_book_i.introduction.reading_the_quests
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Reading the Quests; Triggering Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Actual owned quest occurrence controls reading permission: objective room reached
+    permits text to second border and actual task completion permits aftermath. Actual aftermath
+    finding is distinct from tile-drawn treasure and may be looted off table without traps/locks;
+    findings/collection and resource accounting are separately supplied. Consume each actual
+    chronological Threat change once and apply the printed exact-threshold/upward rule, including
+    falling below and reaching it again. Special placement does not reduce Threat. General
+    individual repeatability is a handoff to acceptance eligibility for a distinct occurrence.'
+  fields:
+    quest_room_reached:
+      type: boolean
+      role: input
+      description: Whether the Quest Room has been reached.
+    quest_complete:
+      type: boolean
+      role: input
+      description: Whether the quest is complete.
+    quest_room_text_readable:
+      type: boolean
+      role: state
+      description: Permission to read up to the second border.
+    aftermath_readable:
+      type: boolean
+      role: state
+      description: Permission to read the last part.
+    found_in_aftermath:
+      type: boolean
+      role: input
+      description: Identifies a finding explicitly described in the aftermath.
+    off_table_looting:
+      type: boolean
+      role: state
+      description: Finding can be looted off table.
+    check_traps:
+      type: boolean
+      role: state
+      description: Whether aftermath loot needs trap checks.
+    check_locks:
+      type: boolean
+      role: state
+      description: Whether aftermath loot needs lock checks.
+    previous_threat:
+      type: number
+      role: input
+      description: Threat immediately before this supplied change.
+      integer: true
+      minimum: 0
+    current_threat:
+      type: number
+      role: input
+      description: Threat after this supplied change.
+      integer: true
+      minimum: 0
+    quest_threshold:
+      type: number
+      role: input
+      description: XX supplied by the current quest.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: state
+      description: Whether this Threat change triggers the quest monster.
+    threat_reduction_on_placement:
+      type: number
+      role: state
+      description: No Threat reduction for this special placement.
+      integer: true
+      minimum: 0
+    phase:
+      type: string
+      role: input
+      description: reading, aftermath or threshold.
+    quest_event_owner_matches:
+      type: boolean
+      role: input
+      description:
+        Actual party/quest occurrence/finding/Threat change event identity confirmed, never
+        another pending event.
+    aftermath_finding_owner_matches:
+      type: boolean
+      role: input
+      description:
+        Actual party/quest occurrence/finding/Threat change event identity confirmed, never
+        another pending event.
+    actual_threat_change_supplied:
+      type: boolean
+      role: input
+      description:
+        Actual party/quest occurrence/finding/Threat change event identity confirmed, never
+        another pending event.
+    aftermath_finding_processed:
+      type: boolean
+      role: state
+      description: Once-only actual finding context; additional findings have separate contexts.
+    actual_threat_event:
+      type: number
+      role: input
+      description: Chronological actual quest Threat event identity.
+      integer: true
+      minimum: 0
+    last_threat_event:
+      type: number
+      role: state
+      description: Chronological actual quest Threat event identity.
+      integer: true
+      minimum: 0
+  dependencies:
+    - key: finding
+      label: Actual source aftermath finding loot/collection outcome; request is not credited treasure
+    - key: monster
+      label: Actual source quest-threshold Wandering Monster outcome; no Threat reduction
+      object_id: procedure.wandering_monster
+    - key: repeat
+      label: Source-eligible distinct occurrence acceptance, not reset of old quest
+      object_id: procedure.quest_acceptance
+  steps:
+    - id: reading
+      source: *a1
+      source_text:
+        Read only the currently permitted source boundaries; completion is supplied from the
+        actual quest.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_event_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: reading
+      rule_refs:
+        - core.quest_book.reading_boundaries
+      effects: []
+    - id: aftermath
+      source: *a1
+      source_text:
+        Actual completed-quest aftermath finding has separate once-only off-table handoff;
+        request never credits purse or consumes another finding.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_event_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: aftermath
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_complete
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: found_in_aftermath
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: aftermath_finding_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: aftermath_finding_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest_book.aftermath_looting
+      effects:
+        - type: invoke
+          dependency: finding
+        - type: set
+          target: aftermath_finding_processed
+          value:
+            type: literal
+            value: true
+    - id: threshold
+      source: *a1
+      source_text:
+        Each actual chronological source Threat change consumes once; upward arrival at exactXX
+        can trigger again after falling below.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_event_owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: threshold
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_threat_change_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: actual_threat_event
+            right:
+              type: field
+              name: last_threat_event
+      rule_refs:
+        - core.quest_book.threat_threshold_monster
+        - core.quest_book.threat_threshold_monster_otherwise
+      effects:
+        - type: set
+          target: last_threat_event
+          value:
+            type: field
+            name: actual_threat_event
+      substeps:
+        - id: monster
+          source: *a1
+          source_text:
+            Actual triggered special placement requests a monster without reducing Threat or
+            fabricating encounter outcome.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: wandering_monster_triggered
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: invoke
+              dependency: monster
+  entry_step: reading
+  exit_step: threshold

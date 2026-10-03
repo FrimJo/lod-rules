@@ -1,0 +1,104 @@
+- id: state_machine.quest_dungeon
+  name: Source-defined resumable dungeon quest occurrence lifecycle
+  section_id: section.into_the_dungeons.generating_the_dungeon
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 88
+      printed_page: 86
+      heading: Abandoning your Quest; Finishing your Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Structural source lifecycle of one accepted dungeon quest occurrence. Initial
+    acceptance/departure are existing owned procedures. Abandonment retains layout; returning
+    resumes the same task after repopulation and fresh checks. Actual task achievement permits
+    leaving without retracing. This machine does not execute rewards, infer source-specific task
+    completion or reset for a repeated quest; a legitimately repeated quest has a separate instance.
+    Wilderness/personal quest applicability is not inferred.
+  issues:
+    - issue.quest.shared_lifecycle_boundaries
+  initial: offered
+  states:
+    - id: offered
+      transitions:
+        - event: actual_party_acceptance
+          to: accepted
+          source_text: Actual party accepts this source offer.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              pdf_page: 132
+              printed_page: 130
+              heading: Taking on Quests
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+    - id: accepted
+      enter:
+        - label: Actual immutable party/occurrence acceptance
+          object_id: procedure.quest_acceptance
+      transitions:
+        - event: actual_departure_and_dungeon_entry
+          to: active
+          source_text: Actual early-morning quest departure followed by actual dungeon entry.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              pdf_page: 133
+              printed_page: 131
+              heading: Leaving on a Quest
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+    - id: active
+      transitions:
+        - event: actual_abandonment_layout_saved
+          to: abandoned
+          source_text: If you must abandon your quest, note down the layout so you can come back and finish.
+          source: &a2
+            - *a1
+        - event: actual_source_task_accomplished
+          to: accomplished
+          source_text: Once you have accomplished what you were tasked to do, you may leave the dungeon.
+          source: *a2
+    - id: abandoned
+      transitions:
+        - event: actual_return_repopulated
+          to: active
+          source_text:
+            Returning resumes the recorded layout; dungeon repopulated, locked doors and encounters
+            checked again.
+          source: *a2
+    - id: accomplished
+      transitions:
+        - event: actual_dungeon_exit
+          to: exited
+          source_text: You may leave without tracing your way back to the entrance. Permission is not departure.
+          source: *a2
+    - id: exited
+      terminal: true

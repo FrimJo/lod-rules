@@ -1,0 +1,460 @@
+- id: procedure.open_portcullis
+  name: Owned portcullis attempts and delayed STR results
+  section_id: section.into_the_dungeons.opening_a_portcullis
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 103
+      printed_page: 101
+      heading: Opening a Portcullis
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Adjacent character:1AP STR test. One helper in the other adjacent slot and two opposite
+    may each add10STR. Unlimited retries; failure raises Threat1.
+  fields:
+    party_id:
+      type: string
+      role: state
+      description: Immutable party_id owning this physical portcullis context.
+    dungeon_visit_id:
+      type: string
+      role: state
+      description: Immutable dungeon_visit_id owning this physical portcullis context.
+    portcullis_id:
+      type: string
+      role: state
+      description: Immutable portcullis_id owning this physical portcullis context.
+    acting_party_id:
+      type: string
+      role: input
+      description: acting_party_id
+    acting_visit_id:
+      type: string
+      role: input
+      description: acting_visit_id
+    acting_portcullis_id:
+      type: string
+      role: input
+      description: acting_portcullis_id
+    actor_id:
+      type: string
+      role: input
+      description: actor_id
+    action_id:
+      type: string
+      role: input
+      description: action_id
+    result_actor_id:
+      type: string
+      role: input
+      description: result_actor_id
+    result_action_id:
+      type: string
+      role: input
+      description: result_action_id
+    phase:
+      type: string
+      role: input
+      description: phase
+    pending_actor_id:
+      type: string
+      role: state
+      description: pending_actor_id
+    pending_action_id:
+      type: string
+      role: state
+      description: pending_action_id
+    pending:
+      type: boolean
+      role: state
+      description: pending
+    open:
+      type: boolean
+      role: state
+      description: open
+    actual_action:
+      type: boolean
+      role: input
+      description: actual_action
+    adjacent:
+      type: boolean
+      role: input
+      description: adjacent
+    result_supplied:
+      type: boolean
+      role: input
+      description: result_supplied
+    strength:
+      type: number
+      role: input
+      description: Acting hero STR before this printed assistance.
+    same_side_helpers:
+      type: number
+      role: input
+      description: One hero may occupy the other adjacent slot on this side.
+      integer: true
+      minimum: 0
+      maximum: 1
+    opposite_side_helpers:
+      type: number
+      role: input
+      description: Up to two actual heroes adjacent on the opposite side.
+      integer: true
+      minimum: 0
+      maximum: 2
+    action_sequence:
+      type: number
+      role: input
+      description: Chronological actual action sequence for this portcullis.
+      integer: true
+      minimum: 1
+    last_action_sequence:
+      type: number
+      role: state
+      description: Consumed/pending chronological sequence.
+      integer: true
+      minimum: 0
+    pending_sequence:
+      type: number
+      role: state
+      description: Consumed/pending chronological sequence.
+      integer: true
+      minimum: 0
+    action_points:
+      type: number
+      role: state
+      description: Acting hero remaining AP.
+      minimum: 0
+    threat_level:
+      type: number
+      role: state
+      description: Actual party Threat before this action.
+    pending_target:
+      type: number
+      role: state
+      description: STR plus actual assistance snapshotted at action.
+    effective_value:
+      type: number
+      role: output
+      description: Saved pending STR test target.
+    roll:
+      type: number
+      role: input
+      description: Actual pending action percentile roll.
+      integer: true
+      minimum: 1
+      maximum: 100
+    outcome:
+      type: string
+      role: output
+      description: Existing standard check result.
+  dependencies:
+    - key: strength_test
+      label: Actual saved STR check result
+      object_id: core.check.standard
+  steps:
+    - id: attempt
+      source_text:
+        An adjacent character spends1AP to try. A hero in the other slot adds10STR; up to two
+        heroes opposite each add10. Retry any number of times.
+      when:
+        type: all
+        conditions:
+          - &a1
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: acting_party_id
+                right:
+                  type: field
+                  name: party_id
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: acting_visit_id
+                right:
+                  type: field
+                  name: dungeon_visit_id
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: acting_portcullis_id
+                right:
+                  type: field
+                  name: portcullis_id
+              - type: not
+                condition:
+                  type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: party_id
+                  right:
+                    type: literal
+                    value: ''
+              - type: not
+                condition:
+                  type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: dungeon_visit_id
+                  right:
+                    type: literal
+                    value: ''
+              - type: not
+                condition:
+                  type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: portcullis_id
+                  right:
+                    type: literal
+                    value: ''
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: attempt
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actual_action
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: open
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: pending
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: action_points
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: action_sequence
+            right:
+              type: field
+              name: last_action_sequence
+          - type: not
+            condition:
+              type: compare
+              operator: eq
+              left:
+                type: field
+                name: actor_id
+              right:
+                type: literal
+                value: ''
+          - type: not
+            condition:
+              type: compare
+              operator: eq
+              left:
+                type: field
+                name: action_id
+              right:
+                type: literal
+                value: ''
+      effects:
+        - type: add
+          target: action_points
+          value:
+            type: literal
+            value: -1
+          duration: immediate
+        - type: set
+          target: pending_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: strength
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: literal
+                    value: 10
+                  - type: sum
+                    values:
+                      - type: field
+                        name: same_side_helpers
+                      - type: field
+                        name: opposite_side_helpers
+        - type: set
+          target: pending_actor_id
+          value:
+            type: field
+            name: actor_id
+        - type: set
+          target: pending_action_id
+          value:
+            type: field
+            name: action_id
+        - type: set
+          target: pending_sequence
+          value:
+            type: field
+            name: action_sequence
+        - type: set
+          target: pending
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: strength_test
+    - id: resolve
+      source_text: Resolve only the actual paid attempt using its saved STR and helpers. Missing or
+        mismatched results leave that attempt pending.
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: resolve
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: pending
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_supplied
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_actor_id
+            right:
+              type: field
+              name: pending_actor_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: result_action_id
+            right:
+              type: field
+              name: pending_action_id
+      effects:
+        - type: set
+          target: effective_value
+          value:
+            type: field
+            name: pending_target
+      substeps:
+        - id: strength_test
+          source_text: Succeed with a STR test; use the existing ordinary and automatic-failure check rules.
+          rule_refs:
+            - core.check.standard
+            - core.check.success
+            - core.check.automatic_failure
+          effects: []
+        - id: success
+          source_text: Success opens the portcullis.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: outcome
+            right:
+              type: literal
+              value: success
+          effects:
+            - type: set
+              target: open
+              value:
+                type: literal
+                value: true
+        - id: failure
+          source_text: A failure raises Threat Level1 due to the noise made when the heroes drop the portcullis.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: outcome
+            right:
+              type: literal
+              value: failure
+          effects:
+            - type: add
+              target: threat_level
+              value:
+                type: literal
+                value: 1
+              duration: immediate
+        - id: consume_result
+          source_text:
+            The paid actual attempt has resolved. A failed attempt may be retried with another
+            actual1AP action.
+          effects:
+            - type: set
+              target: last_action_sequence
+              value:
+                type: field
+                name: pending_sequence
+            - type: set
+              target: pending
+              value:
+                type: literal
+                value: false
+  entry_step: attempt
+  exit_step: resolve
