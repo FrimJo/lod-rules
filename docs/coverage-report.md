@@ -81,7 +81,7 @@ None. Every node in the structural map has been mapped.
 | rules | 359 | 160 | 156 |
 | tables | 201 | 339 | 135 |
 | examples | 14 | 411 | 250 |
-| procedures | 84 | 377 | 214 |
+| procedures | 85 | 376 | 214 |
 | entities | 230 | 332 | 113 |
 
 ## Remaining tables
