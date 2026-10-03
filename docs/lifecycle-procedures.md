@@ -29,95 +29,111 @@ where the source defines states and legal transitions. Do not introduce a game r
 
 ## Starting heading inventory
 
-| Section                                                                              | PDF range | Printed range from source map | Existing quest records                                 | Disposition                                                                                                                                                     |
-| ------------------------------------------------------------------------------------ | --------- | ----------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `section.buying_an_estate`                                                           | 160–166   | 158–164                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising`                                               | 224–236   | 222–234                       | `quest.dead_rising.campaign`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.lair_of_the_spider_queen`                                      | 237–242   | 235–240                       | `quest.spider_queen.campaign`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.random_quests`                                                 | 243–243   | 241–241                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands`                                 | 263–272   | 261–270                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests`                                                   | 273–279   | 271–277                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.1_wanderlust`                                                   | 42–42     | 40–40                         | `quest.background.wanderlust`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.3_fables`                                                       | 42–42     | 40–40                         | `quest.background.fables`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.2_the_well`                                                     | 42–42     | 40–40                         | `quest.background.the_well`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.4_the_heirloom`                                                 | 43–43     | 41–41                         | `quest.background.the_heirloom`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.5_arachnophobia`                                                | 43–43     | 41–41                         | `quest.background.arachnophobia`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.6_the_lost_brother`                                             | 43–44     | 41–42                         | `quest.background.the_lost_brother`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.9_poverty`                                                      | 44–45     | 42–43                         | `quest.background.poverty`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.7_revenge`                                                      | 44–44     | 42–42                         | `quest.background.revenge_bandits`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.11_the_fraud`                                                   | 45–46     | 43–44                         | `quest.background.the_fraud`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.10_proving_your_worth`                                          | 45–45     | 43–43                         | `quest.background.proving_your_worth`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.13_sworn_enemy`                                                 | 47–47     | 45–45                         | `quest.background.sworn_enemy`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.15_troll_slayer`                                                | 47–47     | 45–45                         | `quest.background.troll_slayer`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.16_revenge`                                                     | 47–47     | 45–45                         | `quest.background.revenge_minotaur`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.14_the_family_keep`                                             | 47–47     | 45–45                         | `quest.background.the_family_keep`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.backgrounds.17_a_new_home`                                                  | 47–48     | 45–46                         | `quest.background.a_new_home`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.into_the_dungeons.generating_the_dungeon`                                   | 88–88     | 86–86                         | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.into_the_dungeons.rest`                                                     | 100–100   | 98–98                         | —                                                      | Interruption, entry, attempt accounting and standard hero/point recovery source-reconciled; condition and modified-recovery paths pending.                      |
-| `section.into_the_dungeons.rest.bleeding_out_and_poisoned_characters`                | 100–100   | 98–98                         | —                                                      | Own run-in heading source-reconciled with two procedures; interrupted timing remains explicitly unresolved.                                                     |
-| `section.combat.different_kinds_of_damage`                                           | 121–122   | 119–120                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.combat.different_kinds_of_damage.acidic_damage`                             | 121–121   | 119–119                       | —                                                      | Bounded hit/one-turn procedure reconciled; armour/halving basis unresolved.                                                                                     |
-| `section.combat.different_kinds_of_damage.fire_damage`                               | 121–122   | 119–120                       | —                                                      | Bounded hit/one-turn procedure reconciled; overlapping hit contexts remain supplied.                                                                            |
-| `section.combat.different_kinds_of_damage.frost_damage`                              | 122–122   | 120–120                       | —                                                      | Bounded initial and affected-turn procedure component reconciled; AP/overlap source boundaries retained.                                                        |
-| `section.combat.different_kinds_of_damage.stun`                                      | 122–122   | 120–120                       | —                                                      | Bounded resolved-effect and affected-turn AP-loss procedures reconciled; other components pending.                                                              |
-| `section.combat.different_kinds_of_damage.magic_damage`                              | 122–122   | 120–120                       | —                                                      | Bounded ordinary/exception follow-up reconciled; creature-specific numeric details remain supplied.                                                             |
-| `section.combat.different_kinds_of_damage.disease`                                   | 121–121   | 119–119                       | —                                                      | Bounded procedure component reconciled, including potion/Sick Ward cures; other components pending.                                                             |
-| `section.combat.different_kinds_of_damage.poison`                                    | 122–122   | 120–120                       | —                                                      | Procedure component source-reconciled, including explicit cures; Chapel routing and other source boundaries retained.                                           |
-| `section.combat.bleeding_out`                                                        | 122–122   | 120–120                       | —                                                      | Guarded lifecycle checkpoints source-reconciled, including removal/replacement; source overlap retained.                                                        |
-| `section.travelling_and_skirmishes.rations_and_resting`                              | 126–126   | 124–124                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.settlements.cure_disease_and_poison`                                        | 144–144   | 142–142                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.psychology.sanity`                                                          | 55–55     | 53–53                         | —                                                      | Bounded hero/event loss and exact-zero handoff reconciled; Conditions/recovery remain separate pending units.                                                   |
-| `section.psychology.sanity.conditions`                                               | 55–55     | 53–53                         | `procedure.sanity_condition`                           | Acquisition, duplicate rerolls and positive reset reconciled; historical diagnosis and exhausted/nonpositive boundaries unresolved.                             |
-| `section.settlements.treat_mental_conditions`                                        | 147–147   | 145–145                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.settlements.rest_and_recuperation`                                          | 147–147   | 145–145                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.staying_at_the_house`                                      | 160–160   | 158–158                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.buying_the_house`                                          | 160–160   | 158–158                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.furnishing_the_manor`                                      | 161–161   | 159–159                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.ghostly_events_table`                                      | 162–162   | 160–160                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.side_quest_the_grieving_mother`                            | 164–165   | 162–163                       | `quest.estate.grieving_mother`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.buying_an_estate.the_dark_gods`                                             | 166–166   | 164–164                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.introduction.reading_the_quests`                               | 222–222   | 220–220                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.introduction.first_blood_introductory_quest`                   | 223–223   | 221–221                       | `quest.first_blood`                                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_1_spring_cleaning`                       | 224–226   | 222–224                       | `quest.dead_rising.spring_cleaning`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_2_the_dead_rising`                       | 227–228   | 225–226                       | `quest.dead_rising.the_dead_rising`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_3_highwaymen`                            | 229–230   | 227–228                       | `quest.dead_rising.highwaymen`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_4_the_burning_village`                   | 231–231   | 229–229                       | `quest.dead_rising.burning_village`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_5_the_apprentice`                        | 232–233   | 230–231                       | `quest.dead_rising.apprentice`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_6a_sacrifice`                            | 234–234   | 232–232                       | `quest.dead_rising.sacrifice`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_dead_rising.quest_6b_the_master`                           | 235–236   | 233–234                       | `quest.dead_rising.master`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance`                 | 238–239   | 236–237                       | `quest.spider_queen.entrance`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.lair_of_the_spider_queen.level_2_the_basement`                 | 239–240   | 237–238                       | `quest.spider_queen.basement`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen` | 241–242   | 239–240                       | `quest.spider_queen.tomb`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_lava_river.quest_1_stop_the_heretics`                      | 244–245   | 242–243                       | `quest.lava_river.stop_heretics`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_lava_river.quest_2_the_master_alchemist`                   | 246–246   | 244–244                       | `quest.lava_river.master_alchemist`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster`                  | 247–248   | 245–246                       | `quest.lava_river.preventing_disaster`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners`            | 249–250   | 247–248                       | `quest.bandits_hideout.rescuing_prisoners`             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house`                | 251–252   | 249–250                       | `quest.bandits_hideout.pleasure_house`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water`                 | 253–253   | 251–251                       | `quest.fountain_room.cleansing_water`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_fountain_room.quest_2_baptising`                           | 254–254   | 252–252                       | `quest.fountain_room.baptising`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic`          | 255–255   | 253–253                       | `procedure.returning_relic`                            | Source-local lifecycle extracted with supplied opportunity scope and explicit Luck/maximum/entitlement boundaries; independent review pending.                  |
-| `section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend`            | 256–256   | 254–254                       | `procedure.slaying_fiend`                              | Setup, prior-wound selection/result, placement and defeat-gated aftermath/treasure handoff reconciled; gold/ability/collection boundaries explicit.             |
-| `section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal`           | 257–258   | 255–256                       | `procedure.closing_portal_reading_attempt`             | Source-local preparation/groups, reading/restart/closure, spawn and aftermath/payment extracted within supplied-context boundaries; independent review pending. |
-| `section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom`        | 259–260   | 257–258                       | `procedure.family_heirloom`                            | Source-local tomb/card lifecycle and surface payment extracted within supplied-context boundaries; independent review pending.                                  |
-| `section.quest_book_i.the_great_crypt.quest_2_stopping_the_necromancer`              | 261–261   | 259–259                       | `quest.great_crypt.stopping_necromancer`               | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.the_great_crypt.quest_3_tomb_raiders`                          | 262–262   | 260–260                       | `quest.great_crypt.tomb_raiders`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu`           | 264–265   | 262–263                       | `quest.ancient_lands.pyramid_xanthu`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant`          | 266–267   | 264–265                       | `quest.ancient_lands.hierophant`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair`               | 268–269   | 266–267                       | `quest.ancient_lands.temple_despair`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep`              | 270–270   | 268–268                       | `quest.ancient_lands.amenhotep`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba`                  | 271–272   | 269–270                       | `quest.ancient_lands.khaba`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_1_the_missing_brother`                  | 274–274   | 272–272                       | `quest.side.missing_brother`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_2_slay_the_beast`                       | 275–276   | 273–274                       | `quest.side.slay_beast`                                | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_3_the_mapmaker`                         | 276–276   | 274–274                       | `quest.side.mapmaker`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_4_go_fetch`                             | 277–277   | 275–275                       | `quest.side.go_fetch`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_5_manhunt`                              | 278–278   | 276–276                       | `quest.side.manhunt`                                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.quest_book_i.side_quests.side_quest_6_mushrooms`                            | 279–279   | 277–277                       | `quest.side.mushrooms`                                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                          |
-| `section.combat.wounded`                                                             | 121–121   | 119–119                       | —                                                      | Current HP classification and fresh-turn cap reconciled; active-turn timing/order unresolved.                                                                   |
-| `section.combat.bleeding_out.advanced_rule`                                          | 122–122   | 120–120                       | —                                                      | Guarded optional timer initialization and supplied expiry source-reconciled; elapsed timing supplied.                                                           |
-| `section.psychology.sanity.reducing_insanity`                                        | 55–55     | 53–53                         | `procedure.sanity_recovery`                            | Ordinary and paid recovery source-reconciled with cap/overlap/frequency ambiguities retained; generic recovery dependencies explicit.                           |
-| `section.psychology.table`                                                           | 57–57     | 55–55                         | Nine condition lifecycles plus trigger-table selection | Nine condition lifecycles and current-contribution cure cleanup reconciled; lasting effects remain explicitly unresolved; independent review pending.           |
-| `section.psychology.table_lingering_trauma_table`                                    | 57–57     | 55–55                         | `procedure.trauma_selection`                           | Complete six-row actual supplied selection reconciled once per diagnosis; exact selection timing unresolved.                                                    |
-| `section.settlements.leaving_on_a_quest`                                             | 133–133   | 131–131                       | `procedure.quest_departure`                            | Actual accepted party/occurrence departure reconciled; rule component mapped, source-specific travel/progression separate.                                      |
+| Section                                                                              | PDF range | Printed range from source map | Existing quest records                                 | Disposition                                                                                                                                                            |
+| ------------------------------------------------------------------------------------ | --------- | ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `section.buying_an_estate`                                                           | 160–166   | 158–164                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising`                                               | 224–236   | 222–234                       | `quest.dead_rising.campaign`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.lair_of_the_spider_queen`                                      | 237–242   | 235–240                       | `quest.spider_queen.campaign`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.random_quests`                                                 | 243–243   | 241–241                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands`                                 | 263–272   | 261–270                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests`                                                   | 273–279   | 271–277                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.1_wanderlust`                                                   | 42–42     | 40–40                         | `quest.background.wanderlust`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.3_fables`                                                       | 42–42     | 40–40                         | `quest.background.fables`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.2_the_well`                                                     | 42–42     | 40–40                         | `quest.background.the_well`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.4_the_heirloom`                                                 | 43–43     | 41–41                         | `quest.background.the_heirloom`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.5_arachnophobia`                                                | 43–43     | 41–41                         | `quest.background.arachnophobia`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.6_the_lost_brother`                                             | 43–44     | 41–42                         | `quest.background.the_lost_brother`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.9_poverty`                                                      | 44–45     | 42–43                         | `quest.background.poverty`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.7_revenge`                                                      | 44–44     | 42–42                         | `quest.background.revenge_bandits`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.11_the_fraud`                                                   | 45–46     | 43–44                         | `quest.background.the_fraud`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.10_proving_your_worth`                                          | 45–45     | 43–43                         | `quest.background.proving_your_worth`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.13_sworn_enemy`                                                 | 47–47     | 45–45                         | `quest.background.sworn_enemy`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.15_troll_slayer`                                                | 47–47     | 45–45                         | `quest.background.troll_slayer`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.16_revenge`                                                     | 47–47     | 45–45                         | `quest.background.revenge_minotaur`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.14_the_family_keep`                                             | 47–47     | 45–45                         | `quest.background.the_family_keep`                     | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.backgrounds.17_a_new_home`                                                  | 47–48     | 45–46                         | `quest.background.a_new_home`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.into_the_dungeons.generating_the_dungeon`                                   | 88–88     | 86–86                         | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.into_the_dungeons.rest`                                                     | 100–100   | 98–98                         | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.into_the_dungeons.rest.bleeding_out_and_poisoned_characters`                | 100–100   | 98–98                         | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.different_kinds_of_damage`                                           | 121–122   | 119–120                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.different_kinds_of_damage.acidic_damage`                             | 121–121   | 119–119                       | —                                                      | Covered by cited shared procedure models; see test-owned Package F manifest for object/test/source-limitation references.                                              |
+| `section.combat.different_kinds_of_damage.fire_damage`                               | 121–122   | 119–120                       | —                                                      | Covered by cited shared procedure models; see test-owned Package F manifest for object/test/source-limitation references.                                              |
+| `section.combat.different_kinds_of_damage.frost_damage`                              | 122–122   | 120–120                       | —                                                      | Covered by cited shared procedure models; see test-owned Package F manifest for object/test/source-limitation references.                                              |
+| `section.combat.different_kinds_of_damage.stun`                                      | 122–122   | 120–120                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.different_kinds_of_damage.magic_damage`                              | 122–122   | 120–120                       | —                                                      | Bounded ordinary/exception follow-up reconciled; creature-specific numeric details remain supplied.                                                                    |
+| `section.combat.different_kinds_of_damage.disease`                                   | 121–121   | 119–119                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.different_kinds_of_damage.poison`                                    | 122–122   | 120–120                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.bleeding_out`                                                        | 122–122   | 120–120                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.travelling_and_skirmishes.rations_and_resting`                              | 126–126   | 124–124                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.settlements.cure_disease_and_poison`                                        | 144–144   | 142–142                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.psychology.sanity`                                                          | 55–55     | 53–53                         | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.psychology.sanity.conditions`                                               | 55–55     | 53–53                         | `procedure.sanity_condition`                           | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.settlements.treat_mental_conditions`                                        | 147–147   | 145–145                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.settlements.rest_and_recuperation`                                          | 147–147   | 145–145                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.buying_an_estate.staying_at_the_house`                                      | 160–160   | 158–158                       | —                                                      | Rendered PDF160: owned free lodging, actual completed settlement recovery and sequenced physical-item storage; named regressions bind delayed stay/hero/visit results. |
+| `section.buying_an_estate.buying_the_house`                                          | 160–160   | 158–158                       | —                                                      | Rendered PDF160: actual Silver City purchase spends4000c once and persists party key ownership; estate-ownership lifecycle tests.                                      |
+| `section.buying_an_estate.furnishing_the_manor`                                      | 161–161   | 159–159                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.buying_an_estate.ghostly_events_table`                                      | 162–162   | 160–160                       | —                                                      | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.buying_an_estate.side_quest_the_grieving_mother`                            | 164–165   | 162–163                       | `quest.estate.grieving_mother`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.buying_an_estate.the_dark_gods`                                             | 166–166   | 164–164                       | —                                                      | Nonprocedural setting prose/illustration, rendered PDF166; no lifecycle invented. See manifest.                                                                        |
+| `section.quest_book_i.introduction.reading_the_quests`                               | 222–222   | 220–220                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.introduction.first_blood_introductory_quest`                   | 223–223   | 221–221                       | `quest.first_blood`                                    | Bounded procedure evidence reconciled; see test-owned manifest for actual actor/first-turn/arrival tests and dependencies.                                             |
+| `section.quest_book_i.the_dead_rising.quest_1_spring_cleaning`                       | 224–226   | 222–224                       | `quest.dead_rising.spring_cleaning`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_2_the_dead_rising`                       | 227–228   | 225–226                       | `quest.dead_rising.the_dead_rising`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_3_highwaymen`                            | 229–230   | 227–228                       | `quest.dead_rising.highwaymen`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_4_the_burning_village`                   | 231–231   | 229–229                       | `quest.dead_rising.burning_village`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_5_the_apprentice`                        | 232–233   | 230–231                       | `quest.dead_rising.apprentice`                         | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_6a_sacrifice`                            | 234–234   | 232–232                       | `quest.dead_rising.sacrifice`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_dead_rising.quest_6b_the_master`                           | 235–236   | 233–234                       | `quest.dead_rising.master`                             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance`                 | 238–239   | 236–237                       | `quest.spider_queen.entrance`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.lair_of_the_spider_queen.level_2_the_basement`                 | 239–240   | 237–238                       | `quest.spider_queen.basement`                          | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen` | 241–242   | 239–240                       | `quest.spider_queen.tomb`                              | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_lava_river.quest_1_stop_the_heretics`                      | 244–245   | 242–243                       | `quest.lava_river.stop_heretics`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_lava_river.quest_2_the_master_alchemist`                   | 246–246   | 244–244                       | `quest.lava_river.master_alchemist`                    | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster`                  | 247–248   | 245–246                       | `quest.lava_river.preventing_disaster`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_bandits_hideout.quest_1_rescuing_the_prisoners`            | 249–250   | 247–248                       | `quest.bandits_hideout.rescuing_prisoners`             | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house`                | 251–252   | 249–250                       | `quest.bandits_hideout.pleasure_house`                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_fountain_room.quest_1_cleansing_the_water`                 | 253–253   | 251–251                       | `quest.fountain_room.cleansing_water`                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_fountain_room.quest_2_baptising`                           | 254–254   | 252–252                       | `quest.fountain_room.baptising`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.the_chamber_of_reverence.quest_1_returning_the_relic`          | 255–255   | 253–253                       | `procedure.returning_relic`                            | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.the_chamber_of_reverence.quest_2_slaying_the_fiend`            | 256–256   | 254–254                       | `procedure.slaying_fiend`                              | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal`           | 257–258   | 255–256                       | `procedure.closing_portal_reading_attempt`             | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.the_great_crypt.quest_1_retrieving_the_family_heirloom`        | 259–260   | 257–258                       | `procedure.family_heirloom`                            | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.the_great_crypt.quest_2_stopping_the_necromancer`              | 261–261   | 259–259                       | `quest.great_crypt.stopping_necromancer`               | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.the_great_crypt.quest_3_tomb_raiders`                          | 262–262   | 260–260                       | `quest.great_crypt.tomb_raiders`                       | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands.the_pyramid_of_x_nthu`           | 264–265   | 262–263                       | `quest.ancient_lands.pyramid_xanthu`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands.tomb_of_the_hierophant`          | 266–267   | 264–265                       | `quest.ancient_lands.hierophant`                       | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands.temple_of_despair`               | 268–269   | 266–267                       | `quest.ancient_lands.temple_despair`                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands.halls_of_amenhotep`              | 270–270   | 268–268                       | `quest.ancient_lands.amenhotep`                        | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.quests_into_the_ancient_lands.crypt_of_khaba`                  | 271–272   | 269–270                       | `quest.ancient_lands.khaba`                            | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_1_the_missing_brother`                  | 274–274   | 272–272                       | `quest.side.missing_brother`                           | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_2_slay_the_beast`                       | 275–276   | 273–274                       | `quest.side.slay_beast`                                | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_3_the_mapmaker`                         | 276–276   | 274–274                       | `quest.side.mapmaker`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_4_go_fetch`                             | 277–277   | 275–275                       | `quest.side.go_fetch`                                  | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_5_manhunt`                              | 278–278   | 276–276                       | `quest.side.manhunt`                                   | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.quest_book_i.side_quests.side_quest_6_mushrooms`                            | 279–279   | 277–277                       | `quest.side.mushrooms`                                 | Pending direct lifecycle source reconciliation; catalogue extraction remains separate.                                                                                 |
+| `section.combat.wounded`                                                             | 121–121   | 119–119                       | —                                                      | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.combat.bleeding_out.advanced_rule`                                          | 122–122   | 120–120                       | —                                                      | Guarded optional timer initialization and supplied expiry source-reconciled; elapsed timing supplied.                                                                  |
+| `section.psychology.sanity.reducing_insanity`                                        | 55–55     | 53–53                         | `procedure.sanity_recovery`                            | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.psychology.table`                                                           | 57–57     | 55–55                         | Nine condition lifecycles plus trigger-table selection | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.psychology.table_lingering_trauma_table`                                    | 57–57     | 55–55                         | `procedure.trauma_selection`                           | Bounded procedure evidence reconciled; see test-owned Package F manifest for object/test/source-limitation references.                                                 |
+| `section.settlements.leaving_on_a_quest`                                             | 133–133   | 131–131                       | `procedure.quest_departure`                            | Actual departure is bound to the accepted party and occurrence; completed settlement accounting and departure day are distinct from site arrival or quest completion.  |
+
+| `section.settlements.taking_on_quests` | 132–132 | 130–130 | — | Quest offers and actual acceptance are reconciled with saved party/offer/visit/occurrence provenance, independent main/side records and pending site ownership. |
+
+| `section.quest_book_i.the_dead_rising.campaign_aftermath` | 236–236 | 234–234 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.introduction` | 222–223 | 220–221 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.the_lava_river` | 244–248 | 242–246 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.the_bandits_hideout` | 249–252 | 247–250 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.the_fountain_room` | 253–254 | 251–252 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.the_chamber_of_reverence` | 255–258 | 253–256 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
+
+| `section.quest_book_i.the_great_crypt` | 259–262 | 257–260 | — | Added by closure inventory reconciliation; own heading behavior remains pending. |
 
 ## First bounded unit
 
@@ -200,7 +216,7 @@ after static type narrowing; coverage regeneration, lint and diff checks pass.
 Coverage remains 345/666 extracted (52%) and zero independently reviewed.
 
 The procedure follows PDF100’s +2 morale checklist. The conflicting +1 short-rest
-entry remains `issue.phase4.short_rest_morale`; this unit does not combine the two
+entry historically retained `issue.phase4.short_rest_morale`; the original unit did not combine the two
 values or resolve that source conflict. HP overflow likewise remains
 `issue.phase4.recovery_bounds`. Next bounded unit: per-hero HP/Mana recovery and
 per-lost-point Energy recovery, reusing existing recovery rules and documenting
@@ -1420,3 +1436,212 @@ Returning the Relic lifecycle (1 October): `procedure.returning_relic` cites vis
 Returning the Relic lifecycle final gate (1 October):430 canonical files validate;3395 tests pass with two optional provider skips, including32 new source-derived lifecycle regressions. Coverage regenerated at710 rows; this quest procedure component is extracted within explicit supplied-context/source-boundary dispositions, with no independent review. There are91 procedures and132 review records (124 unresolved, eight resolved). All validation, coverage, full-suite, lint and whitespace gates pass. No commits made. Next Package F source unit: Retrieving the Family Heirloom, PDF259–260/printed257–258.
 
 Retrieving the Family Heirloom lifecycle (3 October): `procedure.family_heirloom` cites visually inspected PDF259/printed257 and PDF260/printed258. It preserves settlement/8+8/R1B-8B/Undead setup, quest-local dead-Brotherhood corpse-search exception and once-only actual d4+1 Threat/minimum=start/max18. Each actual Scenario8–10 event hands off Threat resolution once. Actual objective entry initializes six tombs/no enemies/current positions and the shuffled3Black/1Red/2Dressed pool once. Each actual unopened tomb requires exactly2heroes and a complete turn, followed by one actual unused card. Pending draws block a second opening; supplied classification resolves category once, consumes that actual card and decrements its printed category count atomically. Black records corpse/nothing else, Red retrieves sword, and Dressed places mummy next to tomb and hands off combat without invented statistics or outcome. A later tomb clears only current draw reports, preserving existing mummy/combat state. Actual surface return plus sword presentation transfers sword and credits300c once per actual owned hero. Thirty-nine derived regressions cover all Threat/Scenario faces, work guards, all categories, all six Red positions in a finite pool, pending/unclassified/mismatched draws, duplicate-card/tomb replay, category exhaustion, current-versus-past reports and independent surface payments. Existing card-category ambiguity remains unresolved; `issue.quest.heirloom_lifecycle_scope` records missing combat/escape/entitlement/completion/abandonment boundaries. Canonical YAML uses simple source anchors and explicit branch guards under unchanged parser protections; no numeric mummy content, extra chests or XP invented. Procedure component extracted within this bounded source/supplied-context scope; independent review, Package F and comprehensive Phases7–12 remain unfinished. Next quest lifecycle source unit: Stopping the Necromancer, PDF261/printed259.
+
+Retrieving the Family Heirloom lifecycle final gate (3 October):431 canonical files validate;3485 tests pass with two optional provider skips, including39 Family Heirloom lifecycle regressions and the current retrieval/ask suites. Coverage regenerated at710 rows; procedure component is extracted within the documented source/supplied-context boundaries, with zero independently reviewed sections. Current review inventory is133 records (124 unresolved, nine resolved); there are92 procedures. Full root lint and whitespace checks pass after narrowly excluding the two tool-managed Intent hooks from ESLint and those hooks plus `.claude/settings.json` from Prettier. Hook/settings contents are unchanged; consumer app checks remain separate. No commits made. Next Package F source unit: Stopping the Necromancer, PDF261/printed259. Comprehensive Phases7–12 and Package F remain unfinished.
+
+## Stopping the Necromancer owned lifecycle — 3 October
+
+Rendered PDF261 / source-map printed259 reconciles `procedure.stopping_necromancer`.
+Actual party/occurrence setup and initial d6/minimum=start/maximum20 are once-only.
+Actual objective entry places Ragnalf, six longsword Zombies and short-side heroes
+once. Zombie/statistics/spell/poison outcomes are explicit handoffs. Hero room
+contributions preserve separate unrelated modifiers and never accumulate. Actual
+chronological To Hit90+ owns the next-action requirement; pending getting-up DEX
+belongs to that hero and attempt, and failure preserves fallen status. Further
+retry and timing are not defined by this source. Ragnalf's actual death consumes
+zombie-death/floor-movement consequences once without inventing modifier expiry.
+Battle/XP200/T4 resolution stays a handoff; each actual eligible returned hero
+receives300c once in a separate hero/occurrence context. Generic completion and
+entitlement for absent/dead heroes are not inferred. Review issue
+`issue.quest.necromancer_lifecycle_scope` preserves these source questions.
+
+Twenty-nine derived regressions cover initial Threat faces, incomplete/wrong
+ownership, entry replay, separate modifier contributions, To Hit89/90/100,
+failed/successful and delayed DEX, nonactual actions, actual death traces and
+independent hero payment/replay. Procedure component extracted within this bounded
+unit. Package F remains open; independent review and comprehensive Phases7–12 remain.
+
+Stopping the Necromancer fresh unit gate (3 October): 432 canonical files validate;
+3514 tests pass, two optional provider tests skip; lint and whitespace checks pass.
+Coverage regenerated from YAML at710 rows; no independent review or commits.
+
+## Tomb Raiders owned lifecycle — 3 October
+
+Rendered PDF262 / source-map printed260 reconciles `procedure.tomb_raiders`.
+Actual occurrence setup preserves White38, seven corridors/five rooms/R1B-8B,
+Undead, any loot found and initial d6/minimum=start/maximum20 once. Actual room
+entry preserves hero positions once. Each distinct actual tomb has independent
+opening state, requiring two heroes working together and a complete turn; its
+standard sarcophagus findings are a handoff, never invented contents or cash.
+The source supplies no tomb count and no special completion/payment condition;
+the surface aftermath is narrative. A separate actual Threat-event context
+snapshots current Threat before comparing the supplied roll. At least one hero
+in the objective room and roll above the snapshot requests a Wandering Monster
+and Threat increase once, including20. The source supplies neither increase
+amount nor precedence over ordinary20; `issue.quest.tomb_raiders_threat_boundary`
+retains both. No guessed arithmetic is applied. Other results request ordinary
+Threat resolution without executing it. Distinct quest occurrence, visit, tomb
+and Threat-event contexts remain caller-owned and cannot share consumed markers.
+
+Twenty-seven derived regressions cover initial die faces, incomplete inputs,
+entry/opening replay, actual two-hero work, independent tombs and standard
+sarcophagus traces, Threat below/equal/above including20, room occupancy, wrong
+ownership, snapshots and fresh events. This closes the bounded Great Crypt quest
+procedure units; Package F acceptance remains open.
+
+## Test-owned Package F acceptance checklist — 3 October
+
+`tests/fixtures/acceptance/package-f.json` accounts for all87 starting headings.
+It records explicit canonical candidates, bounded implemented procedure evidence,
+source issue IDs and remaining work. Pending catalogue-only headings remain
+pending. `tests/schema/lifecycle-acceptance.test.ts` checks heading bijection and
+all section/object/review/file references. The final-acceptance check rejects every
+pending disposition and every nonempty implementation gap, even if relabelled as
+source uncertainty. The manifest stays open until the full inventory, Phase5 exit
+criteria and Phase6 candidate loops are reconciled; passing its structural tests
+is not Package F acceptance. Coverage and independent-review flags remain distinct.
+
+Tomb Raiders/acceptance-manifest fresh unit gate (3 October): 433 canonical files
+validate; 3546 tests pass, two optional provider tests skip. Lint and whitespace
+checks pass; coverage regenerated from YAML at710 rows, zero independently
+reviewed sections. No commits made.
+
+## Shared resumable dungeon quest lifecycle — 3 October
+
+Rendered PDF88 / printed86 now supplies three atomic `core.quest_lifecycle.*`
+rules, `procedure.quest_dungeon_lifecycle` and structural
+`state_machine.quest_dungeon`. The procedure composes existing immutable party
+acceptance and actual initial departure. Initial entry, abandonment, pending
+return, actual repopulation, task accomplishment and actual exit have explicit
+owned guards. Abandonment requires the recorded actual layout; a delayed
+recording cannot replace the accepted occurrence, party or layout. Returning
+binds a distinct chronological visit to the same saved layout and requests
+repopulation once; only its supplied completed result resumes. Fresh locked-door
+and encounter checks remain per-visit requirements. Nothing reshuffles the saved
+layout, resets source-specific progress or rewards, or creates a newly accepted
+quest. Later abandonment/return uses a new visit; a legal repeat owns a new
+accepted occurrence. Actual source task achievement permits leaving without
+retracing; permission is distinct from actual exit and payment. This source unit
+is dungeon-scoped, with wilderness/personal quest policies separately pending.
+
+Rendered PDF222 / printed220 supplies `procedure.quest_reading_and_events`.
+Actual objective reach and actual completion govern reading boundaries.
+Each actual aftermath finding owns a separate off-table/no-trap/no-lock handoff;
+request does not collect or credit treasure. Actual chronological Threat changes
+trigger a Wandering Monster only on upward arrival at exactXX; decreasing toXX
+fails, while decreasing below then increasing back triggers again. Placement
+never reduces Threat. `invoke` remains a handoff and the structural machine does
+not execute resources. Thirty-nine derived regressions cover illegal ownership,
+incomplete/replayed actions, pending return resumption, second return versus
+fresh repeat, separate completion/exit, reading, findings and repeated thresholds.
+`issue.quest.shared_lifecycle_boundaries` retains source-specific reset boundaries.
+
+The manifest now reconciles23 implemented headings and3 child headings covered by
+shared models;61 headings retain explicit pending work. Existing bounded condition
+unit evidence corrects stale damage/Wounded and other completed inventory rows.
+Full remaining quest, estate, travel/settlement rest reconciliation, original
+candidate-loop audit and Phase5/6 exit acceptance are still required. These gaps
+are not classified as source ambiguities or deferred to independent review.
+
+Shared dungeon/reading lifecycle fresh unit gate (3 October): 437 canonical files
+validate; 3585 tests pass, two optional provider tests skip. Lint and whitespace
+checks pass. Coverage regenerated at710 rows; zero independently reviewed sections.
+No commits made.
+
+## First Blood introductory encounter — 3 October
+
+Rendered PDF223 / printed221 reconciles `procedure.first_blood`. Actual occurrence
+setup preserves the printed four adversaries/equipment, four open-ground tiles,
+adjacent centre heroes, sight/shooting10 and no Scenario die once. Each actual
+adversary separately persists randomized edge and d10 distance; source geometry
+and unavailable corresponding monster/equipment card values are supplied.
+Only all four actual placements plus confirmed cards and the actual first turn
+request the+2 bandit initiative once. A later-turn report is zero; unrelated token
+contributions remain separate. Actual all-bandits-dead requests no-further-issues
+settlement arrival once, and only a matching completed arrival/event result
+closes the handoff. Invocation does not execute settlement accounting or credit
+cash/XP/treasure. No repeat eligibility is inferred for this introductory quest.
+
+Twenty-nine derived regressions cover all ten distances, four independent actor
+placements, wrong/incomplete ownership, setup/placement/initiative replay,
+first/later-turn separation and actual death/request/completed-arrival gates.
+The manifest now accounts for24 implemented headings,3 shared-model dispositions
+and60 pending headings. Package F and Phase6 Batch7 remain open; Phase5 exit
+reconciliation and comprehensive Phases7–12 also remain required.
+
+First Blood fresh unit gate (3 October): 438 canonical files validate; 3614 tests
+pass, two optional provider tests skip. Lint and whitespace checks pass; coverage
+regenerated at710 rows with zero independently reviewed sections. No commits.
+
+## Narrative disposition and delayed-action refinement — 3 October
+
+Rendered PDF166 / source-map printed164 confirms The Dark Gods is illustration
+and setting prose about forbidden worship and Kheros; it defines no lifecycle
+trigger, action, cost or outcome. The manifest records `nonprocedural` and only
+its procedure coverage becomes `not_applicable`; no lore extraction or independent
+review is claimed. The checklist now has24 implemented,3 shared-model,
+1 nonprocedural and59 pending dispositions.
+
+Stopping the Necromancer's pending DEX result now restores the owned working
+spent-action report from its already accepted attempt, rather than depending on
+a later supplied action flag. A delayed success cannot consume a different action
+or rewrite its inputs. The additional source-derived regression verifies this
+composition and applied-rule trace; the lifecycle fixture now has30 tests.
+
+Current continuation final gate (3 October):438 canonical files validate;3615 tests
+pass with2 optional provider skips, including130 added derived/acceptance checks.
+`npm run validate`, `npm test`, `npm run lint` and `git diff --check` pass.
+Coverage regenerated from YAML at710 rows,675 canonical sections and35 redirects;
+346 sections extracted, zero independently reviewed. Inventory:1533 rules,669
+entities,213 tables,97 procedures,2 structural state machines and475 executable
+YAML fixtures. The canonical review inventory has135 records (126 unresolved,
+9 resolved). No consumer changes, calibration or commits were made by this work.
+Source/manifest and supplemental review-document changes appearing concurrently
+were preserved and are not this continuation's extraction evidence.
+
+Package F remains open with59 pending heading dispositions. The next source units
+are quest selectors/campaign progression, followed by remaining individual and
+Ancient Lands/Side Quests; estate lifecycle must precede closing estate-dependent
+personal quests. Travel/settlement rest reconciliation, original candidate-loop
+audit and Phase5/6 exit checks remain required. The requested comprehensive
+Phases0–6 completion handoff has not been reached.
+
+## Closure reconciliation — original Phase 6 candidate: Opening a Portcullis
+
+Rendered PDF103 / mapped printed101 revealed an original candidate with a mapped
+heading but no procedure. `procedure.open_portcullis` now records a physical gate
+owned by party and dungeon visit. An adjacent hero spends1AP for an actual STR
+attempt, snapshotting STR plus10 for the other same-side adjacent hero and up to
+two opposite-side helpers. Pending actor/action identities prevent replacement,
+wrong-result resolution and repeated cost. Existing ordinary/automatic-failure
+check rules resolve the actual roll. Success opens the gate; failure adds1Threat
+once and allows another paid attempt. Twenty-five derived regressions cover all
+helper configurations, exact success, delayed inputs, wrong ownership, replay,
+insufficient AP, unavailable adjacency and retries. No independent review.
+
+### Official short-rest morale resolution (3 October 2026)
+
+Changelog 2.21 entry 39 (physical PDF page 4) resolves the historical +1/+2 conflict in favor of +2. The Rest checklist supplies the starting-value cap. The printed table is retained, the linked rule implements the resolved amount, and retrieval carries the explicit resolution and document identity. This resolves only that issue; interrupted-rest timing and other recovery boundaries remain unchanged.
+
+## Estate purchase, lodging and storage closure unit — PDF160 / printed158
+
+`procedure.estate_ownership` applies the actual4000c Silver City purchase once to
+its party and persists the key. Lodging saves stay, hero, visit and day identities;
+pending recovery cannot be replaced by another stay or consumed by another hero.
+The composition regression executes actual estate overnight and hero recovery in
+`procedure.settlement_activities_and_overnight` before accepting the completed
+receipt. Equipment storage uses a permanent physical-item identity and chronological
+transfer sequence, rejecting old deposits after retrieval and transfers away from
+the estate. Twenty derived regressions; no independent review. Furnishing, ghost
+contact/events and Grieving Mother remain separate units.
+
+## Acceptance/departure ownership reconciliation — PDF132–133
+
+Earlier acceptance stored quest/site/origin but relied on a supplied ownership
+boolean. It now requires concrete saved party/offer/visit identifiers to match
+actual inputs, persists them on the accepted occurrence, and binds a delayed
+site result to its pending quest/occurrence. Departure compares the actual party
+against that saved owner. Main/side records and eligible repeats remain distinct;
+no universal repeat or completion rule is inferred. Source availability and map
+geometry remain supplied, with the existing review boundaries preserved. The
+omitted Taking on Quests heading is included in the reconciled inventory.

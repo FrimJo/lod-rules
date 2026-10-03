@@ -227,3 +227,7 @@ unavailable external material.
 Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
 semantic-provider calibration, and the full Phase 11 bundle with JSON/SQLite equivalence and
 repeat-build checksums.
+
+### Official ruling evidence
+
+Source citations retain document identity, file, heading and row/other locators, including separately paginated errata and HTML FAQ headings. Resolved issues expose their historical concern and complete resolution separately. Q&A prompts apply a recorded resolution only to its linked issue, preserving original printed text and other unresolved boundaries. The morale table and short-rest rule both link to the entry-39 correction. The web client opens changelog sources separately from the rulebook viewer and downloads archived HTML FAQ evidence. Search format version 4 invalidates older indexes; the input fingerprint includes the source manifest.

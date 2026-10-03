@@ -637,3 +637,9 @@ The final gate validates 403 canonical files and passes 2482 tests (two optional
 skips), coverage regeneration, lint and diff checks. Coverage remains 345/666 extracted
 and zero independently reviewed. Batch 7 is accepted within catalogue scope; Package F
 and comprehensive Phases 7–12 remain required.
+
+Package F follow-up (3 October): Package E's124 catalogue dispositions remain
+accepted within scope. The new test-owned Package F87-heading manifest and
+Necromancer/Tomb Raiders/shared dungeon/First Blood procedure units do not imply
+Phase5 exit acceptance or independent review. Phase5's seven-batch exit audit remains
+required before its live status can become complete. See [lifecycle evidence](lifecycle-procedures.md).

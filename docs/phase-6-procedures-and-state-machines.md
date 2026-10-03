@@ -11,15 +11,15 @@ issues instead of being invented.
 
 ## Batch plan
 
-| Batch | Scope                                                                              | Status    |
-| ----- | ---------------------------------------------------------------------------------- | --------- |
-| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted |
-| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted |
-| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted |
-| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted |
-| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted |
-| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted |
-| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | Pending   |
+| Batch | Scope                                                                              | Status      |
+| ----- | ---------------------------------------------------------------------------------- | ----------- |
+| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted   |
+| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted   |
+| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted   |
+| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted   |
+| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted   |
+| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted   |
+| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | In progress |
 
 State machines are added only where the source genuinely governs transitions by current state;
 every other candidate stays a plain procedure. `procedure.dungeon_turn` and
@@ -1203,3 +1203,21 @@ Closing the Portal spawning and aftermath (1 October): visually inspected PDF257
 Returning the Relic lifecycle (1 October): `procedure.returning_relic` cites visually inspected PDF255/printed253. It preserves Random/8+8 setup, actual initial d4+1 Threat/minimum=start/max20 once, quest-owned Luck nullification until actual stone return without changing numeric Luck, and actual distinct Scenario8–10 handoffs. Actual objective entry records short-side heroes/far-end statue and requests two encounters/random placement once. Refit requires all enemies dead, actual hero in front, actual distinct turn and supplied unresolved party/hero opportunity scope. Pending actual DEX result cannot be replaced by a later turn or mismatched owner; success returns stone and ends only its nullification, failure consumes opportunity and raises Threat1 once below20. At maximum20 raw+1 remains pending source accounting. Actual home arrival after return credits300c once per actual owned hero. Thirty-two derived regressions cover setup faces, all Scenario faces, objective handoff, failed/successful/pending/replayed/mismatched attempts, maximum boundary, unchanged Luck/other curses and independent home payments. `issue.quest.relic_lifecycle_scope` preserves scope, maximum, failed/abandoned-quest curse expiry, generic completion and hero-entitlement ambiguities. No source-local chests/XP invented; no independent review. Lifecycle component extracted within those bounded source/supplied-context dispositions; Package F and Phases 7–12 remain unfinished. Next source unit: Retrieving the Family Heirloom, PDF259–260.
 
 Retrieving the Family Heirloom lifecycle (3 October): `procedure.family_heirloom` cites visually inspected PDF259/printed257 and PDF260/printed258. It preserves settlement/8+8/R1B-8B/Undead setup, quest-local dead-Brotherhood corpse-search exception and once-only actual d4+1 Threat/minimum=start/max18. Each actual Scenario8–10 event hands off Threat resolution once. Actual objective entry initializes six tombs/no enemies/current positions and the shuffled3Black/1Red/2Dressed pool once. Each actual unopened tomb requires exactly2heroes and a complete turn, followed by one actual unused card. Pending draws block a second opening; supplied classification resolves category once, consumes that actual card and decrements its printed category count atomically. Black records corpse/nothing else, Red retrieves sword, and Dressed places mummy next to tomb and hands off combat without invented statistics or outcome. A later tomb clears only current draw reports, preserving existing mummy/combat state. Actual surface return plus sword presentation transfers sword and credits300c once per actual owned hero. Thirty-nine derived regressions cover all Threat/Scenario faces, work guards, all categories, all six Red positions in a finite pool, pending/unclassified/mismatched draws, duplicate-card/tomb replay, category exhaustion, current-versus-past reports and independent surface payments. Existing card-category ambiguity remains unresolved; `issue.quest.heirloom_lifecycle_scope` records missing combat/escape/entitlement/completion/abandonment boundaries. Canonical YAML uses simple source anchors and explicit branch guards under unchanged parser protections; no numeric mummy content, extra chests or XP invented. Procedure component extracted within this bounded source/supplied-context scope; independent review, Package F and comprehensive Phases7–12 remain unfinished. Next quest lifecycle source unit: Stopping the Necromancer, PDF261/printed259.
+
+## Current Package F checkpoint — 3 October
+
+The [lifecycle ledger](lifecycle-procedures.md) and test-owned
+`tests/fixtures/acceptance/package-f.json` now reconcile all87 inventory headings:
+24 implemented,3 covered by shared procedure models,1 narrative-only and59 pending.
+New bounded units are Stopping the Necromancer (30 derived regressions), Tomb Raiders
+(27), shared resumable dungeon progression/reading/aftermath/Threat events (39),
+and First Blood (29). Three source-backed atomic lifecycle rules and structural
+`state_machine.quest_dungeon` preserve resumable abandonment rather than resetting
+accepted occurrences. Dark Gods is nonprocedural setting material. The acceptance
+contract validates section/object/review/file references and rejects pending
+extraction or named gaps at final acceptance. It does not assert independent review.
+
+The remaining quest/campaign/estate/personal-quest units, travel/settlement rest
+reconciliation, original candidate-loop audit and Phase5/6 exit acceptance remain
+required. Package F and Phase6 Batch7 are not closed. Historical counts and
+checkpoints above remain historical; current per-unit gates are in the lifecycle ledger.
