@@ -3,7 +3,14 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['node_modules/', 'generated/', 'dist/', 'clients/'],
+    ignores: [
+      'node_modules/',
+      'generated/',
+      'dist/',
+      'clients/',
+      '.intent/hooks/intent-claude-gate.mjs',
+      '.intent/hooks/intent-codex-gate.mjs',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
