@@ -10,7 +10,7 @@
         },
         {
           "type": "object",
-          "required": ["file", "pdf_page", "printed_page", "heading", "extraction"],
+          "required": ["file", "heading", "extraction"],
           "properties": {
             "file": {
               "type": "string",
@@ -20,7 +20,7 @@
               "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/printedPage"
             },
             "pdf_page": {
-              "type": "integer",
+              "type": ["integer", "null"],
               "minimum": 1
             },
             "heading": {
@@ -42,7 +42,38 @@
                 }
               }
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "pattern": "\\.html?$"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "pdf_page": {
+                    "type": "null"
+                  },
+                  "printed_page": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "required": ["pdf_page", "printed_page"],
+                "properties": {
+                  "pdf_page": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
