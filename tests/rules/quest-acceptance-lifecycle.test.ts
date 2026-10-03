@@ -28,6 +28,12 @@ const arrival: State = {
   business_allowed: true,
 };
 const offer: State = {
+  party_id: 'party-a',
+  actual_party_id: 'party-a',
+  offer_id: 'offer-a',
+  actual_offer_id: 'offer-a',
+  visit_id: 0,
+  actual_visit_id: 0,
   phase: 'accept',
   quest_acceptance_owner_matches: true,
   quest_offer_scope_resolved: true,
@@ -145,7 +151,7 @@ describe('Party offered quest and distinct accepted occurrence — PDF132/133', 
     { quest_choice_available: false },
     { quest_acceptance_confirmed: false },
     { quest_slot: 'side', side_quest_available: false },
-  ] as State[])(
+  ] as State[] as State[])(
     'ineligible/unowned/unconfirmed context does not create an instance %s',
     (change) => {
       expect(run({ ...offer, ...change }).state.instance_acceptance_processed).toBe(false);
@@ -160,19 +166,22 @@ describe('Party offered quest and distinct accepted occurrence — PDF132/133', 
         .instance_acceptance_processed,
     ).toBe(true);
   });
-  it.each([{ quest_offer_scope_resolved: false }, { quest_choice_supplied: false }] as State[])(
-    'missing actual choice/scope requests once %s',
-    (change) => {
-      const first = run({ ...offer, ...change });
-      expect(first.state.instance_acceptance_processed).toBe(false);
-      expect(first.events).toHaveLength(1);
-      expect(run(first.state).events).toEqual([]);
-      expect(
-        run({ ...first.state, quest_offer_scope_resolved: true, quest_choice_supplied: true }).state
-          .instance_acceptance_processed,
-      ).toBe(true);
-    },
-  );
+  it.each([
+    { quest_offer_scope_resolved: false },
+    { quest_choice_supplied: false },
+  ] as State[] as State[])('missing actual choice/scope requests once %s', (change) => {
+    const first = run({ ...offer, ...change });
+    expect(first.state.instance_acceptance_processed).toBe(false);
+    expect(first.events).toHaveLength(1);
+    expect(run(first.state).events).toEqual([]);
+    expect(
+      run({
+        ...first.state,
+        quest_offer_scope_resolved: true,
+        quest_choice_supplied: true,
+      }).state.instance_acceptance_processed,
+    ).toBe(true);
+  });
   it('missing site requests source resolution once then records actual supplied result', () => {
     const first = run({ ...offer, quest_site_supplied: false });
     expect(first.state.instance_acceptance_processed).toBe(false);
@@ -189,12 +198,19 @@ describe('Party offered quest and distinct accepted occurrence — PDF132/133', 
   });
   it('fixed source site is preserved without inventing a random placement', () => {
     expect(
-      run({ ...offer, settlement: 'silver_city', selected_quest_site: 'silver_city' }).state
-        .instance_site,
+      run({
+        ...offer,
+        settlement: 'silver_city',
+        selected_quest_site: 'silver_city',
+      }).state.instance_site,
     ).toBe('silver_city');
   });
   it('no acceptance-site prescription requires no invented location input', () => {
-    const input: State = { ...offer, quest_site_required: false, quest_site_supplied: false };
+    const input: State = {
+      ...offer,
+      quest_site_required: false,
+      quest_site_supplied: false,
+    };
     delete input.selected_quest_site;
     expect(run(input).state).toMatchObject({
       instance_site: '',
@@ -205,14 +221,71 @@ describe('Party offered quest and distinct accepted occurrence — PDF132/133', 
     { selected_quest_id: '' },
     { selected_instance_id: '' },
     { quest_slot: 'unknown' },
-  ] as State[])('invalid supplied identity/slot has an unresolved disposition %s', (change) => {
-    const r = run({ ...offer, ...change });
-    expect(r.state.instance_acceptance_processed).toBe(false);
-    expect(r.unresolved).toContain('issue.quest.acceptance_scope');
-  });
+  ] as State[] as State[])(
+    'invalid supplied identity/slot has an unresolved disposition %s',
+    (change) => {
+      const r = run({ ...offer, ...change });
+      expect(r.state.instance_acceptance_processed).toBe(false);
+      expect(r.unresolved).toContain('issue.quest.acceptance_scope');
+    },
+  );
   it('an empty required site cannot complete acceptance', () => {
     expect(run({ ...offer, selected_quest_site: '' }).state.instance_acceptance_processed).toBe(
       false,
+    );
+  });
+});
+
+describe('Persisted party/offer/visit acceptance ownership', () => {
+  it.each([
+    { actual_party_id: 'other' },
+    { actual_offer_id: 'other' },
+    { actual_visit_id: 1 },
+    { party_id: '' },
+    { offer_id: '' },
+  ] as State[])('rejects mismatched concrete offer identity %j', (patch) => {
+    const result = run({ ...offer, ...patch });
+    expect(result.state.instance_acceptance_processed).toBe(false);
+    expect(result.state.instance_owner).toBeUndefined();
+  });
+  it('persists concrete party and offer provenance and preserves it through replay', () => {
+    const accepted = run(offer);
+    expect(accepted.state).toMatchObject({
+      instance_owner: 'party-a',
+      instance_offer_id: 'offer-a',
+      instance_visit_id: 0,
+    });
+    expect(
+      run({
+        ...accepted.state,
+        party_id: 'other',
+        actual_party_id: 'other',
+        offer_id: 'new',
+        actual_offer_id: 'new',
+        visit_id: 2,
+        actual_visit_id: 2,
+      }).state,
+    ).toMatchObject({
+      instance_owner: 'party-a',
+      instance_offer_id: 'offer-a',
+      instance_visit_id: 0,
+    });
+  });
+  it('delayed site result cannot be transferred to a different quest or occurrence', () => {
+    const pending = run({ ...offer, quest_site_supplied: false }).state;
+    expect(pending.quest_site_request_processed).toBe(true);
+    for (const patch of [
+      { selected_instance_id: 'other' },
+      { selected_quest_id: 'quest.side.mushrooms' },
+      { actual_offer_id: 'other' },
+      { actual_visit_id: 1 },
+    ] as State[])
+      expect(
+        run({ ...pending, quest_site_supplied: true, ...patch }).state
+          .instance_acceptance_processed,
+      ).toBe(false);
+    expect(run({ ...pending, quest_site_supplied: true }).state.instance_acceptance_processed).toBe(
+      true,
     );
   });
 });

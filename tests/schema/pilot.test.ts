@@ -43,6 +43,75 @@ const firstProcedure = () =>
   structuredClone(pilot.procedures.find((p) => p.id === 'procedure.dungeon_turn') as Procedure);
 
 describe('strict pilot schemas', () => {
+  it('checks ruling provenance against its own document rather than the rulebook folios', () => {
+    const changed = structuredClone(pilot);
+    const rule = changed.rules[0]!;
+    const ruling = { id: 'source.test_ruling', file: 'ruling.pdf', canonical: false, pages: 4 };
+    const source = {
+      ...rule.source[0]!,
+      document: ruling.id,
+      file: 'source/ruling.pdf',
+      pdf_page: 4,
+      printed_page: null,
+    };
+    rule.source.push(source);
+    const withRuling = { ...context, documents: [...context.documents, ruling] };
+    expect(checkPilotIntegrity(changed, withRuling)).toEqual([]);
+    source.pdf_page = 5;
+    expect(checkPilotIntegrity(changed, withRuling)).toContain(
+      `${rule.id}: source page exceeds document length`,
+    );
+    source.pdf_page = 4;
+    source.file = 'source/wrong.pdf';
+    expect(checkPilotIntegrity(changed, withRuling)).toContain(
+      `${rule.id}: source file does not match document`,
+    );
+  });
+  it('accepts HTML heading evidence without fabricated pages and still requires PDF pages', () => {
+    const rule = firstRule();
+    const html = {
+      ...rule.source[0]!,
+      document: 'vonbraus.faq_gamefound',
+      file: 'source/vonbraus-faq-2026-10-03.html',
+      heading: 'Which rule is correct?',
+    };
+    delete html.pdf_page;
+    delete html.printed_page;
+    rule.source = [html];
+    expect(getValidator(ajv, 'rules')([rule])).toBe(true);
+    const changed = structuredClone(pilot);
+    changed.rules[0] = rule;
+    expect(checkPilotIntegrity(changed, context)).toEqual([]);
+    html.pdf_page = 4;
+    expect(getValidator(ajv, 'rules')([rule])).toBe(false);
+    expect(checkPilotIntegrity(changed, context).join('\n')).toContain(
+      'HTML source must not claim',
+    );
+    delete html.pdf_page;
+    html.file = 'source/Rulebook-2nd-printing-ENGa.pdf';
+    expect(getValidator(ajv, 'rules')([rule])).toBe(false);
+  });
+  it('checks ruling resolution PDF bounds and FAQ locators independently of rulebook pages', () => {
+    const changed = structuredClone(context);
+    const issue = changed.issues.find((entry) => entry.id === 'issue.phase4.short_rest_morale')!;
+    if (issue.status !== 'resolved') throw new Error('Expected resolved issue');
+    issue.resolution.source[0]!.pdf_page = 29;
+    expect(checkPilotIntegrity(pilot, changed).join('\n')).toContain(
+      'source page exceeds document length',
+    );
+    issue.resolution.source = [
+      {
+        document: 'vonbraus.faq_gamefound',
+        file: 'source/vonbraus-faq-2026-10-03.html',
+        heading: 'Which rule is correct?',
+      },
+    ];
+    expect(checkPilotIntegrity(pilot, changed)).toEqual([]);
+    delete issue.resolution.source[0]!.heading;
+    expect(checkPilotIntegrity(pilot, changed).join('\n')).toContain(
+      'HTML source requires a heading or locator',
+    );
+  });
   it.each(Object.keys(pilot) as Array<keyof Pilot>)('validates all %s files', (kind) => {
     expect(getValidator(ajv, kind)(pilot[kind])).toBe(true);
   });

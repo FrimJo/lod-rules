@@ -59,6 +59,8 @@ const activity: State = {
 const instance: State = {
   phase: 'depart',
   quest_departure_owner_matches: true,
+  instance_owner: 'party-a',
+  actual_party_id: 'party-a',
   instance_acceptance_processed: true,
   instance_completed: false,
   instance_abandoned: false,
@@ -103,7 +105,13 @@ describe('Actual accepted occurrence departure — rendered PDF133', () => {
   });
   it('incomplete occupied activity cannot become a recorded instance departure', () => {
     const accounting = run(
-      { ...activity, phase: 'depart', day: 1, party_occupied_until: 2, leaving_on_quest: true },
+      {
+        ...activity,
+        phase: 'depart',
+        day: 1,
+        party_occupied_until: 2,
+        leaving_on_quest: true,
+      },
       'procedure.settlement_activities_and_overnight',
     );
     expect(
@@ -160,7 +168,10 @@ describe('Actual accepted occurrence departure — rendered PDF133', () => {
     const first = run({ ...instance, ...change });
     expect(first.state.instance_departure_processed).toBe(false);
     expect(first.events).toEqual([
-      { type: 'invoke', dependency: 'procedure.settlement_activities_and_overnight' },
+      {
+        type: 'invoke',
+        dependency: 'procedure.settlement_activities_and_overnight',
+      },
     ]);
     expect(run(first.state).events).toEqual([]);
     expect(
@@ -196,5 +207,35 @@ describe('Actual accepted occurrence departure — rendered PDF133', () => {
       instance_start_settlement: 'irondale',
       instance_site: 'actual site',
     });
+  });
+});
+
+describe('Departure uses the accepted party identity', () => {
+  it('does not accept another party solely from a true ownership assertion', () => {
+    const accepted: State = {
+      ...instance,
+      phase: 'depart',
+      quest_departure_owner_matches: true,
+      instance_owner: 'party-a',
+      actual_party_id: 'party-b',
+      instance_acceptance_processed: true,
+      instance_departure_processed: false,
+      instance_id: 'quest-a',
+      departure_instance_id: 'quest-a',
+      quest_departure_scope_resolved: true,
+      departed: true,
+      leaving_on_quest: true,
+      day: 1,
+      quest_departure_day: 1,
+    };
+    const result = runCase(
+      {
+        ...fixture,
+        procedure_id: 'procedure.quest_departure',
+        inputs: accepted,
+      },
+      corpus,
+    );
+    expect(result.state.instance_departure_processed).toBe(false);
   });
 });
