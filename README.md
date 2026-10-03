@@ -12,7 +12,7 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-As of 1 October 2026, Phases 0–3 are complete and Phase 4 reusable core mechanics are
+As of 3 October 2026, Phases 0–3 are complete and Phase 4 reusable core mechanics are
 extracted and tested across all 21 priority areas. Phases 5 and 6 are in progress:
 
 - **Phase 5 — entities and tables:** Batches 1–6 are extracted within scope. Settlement,
@@ -20,21 +20,21 @@ extracted and tested across all 21 priority areas. Phases 5 and 6 are in progres
   [Package A inventory](docs/package-a-completion-inventory.md). Batch 7 is accepted within catalogue scope; [quest/scenario source evidence](docs/quest-scenario-inventory.md) records all 124 inventory dispositions.
 - **Phase 6 — procedures and state machines:** Batches 1–6 are extracted within scope.
   [Travel and settlement accounting](docs/travel-settlement-accounting.md) records the
-  composed effects and unresolved source boundaries. [Character and guild procedures](docs/character-guild-procedures.md) records Batch 6. Batch 7 remains pending.
+  composed effects and unresolved source boundaries. [Character and guild procedures](docs/character-guild-procedures.md) records Batch 6. Batch 7 is in progress; the [test-owned acceptance manifest](tests/fixtures/acceptance/package-f.json) records 24 implemented, three shared-model, one nonprocedural and 59 pending lifecycle headings.
 - **Phase 4.x — optional semantic decisions:** provider adapters, evaluation, caching and
   shadow comparisons exist. Calibration and production-provider selection remain pending.
 - **Phases 7–12:** references, executable examples and review records provide groundwork for
   Phases 7–9. The full graph, full-book example/review/coverage passes, compiled artifacts and
   retrieval corpus remain unfinished. `build:corpus` is still a stub.
 
-The current corpus contains 1,530 rules, 669 entities, 213 tables, 60 procedures, one state
-machine and 475 executable YAML fixtures. The glossary contains 68 terms and 110 lookup forms.
-The source map covers all 286 pages and tracks 667 canonical sections plus 35 compatibility
-redirects. Coverage records 346 sections extracted (52%) and zero independently reviewed;
-component extraction can be partial within other sections. Of 109 review records, eight are
-resolved and 101 remain unresolved. Extraction and passing tests do not imply independent review.
+The current corpus contains 1,533 rules, 669 entities, 213 tables, 97 procedures, two state
+machines and 475 executable YAML fixtures. The glossary contains 68 terms and 110 lookup forms.
+The source map covers all 286 pages and tracks 675 canonical sections plus 35 compatibility
+redirects. Coverage records 346 sections extracted (51%) and zero independently reviewed;
+component extraction can be partial within other sections. Of 135 review records, nine are
+resolved and 126 remain unresolved. Extraction and passing tests do not imply independent review.
 
-Next: Phase 6 Batch 7, conditions, interrupted rest, quest and estate lifecycle.
+Next: remaining Package F quest/campaign/estate lifecycle, travel/settlement rest reconciliation and original candidate-loop audit. Stopping the Necromancer, Tomb Raiders, shared resumable dungeon progression/reading/Threat checkpoints and First Blood now have bounded procedure evidence. Phase 5/6 exit acceptance remains open.
 Packages A–D are implemented within their documented source boundaries.
 The [settlement catalogue reconciliation](docs/settlement-source-reconciliation.md) records Package A. The
 [combat/treasure source checkpoint](docs/combat-treasure-source-audit.md) is complete;

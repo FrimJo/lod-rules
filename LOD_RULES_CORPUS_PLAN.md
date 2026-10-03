@@ -18,7 +18,7 @@ milestones; completing an early phase does not mean its source sections are inde
 | Phase | Status | Evidence and remaining work |
 | --- | --- | --- |
 | 0 — Repository bootstrap | Complete | Source manifest, conventions, schemas, validation, tests and lint tooling are present. |
-| 1 — Structural map | Complete | All 286 pages mapped; 667 canonical sections and 35 compatibility redirects. Newly discovered structural gaps are still recorded in review. |
+| 1 — Structural map | Complete | All 286 pages mapped; 675 canonical sections and 35 compatibility redirects. Newly discovered structural gaps are still recorded in review. |
 | 2 — Glossary and ontology | Complete within scoped extraction | 68 terms and 110 lookup forms; scope and distinctions recorded in [ontology](docs/ontology.md). |
 | 3 — Schema pilot | Complete | Representative extraction and executable fixtures; see the historical [pilot audit](docs/phase-3-pilot.md). |
 | 4 — Core mechanics | Extracted and tested | All 21 priority areas covered; independent review and unresolved boundaries remain. See the [Phase 4 audit](docs/phase-4-core-mechanics.md). |
@@ -26,20 +26,22 @@ milestones; completing an early phase does not mean its source sections are inde
 | 6 — Procedures and state machines | In progress | Batches 1–6 extracted within scope. Packages B/C implement travel and settlement accounting; [the accounting ledger](docs/travel-settlement-accounting.md) records composition and source boundaries. [Package D](docs/character-guild-procedures.md) records character and guild procedures. Batch 7 has a [pending lifecycle inventory](docs/lifecycle-procedures.md). See the [Phase 6 ledger](docs/phase-6-procedures-and-state-machines.md). |
 | 7 — Dependency graph and precedence | Groundwork only | References and explicit overrides exist; comprehensive graph generation and analysis are pending. |
 | 8 — Examples as executable tests | Partial | Source examples and derived regression fixtures exist; full-book example conversion and trace coverage remain pending. |
-| 9 — Ambiguity, conflict and external-dependency review | Ongoing groundwork | 109 review records: 101 unresolved and eight resolved. Comprehensive review remains pending; unavailable external books remain explicit dependencies. |
-| 10 — Full-book coverage pass | Pending | 346 of 667 sections extracted (52%); zero independently reviewed. Other sections may have extracted components. |
+| 9 — Ambiguity, conflict and external-dependency review | Ongoing groundwork | 135 review records: 126 unresolved and nine resolved. Comprehensive review remains pending; unavailable external books remain explicit dependencies. |
+| 10 — Full-book coverage pass | Pending | 346 of 675 sections extracted (51%); zero independently reviewed. Other sections may have extracted components. |
 | 11 — Build generated artifacts | Not implemented | `npm run build:corpus` remains a stub; JSON bundles, SQLite and compiled graph outputs are pending. |
-| 12 — Semantic retrieval corpus | Not implemented | Generated retrieval documents and indexes remain pending. |
+| 12 — Semantic retrieval corpus | Partial groundwork | Lexical canonical-record retrieval and labelled question-analysis evaluation exist; comprehensive Phase 12 remains unfinished. See [retrieval evidence](docs/retrieval.md). |
 
 The additional **Phase 4.x semantic-decision layer** has provider adapters, a gold evaluation
 set, caching, cascade and shadow comparisons. Calibration and production-provider selection
 remain pending. This is derived judgment metadata, not Phase 12 retrieval or independent corpus
 review. See [semantic decisions](docs/semantic-decisions.md).
 
-Current inventory: 1,530 rules, 669 entities, 213 tables, 60 procedures, one state machine
+Current inventory (3 October): 1,533 rules, 669 entities, 213 tables, 97 procedures, two state machines
 and 475 executable YAML fixtures. Counts describe stored objects, not completeness of their
 source headings. The generated [coverage report](docs/coverage-report.md) is the section and
 component progress reference. Historical phase audits retain their milestone counts.
+
+Live Package F checkpoint (3 October): the [test-owned acceptance manifest](tests/fixtures/acceptance/package-f.json) accounts for all 87 lifecycle headings: 24 implemented, three covered by shared models, one narrative-only and 59 pending. Necromancer, Tomb Raiders, shared resumable dungeon progression/reading/Threat events and First Blood have bounded procedure evidence. Phase 5 exit reconciliation and Phase 6 Batch 7/candidate-loop acceptance remain open; no comprehensive phase closure or independent review is claimed.
 
 ### Next steps
 

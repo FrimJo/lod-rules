@@ -218,3 +218,14 @@ Returning the Relic now has bounded source-owned setup/Threat, Luck nullificatio
 An early Phase 12 retrieval slice (`scripts/retrieve/`, `npm run retrieve`, [docs/retrieval.md](docs/retrieval.md)) indexes all canonical records lexically with provenance, quest scope, relations, review issues and external dependencies. It is a projection, not canonical data, and does not implement `build:corpus`. A 37-question labelled set (`tests/fixtures/ask-questions/`, labels unreviewed) measures question analysis. Jev plus lexical beats lexical recall on validation and held-out. Laya's judgments are weak, and the provisional Laya→Jev cascade escalated on every question. Results are in [docs/retrieval.md](docs/retrieval.md#labelled-questions). Package F (in progress; Family Heirloom lifecycle evidence is recorded in its bounded ledger entry) and comprehensive Phases 7–12 remain unfinished.
 
 Retrieving the Family Heirloom now has bounded source-owned setup/Threat/Scenario, corpse-search override, objective six-tomb/card pool, actual unique opening/draw/outcomes and per-hero surface payment lifecycle evidence in the ledger. Card classification, supplied mummy/search outcomes, escape and unresolved consequences remain explicit; no independent review. Next Package F source unit: Stopping the Necromancer, PDF261/printed259. Phase 6 Batch 7 and comprehensive Phases7–12 remain unfinished.
+
+Current Package F checkpoint (3 October): Stopping the Necromancer, Tomb Raiders,
+shared resumable dungeon progression/reading/aftermath/Threat events and First Blood
+have bounded lifecycle procedures and source-derived regressions. The test-owned
+`tests/fixtures/acceptance/package-f.json` records all87 headings:24 implemented,
+3 shared-model,1 narrative-only and59 pending. Final acceptance rejects pending
+extraction and named implementation gaps. Dark Gods is narrative-only; no procedure
+is invented. Next: remaining quest selectors/campaigns, estate and personal-quest
+lifecycle, travel/settlement rest reconciliation, original candidate-loop audit and
+Phase5/6 exit reconciliation. Package F, Phase6 Batch7 and comprehensive Phases7–12
+remain unfinished; no independent review or commits are implied by extraction.
