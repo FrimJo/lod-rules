@@ -106,10 +106,12 @@ describe('Phase 4 reusable rule interactions', () => {
     expect(result.events).toEqual([{ type: 'require', satisfied: false }]);
     expect(result.state.defence).toBeUndefined();
   });
-  it('rest recovery leaves the competing morale amounts unresolved', () => {
-    const result = run(['character.morale.event.short_rest'], { morale: 4 });
-    expect(result.state.morale).toBe(4);
-    expect(result.unresolved).toEqual(['issue.phase4.short_rest_morale']);
+  it('short rest raises morale by +2 up to the starting value', () => {
+    const result = run(['character.morale.event.short_rest'], { morale: 4, starting_morale: 8 });
+    expect(result.state.morale).toBe(6);
+    expect(result.unresolved).toEqual([]);
+    const capped = run(['character.morale.event.short_rest'], { morale: 7, starting_morale: 8 });
+    expect(capped.state.morale).toBe(8);
   });
   it('can restore Mana and Energy on later nights without restoring spent Luck', () => {
     const result = run(['character.recovery.inn_resources', 'character.recovery.inn_luck'], {

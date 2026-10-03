@@ -533,6 +533,17 @@
         method: text
         confidence: high
         visually_verified: false
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 4
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 39
   status: extracted
   confidence: high
   source_text: 'Taking a short rest: +1. Resting is a good way to calm the nerves.'
@@ -543,27 +554,26 @@
       type: number
       role: state
       description: morale
+    starting_morale:
+      type: number
+      role: input
+      description: starting morale
   effects:
-    - type: unresolved
-      issue_id: issue.phase4.short_rest_morale
+    - type: set
+      target: morale
+      value:
+        type: arithmetic
+        operator: min
+        values:
+          - type: field
+            name: starting_morale
+          - type: sum
+            values:
+              - type: field
+                name: morale
+              - type: literal
+                value: 2
   optional_system: party_morale
-  alternatives:
-    - label: 'Party Morale table: +1'
-      effects:
-        - type: add
-          target: morale
-          value:
-            type: literal
-            value: 1
-          duration: immediate
-    - label: 'Rest: +2'
-      effects:
-        - type: add
-          target: morale
-          value:
-            type: literal
-            value: 2
-          duration: immediate
   issues:
     - issue.phase4.short_rest_morale
 - id: character.morale.event.fine_treasure
