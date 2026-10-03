@@ -33,6 +33,7 @@ export interface RetrievalCorpus {
 }
 
 const singleFiles: Array<{ path: string; schema: SchemaName }> = [
+  { path: 'source/manifest.yaml', schema: 'manifest' },
   { path: 'corpus/glossary/terms.yaml', schema: 'terms' },
   { path: 'corpus/glossary/aliases.yaml', schema: 'aliases' },
   { path: 'review/ambiguities.yaml', schema: 'issues' },

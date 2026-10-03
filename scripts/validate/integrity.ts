@@ -224,6 +224,8 @@ export function checkIntegrity(map: SourceMap): string[] {
 export interface SourceReference {
   document: string;
   file?: string;
+  heading?: string | null;
+  locator?: Record<string, string | number | null>;
   pdf_page?: number | null;
   printed_page?: number | null;
 }

@@ -13,12 +13,15 @@ import type { SourceReference } from '../validate/integrity.ts';
 import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './load.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
-export const SEARCH_DOCUMENT_VERSION = 3;
+export const SEARCH_DOCUMENT_VERSION = 4;
 
 export type DocumentKind =
   'rule' | 'entity' | 'table' | 'procedure' | 'state_machine' | 'term' | 'issue';
 
 export interface Citation {
+  document: string;
+  file?: string;
+  locator?: SourceReference['locator'];
   pdf_page: number | null;
   printed_page: number | null;
   heading?: string;
@@ -57,14 +60,19 @@ export interface SearchDocument {
   external_dependencies: ExternalDependency[];
   review_status: 'extracted' | 'reviewed';
   issue_status?: 'unresolved' | 'resolved';
+  issue_summary?: string;
+  resolution?: { summary: string; citations: Citation[] };
   file: string;
 }
 
-function citations(sources: Array<SourceReference & { heading?: string }>): Citation[] {
+function citations(sources: SourceReference[]): Citation[] {
   const seen = new Set<string>();
   const out: Citation[] = [];
   for (const source of sources) {
     const citation: Citation = {
+      document: source.document,
+      ...(source.file ? { file: source.file } : {}),
+      ...(source.locator ? { locator: source.locator } : {}),
       pdf_page: source.pdf_page ?? null,
       printed_page: source.printed_page ?? null,
     };
@@ -399,6 +407,15 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       external_dependencies: [],
       review_status: 'extracted',
       issue_status: i.status,
+      issue_summary: i.summary,
+      ...(i.status === 'resolved'
+        ? {
+            resolution: {
+              summary: i.resolution.summary,
+              citations: citations(i.resolution.source),
+            },
+          }
+        : {}),
       file: corpus.files.get(i.id) ?? '',
     };
   };

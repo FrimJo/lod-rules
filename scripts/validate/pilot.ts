@@ -1,6 +1,6 @@
 import { reviewSources } from './integrity.ts';
 import { printedDiceMatches } from './dice.ts';
-import type { SourceMap, Term, Issue } from './integrity.ts';
+import type { SourceMap, Term, Issue, SourceReference } from './integrity.ts';
 import type {
   Pilot,
   Metadata,
@@ -10,14 +10,13 @@ import type {
   Effect,
   Dependency,
   Step,
-  PilotSource,
 } from './pilot-types.ts';
 
 export interface PilotContext {
   map: SourceMap;
   terms: Term[];
   issues: Issue[];
-  documents: Array<{ id: string; file: string }>;
+  documents: Array<{ id: string; file: string; canonical?: boolean; pages?: number }>;
   externalIds: string[];
 }
 
@@ -49,8 +48,10 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       errors.push(`${owner}: executable unresolved reference requires an open issue: ${target}`);
   }
   const docs = new Map(context.documents.map((d) => [d.id, d.file]));
+  const canonicalId =
+    context.documents.find((d) => d.canonical)?.id ?? 'rulebook.second_printing.eng';
   const pages = new Map(context.map.pages.map((p) => [p.pdf_page, p]));
-  function provenance(owner: string, sources: PilotSource[]): void {
+  function provenance(owner: string, sources: SourceReference[]): void {
     for (const source of sources) {
       const file = docs.get(source.document);
       if (!file) {
@@ -59,8 +60,34 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       }
       if (source.file !== `source/${file}`)
         errors.push(`${owner}: source file does not match document`);
-      // All present pilot evidence is from the mapped rulebook. External dependencies are not evidence.
-      const page = pages.get(source.pdf_page);
+      if (/\.html?$/i.test(file)) {
+        if (
+          !source.heading?.trim() &&
+          !Object.values(source.locator ?? {}).some(
+            (value) => value != null && String(value).trim(),
+          )
+        )
+          errors.push(`${owner}: HTML source requires a heading or locator`);
+        if (source.pdf_page != null || source.printed_page != null)
+          errors.push(`${owner}: HTML source must not claim PDF or printed pages`);
+        continue;
+      }
+      if (source.document !== canonicalId && typeof source.pdf_page !== 'number') {
+        errors.push(`${owner}: PDF source requires a physical page`);
+        continue;
+      }
+      // The page map describes the canonical rulebook, not separately paginated ruling sources.
+      if (source.document !== canonicalId) {
+        const pageCount = context.documents.find((d) => d.id === source.document)?.pages;
+        if (
+          pageCount !== undefined &&
+          typeof source.pdf_page === 'number' &&
+          source.pdf_page > pageCount
+        )
+          errors.push(`${owner}: source page exceeds document length`);
+        continue;
+      }
+      const page = pages.get(source.pdf_page ?? -1);
       if (!page) errors.push(`${owner}: unknown pdf page ${source.pdf_page}`);
       else if (page.printed_page !== source.printed_page)
         errors.push(`${owner}: printed/pdf page mismatch`);
@@ -595,12 +622,13 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
     }
   }
   for (const entry of [...context.terms, ...context.issues]) {
+    const additional = reviewSources(entry).filter((source) => source.document !== canonicalId);
+    provenance(entry.id, additional);
     for (const source of reviewSources(entry)) {
-      const file = source.file;
       if (
-        file !== undefined &&
-        docs.has(source.document) &&
-        file !== `source/${docs.get(source.document)}`
+        source.document === canonicalId &&
+        source.file !== undefined &&
+        source.file !== `source/${docs.get(source.document)}`
       )
         errors.push(`${entry.id}: source file does not match document`);
     }

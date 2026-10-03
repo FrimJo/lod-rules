@@ -12,6 +12,7 @@ export interface EvidenceIssue {
   type: string;
   status: string;
   summary: string;
+  resolution?: { summary: string; citations: SearchDocument['citations'] };
 }
 
 export interface EvidenceItem {
@@ -138,7 +139,8 @@ function item(retrieval: Retrieval, id: string, why: string[]): EvidenceItem {
       id: issue.id,
       type: issue.type,
       status: issue.issue_status ?? 'unresolved',
-      summary: issue.text.length > 500 ? `${issue.text.slice(0, 500)}…` : issue.text,
+      summary: issue.issue_summary ?? issue.text,
+      ...(issue.resolution ? { resolution: issue.resolution } : {}),
     })),
     external_dependencies: doc.external_dependencies,
     unresolved_references: doc.unresolved_references,

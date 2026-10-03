@@ -9,8 +9,8 @@ export type State = Record<string, Scalar>;
 export interface PilotSource {
   document: string;
   file: string;
-  pdf_page: number;
-  printed_page: number | null;
+  pdf_page?: number | null;
+  printed_page?: number | null;
   heading: string;
 }
 export interface Metadata {
