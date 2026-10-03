@@ -1,4 +1,5 @@
-import type { EvidenceItem } from '../server/ask-service.ts';
+import type { EvidenceItem } from '../../../../scripts/ask/evidence.ts';
+import type { Citation } from '../../../../scripts/retrieve/documents.ts';
 
 /** One physical rulebook page a record cites, with the headings it names there. */
 export interface CitedPage {
@@ -35,7 +36,7 @@ export function linkCitations(text: string): string {
 export function citedPages(item: EvidenceItem): CitedPage[] {
   const pages = new Map<number, CitedPage>();
   for (const citation of item.citations) {
-    if (citation.pdf_page == null) continue;
+    if (citation.document !== 'rulebook.second_printing.eng' || citation.pdf_page == null) continue;
     const page = pages.get(citation.pdf_page) ?? {
       pdf: citation.pdf_page,
       printed: citation.printed_page,
@@ -84,4 +85,24 @@ export function resolveCitation(
   if (item) return { item, issue: false };
   const owner = evidence.find((e) => e.issues.some((issue) => issue.id === id));
   return owner ? { item: owner, issue: true } : null;
+}
+
+/** Ruling sources are separate from pages in the rulebook viewer. */
+export function rulingCitations(item: EvidenceItem): Citation[] {
+  const citations = [
+    ...item.citations,
+    ...item.issues.flatMap((issue) => issue.resolution?.citations ?? []),
+  ];
+  return [
+    ...new Map(
+      citations
+        .filter((citation) => citation.document !== 'rulebook.second_printing.eng')
+        .map((citation) => [JSON.stringify(citation), citation]),
+    ).values(),
+  ];
+}
+
+export function rulingSourceUrl(citation: Citation): string {
+  const page = citation.pdf_page == null ? '' : `#page=${citation.pdf_page}`;
+  return `/api/sources/${encodeURIComponent(citation.document)}${page}`;
 }

@@ -15,12 +15,31 @@ Needs Node 22.5 or newer (`node:sqlite`) and the root repo's dependencies instal
 ```bash
 cd ../.. && npm install && npm run retrieve -- build   # optional: prebuilt SQLite index
 cd clients/web && npm install
-OPENAI_API_KEY=sk-... npm run dev                      # http://localhost:3000
+OPENAI_API_KEY=sk-... npm run dev                      # http://localhost:1234
 ```
 
 The server reads settings from the process environment first, then the root
-`.env.local`. See [.env.example](.env.example) for `OPENAI_API_KEY`, `OPENAI_MODEL` and
-`LOD_ANALYZER`.
+`.env.local`. See [.env.example](.env.example) for `OPENAI_API_KEY`, `OPENAI_MODEL`,
+`LOD_ANALYZER` and `TYPESAFE_API_KEY`.
+
+## Retrieval modes
+
+The gear button next to the title, or the mode chip under the question box, opens the
+retrieval settings. Every mode searches the SQLite lexical index. A model can only add records
+to those results, never remove them:
+
+| Mode                 | Analyzer  | Needs              |
+| -------------------- | --------- | ------------------ |
+| Lexical only         | `lexical` | nothing            |
+| Lexical + Laya       | `laya`    | local ONNX model   |
+| Lexical + Jev        | `jev`     | `TYPESAFE_API_KEY` |
+| Lexical + Laya + Jev | `cascade` | `TYPESAFE_API_KEY` |
+
+`LOD_ANALYZER` sets the server default. The browser saves its choice in `localStorage`
+(`lod-rules:retrieval-mode`) and sends it with each question. Jev modes are disabled when the
+server has no key, and `/api/chat` answers 409 if one is requested anyway. Each question keeps
+the mode it was asked with. The evidence panel and answer badge name that mode, and a model
+failure shows as a lexical-only fallback notice.
 
 ## Rulebook pages
 
@@ -37,4 +56,4 @@ pdf-lib) because opening the whole book makes pdf.js read most of its 40 MB. `/a
 serves the full file with byte-range support for "Open PDF".
 
 Retrieval uses only the latest question; earlier turns go to the model as conversation
-history. `npm run typecheck` checks this package. The root gate ignores `clients/`.
+history. `npm run typecheck` checks this package. `npm test` runs the ruling citation and source-serving regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.

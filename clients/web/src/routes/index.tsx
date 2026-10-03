@@ -7,13 +7,21 @@ import remarkGfm from 'remark-gfm';
 import { CitationGroup } from '../components/CitationChip.tsx';
 import { EvidencePanel, evidenceAnchor } from '../components/EvidencePanel.tsx';
 import { RulebookViewer } from '../components/RulebookViewer.tsx';
+import { SettingsDialog } from '../components/SettingsDialog.tsx';
 import { linkCitations, type RulebookTarget } from '../lib/citations.ts';
+import { MODES, type RetrievalMode } from '../lib/retrieval-modes.ts';
+import { useRetrievalMode } from '../lib/use-retrieval-mode.ts';
 import { checkAnswer, getEvidence, getRulebook } from '../server/functions.ts';
 
 export const Route = createFileRoute('/')({ component: ChatPage });
 
 type Tab = 'evidence' | 'rulebook';
 const TABS: Tab[] = ['evidence', 'rulebook'];
+
+interface Asked {
+  question: string;
+  mode: RetrievalMode;
+}
 
 function textOf(message: UIMessage): string {
   return message.parts
@@ -22,11 +30,11 @@ function textOf(message: UIMessage): string {
     .trim();
 }
 
-function useEvidence(question: string | null) {
+function useEvidence(asked: Asked | null) {
   return useQuery({
-    queryKey: ['evidence', question],
-    queryFn: () => getEvidence({ data: { question: question! } }),
-    enabled: Boolean(question),
+    queryKey: ['evidence', asked?.mode, asked?.question],
+    queryFn: () => getEvidence({ data: asked! }),
+    enabled: Boolean(asked?.question),
     staleTime: Infinity,
   });
 }
@@ -35,9 +43,23 @@ function useRulebookIndex() {
   return useQuery({ queryKey: ['rulebook'], queryFn: () => getRulebook(), staleTime: Infinity });
 }
 
+function GearIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M19.14 12.94a7.07 7.07 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.65 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.07 7.07 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.05.24.25.42.5.42h3.84c.25 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.08.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+      />
+    </svg>
+  );
+}
+
 function ChatPage() {
   const [input, setInput] = useState('');
-  const [selected, setSelected] = useState<string | null>(null);
+  /** Index of the user message whose evidence is shown; null follows the latest question. */
+  const [selected, setSelected] = useState<number | null>(null);
+  const [askedModes, setAskedModes] = useState<RetrievalMode[]>([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('evidence');
   const [target, setTarget] = useState<RulebookTarget | null>(null);
@@ -47,18 +69,24 @@ function ChatPage() {
     connection: fetchServerSentEvents('/api/chat'),
   });
   const rulebook = useRulebookIndex();
+  const retrieval = useRetrievalMode();
 
-  const questions = messages.filter((m) => m.role === 'user').map(textOf);
-  const activeQuestion = selected ?? questions.at(-1) ?? null;
-  const evidence = useEvidence(activeQuestion);
+  const asked: Asked[] = messages
+    .filter((m) => m.role === 'user')
+    .map((m, i) => ({ question: textOf(m), mode: askedModes[i] ?? retrieval.mode }));
+  const activeIndex = selected ?? (asked.length ? asked.length - 1 : null);
+  const active = activeIndex === null ? null : (asked[activeIndex] ?? null);
+  const evidence = useEvidence(active);
 
   const submit = () => {
     const question = input.trim();
-    if (!question || isLoading) return;
+    if (!question || isLoading || !retrieval.ready) return;
+    const mode = retrieval.mode;
     setSelected(null);
     setHighlighted(null);
     setTab('evidence');
-    void sendMessage(question);
+    setAskedModes((modes) => [...modes.slice(0, asked.length), mode]);
+    void sendMessage(question, { body: { mode } });
     setInput('');
   };
 
@@ -84,8 +112,8 @@ function ChatPage() {
     revealPanel();
   };
 
-  const openCitation = (question: string, recordId: string, next: RulebookTarget | null) => {
-    setSelected(question);
+  const openCitation = (questionIndex: number, recordId: string, next: RulebookTarget | null) => {
+    setSelected(questionIndex);
     if (next) openPage(next);
     else showRecord(recordId);
   };
@@ -107,25 +135,40 @@ function ChatPage() {
     tabRefs.current[next]?.focus();
   };
 
-  let lastQuestion = '';
+  const modeLabel = MODES[retrieval.mode].label;
+  let userIndex = -1;
   return (
     <main className="layout">
       <section className="chat">
-        <h1>League of Dungeoneers rules</h1>
+        <header className="chat-header">
+          <h1>League of Dungeoneers rules</h1>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Retrieval settings"
+            aria-haspopup="dialog"
+            title="Retrieval settings"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <GearIcon />
+          </button>
+        </header>
         <div className="messages">
           {messages.map((message, index) => {
             const text = textOf(message);
             if (message.role === 'user') {
-              lastQuestion = text;
+              userIndex += 1;
+              const i = userIndex;
+              const isActive = i === activeIndex;
               return (
                 <button
                   key={message.id}
                   type="button"
-                  className={`message user${text === activeQuestion ? ' active' : ''}`}
-                  aria-pressed={text === activeQuestion}
+                  className={`message user${isActive ? ' active' : ''}`}
+                  aria-pressed={isActive}
                   title="Show the evidence for this question"
                   onClick={() => {
-                    setSelected(text);
+                    setSelected(i);
                     setTab('evidence');
                   }}
                 >
@@ -134,13 +177,14 @@ function ChatPage() {
               );
             }
             const streaming = isLoading && index === messages.length - 1;
+            const i = userIndex;
             return (
               <AssistantMessage
                 key={message.id}
-                question={lastQuestion}
+                asked={asked[i] ?? null}
                 text={text}
                 streaming={streaming}
-                onCitation={openCitation}
+                onCitation={(recordId, next) => openCitation(i, recordId, next)}
               />
             );
           })}
@@ -156,25 +200,36 @@ function ChatPage() {
             submit();
           }}
         >
-          <textarea
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                submit();
-              }
-            }}
-            placeholder="Ask a rules question, e.g. How does resting work?"
-            aria-label="Rules question"
-            rows={2}
-          />
+          <div className="composer-field">
+            <textarea
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  submit();
+                }
+              }}
+              placeholder="Ask a rules question, e.g. How does resting work?"
+              aria-label="Rules question"
+              rows={2}
+            />
+            <button
+              type="button"
+              className="mode-chip"
+              aria-haspopup="dialog"
+              aria-label={`Retrieval mode: ${modeLabel}. Change`}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <span className="mode-chip-key">Retrieval</span> {modeLabel}
+            </button>
+          </div>
           {isLoading ? (
             <button type="button" onClick={stop}>
               Stop
             </button>
           ) : (
-            <button type="submit" disabled={!input.trim()}>
+            <button type="submit" disabled={!input.trim() || !retrieval.ready}>
               Ask
             </button>
           )}
@@ -211,8 +266,10 @@ function ChatPage() {
           className="tab-panel scroll"
           hidden={tab !== 'evidence'}
         >
-          {activeQuestion && <p className="question">{activeQuestion}</p>}
-          {evidence.isLoading && <p className="muted">Retrieving...</p>}
+          {active && <p className="question">{active.question}</p>}
+          {evidence.isLoading && active && (
+            <p className="muted">Retrieving with {MODES[active.mode].label}...</p>
+          )}
           {evidence.error && <p className="error">{evidence.error.message}</p>}
           <EvidencePanel summary={evidence.data} highlighted={highlighted} onOpenPage={openPage} />
         </div>
@@ -230,26 +287,35 @@ function ChatPage() {
           )}
         </div>
       </aside>
+      <SettingsDialog
+        open={settingsOpen}
+        mode={retrieval.mode}
+        settings={retrieval.settings}
+        isDefault={retrieval.isDefault}
+        onChange={retrieval.setMode}
+        onReset={retrieval.reset}
+        onClose={() => setSettingsOpen(false)}
+      />
     </main>
   );
 }
 
 function AssistantMessage({
-  question,
+  asked,
   text,
   streaming,
   onCitation,
 }: {
-  question: string;
+  asked: Asked | null;
   text: string;
   streaming: boolean;
-  onCitation: (question: string, id: string, target: RulebookTarget | null) => void;
+  onCitation: (id: string, target: RulebookTarget | null) => void;
 }) {
-  const evidence = useEvidence(question || null);
+  const evidence = useEvidence(asked);
   const check = useQuery({
-    queryKey: ['check', question, text],
-    queryFn: () => checkAnswer({ data: { question, answer: text } }),
-    enabled: !streaming && Boolean(question && text),
+    queryKey: ['check', asked?.mode, asked?.question, text],
+    queryFn: () => checkAnswer({ data: { ...asked!, answer: text } }),
+    enabled: !streaming && Boolean(asked?.question && text),
     staleTime: Infinity,
   });
   const linked = linkCitations(text);
@@ -269,7 +335,7 @@ function AssistantMessage({
               <CitationGroup
                 ids={href.slice('#cite:'.length).split('+')}
                 evidence={evidence.data?.evidence}
-                onOpen={(recordId, target) => onCitation(question, recordId, target)}
+                onOpen={onCitation}
               />
             ) : (
               <a href={href}>{children}</a>
@@ -278,8 +344,9 @@ function AssistantMessage({
       >
         {linked}
       </Markdown>
-      {check.data && (
+      {check.data && asked && (
         <div className={`badge ${check.data.grounded ? 'ok' : 'bad'}`}>
+          <span className="badge-mode">{MODES[asked.mode].label}</span> ·{' '}
           {check.data.grounded ? 'Grounded' : 'NOT grounded'} · {check.data.cited.length} cited
           {check.data.unknown.length ? ` · not in evidence: ${check.data.unknown.join(', ')}` : ''}
         </div>

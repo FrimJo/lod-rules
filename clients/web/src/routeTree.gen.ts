@@ -14,6 +14,7 @@ import { Route as ApiChatRouteImport } from './routes/api.chat'
 import { Route as ApiRulebookRouteImport } from './routes/api.rulebook'
 import { Route as ApiPdfFontsFileRouteImport } from './routes/api.pdf-fonts.$file'
 import { Route as ApiRulebookPagePdfRouteImport } from './routes/api.rulebook-page.$pdf'
+import { Route as ApiSourcesDocumentRouteImport } from './routes/api.sources.$document'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const ApiRulebookPagePdfRoute = ApiRulebookPagePdfRouteImport.update({
   path: '/api/rulebook-page/$pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSourcesDocumentRoute = ApiSourcesDocumentRouteImport.update({
+  id: '/api/sources/$document',
+  path: '/api/sources/$document',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
   '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
+  '/api/sources/$document': typeof ApiSourcesDocumentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
   '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
+  '/api/sources/$document': typeof ApiSourcesDocumentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,6 +70,7 @@ export interface FileRoutesById {
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
   '/api/rulebook-page/$pdf': typeof ApiRulebookPagePdfRoute
+  '/api/sources/$document': typeof ApiSourcesDocumentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,6 +80,7 @@ export interface FileRouteTypes {
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
     | '/api/rulebook-page/$pdf'
+    | '/api/sources/$document'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -78,6 +88,7 @@ export interface FileRouteTypes {
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
     | '/api/rulebook-page/$pdf'
+    | '/api/sources/$document'
   id:
     | '__root__'
     | '/'
@@ -85,6 +96,7 @@ export interface FileRouteTypes {
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
     | '/api/rulebook-page/$pdf'
+    | '/api/sources/$document'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,6 +105,7 @@ export interface RootRouteChildren {
   ApiRulebookRoute: typeof ApiRulebookRoute
   ApiPdfFontsFileRoute: typeof ApiPdfFontsFileRoute
   ApiRulebookPagePdfRoute: typeof ApiRulebookPagePdfRoute
+  ApiSourcesDocumentRoute: typeof ApiSourcesDocumentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRulebookPagePdfRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sources/$document': {
+      id: '/api/sources/$document'
+      path: '/api/sources/$document'
+      fullPath: '/api/sources/$document'
+      preLoaderRoute: typeof ApiSourcesDocumentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRulebookRoute: ApiRulebookRoute,
   ApiPdfFontsFileRoute: ApiPdfFontsFileRoute,
   ApiRulebookPagePdfRoute: ApiRulebookPagePdfRoute,
+  ApiSourcesDocumentRoute: ApiSourcesDocumentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
