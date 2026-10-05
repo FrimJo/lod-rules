@@ -96,6 +96,141 @@ cases:
     expected: { intent: rule_explanation, complexity: single_rule, entity: guild.fighters }
     required_evidence: [procedure.fighters_bounty, table.guild.fighters_bounty]
 
+  - id: askq.aim_bonus
+    split: development
+    question: What do I get for aiming before a shot, and what cancels the bonus?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.combat_aim]
+
+  - id: askq.damage_calculation
+    split: development
+    question: How do I work out how much damage a hit does to an enemy?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.combat_damage]
+
+  - id: askq.enemy_activation_order
+    split: development
+    question: When an enemy token is drawn, which enemy acts?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [procedure.activation, procedure.enemy_priority]
+
+  - id: askq.line_of_sight
+    split: development
+    question: How do I check line of sight, and what blocks it?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [core.los.trace, core.los.blocked]
+
+  - id: askq.wandering_monster
+    split: development
+    question: How does a wandering monster move each turn?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.wandering_monster]
+
+  - id: askq.torch
+    split: development
+    question: What does a lit torch do for the party, and when does it go out?
+    expected:
+      { intent: rule_explanation, complexity: single_rule, entity: equipment.light_source.torch }
+    required_evidence: [character.equipment.light_source.torch.light]
+
+  - id: askq.curses
+    split: development
+    question: What curses can a cursed magic item give?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.treasure.curses]
+
+  - id: askq.identify_magic_item
+    split: development
+    question: How do we identify a magic item we found, and what does it cost in town?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.magic_item.identify, character.settlement.identification]
+
+  - id: askq.sell_damaged_item
+    split: development
+    question: How much do I get for selling a 40 c item that has 2 points of damage?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.equipment.sell_and_repair]
+
+  - id: askq.elf_stats
+    split: development
+    question: What are an Elf's starting stats and Hit Points?
+    expected: { intent: value_lookup, complexity: single_rule, entity: species.elf }
+    required_evidence: [table.character.elf_stats, species.elf]
+
+  - id: askq.talent_or_perk
+    split: development
+    question: Does a hero gain a talent or a perk every time they level up?
+    expected: { intent: character_building, complexity: single_rule, entity: null }
+    required_evidence: [procedure.character_level_ability]
+
+  - id: askq.luck_points
+    split: development
+    question: How do Luck Points work?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [character.luck.reroll]
+
+  - id: askq.prayer_use
+    split: development
+    question: How does a Warrior Priest use a prayer, and does it cost an action?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.prayer.activation, character.prayer.success]
+
+  - id: askq.arachnophobia
+    split: development
+    question: My hero has the Arachnophobia mental condition. What happens when we meet spiders?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: condition.arachnophobia }
+    required_evidence: [procedure.arachnophobia]
+    notes: Arachnophobia is also a background with a different effect; the question names the condition.
+
+  - id: askq.morale_wavering
+    split: development
+    question: What happens when Party Morale drops below half?
+    expected: { intent: rule_explanation, complexity: single_fact, entity: null }
+    required_evidence: [character.morale.wavering]
+
+  - id: askq.zero_hp_lasting
+    split: development
+    question: Does being reduced to 0 Hit Points have any lasting effect on a hero?
+    expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
+    required_evidence: [character.hit_points.permanent_injury, character.sanity.loss.zero_hp]
+
+  - id: askq.guild_access
+    split: development
+    question: Can my warrior use the services of the Wizards' Guild?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.guild_access]
+
+  - id: askq.gambling
+    split: development
+    question: How does gambling in a settlement work, and what can I win?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.settlement.gambling, table.settlement.gambling]
+
+  - id: askq.silver_city_quests
+    split: development
+    question: How many quests are available in Silver City?
+    expected: { intent: value_lookup, complexity: single_fact, entity: settlement.silver_city }
+    required_evidence: [table.settlement.quest_availability]
+
+  - id: askq.horse
+    split: development
+    question: How much does a horse cost, and what does it do for travel?
+    expected: { intent: value_lookup, complexity: single_fact, entity: equipment.transport.horse }
+    required_evidence: [table.equipment.animals_and_transportation]
+
+  - id: askq.brew_potion
+    split: development
+    question: How does an alchemist brew a potion?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.alchemy.mix, character.alchemy.recipe]
+
+  - id: askq.tomb_raiders_tomb
+    split: development
+    question: In Tomb Raiders, what does it take to open one of the tombs?
+    expected:
+      { intent: quest_running, complexity: single_rule, entity: quest.great_crypt.tomb_raiders }
+    required_evidence: [procedure.tomb_raiders]
+
   # --- validation ----------------------------------------------------------------------
   - id: askq.poison_cure
     split: validation
@@ -190,6 +325,143 @@ cases:
     expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
     required_evidence: [character.hit_points.after_battle_bandage, character.morale.event.zero_hp]
 
+  - id: askq.overwatch
+    split: validation
+    question: When can a hero go into Overwatch, and what does reacting cost?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.overwatch]
+
+  - id: askq.acid_fire_armour
+    split: validation
+    question: Does armour protect against acid or fire damage?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.damage_follow_up]
+
+  - id: askq.attack_from_behind
+    split: validation
+    question: What bonus do I get for attacking an enemy from behind in close combat?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.combat.melee_modifiers]
+
+  - id: askq.fireball_damage
+    split: validation
+    question: How much damage does Fireball do?
+    expected: { intent: value_lookup, complexity: single_fact, entity: spell.fireball }
+    required_evidence: [spell.fireball]
+
+  - id: askq.dungeon_turn_steps
+    split: validation
+    question: What are the steps of a dungeon turn?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.dungeon_turn]
+
+  - id: askq.pit_climb
+    split: validation
+    question: How does a hero climb out of a pit, and does a rope help?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [core.movement.pit.up_with_rope]
+
+  - id: askq.legendary_sell
+    split: validation
+    question: Can a legendary item be sold or damaged?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: null }
+    required_evidence: [character.treasure.legendary.general]
+
+  - id: askq.thief_treasure
+    split: validation
+    question: Does a thief get any advantage when drawing Treasure Cards?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [procedure.thief_treasure_choice]
+
+  - id: askq.creation_steps
+    split: validation
+    question: What are the steps for creating a new hero?
+    expected: { intent: character_building, complexity: single_rule, entity: null }
+    required_evidence: [procedure.character_creation]
+
+  - id: askq.natural_armour
+    split: validation
+    question: How much Natural Armour does a hero with 62 Constitution get?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.character.natural_armour]
+
+  - id: askq.dual_wield
+    split: validation
+    question: Can a hero fight with a weapon in each hand?
+    expected: { intent: situation_ruling, complexity: single_rule, entity: null }
+    required_evidence: [talent.dual_wield]
+    notes: The question avoids the talent name.
+
+  - id: askq.shared_experience
+    split: validation
+    question: Does only the hero who lands the killing blow get the experience?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: null }
+    required_evidence: [character.level.eligibility]
+
+  - id: askq.sanity_loss_sources
+    split: validation
+    question: What makes a hero lose Sanity?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [table.psychology.sanity_losses]
+
+  - id: askq.fear_of_the_dark
+    split: validation
+    question: What does Fear of the Dark do to a hero?
+    expected:
+      { intent: rule_explanation, complexity: single_fact, entity: condition.fear_of_the_dark }
+    required_evidence: [condition.fear_of_the_dark]
+
+  - id: askq.hungry_morale
+    split: validation
+    question: Does going hungry affect Party Morale?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: null }
+    required_evidence: [character.morale.event.hungry]
+
+  - id: askq.buying_availability
+    split: validation
+    question: How does buying an item in a settlement work, and what if the availability roll fails?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.settlement_buy_sell_and_service]
+
+  - id: askq.arena
+    split: validation
+    question: How does fighting in the arena work?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.settlement.arena_entry, table.settlement.arena_modifiers]
+
+  - id: askq.settlement_arrival_event
+    split: validation
+    question: Does anything happen when the party arrives in a settlement?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.settlement.arrival, table.settlement.event_thresholds]
+
+  - id: askq.departure_day
+    split: validation
+    question: Can we do settlement activities on the day we leave on a quest?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: null }
+    required_evidence: [procedure.quest_departure]
+
+  - id: askq.ancient_lands_rations
+    split: validation
+    question: How many rations does the party need per day in the Ancient Lands?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [procedure.travel_food_and_rest]
+
+  - id: askq.cave_bear_parts
+    split: validation
+    question: What do I get from harvesting a Cave Bear?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.alchemy.harvesting]
+
+  - id: askq.claustrophobic_wizard_corridor
+    split: validation
+    question: My wizard has Claustrophobia and Fear of the Dark. What penalties apply when she casts a spell in a corridor?
+    expected: { intent: situation_ruling, complexity: judgment, entity: null }
+    required_evidence: [procedure.claustrophobia, condition.fear_of_the_dark]
+    notes: >-
+      Claustrophobia gives -10 to all skills in corridors, Arcane Arts included. Fear of the Dark
+      only affects Resolve Tests, so a correct answer says it does not change the casting roll.
+
   # --- held out ------------------------------------------------------------------------
   - id: askq.disease_cure
     split: held_out
@@ -275,3 +547,130 @@ cases:
     question: How many activities can a hero do per day in a settlement, and must they stay at the inn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.settlement_activities_and_overnight]
+
+  - id: askq.dodge_parry_limits
+    split: held_out
+    question: How often can a hero dodge and parry?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.hero_defence]
+
+  - id: askq.stunned
+    split: held_out
+    question: What does being stunned do to a hero?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.stun_next_turn]
+
+  - id: askq.shooting_past_cover
+    split: held_out
+    question: What modifier applies when I shoot at an enemy past a half-height object?
+    expected: { intent: value_lookup, complexity: single_fact, entity: null }
+    required_evidence: [table.combat.ranged_modifiers]
+
+  - id: askq.encounter_chance
+    split: held_out
+    question: What is the chance of an encounter when the party enters a new room or corridor?
+    expected: { intent: value_lookup, complexity: single_rule, entity: null }
+    required_evidence: [procedure.encounters]
+
+  - id: askq.open_door_trap
+    split: held_out
+    question: What happens when a hero opens a door? Can it be trapped?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.open_door_or_chest]
+
+  - id: askq.room_treasure
+    split: held_out
+    question: What can a hero find when rolling for treasure in a room or corridor?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [table.treasure.rooms_corridors]
+
+  - id: askq.fountain_drink
+    split: held_out
+    question: What happens if a hero drinks from a fountain in the dungeon?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [table.treasure.furniture.fountain_drink]
+
+  - id: askq.broken_weapon_repair
+    split: held_out
+    question: What happens when a weapon reaches 0 Durability, and where can damaged gear be repaired?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.durability.broken, character.durability.repair_location]
+
+  - id: askq.specialisation
+    split: held_out
+    question: How do I spend the 15 specialisation points when creating a hero?
+    expected: { intent: character_building, complexity: single_rule, entity: null }
+    required_evidence: [procedure.character_creation_specialisation]
+
+  - id: askq.wizard_level_two_talent
+    split: held_out
+    question: Which talent category does a Wizard choose from at level 2?
+    expected: { intent: character_building, complexity: single_fact, entity: profession.wizard }
+    required_evidence: [table.character.talent_progression]
+
+  - id: askq.halfling_longbow
+    split: held_out
+    question: Can a Halfling use a longbow?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: species.halfling }
+    required_evidence: [species.halfling]
+
+  - id: askq.learn_prayer_cost
+    split: held_out
+    question: How much does it cost a Warrior Priest to learn a new prayer?
+    expected: { intent: value_lookup, complexity: single_rule, entity: null }
+    required_evidence: [procedure.learn_prayer]
+
+  - id: askq.sanity_recovery
+    split: held_out
+    question: How can a hero recover lost Sanity?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.sanity_recovery]
+
+  - id: askq.asylum_treatment
+    split: held_out
+    question: How do I get a hero's mental condition treated, and what does it cost?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.mental_condition_treatment]
+
+  - id: askq.failed_fear_retry
+    split: held_out
+    question: A hero failed a Fear Test. Can another hero help them try again?
+    expected: { intent: situation_ruling, complexity: single_fact, entity: null }
+    required_evidence: [perk.rally]
+
+  - id: askq.guild_skill_training
+    split: held_out
+    question: How does skill training at a guild work?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [procedure.guild_skill_training]
+
+  - id: askq.banking
+    split: held_out
+    question: How does keeping money in a bank work?
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [character.settlement.banking, table.settlement.bank_returns]
+
+  - id: askq.inn_recovery
+    split: held_out
+    question: What do heroes recover by staying a night at the inn?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [character.recovery.inn_resources]
+
+  - id: askq.outdoor_obstacles
+    split: held_out
+    question: How do boulders and barrels affect movement and shooting in an outdoor skirmish?
+    expected: { intent: value_lookup, complexity: single_rule, entity: null }
+    required_evidence: [table.travel.obstacles]
+
+  - id: askq.alchemy_harvest
+    split: held_out
+    question: How does an alchemist harvest parts from dead enemies?
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [character.alchemy.harvest]
+
+  - id: askq.ragnalf_stats
+    split: held_out
+    question: What are Ragnalf the Mad's statistics?
+    expected:
+      { intent: value_lookup, complexity: single_fact, entity: quest_actor.great_crypt.ragnalf }
+    required_evidence: [table.quest.stopping_necromancer.ragnalf]
