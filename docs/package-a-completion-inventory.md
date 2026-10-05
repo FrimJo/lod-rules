@@ -112,7 +112,7 @@ racing, guild and bounty fixtures remain in place.
 - False Prophet: the printed guild availability cells and superscript footnote are extracted; expansion contents are unavailable.
 - Event cards, enemy equipment cards, map geometry and missing external adversary/treasure material remain supplied; no contents invented.
 - The Grieving Mother on PDF 164–165 is present but belongs to the next quest catalogue batch. Its ghost-event referral and retry/completion conditions are extracted.
-- Trickster Luck deduction is not quantified; Ohlnir prose names Charus; Fire Staff says Magic Flare. These remain issues in `review/ambiguities.yaml`, alongside the existing trinket overlap and prayer schedule conflict.
+- Trickster Luck deduction is not quantified; Fire Staff says Magic Flare. These remain issues in `review/ambiguities.yaml`, alongside the existing trinket overlap and prayer schedule conflict. Ohlnir prose naming Charus is resolved as a misprint by changelog 2.21 entry 82.
 - Tripwire setup outside a Quick Slot is unspecified. Estate Smithy prose states no repeat-use interval; no limit is invented.
 
 ## Mutation ownership

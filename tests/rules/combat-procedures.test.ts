@@ -186,10 +186,24 @@ describe('combat preparation and resolution: PDF 109–116, 121', () => {
       }).state,
     ).toMatchObject({ armour_piercing: 2, selected_weapon_damage: 4 });
   });
-  it('does not invent an enemy-fumble consequence or a successful missing dependency', () => {
-    expect(run('combat_attack', { ...attack, is_hero: false, roll: 100 }).unresolved).toContain(
-      'issue.combat.enemy_fumble',
-    );
+  it('applies the ruled enemy fumble and does not invent a successful missing dependency', () => {
+    const armed = run('combat_attack', {
+      ...attack,
+      is_hero: false,
+      roll: 100,
+      enemy_has_weapon: true,
+    });
+    expect(armed.state).toMatchObject({ enemy_dropped_weapon: true });
+    expect(armed.state.enemy_prone).toBeUndefined();
+    expect(armed.unresolved).not.toContain('issue.combat.enemy_fumble');
+    const unarmed = run('combat_attack', {
+      ...attack,
+      is_hero: false,
+      roll: 100,
+      enemy_has_weapon: false,
+    });
+    expect(unarmed.state).toMatchObject({ enemy_prone: true });
+    expect(unarmed.state.enemy_dropped_weapon).toBeUndefined();
     expect(
       run('combat_attack', { ...attack, preparation_supplied: false }).state.hit,
     ).toBeUndefined();

@@ -21,7 +21,6 @@ const food: State = {
   food_choice: 'rations',
   terrain: 'road',
   day: 0,
-  party_size: 4,
   food_day: -1,
   hero_food_day: -1,
   hero_rest_day: -1,
@@ -102,11 +101,12 @@ describe('travel resource accounting from PDF 126–128', () => {
     expect(r.state).toMatchObject({ food_required: 1, rations_available: 2, party_fed: true });
     expect(run('travel_food_and_rest', r.state).state.rations_available).toBe(2);
   });
-  it('requires two rations per hero in Ancient Lands and forbids foraging', () => {
+  it('requires two rations for the party in Ancient Lands and forbids foraging', () => {
+    // Changelog 2.21 entry 167: 'each hero' becomes 'the party'.
     expect(
       run('travel_food_and_rest', { ...food, terrain: 'ancient_lands', rations_available: 10 })
         .state,
-    ).toMatchObject({ food_required: 8, rations_available: 2, party_fed: true });
+    ).toMatchObject({ food_required: 2, rations_available: 8, party_fed: true });
     const rejected = run('travel_food_and_rest', {
       ...food,
       terrain: 'ancient_lands',
@@ -118,9 +118,13 @@ describe('travel resource accounting from PDF 126–128', () => {
     expect(rejected.events).toContainEqual({ type: 'require', satisfied: false });
   });
   it('surfaces partial Ancient Lands supply without inventing allocation', () => {
-    const r = run('travel_food_and_rest', { ...food, terrain: 'ancient_lands' });
+    const r = run('travel_food_and_rest', {
+      ...food,
+      terrain: 'ancient_lands',
+      rations_available: 1,
+    });
     expect(r.unresolved).toContain('issue.travel.partial_rations');
-    expect(r.state).toMatchObject({ rations_available: 3, food_day: -1, party_morale: 8 });
+    expect(r.state).toMatchObject({ rations_available: 1, food_day: -1, party_morale: 8 });
   });
   it.each([
     ['trees', 50, true],

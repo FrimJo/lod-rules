@@ -142,7 +142,11 @@ describe('treasure source cell regression matrices', () => {
     const ids = table('legendary').rows.flatMap((r) => r.entity_refs ?? []);
     expect(ids).toContain('equipment.legendary.belt_of_oakenshield');
     expect(ids).toContain('equipment.legendary.the_golden_kopesh');
-    expect(ids).not.toContain('equipment.legendary.belt_of_copperbane');
+    // Changelog 2.21 entry 193 renames the selector's Oakenshield to Copperbane.
+    expect(table('legendary').rows.find((r) => r.id === 'row_5')!.entity_refs).toEqual([
+      'equipment.legendary.belt_of_oakenshield',
+      'equipment.legendary.belt_of_copperbane',
+    ]);
     expect(ids).not.toContain('equipment.legendary.the_golden_khopesh');
     expect(ids).not.toContain('equipment.legendary.armour_of_the_father');
     for (const id of ['belt_of_copperbane', 'the_golden_khopesh', 'armour_of_the_father'])

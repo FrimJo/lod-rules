@@ -43,6 +43,7 @@ const trap: State = {
   perception_succeeded: true,
   disarm_attempted: false,
   disarm_succeeded: false,
+  has_disarm_tool: true,
   deliberate_trigger: false,
   trap_detected: false,
   trap_removed: false,
@@ -166,6 +167,18 @@ describe('traps: PDF 92 and 101', () => {
       opening_eligible: true,
     });
     expect(r.steps).not.toContain('draw_card');
+  });
+  it('cannot disarm without a lock pick or trap disarming kit (changelog 2.21 entry 121)', () => {
+    const r = tr({
+      initial_check: false,
+      trap_detected: true,
+      disarm_attempted: true,
+      disarm_succeeded: true,
+      has_disarm_tool: false,
+    });
+    expect(r.steps).not.toContain('disarm');
+    expect(r.state).toMatchObject({ trap_removed: false, trap_triggered: false });
+    expect(r.state.action_points_spent).toBeUndefined();
   });
   it('deliberately triggers door/chest traps for 2 AP but not a general square trap', () => {
     expect(

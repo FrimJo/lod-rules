@@ -35,11 +35,14 @@ describe('Hero/event Sanity loss / exact-zero handoff — rendered PDF55 / 21', 
     expect(replay.state.sanity).toBe(8 - loss);
     expect(replay.trace).toEqual(['procedure.sanity_loss']);
   });
-  it.each([1, 2, 3])('miscast 1d3 roll %i is applied once', (die) => {
-    const first = run({ ...event, event_kind: 'miscast', die });
-    expect(first.state.sanity).toBe(8 - die);
-    expect(run({ ...first.state, die: 1 }).state.sanity).toBe(8 - die);
+  it('miscast defers to the Miscast table instead of the printed -1d3, once', () => {
+    // FAQ and changelog 2.21 entry 146: the Miscast table is correct.
+    const first = run({ ...event, event_kind: 'miscast' });
+    expect(first.state.sanity).toBe(8);
+    expect(first.state.sanity_loss_processed).toBe(true);
     expect(first.trace).toEqual(['procedure.sanity_loss', 'character.sanity.loss.miscast']);
+    expect(first.events).toContainEqual({ type: 'invoke', dependency: 'core.magic.miscast' });
+    expect(run(first.state).trace).toEqual(['procedure.sanity_loss']);
   });
   const rejected: State[] = [
     { sanity_system_enabled: false },

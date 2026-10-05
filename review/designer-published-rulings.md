@@ -1,7 +1,7 @@
 # Published designer rulings found online
 
 Searched 3 October 2026. This file records what Michael Lundstedt / von Braus Publishing has
-already published about issues in our rulebook PDF. The changelog and FAQ snapshots are now declared in the source manifest. Changelog entry 39 has been applied to the short-rest morale rule and its resolved issue; the other findings below are research, not automatically adopted rules. Original printed wording remains preserved.
+already published about issues in our rulebook PDF. The changelog and FAQ snapshots are declared in the source manifest. Rulings marked **applied** below resolve their issue in `review/ambiguities.yaml`. Rulings marked **partial** are cited on an issue that stays unresolved, and only the settled effects changed. Printed wording is preserved as `source_text`; executable effects follow the ruling. The policy is in `docs/extraction-guide.md` ("Official rulings").
 
 ## Sources
 
@@ -31,14 +31,14 @@ levels. Adopting 2.5 would mean recompiling the corpus, not patching it.
 
 ## Rulings that settle conflicts on the question sheet
 
-| Issue                                   | Ruling                                                                                                                                                                         | Source                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `issue.phase4.short_rest_morale`        | "+2 is correct".                                                                                                                                                               | Changelog #39          |
-| `issue.phase5.ranger_species_bows`      | "You may take a shortbow instead." 2.22 also "Added Shortbow as possible startweapon for Ranger".                                                                              | FAQ; changelog 2.22 #2 |
-| `issue.phase5.heirloom_sword`           | "In The Heirloom, changed 'longsword' into 'shortsword'".                                                                                                                      | Changelog #144         |
-| `issue.settlement.ohlnir_temple_name`   | "Temple of Ohlnir: First sentence refers to Charus. Fixed" (Charus is a misprint).                                                                                             | Changelog #82          |
-| `issue.treasure.legendary_names` (belt) | "Changed 'Oakenshield' to 'Copperbane'". The Kopesh/Khopesh spelling is not mentioned.                                                                                         | Changelog #193         |
-| `issue.quest.prisoner_reward_conflict`  | "Reward listed as 250c per hero but in the Aftermath section references 300c. Fixed. Changed to 250c". Recipient scope of the deduction and a floor at zero are not addressed. | Changelog #106         |
+| Issue                                   | Ruling                                                                                                                                                                         | Source                 | Status  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- | ------- |
+| `issue.phase4.short_rest_morale`        | "+2 is correct".                                                                                                                                                               | Changelog #39          | applied |
+| `issue.phase5.ranger_species_bows`      | "You may take a shortbow instead." 2.22 also "Added Shortbow as possible startweapon for Ranger".                                                                              | FAQ; changelog 2.22 #2 | applied |
+| `issue.phase5.heirloom_sword`           | "In The Heirloom, changed 'longsword' into 'shortsword'".                                                                                                                      | Changelog #144         | applied |
+| `issue.settlement.ohlnir_temple_name`   | "Temple of Ohlnir: First sentence refers to Charus. Fixed" (Charus is a misprint).                                                                                             | Changelog #82          | applied |
+| `issue.treasure.legendary_names` (belt) | "Changed 'Oakenshield' to 'Copperbane'". The Kopesh/Khopesh spelling is not mentioned.                                                                                         | Changelog #193         | partial |
+| `issue.quest.prisoner_reward_conflict`  | "Reward listed as 250c per hero but in the Aftermath section references 300c. Fixed. Changed to 250c". Recipient scope of the deduction and a floor at zero are not addressed. | Changelog #106         | partial |
 
 ## Acknowledged, but the fix isn't stated
 
@@ -65,15 +65,17 @@ The changelog marks these **Fixed** without saying what the new rule is. The cur
 
 ## Rulings on issues we already have that aren't on the sheet
 
-| Issue                          | Ruling                                                                                                                                                                                                                                                     | Source              |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `issue.combat.enemy_fumble`    | The enemy sentence under Fumble should be removed. Enemy Fumbles (PDF 120: drops weapon or falls over) is the rule.                                                                                                                                        | Changelog #68, #123 |
-| `issue.travel.partial_rations` | Changed "each hero" to "the party": "When travelling in the Ancient Lands, the party requires 2 rations per day".                                                                                                                                          | Changelog #167      |
-| `issue.sanity.recovery_scope`  | Tending to those Memories gives 1d3 Sanity once per settlement stay. Further Sanity before the next quest needs the 1d3 × 100 c option, and it becomes available again after a quest. A player (Benman1964) proposed this and von Braus marked it "Fixed". | Changelog #83       |
+| Issue                          | Ruling                                                                                                                                                                                                                                                     | Source              | Status  |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------- |
+| `issue.combat.enemy_fumble`    | The enemy sentence under Fumble should be removed. Enemy Fumbles (PDF 120: drops weapon or falls over) is the rule.                                                                                                                                        | Changelog #68, #123 | applied |
+| `issue.travel.partial_rations` | Changed "each hero" to "the party": "When travelling in the Ancient Lands, the party requires 2 rations per day".                                                                                                                                          | Changelog #167      | partial |
+| `issue.sanity.recovery_scope`  | Tending to those Memories gives 1d3 Sanity once per settlement stay. Further Sanity before the next quest needs the 1d3 × 100 c option, and it becomes available again after a quest. A player (Benman1964) proposed this and von Braus marked it "Fixed". | Changelog #83       | partial |
 
-## Conflicts in our PDF that we haven't recorded yet
+## Conflicts recorded from these rulings
 
-Each of these is present in our PDF, and the designer has ruled on it.
+Each of these is present in our PDF, and the designer has ruled on it. Each is now logged as a
+`conflicting` issue and resolved (**applied**): `issue.sanity.miscast_loss`,
+`issue.movement.pit_down_test` and `issue.traps.disarm_lockpick`.
 
 1. **Miscast Sanity loss.** The Sanity loss table on printed 53 (PDF 55) gives "Miscasting a spell
    −1d3". Miscast on printed 63 (PDF 65) says "the caster must roll on the table below". FAQ:

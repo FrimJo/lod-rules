@@ -453,7 +453,8 @@ and optional-system evidence on rendered PDF21 / printed19 preserve one
 hero/distinct-event loss context. procedure.sanity_loss reuses all existing loss
 rules and the full structured table, including -2 Terror/trap, -1 head wound,
 Fear, each demon battle, reduction to 0 HP, disease contraction and getting
-poisoned, plus actual 1d3 miscast loss. Event confirmation and processed markers
+poisoned. A miscast defers to the Miscast table per the designer ruling in
+issue.sanity.miscast_loss rather than the printed 1d3. Event confirmation and processed markers
 prevent repeating one demon battle, counting ongoing disease/poison checks as
 new onsets, or applying a loss to every hero through one shared state. Creation
 remains owned separately; no event reinitializes Sanity to 8. Disabled Sanity

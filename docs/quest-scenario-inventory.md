@@ -1274,8 +1274,9 @@ and one highest-XP enemy carrying the sword without using it in battle. The
 existing setup and property rules remain quest-scoped. The new quest-bound
 `equipment.quest.great_aunt_sword` exposes the item in the catalogue and links
 those rules without adding price, ENC or unspecified base statistics. The
-existing issue.phase5.heirloom_sword retains the narrative longsword versus
-mechanical silver shortsword distinction and now links this equipment record.
+existing issue.phase5.heirloom_sword, which links this equipment record, is
+resolved: changelog 2.21 entry 144 changes the narrative longsword into the
+mechanical silver shortsword.
 The printed +1 DMG, +2 Durability and sale prohibition remain unchanged.
 
 Arachnophobia retains extreme arachnophobia, the asylum exclusion, three battles

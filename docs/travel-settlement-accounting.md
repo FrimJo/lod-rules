@@ -18,8 +18,9 @@ No reviewed status is claimed.
   `rest` applies one hero’s daily recovery. Pass separate hero state and shared party
   state when composing. Saved hunger losses preserve unrelated Constitution changes.
   The ordinary requirement is one ration **per party**, not per hero. Ancient Lands
-  requires two per hero and disallows Foraging. Partial Ancient Lands allocation is
-  undefined in the source and surfaces `issue.travel.partial_rations` without mutation.
+  prints two per hero; changelog 2.21 entry 167 changes that to two **per party**, which
+  the procedure applies. Ancient Lands disallows Foraging. Partial Ancient Lands
+  allocation is undefined and surfaces `issue.travel.partial_rations` without mutation.
 - Rest applies supplied HP and successful Energy dice outcomes, or full Energy from
   Bed Roll. HP recovery above the recorded maximum retains the existing unresolved
   `issue.phase4.recovery_bounds` instead of choosing a cap. Settlement lodging is separate. Each hero’s rest-day

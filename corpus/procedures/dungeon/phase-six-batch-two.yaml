@@ -714,6 +714,10 @@
       type: boolean
       role: input
       description: Supplied Pick Lock result.
+    has_disarm_tool:
+      type: boolean
+      role: input
+      description: The disarming hero has a lock pick or a trap disarming kit (changelog 2.21 entry 121).
     deliberate_trigger:
       type: boolean
       role: input
@@ -943,7 +947,38 @@
                 type: literal
                 value: true
     - id: disarm
-      source_text: Disarming takes 2 AP using Pick Lock; no Lock Picks required.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          printed_page: 90
+          pdf_page: 92
+          heading: Disarming a Trap
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          printed_page: 26
+          pdf_page: 28
+          heading: Pick Locks (DEX)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 19
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 121
+      source_text: Disarming takes 2 AP using Pick Lock; no Lock Picks required. Designer ruling
+        (changelog 2.21 entry 121) requires a lock pick or trap disarm kit.
       when:
         type: all
         conditions:
@@ -976,6 +1011,14 @@
             left:
               type: field
               name: disarm_attempted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_disarm_tool
             right:
               type: literal
               value: true
@@ -1433,6 +1476,7 @@
   exit_step: opening_eligibility
   issues:
     - issue.phase6.trap_resolution_deferred
+    - issue.traps.disarm_lockpick
   unresolved_references:
     - Trap-card modifiers, affected actors, damage and monster characteristics are supplied inputs
       or unresolved.

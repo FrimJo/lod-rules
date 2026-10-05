@@ -12,9 +12,11 @@ clarifications alongside the original wording; the printed text itself is not ch
 Corpus issue ids are in brackets so answers can be matched back to `review/ambiguities.yaml`.
 
 **Already answered publicly** (see [designer-published-rulings.md](designer-published-rulings.md)):
-questions 1, 9, 11, 12 (base reward only) and 14, plus the belt name in question 7. Questions 8
-and 10 are marked fixed in the 2.2x changelog, but the fix isn't stated. The remaining questions
-(2, 3, 4, 5, 6, the Kopesh spelling in 7, the rest of 12, and 13) have no published answer.
+questions 1, 9, 11 and 14 are resolved in the corpus from published rulings. The belt name in
+question 7 and the 250 c base in question 12 are applied, but those issues stay open for the
+Kopesh spelling and for the deduction's scope and floor. Questions 8 and 10 are marked fixed in
+the 2.2x changelog, but the fix isn't stated. The remaining questions (2, 3, 4, 5, 6 and 13) have
+no published answer.
 
 ---
 

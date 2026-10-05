@@ -100,19 +100,17 @@ describe('Rescuing the Prisoners — PDF249–250', () => {
     expect(run('golfrid_movement').state.tries_to_leave_close_combat_for_shortbow).toBe(true);
   });
   it.each([
-    [250, 0, 350],
-    [300, 0, 400],
-    [250, 1, 200],
-    [300, 1, 250],
-    [300, 6, 0],
-    [300, 10, -200],
+    [0, 350],
+    [1, 200],
+    [5, 0],
+    [6, -50],
+    [10, -250],
   ])(
-    'exposes source arithmetic without choosing a base or silently clamping: %s / %s',
-    (base, dead, raw) => {
+    'uses the ruled 250 c base without choosing a scope or silently clamping: %s dead',
+    (dead, raw) => {
       const state = run('reward_arithmetic', {
         objective_battle_over: true,
         survivor_escort_completed: true,
-        selected_reward_base: base,
         dead_prisoners: dead,
         reward_case: dead === 0 ? 'all_alive' : 'dead_prisoners',
       }).state;
@@ -129,7 +127,6 @@ describe('Rescuing the Prisoners — PDF249–250', () => {
       run('reward_arithmetic', {
         objective_battle_over: over,
         survivor_escort_completed: escorted,
-        selected_reward_base: 300,
         dead_prisoners: 0,
         reward_case: 'all_alive',
       }).state,

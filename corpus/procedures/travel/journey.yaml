@@ -476,12 +476,6 @@
       description: day
       integer: true
       minimum: 0
-    party_size:
-      type: number
-      role: input
-      description: party size
-      integer: true
-      minimum: 1
     food_day:
       type: number
       role: state
@@ -627,7 +621,29 @@
             type: literal
             value: 1
     - id: ancient_food_requirement
-      source_text: Each hero requires two rations in the Ancient Lands.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 127
+          printed_page: 125
+          heading: Rations and Resting
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 25
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 167
+      source_text: When travelling in the Ancient Lands, each hero requires 2 rations per day.
+        Changelog 2.21 entry 167 changes 'each hero' into 'the party'.
       when:
         type: all
         conditions:
@@ -651,13 +667,8 @@
         - type: set
           target: food_required
           value:
-            type: arithmetic
-            operator: multiply
-            values:
-              - type: literal
-                value: 2
-              - type: field
-                name: party_size
+            type: literal
+            value: 2
     - id: reject_ancient_foraging
       source_text: Foraging is impossible in the Ancient Lands.
       when:

@@ -289,39 +289,49 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: There are two different mentions about the effect of miscast. One is -1d3 Sanity and one is to roll on the table. Which one is correct?
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 146
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      heading: Miscast
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: 'Miscasting a spell: -1d3.'
   type: calculation
   scope: global
-  fields:
-    sanity:
-      type: number
-      role: state
-      description: sanity
-    die:
-      type: number
-      role: input
-      description: die
-      integer: true
-      minimum: 1
-      maximum: 3
-      dice:
-        count: 1
-        sides: 3
+  fields: {}
   effects:
-    - type: add
-      target: sanity
-      value:
-        type: arithmetic
-        operator: multiply
-        values:
-          - type: field
-            name: die
-          - type: literal
-            value: -1
-      duration: immediate
+    - type: invoke
+      dependency: miscast_table
   optional_system: sanity
+  dependencies:
+    - key: miscast_table
+      label: Miscast table roll, which owns any Sanity loss
+      object_id: core.magic.miscast
+  issues:
+    - issue.sanity.miscast_loss
 - id: character.sanity.loss.room_event
   name: loss room event
   section_id: section.psychology.sanity

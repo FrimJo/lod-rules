@@ -63,9 +63,16 @@ describe('issue resolutions', () => {
       'issue.0008',
       'issue.0011',
       'issue.phase4.short_rest_morale',
+      'issue.phase5.ranger_species_bows',
+      'issue.phase5.heirloom_sword',
       'issue.phase6.failed_threat_roll_increase',
       'issue.phase6.trap_headings_unmapped',
+      'issue.combat.enemy_fumble',
+      'issue.settlement.ohlnir_temple_name',
       'issue.quest.spider_queen_cobweb_mapping',
+      'issue.sanity.miscast_loss',
+      'issue.movement.pit_down_test',
+      'issue.traps.disarm_lockpick',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

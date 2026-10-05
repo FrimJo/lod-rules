@@ -65,6 +65,24 @@ When the source is unclear:
 The corpus must be able to state that the rulebook does not define something. That is a
 valid answer, and it is better than an invented one.
 
+### Official rulings
+
+Published designer rulings can settle an issue. Their sources are archived under `source/`
+and declared in `source/manifest.yaml` as non-canonical `official_errata` (the von Braus 2.2x
+changelog) or `official_faq` (the official FAQ). Changelog citations give `pdf_page`, the
+version as `heading` and the entry number as `locator.row`. FAQ citations give the exact
+question as `heading` and no pages.
+
+- Printed `source_text` stays verbatim. The ruling never rewrites the quotation.
+- Executable effects follow the ruling. Each changed rule, procedure step or fixture cites
+  both the rulebook page and the ruling.
+- A ruling that settles the whole issue sets `status: resolved` with a `resolution` citing it.
+- A ruling that settles only part of an issue is added to its `source` list and summary; the
+  issue stays unresolved, and only the settled effects change.
+- A ruling marked "Fixed" without a stated rule settles nothing.
+
+Research notes and applied status are in `review/designer-published-rulings.md`.
+
 ## External sources are recorded, never invented
 
 The rulebook defers some material to the Bestiary, the Charts Compendium, Quest Book II,

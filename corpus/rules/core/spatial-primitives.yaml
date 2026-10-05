@@ -882,6 +882,13 @@
         method: text
         confidence: high
         visually_verified: false
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: Does a hero have to make a DEX test to climb DOWN into a pit? The text in the rulebook contradicts itself.
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
   status: extracted
   confidence: high
   source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
@@ -927,6 +934,8 @@
     right:
       type: literal
       value: true
+  issues:
+    - issue.movement.pit_down_test
 - id: core.movement.pit_failure
   name: movement pit failure
   section_id: section.into_the_dungeons.obstacles.climbing_pits
@@ -936,6 +945,13 @@
       printed_page: 91
       pdf_page: 93
       heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: Does a hero have to make a DEX test to climb DOWN into a pit? The text in the rulebook contradicts itself.
       extraction:
         method: text
         confidence: high
@@ -951,6 +967,10 @@
       type: boolean
       role: input
       description: test failed
+    climbing_down:
+      type: boolean
+      role: input
+      description: Climbing down into the pit, which needs no DEX Test and so cannot fail it.
     falls:
       type: boolean
       role: state
@@ -964,19 +984,31 @@
     - type: invoke
       dependency: pit_damage
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: test_failed
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: test_failed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: climbing_down
+        right:
+          type: literal
+          value: false
   dependencies:
     - key: pit_damage
       label: Damage on the exploration or trap card
   unresolved_references:
     - Damage as outlined on the exploration or trap card.
+  issues:
+    - issue.movement.pit_down_test
 - id: core.obstacle.half_square
   name: obstacle half square
   section_id: section.into_the_dungeons.obstacles.rule_of_fifty_percent

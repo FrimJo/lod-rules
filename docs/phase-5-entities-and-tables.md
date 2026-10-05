@@ -19,7 +19,7 @@ tables. Each extraction unit is one heading, one table, or a related 1–4-page 
 - PDF 34–41: all eight professions and skill tables, retaining the pilot Alchemist/Thief records. Alternative talent choices, starting equipment and spell/prayer/perk choices remain distinct; Warrior Priest Energy explicitly overrides the default.
 - PDF 42–48: all 20 backgrounds, 15 personal quest records, and their local rules. IDs: `background.*`, `quest.background.*`, `character.background.*`. Full personal-quest procedures remain deferred.
 - Independent table matrices, catalogue schema/reference tests, and 51 background boundary scenarios are in the Phase 5 test files. Historical Batch 1 gate: 130 canonical files validate; 652 tests pass; lint passes.
-- Open issues: Ranger starting Longbow versus species restrictions; Rogue backpacks; heirloom longsword/shortsword wording; Lost Brother skirmish burial reward; missing Minotaur reward.
+- Open issues: Rogue backpacks; Lost Brother skirmish burial reward; missing Minotaur reward. Resolved by designer rulings: Ranger starting Longbow versus species restrictions (Dwarf and Halfling Rangers take a Shortbow) and heirloom longsword/shortsword wording (shortsword).
 
 Batches 1–7 are extracted within their bounded catalogue scope. Package E acceptance
 is recorded in the [quest inventory](quest-scenario-inventory.md); comprehensive

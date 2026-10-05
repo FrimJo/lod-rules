@@ -78,6 +78,10 @@ sequence. Each of those pages says so in its `notes`.
 
 Details: [docs/extraction-guide.md](docs/extraction-guide.md).
 
+Published designer rulings (manifest `official_errata` / `official_faq`) may resolve an issue:
+printed `source_text` stays verbatim and effects follow the cited ruling. See "Official
+rulings" in the extraction guide.
+
 ## Layout
 
 | Path           | Role                                                  | Hand-edit?             |

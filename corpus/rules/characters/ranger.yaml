@@ -32,3 +32,93 @@
         right:
           type: literal
           value: 3
+- id: character.profession.ranger.short_arms_starting_bow
+  name: Ranger starting bow for Dwarves and Halflings
+  section_id: section.creating_your_character.ranger
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 36
+      printed_page: 34
+      heading: Starting Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 30
+      printed_page: 28
+      heading: Limitations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 31
+      printed_page: 29
+      heading: Limitations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: "I've made a ranger with short arms and can't use the longbow given as start equipment. What do I do?"
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 28
+      printed_page: null
+      heading: '2.22'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 2
+  status: extracted
+  confidence: high
+  source_text: 'Starting Equipment: Small backpack, Longbow and 10 arrows.'
+  type: exception
+  scope: character_creation
+  fields:
+    species:
+      type: string
+      role: input
+      description: 'Ranger species id suffix, for example dwarf, halfling or human.'
+    starting_bow:
+      type: string
+      role: state
+      description: 'Starting bow: longbow as printed, or shortbow under the designer ruling.'
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: species
+        right:
+          type: literal
+          value: dwarf
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: species
+        right:
+          type: literal
+          value: halfling
+  effects:
+    - type: set
+      target: starting_bow
+      value:
+        type: literal
+        value: shortbow
+  issues:
+    - issue.phase5.ranger_species_bows

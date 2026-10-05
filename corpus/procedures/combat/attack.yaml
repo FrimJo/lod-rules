@@ -1331,6 +1331,18 @@
       type: number
       role: output
       description: armour piercing
+    enemy_has_weapon:
+      type: boolean
+      role: input
+      description: Whether a fumbling enemy has a weapon to drop (read only on an enemy roll of 100).
+    enemy_dropped_weapon:
+      type: boolean
+      role: output
+      description: The fumbling enemy dropped its weapon.
+    enemy_prone:
+      type: boolean
+      role: output
+      description: The fumbling enemy without a weapon fell over.
   dependencies:
     - key: preparation
       label: preparation
@@ -1884,7 +1896,29 @@
             method: text
             confidence: high
             visually_verified: true
-      source_text: Do not choose between dropping weapon and falling over.
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 10
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 68
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 21
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 123
+      source_text: An enemy that rolls 100 when attacking drops its weapon, if it has one.
       when:
         type: all
         conditions:
@@ -1922,9 +1956,105 @@
             right:
               type: literal
               value: 100
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_has_weapon
+            right:
+              type: literal
+              value: true
       effects:
-        - type: unresolved
-          issue_id: issue.combat.enemy_fumble
+        - type: set
+          target: enemy_dropped_weapon
+          value:
+            type: literal
+            value: true
+    - id: enemy_fumble_falls_over
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: enemy fumble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 10
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 68
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 21
+          printed_page: null
+          heading: '2.21'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: false
+          locator:
+            row: 123
+      source_text: An enemy without a weapon that rolls 100 when attacking falls over.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: preparation_supplied
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_eligible
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_has_weapon
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: enemy_prone
+          value:
+            type: literal
+            value: true
     - id: normal_damage
       source:
         - document: rulebook.second_printing.eng
