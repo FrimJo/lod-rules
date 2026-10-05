@@ -4,6 +4,7 @@ import {
   QUEUE_BUCKETS,
   QUEUE_BUCKET_LABELS,
   currentLabels,
+  deleteCaseReview,
   distinctAnswers,
   hash,
   hashLabelledRecords,
@@ -14,6 +15,7 @@ import {
   poolIds,
   recordQueue,
   recordTexts,
+  removeRecordLabel,
   reviewStatus,
   saveCaseReview,
   summarizeReview,
@@ -26,6 +28,7 @@ import {
   type ReviewedRelevance,
 } from '../evaluation/grading-review.ts';
 import type { AnswerJudgment, RelevanceJudgment } from '../evaluation/quality.ts';
+import { openRetrieval, type EvidenceItem } from './ask-service.ts';
 import { bundled } from './data-root.ts';
 
 export type { CaseReview, QualityMode, QueueBucket, ReviewStatus, ReviewedRelevance };
@@ -168,9 +171,10 @@ export function getGradedCase(id: string): GradedCaseDetail {
 }
 
 export interface QueueRow extends QueueItem {
-  kind: string;
-  title: string;
-  text: string;
+  /** The record as the answering model saw it, with citations, issues and dependencies. */
+  record: EvidenceItem;
+  /** Rulebook headings above the record, nearest first: "Charging Magic Items — Wizards' Guild — …". */
+  context: string;
   judgeReason: string;
 }
 
@@ -190,19 +194,24 @@ export function getRecordQueue(
   const review = loadReview();
   const queue = recordQueue(all, review, { includeHeldOut: input.includeHeldOut ?? false });
   const byId = new Map(all.map((c) => [c.id, c]));
-  const items = queue.slice(0, input.limit ?? 25).map((item): QueueRow => {
+  const retrieval = openRetrieval();
+  const items = queue.slice(0, input.limit ?? 25).flatMap((item): QueueRow[] => {
     const c = byId.get(item.caseId)!;
-    let record: EvidenceRecord | undefined;
+    let record: EvidenceItem | undefined;
     for (const mode of QUALITY_MODES)
-      record ??= c.evidence[mode]?.find((e) => e.id === item.recordId);
+      record ??= (c.evidence[mode] as EvidenceItem[] | undefined)?.find(
+        (e) => e.id === item.recordId,
+      );
+    if (!record) return [];
     const judged = c.judgment.relevance.find((j) => j.id === item.recordId);
-    return {
-      ...item,
-      kind: record?.kind ?? '',
-      title: record?.title ?? item.recordId,
-      text: record?.text ?? '',
-      judgeReason: judged?.reason ?? 'Not classified by the judge.',
-    };
+    return [
+      {
+        ...item,
+        record: { ...record, why: item.why.length ? item.why : record.why },
+        context: retrieval.document(item.recordId)?.context ?? '',
+        judgeReason: judged?.reason ?? 'Not classified by the judge.',
+      },
+    ];
   });
   return {
     buckets: QUEUE_BUCKETS.map((id) => ({
@@ -213,6 +222,27 @@ export function getRecordQueue(
     progress: labelProgress(all, review),
     items,
   };
+}
+
+export class AlreadyLabelledError extends Error {
+  constructor(recordId: string, label: ReviewedRelevance) {
+    super(
+      `Already labelled ${label} (${recordId}), probably from another tab. Showing the next record.`,
+    );
+    this.name = 'AlreadyLabelledError';
+  }
+}
+
+/** Undoes one record label saved from the queue. */
+export function removeQueueLabel(input: { caseId: string; recordId: string }): void {
+  if (process.env.NODE_ENV === 'production')
+    throw new Error('Grading reviews can only be saved from the dev server');
+  assertRepoCheckout();
+  const existing = loadReview().cases[input.caseId];
+  if (!existing?.relevance[input.recordId]) return;
+  const next = removeRecordLabel(existing, input.recordId);
+  if (next) saveCaseReview(input.caseId, next);
+  else deleteCaseReview(input.caseId);
 }
 
 /** Saves one record label from the queue into its case review, keeping everything else. */
@@ -229,6 +259,11 @@ export function saveRecordLabel(input: {
   if (!c) throw new Error(`No graded case ${input.caseId}`);
   if (!poolIds(c).includes(input.recordId))
     throw new Error(`${input.recordId} is not in the pool of ${input.caseId}`);
+  // The queue only serves unlabelled records; a label here means another tab got there first.
+  const existing = currentLabels(loadReview().cases[c.id], recordTexts(c)).labels.get(
+    input.recordId,
+  );
+  if (existing) throw new AlreadyLabelledError(input.recordId, existing);
   const review = mergeRecordLabels(
     loadReview().cases[c.id],
     { [input.recordId]: input.label },

@@ -186,18 +186,20 @@ export function RulebookViewer({
             </button>
           </div>
         </div>
-        {highlight && highlight.pdf === pdf && (highlight.matched.length > 0 || highlight.missing.length > 0) && (
-          <p className="viewer-heading-note" role="status">
-            {highlight.matched.length > 0 && (
-              <>
-                <span className="swatch" aria-hidden="true" />
-                Highlighted: {highlight.matched.join(', ')}.
-              </>
-            )}
-            {highlight.missing.length > 0 &&
-              ` Cited under “${highlight.missing.join('”, “')}”, which this page does not print word for word.`}
-          </p>
-        )}
+        {highlight &&
+          highlight.pdf === pdf &&
+          (highlight.matched.length > 0 || highlight.missing.length > 0) && (
+            <p className="viewer-heading-note" role="status">
+              {highlight.matched.length > 0 && (
+                <>
+                  <span className="swatch" aria-hidden="true" />
+                  Highlighted: {highlight.matched.join(', ')}.
+                </>
+              )}
+              {highlight.missing.length > 0 &&
+                ` Cited under “${highlight.missing.join('”, “')}”, which this page does not print word for word.`}
+            </p>
+          )}
       </header>
 
       <div className="viewer-scroll" tabIndex={0} role="region" aria-label={`Rulebook ${pageName}`}>

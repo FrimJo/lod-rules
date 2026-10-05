@@ -62,7 +62,7 @@ let ranker: SystemOneModel | null | undefined;
  * A data bundle ships the database built from the deployed commit and no corpus, so it is
  * opened as is. In the repo checkout, a stale or missing database is rebuilt in memory.
  */
-function openRetrieval(): Retrieval {
+export function openRetrieval(): Retrieval {
   if (!retrieval) {
     if (bundled) retrieval = Retrieval.open(join(dataRoot, RETRIEVAL_DIR, 'retrieval.sqlite'));
     else {

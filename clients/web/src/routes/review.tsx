@@ -1,8 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { EvidenceCard } from '../components/EvidenceList.tsx';
+import { RulebookViewer } from '../components/RulebookViewer.tsx';
+import type { RulebookTarget } from '../lib/citations.ts';
+import { describeRetrieval } from '../lib/retrieval-steps.ts';
 import type {
   GradedCaseDetail,
   GradedCaseRow,
@@ -14,8 +18,10 @@ import {
   getGradedCase,
   getGradedCases,
   getReviewQueue,
+  getRulebook,
   saveQueueLabel,
   saveReview,
+  undoQueueLabel,
 } from '../server/functions.ts';
 
 interface ReviewSearch {
@@ -43,40 +49,52 @@ const percent = (value: number | null) => (value === null ? '–' : `${Math.roun
 
 function ReviewPage() {
   const search = Route.useSearch();
+  return search.view === 'records' ? <RecordQueuePage /> : <CasesPage selectedCase={search.case} />;
+}
+
+function ReviewHeader({ view }: { view: 'cases' | 'records' }) {
+  return (
+    <>
+      <header className="review-list-head">
+        <h1>Grading review</h1>
+        <Link to="/" className="link">
+          Back to questions
+        </Link>
+      </header>
+      <nav className="review-views" aria-label="Review views">
+        <Link
+          to="/review"
+          search={{}}
+          className={view === 'cases' ? 'active' : undefined}
+          aria-current={view === 'cases' ? 'page' : undefined}
+        >
+          Questions
+        </Link>
+        <Link
+          to="/review"
+          search={{ view: 'records' }}
+          className={view === 'records' ? 'active' : undefined}
+          aria-current={view === 'records' ? 'page' : undefined}
+        >
+          Record queue
+        </Link>
+      </nav>
+    </>
+  );
+}
+
+function CasesPage({ selectedCase }: { selectedCase: string | undefined }) {
   const list = useQuery({
     queryKey: ['graded-cases'],
     queryFn: () => getGradedCases(),
   });
   const rows = list.data?.rows ?? [];
-  const selected = search.case ?? rows[0]?.id;
+  const selected = selectedCase ?? rows[0]?.id;
 
   return (
     <div className="review-layout">
       <aside className="review-list">
-        <header className="review-list-head">
-          <h1>Grading review</h1>
-          <Link to="/" className="link">
-            Back to questions
-          </Link>
-        </header>
-        <nav className="review-views" aria-label="Review views">
-          <Link
-            to="/review"
-            search={{}}
-            className={search.view ? 'link' : 'link active'}
-            aria-current={search.view ? undefined : 'page'}
-          >
-            Cases
-          </Link>
-          <Link
-            to="/review"
-            search={{ view: 'records' }}
-            className={search.view === 'records' ? 'link active' : 'link'}
-            aria-current={search.view === 'records' ? 'page' : undefined}
-          >
-            Record queue
-          </Link>
-        </nav>
+        <ReviewHeader view="cases" />
         {list.data && <ReviewSummary summary={list.data.summary} />}
         {list.isPending && <p className="muted">Loading graded cases…</p>}
         {list.error && <p className="error">{list.error.message}</p>}
@@ -93,13 +111,7 @@ function ReviewPage() {
         </ol>
       </aside>
       <main className="review-main">
-        {search.view === 'records' ? (
-          <RecordQueueView />
-        ) : selected ? (
-          <CaseView id={selected} rows={rows} />
-        ) : (
-          <p className="muted">Pick a case.</p>
-        )}
+        {selected ? <CaseView id={selected} rows={rows} /> : <p className="muted">Pick a case.</p>}
       </main>
     </div>
   );
@@ -447,140 +459,453 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
   );
 }
 
-const LABEL_KEYS: Record<string, ReviewedRelevance> = {
-  '1': 'direct',
-  '2': 'supporting',
-  '3': 'irrelevant',
+type QueueData = Awaited<ReturnType<typeof getReviewQueue>>;
+type QueueRowData = QueueData['items'][number];
+
+const CHOICES: Array<{ label: ReviewedRelevance; key: string; title: string; hint: string }> = [
+  {
+    label: 'direct',
+    key: '1',
+    title: 'Direct',
+    hint: 'Answers part of the question: a rule, value, step, exception or limit.',
+  },
+  {
+    label: 'supporting',
+    key: '2',
+    title: 'Supporting',
+    hint: 'Doesn’t answer it, but defines a term or gives context needed to apply the answer.',
+  },
+  {
+    label: 'irrelevant',
+    key: '3',
+    title: 'Irrelevant',
+    hint: 'Not needed: a different situation or concept, another quest, or shared words only.',
+  },
+];
+const CHOICE_TITLE = Object.fromEntries(CHOICES.map((c) => [c.label, c.title])) as Record<
+  ReviewedRelevance,
+  string
+>;
+
+const BUCKETS: Record<QueueBucket, { title: string; detail: string }> = {
+  dropped_relevant: {
+    title: 'Possible filter mistakes',
+    detail: 'The filter dropped these, but the judge thinks they matter.',
+  },
+  threshold_band: {
+    title: 'Close calls',
+    detail: 'Jev was unsure, or Jev and the judge disagree.',
+  },
+  new_step: {
+    title: 'New retrieval steps',
+    detail: 'Found by the heading lookups added on 5 October.',
+  },
+  sample: {
+    title: 'Spot checks',
+    detail: 'A random eighth of the rest, to measure mistakes on easy records.',
+  },
 };
 
+const keyOf = (row: { caseId: string; recordId: string }) => `${row.caseId}\u0000${row.recordId}`;
+
 /**
- * One record at a time, across cases, in the order that most helps calibrate the Jev filter.
- * Each label is saved into that case's review straight away.
+ * Labels one record at a time, across questions, in the order that most helps calibrate the
+ * Jev filter. Each label is saved into that question's review straight away and can be undone.
+ * The judge's label and Jev's score are shown only after the reader decides, to avoid anchoring.
  */
-function RecordQueueView() {
+function RecordQueuePage() {
   const queryClient = useQueryClient();
   const [includeHeldOut, setIncludeHeldOut] = useState(false);
-  const [revealed, setRevealed] = useState(false);
+  const [done, setDone] = useState<ReadonlySet<string>>(new Set());
+  const [skipped, setSkipped] = useState<ReadonlySet<string>>(new Set());
+  const [last, setLast] = useState<{ row: QueueRowData; label: ReviewedRelevance } | null>(null);
+  const [target, setTarget] = useState<RulebookTarget | null>(null);
+  const taskRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+
   const queue = useQuery({
     queryKey: ['review-queue', includeHeldOut],
     queryFn: () => getReviewQueue({ data: { includeHeldOut } }),
   });
-  const item = queue.data?.items[0];
+  const rulebook = useQuery({
+    queryKey: ['rulebook'],
+    queryFn: () => getRulebook(),
+    staleTime: Infinity,
+    enabled: target !== null,
+  });
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['review-queue'] });
+    void queryClient.invalidateQueries({ queryKey: ['graded-cases'] });
+  };
+
+  const items = queue.data?.items ?? [];
+  const pending = items.filter((row) => !done.has(keyOf(row)));
+  const current = pending.find((row) => !skipped.has(keyOf(row)));
+
   const save = useMutation({
-    mutationFn: (label: ReviewedRelevance) =>
-      saveQueueLabel({ data: { caseId: item!.caseId, recordId: item!.recordId, label } }),
-    onSuccess: async () => {
-      setRevealed(false);
-      await queryClient.invalidateQueries({ queryKey: ['review-queue'] });
-      await queryClient.invalidateQueries({ queryKey: ['graded-cases'] });
-      await queryClient.invalidateQueries({ queryKey: ['graded-case', item?.caseId] });
+    mutationFn: (input: { row: QueueRowData; label: ReviewedRelevance }) =>
+      saveQueueLabel({
+        data: { caseId: input.row.caseId, recordId: input.row.recordId, label: input.label },
+      }),
+    onError: (error, input) => {
+      // Labelled in another tab: move on and refresh, keeping the message visible. Any other
+      // error keeps the record so the label can be retried.
+      if (!error.message.startsWith('Already labelled')) return;
+      setDone((prev) => new Set(prev).add(keyOf(input.row)));
+      refresh();
+    },
+    onSuccess: (_review, input) => {
+      setDone((prev) => new Set(prev).add(keyOf(input.row)));
+      setLast(input);
+      setTarget(null);
+      refresh();
+      void queryClient.invalidateQueries({ queryKey: ['graded-case', input.row.caseId] });
+    },
+  });
+  const undo = useMutation({
+    mutationFn: (row: QueueRowData) =>
+      undoQueueLabel({ data: { caseId: row.caseId, recordId: row.recordId } }),
+    onSuccess: (_result, row) => {
+      setDone((prev) => {
+        const next = new Set(prev);
+        next.delete(keyOf(row));
+        return next;
+      });
+      setSkipped((prev) => {
+        const next = new Set(prev);
+        next.delete(keyOf(row));
+        return next;
+      });
+      setLast(null);
+      refresh();
+      void queryClient.invalidateQueries({ queryKey: ['graded-case', row.caseId] });
     },
   });
 
+  const busy = save.isPending || undo.isPending;
+  const choose = (label: ReviewedRelevance) => {
+    if (current && !busy) save.mutate({ row: current, label });
+  };
+  const skip = () => {
+    if (current) setSkipped((prev) => new Set(prev).add(keyOf(current)));
+  };
+
+  // A new record: back to the top, and move focus so screen readers announce the question.
+  const currentKey = current ? keyOf(current) : null;
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0 });
+    if (currentKey) taskRef.current?.focus({ preventScroll: true });
+  }, [currentKey]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
-      const label = LABEL_KEYS[event.key];
-      if (label && item && !save.isPending) save.mutate(label);
-      if (event.key === 'j') setRevealed((r) => !r);
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const el = event.target as HTMLElement | null;
+      if (el && (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable))
+        return;
+      const choice = CHOICES.find((c) => c.key === event.key);
+      if (choice) choose(choice.label);
+      else if (event.key === 's') skip();
+      else if (event.key === 'u' && last && !busy) undo.mutate(last.row);
+      else if (event.key === 'Escape') setTarget(null);
+      else return;
+      event.preventDefault();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [item, save]);
+  });
 
-  if (queue.isPending) return <p className="muted">Loading the record queue…</p>;
-  if (queue.error) return <p className="error">{queue.error.message}</p>;
-  const { buckets, progress } = queue.data;
-  const remaining = buckets.reduce((sum, b) => sum + b.remaining, 0);
+  const progress = queue.data?.progress;
+  const remaining = queue.data
+    ? queue.data.buckets.reduce((sum, b) => sum + b.remaining, 0) -
+      items.filter((row) => done.has(keyOf(row))).length
+    : 0;
 
   return (
-    <div className="review-case-form">
-      <header className="review-case-head">
-        <h2>Record queue</h2>
-        <p>
-          {progress.total} of {progress.targets.total} labels · {progress.relevantInBand} of{' '}
-          {progress.targets.relevantInBand} relevant records that Jev doubts (p(irrelevant) ≥ 0.6) ·
-          development and validation only
-        </p>
-        <ul className="review-buckets">
-          {buckets.map((bucket) => (
-            <li key={bucket.id} className={item?.bucket === bucket.id ? 'active' : undefined}>
-              <strong>{bucket.remaining}</strong> {bucket.label}
-            </li>
-          ))}
-        </ul>
-        <label className="muted">
-          <input
-            type="checkbox"
-            checked={includeHeldOut}
-            onChange={(event) => setIncludeHeldOut(event.target.checked)}
-          />{' '}
-          Include held-out questions (label these once, after the policy is chosen)
-        </label>
-      </header>
-
-      {!item ? (
-        <p className="muted">Nothing left in the queue.</p>
-      ) : (
-        <section className="review-section review-queue-item">
-          <p className="muted">
-            {QUEUE_LABELS[item.bucket]} · {remaining} left ·{' '}
-            <Link to="/review" search={{ case: item.caseId }} className="link">
-              {item.caseId}
-            </Link>{' '}
-            · {item.split}
-          </p>
-          <h3>{item.question}</h3>
-          <p>
-            <code>{item.recordId}</code> <span className="muted">{item.kind}</span>
-            {item.required && <span className="tag default">required</span>}
-          </p>
-          <p>
-            <strong>{item.title}</strong>
-          </p>
-          <pre className="review-record-text">{item.text}</pre>
-          <p className="muted">Retrieved by: {item.why.join(', ') || 'unknown'}</p>
-          <div className="review-queue-actions">
-            {RELEVANCE.map((label, i) => (
-              <button
-                key={label}
-                type="button"
-                className="button"
-                disabled={save.isPending}
-                onClick={() => save.mutate(label)}
-              >
-                {i + 1} · {label}
-              </button>
+    <div className={`review-layout queue-layout${target ? ' with-viewer' : ''}`}>
+      <aside className="review-list queue-rail">
+        <ReviewHeader view="records" />
+        {progress && (
+          <section className="queue-panel" aria-labelledby="queue-progress">
+            <h2 id="queue-progress">Progress</h2>
+            <Meter label="Labels" value={progress.total} max={progress.targets.total} />
+            <Meter
+              label="Relevant records Jev doubts"
+              value={progress.relevantInBand}
+              max={progress.targets.relevantInBand}
+            />
+            <p className="muted">
+              Calibration needs both targets. Counts cover development and validation questions.
+            </p>
+          </section>
+        )}
+        {queue.data && (
+          <section className="queue-panel" aria-labelledby="queue-order">
+            <h2 id="queue-order">Queue order</h2>
+            <ol className="queue-buckets">
+              {queue.data.buckets.map((bucket) => (
+                <li
+                  key={bucket.id}
+                  aria-current={current?.bucket === bucket.id ? 'step' : undefined}
+                >
+                  <span className="queue-bucket-title">
+                    {BUCKETS[bucket.id].title}
+                    <span className="count">{bucket.remaining}</span>
+                  </span>
+                  <span className="muted">{BUCKETS[bucket.id].detail}</span>
+                </li>
+              ))}
+            </ol>
+            <label className="queue-toggle">
+              <input
+                type="checkbox"
+                checked={includeHeldOut}
+                onChange={(event) => setIncludeHeldOut(event.target.checked)}
+              />
+              <span>
+                Include held-out questions
+                <span className="muted"> Label these once, after the policy is chosen.</span>
+              </span>
+            </label>
+          </section>
+        )}
+        <section className="queue-panel" aria-labelledby="queue-keys">
+          <h2 id="queue-keys">Keyboard</h2>
+          <dl className="queue-keys">
+            {CHOICES.map((c) => (
+              <div key={c.key}>
+                <dt>
+                  <kbd>{c.key}</kbd>
+                </dt>
+                <dd>{c.title}</dd>
+              </div>
             ))}
+            <div>
+              <dt>
+                <kbd>S</kbd>
+              </dt>
+              <dd>Skip for now</dd>
+            </div>
+            <div>
+              <dt>
+                <kbd>U</kbd>
+              </dt>
+              <dd>Undo the last label</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <main className="review-main queue-main" ref={mainRef}>
+        <div className="queue-status" role="status" aria-live="polite">
+          {last && (
+            <LastLabel last={last} undoing={undo.isPending} onUndo={() => undo.mutate(last.row)} />
+          )}
+          {(save.error ?? undo.error) && (
+            <p className="error">{(save.error ?? undo.error)!.message}</p>
+          )}
+        </div>
+        {queue.isPending && <p className="muted">Loading the record queue…</p>}
+        {queue.error && <p className="error">{queue.error.message}</p>}
+        {queue.data &&
+          (current ? (
+            <QueueTask
+              key={keyOf(current)}
+              row={current}
+              remaining={remaining}
+              taskRef={taskRef}
+              busy={busy}
+              onChoose={choose}
+              onSkip={skip}
+              onOpenPage={setTarget}
+            />
+          ) : pending.length > 0 ? (
+            <div className="queue-empty">
+              <h2>You skipped the rest of this batch</h2>
+              <button type="button" className="button" onClick={() => setSkipped(new Set())}>
+                Show skipped records again
+              </button>
+            </div>
+          ) : remaining > 0 ? (
+            <p className="muted">Loading the next records…</p>
+          ) : (
+            <div className="queue-empty">
+              <h2>The queue is empty</h2>
+              <p className="muted">
+                Every record in the queue has a label. Run{' '}
+                <code>node --import tsx clients/web/src/evaluation/calibrate-filter.ts</code>.
+              </p>
+            </div>
+          ))}
+      </main>
+
+      {target && (
+        <aside className="viewer-pane" aria-label="Rulebook">
+          <div className="pane-bar">
+            <span className="pane-title">Rulebook</span>
             <button
               type="button"
-              className="button secondary"
-              onClick={() => setRevealed((r) => !r)}
+              className="icon-button"
+              onClick={() => setTarget(null)}
+              aria-label="Close the rulebook"
+              title="Close (Esc)"
             >
-              {revealed ? 'Hide' : 'Show'} judge and Jev (j)
+              <span aria-hidden="true">×</span> Close
             </button>
           </div>
-          {revealed && (
-            <p className="muted">
-              Judge: <strong>{item.judge}</strong>, {item.judgeReason} · Jev p(irrelevant):{' '}
-              {item.pIrrelevant === null ? '–' : `${Math.round(item.pIrrelevant * 100)}%`}
-              {item.kept !== null && ` (${item.kept ? 'kept' : 'dropped'}: ${item.filterReason})`}
+          {rulebook.data ? (
+            <RulebookViewer target={target} index={rulebook.data} onShowRecord={() => {}} />
+          ) : (
+            <p className="muted queue-viewer-loading">
+              {rulebook.error ? rulebook.error.message : 'Loading the rulebook…'}
             </p>
           )}
-          {save.error && <p className="error">{save.error.message}</p>}
-        </section>
+        </aside>
       )}
     </div>
   );
 }
 
-const QUEUE_LABELS: Record<QueueBucket, string> = {
-  dropped_relevant: 'Dropped, judge says relevant',
-  threshold_band: 'Near the drop line',
-  new_step: 'New retrieval step',
-  sample: 'Sample',
-};
+function Meter({ label, value, max }: { label: string; value: number; max: number }) {
+  return (
+    <div className="meter">
+      <div className="meter-label">
+        <span>{label}</span>
+        <span>
+          {value} / {max}
+        </span>
+      </div>
+      <progress
+        value={Math.min(value, max)}
+        max={max}
+        aria-label={`${label}: ${value} of ${max}`}
+      />
+    </div>
+  );
+}
+
+function QueueTask({
+  row,
+  remaining,
+  taskRef,
+  busy,
+  onChoose,
+  onSkip,
+  onOpenPage,
+}: {
+  row: QueueRowData;
+  remaining: number;
+  taskRef: RefObject<HTMLElement | null>;
+  busy: boolean;
+  onChoose: (label: ReviewedRelevance) => void;
+  onSkip: () => void;
+  onOpenPage: (target: RulebookTarget) => void;
+}) {
+  const foundBy = describeRetrieval(row.record.why);
+  return (
+    <article className="queue-task" ref={taskRef} tabIndex={-1} aria-labelledby="queue-question">
+      <p className="queue-reason">
+        <span className="tag">{BUCKETS[row.bucket].title}</span>
+        <span className="muted">
+          {BUCKETS[row.bucket].detail} {remaining} left.
+        </span>
+      </p>
+
+      <section className="queue-block">
+        <p className="queue-step">Question</p>
+        <h2 id="queue-question" className="queue-question">
+          {row.question}
+        </h2>
+        <p className="muted">
+          {row.split === 'held_out' ? 'Held-out' : row.split.replace(/^./, (c) => c.toUpperCase())}{' '}
+          question ·{' '}
+          <Link to="/review" search={{ case: row.caseId }} className="link">
+            See its answers and other records
+          </Link>
+        </p>
+      </section>
+
+      <section className="queue-block">
+        <p className="queue-step">Record</p>
+        <EvidenceCard
+          item={row.record}
+          context={row.context}
+          highlighted={false}
+          cited={false}
+          onOpenPage={onOpenPage}
+          expandText
+        />
+        {foundBy.length > 0 && (
+          <p className="queue-found muted">
+            Found by: {foundBy.join('; ')}.
+            {row.required && ' It is one of this question’s required records.'}
+          </p>
+        )}
+      </section>
+
+      <section className="queue-block" aria-labelledby="queue-ask">
+        <h3 id="queue-ask" className="queue-ask">
+          Would a game master need this record to answer the question?
+        </h3>
+        <div className="queue-choices">
+          {CHOICES.map((choice) => (
+            <button
+              key={choice.label}
+              type="button"
+              className={`queue-choice ${choice.label}`}
+              disabled={busy}
+              aria-keyshortcuts={choice.key}
+              onClick={() => onChoose(choice.label)}
+            >
+              <span className="queue-choice-head">
+                <kbd aria-hidden="true">{choice.key}</kbd> {choice.title}
+              </span>
+              <span className="queue-choice-hint">{choice.hint}</span>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="link queue-skip" onClick={onSkip} aria-keyshortcuts="s">
+          Not sure? Skip for now
+        </button>
+      </section>
+    </article>
+  );
+}
+
+/** Confirms the saved label, then shows how the judge and Jev saw the same record. */
+function LastLabel({
+  last,
+  undoing,
+  onUndo,
+}: {
+  last: { row: QueueRowData; label: ReviewedRelevance };
+  undoing: boolean;
+  onUndo: () => void;
+}) {
+  const { row, label } = last;
+  const jev =
+    row.pIrrelevant === null
+      ? 'Jev did not score it'
+      : `Jev gave ${Math.round(row.pIrrelevant * 100)}% irrelevant${row.kept === false ? ' and the filter dropped it' : row.kept ? ' and the filter kept it' : ''}`;
+  const relevant = label !== 'irrelevant';
+  const jevSaysRelevant = row.pIrrelevant !== null && row.pIrrelevant < 0.5;
+  return (
+    <div className="queue-last">
+      <p>
+        <strong>
+          Saved “{row.record.title}” as {CHOICE_TITLE[label].toLowerCase()}.
+        </strong>{' '}
+        The judge said {row.judge}; {jev}.
+        {row.pIrrelevant !== null && relevant !== jevSaysRelevant && (
+          <> You disagree with Jev, which is what calibration needs to know.</>
+        )}
+      </p>
+      <button type="button" className="button secondary" onClick={onUndo} disabled={undoing}>
+        Undo <kbd aria-hidden="true">U</kbd>
+      </button>
+    </div>
+  );
+}
 
 function JudgeList({ title, items }: { title: string; items: string[] }) {
   if (!items.length) return null;

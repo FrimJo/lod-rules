@@ -141,16 +141,15 @@ text changes, after which the label is ignored and the record shows "text change
 relabelling. Saving works only from the dev server.
 
 **Record queue** (`/review?view=records`) serves single records across all questions, in the
-order that most helps calibrate the Jev filter: records the filter dropped that the judge
-calls relevant, then records near the drop line or where Jev and the judge disagree, then
-records added by the heading retrieval steps, then a random eighth of the rest. Keys 1/2/3 label
-direct/supporting/irrelevant, and `j` shows the judge's label and Jev's score after you decide.
-Each label is saved straight into that question's review. Held-out questions are left out
-unless you include them; label those once, after the policy is chosen. The header tracks
-progress towards 300 labels and 60 relevant records that Jev doubts.
-`node --import tsx clients/web/src/evaluation/review-report.ts` prints how often the judge
-agrees with you. `calibrate-filter.ts` uses your record labels in place of the judge's
-wherever they exist, and requires that no record you marked direct is dropped;
-`calibrate-filter.ts --check` says whether the stored calibration is stale.
+order that most helps calibrate the Jev filter: possible filter mistakes (dropped, but the judge
+calls them relevant), close calls (near the drop line, or Jev and the judge disagree), records
+from the heading retrieval steps, then spot checks (a random eighth of the rest). Each task shows
+the question, the record as the search page renders it (heading path, rulebook page link, tables,
+open questions) and how it was found. Keys 1/2/3 label it direct/supporting/irrelevant, S skips
+it for the session and U undoes the last label. The judge's label and Jev's score appear only
+after you choose, so they cannot anchor you. Each label is saved straight into that question's
+review; a record already labelled in another tab is never overwritten. Held-out questions are
+left out unless you include them; label those once, after the policy is chosen. The side panel
+tracks progress towards 300 labels and 60 relevant records that Jev doubts.
 
 `npm run typecheck` checks this package. `npm test` runs the ruling citation, source-serving, retrieval-mode, record-text, grading-review and filter-calibration regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.

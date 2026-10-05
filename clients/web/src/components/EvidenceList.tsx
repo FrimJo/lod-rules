@@ -74,6 +74,19 @@ function RecordText({ text }: { text: string }) {
   );
 }
 
+/** "Settlements › Wizards' Guild": where the record sits, outermost first, minus its own title. */
+function ContextTrail({ context, title }: { context: string; title: string }) {
+  const trail = context.split(' — ').filter(Boolean);
+  if (trail[0]?.toLowerCase() === title.toLowerCase()) trail.shift();
+  if (!trail.length) return null;
+  return (
+    <p className="ev-context">
+      <span className="sr-only">In the rulebook under </span>
+      {trail.reverse().join(' › ')}
+    </p>
+  );
+}
+
 function BookIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -163,18 +176,24 @@ export function EvidenceList({
   );
 }
 
-function EvidenceCard({
+export function EvidenceCard({
   item,
   highlighted,
   cited,
   onOpenPage,
+  context,
+  expandText = false,
 }: {
   item: EvidenceItem;
   highlighted: boolean;
   cited: boolean;
   onOpenPage: (target: RulebookTarget) => void;
+  /** Rulebook headings above the record, nearest first, as `Heading — Parent — Chapter`. */
+  context?: string;
+  /** Start with long text unclamped, e.g. when the reader must judge the whole record. */
+  expandText?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(expandText);
   const pages = citedPages(item);
   const rulings = rulingCitations(item);
   const text = item.text.trim();
@@ -199,6 +218,7 @@ function EvidenceCard({
             {cited && <span className="tag cited">Cited in AI answer</span>}
           </p>
           <h3 id={titleId}>{item.title}</h3>
+          {context && <ContextTrail context={context} title={item.title} />}
         </div>
         {pages.length > 0 && (
           <div className="ev-pages" role="group" aria-label={`Rulebook pages for ${item.title}`}>

@@ -24,11 +24,13 @@ function serve(request: Request, includeBody: boolean): Response {
     'Content-Type': 'application/pdf',
     ETag: etag,
   });
-  if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers });
+  if (request.headers.get('if-none-match') === etag)
+    return new Response(null, { status: 304, headers });
 
   const header = request.headers.get('range');
   const ifRange = request.headers.get('if-range');
-  const range = header && (!ifRange || ifRange === etag) ? parseRange(header, file.size) : undefined;
+  const range =
+    header && (!ifRange || ifRange === etag) ? parseRange(header, file.size) : undefined;
   if (range === null) {
     headers.set('Content-Range', `bytes */${file.size}`);
     return new Response(null, { status: 416, headers });

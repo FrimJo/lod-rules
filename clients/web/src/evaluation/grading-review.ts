@@ -127,6 +127,14 @@ export function saveCaseReview(id: string, review: CaseReview, path = REVIEW_PAT
   return { version: 1, cases: sorted };
 }
 
+/** Deletes a case's review, e.g. after undoing its only label. */
+export function deleteCaseReview(id: string, path = REVIEW_PATH): GradingReview {
+  const all = loadReview(path);
+  delete all.cases[id];
+  writeFileSync(path, `${JSON.stringify(all, null, 2)}\n`);
+  return all;
+}
+
 export function loadGradedCases(dir = GRADED_DIR): GradedCase[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
@@ -435,4 +443,20 @@ export function mergeRecordLabels(
     answers: existing?.answers ?? {},
     ...(existing?.note ? { note: existing.note } : {}),
   };
+}
+
+/**
+ * Undo one record label. Returns null when nothing else is left in the review, so the caller
+ * can delete it rather than keep an empty entry.
+ */
+export function removeRecordLabel(existing: CaseReview, recordId: string): CaseReview | null {
+  const { [recordId]: _label, ...relevance } = existing.relevance;
+  const { [recordId]: _hash, ...recordHashes } = existing.recordHashes ?? {};
+  const empty =
+    Object.keys(relevance).length === 0 &&
+    Object.keys(existing.answers).length === 0 &&
+    existing.wrongFacts.length === 0 &&
+    !existing.note;
+  if (empty) return null;
+  return { ...existing, relevance, recordHashes };
 }

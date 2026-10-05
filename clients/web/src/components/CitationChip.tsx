@@ -27,7 +27,10 @@ function place(anchor: HTMLElement, popover: HTMLElement): void {
   const p = popover.getBoundingClientRect();
   const above = a.top - p.height - GAP;
   const top = above >= GAP ? above : Math.min(a.bottom + GAP, innerHeight - p.height - GAP);
-  const left = Math.max(GAP, Math.min(a.left + a.width / 2 - p.width / 2, innerWidth - p.width - GAP));
+  const left = Math.max(
+    GAP,
+    Math.min(a.left + a.width / 2 - p.width / 2, innerWidth - p.width - GAP),
+  );
   popover.style.top = `${top}px`;
   popover.style.left = `${left}px`;
 }
@@ -38,9 +41,7 @@ function mergedTarget(entries: Entry[]): RulebookTarget | null {
   const pages = first.pages.map((page) => ({
     ...page,
     headings: [
-      ...new Set(
-        entries.flatMap((e) => e.pages.find((p) => p.pdf === page.pdf)?.headings ?? []),
-      ),
+      ...new Set(entries.flatMap((e) => e.pages.find((p) => p.pdf === page.pdf)?.headings ?? [])),
     ],
   }));
   const start = pages[0];
@@ -151,7 +152,13 @@ function CitationChip({ entries, onOpen }: { entries: Entry[]; onOpen: OnOpen })
         {label}
         {entries.length > 1 && <span className="cite-count">×{entries.length}</span>}
       </button>
-      <span ref={popoverRef} id={popoverId} popover="manual" role="tooltip" className="cite-preview">
+      <span
+        ref={popoverRef}
+        id={popoverId}
+        popover="manual"
+        role="tooltip"
+        className="cite-preview"
+      >
         {entries.slice(0, 4).map((entry) => (
           <span key={entry.id} className="cite-preview-entry">
             <span className="cite-preview-kind">

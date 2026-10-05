@@ -1,11 +1,7 @@
 import { chat, toServerSentEventsResponse, type ModelMessage } from '@tanstack/ai';
 import { createFileRoute } from '@tanstack/react-router';
 import { isRetrievalMode } from '../lib/retrieval-modes.ts';
-import {
-  ModeUnavailableError,
-  getAskResult,
-  getRetrievalSettings,
-} from '../server/ask-service.ts';
+import { ModeUnavailableError, getAskResult, getRetrievalSettings } from '../server/ask-service.ts';
 import { llmAdapter, llmApiKey } from '../server/llm.ts';
 
 function messageText(message: ModelMessage): string {

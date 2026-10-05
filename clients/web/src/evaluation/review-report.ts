@@ -37,7 +37,9 @@ for (const mode of QUALITY_MODES) {
 
 console.log('\nJudge label (rows) vs reviewer label (columns):');
 for (const [judge, row] of Object.entries(relevance.confusion))
-  console.log(`  ${judge.padEnd(10)} direct ${row.direct}  supporting ${row.supporting}  irrelevant ${row.irrelevant}`);
+  console.log(
+    `  ${judge.padEnd(10)} direct ${row.direct}  supporting ${row.supporting}  irrelevant ${row.irrelevant}`,
+  );
 
 for (const [title, rows] of [
   ['Judge said correct, reviewer said incorrect', answers.judgeTooLenient],

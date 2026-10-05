@@ -456,8 +456,8 @@ function ResultView({
           <div className="empty">
             <h2>Nothing in the rulebook matched</h2>
             <p className="muted">
-              Try the book's own terms (for example “battle” rather than “combat”), name the
-              thing you are asking about, or switch retrieval mode.
+              Try the book's own terms (for example “battle” rather than “combat”), name the thing
+              you are asking about, or switch retrieval mode.
             </p>
           </div>
         ) : (

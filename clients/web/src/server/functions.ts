@@ -9,6 +9,7 @@ import {
   getGradedCase as gradedCase,
   getRecordQueue,
   listGradedCases,
+  removeQueueLabel,
   saveGradingReview,
   saveRecordLabel,
   type ReviewedRelevance,
@@ -87,3 +88,12 @@ export const saveQueueLabel = createServerFn({ method: 'POST' })
     return data;
   })
   .handler(({ data }) => saveRecordLabel(data));
+
+export const undoQueueLabel = createServerFn({ method: 'POST' })
+  .validator((data: { caseId: string; recordId: string }) => {
+    if (!/^askq\.[a-z0-9_.]+$/.test(data.caseId))
+      throw new Error(`Invalid case id: ${data.caseId}`);
+    if (typeof data.recordId !== 'string' || !data.recordId) throw new Error('Missing record id');
+    return data;
+  })
+  .handler(({ data }) => removeQueueLabel(data));
