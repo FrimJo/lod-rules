@@ -1,5 +1,4 @@
 import { chat, toServerSentEventsResponse, type ModelMessage } from '@tanstack/ai';
-import { openaiText } from '@tanstack/ai-openai';
 import { createFileRoute } from '@tanstack/react-router';
 import { isRetrievalMode } from '../lib/retrieval-modes.ts';
 import {
@@ -7,8 +6,7 @@ import {
   getAskResult,
   getRetrievalSettings,
 } from '../server/ask-service.ts';
-
-type OpenAIModel = Parameters<typeof openaiText>[0];
+import { llmAdapter, llmApiKey } from '../server/llm.ts';
 
 function messageText(message: ModelMessage): string {
   if (typeof message.content === 'string') return message.content;
@@ -34,8 +32,8 @@ export const Route = createFileRoute('/api/chat')({
         if (!isRetrievalMode(mode)) {
           return new Response(`Unknown retrieval mode: ${String(mode)}`, { status: 400 });
         }
-        if (!process.env.OPENAI_API_KEY) {
-          return new Response('OPENAI_API_KEY is not set on the server', { status: 500 });
+        if (!llmApiKey()) {
+          return new Response('OPENAI_ROUTER_API_KEY is not set on the server', { status: 500 });
         }
 
         let prompt: string;
@@ -49,7 +47,7 @@ export const Route = createFileRoute('/api/chat')({
         }
         const abortController = new AbortController();
         const stream = chat({
-          adapter: openaiText((process.env.OPENAI_MODEL || 'gpt-5.5') as OpenAIModel),
+          adapter: llmAdapter(),
           messages,
           systemPrompts: [prompt],
           abortController,

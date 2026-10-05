@@ -5,8 +5,11 @@ export interface RelevanceJudgment {
   reason: string;
 }
 
+export const ANSWER_NAMES = ['A', 'B', 'C', 'D'] as const;
+export type AnswerName = (typeof ANSWER_NAMES)[number];
+
 export interface AnswerJudgment {
-  name: 'A' | 'B';
+  name: AnswerName;
   covered: string[];
   missing: string[];
   incorrectClaims: string[];
@@ -29,35 +32,39 @@ const object = (properties: Record<string, unknown>): object => ({
   additionalProperties: false,
 });
 
-export const qualitySchema = object({
-  facts: {
-    type: 'array',
-    minItems: 1,
-    items: object({ id: { type: 'string' }, claim: { type: 'string' }, sources: strings }),
-  },
-  relevance: {
-    type: 'array',
-    items: object({
-      id: { type: 'string' },
-      relevance: { enum: ['direct', 'supporting', 'irrelevant', 'uncertain'] },
-      reason: { type: 'string' },
-    }),
-  },
-  answers: {
-    type: 'array',
-    minItems: 2,
-    maxItems: 2,
-    items: object({
-      name: { enum: ['A', 'B'] },
-      covered: strings,
-      missing: strings,
-      incorrectClaims: strings,
-      unsupportedClaims: strings,
-      citationErrors: strings,
-      explanation: { type: 'string' },
-    }),
-  },
-});
+/** Judge output schema for `count` anonymous answers named A, B, … */
+export const qualitySchemaFor = (count: number) =>
+  object({
+    facts: {
+      type: 'array',
+      minItems: 1,
+      items: object({ id: { type: 'string' }, claim: { type: 'string' }, sources: strings }),
+    },
+    relevance: {
+      type: 'array',
+      items: object({
+        id: { type: 'string' },
+        relevance: { enum: ['direct', 'supporting', 'irrelevant', 'uncertain'] },
+        reason: { type: 'string' },
+      }),
+    },
+    answers: {
+      type: 'array',
+      minItems: count,
+      maxItems: count,
+      items: object({
+        name: { enum: ANSWER_NAMES.slice(0, count) },
+        covered: strings,
+        missing: strings,
+        incorrectClaims: strings,
+        unsupportedClaims: strings,
+        citationErrors: strings,
+        explanation: { type: 'string' },
+      }),
+    },
+  });
+
+export const qualitySchema = qualitySchemaFor(2);
 
 function sameMembers(actual: string[], expected: string[]): boolean {
   return (
@@ -72,21 +79,25 @@ export function validateJudgmentCoverage(
   judgment: QualityJudgment,
   evidenceIds: string[],
   sourceIds: string[],
+  names: readonly AnswerName[] = ['A', 'B'],
 ): void {
-  if (
-    !sameMembers(
-      judgment.relevance.map((r) => r.id),
-      evidenceIds,
-    )
-  )
-    throw new Error('Judge must classify each candidate exactly once');
+  const classified = judgment.relevance.map((r) => r.id);
+  if (!sameMembers(classified, evidenceIds)) {
+    const missing = evidenceIds.filter((id) => !classified.includes(id));
+    const extra = classified.filter(
+      (id, i) => !evidenceIds.includes(id) || classified.indexOf(id) !== i,
+    );
+    throw new Error(
+      `Judge must classify each candidate exactly once (missing: ${missing.join(', ') || 'none'}; extra or repeated: ${extra.join(', ') || 'none'})`,
+    );
+  }
   if (
     !sameMembers(
       judgment.answers.map((a) => a.name),
-      ['A', 'B'],
+      [...names],
     )
   )
-    throw new Error('Judge must grade A and B exactly once');
+    throw new Error(`Judge must grade ${names.join(', ')} exactly once`);
   const facts = judgment.facts.map((f) => f.id);
   if (new Set(facts).size !== facts.length || facts.length === 0)
     throw new Error('Judge facts must be nonempty and unique');
@@ -102,7 +113,7 @@ export function qualityMetrics(
   ids: string[],
   required: string[],
   judgment: QualityJudgment,
-  name: 'A' | 'B',
+  name: AnswerName,
 ) {
   const relevance = new Map(judgment.relevance.map((r) => [r.id, r.relevance]));
   if (ids.some((id) => !relevance.has(id))) throw new Error('Ungraded evidence');
@@ -128,5 +139,29 @@ export function qualityMetrics(
     answerComplete: answer.missing.length === 0,
     answerCorrect: factualPass && answer.missing.length === 0 && answer.citationErrors.length === 0,
     citationPass: answer.citationErrors.length === 0,
+  };
+}
+
+/**
+ * What a mode removed from the full candidate pool (the lexical + Jev union). Required
+ * records pruned are the hard safety metric for any filter.
+ */
+export function prunedMetrics(
+  ids: string[],
+  pool: string[],
+  lexical: string[],
+  required: string[],
+  judgment: QualityJudgment,
+) {
+  const kept = new Set(ids);
+  const relevance = new Map(judgment.relevance.map((r) => [r.id, r.relevance]));
+  const pruned = pool.filter((id) => !kept.has(id));
+  return {
+    pruned: pruned.length,
+    prunedLexical: pruned.filter((id) => lexical.includes(id)).length,
+    prunedRequired: pruned.filter((id) => required.includes(id)).length,
+    prunedRelevant: pruned.filter((id) => ['direct', 'supporting'].includes(relevance.get(id)!))
+      .length,
+    prunedIrrelevant: pruned.filter((id) => relevance.get(id) === 'irrelevant').length,
   };
 }
