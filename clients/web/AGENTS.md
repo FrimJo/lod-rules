@@ -1,7 +1,7 @@
 # AGENTS.md (web client)
 
 TanStack Start (Vite) rules Q&A consumer. It calls the root `scripts/ask` pipeline on the
-server and streams OpenAI for the final answer. It is **not** part of the canonical corpus.
+server and streams the final answer from an OpenRouter model. It is **not** part of the canonical corpus.
 
 ## Boundaries
 
@@ -19,7 +19,7 @@ From this directory:
 
 ```bash
 npm install
-OPENAI_API_KEY=sk-... npm run dev    # http://localhost:1234
+OPENAI_ROUTER_API_KEY=sk-or-... npm run dev    # http://localhost:1234
 npm run typecheck
 npm test
 ```

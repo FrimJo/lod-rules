@@ -24,15 +24,15 @@ directly.
 
 Everything except rendering runs on the TanStack Start server today:
 
-| Server piece                                | What it does                                                 |
-| ------------------------------------------- | ------------------------------------------------------------ |
-| `server/ask-service.ts`, `getEvidence`      | Runs `ask()` over `Retrieval` (`node:sqlite`, FTS5)          |
-| `checkAnswer`                               | Runs `checkCitations()` against the cached evidence          |
-| `routes/api.chat.ts`                        | Streams OpenAI with a server-side `OPENAI_API_KEY`           |
-| `server/rulebook.ts`, `/api/rulebook-page/` | Cuts single pages from the 40 MB PDF with pdf-lib            |
-| `getRulebook`                               | Builds the page index from `pages.yaml` and `sections.yaml`  |
-| `/api/pdf-fonts/`                           | Serves pdf.js standard fonts from `node_modules`             |
-| Analyzer (`LOD_ANALYZER`)                   | Lexical, or Laya via `onnxruntime-node`, or Jev over the API |
+| Server piece                                | What it does                                                  |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `server/ask-service.ts`, `getEvidence`      | Runs `ask()` over `Retrieval` (`node:sqlite`, FTS5)           |
+| `checkAnswer`                               | Runs `checkCitations()` against the cached evidence           |
+| `routes/api.chat.ts`                        | Streams OpenRouter with a server-side `OPENAI_ROUTER_API_KEY` |
+| `server/rulebook.ts`, `/api/rulebook-page/` | Cuts single pages from the 40 MB PDF with pdf-lib             |
+| `getRulebook`                               | Builds the page index from `pages.yaml` and `sections.yaml`   |
+| `/api/pdf-fonts/`                           | Serves pdf.js standard fonts from `node_modules`              |
+| Analyzer (`LOD_ANALYZER`)                   | Lexical, or Laya via `onnxruntime-node`, or Jev over the API  |
 
 `scripts/ask/analysis.ts`, `evidence.ts` and `prompt.ts` are plain TypeScript. Their only
 runtime dependency is the `Retrieval` class and `normalize()`. `Retrieval` is the one

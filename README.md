@@ -77,7 +77,7 @@ npm run ask -- "How many hit points does Molgor have?" --analyzer laya
 
 [clients/web/](clients/web/README.md) is a TanStack Start web client that answers rules
 questions in a browser. It runs the same `ask()` pipeline on the server, streams an
-OpenAI answer, and shows the evidence and citation check. It is a consumer with its own
+answer from an OpenRouter model, and shows the evidence and citation check. It is a consumer with its own
 `package.json` and is excluded from the root checks.
 
 ## Layout
