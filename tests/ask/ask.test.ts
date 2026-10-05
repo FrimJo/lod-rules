@@ -134,6 +134,24 @@ describe('evidence', () => {
     });
   });
 
+  it('keeps records from the same heading as a top hit together', () => {
+    const question = 'For a wizard, how does miscast and failing a spell relate?';
+    const evidence = gatherEvidence(retrieval, lexicalAnalysis(retrieval, question));
+    const wounded = evidence.find((i) => i.id === 'core.magic.miscast.threshold.wounded');
+    expect(wounded?.why).toContain('section:section.magic.miscast');
+    // Siblings sit on top of the budget, so the miscast table the rule uses still fits.
+    expect(evidence.map((i) => i.id)).toEqual(
+      expect.arrayContaining(['core.magic.miscast', 'table.magic.miscast']),
+    );
+  });
+
+  it('brings in the rule behind a heading the question names, from any chapter', () => {
+    const question = 'Can a wounded wizard still cast spells, and is a miscast more likely?';
+    const evidence = gatherEvidence(retrieval, lexicalAnalysis(retrieval, question));
+    const wounded = evidence.find((i) => i.id === 'character.hit_points.wounded');
+    expect(wounded?.why).toContain('heading:section.combat.wounded');
+  });
+
   it('lets an uncalibrated model widen retrieval but never narrow it', async () => {
     const narrow = await analyzeQuestion(retrieval, BLEEDING, fixtureModel(narrowAnswers));
     expect(selectedSystems(narrow)).toEqual([]);

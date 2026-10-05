@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildSearchDocuments } from '../../scripts/retrieve/documents.ts';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
+import type { Step } from '../../scripts/validate/pilot-types.ts';
 
 let retrieval: Retrieval;
 beforeAll(() => {
@@ -31,6 +32,20 @@ describe('search documents', () => {
       expect(doc.file, doc.id).toMatch(/^(corpus|review)\/.+\.yaml$/);
       expect(doc.citations.length, doc.id).toBeGreaterThan(0);
     }
+  }, 60_000);
+
+  it('state each cited passage of a procedure or state machine once', () => {
+    const corpus = loadRetrievalCorpus();
+    const texts = new Map(buildSearchDocuments(corpus).map((doc) => [doc.id, doc.text]));
+    const passages = (steps: Step[]): string[] =>
+      steps.flatMap((step) => [step.source_text, ...passages(step.substeps ?? [])]);
+    for (const procedure of corpus.pilot.procedures) {
+      const distinct = new Set([procedure.source_text, ...passages(procedure.steps)]);
+      expect(texts.get(procedure.id), procedure.id).toBe([...distinct].join('\n'));
+    }
+    expect(retrieval.document('procedure.rest_mana_recovery')?.text).toBe(
+      'If the rest is not interrupted, the heroes regain all Mana, 1D6 Hit Points and possibly some energy.',
+    );
   }, 60_000);
 
   it('keep quest-local mechanics scoped to their quest', () => {
@@ -117,6 +132,26 @@ describe('lexical search', () => {
     expect(retrieval.search('door', { scope: 'quest' }).every((hit) => hit.scope === 'quest')).toBe(
       true,
     );
+  });
+
+  it('filters by exact section', () => {
+    const hits = retrieval.search('miscast', { sections: ['section.magic.miscast'] });
+    expect(hits.map((hit) => hit.id).sort()).toEqual([
+      'core.magic.miscast',
+      'core.magic.miscast.threshold.normal',
+      'core.magic.miscast.threshold.wounded',
+    ]);
+  });
+
+  it('finds headings a question names, including inflected forms', () => {
+    const named = (text: string): string[] =>
+      retrieval.namedHeadings(text).map((heading) => heading.section_id);
+    expect(named('Can a wounded wizard cast?')).toContain('section.combat.wounded');
+    expect(named('What happens when my hero is stunned?')).toContain(
+      'section.combat.different_kinds_of_damage.stun',
+    );
+    // Chapters are too broad to count as a named heading.
+    expect(named('How does magic work?')).not.toContain('section.magic');
   });
 
   it('excludes review issues unless asked', () => {

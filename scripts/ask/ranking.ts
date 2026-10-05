@@ -56,6 +56,15 @@ export interface FilterPolicy {
    * matches), dropping the most likely irrelevant first.
    */
   cap: boolean;
+  /**
+   * Never drop a record whose `why` starts with one of these prefixes, e.g. `heading:` for
+   * records retrieved because the question names their heading.
+   */
+  protectWhy?: string[];
+  /** Per record kind override of `dropIrrelevantAt` (tables and procedures read as noise alone). */
+  dropAtByKind?: Partial<Record<string, number>>;
+  /** Keep at least this many judged records per question, the least likely irrelevant first. */
+  minKept?: number;
 }
 
 /**
@@ -79,7 +88,15 @@ export interface FilterDecision {
   why: string[];
   judgment: RecordJudgment | null;
   kept: boolean;
-  reason: 'relevant' | 'protected' | 'linked' | 'unjudged' | 'irrelevant' | 'cap';
+  reason:
+    | 'relevant'
+    | 'protected'
+    | 'linked'
+    | 'structural'
+    | 'unjudged'
+    | 'irrelevant'
+    | 'floor'
+    | 'cap';
 }
 
 export interface FilteredEvidence {
@@ -172,7 +189,13 @@ export async function judgeRelevance(
 
 /** Pure policy over judged candidates; never adds a record that retrieval did not find. */
 export function applyFilter(
-  candidates: Array<{ id: string; why: string[]; sources: CandidateSource[]; exact: boolean }>,
+  candidates: Array<{
+    id: string;
+    kind?: string;
+    why: string[];
+    sources: CandidateSource[];
+    exact: boolean;
+  }>,
   judgments: Map<string, RecordJudgment>,
   policy: FilterPolicy,
   capLimit: number,
@@ -183,13 +206,31 @@ export function applyFilter(
     if (policy.protectExact && c.exact) return { ...base, kept: true, reason: 'protected' };
     if (policy.protectLinked && c.why.some((w) => DEPENDENCY_LINK.test(w)))
       return { ...base, kept: true, reason: 'linked' };
+    const structural = policy.protectWhy ?? [];
+    if (c.why.some((w) => structural.some((prefix) => w.startsWith(prefix))))
+      return { ...base, kept: true, reason: 'structural' };
     if (!judgment) return { ...base, kept: true, reason: 'unjudged' };
-    if (judgment.probabilities.irrelevant >= policy.dropIrrelevantAt)
+    const dropAt =
+      (c.kind === undefined ? undefined : policy.dropAtByKind?.[c.kind]) ?? policy.dropIrrelevantAt;
+    if (judgment.probabilities.irrelevant >= dropAt)
       return { ...base, kept: false, reason: 'irrelevant' };
     return { ...base, kept: true, reason: 'relevant' };
   });
+  const minKept = policy.minKept ?? 0;
+  const judgedKept = decisions.filter((d) => d.kept && d.judgment).length;
+  if (judgedKept < minKept) {
+    const restore = decisions
+      .filter((d) => !d.kept)
+      .sort((a, b) => a.judgment!.probabilities.irrelevant - b.judgment!.probabilities.irrelevant)
+      .slice(0, minKept - judgedKept);
+    for (const d of restore) {
+      d.kept = true;
+      d.reason = 'floor';
+    }
+  }
   if (policy.cap) {
-    const fixed = (d: FilterDecision) => d.reason === 'protected' || d.reason === 'linked';
+    const fixed = (d: FilterDecision) =>
+      d.reason === 'protected' || d.reason === 'linked' || d.reason === 'structural';
     const protectedCount = decisions.filter((d) => d.kept && fixed(d)).length;
     const open = decisions
       .filter((d) => d.kept && !fixed(d))

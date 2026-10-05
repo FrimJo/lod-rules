@@ -10,6 +10,8 @@ export interface SearchOptions {
   questId?: string;
   /** Section-id prefixes; a document matches when its chapter starts with any of them. */
   chapters?: string[];
+  /** Exact section ids; a document matches when it sits directly under one of them. */
+  sections?: string[];
   limit?: number;
 }
 
@@ -225,6 +227,12 @@ export class Retrieval {
       where.push(`(${options.chapters.map(() => "d.chapter LIKE ? || '%'").join(' OR ')})`);
       params.push(...options.chapters);
     }
+    if (options.sections && options.sections.length > 0) {
+      where.push(
+        `json_extract(d.json, '$.section_id') IN (${options.sections.map(() => '?').join(', ')})`,
+      );
+      params.push(...options.sections);
+    }
     if (options.questId) {
       where.push('d.quest_id = ?');
       params.push(options.questId);
@@ -338,6 +346,50 @@ export class Retrieval {
   }
 
   private vocabulary: Set<string> | null = null;
+  private headings: Array<{ section_id: string; title: string }> | null = null;
+  /**
+   * Rulebook headings the text names, longest title first. A heading word also matches an
+   * inflected form ("Stun" in "stunned"). Chapters and quest-only headings are skipped: they
+   * are too broad, or demoted unless the quest is named.
+   */
+  namedHeadings(text: string): Array<{ section_id: string; title: string }> {
+    const words = normalize(text).split(' ');
+    const wordMatches = (heading: string, word: string | undefined): boolean =>
+      word === heading ||
+      (word !== undefined &&
+        heading.length >= 4 &&
+        word.startsWith(heading) &&
+        word.length - heading.length <= 3);
+    const named = (title: string): boolean => {
+      const heading = normalize(title).split(' ');
+      if (heading.every((w) => STOPWORDS.has(w) || /^\d+$/.test(w))) return false;
+      for (let i = 0; i + heading.length <= words.length; i += 1) {
+        if (heading.every((w, j) => wordMatches(w, words[i + j]))) return true;
+      }
+      return false;
+    };
+    return this.headingTitles()
+      .filter((heading) => named(heading.title))
+      .sort((a, b) => b.title.length - a.title.length || a.section_id.localeCompare(b.section_id));
+  }
+
+  private headingTitles(): Array<{ section_id: string; title: string }> {
+    if (!this.headings) {
+      const seen = new Map<string, string>();
+      for (const row of this.db
+        .prepare("SELECT json FROM documents WHERE scope <> 'quest' ORDER BY id")
+        .all()) {
+        const doc = decode(text(row, 'json'));
+        if (!doc.section_id || doc.section_id === doc.chapter || seen.has(doc.section_id)) continue;
+        // `context` starts with the record's own section title.
+        const title = doc.context.split(' — ')[0];
+        if (title) seen.set(doc.section_id, title);
+      }
+      this.headings = [...seen].map(([section_id, title]) => ({ section_id, title }));
+    }
+    return this.headings;
+  }
+
   private globalVocabulary(): Set<string> {
     if (!this.vocabulary) {
       this.vocabulary = new Set();

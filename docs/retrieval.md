@@ -187,9 +187,13 @@ grow the labelled set before changing the policy.
 **Evidence** (`evidence.ts`) is deterministic. It retrieves exact entities and their
 rules and tables, then searches the entity's quest, the selected system chapters and
 intent-specific kinds (terms for definitions, tables for value lookups), followed by an
-unfiltered fallback search. For `multi_rule` and `judgment` it also follows one hop of
-`see_also`, `uses_table`, `depends_on` and `step_rule` links. Complexity sets the budget
-at 5, 7, 11 or 13 records. Each item records `why` it was selected and carries its
+unfiltered fallback search. A rulebook heading the question names ("wounded", "stunned"
+matches the heading Stun) adds up to two records from that heading, whatever its chapter;
+chapters themselves are too broad to count. For `multi_rule` and `judgment` it also adds up
+to two records sharing a heading with each of the top two system hits (the miscast rule
+brings its normal and wounded thresholds), and follows one hop of `see_also`, `uses_table`,
+`depends_on` and `step_rule` links. Complexity sets the budget at 5, 7, 11 or 13 records;
+exact name matches and the heading records above ride on top of it. Each item records `why` it was selected and carries its
 issues, external dependencies and citations.
 
 **Relevance filter** (`ranking.ts`, opt-in with `--filter`) lets Jev remove noise from

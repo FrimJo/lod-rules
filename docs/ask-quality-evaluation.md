@@ -101,7 +101,10 @@ question at a time:
 
 Saving writes `clients/web/evaluation/grading-review.json`. This file is committed and
 is the only place where human judgments are kept. Record labels are keyed by record id
-and survive reruns. Answer verdicts are keyed by a hash of the answer text, so they carry
+and store a hash of the record text. They survive reruns until the record text changes;
+after that they are ignored and the record is shown for relabelling. The record queue
+(`/review?view=records`) serves single records in the order that most helps the filter
+calibration; see [jev-filter-calibration-plan.md](jev-filter-calibration-plan.md). Answer verdicts are keyed by a hash of the answer text, so they carry
 over when a rerun produces the same answer. If the judge's output changes and some
 answers are still unreviewed, the question is marked stale (`!`).
 
@@ -110,7 +113,16 @@ answers are still unreviewed, the question is marked stale (`!`).
 node --import tsx clients/web/src/evaluation/review-report.ts   # → generated/ask-quality/review-summary.json
 # Recalibrate the filter; reviewed record labels replace the judge's where present:
 node --import tsx clients/web/src/evaluation/calibrate-filter.ts
+# Is the stored calibration still current (Jev model, corpus, retrieval code, labels)?
+node --import tsx clients/web/src/evaluation/calibrate-filter.ts --check
 ```
+
+Since 5 October the sweep chooses on development + validation, requires that no
+reviewer-direct record is dropped, bounds trusted supporting loss at 5 % and reports the
+reviewer-only relevant loss with a 95 % upper bound. Besides the threshold it varies
+protection by retrieval step (`protectWhy`), a stricter line for tables and procedures
+(`dropAtByKind`) and a minimum-kept floor (`minKept`). The report lists every relevant
+record Jev scored ≥ 0.9 under `misses`, for diagnosis.
 
 The report counts a judge label of "uncertain" as disagreement whenever the reviewer
 chose a definite label. Review the cases in the paired `regressed` and `improved` buckets
@@ -235,6 +247,6 @@ Recalibrating with the reviewed record labels left no policy eligible on develop
 and every policy in the sweep drops at least one of them.
 
 Until reviewed grades confirm one or the other, the union (`jev` in the web client) and
-the filter (`jev_filtered`, currently the web default) are within sampling noise of each
+the filter (`jev_filtered`, the web default until 5 October; the default is now `jev`) are within sampling noise of each
 other on correctness. The filter costs less context; the union has the better unreviewed
 score.

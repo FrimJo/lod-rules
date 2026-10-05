@@ -100,6 +100,12 @@ function flattenSteps(steps: Step[]): Step[] {
   return steps.flatMap((step) => [step, ...flattenSteps(step.substeps ?? [])]);
 }
 
+// Steps and substeps often cite the same sentence as their procedure, so join each
+// distinct passage once, in source order.
+function distinctLines(lines: string[]): string {
+  return [...new Set(lines.filter((line) => line !== ''))].join('\n');
+}
+
 function cellText(cell: Cell): string {
   return cell.printed;
 }
@@ -321,7 +327,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
     );
     const external = dependencyRelations(b, p.dependencies);
     const quest = isQuestSection(p.section_id);
-    const text = [p.source_text, ...steps.map((step) => step.source_text)].join('\n');
+    const text = distinctLines([p.source_text, ...steps.map((step) => step.source_text)]);
     const doc = base(
       p,
       'procedure',
@@ -342,13 +348,13 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       'enters',
       m.states.flatMap((state) => (state.enter ?? []).map((e) => e.object_id)),
     );
-    const text = [
+    const text = distinctLines([
       m.source_text,
       ...m.states.flatMap((state) => [
         state.source_text ?? '',
         ...(state.transitions ?? []).map((t) => `${t.event}: ${t.source_text}`),
       ]),
-    ].join('\n');
+    ]);
     return base(m, 'state_machine', 'state_machine', 'global', undefined, text, b);
   };
 

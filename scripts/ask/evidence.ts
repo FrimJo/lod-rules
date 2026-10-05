@@ -47,6 +47,7 @@ export type CandidateSource = 'lexical' | 'model';
 
 export interface EvidenceCandidate {
   id: string;
+  kind: SearchDocument['kind'];
   why: string[];
   /** Which analyses selected the record: the lexical baseline, the model, or both. */
   sources: CandidateSource[];
@@ -88,7 +89,10 @@ export function collectCandidates(
         seen.why = [...seen.why, ...why];
         seen.sources.push(source);
         seen.exact ||= exact;
-      } else out.set(id, { id, why, sources: [source], exact });
+      } else {
+        const kind = retrieval.document(id)!.kind;
+        out.set(id, { id, kind, why, sources: [source], exact });
+      }
     }
   }
   return [...out.values()];
@@ -101,6 +105,8 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Pic
   const systems = selectedSystems(analysis);
   const entities = new Map(analysis.entities.map((e) => [e.id, e]));
   const picked = new Map<string, Picked>();
+  // Records found by heading structure rather than ranking; they ride on top of the budget.
+  let structural = 0;
   const add = (id: string, why: string, exact = false): void => {
     if (!retrieval.document(id)) return;
     const seen = picked.get(id);
@@ -129,9 +135,35 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Pic
   if (systems.length > 0) {
     const chapters = [...new Set(systems.flatMap((id) => SYSTEMS[id].chapters))];
     const limit = Math.ceil(budget.limit * 0.6);
-    for (const hit of retrieval.search(question, { chapters, limit })) {
-      add(hit.id, `systems:${systems.join('+')}`);
+    const hits = retrieval.search(question, { chapters, limit });
+    for (const hit of hits) add(hit.id, `systems:${systems.join('+')}`);
+    // One heading is often split into several records (a miscast, its normal and wounded
+    // thresholds); siblings of the top hits rarely share enough words with the question.
+    if (budget.expand) {
+      for (const hit of hits.slice(0, 2)) {
+        const section = retrieval.document(hit.id)?.section_id;
+        if (!section) continue;
+        const siblings = retrieval
+          .search(question, { sections: [section], limit: 3 })
+          .filter((sibling) => !picked.has(sibling.id))
+          .slice(0, 2);
+        for (const sibling of siblings) add(sibling.id, `section:${section}`);
+        structural += siblings.length;
+      }
     }
+  }
+
+  // A heading the question names ("wounded", "stunned") holds the rule that defines it, often
+  // in a chapter the system search did not reach.
+  const covered = new Set([...picked.keys()].map((id) => retrieval.document(id)?.section_id));
+  for (const heading of retrieval.namedHeadings(question).slice(0, 4)) {
+    if (covered.has(heading.section_id)) continue;
+    const hits = retrieval
+      .search(question, { sections: [heading.section_id], limit: 2 })
+      .filter((hit) => !picked.has(hit.id));
+    for (const hit of hits) add(hit.id, `heading:${heading.section_id}`);
+    covered.add(heading.section_id);
+    structural += hits.length;
   }
 
   if (intents.has('definition')) {
@@ -161,7 +193,9 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Pic
     }
   }
 
-  const cap = budget.limit + [...entities.values()].filter((e) => e.via === 'alias').length;
+  // Exact names and structural records ride on top of the budget rather than crowd out search.
+  const cap =
+    budget.limit + structural + [...entities.values()].filter((e) => e.via === 'alias').length;
   return new Map([...picked.entries()].slice(0, cap));
 }
 

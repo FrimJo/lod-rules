@@ -219,6 +219,63 @@ describe('Jev relevance filter', () => {
   });
 });
 
+describe('calibration knobs', () => {
+  const judged = (irrelevant: number): RecordJudgment => ({
+    id: '',
+    relevance: 'irrelevant',
+    probabilities: { direct: 0, supporting: 1 - irrelevant, irrelevant },
+  });
+  const base: FilterPolicy = {
+    id: 't',
+    dropIrrelevantAt: 0.9,
+    protectExact: false,
+    protectLinked: false,
+    cap: false,
+  };
+
+  it('protects records by how they were retrieved', () => {
+    const candidates = [
+      { id: 'a', why: ['heading:section.combat.wounded'], sources: ['lexical' as const] },
+      { id: 'b', why: ['search'], sources: ['lexical' as const] },
+    ].map((c) => ({ ...c, exact: false }));
+    const judgments = new Map([
+      ['a', judged(1)],
+      ['b', judged(1)],
+    ]);
+    const policy = { ...base, protectWhy: ['heading:'] };
+    expect(applyFilter(candidates, judgments, policy, 10).map((d) => d.reason)).toEqual([
+      'structural',
+      'irrelevant',
+    ]);
+  });
+
+  it('applies a per-kind threshold and a minimum-kept floor', () => {
+    const candidates = [
+      { id: 't', kind: 'table' },
+      { id: 'r', kind: 'rule' },
+      { id: 's', kind: 'rule' },
+    ].map((c) => ({ ...c, why: ['search'], sources: ['lexical' as const], exact: false }));
+    const judgments = new Map([
+      ['t', judged(0.93)],
+      ['r', judged(0.95)],
+      ['s', judged(0.99)],
+    ]);
+    const byKind = { ...base, dropAtByKind: { table: 0.97 } };
+    expect(applyFilter(candidates, judgments, byKind, 10).map((d) => d.kept)).toEqual([
+      true,
+      false,
+      false,
+    ]);
+    // The floor restores the least likely irrelevant drop first.
+    const floor = { ...byKind, minKept: 2 };
+    expect(applyFilter(candidates, judgments, floor, 10).map((d) => d.reason)).toEqual([
+      'relevant',
+      'floor',
+      'irrelevant',
+    ]);
+  });
+});
+
 describe('ask with a filter', () => {
   it('filters a model analysis and records every decision', async () => {
     const result = await ask(retrieval, MOLGOR, {
