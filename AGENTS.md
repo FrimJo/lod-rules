@@ -51,7 +51,10 @@ npm run ask:evaluate # labelled questions: lexical vs Laya vs Jev vs Laya→Jev 
 `npm run ask` uses Laya/Jev only to choose what to retrieve, as the union with a lexical
 baseline while they are uncalibrated. The baseline's records are gathered first, so a model can add
 records but never displace them. `tests/ask/evaluate.test.ts` enforces this on every labelled
-question. It never writes judgments into the corpus. The only
+question. `--filter` (opt-in, experimental) then lets Jev drop records it judges irrelevant from
+that pool, lexical ones included; `tests/ask/ranking.test.ts` covers it and
+[docs/ask-quality-evaluation.md](docs/ask-quality-evaluation.md) records its calibration.
+It never writes judgments into the corpus. The only
 LLM client is the consumer in `clients/web/`; `scripts/` stays LLM-client-free.
 
 `npm run build:corpus` is a stub until Phase 11. Do not invent its outputs.

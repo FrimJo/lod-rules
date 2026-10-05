@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  prunedMetrics,
   qualityMetrics,
   qualitySchema,
+  qualitySchemaFor,
   validateJudgmentCoverage,
   type QualityJudgment,
 } from '../../clients/web/src/evaluation/quality.ts';
@@ -93,5 +95,41 @@ describe('provisional evidence and answer quality scoring', () => {
     const duplicate = fixture();
     duplicate.answers[0]!.missing = ['f1'];
     expect(() => validateJudgmentCoverage(duplicate, ids, ids)).toThrow(/every fact/);
+  });
+
+  it('grades as many answers as were sent, each exactly once', () => {
+    const three = fixture();
+    three.answers.push({ ...three.answers[1]!, name: 'C' });
+    const validate = createAjv().compile(qualitySchemaFor(3));
+    expect(validate(three)).toBe(true);
+    expect(validate(fixture())).toBe(false);
+    expect(() => validateJudgmentCoverage(three, ids, ids, ['A', 'B', 'C'])).not.toThrow();
+    expect(() => validateJudgmentCoverage(fixture(), ids, ids, ['A', 'B', 'C'])).toThrow(
+      /A, B, C exactly once/,
+    );
+  });
+
+  it('names omitted and extra candidates when coverage fails', () => {
+    const omitted = fixture();
+    omitted.relevance.pop();
+    expect(() => validateJudgmentCoverage(omitted, ids, ids)).toThrow(/missing: rule\.unknown/);
+  });
+
+  it('counts what a mode pruned from the candidate pool', () => {
+    expect(
+      prunedMetrics(
+        ['rule.required'],
+        ids,
+        ['rule.required', 'rule.other'],
+        ['rule.required'],
+        fixture(),
+      ),
+    ).toEqual({
+      pruned: 3,
+      prunedLexical: 1,
+      prunedRequired: 0,
+      prunedRelevant: 1,
+      prunedIrrelevant: 1,
+    });
   });
 });

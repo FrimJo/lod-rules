@@ -7,13 +7,16 @@ import { freshDatabasePath } from '../retrieve/build.ts';
 import { Retrieval } from '../retrieve/index.ts';
 import { selectedSystems, type SystemOneModel } from './analysis.ts';
 import { ask } from './index.ts';
-import { analyzerModel, isAnalyzerName } from './models.ts';
+import { analyzerModel, isAnalyzerName, jevModel } from './models.ts';
 
 const usage = `Usage: npm run ask -- "<question>" [options]
 
   --analyzer lexical|laya|jev|cascade
                                 Question analysis (default lexical; laya runs locally;
                                 cascade asks Jev only what Laya is unsure of)
+  --filter                      Let Jev drop records it judges irrelevant, lexical ones
+                                included (experimental; needs a model analyzer and
+                                TYPESAFE_API_KEY; exact name matches are kept)
   --completer-cmd "<command>"   Shell command that reads the prompt on stdin and prints
                                 the answer, e.g. "claude -p". Without it, prints the prompt.
   --show-prompt                 Print the grounded prompt as well
@@ -24,6 +27,7 @@ const { values, positionals } = parseArgs({
   options: {
     analyzer: { type: 'string', default: 'lexical' },
     'completer-cmd': { type: 'string' },
+    filter: { type: 'boolean' },
     'show-prompt': { type: 'boolean' },
     json: { type: 'boolean' },
     help: { type: 'boolean', short: 'h' },
@@ -75,10 +79,16 @@ function shellCompleter(command: string): LlmCompleter {
 const database = freshDatabasePath();
 const retrieval = database ? Retrieval.open(database) : Retrieval.fromCorpus();
 const command = values['completer-cmd'];
+const ranker = values.filter ? jevModel() : null;
+if (values.filter && !ranker) console.error('TYPESAFE_API_KEY is not set; not filtering.');
 const result = await ask(retrieval, question, {
   model: analyzer(values.analyzer ?? 'lexical'),
   completer: command ? shellCompleter(command) : null,
+  filter: ranker ? { ranker } : null,
 });
+if (values.filter && ranker && !result.filter) {
+  console.error('The filter needs a model analysis (--analyzer jev); not filtering.');
+}
 retrieval.close();
 await closeLaya();
 
@@ -121,6 +131,19 @@ if (values.json) {
     console.log(
       `  ${item.id} — ${item.title} (${scope}; ${page})${flags ? ` [${flags}]` : ''}  ← ${item.why.join(', ')}`,
     );
+  }
+  if (result.filter) {
+    const dropped = result.filter.decisions.filter((d) => !d.kept);
+    console.log(
+      `\nFiltered by ${result.filter.ranker} (${result.filter.policy.id})${
+        result.filter.fallback ? `, fallback: ${result.filter.fallback}` : ''
+      }: ${dropped.length} dropped`,
+    );
+    for (const d of dropped) {
+      console.log(
+        `  ${d.id} [${d.sources.join('+')}] irrelevant ${pct(d.judgment?.probabilities.irrelevant ?? 0)} (${d.reason})`,
+      );
+    }
   }
   if (values['show-prompt'] || !result.answer) console.log(`\n--- PROMPT ---\n${result.prompt}`);
   if (result.answer) {

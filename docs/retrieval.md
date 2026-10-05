@@ -99,6 +99,7 @@ question → analysis (lexical | Laya | Jev | Laya→Jev cascade) → determinis
 npm run ask -- "How many hit points does Molgor have?"                  # lexical, prints prompt
 npm run ask -- "My hero is poisoned and bleeding out during a rest. What happens?" --analyzer laya
 npm run ask -- "…" --analyzer laya --completer-cmd "cd /tmp && cursor-agent -p --trust --output-format text"
+npm run ask -- "What happens when a wizard miscasts a spell?" --analyzer jev --filter  # Jev drops noise
 ```
 
 **Analysis** (`analysis.ts`) asks, in one System One call:
@@ -130,8 +131,11 @@ model whose answer was kept.
 
 ### Labelled questions
 
-`tests/fixtures/ask-questions/cases.yaml` holds 37 rules questions in three splits:
-development (12), validation (13) and held-out (12). Each question is labelled with its
+`tests/fixtures/ask-questions/cases.yaml` holds 102 rules questions in three splits:
+development (34), validation (35) and held-out (33). The first 37 (12 / 13 / 12) date from
+1 October; the other 65 were added on 5 October across combat, dungeon, treasure,
+character building, psychology, settlements, travel, alchemy, magic and quests. The results
+below cover the original 37 only. Each question is labelled with its
 intent, its complexity, the one entity record it is about (or `null`), and the
 `required_evidence` records a correct answer must be able to cite. Labels were drafted from
 the canonical records they name and have not been independently reviewed
@@ -188,6 +192,19 @@ unfiltered fallback search. For `multi_rule` and `judgment` it also follows one 
 at 5, 7, 11 or 13 records. Each item records `why` it was selected and carries its
 issues, external dependencies and citations.
 
+**Relevance filter** (`ranking.ts`, opt-in with `--filter`) lets Jev remove noise from
+the union pool, lexical records included. Jev gets the question and one candidate per
+request (the same text the LLM would see, plus its issues and unavailable-book
+dependencies) and chooses `direct`, `supporting` or `irrelevant`. Policy
+`provisional-1` drops a record when p(irrelevant) ≥ 0.9, except records reached through
+a `uses_table`, `depends_on` or `step_rule` link. It never adds a record. A record Jev
+fails to judge is kept, and if no record can be judged the pool is used unfiltered.
+`AskResult.filter` lists every keep/drop decision with Jev's probabilities. The filter
+runs only on a model analysis. Calibration and answer-quality results are in
+[ask-quality-evaluation.md](ask-quality-evaluation.md): on the labelled set it dropped no
+required record, cut irrelevant evidence by about 70 % and regressed no answer against
+the union. It is not the default until a larger reviewed label set confirms that.
+
 **Prompt and check** (`prompt.ts`) tell the LLM to answer only from the evidence, to cite
 `[record.id]`, to name the quest for quest-scoped records, and to surface issues and
 unavailable books. `checkCitations` marks an answer grounded only if it cites at least
@@ -223,6 +240,11 @@ unavailable external material.
 - that the cascade asks the fallback only the unsure answers, skips it when sure, and keeps the
   first answers when the fallback fails;
 - per-question answer replay and scoring.
+
+`tests/ask/ranking.test.ts` checks that the candidate pool matches `gatherEvidence` and
+labels each record's sources, that the filter asks one relevance question per record,
+drops only above its threshold, honours exact and linked protection and the budget cap,
+keeps every record when the ranker fails, and that `ask()` filters only model analyses.
 
 Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
 semantic-provider calibration, and the full Phase 11 bundle with JSON/SQLite equivalence and

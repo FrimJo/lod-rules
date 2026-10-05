@@ -43,38 +43,78 @@ export const BUDGETS: Record<ComplexityId, { limit: number; expand: boolean }> =
 
 const TEXT_LIMIT = 2_400;
 
+export type CandidateSource = 'lexical' | 'model';
+
+export interface EvidenceCandidate {
+  id: string;
+  why: string[];
+  /** Which analyses selected the record: the lexical baseline, the model, or both. */
+  sources: CandidateSource[];
+  /** An exact name in the question, or that entity's own rule or table. */
+  exact: boolean;
+}
+
+interface Picked {
+  why: string[];
+  exact: boolean;
+}
+
 /**
  * Deterministic: the same analysis and corpus always produce the same evidence. With a
  * baseline, each analysis gathers within its own budget and the baseline's records come
  * first, so a model analysis can add records but never displace one the baseline found.
  */
 export function gatherEvidence(retrieval: Retrieval, analysis: QuestionAnalysis): EvidenceItem[] {
-  const { baseline, ...model } = analysis;
-  const picked = baseline ? pick(retrieval, baseline) : new Map<string, string[]>();
-  for (const [id, why] of pick(retrieval, model))
-    picked.set(id, [...(picked.get(id) ?? []), ...why]);
-  return [...picked.entries()].map(([id, why]) => item(retrieval, id, why));
+  return collectCandidates(retrieval, analysis).map((c) => evidenceItem(retrieval, c.id, c.why));
 }
 
-function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, string[]> {
+/** The records `gatherEvidence` returns, in the same order, with where each came from. */
+export function collectCandidates(
+  retrieval: Retrieval,
+  analysis: QuestionAnalysis,
+): EvidenceCandidate[] {
+  const { baseline, ...model } = analysis;
+  const pools: Array<[CandidateSource, Map<string, Picked>]> = baseline
+    ? [
+        ['lexical', pick(retrieval, baseline)],
+        ['model', pick(retrieval, model)],
+      ]
+    : [[model.analyzer === 'lexical' ? 'lexical' : 'model', pick(retrieval, model)]];
+  const out = new Map<string, EvidenceCandidate>();
+  for (const [source, picked] of pools) {
+    for (const [id, { why, exact }] of picked) {
+      const seen = out.get(id);
+      if (seen) {
+        seen.why = [...seen.why, ...why];
+        seen.sources.push(source);
+        seen.exact ||= exact;
+      } else out.set(id, { id, why, sources: [source], exact });
+    }
+  }
+  return [...out.values()];
+}
+
+function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Picked> {
   const { question } = analysis;
   const budget = BUDGETS[analysis.complexity.value];
   const intents = new Set([analysis.intent.value]);
   const systems = selectedSystems(analysis);
   const entities = new Map(analysis.entities.map((e) => [e.id, e]));
-  const picked = new Map<string, string[]>();
-  const add = (id: string, why: string): void => {
+  const picked = new Map<string, Picked>();
+  const add = (id: string, why: string, exact = false): void => {
     if (!retrieval.document(id)) return;
-    picked.set(id, [...(picked.get(id) ?? []), why]);
+    const seen = picked.get(id);
+    picked.set(id, { why: [...(seen?.why ?? []), why], exact: (seen?.exact ?? false) || exact });
   };
 
   const addEntity = (entity: EntityRef): void => {
-    add(entity.id, `entity:${entity.via}`);
+    const exact = entity.via === 'alias';
+    add(entity.id, `entity:${entity.via}`, exact);
     const neighbours = retrieval
       .expand(entity.id, { direction: 'out', relations: ['rule', 'table', 'uses_table'] })
       .filter((edge) => edge.found)
       .slice(0, 4);
-    for (const edge of neighbours) add(edge.target, `entity:${edge.relation}`);
+    for (const edge of neighbours) add(edge.target, `entity:${edge.relation}`, exact);
     const quest = entity.type === 'quest' ? entity.id : retrieval.document(entity.id)?.quest_id;
     if (quest) {
       for (const hit of retrieval.search(question, { questId: quest, limit: 4 })) {
@@ -125,7 +165,7 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, str
   return new Map([...picked.entries()].slice(0, cap));
 }
 
-function item(retrieval: Retrieval, id: string, why: string[]): EvidenceItem {
+export function evidenceItem(retrieval: Retrieval, id: string, why: string[]): EvidenceItem {
   const doc = retrieval.document(id)!;
   const evidence: EvidenceItem = {
     id: doc.id,
