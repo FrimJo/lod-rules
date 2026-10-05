@@ -2,7 +2,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { PDFDocument } from 'pdf-lib';
 import { parse } from 'yaml';
-import { repoRoot } from '../../../../scripts/validate/schemas.ts';
+import { dataRoot } from './data-root.ts';
 
 export interface RulebookPage {
   pdf: number;
@@ -38,7 +38,7 @@ interface PageRow {
 }
 
 function readYaml<T>(path: string): T {
-  return parse(readFileSync(join(repoRoot, path), 'utf8')) as T;
+  return parse(readFileSync(join(dataRoot, path), 'utf8')) as T;
 }
 
 function canonicalDocument(): ManifestDocument {
@@ -50,7 +50,7 @@ function canonicalDocument(): ManifestDocument {
 
 export function rulebookFile(): { path: string; name: string; size: number; mtimeMs: number } {
   const { file } = canonicalDocument();
-  const path = join(repoRoot, 'source', file);
+  const path = join(dataRoot, 'source', file);
   const { size, mtimeMs } = statSync(path);
   return { path, name: file, size, mtimeMs };
 }

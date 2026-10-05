@@ -2,11 +2,16 @@ import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { createFileRoute } from '@tanstack/react-router';
+import { bundled, dataRoot } from '../server/data-root.ts';
 
-const fontsDir = join(
-  dirname(createRequire(import.meta.url).resolve('pdfjs-dist/package.json')),
-  'standard_fonts',
-);
+/** A data bundle carries a copy of the fonts; the built server does not ship pdfjs-dist. */
+const fontsDir = (): string =>
+  bundled
+    ? join(dataRoot, 'pdf-fonts')
+    : join(
+        dirname(createRequire(import.meta.url).resolve('pdfjs-dist/package.json')),
+        'standard_fonts',
+      );
 
 /** pdf.js's substitutes for the standard 14 fonts, for pages that use them without embedding. */
 export const Route = createFileRoute('/api/pdf-fonts/$file')({
@@ -15,7 +20,7 @@ export const Route = createFileRoute('/api/pdf-fonts/$file')({
       GET: async ({ params }) => {
         if (!/^[\w-]+\.(pfb|ttf)$/.test(params.file)) return new Response(null, { status: 404 });
         try {
-          const bytes = await readFile(join(fontsDir, params.file));
+          const bytes = await readFile(join(fontsDir(), params.file));
           return new Response(bytes, {
             headers: {
               'Cache-Control': 'public, max-age=604800, immutable',

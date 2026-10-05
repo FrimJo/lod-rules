@@ -50,7 +50,7 @@ export function SettingsDialog({
       <div className="settings-body">
         <h2 id="settings-title">Retrieval settings</h2>
         <p id="settings-intro" className="muted">
-          Every mode searches the rulebook index. Laya and Jev add related records. Only the
+          Every mode searches the rulebook index. Jev adds related records. Only the
           filtered mode removes any: Jev drops records it judges irrelevant to the question.
         </p>
         <fieldset className="mode-options">

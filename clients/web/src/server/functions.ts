@@ -1,10 +1,17 @@
 import { createServerFn } from '@tanstack/react-start';
 import { isRetrievalMode, type RetrievalMode } from '../lib/retrieval-modes.ts';
-import { checkAnswer as check, getAskSummary, getRetrievalSettings as settings } from './ask-service.ts';
+import {
+  checkAnswer as check,
+  getAskSummary,
+  getRetrievalSettings as settings,
+} from './ask-service.ts';
 import {
   getGradedCase as gradedCase,
+  getRecordQueue,
   listGradedCases,
   saveGradingReview,
+  saveRecordLabel,
+  type ReviewedRelevance,
   type CaseReview,
 } from './grading.ts';
 import { llmApiKey, llmModel } from './llm.ts';
@@ -29,9 +36,10 @@ export interface AnswerSettings {
   model: string;
 }
 
-export const getAnswerSettings = createServerFn({ method: 'GET' }).handler(
-  (): AnswerSettings => ({ available: Boolean(llmApiKey()), model: llmModel() }),
-);
+export const getAnswerSettings = createServerFn({ method: 'GET' }).handler((): AnswerSettings => ({
+  available: Boolean(llmApiKey()),
+  model: llmModel(),
+}));
 
 export const getEvidence = createServerFn({ method: 'POST' })
   .validator((data: { question: string; mode: RetrievalMode }) => ({
@@ -64,3 +72,18 @@ export const saveReview = createServerFn({ method: 'POST' })
     return data;
   })
   .handler(({ data }) => saveGradingReview(data.id, data.review));
+
+export const getReviewQueue = createServerFn({ method: 'GET' })
+  .validator((data: { includeHeldOut?: boolean }) => ({
+    includeHeldOut: data?.includeHeldOut === true,
+  }))
+  .handler(({ data }) => getRecordQueue(data));
+
+export const saveQueueLabel = createServerFn({ method: 'POST' })
+  .validator((data: { caseId: string; recordId: string; label: ReviewedRelevance }) => {
+    if (!/^askq\.[a-z0-9_.]+$/.test(data.caseId))
+      throw new Error(`Invalid case id: ${data.caseId}`);
+    if (typeof data.recordId !== 'string' || !data.recordId) throw new Error('Missing record id');
+    return data;
+  })
+  .handler(({ data }) => saveRecordLabel(data));

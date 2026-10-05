@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { basename, join, resolve, sep } from 'node:path';
 import { parse } from 'yaml';
-import { repoRoot } from '../../../../scripts/validate/schemas.ts';
+import { dataRoot } from './data-root.ts';
 
 /** Serve only present ruling documents explicitly declared in the manifest. */
 export function rulingSource(documentId: string): Response {
-  const manifest = parse(readFileSync(join(repoRoot, 'source/manifest.yaml'), 'utf8')) as {
+  const manifest = parse(readFileSync(join(dataRoot, 'source/manifest.yaml'), 'utf8')) as {
     documents: Array<{ id: string; file: string; source_class?: string }>;
   };
   const document = manifest.documents.find(
@@ -14,7 +14,7 @@ export function rulingSource(documentId: string): Response {
       ['official_errata', 'official_faq'].includes(entry.source_class ?? ''),
   );
   if (!document) return new Response('Unknown ruling source', { status: 404 });
-  const directory = resolve(repoRoot, 'source');
+  const directory = resolve(dataRoot, 'source');
   const path = resolve(directory, document.file);
   if (!path.startsWith(`${directory}${sep}`))
     return new Response('Invalid source path', { status: 400 });

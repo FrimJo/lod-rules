@@ -1,10 +1,11 @@
 import type { AnalyzerName } from '../../../../scripts/ask/models.ts';
 
 /**
- * One mode per `ANALYZERS` entry in scripts/ask/models.ts (ask-service.ts checks this), plus
- * `jev_filtered`: the Jev union after Jev drops records it judges irrelevant.
+ * The `ANALYZERS` from scripts/ask/models.ts that the web client offers, plus `jev_filtered`:
+ * the Jev union after Jev drops records it judges irrelevant. Laya and the Laya→Jev cascade are
+ * shelved here: onnxruntime and the Laya weights do not fit a Vercel function.
  */
-export const RETRIEVAL_MODES = ['jev_filtered', 'jev', 'lexical', 'laya', 'cascade'] as const;
+export const RETRIEVAL_MODES = ['jev_filtered', 'jev', 'lexical'] as const;
 export type RetrievalMode = (typeof RETRIEVAL_MODES)[number];
 
 export interface RetrievalModeInfo {
@@ -53,27 +54,6 @@ export const MODES: Record<RetrievalMode, RetrievalModeInfo> = {
     needsJev: false,
     tags: ['Local', 'No model'],
   },
-  laya: {
-    id: 'laya',
-    label: 'Lexical + Laya',
-    analyzer: 'laya',
-    filter: false,
-    models: 'Laya',
-    description:
-      'Adds records chosen by the local Laya model. The first question can be slow while it loads.',
-    needsJev: false,
-    tags: ['Local', 'Model'],
-  },
-  cascade: {
-    id: 'cascade',
-    label: 'Lexical + Laya + Jev',
-    analyzer: 'cascade',
-    filter: false,
-    models: 'Laya + Jev',
-    description: 'Laya answers first, and Jev re-answers only what Laya was unsure about.',
-    needsJev: true,
-    tags: ['Local', 'Cloud', 'Model'],
-  },
 };
 
 export interface RetrievalSettings {
@@ -89,9 +69,13 @@ export function isModeAvailable(mode: RetrievalMode, settings: RetrievalSettings
   return !MODES[mode].needsJev || settings.jevAvailable;
 }
 
-/** `LOD_ANALYZER` when it names an available mode, else filtered Jev with a key, else lexical. */
+/**
+ * `LOD_ANALYZER` when it names an available mode, else unfiltered Jev with a key, else lexical.
+ * The filter stays opt-in until a policy calibrated on reviewed labels passes; see
+ * docs/jev-filter-calibration-plan.md.
+ */
 export function defaultMode(configured: string | undefined, jevAvailable: boolean): RetrievalMode {
   const settings = { defaultMode: 'lexical' as const, jevAvailable };
   if (isRetrievalMode(configured) && isModeAvailable(configured, settings)) return configured;
-  return jevAvailable ? 'jev_filtered' : 'lexical';
+  return jevAvailable ? 'jev' : 'lexical';
 }

@@ -1,19 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type {
   GradedCaseDetail,
   GradedCaseRow,
   QualityMode,
+  QueueBucket,
   ReviewedRelevance,
 } from '../server/grading.ts';
-import { getGradedCase, getGradedCases, saveReview } from '../server/functions.ts';
+import {
+  getGradedCase,
+  getGradedCases,
+  getReviewQueue,
+  saveQueueLabel,
+  saveReview,
+} from '../server/functions.ts';
+
+interface ReviewSearch {
+  case?: string;
+  view?: 'records';
+}
 
 export const Route = createFileRoute('/review')({
-  validateSearch: (search: Record<string, unknown>): { case?: string } =>
-    typeof search.case === 'string' ? { case: search.case } : {},
+  validateSearch: (search: Record<string, unknown>): ReviewSearch => ({
+    ...(typeof search.case === 'string' ? { case: search.case } : {}),
+    ...(search.view === 'records' ? { view: 'records' as const } : {}),
+  }),
   component: ReviewPage,
 });
 
@@ -45,12 +59,31 @@ function ReviewPage() {
             Back to questions
           </Link>
         </header>
+        <nav className="review-views" aria-label="Review views">
+          <Link
+            to="/review"
+            search={{}}
+            className={search.view ? 'link' : 'link active'}
+            aria-current={search.view ? undefined : 'page'}
+          >
+            Cases
+          </Link>
+          <Link
+            to="/review"
+            search={{ view: 'records' }}
+            className={search.view === 'records' ? 'link active' : 'link'}
+            aria-current={search.view === 'records' ? 'page' : undefined}
+          >
+            Record queue
+          </Link>
+        </nav>
         {list.data && <ReviewSummary summary={list.data.summary} />}
         {list.isPending && <p className="muted">Loading graded cases…</p>}
         {list.error && <p className="error">{list.error.message}</p>}
         {list.data && rows.length === 0 && (
           <p className="muted">
-            No graded cases. Run <code>node --import tsx clients/web/src/evaluation/run-quality.ts</code>.
+            No graded cases. Run{' '}
+            <code>node --import tsx clients/web/src/evaluation/run-quality.ts</code>.
           </p>
         )}
         <ol className="review-cases">
@@ -60,7 +93,9 @@ function ReviewPage() {
         </ol>
       </aside>
       <main className="review-main">
-        {selected ? (
+        {search.view === 'records' ? (
+          <RecordQueueView />
+        ) : selected ? (
           <CaseView id={selected} rows={rows} />
         ) : (
           <p className="muted">Pick a case.</p>
@@ -80,6 +115,12 @@ function ReviewSummary({ summary }: { summary: Summary }) {
         {summary.statuses.partial ? `, ${summary.statuses.partial} partial` : ''}
         {summary.statuses.stale ? `, ${summary.statuses.stale} stale` : ''}
       </p>
+      {summary.relevance.stale > 0 && (
+        <p>
+          {summary.relevance.stale} record label{summary.relevance.stale === 1 ? '' : 's'} need
+          relabelling: the record text changed.
+        </p>
+      )}
       <p>
         Judge agrees on {percent(summary.answers.agreement)} of {summary.answers.reviewed} answers
         and {percent(summary.relevance.exactAgreement)} of {summary.relevance.labelled} record
@@ -244,8 +285,8 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
           </button>
         </div>
         <p className="muted">
-          Judge each answer yourself before reading the judge's verdict. Modes stay hidden until
-          you reveal them.
+          Judge each answer yourself before reading the judge's verdict. Modes stay hidden until you
+          reveal them.
         </p>
         {detail.answers.map((answer) => (
           <article key={answer.hash} className="review-answer">
@@ -253,7 +294,10 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
               <h4>
                 Answer {answer.name}
                 {revealed && (
-                  <span className="muted"> · {answer.modes.map((m) => MODE_LABELS[m]).join(', ')}</span>
+                  <span className="muted">
+                    {' '}
+                    · {answer.modes.map((m) => MODE_LABELS[m]).join(', ')}
+                  </span>
                 )}
               </h4>
               <fieldset className="review-verdict">
@@ -264,7 +308,9 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
                       type="radio"
                       name={`answer-${answer.hash}`}
                       checked={answers[answer.hash] === correct}
-                      onChange={() => setAnswers((current) => ({ ...current, [answer.hash]: correct }))}
+                      onChange={() =>
+                        setAnswers((current) => ({ ...current, [answer.hash]: correct }))
+                      }
                     />{' '}
                     {correct ? 'Correct' : 'Incorrect'}
                   </label>
@@ -311,7 +357,9 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
               <tr
                 key={record.id}
                 className={
-                  relevance[record.id] && relevance[record.id] !== record.judge ? 'changed' : undefined
+                  relevance[record.id] && relevance[record.id] !== record.judge
+                    ? 'changed'
+                    : undefined
                 }
               >
                 <td>
@@ -319,6 +367,14 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
                     <summary>
                       <code>{record.id}</code>
                       {record.required && <span className="tag default">required</span>}
+                      {record.staleLabel && (
+                        <span
+                          className="tag"
+                          title="Your label was for an older text of this record"
+                        >
+                          text changed
+                        </span>
+                      )}
                       <span className="muted"> {record.title}</span>
                     </summary>
                     <pre className="review-record-text">{record.text}</pre>
@@ -329,7 +385,8 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
                   {record.jevIrrelevant !== null && (
                     <>
                       <br />
-                      Jev irrelevant {Math.round(record.jevIrrelevant * 100)}% ({record.filterReason})
+                      Jev irrelevant {Math.round(record.jevIrrelevant * 100)}% (
+                      {record.filterReason})
                     </>
                   )}
                 </td>
@@ -371,8 +428,15 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
       <footer className="review-actions">
         {save.error && <span className="error">{save.error.message}</span>}
         {save.isSuccess && !save.isPending && <span className="badge ok">Saved</span>}
-        {!complete && <span className="muted">Give every answer a verdict and every record a label.</span>}
-        <button type="button" className="button secondary" disabled={save.isPending} onClick={() => save.mutate()}>
+        {!complete && (
+          <span className="muted">Give every answer a verdict and every record a label.</span>
+        )}
+        <button
+          type="button"
+          className="button secondary"
+          disabled={save.isPending}
+          onClick={() => save.mutate()}
+        >
           Save
         </button>
         <button type="submit" className="button" disabled={save.isPending}>
@@ -382,6 +446,141 @@ function CaseForm({ detail, rows }: { detail: GradedCaseDetail; rows: GradedCase
     </form>
   );
 }
+
+const LABEL_KEYS: Record<string, ReviewedRelevance> = {
+  '1': 'direct',
+  '2': 'supporting',
+  '3': 'irrelevant',
+};
+
+/**
+ * One record at a time, across cases, in the order that most helps calibrate the Jev filter.
+ * Each label is saved into that case's review straight away.
+ */
+function RecordQueueView() {
+  const queryClient = useQueryClient();
+  const [includeHeldOut, setIncludeHeldOut] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const queue = useQuery({
+    queryKey: ['review-queue', includeHeldOut],
+    queryFn: () => getReviewQueue({ data: { includeHeldOut } }),
+  });
+  const item = queue.data?.items[0];
+  const save = useMutation({
+    mutationFn: (label: ReviewedRelevance) =>
+      saveQueueLabel({ data: { caseId: item!.caseId, recordId: item!.recordId, label } }),
+    onSuccess: async () => {
+      setRevealed(false);
+      await queryClient.invalidateQueries({ queryKey: ['review-queue'] });
+      await queryClient.invalidateQueries({ queryKey: ['graded-cases'] });
+      await queryClient.invalidateQueries({ queryKey: ['graded-case', item?.caseId] });
+    },
+  });
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      const label = LABEL_KEYS[event.key];
+      if (label && item && !save.isPending) save.mutate(label);
+      if (event.key === 'j') setRevealed((r) => !r);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [item, save]);
+
+  if (queue.isPending) return <p className="muted">Loading the record queue…</p>;
+  if (queue.error) return <p className="error">{queue.error.message}</p>;
+  const { buckets, progress } = queue.data;
+  const remaining = buckets.reduce((sum, b) => sum + b.remaining, 0);
+
+  return (
+    <div className="review-case-form">
+      <header className="review-case-head">
+        <h2>Record queue</h2>
+        <p>
+          {progress.total} of {progress.targets.total} labels · {progress.relevantInBand} of{' '}
+          {progress.targets.relevantInBand} relevant records that Jev doubts (p(irrelevant) ≥ 0.6) ·
+          development and validation only
+        </p>
+        <ul className="review-buckets">
+          {buckets.map((bucket) => (
+            <li key={bucket.id} className={item?.bucket === bucket.id ? 'active' : undefined}>
+              <strong>{bucket.remaining}</strong> {bucket.label}
+            </li>
+          ))}
+        </ul>
+        <label className="muted">
+          <input
+            type="checkbox"
+            checked={includeHeldOut}
+            onChange={(event) => setIncludeHeldOut(event.target.checked)}
+          />{' '}
+          Include held-out questions (label these once, after the policy is chosen)
+        </label>
+      </header>
+
+      {!item ? (
+        <p className="muted">Nothing left in the queue.</p>
+      ) : (
+        <section className="review-section review-queue-item">
+          <p className="muted">
+            {QUEUE_LABELS[item.bucket]} · {remaining} left ·{' '}
+            <Link to="/review" search={{ case: item.caseId }} className="link">
+              {item.caseId}
+            </Link>{' '}
+            · {item.split}
+          </p>
+          <h3>{item.question}</h3>
+          <p>
+            <code>{item.recordId}</code> <span className="muted">{item.kind}</span>
+            {item.required && <span className="tag default">required</span>}
+          </p>
+          <p>
+            <strong>{item.title}</strong>
+          </p>
+          <pre className="review-record-text">{item.text}</pre>
+          <p className="muted">Retrieved by: {item.why.join(', ') || 'unknown'}</p>
+          <div className="review-queue-actions">
+            {RELEVANCE.map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                className="button"
+                disabled={save.isPending}
+                onClick={() => save.mutate(label)}
+              >
+                {i + 1} · {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => setRevealed((r) => !r)}
+            >
+              {revealed ? 'Hide' : 'Show'} judge and Jev (j)
+            </button>
+          </div>
+          {revealed && (
+            <p className="muted">
+              Judge: <strong>{item.judge}</strong>, {item.judgeReason} · Jev p(irrelevant):{' '}
+              {item.pIrrelevant === null ? '–' : `${Math.round(item.pIrrelevant * 100)}%`}
+              {item.kept !== null && ` (${item.kept ? 'kept' : 'dropped'}: ${item.filterReason})`}
+            </p>
+          )}
+          {save.error && <p className="error">{save.error.message}</p>}
+        </section>
+      )}
+    </div>
+  );
+}
+
+const QUEUE_LABELS: Record<QueueBucket, string> = {
+  dropped_relevant: 'Dropped, judge says relevant',
+  threshold_band: 'Near the drop line',
+  new_step: 'New retrieval step',
+  sample: 'Sample',
+};
 
 function JudgeList({ title, items }: { title: string; items: string[] }) {
   if (!items.length) return null;

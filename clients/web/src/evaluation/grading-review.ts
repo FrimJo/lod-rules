@@ -24,6 +24,11 @@ export interface CaseReview {
   wrongFacts: string[];
   /** The reviewer's label for every pool record. Stays valid across reruns. */
   relevance: Record<string, ReviewedRelevance>;
+  /**
+   * `hash` of each labelled record's text when it was labelled. A label whose record text has
+   * changed since is stale and no longer trusted. Labels without a hash predate this field.
+   */
+  recordHashes?: Record<string, string>;
   /** The reviewer's verdict per answer, keyed by `answerHash`, so it follows identical text. */
   answers: Record<string, { correct: boolean }>;
   note?: string;
@@ -40,7 +45,17 @@ export interface GradedCase {
   split: string;
   question: string;
   required: string[];
-  evidence: Record<QualityMode, Array<{ id: string }>>;
+  evidence: Record<QualityMode, Array<{ id: string; text?: string }>>;
+  /** Jev's filter decisions over the union pool; absent when the filtered mode was not run. */
+  filter?: {
+    decisions: Array<{
+      id: string;
+      why: string[];
+      kept: boolean;
+      reason: string;
+      judgment: { probabilities: Record<string, number> } | null;
+    }>;
+  };
   answers: Partial<Record<QualityMode, string>>;
   identities: Partial<Record<QualityMode, string>>;
   judgment: QualityJudgment;
@@ -60,10 +75,53 @@ export function loadReview(path = REVIEW_PATH): GradingReview {
   return review;
 }
 
+/** Record text as the case's modes retrieved it, by id. */
+export function recordTexts(c: Pick<GradedCase, 'evidence'>): Map<string, string> {
+  const texts = new Map<string, string>();
+  for (const mode of QUALITY_MODES)
+    for (const item of c.evidence[mode] ?? [])
+      if (item.text !== undefined && !texts.has(item.id)) texts.set(item.id, item.text);
+  return texts;
+}
+
+/**
+ * The reviewer's labels that still apply: a label is dropped when its record text has changed
+ * since it was given. `texts` is the current text by record id; records it lacks keep their label.
+ */
+export function currentLabels(
+  review: CaseReview | undefined,
+  texts: Map<string, string>,
+): { labels: Map<string, ReviewedRelevance>; stale: string[] } {
+  const labels = new Map<string, ReviewedRelevance>();
+  const stale: string[] = [];
+  for (const [id, label] of Object.entries(review?.relevance ?? {})) {
+    const then = review?.recordHashes?.[id];
+    const now = texts.get(id);
+    if (then !== undefined && now !== undefined && hash(now) !== then) stale.push(id);
+    else labels.set(id, label);
+  }
+  return { labels, stale };
+}
+
+/** Hashes of the current text for every labelled record, for `CaseReview.recordHashes`. */
+export function hashLabelledRecords(
+  relevance: Record<string, ReviewedRelevance>,
+  texts: Map<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.keys(relevance).flatMap((id) => {
+      const text = texts.get(id);
+      return text === undefined ? [] : [[id, hash(text)]];
+    }),
+  );
+}
+
 export function saveCaseReview(id: string, review: CaseReview, path = REVIEW_PATH): GradingReview {
   const all = loadReview(path);
   all.cases[id] = review;
-  const sorted = Object.fromEntries(Object.entries(all.cases).sort(([a], [b]) => a.localeCompare(b)));
+  const sorted = Object.fromEntries(
+    Object.entries(all.cases).sort(([a], [b]) => a.localeCompare(b)),
+  );
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify({ version: 1, cases: sorted }, null, 2)}\n`);
   return { version: 1, cases: sorted };
@@ -88,7 +146,10 @@ export function poolIds(c: GradedCase): string[] {
 
 /** Each distinct answer once, with every mode that produced it. */
 export function distinctAnswers(c: GradedCase) {
-  const byHash = new Map<string, { hash: string; name: string; text: string; modes: QualityMode[] }>();
+  const byHash = new Map<
+    string,
+    { hash: string; name: string; text: string; modes: QualityMode[] }
+  >();
   for (const mode of QUALITY_MODES) {
     const text = c.answers[mode];
     const name = c.identities[mode];
@@ -108,7 +169,8 @@ export function reviewStatus(c: GradedCase, review: CaseReview | undefined): Rev
   const answers = distinctAnswers(c);
   const pool = poolIds(c);
   const answered = answers.filter((a) => review.answers[a.hash]).length;
-  const labelled = pool.filter((id) => review.relevance[id]).length;
+  const { labels } = currentLabels(review, recordTexts(c));
+  const labelled = pool.filter((id) => labels.has(id)).length;
   if (review.judgmentHash !== hash(c.judgment) && answered < answers.length) return 'stale';
   return answered === answers.length && labelled === pool.length ? 'reviewed' : 'partial';
 }
@@ -126,11 +188,17 @@ export function summarizeReview(cases: GradedCase[], review: GradingReview) {
   }> = [];
   const confusion: Record<string, Record<ReviewedRelevance, number>> = {};
   let labelled = 0;
+  let staleLabels = 0;
   let labelAgree = 0;
   let relevanceAgree = 0;
   let wrongFacts = 0;
   let facts = 0;
-  const statuses: Record<ReviewStatus, number> = { unreviewed: 0, partial: 0, reviewed: 0, stale: 0 };
+  const statuses: Record<ReviewStatus, number> = {
+    unreviewed: 0,
+    partial: 0,
+    reviewed: 0,
+    stale: 0,
+  };
 
   for (const c of cases) {
     const r = review.cases[c.id];
@@ -140,10 +208,18 @@ export function summarizeReview(cases: GradedCase[], review: GradingReview) {
       const human = r.answers[answer.hash];
       if (!human) continue;
       const judge = c.metrics[answer.modes[0]!].answerCorrect;
-      answerRows.push({ case: c.id, split: c.split, modes: answer.modes, judge, human: human.correct });
+      answerRows.push({
+        case: c.id,
+        split: c.split,
+        modes: answer.modes,
+        judge,
+        human: human.correct,
+      });
     }
     const judged = new Map(c.judgment.relevance.map((j) => [j.id, j.relevance]));
-    for (const [id, human] of Object.entries(r.relevance)) {
+    const { labels, stale } = currentLabels(r, recordTexts(c));
+    staleLabels += stale.length;
+    for (const [id, human] of labels) {
       const judge = judged.get(id) ?? 'unlabelled';
       if (judge === 'unlabelled') continue;
       labelled += 1;
@@ -186,6 +262,8 @@ export function summarizeReview(cases: GradedCase[], review: GradingReview) {
     perMode,
     relevance: {
       labelled,
+      /** Labels whose record text changed since review; they are ignored until relabelled. */
+      stale: staleLabels,
       exactAgreement: labelled ? labelAgree / labelled : null,
       relevantVsIrrelevantAgreement: labelled ? relevanceAgree / labelled : null,
       /** Rows are the judge's label, columns the reviewer's. */
@@ -195,15 +273,166 @@ export function summarizeReview(cases: GradedCase[], review: GradingReview) {
   };
 }
 
-/** Relevance label to trust for one record: the reviewer's when present, else the judge's. */
+/**
+ * Relevance label to trust for one record: the reviewer's when present and not stale, else the
+ * judge's. `texts` is the current record text by id (see `currentLabels`).
+ */
 export function trustedRelevance(
   c: Pick<GradedCase, 'id' | 'judgment'>,
   review: GradingReview,
+  texts: Map<string, string> = new Map(),
 ): Map<string, { label: string; reviewed: boolean }> {
   const out = new Map(
     c.judgment.relevance.map((j) => [j.id, { label: j.relevance as string, reviewed: false }]),
   );
-  for (const [id, label] of Object.entries(review.cases[c.id]?.relevance ?? {}))
+  for (const [id, label] of currentLabels(review.cases[c.id], texts).labels)
     out.set(id, { label, reviewed: true });
   return out;
+}
+
+/** Why a record is in the review queue, in the order the queue serves them. */
+export const QUEUE_BUCKETS = ['dropped_relevant', 'threshold_band', 'new_step', 'sample'] as const;
+export type QueueBucket = (typeof QUEUE_BUCKETS)[number];
+
+export const QUEUE_BUCKET_LABELS: Record<QueueBucket, string> = {
+  dropped_relevant: 'Dropped by the filter, relevant to the judge',
+  threshold_band: 'Near the drop line, or Jev and the judge disagree',
+  new_step: 'Added by the heading or same-heading retrieval steps',
+  sample: 'Random sample of the rest',
+};
+
+/** p(irrelevant) band in which every candidate drop threshold lies. */
+export const THRESHOLD_BAND = [0.6, 0.97] as const;
+/** Share of the remaining records sampled into the queue (by a stable hash). */
+export const SAMPLE_RATE = 1 / 8;
+
+export interface QueueItem {
+  caseId: string;
+  split: string;
+  question: string;
+  recordId: string;
+  bucket: QueueBucket;
+  judge: string;
+  pIrrelevant: number | null;
+  kept: boolean | null;
+  filterReason: string | null;
+  why: string[];
+  required: boolean;
+}
+
+const SPLIT_ORDER = ['development', 'validation', 'held_out'];
+
+/** The bucket a record falls in, or null when reviewing it would barely move the policy. */
+export function queueBucket(input: {
+  caseId: string;
+  recordId: string;
+  judge: string;
+  pIrrelevant: number | null;
+  kept: boolean | null;
+  why: string[];
+}): QueueBucket | null {
+  const judgeRelevant = input.judge !== 'irrelevant';
+  const p = input.pIrrelevant;
+  if (input.kept === false && judgeRelevant) return 'dropped_relevant';
+  if (p !== null) {
+    const inBand = p >= THRESHOLD_BAND[0] && p <= THRESHOLD_BAND[1];
+    const disagree = judgeRelevant ? p >= 0.5 : p < 0.5;
+    if (inBand || disagree) return 'threshold_band';
+  }
+  if (input.why.some((w) => w.startsWith('heading:') || w.startsWith('section:')))
+    return 'new_step';
+  return parseInt(hash(`${input.caseId}:${input.recordId}`).slice(0, 4), 16) / 0x10000 < SAMPLE_RATE
+    ? 'sample'
+    : null;
+}
+
+/**
+ * Records worth a human label, most useful to the filter calibration first. Records with a
+ * current human label are left out. Held-out cases are excluded unless asked for: they are
+ * labelled once, after the policy is chosen.
+ */
+export function recordQueue(
+  cases: GradedCase[],
+  review: GradingReview,
+  options: { includeHeldOut?: boolean } = {},
+): QueueItem[] {
+  const items: QueueItem[] = [];
+  for (const c of cases) {
+    if (c.split === 'held_out' && !options.includeHeldOut) continue;
+    const { labels } = currentLabels(review.cases[c.id], recordTexts(c));
+    const judged = new Map(c.judgment.relevance.map((j) => [j.id, j.relevance as string]));
+    const decisions = new Map((c.filter?.decisions ?? []).map((d) => [d.id, d]));
+    for (const recordId of poolIds(c)) {
+      if (labels.has(recordId)) continue;
+      const decision = decisions.get(recordId);
+      const entry = {
+        caseId: c.id,
+        recordId,
+        judge: judged.get(recordId) ?? 'uncertain',
+        pIrrelevant: decision?.judgment?.probabilities.irrelevant ?? null,
+        kept: decision ? decision.kept : null,
+        why: decision?.why ?? [],
+      };
+      const bucket = queueBucket(entry);
+      if (!bucket) continue;
+      items.push({
+        ...entry,
+        split: c.split,
+        question: c.question,
+        bucket,
+        filterReason: decision?.reason ?? null,
+        required: c.required.includes(recordId),
+      });
+    }
+  }
+  return items.sort(
+    (a, b) =>
+      QUEUE_BUCKETS.indexOf(a.bucket) - QUEUE_BUCKETS.indexOf(b.bucket) ||
+      SPLIT_ORDER.indexOf(a.split) - SPLIT_ORDER.indexOf(b.split) ||
+      (b.pIrrelevant ?? 0) - (a.pIrrelevant ?? 0) ||
+      a.caseId.localeCompare(b.caseId) ||
+      a.recordId.localeCompare(b.recordId),
+  );
+}
+
+/** Calibration targets from the plan: total human labels, and relevant ones Jev doubts. */
+export const LABEL_TARGETS = { total: 300, relevantInBand: 60 } as const;
+
+/** Progress towards `LABEL_TARGETS` over development and validation cases. */
+export function labelProgress(cases: GradedCase[], review: GradingReview) {
+  let total = 0;
+  let relevantInBand = 0;
+  for (const c of cases) {
+    if (c.split === 'held_out') continue;
+    const { labels } = currentLabels(review.cases[c.id], recordTexts(c));
+    const decisions = new Map((c.filter?.decisions ?? []).map((d) => [d.id, d]));
+    for (const [id, label] of labels) {
+      total += 1;
+      const p = decisions.get(id)?.judgment?.probabilities.irrelevant;
+      if (label !== 'irrelevant' && p !== undefined && p >= THRESHOLD_BAND[0]) relevantInBand += 1;
+    }
+  }
+  return { total, relevantInBand, targets: LABEL_TARGETS };
+}
+
+/**
+ * Merge record labels into a case's review without touching its answer verdicts, fact flags or
+ * note. A new review starts with no answers and the current judgment hash.
+ */
+export function mergeRecordLabels(
+  existing: CaseReview | undefined,
+  labels: Record<string, ReviewedRelevance>,
+  texts: Map<string, string>,
+  judgmentHash: string,
+  now = new Date().toISOString(),
+): CaseReview {
+  return {
+    reviewedAt: now,
+    judgmentHash: existing?.judgmentHash ?? judgmentHash,
+    wrongFacts: existing?.wrongFacts ?? [],
+    relevance: { ...existing?.relevance, ...labels },
+    recordHashes: { ...existing?.recordHashes, ...hashLabelledRecords(labels, texts) },
+    answers: existing?.answers ?? {},
+    ...(existing?.note ? { note: existing.note } : {}),
+  };
 }

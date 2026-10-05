@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import type { SystemOneModel } from '../../../../scripts/ask/analysis.ts';
 import type { EvidenceItem } from '../../../../scripts/ask/evidence.ts';
 import { ask, type AskResult } from '../../../../scripts/ask/index.ts';
@@ -8,7 +9,7 @@ import {
 } from '../../../../scripts/ask/models.ts';
 import { checkCitations, type CitationCheck } from '../../../../scripts/ask/prompt.ts';
 import { loadLocalEnv } from '../../../../scripts/decisions/env.ts';
-import { freshDatabasePath } from '../../../../scripts/retrieve/build.ts';
+import { RETRIEVAL_DIR, freshDatabasePath } from '../../../../scripts/retrieve/build.ts';
 import { Retrieval } from '../../../../scripts/retrieve/index.ts';
 import {
   MODES,
@@ -17,12 +18,13 @@ import {
   type RetrievalMode,
   type RetrievalSettings,
 } from '../lib/retrieval-modes.ts';
+import { bundled, dataRoot } from './data-root.ts';
 
 loadLocalEnv();
 
-type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
-const modesMatchAnalyzers: Same<Exclude<RetrievalMode, 'jev_filtered'>, AnalyzerName> = true;
-void modesMatchAnalyzers;
+type Subset<A, B> = [A] extends [B] ? true : false;
+const modesAreAnalyzers: Subset<Exclude<RetrievalMode, 'jev_filtered'>, AnalyzerName> = true;
+void modesAreAnalyzers;
 
 export type { CitationCheck, EvidenceItem };
 
@@ -56,10 +58,17 @@ let retrieval: Retrieval | null = null;
 const analyzers = new Map<AnalyzerName, SystemOneModel | null>();
 let ranker: SystemOneModel | null | undefined;
 
+/**
+ * A data bundle ships the database built from the deployed commit and no corpus, so it is
+ * opened as is. In the repo checkout, a stale or missing database is rebuilt in memory.
+ */
 function openRetrieval(): Retrieval {
   if (!retrieval) {
-    const database = freshDatabasePath();
-    retrieval = database ? Retrieval.open(database) : Retrieval.fromCorpus();
+    if (bundled) retrieval = Retrieval.open(join(dataRoot, RETRIEVAL_DIR, 'retrieval.sqlite'));
+    else {
+      const database = freshDatabasePath();
+      retrieval = database ? Retrieval.open(database) : Retrieval.fromCorpus();
+    }
   }
   return retrieval;
 }

@@ -222,6 +222,17 @@ async function evaluate(label: (typeof labels)[number], index: number) {
       );
       if (!validate(parsed))
         throw new Error(`invalid judge JSON: ${JSON.stringify(validate.errors)}`);
+      // The judge sometimes also labels a required record that retrieval missed. It sees those as
+      // references, not candidates, so the extra label is dropped; gaps and repeats still fail.
+      const referenceOnly = parsed.relevance.filter(
+        (r) => !candidateIds.includes(r.id) && label.requiredEvidence.includes(r.id),
+      );
+      if (referenceOnly.length) {
+        parsed.relevance = parsed.relevance.filter((r) => !referenceOnly.includes(r));
+        console.error(
+          `${label.id}: ignored judge labels for reference-only records ${referenceOnly.map((r) => r.id).join(', ')}`,
+        );
+      }
       validateJudgmentCoverage(parsed, candidateIds, sourceIds, names);
       judgment = parsed;
     } catch (error) {

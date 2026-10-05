@@ -62,16 +62,17 @@ function withEnv(env: Record<string, string | undefined>, run: () => void) {
   }
 }
 
-test('the default is filtered Jev with a key, lexical without, and LOD_ANALYZER wins when usable', () => {
-  assert.equal(defaultMode(undefined, true), 'jev_filtered');
+test('the default is unfiltered Jev with a key, lexical without, and LOD_ANALYZER wins when usable', () => {
+  assert.equal(defaultMode(undefined, true), 'jev');
   assert.equal(defaultMode(undefined, false), 'lexical');
-  assert.equal(defaultMode('bogus', true), 'jev_filtered');
-  assert.equal(defaultMode('jev', true), 'jev');
+  assert.equal(defaultMode('bogus', true), 'jev');
+  assert.equal(defaultMode('jev_filtered', true), 'jev_filtered');
   assert.equal(defaultMode('jev_filtered', false), 'lexical');
-  assert.equal(defaultMode('laya', false), 'laya');
+  assert.equal(defaultMode('lexical', true), 'lexical');
+  assert.equal(defaultMode('laya', false), 'lexical');
 
   withEnv({ TYPESAFE_API_KEY: 'test-key', LOD_ANALYZER: undefined }, () =>
-    assert.deepEqual(getRetrievalSettings(), { defaultMode: 'jev_filtered', jevAvailable: true }),
+    assert.deepEqual(getRetrievalSettings(), { defaultMode: 'jev', jevAvailable: true }),
   );
   withEnv({ TYPESAFE_API_KEY: undefined, LOD_ANALYZER: 'jev_filtered' }, () =>
     assert.deepEqual(getRetrievalSettings(), { defaultMode: 'lexical', jevAvailable: false }),

@@ -28,6 +28,14 @@ npm test
 Needs Node 22.5+ (`node:sqlite` on the server). Env: see [.env.example](.env.example) and
 [README.md](README.md).
 
+## Deployment
+
+Vercel, through Nitro (`nitro/vite` in [vite.config.ts](vite.config.ts)). Server code reads
+data through `dataRoot` from `src/server/data-root.ts`, never `repoRoot`: the deployed server
+reads a data bundle (`build/bundle-data.ts`) instead of the checkout. A new file the server
+reads at runtime must be added to that bundle. Laya is shelved here; keep onnxruntime out of
+the server build. See [README.md](README.md#deploying-to-vercel).
+
 ## Stack
 
 TanStack Start, `@tanstack/ai`, `@tanstack/ai-openai`, `@tanstack/ai-react`, TanStack Query.
