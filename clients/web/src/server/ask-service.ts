@@ -1,15 +1,19 @@
 import type { SystemOneModel } from '../../../../scripts/ask/analysis.ts';
 import type { EvidenceItem } from '../../../../scripts/ask/evidence.ts';
 import { ask, type AskResult } from '../../../../scripts/ask/index.ts';
-import { analyzerModel as createAnalyzer, type AnalyzerName } from '../../../../scripts/ask/models.ts';
+import {
+  analyzerModel as createAnalyzer,
+  jevModel,
+  type AnalyzerName,
+} from '../../../../scripts/ask/models.ts';
 import { checkCitations, type CitationCheck } from '../../../../scripts/ask/prompt.ts';
 import { loadLocalEnv } from '../../../../scripts/decisions/env.ts';
 import { freshDatabasePath } from '../../../../scripts/retrieve/build.ts';
 import { Retrieval } from '../../../../scripts/retrieve/index.ts';
 import {
   MODES,
+  defaultMode,
   isModeAvailable,
-  isRetrievalMode,
   type RetrievalMode,
   type RetrievalSettings,
 } from '../lib/retrieval-modes.ts';
@@ -17,10 +21,18 @@ import {
 loadLocalEnv();
 
 type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
-const modesMatchAnalyzers: Same<RetrievalMode, AnalyzerName> = true;
+const modesMatchAnalyzers: Same<Exclude<RetrievalMode, 'jev_filtered'>, AnalyzerName> = true;
 void modesMatchAnalyzers;
 
 export type { CitationCheck, EvidenceItem };
+
+export interface FilterSummary {
+  policy: string;
+  ranker: string;
+  fallback?: string;
+  /** Records Jev removed, in retrieval order. */
+  dropped: Array<{ id: string; sources: string[]; pIrrelevant: number | null; reason: string }>;
+}
 
 export interface AskSummary {
   question: string;
@@ -30,6 +42,7 @@ export interface AskSummary {
   intent: string;
   complexity: string;
   evidence: EvidenceItem[];
+  filter?: FilterSummary;
 }
 
 export class ModeUnavailableError extends Error {
@@ -40,7 +53,8 @@ export class ModeUnavailableError extends Error {
 }
 
 let retrieval: Retrieval | null = null;
-const models = new Map<RetrievalMode, SystemOneModel | null>();
+const analyzers = new Map<AnalyzerName, SystemOneModel | null>();
+let ranker: SystemOneModel | null | undefined;
 
 function openRetrieval(): Retrieval {
   if (!retrieval) {
@@ -50,19 +64,24 @@ function openRetrieval(): Retrieval {
   return retrieval;
 }
 
-function analyzerModel(mode: RetrievalMode): SystemOneModel | null {
-  if (!models.has(mode)) models.set(mode, createAnalyzer(mode));
-  return models.get(mode) ?? null;
+function analyzerModel(name: AnalyzerName): SystemOneModel | null {
+  if (!analyzers.has(name)) analyzers.set(name, createAnalyzer(name));
+  return analyzers.get(name) ?? null;
+}
+
+/** The `ask()` options a mode runs with. */
+export function askOptions(mode: RetrievalMode): Parameters<typeof ask>[2] {
+  const info = MODES[mode];
+  if (info.filter && ranker === undefined) ranker = jevModel();
+  return {
+    model: analyzerModel(info.analyzer),
+    filter: info.filter && ranker ? { ranker } : null,
+  };
 }
 
 export function getRetrievalSettings(): RetrievalSettings {
   const jevAvailable = Boolean(process.env.TYPESAFE_API_KEY?.trim());
-  const configured = process.env.LOD_ANALYZER?.trim();
-  const defaultMode =
-    isRetrievalMode(configured) && isModeAvailable(configured, { defaultMode: 'lexical', jevAvailable })
-      ? configured
-      : 'lexical';
-  return { defaultMode, jevAvailable };
+  return { defaultMode: defaultMode(process.env.LOD_ANALYZER?.trim(), jevAvailable), jevAvailable };
 }
 
 export function assertModeAvailable(mode: RetrievalMode): void {
@@ -83,15 +102,15 @@ export function getAskResult(question: string, mode: RetrievalMode): Promise<Ask
     cache.set(key, hit);
     return hit;
   }
-  const pending = ask(openRetrieval(), trimmed, { model: analyzerModel(mode) });
+  const pending = ask(openRetrieval(), trimmed, askOptions(mode));
   pending.catch(() => cache.delete(key));
   cache.set(key, pending);
   if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value!);
   return pending;
 }
 
-export async function getAskSummary(question: string, mode: RetrievalMode): Promise<AskSummary> {
-  const { analysis, evidence } = await getAskResult(question, mode);
+export function summarize(result: AskResult, mode: RetrievalMode): AskSummary {
+  const { analysis, evidence, filter } = result;
   return {
     question: analysis.question,
     mode,
@@ -100,7 +119,28 @@ export async function getAskSummary(question: string, mode: RetrievalMode): Prom
     intent: analysis.intent.value,
     complexity: analysis.complexity.value,
     evidence,
+    ...(filter
+      ? {
+          filter: {
+            policy: filter.policy.id,
+            ranker: filter.ranker,
+            ...(filter.fallback ? { fallback: filter.fallback } : {}),
+            dropped: filter.decisions
+              .filter((d) => !d.kept)
+              .map((d) => ({
+                id: d.id,
+                sources: d.sources,
+                pIrrelevant: d.judgment?.probabilities.irrelevant ?? null,
+                reason: d.reason,
+              })),
+          },
+        }
+      : {}),
   };
+}
+
+export async function getAskSummary(question: string, mode: RetrievalMode): Promise<AskSummary> {
+  return summarize(await getAskResult(question, mode), mode);
 }
 
 export async function checkAnswer(

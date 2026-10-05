@@ -40,6 +40,33 @@ export function EvidencePanel({
           <span className="notice-detail">{summary.fallback}</span>
         </div>
       )}
+      {info.filter && !summary.fallback && !summary.filter && (
+        <div className="notice" role="status">
+          The relevance filter did not run; showing unfiltered results.
+        </div>
+      )}
+      {summary.filter?.fallback && (
+        <div className="notice" role="status">
+          Jev could not judge the records; showing unfiltered results.
+          <span className="notice-detail">{summary.filter.fallback}</span>
+        </div>
+      )}
+      {summary.filter && summary.filter.dropped.length > 0 && (
+        <details className="meta">
+          <summary>
+            Jev dropped {summary.filter.dropped.length} record
+            {summary.filter.dropped.length === 1 ? '' : 's'} as irrelevant ({summary.filter.policy})
+          </summary>
+          <ul>
+            {summary.filter.dropped.map((d) => (
+              <li key={d.id}>
+                <code>{d.id}</code> · {d.sources.join(' + ')}
+                {d.pIrrelevant !== null && <> · irrelevant {Math.round(d.pIrrelevant * 100)}%</>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
       {summary.evidence.map((item) => {
         const pages = citedPages(item);
         return (

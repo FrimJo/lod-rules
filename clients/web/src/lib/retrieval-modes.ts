@@ -1,10 +1,19 @@
-/** Mirrors `ANALYZERS` in scripts/ask/models.ts; ask-service.ts checks the two stay equal. */
-export const RETRIEVAL_MODES = ['lexical', 'laya', 'jev', 'cascade'] as const;
+import type { AnalyzerName } from '../../../../scripts/ask/models.ts';
+
+/**
+ * One mode per `ANALYZERS` entry in scripts/ask/models.ts (ask-service.ts checks this), plus
+ * `jev_filtered`: the Jev union after Jev drops records it judges irrelevant.
+ */
+export const RETRIEVAL_MODES = ['jev_filtered', 'jev', 'lexical', 'laya', 'cascade'] as const;
 export type RetrievalMode = (typeof RETRIEVAL_MODES)[number];
 
 export interface RetrievalModeInfo {
   id: RetrievalMode;
   label: string;
+  /** Question analyzer passed to `ask()`. */
+  analyzer: AnalyzerName;
+  /** Whether Jev's relevance filter runs over the retrieved records. */
+  filter: boolean;
   /** Models the mode adds to lexical search, as named in a fallback notice. */
   models: string | null;
   description: string;
@@ -13,9 +22,32 @@ export interface RetrievalModeInfo {
 }
 
 export const MODES: Record<RetrievalMode, RetrievalModeInfo> = {
+  jev_filtered: {
+    id: 'jev_filtered',
+    label: 'Lexical + Jev, filtered',
+    analyzer: 'jev',
+    filter: true,
+    models: 'Jev',
+    description:
+      'Adds records chosen by Jev, then lets Jev drop records it judges irrelevant, keyword matches included.',
+    needsJev: true,
+    tags: ['Cloud', 'Model', 'Filter'],
+  },
+  jev: {
+    id: 'jev',
+    label: 'Lexical + Jev',
+    analyzer: 'jev',
+    filter: false,
+    models: 'Jev',
+    description: 'Adds records chosen by the TypeSafe Jev model.',
+    needsJev: true,
+    tags: ['Cloud', 'Model'],
+  },
   lexical: {
     id: 'lexical',
     label: 'Lexical only',
+    analyzer: 'lexical',
+    filter: false,
     models: null,
     description: 'Searches the rulebook index by keywords. Fast and needs no model.',
     needsJev: false,
@@ -24,23 +56,19 @@ export const MODES: Record<RetrievalMode, RetrievalModeInfo> = {
   laya: {
     id: 'laya',
     label: 'Lexical + Laya',
+    analyzer: 'laya',
+    filter: false,
     models: 'Laya',
     description:
       'Adds records chosen by the local Laya model. The first question can be slow while it loads.',
     needsJev: false,
     tags: ['Local', 'Model'],
   },
-  jev: {
-    id: 'jev',
-    label: 'Lexical + Jev',
-    models: 'Jev',
-    description: 'Adds records chosen by the TypeSafe Jev model.',
-    needsJev: true,
-    tags: ['Cloud', 'Model'],
-  },
   cascade: {
     id: 'cascade',
     label: 'Lexical + Laya + Jev',
+    analyzer: 'cascade',
+    filter: false,
     models: 'Laya + Jev',
     description: 'Laya answers first, and Jev re-answers only what Laya was unsure about.',
     needsJev: true,
@@ -59,4 +87,11 @@ export function isRetrievalMode(value: unknown): value is RetrievalMode {
 
 export function isModeAvailable(mode: RetrievalMode, settings: RetrievalSettings): boolean {
   return !MODES[mode].needsJev || settings.jevAvailable;
+}
+
+/** `LOD_ANALYZER` when it names an available mode, else filtered Jev with a key, else lexical. */
+export function defaultMode(configured: string | undefined, jevAvailable: boolean): RetrievalMode {
+  const settings = { defaultMode: 'lexical' as const, jevAvailable };
+  if (isRetrievalMode(configured) && isModeAvailable(configured, settings)) return configured;
+  return jevAvailable ? 'jev_filtered' : 'lexical';
 }
