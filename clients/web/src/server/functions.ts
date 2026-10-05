@@ -7,6 +7,7 @@ import {
   saveGradingReview,
   type CaseReview,
 } from './grading.ts';
+import { llmApiKey, llmModel } from './llm.ts';
 import { getRulebookIndex, loadSource } from './rulebook.ts';
 
 function retrievalMode(mode: unknown): RetrievalMode {
@@ -20,6 +21,17 @@ export const getRulebook = createServerFn({ method: 'GET' }).handler(() => {
 });
 
 export const getRetrievalSettings = createServerFn({ method: 'GET' }).handler(() => settings());
+
+export interface AnswerSettings {
+  /** Whether the server can send evidence to an LLM at all. */
+  available: boolean;
+  /** OpenRouter model id the answer would come from. */
+  model: string;
+}
+
+export const getAnswerSettings = createServerFn({ method: 'GET' }).handler(
+  (): AnswerSettings => ({ available: Boolean(llmApiKey()), model: llmModel() }),
+);
 
 export const getEvidence = createServerFn({ method: 'POST' })
   .validator((data: { question: string; mode: RetrievalMode }) => ({

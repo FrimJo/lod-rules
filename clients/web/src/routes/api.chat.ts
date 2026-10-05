@@ -33,7 +33,7 @@ export const Route = createFileRoute('/api/chat')({
           return new Response(`Unknown retrieval mode: ${String(mode)}`, { status: 400 });
         }
         if (!llmApiKey()) {
-          return new Response('OPENAI_ROUTER_API_KEY is not set on the server', { status: 500 });
+          return new Response('OPENAI_ROUTER_API_KEY is not set on the server', { status: 503 });
         }
 
         let prompt: string;
