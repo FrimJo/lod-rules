@@ -1,7 +1,8 @@
 # AGENTS.md (web client)
 
 TanStack Start (Vite) rules Q&A consumer. It calls the root `scripts/ask` pipeline on the
-server and streams the final answer from an OpenRouter model. It is **not** part of the canonical corpus.
+server and shows the evidence first; an OpenRouter model writes an answer only when the reader
+asks for one (or opts into automatic answers). It is **not** part of the canonical corpus.
 
 ## Boundaries
 
