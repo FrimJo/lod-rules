@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ApiChatRouteImport } from './routes/api.chat'
 import { Route as ApiRulebookRouteImport } from './routes/api.rulebook'
 import { Route as ApiPdfFontsFileRouteImport } from './routes/api.pdf-fonts.$file'
@@ -19,6 +20,11 @@ import { Route as ApiSourcesDocumentRouteImport } from './routes/api.sources.$do
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -49,6 +55,7 @@ const ApiSourcesDocumentRoute = ApiSourcesDocumentRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
   '/api/pdf-fonts/$file': typeof ApiPdfFontsFileRoute
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/review'
     | '/api/chat'
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/review'
     | '/api/chat'
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/review'
     | '/api/chat'
     | '/api/rulebook'
     | '/api/pdf-fonts/$file'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReviewRoute: typeof ReviewRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiRulebookRoute: typeof ApiRulebookRoute
   ApiPdfFontsFileRoute: typeof ApiPdfFontsFileRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -157,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReviewRoute: ReviewRoute,
   ApiChatRoute: ApiChatRoute,
   ApiRulebookRoute: ApiRulebookRoute,
   ApiPdfFontsFileRoute: ApiPdfFontsFileRoute,

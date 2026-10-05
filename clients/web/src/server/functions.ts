@@ -1,6 +1,12 @@
 import { createServerFn } from '@tanstack/react-start';
 import { isRetrievalMode, type RetrievalMode } from '../lib/retrieval-modes.ts';
 import { checkAnswer as check, getAskSummary, getRetrievalSettings as settings } from './ask-service.ts';
+import {
+  getGradedCase as gradedCase,
+  listGradedCases,
+  saveGradingReview,
+  type CaseReview,
+} from './grading.ts';
 import { getRulebookIndex, loadSource } from './rulebook.ts';
 
 function retrievalMode(mode: unknown): RetrievalMode {
@@ -29,3 +35,20 @@ export const checkAnswer = createServerFn({ method: 'POST' })
     mode: retrievalMode(data.mode),
   }))
   .handler(({ data }) => check(data.question, data.answer, data.mode));
+
+export const getGradedCases = createServerFn({ method: 'GET' }).handler(() => listGradedCases());
+
+export const getGradedCase = createServerFn({ method: 'GET' })
+  .validator((id: string) => {
+    if (typeof id !== 'string' || !/^askq\.[a-z0-9_.]+$/.test(id))
+      throw new Error(`Invalid case id: ${String(id)}`);
+    return id;
+  })
+  .handler(({ data }) => gradedCase(data));
+
+export const saveReview = createServerFn({ method: 'POST' })
+  .validator((data: { id: string; review: Omit<CaseReview, 'reviewedAt'> }) => {
+    if (!/^askq\.[a-z0-9_.]+$/.test(data.id)) throw new Error(`Invalid case id: ${data.id}`);
+    return data;
+  })
+  .handler(({ data }) => saveGradingReview(data.id, data.review));
