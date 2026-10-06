@@ -80,6 +80,12 @@ questions in a browser. It runs the same `ask()` pipeline on the server, streams
 answer from an OpenRouter model, and shows the evidence and citation check. It is a consumer with its own
 `package.json` and is excluded from the root checks.
 
+[clients/mcp/](clients/mcp/README.md) is a read-only MCP server. It gives Claude agents
+rulebook tools (`lod_search`, `lod_get`, `lod_resolve`, `lod_expand`) that return rulebook
+content only,
+for example while they build the helper app in another repository. It is registered for
+this repository in `.mcp.json`.
+
 ## Layout
 
 ```text

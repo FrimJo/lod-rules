@@ -60,32 +60,62 @@ or quest filter is given. Review issues are excluded by default; request them wi
 
 ## Wiring an LLM client
 
-Expose the library (`scripts/retrieve/index.ts`, class `Retrieval`) to the model as
-tools in the consuming client:
+`scripts/retrieve/tools.ts` turns the library into agent tools for consumers, such as agents
+building the helper app. `RETRIEVAL_TOOLS` holds one definition per tool (`name`,
+`description`, `input_schema` as JSON Schema), the shape the Claude Messages API takes in
+`tools`. `runRetrievalTool(retrieval, name, input)` validates a call, runs it, and projects
+the result. The module has no LLM client; the consuming app owns the model loop.
 
-| Tool                     | Library call                                                  |
-| ------------------------ | ------------------------------------------------------------- |
-| `search(query, filters)` | `search(query, { kinds, scope, questId, limit })`             |
-| `get(id)`                | `get(id)`, which returns the full canonical record and tables |
-| `resolve(name)`          | `resolve(name)`                                               |
-| `expand(id, direction)`  | `expand(id, { direction, relations, depth })`                 |
-| `issues(id)`             | `issues(id)`                                                  |
+| Tool          | Input                                              | Returns                                                          |
+| ------------- | -------------------------------------------------- | ---------------------------------------------------------------- |
+| `lod_search`  | `query`, `kinds?`, `scope?`, `quest_id?`, `limit?` | Ranked summaries: id, title, scope, quest, citations, snippet    |
+| `lod_get`     | `id`                                               | Verbatim text, citations, links, external books, structured data |
+| `lod_resolve` | `name`                                             | Summaries of records with that exact name or abbreviation        |
+| `lod_expand`  | `id`, `direction?`, `relations?`, `depth?`         | Typed links to other records                                     |
 
-A client in another language can query `retrieval.sqlite` directly.
+The tools return rulebook content only. They drop review issues (records, ids and links),
+`review_status`, extraction method and confidence, `completeness`, locators, file paths,
+unresolved pointers and ranking scores. Tables in `lod_get` and search snippets are rendered
+from printed cells and footnotes, because a table's `source_text` is sometimes a curator note.
+Consumer prompts therefore never carry corpus bookkeeping. Maintainers use the library or
+`npm run retrieve -- search|get|issues` for the full documents.
 
-Instructions that keep answers grounded:
+```ts
+import { Retrieval } from './scripts/retrieve/index.ts';
+import { RETRIEVAL_TOOLS, ToolInputError, runRetrievalTool } from './scripts/retrieve/tools.ts';
 
-- Search before stating any rule. Call `get` before quoting numbers or table rows.
-- Rephrase with rulebook vocabulary when a search misses ("poison cure" rather than
-  "recover from poison"). Search is lexical, not semantic.
-- Cite record ids and PDF/printed pages for every claim.
-- If a result has `scope: quest`, say which quest it applies to and do not generalise it.
-- Report `issue_ids` and `external_dependencies`. "The rulebook does not define this"
-  and "that is in the Bestiary, which is not available" are correct answers.
-- Treat `review_status: extracted` as unreviewed. No section is independently reviewed yet.
+const retrieval = Retrieval.open('generated/retrieval/retrieval.sqlite');
+// Pass `tools: RETRIEVAL_TOOLS` to the model. For each tool_use block, answer with a tool_result:
+try {
+  content = JSON.stringify(runRetrievalTool(retrieval, block.name, block.input));
+} catch (error) {
+  if (!(error instanceof ToolInputError)) throw error;
+  content = error.message; // send with is_error: true
+}
+```
 
-Coverage is partial (see the [coverage report](coverage-report.md)). A missing result
-can mean the section has not been extracted yet.
+`runRetrievalTool` throws `ToolInputError` for an unknown tool or bad input. A missing id
+is a normal result (`{ found: false, hint }`).
+
+Clients in other languages can use the CLI:
+
+```bash
+npm run retrieve -- tools                                    # tool definitions as JSON
+npm run retrieve -- call lod_search '{"query":"locked door","limit":5}'
+```
+
+The tool descriptions carry the usage guidance an agent needs. Search matches words, so
+rephrase in rulebook vocabulary. Read a record before relying on it, and keep quest-scoped
+records inside their quest. A consumer that adds its own system prompt should keep it to
+rulebook use. Typical additions are citing PDF/printed pages, and saying when the rulebook
+does not define something or defers to a book that is not available.
+
+### Maintainer notes
+
+Full search documents carry `issue_ids` and `review_status`. `review_status: extracted`
+means unreviewed; no section is independently reviewed yet. Coverage is partial (see the
+[coverage report](coverage-report.md)), so a missing result can mean the section has not been
+extracted yet.
 
 ## Ask pipeline
 

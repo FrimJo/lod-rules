@@ -5,11 +5,28 @@ into a machine-readable corpus. Treat it as a compiler: the PDF is source, YAML 
 `corpus/` is the IR, schemas and tests are the checks, and `generated/` is build output.
 
 There is no application, UI, API server, or game runtime here. Do not introduce one.
-Consumers read the corpus; they are not part of it. The one exception is `clients/web/`, a
-self-contained TanStack Start consumer that answers rules questions through `scripts/ask`.
-It has its own `package.json` and checks, never writes to `corpus/`, and is excluded from
-the root gate. Do not add app code anywhere else. For web-only work, see
-[clients/web/AGENTS.md](clients/web/AGENTS.md).
+Consumers read the corpus; they are not part of it. There are two exceptions, both
+self-contained consumers under `clients/` with their own `package.json` and checks. Neither
+writes to `corpus/`, and both are excluded from the root gate:
+
+- `clients/web/`: a TanStack Start app that answers rules questions through `scripts/ask`.
+  See [clients/web/AGENTS.md](clients/web/AGENTS.md).
+- `clients/mcp/`: a read-only stdio MCP server that publishes the retrieval tools to Claude
+  agents, including agents building the LoD helper app in another repository. See
+  [clients/mcp/AGENTS.md](clients/mcp/AGENTS.md).
+
+Do not add app code anywhere else. The helper app itself lives outside this repository.
+
+## Looking up rules
+
+To answer a rules question, use the `lod-rules` MCP tools (`lod_search`, `lod_resolve`,
+`lod_get`, `lod_expand`) instead of grepping or reading YAML. They are registered in
+`.mcp.json`; first run `npm install --prefix clients/mcp`. The same tools are available from
+the CLI as `npm run retrieve -- call <tool> '<json>'`.
+
+These tools return rulebook content only. They hide review issues, extraction status, YAML
+paths and coverage. For corpus work, use `npm run retrieve -- search|get|issues`, which show
+all of it, and treat the YAML and the PDF as authoritative.
 
 There is no `convex/` backend in this repository. Ignore Convex-oriented guidance unless
 you are explicitly adding a Convex project elsewhere.
@@ -44,6 +61,8 @@ npx tsx scripts/extract/inspect-pdf.ts   # dumps PDF text to generated/extract/
 npm run decisions -- evaluate --provider structural
 npm run retrieve -- search "query" # early Phase 12 retrieval; see docs/retrieval.md
 npm run retrieve -- build # generated/retrieval/ (not build:corpus)
+npm run retrieve -- tools # agent tool definitions (lod_search, …) as JSON
+npm run retrieve -- call lod_search '{"query":"locked door"}' # run one tool call
 npm run ask -- "question" --analyzer laya # analysis → evidence → grounded prompt; LLM injected
 npm run ask:evaluate # labelled questions: lexical vs Laya vs Jev vs Laya→Jev cascade
 ```
@@ -56,6 +75,13 @@ that pool, lexical ones included; `tests/ask/ranking.test.ts` covers it and
 [docs/ask-quality-evaluation.md](docs/ask-quality-evaluation.md) records its calibration.
 It never writes judgments into the corpus. The only
 LLM client is the consumer in `clients/web/`; `scripts/` stays LLM-client-free.
+
+Agent tool definitions live in `scripts/retrieve/tools.ts`: names, descriptions, JSON Schema
+inputs, validation and the output projection. The MCP server, the CLI and direct API clients
+all use that file. Change a tool there, never in a consumer. These tools serve agents that
+consume the rules, such as those building the helper app. Their descriptions and results
+carry rulebook content only, never corpus bookkeeping (review issues, extraction status,
+confidence, file paths, coverage). `tests/retrieve/tools.test.ts` checks every record.
 
 `npm run build:corpus` is a stub until Phase 11. Do not invent its outputs.
 
@@ -84,17 +110,18 @@ rulings" in the extraction guide.
 
 ## Layout
 
-| Path           | Role                                                  | Hand-edit?             |
-| -------------- | ----------------------------------------------------- | ---------------------- |
-| `source/`      | Canonical PDF + [manifest.yaml](source/manifest.yaml) | Add/replace only       |
-| `corpus/`      | Canonical YAML (the IR)                               | Yes, reviewed          |
-| `schemas/`     | JSON Schema for that YAML                             | Yes                    |
-| `review/`      | Ambiguities, conflicts, open questions                | Yes                    |
-| `scripts/`     | Validate, inspect, report, (later) build              | Yes                    |
-| `tests/`       | Schema, integrity, rule and procedure fixtures        | Yes                    |
-| `docs/`        | Conventions. `coverage-report.md` is generated        | Yes, except the report |
-| `generated/`   | Build and extract dumps, gitignored                   | **Never**              |
-| `clients/web/` | Rules Q&A web client over `scripts/ask` (consumer)    | Yes, own checks        |
+| Path           | Role                                                   | Hand-edit?             |
+| -------------- | ------------------------------------------------------ | ---------------------- |
+| `source/`      | Canonical PDF + [manifest.yaml](source/manifest.yaml)  | Add/replace only       |
+| `corpus/`      | Canonical YAML (the IR)                                | Yes, reviewed          |
+| `schemas/`     | JSON Schema for that YAML                              | Yes                    |
+| `review/`      | Ambiguities, conflicts, open questions                 | Yes                    |
+| `scripts/`     | Validate, inspect, report, (later) build               | Yes                    |
+| `tests/`       | Schema, integrity, rule and procedure fixtures         | Yes                    |
+| `docs/`        | Conventions. `coverage-report.md` is generated         | Yes, except the report |
+| `generated/`   | Build and extract dumps, gitignored                    | **Never**              |
+| `clients/web/` | Rules Q&A web client over `scripts/ask` (consumer)     | Yes, own checks        |
+| `clients/mcp/` | MCP server over `scripts/retrieve/tools.ts` (consumer) | Yes, own checks        |
 
 `docs/coverage-report.md` is generated from `corpus/source-map/`. Fix the YAML, then
 rebuild the report. Never patch the markdown.
@@ -131,7 +158,8 @@ rebuild the report. Never patch the markdown.
   `generated/decisions/`.
 - Claim a section `extracted` or `reviewed` without coverage evidence.
 - Apply Convex, React, Next.js, or app-backend patterns repo-wide. Root work is YAML +
-  Node TypeScript tooling. React/TanStack belongs only under `clients/web/`.
+  Node TypeScript tooling. React/TanStack belongs only under `clients/web/`; MCP SDK code
+  only under `clients/mcp/`.
 
 ## Extraction workflow
 
