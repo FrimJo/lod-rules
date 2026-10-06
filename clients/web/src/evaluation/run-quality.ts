@@ -15,7 +15,7 @@ import { loadLabels } from '../../../../scripts/ask/labels.ts';
 import { jevModel } from '../../../../scripts/ask/models.ts';
 import { buildPrompt, checkCitations } from '../../../../scripts/ask/prompt.ts';
 import {
-  PROVISIONAL_FILTER,
+  CALIBRATED_FILTER,
   filterEvidence,
   type FilterPolicy,
 } from '../../../../scripts/ask/ranking.ts';
@@ -65,12 +65,12 @@ if (!modes.length || modes.some((m) => !(MODES as readonly string[]).includes(m)
 const selected = MODES.filter((m) => modes.includes(m));
 const policy: FilterPolicy =
   values['drop-at'] === undefined && !values.cap
-    ? PROVISIONAL_FILTER
+    ? CALIBRATED_FILTER
     : {
-        ...PROVISIONAL_FILTER,
-        id: `${PROVISIONAL_FILTER.id}+override`,
-        dropIrrelevantAt: Number(values['drop-at'] ?? PROVISIONAL_FILTER.dropIrrelevantAt),
-        cap: values.cap ?? PROVISIONAL_FILTER.cap,
+        ...CALIBRATED_FILTER,
+        id: `${CALIBRATED_FILTER.id}+override`,
+        dropIrrelevantAt: Number(values['drop-at'] ?? CALIBRATED_FILTER.dropIrrelevantAt),
+        cap: values.cap ?? CALIBRATED_FILTER.cap,
       };
 if (!(policy.dropIrrelevantAt > 0 && policy.dropIrrelevantAt <= 1))
   throw new Error('--drop-at must be in (0, 1]');

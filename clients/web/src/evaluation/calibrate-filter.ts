@@ -224,6 +224,8 @@ const show = (title: string, entry: (typeof sweep)[number]) => {
 };
 const provisional = sweep.find((e) => e.policy.id === 'sweep-0.9-noexact');
 if (provisional) show('provisional-1 equivalent', provisional);
+const calibrated = sweep.find((e) => e.policy.id === 'sweep-0.95-noexact-kinds@0.99');
+if (calibrated) show('calibrated-1 equivalent', calibrated);
 if (chosen) show('Chosen', chosen);
 else console.log(`\nNo policy is eligible on ${TUNE_SPLITS.join(' + ')}.`);
 console.log(

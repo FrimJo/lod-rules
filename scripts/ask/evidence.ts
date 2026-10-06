@@ -131,6 +131,8 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Pic
 
   // Exact name matches are strong evidence; model-picked entities wait until after search.
   for (const entity of entities.values()) if (entity.via === 'alias') addEntity(entity);
+  // A model-picked table often shares no words with the question, so search would not reach it.
+  for (const id of analysis.tables) add(id, 'table:model');
 
   if (systems.length > 0) {
     const chapters = [...new Set(systems.flatMap((id) => SYSTEMS[id].chapters))];
@@ -193,9 +195,12 @@ function pick(retrieval: Retrieval, analysis: QuestionAnalysis): Map<string, Pic
     }
   }
 
-  // Exact names and structural records ride on top of the budget rather than crowd out search.
+  // Exact names, model-picked tables and structural records ride on top of the budget rather than crowd out search.
   const cap =
-    budget.limit + structural + [...entities.values()].filter((e) => e.via === 'alias').length;
+    budget.limit +
+    structural +
+    analysis.tables.length +
+    [...entities.values()].filter((e) => e.via === 'alias').length;
   return new Map([...picked.entries()].slice(0, cap));
 }
 

@@ -145,6 +145,11 @@ export interface QuestionAnalysis {
   /** Every system with its yes-probability, highest first. */
   systems: Array<{ id: SystemId; probabilityYes: number }>;
   entities: EntityRef[];
+  /**
+   * Table ids the model judged would answer the question. Lexical analysis leaves this empty;
+   * it exists for questions that describe a table's result in other words ("where a hit lands").
+   */
+  tables: string[];
   complexity: { value: ComplexityId; probabilities: Record<string, number> };
   /** Set when the model failed and the lexical analyzer answered instead. */
   fallback?: string;
@@ -258,11 +263,18 @@ export function lexicalAnalysis(retrieval: Retrieval, question: string): Questio
     intent: { value: intent, probabilities: { [intent]: 1 } },
     systems,
     entities,
+    tables: [],
     complexity: { value: complexity, probabilities: { [complexity]: 1 } },
   };
 }
 
-/** Asks intent, systems, primary entity and complexity of a Laya or Jev model in one call. */
+/** Tables offered to the model; the right one usually ranks in the top few among tables. */
+const TABLE_OPTIONS = 8;
+
+/**
+ * Asks intent, systems, primary entity, answering table and complexity of a Laya or Jev
+ * model in one call.
+ */
 export async function modelAnalysis(
   retrieval: Retrieval,
   model: SystemOneModel,
@@ -287,6 +299,16 @@ export async function modelAnalysis(
   entityCriteria.no_match =
     'The question does not depend on any one of these specific game elements';
 
+  const tableOptions = retrieval
+    .search(question, { kinds: ['table'], limit: TABLE_OPTIONS })
+    .map((hit) => retrieval.document(hit.id))
+    .filter((doc): doc is SearchDocument => doc !== undefined);
+  const tableCriteria: Record<string, string> = {};
+  tableOptions.forEach((doc, index) => {
+    tableCriteria[`t${index}`] = doc.context ? `${doc.title} (${doc.context})` : doc.title;
+  });
+  tableCriteria.no_match = 'None of these tables gives the answer';
+
   const questions: Record<string, ModelQuestion> = {
     intent: {
       type: 'choice',
@@ -302,6 +324,11 @@ export async function modelAnalysis(
       type: 'choice',
       instructions: 'Which specific named game element is the question about?',
       criteria: entityCriteria,
+    },
+    table: {
+      type: 'choice',
+      instructions: 'Which rulebook table would a game master look up to answer the question?',
+      criteria: tableCriteria,
     },
   };
   for (const [id, system] of Object.entries(SYSTEMS)) {
@@ -320,13 +347,15 @@ export async function modelAnalysis(
   const intent = choiceAnswer(answers.intent, Object.keys(INTENTS) as IntentId[]);
   const complexity = choiceAnswer(answers.complexity, Object.keys(COMPLEXITY) as ComplexityId[]);
   const entity = choiceAnswer(answers.entity, Object.keys(entityCriteria));
+  const table = choiceAnswer(answers.table, Object.keys(tableCriteria));
   const systems: QuestionAnalysis['systems'] = [];
   for (const id of Object.keys(SYSTEMS) as SystemId[]) {
     const probability = noulAnswer(answers[`system_${id}`]);
     if (probability === null) throw new Error(`${model.id}: system_${id} answer is malformed`);
     systems.push({ id, probabilityYes: probability });
   }
-  if (!intent || !complexity || !entity) throw new Error(`${model.id}: choice answer is malformed`);
+  if (!intent || !complexity || !entity || !table)
+    throw new Error(`${model.id}: choice answer is malformed`);
   systems.sort((a, b) => b.probabilityYes - a.probabilityYes || a.id.localeCompare(b.id, 'en'));
 
   const entities = [...aliasMatches];
@@ -337,6 +366,12 @@ export async function modelAnalysis(
     }
   }
 
+  const tables: string[] = [];
+  if (table.value !== 'no_match') {
+    const doc = tableOptions[Number(table.value.slice(1))];
+    if (doc) tables.push(doc.id);
+  }
+
   return {
     question,
     analyzer: model.id,
@@ -344,6 +379,7 @@ export async function modelAnalysis(
     intent,
     systems,
     entities,
+    tables,
     complexity,
     ...(escalations ? { escalations } : {}),
   };

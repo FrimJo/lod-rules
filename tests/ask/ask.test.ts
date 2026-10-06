@@ -42,6 +42,7 @@ function narrowAnswers(questions: Record<string, ModelQuestion>): Record<string,
     intent: { choice: 'no_match', probabilities: { no_match: 0.9 } },
     complexity: { choice: 'single_fact', probabilities: { single_fact: 0.9 } },
     entity: { choice: 'no_match', probabilities: { no_match: 0.9 } },
+    table: { choice: 'no_match', probabilities: { no_match: 0.9 } },
   };
   for (const id of Object.keys(questions))
     if (id.startsWith('system_')) answers[id] = { noul: 0.05 };
@@ -95,6 +96,27 @@ describe('model analysis', () => {
       expect.objectContaining({ id: 'quest.chamber_of_reverence.slaying_fiend' }),
     );
     expect(analysis.baseline?.analyzer).toBe('lexical');
+  });
+
+  it('adds the chosen table to evidence even when search ranks it low', async () => {
+    const model = fixtureModel((questions) => {
+      const table = Object.entries(questions.table!.criteria).find(([, label]) =>
+        label.startsWith('hit location'),
+      );
+      return {
+        ...narrowAnswers(questions),
+        table: { choice: table?.[0] ?? 'no_match', probabilities: {} },
+      };
+    });
+    const question = 'How does a hero roll a hit location?';
+    const analysis = await analyzeQuestion(retrieval, question, model);
+    expect(Object.keys(model.asked[0]!.table!.criteria).length).toBeLessThanOrEqual(9);
+    expect(analysis.tables).toEqual(['table.combat.hit_location']);
+    expect(analysis.baseline?.tables).toEqual([]);
+    const item = gatherEvidence(retrieval, analysis).find(
+      (i) => i.id === 'table.combat.hit_location',
+    );
+    expect(item?.why).toContain('table:model');
   });
 
   it('falls back to lexical analysis when the model output is malformed', async () => {

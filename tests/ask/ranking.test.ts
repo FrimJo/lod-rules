@@ -8,6 +8,7 @@ import {
 import { collectCandidates, gatherEvidence } from '../../scripts/ask/evidence.ts';
 import { ask } from '../../scripts/ask/index.ts';
 import {
+  CALIBRATED_FILTER,
   PROVISIONAL_FILTER,
   RELEVANCE_QUESTION,
   applyFilter,
@@ -35,6 +36,7 @@ const analyzer: SystemOneModel = {
       intent: { choice: 'no_match', probabilities: { no_match: 0.9 } },
       complexity: { choice: 'judgment', probabilities: { judgment: 0.9 } },
       entity: { choice: 'no_match', probabilities: { no_match: 0.9 } },
+      table: { choice: 'no_match', probabilities: { no_match: 0.9 } },
     };
     for (const id of Object.keys(questions))
       if (id.startsWith('system_')) answers[id] = { noul: 0.9 };
@@ -154,9 +156,48 @@ describe('Jev relevance filter', () => {
     ]);
   });
 
+  it('pins calibrated-1: rules drop at 0.95, tables and procedures at 0.99', () => {
+    expect(CALIBRATED_FILTER).toEqual({
+      id: 'calibrated-1',
+      dropIrrelevantAt: 0.95,
+      protectExact: false,
+      protectLinked: true,
+      cap: false,
+      dropAtByKind: { table: 0.99, procedure: 0.99 },
+    });
+    const candidates = ['rule', 'table', 'procedure'].map((kind) => ({
+      id: `${kind}.x`,
+      kind,
+      why: ['search'],
+      sources: ['lexical' as const],
+      exact: false,
+    }));
+    const at = (p: number) =>
+      new Map(
+        candidates.map((c): [string, RecordJudgment] => [
+          c.id,
+          {
+            id: c.id,
+            relevance: 'irrelevant',
+            probabilities: { direct: 1 - p, supporting: 0, irrelevant: p },
+          },
+        ]),
+      );
+    expect(applyFilter(candidates, at(0.97), CALIBRATED_FILTER, 10).map((d) => d.kept)).toEqual([
+      false,
+      true,
+      true,
+    ]);
+    expect(applyFilter(candidates, at(0.99), CALIBRATED_FILTER, 10).map((d) => d.kept)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+
   it('keeps records below the threshold', async () => {
     const analysis = await analyzeQuestion(retrieval, MOLGOR, analyzer);
-    const below = PROVISIONAL_FILTER.dropIrrelevantAt - 0.01;
+    const below = CALIBRATED_FILTER.dropIrrelevantAt - 0.01;
     const result = await filterEvidence(retrieval, analysis, ranker(below));
     expect(result.decisions.every((d) => d.kept)).toBe(true);
   });
@@ -282,7 +323,7 @@ describe('ask with a filter', () => {
       model: analyzer,
       filter: { ranker: ranker(0.99) },
     });
-    expect(result.filter?.policy).toEqual(PROVISIONAL_FILTER);
+    expect(result.filter?.policy).toEqual(CALIBRATED_FILTER);
     expect(result.evidence.map((e) => e.id)).toEqual(
       result.filter!.decisions.filter((d) => d.kept).map((d) => d.id),
     );

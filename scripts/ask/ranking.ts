@@ -79,6 +79,21 @@ export const PROVISIONAL_FILTER: FilterPolicy = {
   cap: false,
 };
 
+/**
+ * Chosen on development + validation against 391 reviewer relevance labels (judge labels
+ * where none exist): no reviewer- or judge-direct and no required record dropped, supporting
+ * loss 4.3 %, 51 % of irrelevant records removed. A table or procedure judged alone reads as
+ * noise more often, hence its stricter line. See docs/ask-quality-evaluation.md.
+ */
+export const CALIBRATED_FILTER: FilterPolicy = {
+  id: 'calibrated-1',
+  dropIrrelevantAt: 0.95,
+  protectExact: false,
+  protectLinked: true,
+  cap: false,
+  dropAtByKind: { table: 0.99, procedure: 0.99 },
+};
+
 const DEPENDENCY_LINK = /^expand:(uses_table|depends_on|step_rule)$/;
 
 export interface FilterDecision {
@@ -260,7 +275,7 @@ export async function filterEvidence(
   retrieval: Retrieval,
   analysis: QuestionAnalysis,
   ranker: SystemOneModel,
-  policy: FilterPolicy = PROVISIONAL_FILTER,
+  policy: FilterPolicy = CALIBRATED_FILTER,
 ): Promise<FilteredEvidence> {
   const candidates = collectCandidates(retrieval, analysis);
   const items = new Map(candidates.map((c) => [c.id, evidenceItem(retrieval, c.id, c.why)]));

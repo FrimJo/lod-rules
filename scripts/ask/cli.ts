@@ -110,6 +110,7 @@ if (values.json) {
   console.log(
     `Entities: ${analysis.entities.map((e) => `${e.title} [${e.via}]`).join(', ') || 'none'}`,
   );
+  if (analysis.tables.length) console.log(`Tables: ${analysis.tables.join(', ')} [model]`);
   if (analysis.escalations?.length) {
     console.log(
       `Escalated: ${analysis.escalations

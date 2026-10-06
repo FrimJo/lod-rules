@@ -1,7 +1,8 @@
 # Plan: calibrating the Jev relevance filter with human grading
 
-Status: tooling implemented 5 October 2026; human review and policy adoption (Phase 2
-labelling, Phases 3–4 decisions) remain. Results so far are in
+Status: tooling implemented 5 October 2026. Development + validation were labelled and
+`calibrated-1` was adopted on 6 October 2026. Still to do: held-out labels, an answer
+regrade, and the web default switch. Results so far are in
 [ask-quality-evaluation.md](ask-quality-evaluation.md); the filter is described in
 [retrieval.md](retrieval.md#ask-pipeline).
 
@@ -104,14 +105,14 @@ Extend `calibrate-filter.ts` rather than writing a new tool.
 
 ## Implementation status
 
-| Item                    | State                                                                                                                                                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.1 Jev relevance cache | Already in place: `memoModel` keys on model id, question, record text and prompt. `calibrate-filter.ts` warns when the model id is a floating alias such as `jev-latest`; set `TYPESAFE_DEFAULT_MODEL` to pin one. |
-| 1.2 Label text hashes   | `CaseReview.recordHashes`; stale labels are ignored by calibration and flagged in `/review`. Labels saved before this have no hash and stay trusted.                                                               |
-| 1.3 Regrade             | Rerun `run-quality.ts` with the current retrieval. The previous grades are in `generated/ask-quality-2026-10-05-before-heading/`.                                                                                  |
-| 2 Record queue          | `/review?view=records`, buckets as above, progress against the targets.                                                                                                                                            |
-| 3 Policy choice         | `calibration.ts` (grid, scoring, bounds, selection, inputs) and `calibrate-filter.ts`.                                                                                                                             |
-| 4 Adopt                 | Web default changed to `jev`. Choosing `calibrated-1` waits for the labels. `calibrate-filter.ts --check` detects a stale result.                                                                                  |
+| Item                    | State                                                                                                                                                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 Jev relevance cache | Already in place: `memoModel` keys on model id, question, record text and prompt. `calibrate-filter.ts` warns when the model id is a floating alias such as `jev-latest`; set `TYPESAFE_DEFAULT_MODEL` to pin one.                  |
+| 1.2 Label text hashes   | `CaseReview.recordHashes`; stale labels are ignored by calibration and flagged in `/review`. Labels saved before this have no hash and stay trusted.                                                                                |
+| 1.3 Regrade             | Rerun `run-quality.ts` with the current retrieval. The previous grades are in `generated/ask-quality-2026-10-05-before-heading/`.                                                                                                   |
+| 2 Record queue          | `/review?view=records`, buckets as above, progress against the targets.                                                                                                                                                             |
+| 3 Policy choice         | Done 6 October: 391 reviewer labels, `calibrated-1` (0.95; tables and procedures 0.99; linked protected; no cap). See [ask-quality-evaluation.md](ask-quality-evaluation.md#filter-calibration-on-reviewed-labels--6-october-2026). |
+| 4 Adopt                 | `CALIBRATED_FILTER` in `ranking.ts`, pinned in `tests/ask/ranking.test.ts`. Web default stays `jev` until held-out is labelled and answers are regraded. `calibrate-filter.ts --check` detects a stale result.                      |
 
 ## First steps
 

@@ -250,3 +250,42 @@ Until reviewed grades confirm one or the other, the union (`jev` in the web clie
 the filter (`jev_filtered`, the web default until 5 October; the default is now `jev`) are within sampling noise of each
 other on correctness. The filter costs less context; the union has the better unreviewed
 score.
+
+## Filter calibration on reviewed labels — 6 October 2026
+
+The record queue produced 395 reviewer relevance labels (67 direct, 62 supporting, 266
+irrelevant). Four are stale because their record text has since changed, which leaves 391,
+almost all from development and validation. `calibrate-filter.ts` swept 768 policies over
+the 103 current pools (corpus `a05504b7`, `jev:jev-latest`, 0 new Jev requests). Judge
+labels fill in where no reviewer label exists. Jev's p(irrelevant) separates relevant
+records from irrelevant ones with an AUC of 0.93 against these combined labels, and 0.82
+against reviewer labels alone (development 0.77, validation 0.89).
+
+`provisional-1` fails on reviewer labels. On development it drops one reviewer-direct
+record and 15 % of supporting records (8 records).
+
+Adopted policy `calibrated-1` (`CALIBRATED_FILTER` in `scripts/ask/ranking.ts`, the default
+for `--filter` and `jev_filtered`): drop at p(irrelevant) ≥ 0.95, or ≥ 0.99 for tables and
+procedures, with linked records protected, no exact-match protection and no cap.
+
+| Split       | Pool | Dropped | Required lost | Direct lost | Supporting lost | Reviewer-relevant loss (95 % bound) | Noise removed | Precision   |
+| ----------- | ---- | ------- | ------------- | ----------- | --------------- | ----------------------------------- | ------------- | ----------- |
+| development | 361  | 99      | 0             | 0           | 3               | 4 % (≤ 10 %)                        | 47 %          | 44 % → 59 % |
+| validation  | 350  | 111     | 0             | 0           | 1               | 2 % (≤ 9 %)                         | 54 %          | 42 % → 61 % |
+| held-out    | 324  | 83      | 0             | 0           | 1 (judge)       | — (no reviewer labels yet)          | 46 %          | 45 % → 61 % |
+
+It drops these supporting records: `character.hit_points.party_loss` (`poison_bleeding_rest`),
+`character.hit_points.wounded` (`molgor_hit_points`),
+`character.profession.warrior_priest.initial_energy` (`prayer_use`),
+`background.troll_slayer` (`shared_experience`) and, in held-out,
+`quest.great_crypt.stopping_necromancer` (`ragnalf_stats`).
+
+The selection rule actually chose `sweep-0.98-noexact-cap-kinds@0.99`, a policy that
+removes 52 % of noise against `calibrated-1`'s 51 % on development + validation. Most of
+its losses come from the cap, which cuts records Jev scores below any threshold. The
+simpler policy without a cap was adopted. That choice was made after held-out results had
+been seen, but held-out had no reviewer labels yet. The held-out reviewer labels collected
+next are the test of `calibrated-1`.
+
+Still to do: label held-out, then regrade answers under `calibrated-1`. The web default
+stays `jev` (the union) until both are done.

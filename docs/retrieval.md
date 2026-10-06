@@ -107,7 +107,10 @@ npm run ask -- "What happens when a wizard miscasts a spell?" --analyzer jev --f
 - intent: a choice of seven options;
 - complexity: `single_fact`, `single_rule`, `multi_rule` or `judgment`;
 - one yes/no question per game system. There are nine systems, and each maps to rulebook chapters;
-- the named entity the question is about, chosen from fewer than 20 candidates.
+- the named entity the question is about, chosen from fewer than 20 candidates;
+- the table that answers the question, chosen from the top eight tables by lexical score.
+  This reaches tables the question describes in other words ("Where does a hit land on a
+  hero?" ranks `table.combat.hit_location` 45th overall but 4th among tables).
 
 Exact names in the question ("Molgor", "Potion of Cure Poison") are matched
 deterministically first. The `lexical` analyser answers the same questions without a
@@ -185,7 +188,7 @@ Thirty-seven questions are too few to calibrate any of these numbers. Keep the u
 grow the labelled set before changing the policy.
 
 **Evidence** (`evidence.ts`) is deterministic. It retrieves exact entities and their
-rules and tables, then searches the entity's quest, the selected system chapters and
+rules and tables, and the model-picked table outside the budget, then searches the entity's quest, the selected system chapters and
 intent-specific kinds (terms for definitions, tables for value lookups), followed by an
 unfiltered fallback search. A rulebook heading the question names ("wounded", "stunned"
 matches the heading Stun) adds up to two records from that heading, whatever its chapter;
@@ -200,14 +203,16 @@ issues, external dependencies and citations.
 the union pool, lexical records included. Jev gets the question and one candidate per
 request (the same text the LLM would see, plus its issues and unavailable-book
 dependencies) and chooses `direct`, `supporting` or `irrelevant`. Policy
-`provisional-1` drops a record when p(irrelevant) ≥ 0.9, except records reached through
-a `uses_table`, `depends_on` or `step_rule` link. It never adds a record. A record Jev
+`calibrated-1`, chosen on reviewer labels, drops a record when p(irrelevant) ≥ 0.95 (≥ 0.99
+for tables and procedures), except records reached through a `uses_table`, `depends_on` or
+`step_rule` link. It replaced `provisional-1` (≥ 0.9 for every kind). It never adds a record. A record Jev
 fails to judge is kept, and if no record can be judged the pool is used unfiltered.
 `AskResult.filter` lists every keep/drop decision with Jev's probabilities. The filter
 runs only on a model analysis. Calibration and answer-quality results are in
-[ask-quality-evaluation.md](ask-quality-evaluation.md): on the labelled set it dropped no
-required record, cut irrelevant evidence by about 70 % and regressed no answer against
-the union. It is not the default until a larger reviewed label set confirms that.
+[ask-quality-evaluation.md](ask-quality-evaluation.md): on development and validation
+it drops no required or direct record, loses 4 % of supporting records and removes about
+half of the irrelevant ones. It is not the web default until held-out review and an answer
+regrade confirm that.
 
 **Prompt and check** (`prompt.ts`) tell the LLM to answer only from the evidence, to cite
 `[record.id]`, to name the quest for quest-scoped records, and to surface issues and
