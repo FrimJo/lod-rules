@@ -46,6 +46,8 @@ export interface ExpandOptions {
   direction?: 'out' | 'in' | 'both';
   relations?: string[];
   depth?: number;
+  /** Neither report nor traverse edges to records of these kinds (e.g. `issue`). */
+  skipKinds?: DocumentKind[];
 }
 
 const STOPWORDS = new Set(
@@ -320,6 +322,7 @@ export class Retrieval {
         for (const edge of found) {
           if (wanted && !wanted.has(edge.relation)) continue;
           const target = this.document(edge.target);
+          if (target && options.skipKinds?.includes(target.kind)) continue;
           edges.push({
             ...edge,
             found: target !== null,
