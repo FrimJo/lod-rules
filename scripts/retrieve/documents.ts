@@ -110,14 +110,19 @@ function cellText(cell: Cell): string {
   return cell.printed;
 }
 
-function tableText(table: Table): string {
+/** Header, rows and footnotes as printed. Omits `source_text`, which can be a curator note. */
+export function printedTableText(table: Table): string {
   const header = table.columns.map((column) => column.label).join(' | ');
   const rows = table.rows.map((row) =>
     table.columns
       .map((column) => (row.cells[column.id] ? cellText(row.cells[column.id]!) : ''))
       .join(' | '),
   );
-  return [table.source_text, header, ...rows, ...table.footnotes].join('\n');
+  return [header, ...rows, ...table.footnotes].join('\n');
+}
+
+function tableText(table: Table): string {
+  return [table.source_text, printedTableText(table)].join('\n');
 }
 
 class Builder {

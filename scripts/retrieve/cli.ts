@@ -2,6 +2,7 @@ import { parseArgs } from 'node:util';
 import type { DocumentKind } from './documents.ts';
 import { buildRetrievalArtifacts, freshDatabasePath } from './build.ts';
 import { Retrieval } from './index.ts';
+import { RETRIEVAL_TOOLS, ToolInputError, runRetrievalTool } from './tools.ts';
 
 const usage = `Usage: npm run retrieve -- <command> [options]
 
@@ -11,6 +12,8 @@ Commands:
   resolve <name>      Exact title or alias match (e.g. AP, "Molgor")
   expand <id>         Related records. --direction out|in|both  --relation see_also,uses_table  --depth N
   issues <id>         Review issues attached to a record
+  tools               Rulebook tool definitions for agents (lod_search, lod_get, …)
+  call <tool> <json>  Run one tool call (rulebook content only), e.g. call lod_search '{"query":"locked door"}'
   build               Write generated/retrieval/ (search-documents.jsonl, retrieval.sqlite, manifest.json)
 
 Output is JSON. Uses generated/retrieval/retrieval.sqlite when it matches the corpus;
@@ -45,6 +48,11 @@ if (!command || values.help) {
 
 if (command === 'build') {
   print(buildRetrievalArtifacts());
+  process.exit(0);
+}
+
+if (command === 'tools') {
+  print(RETRIEVAL_TOOLS);
   process.exit(0);
 }
 
@@ -89,6 +97,17 @@ switch (command) {
       }),
     );
     break;
+  case 'call': {
+    const [tool = '', json = '{}'] = rest;
+    try {
+      print(runRetrievalTool(retrieval, tool, JSON.parse(json) as unknown));
+    } catch (error) {
+      if (!(error instanceof ToolInputError || error instanceof SyntaxError)) throw error;
+      print({ error: error.message });
+      process.exitCode = 1;
+    }
+    break;
+  }
   case 'issues':
     print(retrieval.issues(argument));
     break;
