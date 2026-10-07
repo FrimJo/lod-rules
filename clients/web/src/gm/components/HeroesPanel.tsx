@@ -1,26 +1,69 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { lightSummary, type Hero } from '../engine.ts';
 import { CITES, HERO_STATUSES, MENTAL_CONDITIONS, SANITY, type HeroStatus } from '../rules.ts';
 import { CiteChip, Panel, useGm } from './common.tsx';
 
+const COLLAPSED_KEY = 'lod-rules:gm-table:heroes-collapsed';
+
+/** A view preference (not table state): whether the party band is folded to its summary strip. */
+function useCollapsed(): [boolean, (next: boolean) => void] {
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try {
+      setCollapsed(window.localStorage.getItem(COLLAPSED_KEY) === '1');
+    } catch {
+      // Storage blocked: the band simply starts open.
+    }
+  }, []);
+  const set = (next: boolean) => {
+    setCollapsed(next);
+    try {
+      window.localStorage.setItem(COLLAPSED_KEY, next ? '1' : '0');
+    } catch {
+      // Ignore; the preference lasts for the session.
+    }
+  };
+  return [collapsed, set];
+}
+
 /**
- * The party. Adding heroes comes first: Party Morale starts at the sum of their RES ÷ 10, so the
- * form stays open until the first hero is in and keeps the focus for the next one.
+ * The party, first on the table: the Game Master enters each hero's RES before anything else
+ * (Party Morale starts at the sum of RES ÷ 10), so the form stays open until the first hero is
+ * in and keeps the focus for the next one. Once the party is in, the band can fold to a
+ * one-line summary and reopens with a click when a RES changes or a hero needs attention.
  */
 export function HeroesPanel() {
   const { state } = useGm();
   const [adding, setAdding] = useState(false);
+  const [stored, setCollapsed] = useCollapsed();
   const empty = state.heroes.length === 0;
+  const collapsed = stored && !empty && !adding;
   const showForm = adding || empty;
+  const bodyId = useId();
+  const expand = () => setCollapsed(false);
   return (
     <Panel
       title="Heroes"
       cite={CITES.sanity}
+      className="gm-party"
       aside={
-        !showForm && (
-          <button type="button" className="gm-secondary" onClick={() => setAdding(true)} aria-expanded={false}>
-            Add hero
-          </button>
+        !empty && (
+          <>
+            {!showForm && !collapsed && (
+              <button type="button" className="gm-secondary" onClick={() => setAdding(true)} aria-expanded={false}>
+                Add hero
+              </button>
+            )}
+            <button
+              type="button"
+              className="gm-link"
+              aria-expanded={!collapsed}
+              aria-controls={bodyId}
+              onClick={() => (collapsed ? expand() : setCollapsed(true))}
+            >
+              {collapsed ? 'Show the party' : 'Fold away'}
+            </button>
+          </>
         )
       }
     >
@@ -30,24 +73,66 @@ export function HeroesPanel() {
           <CiteChip cite={CITES.moraleCalculation} />, and every hero starts with {SANITY.start} Sanity.
         </p>
       )}
-      {showForm && (
-        <AddHero
-          onDone={() => setAdding(false)}
-          onAdded={() => setAdding(true)}
-          closable={!empty}
-          autoFocus={adding}
-        />
-      )}
-      {!empty && (
-        <ul className="gm-heroes">
-          {state.heroes.map((hero) => (
-            <li key={hero.id}>
-              <HeroCard hero={hero} />
-            </li>
-          ))}
-        </ul>
+      {collapsed ? (
+        <PartyStrip onExpand={expand} />
+      ) : (
+        <div id={bodyId}>
+          {showForm && (
+            <AddHero
+              onDone={() => setAdding(false)}
+              onAdded={() => setAdding(true)}
+              closable={!empty}
+              autoFocus={adding}
+            />
+          )}
+          {!empty && (
+            <ul className="gm-heroes">
+              {state.heroes.map((hero) => (
+                <li key={hero.id}>
+                  <HeroCard hero={hero} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </Panel>
+  );
+}
+
+/** The folded party: one chip per hero with the numbers that change mid-dungeon. Click to open. */
+function PartyStrip({ onExpand }: { onExpand: () => void }) {
+  const { state } = useGm();
+  return (
+    <ul className="gm-party-strip" aria-label="Party summary">
+      {state.heroes.map((hero) => {
+        const flags = [
+          ...hero.conditions.map((id) => MENTAL_CONDITIONS.find((c) => c.id === id)?.name ?? id),
+          ...hero.statuses.map((status) => HERO_STATUSES[status].label),
+        ];
+        const alarmed = hero.dead || flags.length > 0 || hero.sanity < hero.sanityMax;
+        return (
+          <li key={hero.id}>
+            <button
+              type="button"
+              className={`gm-party-chip${hero.dead ? ' dead' : alarmed ? ' alarmed' : ''}`}
+              onClick={onExpand}
+              title={`${hero.name}: RES ${hero.resolve}. Open the party to change Sanity or statuses.`}
+            >
+              <strong>{hero.name}</strong>
+              {hero.dead ? (
+                <span className="muted">dead</span>
+              ) : (
+                <span className="gm-party-sanity" aria-label={`Sanity ${hero.sanity} of ${hero.sanityMax}`}>
+                  {hero.sanity}/{hero.sanityMax}
+                </span>
+              )}
+              {flags.length > 0 && <span className="gm-party-flags">{flags.join(', ')}</span>}
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

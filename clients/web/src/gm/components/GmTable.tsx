@@ -105,6 +105,7 @@ export function GmTable() {
         </header>
 
         <main className="gm-main" id="gm-main" tabIndex={-1}>
+          <HeroesPanel />
           <NowPanel />
           <div className="gm-grid">
             <div className="gm-col">
@@ -115,7 +116,6 @@ export function GmTable() {
               <LightPanel />
             </div>
             <div className="gm-col">
-              <HeroesPanel />
               <MoralePanel />
             </div>
           </div>
