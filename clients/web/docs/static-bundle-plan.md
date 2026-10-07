@@ -1,6 +1,9 @@
 # Plan: a static, browser-only web client
 
-Status: proposed, 3 October 2026. Nothing in this plan is implemented yet.
+Status: proposed, 3 October 2026; not implemented. Since then the client has been deployed
+server-side on Vercel with a bundled corpus and access gating (see
+[README.md](../README.md#deploying-to-vercel)). The "Current state" table below predates
+that deployment. This plan remains the direction if the server is to be retired.
 
 ## Goal
 
@@ -84,7 +87,7 @@ Acceptance: `tests/retrieve/retrieval.test.ts` and `tests/ask/*.test.ts` pass ag
 both backends. sqlite-wasm runs in Node for in-memory databases. A parity test checks
 that both backends return identical hits, scores and snippets for every labelled
 question. A pure-JS search index (MiniSearch, Lunr) was rejected: it would rank
-differently, and the recall figures in [retrieval.md](retrieval.md) would no longer
+differently, and the recall figures in [retrieval.md](../../../docs/retrieval.md) would no longer
 describe the deployed client.
 
 ### 2. A bundle step (`clients/web`)
@@ -222,7 +225,7 @@ Do this only after the browser analyzer (Laya or the task-specific encoder) pass
 gate:
 
 - Remove Jev from `scripts/ask/models.ts`, `cascade.ts` and the evaluation, and update
-  [retrieval.md](retrieval.md) and [semantic-decisions.md](semantic-decisions.md).
+  [retrieval.md](../../../docs/retrieval.md) and [semantic-decisions.md](../../../docs/semantic-decisions.md).
   This is a root-repo change and needs the full gate.
 - Keep the lexical union. The analyzer stays uncalibrated until the labelled set is large
   enough to calibrate it, and the union is what keeps a wrong answer from removing evidence.
@@ -250,7 +253,7 @@ parallel with them.
   rulebook wording by design. If the site is public, both are redistributed. Decide
   whether the deployment is public, password-protected or private before going live.
 - **Laya quality.** On the labelled set, Laya alone has 31–33 % intent accuracy and
-  5–38 % chapter coverage (see [retrieval.md](retrieval.md#labelled-questions)).
+  5–38 % chapter coverage (see [retrieval.md](../../../docs/retrieval.md#labelled-questions)).
   Removing Jev assumes this improves substantially. Quantization can only make it worse.
 - **Laya size and speed.** Even quantized, the model is hundreds of megabytes, and one
   question runs a dozen or more 512-token passes. WASM-only devices may take several
