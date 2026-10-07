@@ -73,7 +73,7 @@ optional ([§6](#6-optional-and-deferred-work)).
 Run these in order. Each step has an exit condition; shared gates are in
 [§7](#7-shared-gates-and-final-closure).
 
-### Step 1 — Close Package F at reduced scope
+### Step 1 — Close Package F at reduced scope (done 7 October)
 
 Package F (Phase 6 Batch 7) stays required for shared lifecycle models and becomes optional for
 per-quest ordered lifecycles.
@@ -101,16 +101,23 @@ per-quest ordered lifecycles.
 **Exit:** the manifest has no `pending` rows; final acceptance passes; Phase 6 Batch 7 is marked
 complete at the documented scope in the [Phase 6 ledger](ledgers/phase-6-procedures-and-state-machines.md).
 
+**Outcome:** Package F is `accepted` (41 implemented, 10 covered by another model, 1
+nonprocedural, 43 `catalogue_scope`). The estate's source-silent readings are caller-supplied
+inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 76 of 85
+rows verified; the 9 still pending are assigned below and close with the steps that own them.
+
 ### Step 2 — Core-chapter loop: reconcile, extract, review
 
 This brings Phase 10 forward for the core book and runs Phases 8 and 9 alongside it, one chapter
 at a time. Work in dependency order:
 
 1. Introduction and Game Basics
-2. Character Basics, Creating Your Character, Levelling Up
+2. Character Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest
+   (its starting-settlement roll on PDF 59 has no record)
 3. Equipment, Psychology
 4. Magic, Magic Items, Enchantments, Alchemy, Prayers
-5. Into the Dungeons, Treasure, Combat
+5. Into the Dungeons, Treasure, Combat (open exit rows: Healing PDF 100, Identifying Items
+   PDF 98, optional Dungeon Events PDF 105, and the mapped table nodes on PDF 91/94/104/105/119)
 6. Travelling and Skirmishes, Settlements, guilds, Inner Sanctum, Buying an Estate
 7. Appendices I–V, Adding a Third Dimension, front and back matter
 
@@ -159,7 +166,13 @@ disposition and independent review. Quest rules remain scenario-scoped.
 ### Step 4 — Dependency graph and precedence (Phase 7)
 
 Run after Steps 2–3 so the graph covers the reconciled corpus. Omissions it exposes go back
-through the Step 2 loop.
+through the Step 2 loop. This step also closes the Phase 6 exit row "procedure steps reference
+rules rather than duplicate them", which needs a duplication check.
+
+The remaining open Phase 0–6 exit rows close in Phase 10 (Steps 2–3): a page-by-page table
+inventory (including turning the duplicate PDF 186 table node into a redirect), typed dice for
+the 63 table rows that print dice only in text, and an audit that printed restrictions are
+rules.
 
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 
