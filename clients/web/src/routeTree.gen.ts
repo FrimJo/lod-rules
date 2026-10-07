@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GmRouteImport } from './routes/gm'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as ApiChatRouteImport } from './routes/api.chat'
 import { Route as ApiRulebookRouteImport } from './routes/api.rulebook'
@@ -20,6 +21,11 @@ import { Route as ApiSourcesDocumentRouteImport } from './routes/api.sources.$do
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GmRoute = GmRouteImport.update({
+  id: '/gm',
+  path: '/gm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReviewRoute = ReviewRouteImport.update({
@@ -55,6 +61,7 @@ const ApiSourcesDocumentRoute = ApiSourcesDocumentRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/gm': typeof GmRoute
   '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/gm': typeof GmRoute
   '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/gm': typeof GmRoute
   '/review': typeof ReviewRoute
   '/api/chat': typeof ApiChatRoute
   '/api/rulebook': typeof ApiRulebookRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/gm'
     | '/review'
     | '/api/chat'
     | '/api/rulebook'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/gm'
     | '/review'
     | '/api/chat'
     | '/api/rulebook'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/gm'
     | '/review'
     | '/api/chat'
     | '/api/rulebook'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GmRoute: typeof GmRoute
   ReviewRoute: typeof ReviewRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiRulebookRoute: typeof ApiRulebookRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gm': {
+      id: '/gm'
+      path: '/gm'
+      fullPath: '/gm'
+      preLoaderRoute: typeof GmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/review': {
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GmRoute: GmRoute,
   ReviewRoute: ReviewRoute,
   ApiChatRoute: ApiChatRoute,
   ApiRulebookRoute: ApiRulebookRoute,
@@ -189,10 +210,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

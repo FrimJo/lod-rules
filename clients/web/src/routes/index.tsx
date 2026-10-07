@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { AnswerCard } from '../components/AnswerCard.tsx';
 import {
@@ -225,6 +225,9 @@ function RulesPage() {
               </div>
             </>
           )}
+          <Link to="/gm" className="icon-button" title="Track Threat, light, morale and Sanity at the table">
+            Game master’s table
+          </Link>
           <button
             type="button"
             className="icon-button"
