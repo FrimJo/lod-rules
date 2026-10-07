@@ -12,7 +12,13 @@ export interface LifecycleSource {
 export interface LifecycleObligation {
   id: string;
   behavior: string;
-  disposition: 'implemented' | 'shared_model' | 'nonprocedural' | 'source_limitation' | 'pending';
+  disposition:
+    | 'implemented'
+    | 'shared_model'
+    | 'nonprocedural'
+    | 'source_limitation'
+    | 'catalogue_scope'
+    | 'pending';
   canonical_object_ids: string[];
   tests: { file: string; name: string }[];
   source: LifecycleSource[];
@@ -20,8 +26,18 @@ export interface LifecycleObligation {
   limitations: { fact: string; review_id: string }[];
   remaining_work: string[];
 }
+/**
+ * `catalogue_scope` closes a quest or personal-quest heading at reduced scope: its catalogue
+ * records resolve and the shared lifecycle rows it composes are closed, but its own ordered
+ * lifecycle is deferred (named in `deferred_work`). It never means the lifecycle was modelled.
+ */
 export type LifecycleDisposition =
-  'implemented' | 'covered_by_another_model' | 'nonprocedural' | 'source_limitation' | 'pending';
+  | 'implemented'
+  | 'covered_by_another_model'
+  | 'nonprocedural'
+  | 'source_limitation'
+  | 'catalogue_scope'
+  | 'pending';
 export interface LifecycleEntry {
   section_id: string;
   disposition: LifecycleDisposition;
@@ -30,6 +46,10 @@ export interface LifecycleEntry {
   evidence: string[];
   source_limitations: string[];
   remaining_work: string[];
+  /** `catalogue_scope` only: manifest section ids of the closed shared lifecycle rows relied on. */
+  shared_lifecycle_rows?: string[];
+  /** `catalogue_scope` only: the ordered-lifecycle work deliberately left unmodelled. */
+  deferred_work?: string[];
   notes: string;
   source: LifecycleSource[];
   obligations: LifecycleObligation[];
@@ -49,6 +69,13 @@ export interface AcceptanceReferences {
   read: (path: string) => string;
   pages: Map<number, number | null>;
 }
+/** Headings that may close at catalogue scope: Quest Book I quests and personal quests. */
+export const catalogueScopePrefixes = ['section.quest_book_i.', 'section.backgrounds.'];
+/** Shared row dispositions a catalogue-scope row may rely on. */
+const closedSharedDispositions: LifecycleDisposition[] = [
+  'implemented',
+  'covered_by_another_model',
+];
 const validateShape = createAjv().compile<LifecycleManifest>(
   JSON.parse(
     readFileSync(join(repoRoot, 'tests/fixtures/acceptance/package-f.schema.json'), 'utf8'),
@@ -81,6 +108,28 @@ export function lifecycleAcceptanceErrors(
         errors.push(`${id}: source page label does not match page map`);
   };
   if (!refs.exists(manifest.inventory)) errors.push('Missing source inventory');
+  const rows = new Map(manifest.entries.map((x) => [x.section_id, x]));
+  const catalogueScopeErrors = (row: LifecycleEntry) => {
+    const id = row.section_id;
+    if (!catalogueScopePrefixes.some((prefix) => id.startsWith(prefix)))
+      errors.push(`${id}: catalogue scope is limited to quest and personal-quest headings`);
+    if (!row.canonical_object_ids.some((x) => x.startsWith('quest.') && refs.canonicalIds.has(x)))
+      errors.push(`${id}: catalogue scope needs a resolving quest catalogue record`);
+    const shared = row.shared_lifecycle_rows ?? [];
+    if (!shared.length) errors.push(`${id}: catalogue scope must name its shared lifecycle rows`);
+    for (const target of shared) {
+      const dependency = rows.get(target);
+      if (!dependency || target === id)
+        errors.push(`${id}: unknown shared lifecycle row ${target}`);
+      else if (!closedSharedDispositions.includes(dependency.disposition))
+        errors.push(`${id}: shared lifecycle row ${target} is ${dependency.disposition}`);
+    }
+    const deferred = row.deferred_work ?? [];
+    if (!deferred.length || deferred.some((x) => !x.trim()))
+      errors.push(`${id}: catalogue scope must name its deferred ordered-lifecycle work`);
+    if (row.remaining_work.length)
+      errors.push(`${id}: catalogue scope cannot carry remaining work; keep the row pending`);
+  };
   for (const row of manifest.entries) {
     const id = row.section_id;
     if (seen.has(id)) errors.push(`${id}: duplicate entry`);
@@ -106,6 +155,9 @@ export function lifecycleAcceptanceErrors(
       errors.push(`${id}: source limitation needs a review record`);
     if (row.disposition === 'pending' && !row.remaining_work.length)
       errors.push(`${id}: pending work must be named`);
+    if (row.disposition === 'catalogue_scope') catalogueScopeErrors(row);
+    else if (row.shared_lifecycle_rows !== undefined || row.deferred_work !== undefined)
+      errors.push(`${id}: deferred lifecycle fields require catalogue scope`);
     sources(row.source, id);
     const obligationIds = new Set<string>();
     for (const obligation of row.obligations) {
@@ -142,6 +194,10 @@ export function lifecycleAcceptanceErrors(
         errors.push(`${key}: pending behavior must name implementation work`);
       if (obligation.remaining_work.length && obligation.disposition !== 'pending')
         errors.push(`${key}: implementation gap must remain pending`);
+      if (obligation.disposition === 'catalogue_scope' && row.disposition !== 'catalogue_scope')
+        errors.push(`${key}: catalogue scope behavior requires a catalogue scope heading`);
+      if (obligation.disposition === 'catalogue_scope' && !obligation.canonical_object_ids.length)
+        errors.push(`${key}: catalogue scope behavior needs catalogue records`);
       if (row.disposition !== 'pending' && obligation.disposition === 'pending')
         errors.push(`${key}: unsupported completed heading disposition`);
       if (accepting && (obligation.disposition === 'pending' || obligation.remaining_work.length))
