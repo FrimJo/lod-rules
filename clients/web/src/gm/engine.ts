@@ -22,6 +22,7 @@ import {
   SCENARIO,
   THREAT,
   THREAT_SOURCES,
+  TURN_SEQUENCE,
   questById,
   type Cite,
   type HeroStatus,
@@ -115,6 +116,17 @@ export interface LogEntry {
   cite?: Cite;
 }
 
+/** The last tile revealed: what was rolled for enemies and what came of it. */
+export interface TileReveal {
+  kind: 'room' | 'corridor';
+  /** Encounter chance the roll was made against. */
+  chance: number;
+  /** The 1d100 result, or null when the Game Master declared the outcome without a roll. */
+  roll: number | null;
+  encounter: boolean;
+  turn: number;
+}
+
 export interface GmState {
   version: typeof STATE_VERSION;
   questId: string | null;
@@ -124,6 +136,8 @@ export interface GmState {
   scenarioTrigger: number;
   inBattle: boolean;
   resting: boolean;
+  /** 0-based index into `TURN_SEQUENCE`: where the Game Master is in the current turn. */
+  turnStep: number;
   threat: ThreatState;
   lights: LightSource[];
   spares: { torches: number; lampOil: number };
@@ -140,6 +154,7 @@ export interface GmState {
   restsTaken: number;
   /** Tiles revealed since the last encounter, for the +10 encounter bonus. */
   encounterStreak: number;
+  lastTile: TileReveal | null;
   wanderingMonsters: number;
   pending: Prompt[];
   log: LogEntry[];
@@ -164,12 +179,14 @@ export type GmEvent =
   | { type: 'threat_table_result'; decrease: number; event: string }
   | { type: 'pass_entrance' }
   | { type: 'new_turn' }
+  | { type: 'turn_step'; step: number }
   | { type: 'scenario_roll'; value: number }
   | { type: 'set_in_battle'; inBattle: boolean }
   | { type: 'battle_start'; demons: boolean }
   | { type: 'battle_end'; won: boolean }
   | { type: 'door_open'; entrance?: boolean }
-  | { type: 'tile_revealed'; kind: 'room' | 'corridor'; encounter: boolean }
+  /** A tile placed: with a 1d100 `roll` the table decides whether enemies appear; otherwise `encounter` says so. */
+  | { type: 'tile_revealed'; kind: 'room' | 'corridor'; roll?: number; encounter?: boolean }
   | { type: 'wm_place' }
   | { type: 'wm_remove' }
   | { type: 'light_add'; kind: LightKind; carrierId: string | null; lit: boolean }
@@ -219,6 +236,7 @@ export function initialState(): GmState {
     scenarioTrigger: SCENARIO.threatTrigger,
     inBattle: false,
     resting: false,
+    turnStep: 0,
     threat: { enabled: true, level: 2, start: 2, min: null, max: null, thresholds: [] },
     lights: [],
     spares: { torches: 0, lampOil: 0 },
@@ -227,6 +245,7 @@ export function initialState(): GmState {
     rations: 0,
     restsTaken: 0,
     encounterStreak: 0,
+    lastTile: null,
     wanderingMonsters: 0,
     pending: [],
     log: [],
@@ -272,6 +291,11 @@ export function encounterChance(kind: 'room' | 'corridor', streak: number): numb
   const base = kind === 'room' ? ENCOUNTER.room : ENCOUNTER.corridor;
   const bonus = streak >= ENCOUNTER.streakTiles ? ENCOUNTER.streakBonus : 0;
   return Math.min(ENCOUNTER.cap, base + bonus);
+}
+
+/** A 1d100 result at or under the encounter chance means enemies are on the tile. */
+export function encounterRolled(kind: 'room' | 'corridor', streak: number, roll: number): boolean {
+  return roll <= encounterChance(kind, streak);
 }
 
 export interface LightSummary {
@@ -805,8 +829,13 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       );
     }
 
+    case 'turn_step': {
+      const step = Math.min(TURN_SEQUENCE.length - 1, Math.max(0, Math.trunc(event.step)));
+      return step === state.turnStep ? state : { ...state, turnStep: step };
+    }
+
     case 'new_turn': {
-      let result: GmState = { ...state, turn: state.turn + 1 };
+      let result: GmState = { ...state, turn: state.turn + 1, turnStep: 0 };
       result = log(result, 'turn', `Turn ${result.turn}.`, CITES.turnSequence);
       if (!state.scenarioEnabled) {
         result = log(result, 'info', 'This quest does not use the Scenario die.');
@@ -950,13 +979,20 @@ export function reduce(state: GmState, event: GmEvent): GmState {
 
     case 'tile_revealed': {
       const chance = encounterChance(event.kind, state.encounterStreak);
+      const encounter =
+        event.roll !== undefined ? encounterRolled(event.kind, state.encounterStreak, event.roll) : event.encounter === true;
+      const rolled = event.roll !== undefined ? `rolled ${event.roll} against ${chance}%` : `chance was ${chance}%`;
       let result = dropPrompts(state, (p) => p.key === 'door');
-      if (event.encounter) {
+      result = {
+        ...result,
+        lastTile: { kind: event.kind, chance, roll: event.roll ?? null, encounter, turn: state.turn },
+      };
+      if (encounter) {
         result = { ...result, encounterStreak: 0 };
         result = log(
           result,
           'explore',
-          `${event.kind === 'room' ? 'Room' : 'Corridor'} revealed with enemies (chance was ${chance}%). The turn ends immediately.`,
+          `${event.kind === 'room' ? 'Room' : 'Corridor'} revealed with enemies (${rolled}). The turn ends immediately.`,
           CITES.encounters,
         );
         result = prompt(
@@ -977,7 +1013,7 @@ export function reduce(state: GmState, event: GmEvent): GmState {
         result = log(
           result,
           'explore',
-          `${event.kind === 'room' ? 'Room' : 'Corridor'} revealed, empty (chance was ${chance}%). ${streak} encounter-free tile${streak === 1 ? '' : 's'} in a row${
+          `${event.kind === 'room' ? 'Room' : 'Corridor'} revealed, empty (${rolled}). ${streak} encounter-free tile${streak === 1 ? '' : 's'} in a row${
             streak >= ENCOUNTER.streakTiles ? ': the next encounter roll gets +10 (max 70%)' : ''
           }.`,
           CITES.encounters,

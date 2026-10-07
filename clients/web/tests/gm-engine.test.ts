@@ -4,6 +4,7 @@ import { diceRange, formatDice, parseDice, rollDice } from '../src/gm/dice.ts';
 import {
   ambushRisk,
   encounterChance,
+  encounterRolled,
   initialState,
   isWavering,
   lightSummary,
@@ -232,6 +233,40 @@ test('opening a door adds Threat and the encounter chance rises after four empty
   state = reduce(state, { type: 'tile_revealed', kind: 'room', encounter: true });
   assert.equal(state.encounterStreak, 0);
   assert.deepEqual(prompts(state), ['battle_start']);
+});
+
+test('a tile roll at or under the encounter chance means enemies, and the outcome is kept', () => {
+  assert.equal(encounterRolled('room', 0, 50), true);
+  assert.equal(encounterRolled('room', 0, 51), false);
+  assert.equal(encounterRolled('corridor', 4, 40), true);
+  let state = reduce(withParty(), { type: 'tile_revealed', kind: 'corridor', roll: 72 });
+  assert.deepEqual(state.lastTile, { kind: 'corridor', chance: 30, roll: 72, encounter: false, turn: 0 });
+  assert.equal(state.encounterStreak, 1);
+  assert.match(lastLog(state), /rolled 72 against 30%/);
+  state = reduce(state, { type: 'tile_revealed', kind: 'room', roll: 50 });
+  assert.equal(state.lastTile?.encounter, true);
+  assert.equal(state.encounterStreak, 0);
+  assert.deepEqual(prompts(state), ['battle_start']);
+  state = reduce(state, { type: 'tile_revealed', kind: 'room', encounter: true });
+  assert.equal(state.lastTile?.roll, null, 'a declared outcome records no roll');
+});
+
+test('the turn sequence step is clamped and resets on a new turn', () => {
+  let state = reduce(withParty(), { type: 'new_turn' });
+  assert.equal(state.turnStep, 0);
+  const logBefore = state.log.length;
+  state = reduce(state, { type: 'turn_step', step: 3 });
+  assert.equal(state.turnStep, 3);
+  assert.equal(state.log.length, logBefore, 'stepping is not logged');
+  state = reduce(state, { type: 'turn_step', step: 99 });
+  assert.equal(state.turnStep, 4);
+  state = reduce(state, { type: 'turn_step', step: -1 });
+  assert.equal(state.turnStep, 0);
+  const same = reduce(state, { type: 'turn_step', step: 0 });
+  assert.equal(same, state, 'no change returns the same state');
+  state = reduce(reduce(state, { type: 'turn_step', step: 4 }), { type: 'new_turn' });
+  assert.equal(state.turn, 2);
+  assert.equal(state.turnStep, 0);
 });
 
 test('morale events apply their printed effect and the linked Sanity loss', () => {

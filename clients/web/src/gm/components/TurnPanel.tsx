@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { ambushRisk, encounterChance } from '../engine.ts';
-import { CITES, ENCOUNTER, QUESTS, REST, SEARCH, TURN_SEQUENCE, questById } from '../rules.ts';
+import { ambushRisk } from '../engine.ts';
+import { CITES, QUESTS, REST, questById } from '../rules.ts';
 import { CiteChip, Panel, Stepper, useGm } from './common.tsx';
+import { NextTile } from './NextTile.tsx';
+import { TurnSequence } from './TurnSequence.tsx';
 
 export function TurnPanel() {
   const { state, dispatch } = useGm();
   const quest = questById(state.questId);
   const [demons, setDemons] = useState(false);
-  const roomChance = encounterChance('room', state.encounterStreak);
-  const corridorChance = encounterChance('corridor', state.encounterStreak);
   const risk = ambushRisk(state.threat.level, state.restsTaken + 1);
-  const scenarioPending = state.pending.some((p) => p.request.kind === 'scenario_roll');
 
   return (
     <Panel
@@ -48,20 +47,7 @@ export function TurnPanel() {
         </p>
       )}
 
-      <ol className="gm-sequence">
-        {TURN_SEQUENCE.map((step, i) => (
-          <li key={step.id} className={i === 0 && scenarioPending ? 'active' : ''}>
-            {step.text}
-            {step.sub && (
-              <ol>
-                {step.sub.map((sub) => (
-                  <li key={sub}>{sub}</li>
-                ))}
-              </ol>
-            )}
-          </li>
-        ))}
-      </ol>
+      <TurnSequence />
 
       <h3 className="gm-subhead">Exploring</h3>
       <div className="gm-actions wrap">
@@ -74,32 +60,7 @@ export function TurnPanel() {
           Door or chest opened
         </button>
       </div>
-      <div className="gm-tile">
-        <span>
-          Next tile: room <strong>{roomChance}%</strong>, corridor <strong>{corridorChance}%</strong>
-          {state.encounterStreak >= ENCOUNTER.streakTiles ? ' (four or more empty tiles: +10)' : ''}{' '}
-          <CiteChip cite={CITES.encounters} />
-        </span>
-        <div className="gm-actions wrap">
-          <button type="button" className="gm-secondary" onClick={() => dispatch({ type: 'tile_revealed', kind: 'room', encounter: false })}>
-            Room, empty
-          </button>
-          <button type="button" className="gm-secondary" onClick={() => dispatch({ type: 'tile_revealed', kind: 'room', encounter: true })}>
-            Room, enemies
-          </button>
-          <button type="button" className="gm-secondary" onClick={() => dispatch({ type: 'tile_revealed', kind: 'corridor', encounter: false })}>
-            Corridor, empty
-          </button>
-          <button type="button" className="gm-secondary" onClick={() => dispatch({ type: 'tile_revealed', kind: 'corridor', encounter: true })}>
-            Corridor, enemies
-          </button>
-        </div>
-        <span className="gm-hint">
-          {state.encounterStreak} encounter-free tile{state.encounterStreak === 1 ? '' : 's'} in a row. Searching a room
-          takes the whole turn: one search per room, +{SEARCH.oneHelper} with a second searcher, +{SEARCH.moreHelpers} each after that{' '}
-          <CiteChip cite={CITES.searching} />
-        </span>
-      </div>
+      <NextTile />
 
       <h3 className="gm-subhead">Battle</h3>
       <div className="gm-actions wrap">

@@ -115,8 +115,8 @@ export function GmTable() {
               <LightPanel />
             </div>
             <div className="gm-col">
-              <MoralePanel />
               <HeroesPanel />
+              <MoralePanel />
             </div>
           </div>
           <LogPanel />

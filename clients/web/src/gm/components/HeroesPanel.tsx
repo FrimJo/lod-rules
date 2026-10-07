@@ -1,26 +1,44 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { lightSummary, type Hero } from '../engine.ts';
 import { CITES, HERO_STATUSES, MENTAL_CONDITIONS, SANITY, type HeroStatus } from '../rules.ts';
 import { CiteChip, Panel, useGm } from './common.tsx';
 
+/**
+ * The party. Adding heroes comes first: Party Morale starts at the sum of their RES ÷ 10, so the
+ * form stays open until the first hero is in and keeps the focus for the next one.
+ */
 export function HeroesPanel() {
   const { state } = useGm();
   const [adding, setAdding] = useState(false);
-  const showForm = adding || state.heroes.length === 0;
+  const empty = state.heroes.length === 0;
+  const showForm = adding || empty;
   return (
     <Panel
       title="Heroes"
       cite={CITES.sanity}
       aside={
-        <button type="button" className="gm-secondary" onClick={() => setAdding((v) => !v)} aria-expanded={showForm}>
-          Add hero
-        </button>
+        !showForm && (
+          <button type="button" className="gm-secondary" onClick={() => setAdding(true)} aria-expanded={false}>
+            Add hero
+          </button>
+        )
       }
     >
-      {showForm && <AddHero onDone={() => setAdding(false)} />}
-      {state.heroes.length === 0 ? (
-        <p className="muted">No heroes yet. Each hero starts with {SANITY.start} Sanity.</p>
-      ) : (
+      {empty && (
+        <p className="gm-lead">
+          Add each hero with the RES from their character sheet. Party Morale starts at the sum of RES ÷ 10{' '}
+          <CiteChip cite={CITES.moraleCalculation} />, and every hero starts with {SANITY.start} Sanity.
+        </p>
+      )}
+      {showForm && (
+        <AddHero
+          onDone={() => setAdding(false)}
+          onAdded={() => setAdding(true)}
+          closable={!empty}
+          autoFocus={adding}
+        />
+      )}
+      {!empty && (
         <ul className="gm-heroes">
           {state.heroes.map((hero) => (
             <li key={hero.id}>
@@ -160,43 +178,104 @@ function HeroCard({ hero }: { hero: Hero }) {
   );
 }
 
-function AddHero({ onDone }: { onDone: () => void }) {
+function AddHero({
+  onDone,
+  onAdded,
+  closable,
+  autoFocus,
+}: {
+  onDone: () => void;
+  /** Keeps the form open after a hero is added so the next one follows at once. */
+  onAdded: () => void;
+  closable: boolean;
+  autoFocus: boolean;
+}) {
   const { dispatch } = useGm();
   const [name, setName] = useState('');
   const [resolve, setResolve] = useState('');
   const [nightVision, setNightVision] = useState(false);
+  const [added, setAdded] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const res = Number(resolve);
-  const valid = name.trim() !== '' && Number.isInteger(res) && res >= 0;
+  const resValid = resolve.trim() !== '' && Number.isInteger(res) && res >= 0;
+  const valid = name.trim() !== '' && resValid;
+  const moraleShare = resValid ? Math.floor(res / 10) : null;
+
+  // Focus the name only when the Game Master opened the form; on a fresh page the form is
+  // already open and stealing focus would scroll the table.
+  useEffect(() => {
+    if (autoFocus) nameRef.current?.focus();
+  }, [autoFocus]);
+
   return (
     <form
-      className="gm-form gm-inline"
+      className="gm-form gm-inline gm-add-hero"
+      aria-label="Add a hero"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && closable) {
+          e.preventDefault();
+          onDone();
+        }
+      }}
       onSubmit={(e) => {
         e.preventDefault();
         if (!valid) return;
-        dispatch({ type: 'hero_add', name: name.trim(), resolve: res, nightVision });
+        const trimmed = name.trim();
+        dispatch({ type: 'hero_add', name: trimmed, resolve: res, nightVision });
+        onAdded();
+        setAdded(trimmed);
         setName('');
         setResolve('');
         setNightVision(false);
+        nameRef.current?.focus();
       }}
     >
       <div className="gm-field">
         <label htmlFor="gm-hero-name">Name</label>
-        <input id="gm-hero-name" type="text" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+        <input
+          id="gm-hero-name"
+          ref={nameRef}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="off"
+          placeholder="Hero’s name"
+        />
       </div>
       <div className="gm-field narrow">
         <label htmlFor="gm-hero-res">RES</label>
-        <input id="gm-hero-res" type="number" inputMode="numeric" min={0} value={resolve} onChange={(e) => setResolve(e.target.value)} />
+        <input
+          id="gm-hero-res"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={resolve}
+          onChange={(e) => setResolve(e.target.value)}
+          placeholder="e.g. 45"
+          aria-describedby="gm-hero-res-hint"
+        />
       </div>
       <label className="gm-check">
         <input type="checkbox" checked={nightVision} onChange={(e) => setNightVision(e.target.checked)} />
         Night Vision
       </label>
-      <button type="submit" disabled={!valid}>
-        Add hero
-      </button>
-      <button type="button" className="gm-link" onClick={onDone}>
-        Close
-      </button>
+      <div className="gm-form-actions">
+        <button type="submit" className="gm-primary" disabled={!valid}>
+          Add to party
+        </button>
+        {closable && (
+          <button type="button" className="gm-link" onClick={onDone}>
+            Done
+          </button>
+        )}
+      </div>
+      <p id="gm-hero-res-hint" className="gm-form-status" aria-live="polite">
+        {moraleShare !== null
+          ? `Adds +${moraleShare} to the Party Morale start value (RES ÷ 10, rounded down).`
+          : added
+            ? `${added} joined the party. Add the next hero, or press Enter after typing.`
+            : 'Resolve from the character sheet. Press Enter to add.'}
+      </p>
     </form>
   );
 }

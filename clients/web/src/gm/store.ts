@@ -55,10 +55,17 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
+/** Navigation events: they change the view of the turn, not the dungeon, so Undo skips them. */
+const NOT_UNDOABLE = new Set<GmEvent['type']>(['turn_step']);
+
 export function dispatch(event: GmEvent): void {
   const current = getSnapshot();
   const present = reduce(current.present, event);
   if (present === current.present) return;
+  if (NOT_UNDOABLE.has(event.type)) {
+    write({ present, past: current.past });
+    return;
+  }
   write({ present, past: [...current.past, current.present].slice(-UNDO_LIMIT) });
 }
 
