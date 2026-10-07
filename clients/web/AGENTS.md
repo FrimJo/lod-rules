@@ -65,4 +65,4 @@ unless the user explicitly requests it.
 ## Docs
 
 - [README.md](README.md) — run, retrieval modes, rulebook viewer
-- [../../docs/web-client-static-bundle-plan.md](../../docs/web-client-static-bundle-plan.md) — proposed static/browser-only direction (not implemented)
+- [docs/static-bundle-plan.md](docs/static-bundle-plan.md) — proposed static/browser-only direction (not implemented)

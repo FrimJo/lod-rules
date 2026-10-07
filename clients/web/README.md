@@ -58,7 +58,7 @@ weights do not fit a Vercel function. They remain available to `npm run ask` in 
 `LOD_ANALYZER` sets the server default when it names an available mode. Otherwise the default
 is `jev` when `TYPESAFE_API_KEY` is set and `lexical` when it is not. The filtered mode stays
 opt-in until a filter policy calibrated on reviewed labels passes
-([docs/jev-filter-calibration-plan.md](../../docs/jev-filter-calibration-plan.md)); on
+([docs/ask-quality-evaluation.md](../../docs/ask-quality-evaluation.md#filter-calibration-plan)); on
 judge-only grades it was within noise of the union
 ([docs/ask-quality-evaluation.md](../../docs/ask-quality-evaluation.md)).
 The browser saves its choice in `localStorage`
@@ -96,9 +96,13 @@ chips that open the rulebook pane, and lists what to resolve next:
 
 - **Turn**: pick the quest (start, minimum and maximum Threat and the Wandering Monster
   thresholds come from the quest tables); `New turn` (or `N`) asks for the Scenario die once
-  the party has passed the first door; a 9 or 0 asks for a Threat roll. Door opened, tile
-  revealed (with the encounter chance, +10 after four empty tiles), battle begins and ends,
-  short rest (ration, recovery, ambush roll against 5 + Threat, +10 per later rest).
+  the party has passed the first door; a 9 or 0 asks for a Threat roll. The five printed turn
+  steps are a click-through: each step shows what the table knows about it and takes the roll
+  it calls for, and `Show as list` swaps in the plain list (remembered per browser). Door
+  opened; next tile as one action (`Roll for enemies` rolls 1d100 against the room or corridor
+  chance, +10 after four empty tiles, and shows the outcome; a physical roll or a result the
+  quest dictates can be entered instead); battle begins and ends; short rest (ration,
+  recovery, ambush roll against 5 + Threat, +10 per later rest).
 - **Threat**: 20 lowers by 5, above Threat adds 1, at or below asks you to roll on the printed
   Threat table and enter its decrease (those tables are not in the corpus yet). Door +1,
   forcing a lock +2, crowbar +1, portcullis failure +1, perks, and a prompt for the
