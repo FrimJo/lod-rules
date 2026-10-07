@@ -73,3 +73,27 @@ describe('Bleeding entry ownership — rendered PDF122', () => {
     expect(result.steps).not.toContain('zero');
   });
 });
+
+describe('Bleeding Out Advanced Rule time limit — rendered PDF122', () => {
+  const timer = (state: State, elapsed: number) =>
+    run({ ...state, phase: 'timer', elapsed_turns: elapsed });
+  it('the hero dies once the 1d6+1 limit set at this downing event has elapsed', () => {
+    const downed = run(initial).state;
+    expect(downed.turns).toBe(5);
+    expect(timer(downed, 4).state.dead).toBe(false);
+    const expired = timer(downed, 5);
+    expect(expired.state.dead).toBe(true);
+    expect(expired.events).toContainEqual({ type: 'invoke', dependency: 'procedure.hero_death' });
+  });
+  it('a limit never initialized for this downing event cannot kill the hero', () => {
+    const ordinary = run({ ...initial, advanced_rule_enabled: false }).state;
+    const enabledLater = timer({ ...ordinary, advanced_rule_enabled: true, turns: 2 }, 6);
+    expect(enabledLater.state.dead).toBe(false);
+    expect(enabledLater.steps).not.toContain('expired');
+  });
+  it('a hero rescued before expiry is no longer subject to the limit', () => {
+    const downed = run(initial).state;
+    const result = timer({ ...downed, bleeding_out: false, hit_points: 3 }, 9);
+    expect(result.state.dead).toBe(false);
+  });
+});

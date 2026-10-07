@@ -290,6 +290,20 @@ describe('per-hero activities and shared lodging — PDF 133–134, 147, 160', (
     expect(otherHero.state.hit_points).toBe(10);
     expect(otherHero.state.coins).toBe(475);
   });
+  it('a hero at full HP still regains Mana, Energy and Luck at a paid inn (PDF147)', () => {
+    const paid = act({ phase: 'overnight' });
+    const full = act({ ...paid.state, phase: 'recover', hit_points: 30, hp_roll: 7 });
+    expect(full.unresolved).toContain('issue.phase4.recovery_bounds');
+    expect(full.state).toMatchObject({
+      hit_points: 30,
+      mana: 20,
+      energy: 5,
+      luck: 3,
+      hero_recovery_day: 0,
+    });
+    const replay = act({ ...full.state, mana: 0, hit_points: 20 });
+    expect(replay.state).toMatchObject({ mana: 0, hit_points: 20 });
+  });
   it('uses estate lodging without a charge and rejects ownership-free use', () => {
     const home = act({ phase: 'overnight', lodging_choice: 'estate', estate_owned: true });
     expect(home.state).toMatchObject({ coins: 500, inn_nights: 0, lodging_kind: 'estate' });
@@ -488,16 +502,28 @@ describe('guarded purchases and distinct services — PDF 144, 146–147', () =>
     expect(shop(r.state).state.coins).toBe(490);
   });
   it('illness treatment charges once per day and applies only its supplied successful outcome', () => {
-    const failed = shop({ operation: 'cure_disease', treatment_succeeds: false });
-    expect(failed.state).toMatchObject({
+    const cured = shop({ operation: 'cure_disease' });
+    expect(cured.state).toMatchObject({
       coins: 400,
-      diseased: true,
+      diseased: false,
       poisoned: true,
       last_treatment_day: 0,
     });
-    expect(shop(failed.state).state.coins).toBe(400);
-    const cured = shop({ ...failed.state, day: 1, treatment_succeeds: true });
-    expect(cured.state).toMatchObject({ coins: 300, diseased: false, poisoned: true });
+    expect(shop(cured.state).state.coins).toBe(400);
+    const poison = shop({ ...cured.state, operation: 'cure_poison' });
+    expect(poison.state).toMatchObject({ coins: 400, poisoned: true });
+    const nextDay = shop({ ...cured.state, operation: 'cure_poison', day: 1 });
+    expect(nextDay.state).toMatchObject({ coins: 300, poisoned: false });
+  });
+  it('an unsuccessful illness treatment is not source-defined, so nothing is charged or cured (PDF144)', () => {
+    const failed = shop({ operation: 'cure_disease', treatment_succeeds: false });
+    expect(failed.unresolved).toContain('issue.settlement.illness_treatment_limits');
+    expect(failed.state).toMatchObject({
+      coins: 500,
+      diseased: true,
+      last_treatment_day: -1,
+      service_completed: false,
+    });
   });
   it.each([
     [5, 1],

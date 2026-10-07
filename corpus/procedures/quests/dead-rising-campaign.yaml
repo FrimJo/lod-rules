@@ -1,0 +1,1138 @@
+- id: procedure.dead_rising_campaign
+  name: The Dead Rising campaign progression
+  section_id: section.quest_book_i.the_dead_rising
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 224
+      printed_page: 222
+      heading: The Dead Rising
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a4
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 226
+      printed_page: 224
+      heading: 'Quest 1: Spring Cleaning — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 227
+      printed_page: 225
+      heading: 'Quest 2: The Dead Rising'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a5
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 230
+      printed_page: 228
+      heading: 'Quest 3: Highwaymen — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 231
+      printed_page: 229
+      heading: 'Quest 4: The Burning Village'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a6
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 233
+      printed_page: 231
+      heading: 'Quest 5: The Apprentice — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a7
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 234
+      printed_page: 232
+      heading: 'Quest 6A: Sacrifice — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a8
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 236
+      printed_page: 234
+      heading: 'Quest 6B: The Master — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'The campaign starts wherever the heroes are, but the second quest must be started in
+    Silver City. Its quests run in order: Spring Cleaning, The Dead Rising, Highwaymen, The Burning
+    Village (won or fled, the campaign continues), The Apprentice, then the party chooses: the
+    Apostle (6A, then travel to White 39 for 6B) or the Master (6B directly), with no time to return
+    to Silver City. After 6B the party travels to Silver City for the campaign aftermath. Each quest
+    runs as its own accepted quest; this procedure owns only the campaign order, the Silver City
+    start check, the 6A/6B choice and the once-only aftermath.'
+  issues:
+    - issue.quest.campaign_progression_boundaries
+  fields:
+    campaign_id:
+      type: string
+      role: input
+      description: Actual The Dead Rising campaign instance of this call.
+    campaign_owner_id:
+      type: string
+      role: state
+      description: Campaign instance this progression belongs to. Empty for a fresh campaign; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's campaign instance matches the saved one. Reset on every call.
+    phase:
+      type: string
+      role: input
+      description:
+        start, start_quest, complete, choose or return (Dead Rising) / start, accept, complete
+        or return (Spider Queen).
+    stage:
+      type: string
+      role: state
+      description: Campaign position. Empty before the campaign starts.
+    next_quest_id:
+      type: string
+      role: state
+      description: Quest the campaign requires next.
+    quest_in_progress:
+      type: boolean
+      role: state
+      description: The required next quest has been started and not yet completed.
+    completed_quest_id:
+      type: string
+      role: input
+      description: Actual quest whose outcome this call reports.
+    quest_outcome:
+      type: string
+      role: input
+      description:
+        'Actual outcome of that quest: completed, fled (where the quest allows it), failed or
+        abandoned.'
+    completion_accepted:
+      type: boolean
+      role: output
+      description:
+        This call reports a completion that advances the campaign. Cleared by the transition it
+        triggers.
+    current_settlement:
+      type: string
+      role: input
+      description:
+        Actual settlement where the party is for this call (starting a quest or arriving for
+        the aftermath); silver_city for Silver City.
+    next_destination:
+      type: string
+      role: state
+      description: Where the campaign text sends the party after the last completed quest.
+    settlement_return_allowed:
+      type: boolean
+      role: state
+      description: 'False between The Apprentice and the end of 6B: there is no time to head back to
+        Silver City.'
+    campaign_choice:
+      type: string
+      role: input
+      description: 'Actual party choice after The Apprentice: apostle or master.'
+    chose_to_stop_sacrifice:
+      type: boolean
+      role: state
+      description: The party chose the Apostle (6A). Quest 6B reads this for its harder encounters.
+    aftermath_processed:
+      type: boolean
+      role: state
+      description: The campaign aftermath has been applied once.
+    league_member:
+      type: boolean
+      role: state
+      description: The party has been enlisted into the League of Dungeoneers by playing this campaign.
+    dagger_taken_for_investigation:
+      type: boolean
+      role: output
+      description: From the aftermath rule.
+    dagger_symbol_origin:
+      type: string
+      role: output
+      description: From the aftermath rule.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Coins each hero receives at the aftermath dinner, from the aftermath rule.
+      integer: true
+    reward_presentation:
+      type: string
+      role: output
+      description: From the aftermath rule.
+    league_enlistment_requested:
+      type: boolean
+      role: output
+      description: From the aftermath rule.
+    requesting_king:
+      type: string
+      role: output
+      description: From the aftermath rule.
+    next_expeditions:
+      type: string
+      role: output
+      description: From the aftermath rule.
+  dependencies:
+    - key: quests
+      label: Each campaign quest as its own accepted quest and dungeon lifecycle
+      object_id: procedure.quest_acceptance
+    - key: travel
+      label: Travel to the next destination named by the campaign text
+      object_id: procedure.travel_daily_movement
+    - key: rochdale
+      label: Travel to Rochdale without event using the bandit rations
+      object_id: core.quest.highwaymen.aftermath_travel
+  steps:
+    - id: check_owner
+      source: &a2
+        - *a1
+      source_text: Bind a fresh campaign progression to its instance; another instance cannot advance it.
+      substeps:
+        - id: bind_campaign
+          source: *a2
+          source_text: A fresh progression takes the campaign instance of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_owner_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: campaign_owner_id
+              value:
+                type: field
+                name: campaign_id
+        - id: owner
+          source: *a2
+          source_text: Only the bound campaign instance continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_owner_id
+            right:
+              type: field
+              name: campaign_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+    - id: start_campaign
+      source:
+        - *a1
+      source_text: 'This campaign starts wherever the heroes are, with Quest 1: Spring Cleaning.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: start
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: ''
+      effects:
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q1
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.spring_cleaning
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: settlement_return_allowed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: aftermath_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: chose_to_stop_sacrifice
+          value:
+            type: literal
+            value: false
+    - id: start_quest
+      source:
+        - *a1
+      source_text:
+        The second quest must be started in Silver City; the other quests start where their own
+        text places them.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: start_quest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_in_progress
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q1
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q3
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q5
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q6a
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q6b
+      effects:
+        - type: require
+          condition:
+            type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: stage
+                right:
+                  type: literal
+                  value: q2
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: current_settlement
+                right:
+                  type: literal
+                  value: silver_city
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: true
+    - id: accept_completion
+      source:
+        - *a1
+        - *a3
+      source_text: Only the actual completion of the required next quest advances the campaign. The
+        Burning Village continues the campaign whether the heroes won or fled.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_in_progress
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completed_quest_id
+            right:
+              type: field
+              name: next_quest_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_outcome
+                right:
+                  type: literal
+                  value: completed
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: quest_outcome
+                    right:
+                      type: literal
+                      value: fled
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: stage
+                    right:
+                      type: literal
+                      value: q4
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: true
+    - id: unhandled_outcome
+      source:
+        - *a1
+      source_text:
+        The campaign text gives the order of its quests and where to go next, but not what
+        happens to the campaign when one of them is failed or abandoned. Such an outcome changes
+        nothing here.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_in_progress
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completed_quest_id
+            right:
+              type: field
+              name: next_quest_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_outcome
+                right:
+                  type: literal
+                  value: failed
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_outcome
+                right:
+                  type: literal
+                  value: abandoned
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.campaign_progression_boundaries
+    - id: after_spring_cleaning
+      source:
+        - *a4
+      source_text: Head to Silver City to continue the campaign.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q1
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q2
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.the_dead_rising
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: Silver City
+    - id: after_dead_rising
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 228
+          printed_page: 226
+          heading: 'Quest 2: The Dead Rising — aftermath'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: 'Quest 3: Highwaymen follows The Dead Rising.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q2
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q3
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.highwaymen
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: White 34
+    - id: after_highwaymen
+      source:
+        - *a5
+      source_text: The party travels to Rochdale without event, using the rations found at the bandit hideout.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q3
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q4
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.burning_village
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: Rochdale
+        - type: invoke
+          dependency: rochdale
+    - id: after_burning_village
+      source:
+        - *a3
+      source_text: 'Won or fled, continue the travel to Silver City for Quest 5: The Apprentice.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q4
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q5
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.apprentice
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: Silver City
+    - id: after_apprentice
+      source:
+        - *a6
+      source_text:
+        There is no time to head back to Silver City; the party must choose the Apostle or the
+        Master.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q5
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: choice
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: ''
+        - type: set
+          target: settlement_return_allowed
+          value:
+            type: literal
+            value: false
+    - id: choose_apostle
+      source:
+        - *a6
+      source_text: If they choose to go for the Apostle, play quest 6A.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: choice
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_choice
+            right:
+              type: literal
+              value: apostle
+      effects:
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q6a
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.sacrifice
+        - type: set
+          target: chose_to_stop_sacrifice
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: White 36
+    - id: choose_master
+      source:
+        - *a6
+      source_text: If they choose to go for the Master, play quest 6B.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: choose
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: choice
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_choice
+            right:
+              type: literal
+              value: master
+      effects:
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q6b
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.master
+        - type: set
+          target: chose_to_stop_sacrifice
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: White 39
+    - id: after_sacrifice
+      source:
+        - *a7
+      source_text: 'After 6A the heroes head straight towards the Master: travel to White 39 for 6B.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q6a
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: q6b
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.dead_rising.master
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: White 39
+    - id: after_master
+      source:
+        - *a8
+      source_text: After 6B, travel to Silver City for the campaign aftermath.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: q6b
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: return
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: ''
+        - type: set
+          target: next_destination
+          value:
+            type: literal
+            value: Silver City
+        - type: set
+          target: settlement_return_allowed
+          value:
+            type: literal
+            value: true
+    - id: campaign_aftermath
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 236
+          printed_page: 234
+          heading: Campaign aftermath
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        In Silver City the Jarl presents each hero with 1000 c and the party is enlisted into
+        the League of Dungeoneers. This happens once.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: return
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: return
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: current_settlement
+            right:
+              type: literal
+              value: silver_city
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: aftermath_processed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.dead_rising_campaign.aftermath
+      effects:
+        - type: set
+          target: aftermath_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: league_member
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: complete
+  entry_step: check_owner
+  exit_step: campaign_aftermath

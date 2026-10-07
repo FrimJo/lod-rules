@@ -157,6 +157,19 @@ describe('travel resource accounting from PDF 126–128', () => {
     });
     expect(r.state).toMatchObject({ foraging_target: 40, party_fed: true });
   });
+  it('a failed Foraging attempt leaves the party without food for that day (PDF126)', () => {
+    const failed = run('travel_food_and_rest', {
+      ...food,
+      food_choice: 'forage',
+      terrain: 'road',
+      foraging_roll: 31,
+    });
+    expect(failed.state).toMatchObject({ party_fed: false, party_morale: 4, rations_available: 3 });
+    const fallback = run('travel_food_and_rest', { ...failed.state, food_choice: 'rations' });
+    expect(fallback.state).toMatchObject({ party_fed: false, rations_available: 3 });
+    const hero = run('travel_food_and_rest', { ...fallback.state, phase: 'hero' });
+    expect(hero.state).toMatchObject({ constitution: 16, hungry: true });
+  });
   it('applies hunger once and restores only its temporary deltas after eating', () => {
     const party = run('travel_food_and_rest', { ...food, rations_available: 0 });
     expect(party.state.party_morale).toBe(4);
@@ -199,12 +212,22 @@ describe('travel resource accounting from PDF 126–128', () => {
   it('invalid supplied rest outcomes cannot award HP or Energy', () => {
     const r = run('travel_food_and_rest', { ...food, phase: 'rest', energy_successes: 5 });
     expect(r.state).toMatchObject({ hit_points: 12, energy: 1, hero_rest_day: -1 });
-    const overflow = run('travel_food_and_rest', { ...food, phase: 'rest', hp_roll: 6 });
-    expect(overflow.unresolved).toContain('issue.phase4.recovery_bounds');
-    expect(overflow.state).toMatchObject({ hit_points: 12, energy: 1, hero_rest_day: -1 });
     expect(() => run('travel_food_and_rest', { ...food, phase: 'rest', hp_roll: 7 })).toThrow(
       'Input out of range',
     );
+  });
+  it('an HP roll above maximum stays open but does not block Energy recovery (PDF127)', () => {
+    const overflow = run('travel_food_and_rest', { ...food, phase: 'rest', hp_roll: 6 });
+    expect(overflow.unresolved).toContain('issue.phase4.recovery_bounds');
+    expect(overflow.state).toMatchObject({ hit_points: 12, energy: 3, hero_rest_day: 0 });
+    const bedroll = run('travel_food_and_rest', {
+      ...food,
+      phase: 'rest',
+      hp_roll: 6,
+      bedroll: true,
+    });
+    expect(bedroll.state).toMatchObject({ hit_points: 12, energy: 4 });
+    expect(run('travel_food_and_rest', overflow.state).state.energy).toBe(3);
   });
   it.each([
     ['off_road', 10, false, 'none'],

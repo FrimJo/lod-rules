@@ -58,3 +58,76 @@ describe('Random Quests — rendered PDF243', () => {
     expect(t?.source[0]).toMatchObject({ pdf_page: 243, printed_page: 241 });
   });
 });
+
+describe('Random Quest selection order — rendered PDF243', () => {
+  const select = (inputs: State) =>
+    runCase({ procedure_id: 'procedure.random_quest_selection', inputs } as TestCase, corpus);
+  const fresh: State = {
+    offer_id: 'visit-3/random-1',
+    selection_offer_id: '',
+    objective_room_roll: 6,
+    room_selected: false,
+    selected_objective_room: '',
+    quest_selected: false,
+    selected_quest_id: '',
+    chapter_quest_supplied: false,
+    chapter_quest_id: '',
+    chapter_quest_room: '',
+    acceptance_handoff_processed: false,
+  };
+  const handoffs = (result: ReturnType<typeof select>) =>
+    result.events.filter((e) => e.type === 'invoke');
+  it('a 6 rolls again; the first 1–5 room is kept and cannot be replaced', () => {
+    const six = select(fresh);
+    expect(six.state).toMatchObject({ reroll_objective_room: true, room_selected: false });
+    const two = select({ ...six.state, objective_room_roll: 2 });
+    expect(two.state).toMatchObject({
+      room_selected: true,
+      selected_objective_room: 'The Bandits’ Hideout',
+      reroll_objective_room: false,
+    });
+    const later = select({ ...two.state, objective_room_roll: 1 });
+    expect(later.state.selected_objective_room).toBe('The Bandits’ Hideout');
+  });
+  it('the unprinted chapter quest roll stays open until a result from that chapter is supplied', () => {
+    const room = select({ ...fresh, objective_room_roll: 2 }).state;
+    const open = select(room);
+    expect(open.unresolved).toEqual(['issue.quest.random_quest_second_stage']);
+    expect(handoffs(open)).toEqual([]);
+    const wrongChapter = select({
+      ...room,
+      chapter_quest_supplied: true,
+      chapter_quest_id: 'quest.lava_river.stop_heretics',
+      chapter_quest_room: 'The Lava River',
+    });
+    expect(wrongChapter.state.quest_selected).toBe(false);
+    expect(handoffs(wrongChapter)).toEqual([]);
+    const chosen = select({
+      ...room,
+      chapter_quest_supplied: true,
+      chapter_quest_id: 'quest.bandits_hideout.pleasure_house',
+      chapter_quest_room: 'The Bandits’ Hideout',
+    });
+    expect(chosen.state).toMatchObject({
+      quest_selected: true,
+      selected_quest_id: 'quest.bandits_hideout.pleasure_house',
+    });
+    expect(handoffs(chosen)).toEqual([
+      { type: 'invoke', dependency: 'procedure.quest_acceptance' },
+    ]);
+    expect(handoffs(select(chosen.state))).toEqual([]);
+  });
+  it('another offer cannot use this selection; a later offer of the same quest starts fresh', () => {
+    const room = select({ ...fresh, objective_room_roll: 4 }).state;
+    const other = select({ ...room, offer_id: 'visit-3/random-2', objective_room_roll: 1 });
+    expect(other.state).toMatchObject({
+      owner_matches: false,
+      selected_objective_room: 'The Great Crypt',
+    });
+    const repeat = select({ ...fresh, offer_id: 'visit-9/random-1', objective_room_roll: 4 });
+    expect(repeat.state).toMatchObject({
+      selection_offer_id: 'visit-9/random-1',
+      selected_objective_room: 'The Great Crypt',
+    });
+  });
+});

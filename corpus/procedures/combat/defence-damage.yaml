@@ -3609,7 +3609,10 @@
             method: text
             confidence: high
             visually_verified: true
-      source_text: Optional bleeding time limit kills at expiry; elapsed turns and limit are supplied.
+      source_text:
+        Optional bleeding time limit kills at expiry; elapsed turns are supplied. Only the limit
+        initialized for this hero/downing event (timer_processed) can expire; a stale or
+        never-initialized limit cannot kill.
       when:
         type: all
         conditions:
@@ -3626,6 +3629,14 @@
             left:
               type: field
               name: advanced_rule_enabled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: timer_processed
             right:
               type: literal
               value: true

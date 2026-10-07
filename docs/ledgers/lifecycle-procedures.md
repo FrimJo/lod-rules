@@ -1659,3 +1659,143 @@ which must not be empty. Non-empty `remaining_work` is rejected; such a row stay
 two new fields are rejected on any other disposition. A matching obligation disposition, `catalogue_scope`, is allowed only inside such a row and needs catalogue records. No real rows use the disposition yet,
 because the shared campaign rows are still pending. Synthetic fixtures in
 `tests/schema/lifecycle-acceptance.test.ts` cover each guard.
+
+## Condition and rest audit rows — 7 October 2026
+
+I rendered PDF122, 126–127, 134, 144 and 147 and compared them with the procedures that
+already model these headings. All five rows are now `implemented`.
+
+- **Magic Damage** (PDF122): `procedure.damage_follow_up` matches the passage. No change.
+  Creature complications stay a handoff under `issue.magic.creature_complications`.
+- **Bleeding Out, Advanced Rule** (PDF122): the expiry step could kill a hero with a limit
+  that was never set for the current downing event. It now requires `timer_processed`.
+- **Rations and Resting** (PDF126–127): an HP roll above maximum blocked the day's Energy
+  recovery. HP is now a separate `rest_hp` step; Energy no longer waits on it.
+- **Cure Disease and Poison** (PDF144, table on PDF134): the service charged 100 c on a
+  supplied failed treatment. The book defines no failure, so that outcome now surfaces the
+  new `issue.settlement.illness_treatment_limits` and charges nothing.
+- **Rest and Recuperation** (PDF147): a hero at full HP got no Mana, Energy or Luck at a paid
+  inn, because the above-maximum HP question blocked the whole night. HP is now a separate
+  `paid_hp` step.
+
+New or changed regressions: the `Bleeding Out Advanced Rule time limit — rendered PDF122`
+block (3 tests), one Foraging-failure test and one HP-overflow test in
+`tests/rules/travel-accounting.test.ts`, and one full-HP inn test plus one failed-treatment
+test in `tests/rules/travel-settlement.test.ts`. Three existing tests that asserted the
+invented failure fee, and one that asserted the HP/Energy coupling, were updated. The dungeon
+rest procedures in `corpus/procedures/dungeon/rest-recovery.yaml` do not gate Mana or Energy
+on the HP bound, so they do not have the same problem.
+
+## Shared quest selectors and campaign parents — 7 October 2026
+
+I rendered PDF243–244 (Random Quests), 224–225 and the transitions on 226–236 (The Dead
+Rising), 237–242 (Lair of the Spider Queen), 263–264 and 138 (Ancient Lands and The Outpost),
+and 273 with 133 (Side Quests). Each heading gained one small procedure that owns only what
+its text defines at selector or campaign level. The quests themselves stay their own
+accepted quests, and their per-quest ordered lifecycles are separate rows. All five rows are
+now `implemented`.
+
+- `procedure.random_quest_selection`: roll the Objective Room (6 rolls again; the first 1–5
+  is kept), take a supplied chapter quest that belongs to that room, and hand it to
+  acceptance once per offer. The second-stage die is not printed
+  (`issue.quest.random_quest_second_stage`).
+- `procedure.dead_rising_campaign`: quests in printed order. Quest 2 must start in Silver
+  City. Quest 4 continues whether won or fled. After Quest 5 there is no return to Silver
+  City. 6A's aftermath sends the party to White 39, so choosing the Apostle plays 6A then 6B,
+  while the Master goes straight to 6B. The aftermath (1000 c per hero, League enlistment)
+  applies once.
+- `procedure.spider_queen_campaign`: start in Whiteport, accept at White 40, then the three
+  levels in a row without a surface return. Leave the Tomb without retracing, travel
+  overland, and receive 1200 c per hero once back in Whiteport.
+- `procedure.ancient_lands_expedition`: League members leave from The Outpost and pay the
+  100 c per hero toll once, then travel under the Ancient Lands costs. The objective room
+  version is read once per occurrence.
+- `procedure.side_quest_selection`: one side quest per offer, by 1d6 or in printed order,
+  attached to another accepted quest at no Day Count cost, and handed to acceptance once.
+
+Regressions: four in `tests/rules/random-quests.test.ts` (one describe block of three tests)
+and fifteen in the new `tests/rules/campaign-progression.test.ts`. New unresolved issues:
+`issue.quest.campaign_progression_boundaries` (failed or abandoned campaign quests, retries
+and replay are undefined), `issue.quest.side_quest_availability` (arrival d8 against "any
+time during their stay in the city") and `issue.quest.ancient_lands_quest_selection` (no
+table chooses among the five Ancient Lands quests). Coverage now marks the procedures
+component of these five sections `extracted`.
+
+## Estate ghosts, furnishing and The Grieving Mother — 7 October 2026
+
+I rendered PDF160–165 (confirmed as printed 158–163 in the page map). Purchase, lodging and
+storage were already implemented (`procedure.estate_ownership`). This unit adds three small
+procedures that reuse the estate catalogue rules and tables. The estate parent, Furnishing,
+Ghostly Events Table and Grieving Mother rows are now `implemented`.
+
+- `procedure.estate_ghostly_events`: once per between-quest interval, the night before
+  departure, a party that stayed at the estate rolls 1d10; 7–10 brings one table event, and
+  plans cannot then change. Event 6 starts The Grieving Mother, or counts as #2 after its
+  success. Event 5 is ignored without a wizard. Event 7 empties the estate crop rations. An
+  owed event 8 replaces the rolls. Effects for the coming quest are handed to each hero.
+- `procedure.grieving_mother`: one occurrence in the next quest's dungeon. The card leads to
+  the side room, the door slams after the first combat turn, and a hero spends one action to
+  pick up the remains once the spiders are beaten. Ending before the card is drawn fails and
+  owes Ghostly Event 8. Burial at the estate gives the Longsword once. A retry is a new
+  occurrence.
+- `procedure.estate_furnishing`: the printed prices, one purchase per interval while staying
+  at the manor, no use until after the next dungeon, training once per interval at one
+  facility, and one Alchemist Lab recipe and one Garden gathering per interval.
+
+Regressions: 15 tests in the new `tests/rules/estate-ghosts-lifecycle.test.ts`. New
+unresolved issues: `issue.estate.ghost_contact_scope` (a night spent elsewhere, and an owed
+event 8 alongside the ordinary roll), `issue.quest.grieving_mother_outcome_boundaries`
+(leaving without the remains, or losing the carrier) and
+`issue.estate.furnishing_usage_boundaries` (training facility choice, Smithy, Shrine and
+Crops frequency, lab and garden scope, crop ration holding). Coverage now marks the
+procedures component of the four estate sections `extracted`.
+
+## Estate readings supplied, and Package F closure — 7 October 2026
+
+**Estate source-silent choices are now caller-supplied.** I re-rendered PDF160–165 (printed
+158–163 in the page map). The book does not say whether the ghost roll needs a night at the
+estate, whether an owed Ghostly Event 8 replaces or adds to the ordinary rolls, whether the
+one Alchemist Lab recipe and one Garden gathering count per facility or per alchemist, or
+where crop rations are kept. The procedures no longer pick a reading:
+
+- `procedure.estate_ghostly_events` takes `ghost_roll_scope` (`estate_night_only` or
+  `every_interval`) and, only when an event 8 is owed, `owed_event_reading` (`replaces_rolls`
+  or `in_addition`). Event 7 takes `crop_rations_holding` (`held_at_estate` or
+  `carried_by_party`) and reports `crop_rations_lost`. Without a supplied reading the interval
+  waits on `issue.estate.ghost_contact_scope`, or event 7 loses nothing and surfaces
+  `issue.estate.furnishing_usage_boundaries`.
+- `procedure.estate_furnishing` takes `lab_garden_limit_scope` (`per_facility` or
+  `per_alchemist`); without it the Lab or Garden use is refused and the issue surfaces.
+
+Both issues stay unresolved and now say the caller supplies the value. In
+`tests/rules/estate-ghosts-lifecycle.test.ts`, the owed-event and night-away tests were
+rewritten, the crop-ration check was split out of the Protector test, and a Lab/Garden test
+was added. The three reading tests each run both readings and the missing input (17 tests in
+the file, up from 15).
+
+**Location groupings and the campaign aftermath.** Rendered PDF244, 249, 253, 255 and 259:
+The Lava River, The Bandits’ Hideout, The Fountain Room, The Chamber of Reverence and The
+Great Crypt are titles only, with Quest 1 directly beneath. They are now
+`covered_by_another_model`, citing their child `quest.*` records and the Random Quests
+objective-room table they name. Rendered PDF222: the Quest Book I Introduction has one
+structural paragraph (`core.quest_book.catalogue_structure`) and the Triggering Wandering
+Monsters rules, which `procedure.quest_reading_and_events` executes; it is covered too.
+Rendered PDF236: Campaign aftermath is the `campaign_aftermath` step of
+`procedure.dead_rising_campaign`, so it is covered rather than catalogue-scoped. Coverage now
+marks the procedures component of the Introduction and Campaign aftermath extracted; the
+Introduction section becomes `extracted`.
+
+**Catalogue scope.** The remaining 28 Quest Book I and 15 personal-quest rows are
+`catalogue_scope`. Each names the closed shared rows it relies on (acceptance, departure,
+reading and Threat, shared dungeon progression, and its campaign, selector or grouping row;
+personal quests name the row their progress runs through, such as the psychology table, the
+Ancient Lands expedition or the estate purchase) and states its unmodelled ordered lifecycle
+in `deferred_work`. Two mappings are loose and are said so in the row: Poverty relies on the
+settlement visit model (travel movement is outside the Package F inventory), and The Fraud
+on the estate training facilities (levelling up, its main source, is outside the inventory).
+The seven bespoke quest lifecycles are unchanged.
+
+**Result.** The manifest is `accepted`: 41 implemented, 10 covered by another model,
+1 nonprocedural, 43 catalogue scope, 0 pending, and the final-acceptance check reports no
+errors. Coverage for the quest sections' procedures component is unchanged, because their
+ordered lifecycles are deferred, not extracted. No independent review.

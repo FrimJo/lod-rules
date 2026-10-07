@@ -1,0 +1,430 @@
+- id: procedure.ancient_lands_expedition
+  name: Ancient Lands expedition entry, travel and objective variant
+  section_id: section.quest_book_i.quests_into_the_ancient_lands
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Quests into the Ancient Lands
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 138
+      printed_page: 136
+      heading: The Outpost
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: To enter the Ancient Lands via the Outpost the party must be members of the League of
+    Dungeoneers (play the first campaign to become this). All expeditions into these lands must
+    start from the Outpost, where a toll of 100 c per hero is paid first. Travel there costs 2
+    Movement Points per hex and 2 Rations per day, and a Travel Event roll of 10–12 draws a Desert
+    Event Card. Each of the five quests has two objective rooms, depending on access to the Ancient
+    Lands tiles; read the correct one. Which of the five quests is offered is not printed and stays
+    a supplied choice.
+  issues:
+    - issue.quest.ancient_lands_quest_selection
+  fields:
+    expedition_id:
+      type: string
+      role: input
+      description: Actual accepted Ancient Lands quest occurrence of this call.
+    expedition_owner_id:
+      type: string
+      role: state
+      description: Occurrence this expedition belongs to. Empty for a fresh one; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's occurrence matches the saved one. Reset on every call.
+    phase:
+      type: string
+      role: input
+      description: depart (leave the Outpost for the quest site) or objective (read the objective room).
+    ancient_quest_id:
+      type: string
+      role: input
+      description: Actual chosen Ancient Lands quest. Empty when no choice is supplied.
+    current_settlement:
+      type: string
+      role: input
+      description: Actual settlement the party departs from; outpost for The Outpost.
+    via_outpost:
+      type: boolean
+      role: output
+      description: The party departs from The Outpost; input to the eligibility rule.
+    league_member:
+      type: boolean
+      role: input
+      description:
+        The party is a member of the League of Dungeoneers (procedure.dead_rising_campaign
+        aftermath).
+    outpost_entry_eligible:
+      type: boolean
+      role: output
+      description: From the eligibility rule.
+    hero_count:
+      type: number
+      role: input
+      description: Number of heroes passing the toll.
+      integer: true
+      minimum: 1
+    toll_due:
+      type: number
+      role: output
+      description: 'Toll to the King: 100 c per hero.'
+      integer: true
+    coins:
+      type: number
+      role: state
+      description: Party coins that pay the toll.
+    toll_paid:
+      type: boolean
+      role: state
+      description: The toll for this expedition has been paid once.
+    travelling_in_ancient_lands:
+      type: boolean
+      role: output
+      description: The travel to the site uses the Ancient Lands costs; input to the travel rules.
+    movement_points_per_hex:
+      type: number
+      role: output
+      description: From the travel cost rule.
+    rations_per_day_printed:
+      type: number
+      role: output
+      description: From the travel cost rule.
+    camel_reduces_travel_time:
+      type: boolean
+      role: output
+      description: From the travel cost rule.
+    ancient_tiles_available:
+      type: boolean
+      role: input
+      description: The players have the Ancient Lands tiles.
+    objective_room_variant:
+      type: string
+      role: state
+      description: Objective room version read for this occurrence; kept once chosen.
+    objective_variant_fixed:
+      type: boolean
+      role: state
+      description: The objective room version is fixed for this occurrence.
+  dependencies:
+    - key: acceptance
+      label: Acceptance of the chosen quest at The Outpost
+      object_id: procedure.quest_acceptance
+    - key: travel
+      label: Daily travel with Ancient Lands movement, rations and desert events
+      object_id: procedure.travel_daily_movement
+  steps:
+    - id: check_owner
+      source: &a2
+        - *a1
+      source_text: Bind a fresh expedition to its expedition; another one cannot change it.
+      substeps:
+        - id: bind
+          source: *a2
+          source_text: A fresh expedition takes the expedition of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: expedition_owner_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: expedition_owner_id
+              value:
+                type: field
+                name: expedition_id
+        - id: owner
+          source: *a2
+          source_text: Only the bound one continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: expedition_owner_id
+            right:
+              type: field
+              name: expedition_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+    - id: quest_choice_unresolved
+      source:
+        - *a1
+      source_text:
+        The Quest Book prints no table for which Ancient Lands quest is offered; without a
+        supplied choice the expedition stays open.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: toll_paid
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ancient_quest_id
+            right:
+              type: literal
+              value: ''
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.ancient_lands_quest_selection
+    - id: depart_from_outpost
+      source:
+        - *a1
+        - *a3
+      source_text:
+        All expeditions start from The Outpost, and only League members may pass. Pay the toll
+        of 100 c per hero once, then travel under the Ancient Lands costs.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: depart
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: toll_paid
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: ancient_quest_id
+            right:
+              type: literal
+              value: ''
+      substeps:
+        - id: at_outpost
+          source:
+            - *a3
+          source_text: The expedition leaves from The Outpost.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: current_settlement
+            right:
+              type: literal
+              value: outpost
+          effects:
+            - type: set
+              target: via_outpost
+              value:
+                type: literal
+                value: true
+        - id: league_check
+          source:
+            - *a1
+            - *a3
+          source_text: You must be a member of the League of Dungeoneers to be allowed to pass.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: via_outpost
+            right:
+              type: literal
+              value: true
+          rule_refs:
+            - core.quest.ancient_lands.outpost_eligibility
+          effects: []
+        - id: pay_toll
+          source:
+            - *a3
+            - *a1
+          source_text: A League member party at The Outpost pays the toll first, once, if it can.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: outpost_entry_eligible
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: toll_due
+          substeps:
+            - id: ancient_travel_costs
+              source:
+                - *a1
+              source_text:
+                Each hex requires 2 Movement Points and each day 2 Rations; a camel reduces travel
+                time.
+              when:
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: travelling_in_ancient_lands
+                right:
+                  type: literal
+                  value: true
+              rule_refs:
+                - core.quest.ancient_lands.travel_costs
+              effects: []
+          effects:
+            - type: set
+              target: coins
+              value:
+                type: arithmetic
+                operator: subtract
+                values:
+                  - type: field
+                    name: coins
+                  - type: field
+                    name: toll_due
+            - type: set
+              target: toll_paid
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: travelling_in_ancient_lands
+              value:
+                type: literal
+                value: true
+            - type: invoke
+              dependency: travel
+      effects:
+        - type: set
+          target: via_outpost
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: outpost_entry_eligible
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: toll_due
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: hero_count
+              - type: literal
+                value: 100
+    - id: read_objective
+      source:
+        - *a1
+      source_text:
+        Each quest has two objective rooms, depending on access to the Ancient Lands tiles.
+        Read the correct one, once per occurrence.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: objective
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: toll_paid
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: objective_variant_fixed
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest.ancient_lands.ancient_objective
+        - core.quest.ancient_lands.standard_objective
+      effects:
+        - type: set
+          target: objective_variant_fixed
+          value:
+            type: literal
+            value: true
+  entry_step: check_owner
+  exit_step: read_objective

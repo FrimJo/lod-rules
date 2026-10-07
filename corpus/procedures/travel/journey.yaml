@@ -1272,7 +1272,9 @@
               type: field
               name: maximum_energy
     - id: ordinary_energy
-      source_text: Regain the supplied successful Energy rolls, capped by maximum.
+      source_text:
+        Regain the supplied successful Energy rolls, capped by maximum. Energy recovery does not
+        depend on whether the HP roll would exceed maximum HP.
       when:
         type: all
         conditions:
@@ -1295,19 +1297,6 @@
                 right:
                   type: field
                   name: maximum_energy
-          - &a10
-            type: compare
-            operator: gte
-            left:
-              type: field
-              name: maximum_hit_points
-            right:
-              type: sum
-              values:
-                - type: field
-                  name: hit_points
-                - type: field
-                  name: hp_roll
       effects:
         - type: set
           target: energy
@@ -1339,7 +1328,6 @@
                 right:
                   type: literal
                   value: true
-          - *a10
       effects:
         - type: invoke
           dependency: bedroll
@@ -1348,14 +1336,15 @@
           value:
             type: field
             name: maximum_energy
-    - id: recover_at_rest
+    - id: rest_hp
       source_text:
-        Once per day regain 1d6 HP. Above-maximum recovery remains the existing unresolved
-        source boundary; settlement lodging uses separate rules.
+        Once per day regain 1d6 HP. Above-maximum recovery remains the existing unresolved source
+        boundary, so that roll is not applied; it does not block Energy recovery.
       when:
         type: all
         conditions:
-          - type: all
+          - &rest_valid
+            type: all
             conditions:
               - *a9
               - type: any
@@ -1376,7 +1365,18 @@
                     right:
                       type: field
                       name: maximum_energy
-          - *a10
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_hit_points
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: hp_roll
       effects:
         - type: set
           target: hit_points
@@ -1387,6 +1387,10 @@
                 name: hit_points
               - type: field
                 name: hp_roll
+    - id: recover_at_rest
+      source_text: The hero has taken this day's rest; settlement lodging uses separate rules.
+      when: *rest_valid
+      effects:
         - type: set
           target: hero_rest_day
           value:

@@ -1,0 +1,413 @@
+- id: procedure.side_quest_selection
+  name: Side Quest offer, selection and attachment
+  section_id: section.quest_book_i.side_quests
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 273
+      printed_page: 271
+      heading: Side Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Available quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Side Quests can be added to basically any other quest. A side quest is available when
+    the arrival d8 shows 1–2 after a quest is available, and may be taken together with any of the
+    other quests. The heroes may accept it at any time during their stay, and it does not add to the
+    Day Count. Either roll 1d6 on the table, or work through the six side quests one by one. This
+    procedure owns one side quest offer: its selection, its attachment to another quest and the
+    handoff to acceptance.'
+  issues:
+    - issue.quest.side_quest_availability
+  fields:
+    offer_id:
+      type: string
+      role: input
+      description: Actual side quest offer of this call.
+    offer_owner_id:
+      type: string
+      role: state
+      description: Offer this selection belongs to. Empty for a fresh offer; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's offer matches the saved one. Reset on every call.
+    offer_basis:
+      type: string
+      role: input
+      description:
+        arrival_d8 when the settlement arrival d8 made the side quest available; stay_choice
+        when the party wants one during its stay without that result.
+    side_quest_available:
+      type: boolean
+      role: input
+      description: 'Actual arrival result: a side quest is available this visit (procedure.settlement_arrival).'
+    selection_method:
+      type: string
+      role: input
+      description: roll (1d6 on the table) or in_order (work through them one by one).
+    side_quest_selection_roll:
+      type: number
+      role: input
+      description: Actual 1d6 roll for the roll method.
+      integer: true
+      minimum: 1
+      maximum: 6
+    side_quests_worked:
+      type: number
+      role: state
+      description: Party count of side quests already taken in printed order, for the in_order method.
+      integer: true
+      minimum: 0
+      maximum: 6
+    selected_side_quest:
+      type: string
+      role: state
+      description: Side quest chosen for this offer.
+    side_quest_selected:
+      type: boolean
+      role: state
+      description: This offer has its side quest; later rolls cannot replace it.
+    main_quest_instance_id:
+      type: string
+      role: input
+      description: Actual accepted quest instance the side quest is added to. Empty when there is none.
+    attached_main_quest_instance_id:
+      type: string
+      role: state
+      description: Quest instance the selected side quest is attached to.
+    day_count_cost:
+      type: number
+      role: output
+      description: Days added to the Day Count by accepting the side quest.
+      integer: true
+    acceptance_handoff_processed:
+      type: boolean
+      role: state
+      description: The side quest has been handed to acceptance once.
+  dependencies:
+    - key: arrival
+      label: Arrival d8 side quest availability
+      object_id: procedure.settlement_arrival
+    - key: table
+      label: Side Quests table
+      object_id: table.quest.side_quests.selector
+    - key: acceptance
+      label: Acceptance of the side quest in the side slot beside its main quest
+      object_id: procedure.quest_acceptance
+  steps:
+    - id: check_owner
+      source: &a2
+        - *a1
+      source_text: Bind a fresh side quest selection to its offer; another one cannot change it.
+      substeps:
+        - id: bind
+          source: *a2
+          source_text: A fresh side quest selection takes the offer of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_owner_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: offer_owner_id
+              value:
+                type: field
+                name: offer_id
+        - id: owner
+          source: *a2
+          source_text: Only the bound one continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_owner_id
+            right:
+              type: field
+              name: offer_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+    - id: stay_choice_unresolved
+      source:
+        - *a1
+        - *a3
+      source_text: PDF271 lets heroes accept a side quest at any time during their stay in the city;
+        PDF131 makes one available only on the arrival d8. Without the d8 result the offer stays
+        open.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_selected
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: offer_basis
+                right:
+                  type: literal
+                  value: stay_choice
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: side_quest_available
+                right:
+                  type: literal
+                  value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.side_quest_availability
+    - id: roll_side_quest
+      source:
+        - *a1
+      source_text: Roll 1d6 on the Side Quests table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_selected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_basis
+            right:
+              type: literal
+              value: arrival_d8
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_available
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selection_method
+            right:
+              type: literal
+              value: roll
+      rule_refs:
+        - core.quest.side_quests.result_1
+        - core.quest.side_quests.result_2
+        - core.quest.side_quests.result_3
+        - core.quest.side_quests.result_4
+        - core.quest.side_quests.result_5
+        - core.quest.side_quests.result_6
+      effects:
+        - type: set
+          target: side_quest_selected
+          value:
+            type: literal
+            value: true
+    - id: next_in_order
+      source:
+        - *a1
+      source_text: 'Or work through them one by one: take the next side quest in printed order.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_selected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: offer_basis
+            right:
+              type: literal
+              value: arrival_d8
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_available
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: selection_method
+            right:
+              type: literal
+              value: in_order
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: side_quests_worked
+            right:
+              type: literal
+              value: 6
+      effects:
+        - type: lookup
+          table_id: table.quest.side_quests.selector
+          key_column: roll
+          key:
+            type: sum
+            values:
+              - type: field
+                name: side_quests_worked
+              - type: literal
+                value: 1
+          value_column: quest
+          target: selected_side_quest
+          on_missing_issue: issue.quest.side_quest_availability
+        - type: set
+          target: side_quests_worked
+          value:
+            type: sum
+            values:
+              - type: field
+                name: side_quests_worked
+              - type: literal
+                value: 1
+        - type: set
+          target: side_quest_selected
+          value:
+            type: literal
+            value: true
+    - id: attach_and_hand_off
+      source:
+        - *a1
+        - *a3
+      source_text:
+        The side quest is taken together with another quest, at no Day Count cost, and handed
+        to acceptance once.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acceptance_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: ne
+            left:
+              type: field
+              name: main_quest_instance_id
+            right:
+              type: literal
+              value: ''
+        - type: set
+          target: attached_main_quest_instance_id
+          value:
+            type: field
+            name: main_quest_instance_id
+        - type: set
+          target: day_count_cost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: acceptance_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: acceptance
+  entry_step: check_owner
+  exit_step: attach_and_hand_off

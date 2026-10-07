@@ -289,17 +289,18 @@ describe('Explicit disease cures — rendered PDF121 / 80 / 144', () => {
     expect(result.state.coins).toBe(400);
     expect(run(service.state, 'procedure.settlement_buy_sell_and_service').state.coins).toBe(400);
   });
-  it('failed service consumes its existing fee but leaves the modifier active', () => {
+  it('failed service surfaces the undefined outcome, charges nothing and leaves the modifier active', () => {
     const service = run(
       { ...treatment, treatment_succeeds: false },
       'procedure.settlement_buy_sell_and_service',
     );
-    const result = run({ ...ward, ...service.state, treatment_resolution_completed: true });
+    expect(service.unresolved).toContain('issue.settlement.illness_treatment_limits');
+    expect(service.state).toMatchObject({ coins: 500, service_completed: false });
+    const result = run({ ...ward, ...service.state, treatment_resolution_completed: false });
     expect(result.state).toMatchObject({
-      coins: 400,
+      coins: 500,
       diseased: true,
       disease_penalty_active: true,
-      disease_cure_result_processed: true,
     });
   });
   it('ineligible service cannot charge or clear disease', () => {

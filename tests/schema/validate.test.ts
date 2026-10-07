@@ -3,12 +3,34 @@ import { discoverPilotFiles } from '../../scripts/validate/pilot-files.ts';
 import { discoverReviewFiles } from '../../scripts/validate/independent-review.ts';
 import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { renderCoverageReport } from '../../scripts/reports/render-coverage.ts';
+import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';
+import { checkGlossaryIntegrity, checkIntegrity } from '../../scripts/validate/integrity.ts';
 
 describe('corpus validation', () => {
   it('passes against the canonical corpus', () => {
     const { errors, filesChecked } = validateCorpus();
     expect(errors).toEqual([]);
     expect(filesChecked).toBe(7 + discoverPilotFiles().length + discoverReviewFiles().length);
+  });
+});
+
+describe('empty corpus data', () => {
+  it('passes every canonical schema and integrity check with no corpus records', () => {
+    const ajv = createAjv();
+    const lists = ['terms', 'aliases', 'issues', 'sections', 'pages'] as const;
+    const records = ['rules', 'entities', 'tables', 'procedures', 'stateMachines'] as const;
+    for (const name of [...lists, ...records]) expect(getValidator(ajv, name)([]), name).toBe(true);
+    expect(getValidator(ajv, 'coverage')({ sections: [] })).toBe(true);
+    const map = { sections: [], pages: [], coverage: [], externalSourceIds: [] };
+    expect(checkIntegrity(map)).toEqual([]);
+    const glossary = {
+      terms: [],
+      aliases: [],
+      issues: [],
+      documentIds: [],
+      canonicalDocumentId: '',
+    };
+    expect(checkGlossaryIntegrity(glossary, map)).toEqual([]);
   });
 });
 

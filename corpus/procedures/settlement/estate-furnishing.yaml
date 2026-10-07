@@ -1,0 +1,1040 @@
+- id: procedure.estate_furnishing
+  name: Estate furnishing purchase and use
+  section_id: section.buying_an_estate.furnishing_the_manor
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 161
+      printed_page: 159
+      heading: Furnishing the Manor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When staying at the manor, the heroes may furnish rooms or build new areas. Only one
+    thing may be bought in between every quest, and it cannot be used until after leaving the next
+    dungeon. Training Grounds and Archery Range may each be used once between each visit to a
+    dungeon, and each hero trains at one or the other. The Alchemist Lab allows one recipe and the
+    Garden one gathering between visits; whether that limit is per facility or per alchemist is not
+    stated, so the caller supplies the reading. The Wizard’s Study and Kennel have no stated use
+    limit. The text does not say how often the Smithy, Shrine or Crops can be used.
+  issues:
+    - issue.estate.furnishing_usage_boundaries
+  fields:
+    phase:
+      type: string
+      role: input
+      description: purchase, dungeon_exit or use.
+    estate_owned:
+      type: boolean
+      role: input
+      description: The party holds the estate key.
+    owner_matches_estate:
+      type: boolean
+      role: output
+      description: The party owns the estate. Reset on every call.
+    staying_at_manor:
+      type: boolean
+      role: input
+      description: The heroes are staying at the manor between quests.
+    interval_id:
+      type: string
+      role: input
+      description: Actual between-quest interval (the time between two dungeon visits).
+    furnishing:
+      type: string
+      role: input
+      description: Printed furnishing name, as in table.estate.furnishings.
+    furnishing_cost:
+      type: number
+      role: output
+      description: Printed cost of the selected furnishing; 0 for an unknown name.
+      integer: true
+    coins:
+      type: number
+      role: state
+      description: Party coins that pay for the furnishing.
+    purchase_interval_id:
+      type: string
+      role: state
+      description: 'Estate state: interval of the last furnishing purchase.'
+    furnishing_owned:
+      type: boolean
+      role: state
+      description: 'Record of the selected furnishing: it has been bought.'
+    awaiting_dungeon_exit:
+      type: boolean
+      role: state
+      description: 'Record of the selected furnishing: bought, but the party has not yet left the next dungeon.'
+    chosen_god:
+      type: string
+      role: input
+      description: God chosen for the Shrine when it is built.
+    shrine_god:
+      type: string
+      role: state
+      description: 'Record of the Shrine: its god.'
+    hero_id:
+      type: string
+      role: input
+      description: Actual hero using the furnishing.
+    hero_is_alchemist:
+      type: boolean
+      role: input
+      description: That hero is an alchemist.
+    lab_garden_limit_scope:
+      type: string
+      role: input
+      description: 'Caller-supplied reading of issue.estate.furnishing_usage_boundaries:
+        per_facility (one recipe or gathering per interval for the whole party) or per_alchemist
+        (one per alchemist per interval). Any other value, including empty, is not supplied and
+        the Lab or Garden use waits.'
+    hero_use_interval_id:
+      type: string
+      role: state
+      description: 'Record of this hero and furnishing: interval of the last use.'
+    hero_training_facility:
+      type: string
+      role: state
+      description: 'Record of this hero: Training Grounds or Archery Range used most recently.'
+    hero_training_interval_id:
+      type: string
+      role: state
+      description: 'Record of this hero: interval of that training.'
+    furnishing_use_interval_id:
+      type: string
+      role: state
+      description: 'Record of the selected furnishing: interval of its last limited use.'
+    use_allowed:
+      type: boolean
+      role: output
+      description: This use is allowed now. Reset on every call.
+    purchases_between_quests:
+      type: number
+      role: output
+      description: purchases between quests
+    usable_after:
+      type: string
+      role: output
+      description: usable after
+    chosen_cs_or_dodge_increase_die:
+      type: number
+      role: output
+      description: chosen cs or dodge increase die
+    uses_between_dungeons:
+      type: number
+      role: output
+      description: uses between dungeons
+    excludes_archery_range_training:
+      type: boolean
+      role: output
+      description: excludes archery range training
+    rs_increase_die:
+      type: number
+      role: output
+      description: rs increase die
+    excludes_training_grounds_training:
+      type: boolean
+      role: output
+      description: excludes training grounds training
+    requires_alchemist:
+      type: boolean
+      role: output
+      description: requires alchemist
+    choose_potion_kind:
+      type: boolean
+      role: output
+      description: choose potion kind
+    recipes_between_dungeons:
+      type: number
+      role: output
+      description: recipes between dungeons
+    ingredients_die:
+      type: number
+      role: output
+      description: ingredients die
+    additional_ingredients:
+      type: number
+      role: output
+      description: additional ingredients
+    ingredients_random:
+      type: boolean
+      role: output
+      description: ingredients random
+    uses_between_quests:
+      type: number
+      role: output
+      description: uses between quests
+    free_familiar_storage:
+      type: boolean
+      role: output
+      description: free familiar storage
+    unlimited_familiars:
+      type: boolean
+      role: output
+      description: unlimited familiars
+    enchantment_modifier:
+      type: number
+      role: output
+      description: enchantment modifier
+    magic_scribble_modifier:
+      type: number
+      role: output
+      description: magic scribble modifier
+    may_leave_dogs_between_quests:
+      type: boolean
+      role: output
+      description: may leave dogs between quests
+    requires_companions_expansion:
+      type: boolean
+      role: output
+      description: requires companions expansion
+  dependencies:
+    - key: table
+      label: Furnishing the Manor
+      object_id: table.estate.furnishings
+    - key: ownership
+      label: Estate key
+      object_id: procedure.estate_ownership
+  steps:
+    - id: reset
+      source:
+        - *a1
+      source_text: Each call decides afresh.
+      substeps:
+        - id: owned
+          source:
+            - *a1
+          source_text: Only the estate owners furnish and use it.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: estate_owned
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: owner_matches_estate
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches_estate
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: use_allowed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 0
+    - id: price_1
+      source:
+        - *a1
+      source_text: 'Training Grounds: 500 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Training Grounds
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 500
+    - id: price_2
+      source:
+        - *a1
+      source_text: 'Wizard’s Study: 500 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Wizard’s Study
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 500
+    - id: price_3
+      source:
+        - *a1
+      source_text: 'Alchemist Lab: 500 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Alchemist Lab
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 500
+    - id: price_4
+      source:
+        - *a1
+      source_text: 'Shrine: 350 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Shrine
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 350
+    - id: price_5
+      source:
+        - *a1
+      source_text: 'Smithy: 350 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Smithy
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 350
+    - id: price_6
+      source:
+        - *a1
+      source_text: 'Archery Range: 500 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Archery Range
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 500
+    - id: price_7
+      source:
+        - *a1
+      source_text: 'Crops, Hen House, and Pigsty: 200 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Crops, Hen House, and Pigsty
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 200
+    - id: price_8
+      source:
+        - *a1
+      source_text: 'Garden: 200 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Garden
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 200
+    - id: price_9
+      source:
+        - *a1
+      source_text: 'Kennel: 75 c.'
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: furnishing
+        right:
+          type: literal
+          value: Kennel
+      effects:
+        - type: set
+          target: furnishing_cost
+          value:
+            type: literal
+            value: 75
+    - id: purchase
+      source:
+        - *a1
+      source_text:
+        Only one thing may be bought in between every quest; it cannot be used until after
+        leaving the next dungeon.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches_estate
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: purchase
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: staying_at_manor
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: purchase_interval_id
+            right:
+              type: field
+              name: interval_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing_owned
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: furnishing_cost
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: field
+              name: furnishing_cost
+      rule_refs:
+        - character.settlement.estate.furnishing
+      substeps:
+        - id: shrine_god
+          source:
+            - *a1
+          source_text: Only one shrine can be built, dedicated to a god of the hero’s choice.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Shrine
+          effects:
+            - type: set
+              target: shrine_god
+              value:
+                type: field
+                name: chosen_god
+      effects:
+        - type: set
+          target: coins
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: coins
+              - type: field
+                name: furnishing_cost
+        - type: set
+          target: furnishing_owned
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: awaiting_dungeon_exit
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: purchase_interval_id
+          value:
+            type: field
+            name: interval_id
+    - id: first_dungeon_exit
+      source:
+        - *a1
+      source_text: After leaving the next dungeon the new furnishing may be used.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches_estate
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: dungeon_exit
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing_owned
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: awaiting_dungeon_exit
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: awaiting_dungeon_exit
+          value:
+            type: literal
+            value: false
+    - id: train
+      source:
+        - *a1
+      source_text:
+        'Training Grounds (CS or Dodge +1d2) or Archery Range (RS +1d2): once between each
+        visit to a dungeon, and each hero trains at one or the other.'
+      when:
+        type: all
+        conditions:
+          - &a2
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: owner_matches_estate
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: phase
+                right:
+                  type: literal
+                  value: use
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing_owned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: awaiting_dungeon_exit
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: staying_at_manor
+                right:
+                  type: literal
+                  value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Training Grounds
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Archery Range
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: hero_use_interval_id
+            right:
+              type: field
+              name: interval_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hero_training_facility
+                right:
+                  type: literal
+                  value: ''
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hero_training_facility
+                right:
+                  type: field
+                  name: furnishing
+      substeps:
+        - id: training_grounds_rule
+          source:
+            - *a1
+          source_text: Training Grounds effect.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Training Grounds
+          rule_refs:
+            - character.settlement.estate.training_grounds
+          effects: []
+        - id: archery_range_rule
+          source:
+            - *a1
+          source_text: Archery Range effect.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Archery Range
+          rule_refs:
+            - character.settlement.estate.archery_range
+          effects: []
+      effects:
+        - type: set
+          target: use_allowed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hero_use_interval_id
+          value:
+            type: field
+            name: interval_id
+        - type: set
+          target: hero_training_facility
+          value:
+            type: field
+            name: furnishing
+        - type: set
+          target: hero_training_interval_id
+          value:
+            type: field
+            name: interval_id
+    - id: train_other_facility
+      source:
+        - *a1
+      source_text:
+        'A hero who trained at the other facility: refused in the same interval; whether the
+        choice is permanent is not stated.'
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Training Grounds
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Archery Range
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: hero_training_facility
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: hero_training_facility
+            right:
+              type: field
+              name: furnishing
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: hero_training_interval_id
+            right:
+              type: field
+              name: interval_id
+      effects:
+        - type: unresolved
+          issue_id: issue.estate.furnishing_usage_boundaries
+    - id: alchemy
+      source:
+        - *a1
+      source_text:
+        'Alchemist Lab: one recipe between each visit to a dungeon. Garden: one gathering of
+        1d6+2 ingredients between each quest. Alchemists only. The limit is counted per
+        facility or per alchemist as the caller supplies.'
+      when:
+        type: all
+        conditions:
+          - &a3
+            type: all
+            conditions:
+              - *a2
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: furnishing
+                    right:
+                      type: literal
+                      value: Alchemist Lab
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: furnishing
+                    right:
+                      type: literal
+                      value: Garden
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: hero_is_alchemist
+                right:
+                  type: literal
+                  value: true
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: lab_garden_limit_scope
+                    right:
+                      type: literal
+                      value: per_facility
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: furnishing_use_interval_id
+                    right:
+                      type: field
+                      name: interval_id
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: lab_garden_limit_scope
+                    right:
+                      type: literal
+                      value: per_alchemist
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: hero_use_interval_id
+                    right:
+                      type: field
+                      name: interval_id
+      substeps:
+        - id: lab_rule
+          source:
+            - *a1
+          source_text: Alchemist Lab effect.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Alchemist Lab
+          rule_refs:
+            - character.settlement.estate.alchemist_lab
+          effects: []
+        - id: garden_rule
+          source:
+            - *a1
+          source_text: Garden effect.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Garden
+          rule_refs:
+            - character.settlement.estate.garden
+          effects: []
+      effects:
+        - type: set
+          target: use_allowed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: furnishing_use_interval_id
+          value:
+            type: field
+            name: interval_id
+        - type: set
+          target: hero_use_interval_id
+          value:
+            type: field
+            name: interval_id
+    - id: alchemy_limit_unsupplied
+      source:
+        - *a1
+      source_text:
+        Whether the one recipe and one gathering are counted per facility or per alchemist is
+        not stated; the caller supplies the reading.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: not
+            condition:
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: lab_garden_limit_scope
+                  right:
+                    type: literal
+                    value: per_facility
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: lab_garden_limit_scope
+                  right:
+                    type: literal
+                    value: per_alchemist
+      effects:
+        - type: unresolved
+          issue_id: issue.estate.furnishing_usage_boundaries
+    - id: unlimited
+      source:
+        - *a1
+      source_text: The Wizard’s Study and Kennel state no use limit.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Wizard’s Study
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Kennel
+      substeps:
+        - id: study_rule
+          source:
+            - *a1
+          source_text: Wizard’s Study effect.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Wizard’s Study
+          rule_refs:
+            - character.settlement.estate.wizards_study
+          effects: []
+        - id: kennel_rule
+          source:
+            - *a1
+          source_text: Kennel effect (Companion’s Expansion).
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: furnishing
+            right:
+              type: literal
+              value: Kennel
+          rule_refs:
+            - character.settlement.estate.kennel
+          effects: []
+      effects:
+        - type: set
+          target: use_allowed
+          value:
+            type: literal
+            value: true
+    - id: frequency_open
+      source:
+        - *a1
+      source_text: How often the Smithy, Shrine and Crops may be used is not stated.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Smithy
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Shrine
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: furnishing
+                right:
+                  type: literal
+                  value: Crops, Hen House, and Pigsty
+      effects:
+        - type: unresolved
+          issue_id: issue.estate.furnishing_usage_boundaries
+  entry_step: reset
+  exit_step: frequency_open

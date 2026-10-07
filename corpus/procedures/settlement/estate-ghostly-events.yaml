@@ -1,0 +1,1029 @@
+- id: procedure.estate_ghostly_events
+  name: Estate ghost contact and Ghostly Events before departure
+  section_id: section.buying_an_estate.ghostly_events_table
+  source:
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: The Ghosts of Past Generations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 161
+      printed_page: 159
+      heading: The Ghosts of Past Generations
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a5
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 162
+      printed_page: 160
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a7
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 163
+      printed_page: 161
+      heading: Ghostly Events Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: Aftermath – If You Fail
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'The estate is haunted. Between every quest, the night before the planned departure,
+    the party rolls 1d10; on 7–10 the ghosts make contact and the party rolls 1d10 on the Ghostly
+    Events Table. There is then no time to change plans; head straight to the World Map. Event 6
+    starts The Grieving Mother, or counts as #2 once that quest has succeeded; event 5 is ignored
+    without a wizard. A failed Grieving Mother makes the next event #8 automatically. Hero effects
+    for the coming quest are handed to their owners; this procedure owns the once-per-interval roll,
+    the event chosen and the estate state it changes. The book does not say whether the roll needs
+    a night at the estate, whether an owed #8 replaces the rolls, or where crop rations are held;
+    the caller supplies each reading, and the procedure waits on an issue until it does.'
+  issues:
+    - issue.estate.ghost_contact_scope
+    - issue.estate.furnishing_usage_boundaries
+  fields:
+    ghost_roll_scope:
+      type: string
+      role: input
+      description: 'Caller-supplied reading of issue.estate.ghost_contact_scope: estate_night_only
+        (roll only when the party spent the night before departure at the estate) or
+        every_interval (roll before every quest while the party owns the estate). Any other
+        value, including empty, is not supplied and the roll waits.'
+    owed_event_reading:
+      type: string
+      role: input
+      description: "Caller-supplied reading of issue.estate.ghost_contact_scope, needed only when
+        an event #8 is owed: replaces_rolls (the owed #8 is the interval's event) or in_addition
+        (the owed #8 applies and the ordinary contact roll is also made). Any other value is not
+        supplied and the interval waits."
+    crop_rations_holding:
+      type: string
+      role: input
+      description: 'Caller-supplied reading of issue.estate.furnishing_usage_boundaries, needed
+        only for event 7: held_at_estate (crop rations stay at the estate until taken) or
+        carried_by_party (crop rations go with the party). Any other value is not supplied and
+        no rations are lost.'
+    party_crop_rations:
+      type: number
+      role: state
+      description: Rations from the crops, hen house and pigsty that the party carries (carried_by_party reading).
+      integer: true
+      minimum: 0
+    crop_rations_lost:
+      type: number
+      role: output
+      description: Crop rations lost to event 7 in this call. Reset on every call.
+      integer: true
+    owed_event_applied:
+      type: boolean
+      role: output
+      description: 'in_addition reading: the owed #8 was applied alongside the rolls. Reset on every call.'
+    estate_owned:
+      type: boolean
+      role: input
+      description: The party holds the estate key (procedure.estate_ownership).
+    stayed_at_estate:
+      type: boolean
+      role: input
+      description: The party spent the night before the planned departure at the estate. Read only under the estate_night_only reading.
+    interval_id:
+      type: string
+      role: input
+      description: 'Actual between-quest interval: the planned departure this roll belongs to.'
+    ghost_interval_id:
+      type: string
+      role: state
+      description: Last interval whose ghost check is done. Empty before the first one.
+    ghost_check_due:
+      type: boolean
+      role: output
+      description: This call is the ghost check of a new interval. Reset on every call.
+    forced_ghost_event:
+      type: number
+      role: state
+      description: Event owed by a failed Grieving Mother (8), or 0.
+      integer: true
+    event_forced:
+      type: boolean
+      role: output
+      description: This interval uses the owed event instead of the rolls.
+    contact_roll:
+      type: number
+      role: input
+      description: Actual 1d10 contact roll.
+      integer: true
+      minimum: 1
+      maximum: 10
+    event_roll:
+      type: number
+      role: input
+      description: Actual 1d10 Ghostly Events Table roll.
+      integer: true
+      minimum: 1
+      maximum: 10
+    ghosts_make_contact:
+      type: boolean
+      role: output
+      description: The ghosts make contact this interval.
+    ghost_event:
+      type: number
+      role: state
+      description: Ghostly Event applied for the latest interval; 0 for none.
+      integer: true
+    grieving_mother_succeeded:
+      type: boolean
+      role: state
+      description: The party has brought back the remains (procedure.grieving_mother).
+    grieving_mother_triggered:
+      type: boolean
+      role: state
+      description: Event 6 has started The Grieving Mother for the next dungeon.
+    wizard_in_party:
+      type: boolean
+      role: input
+      description: At least one wizard is in the party.
+    estate_crop_rations:
+      type: number
+      role: state
+      description: Rations produced by the crops, hen house and pigsty that the party has not yet taken (held_at_estate reading).
+      integer: true
+      minimum: 0
+    must_head_straight_to_world_map:
+      type: boolean
+      role: output
+      description: 'From the departure rule: no time to change plans.'
+    event_die:
+      type: number
+      role: output
+      description: From the departure rule.
+    may_change_plans:
+      type: boolean
+      role: output
+      description: From the departure rule.
+    selected:
+      type: boolean
+      role: output
+      description: Input to the selected Ghostly Event rule.
+    contact_die:
+      type: number
+      role: output
+      description: From the contact rule.
+    contact_minimum:
+      type: number
+      role: output
+      description: From the contact rule.
+    timing:
+      type: string
+      role: output
+      description: From the contact rule.
+    wonderful_treasure_rolls:
+      type: number
+      role: output
+      description: wonderful treasure rolls
+    energy_loss_per_hero:
+      type: number
+      role: output
+      description: energy loss per hero
+    luck_modifier_all_heroes:
+      type: number
+      role: output
+      description: luck modifier all heroes
+    duration:
+      type: string
+      role: output
+      description: duration
+    side_quest_card_position:
+      type: string
+      role: output
+      description: side quest card position
+    on_draw:
+      type: string
+      role: output
+      description: on draw
+    extra_door_target:
+      type: string
+      role: output
+      description: extra door target
+    door_is_normal:
+      type: boolean
+      role: output
+      description: door is normal
+    door_can_be_locked_or_trapped:
+      type: boolean
+      role: output
+      description: door can be locked or trapped
+    encounters_inside:
+      type: boolean
+      role: output
+      description: encounters inside
+    cs_modifier_all_heroes:
+      type: number
+      role: output
+      description: cs modifier all heroes
+    rs_modifier_all_heroes:
+      type: number
+      role: output
+      description: rs modifier all heroes
+    wizard_miscast_minimum:
+      type: number
+      role: output
+      description: wizard miscast minimum
+    wizard_miscast_maximum:
+      type: number
+      role: output
+      description: wizard miscast maximum
+    ignore_without_wizard:
+      type: boolean
+      role: output
+      description: ignore without wizard
+    side_quest:
+      type: string
+      role: output
+      description: side quest
+    if_previously_succeeded:
+      type: string
+      role: output
+      description: if previously succeeded
+    retry_after_failure_allowed:
+      type: boolean
+      role: output
+      description: retry after failure allowed
+    lose_all_estate_crop_rations:
+      type: boolean
+      role: output
+      description: lose all estate crop rations
+    energy_loss_all_heroes:
+      type: number
+      role: output
+      description: energy loss all heroes
+    energy_minimum:
+      type: number
+      role: output
+      description: energy minimum
+    may_recover_after_quest_starts:
+      type: boolean
+      role: output
+      description: may recover after quest starts
+    hero_selection:
+      type: string
+      role: output
+      description: hero selection
+    item_selection:
+      type: string
+      role: output
+      description: item selection
+    item_location:
+      type: string
+      role: output
+      description: item location
+    unavailable_until:
+      type: string
+      role: output
+      description: unavailable until
+    curse_rolls_per_hero:
+      type: number
+      role: output
+      description: curse rolls per hero
+    cannot_lift_until:
+      type: string
+      role: output
+      description: cannot lift until
+  dependencies:
+    - key: table
+      label: Ghostly Events Table
+      object_id: table.estate.ghost_events
+    - key: grieving_mother
+      label: The Grieving Mother side quest in the next dungeon
+      object_id: procedure.grieving_mother
+    - key: heroes
+      label: Each hero applies its own event effect for the coming quest
+  steps:
+    - id: reset
+      source:
+        - *a1
+      source_text: Each call decides afresh whether a new interval is due.
+      effects:
+        - type: set
+          target: ghost_check_due
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: ghosts_make_contact
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: event_forced
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: selected
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: crop_rations_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: owed_event_applied
+          value:
+            type: literal
+            value: false
+    - id: scope_unsupplied
+      source:
+        - *a1
+        - *a2
+      source_text:
+        The roll is printed under Staying at the House. Whether it applies when the party did
+        not spend that night at the estate is not stated; the caller supplies the reading.
+      when:
+        type: all
+        conditions:
+          - &a8
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: estate_owned
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: ghost_interval_id
+                right:
+                  type: field
+                  name: interval_id
+          - type: not
+            condition: &a9
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: ghost_roll_scope
+                  right:
+                    type: literal
+                    value: estate_night_only
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: ghost_roll_scope
+                  right:
+                    type: literal
+                    value: every_interval
+      effects:
+        - type: unresolved
+          issue_id: issue.estate.ghost_contact_scope
+    - id: owed_reading_unsupplied
+      source:
+        - *a3
+      source_text:
+        'Whether an owed #8 replaces the ordinary contact roll or comes in addition to it is not
+        stated; the caller supplies the reading.'
+      when:
+        type: all
+        conditions:
+          - *a8
+          - *a9
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: forced_ghost_event
+            right:
+              type: literal
+              value: 8
+          - type: not
+            condition: &a10
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: owed_event_reading
+                  right:
+                    type: literal
+                    value: replaces_rolls
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: owed_event_reading
+                  right:
+                    type: literal
+                    value: in_addition
+      effects:
+        - type: unresolved
+          issue_id: issue.estate.ghost_contact_scope
+    - id: due
+      source:
+        - *a1
+      source_text:
+        Between every quest, once, the night before the planned departure, under the supplied
+        reading of whether that night must be spent at the estate.
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: ghost_roll_scope
+                right:
+                  type: literal
+                  value: every_interval
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ghost_roll_scope
+                    right:
+                      type: literal
+                      value: estate_night_only
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: stayed_at_estate
+                    right:
+                      type: literal
+                      value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: forced_ghost_event
+                right:
+                  type: literal
+                  value: 8
+              - *a10
+      rule_refs:
+        - character.settlement.estate.ghost_contact
+      effects:
+        - type: set
+          target: ghost_check_due
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ghost_interval_id
+          value:
+            type: field
+            name: interval_id
+        - type: set
+          target: ghost_event
+          value:
+            type: literal
+            value: 0
+    - id: forced_event
+      source:
+        - *a3
+      source_text:
+        "After a failed Grieving Mother there is automatically a Ghostly Event before the next
+        quest, and it is #8. Under the replaces_rolls reading it is the interval's event."
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_check_due
+            right:
+              type: literal
+              value: true
+          - &a11
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: forced_ghost_event
+            right:
+              type: literal
+              value: 8
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owed_event_reading
+            right:
+              type: literal
+              value: replaces_rolls
+      effects:
+        - type: set
+          target: event_forced
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ghosts_make_contact
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ghost_event
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: forced_ghost_event
+          value:
+            type: literal
+            value: 0
+    - id: owed_event_in_addition
+      source:
+        - *a3
+      source_text:
+        'Under the in_addition reading the owed #8 applies once and the ordinary contact roll is
+        also made; there is no time to change plans.'
+      when:
+        type: all
+        conditions:
+          - *a4
+          - *a11
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owed_event_reading
+            right:
+              type: literal
+              value: in_addition
+      effects:
+        - type: set
+          target: selected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: owed_event_applied
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: forced_ghost_event
+          value:
+            type: literal
+            value: 0
+      substeps:
+        - id: owed_event_8
+          source:
+            - *a7
+          source_text: 'Restless Night: all heroes start the next quest with -2 Energy (minimum 0).'
+          rule_refs:
+            - character.settlement.estate.departure
+            - character.settlement.ghost_event.8
+          effects: []
+    - id: contact
+      source:
+        - *a1
+      source_text: On a result of 7–10 the ghosts make contact; roll on the Ghostly Events Table.
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: event_forced
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: contact_roll
+            right:
+              type: literal
+              value: 7
+      effects:
+        - type: set
+          target: ghosts_make_contact
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: ghost_event
+          value:
+            type: field
+            name: event_roll
+    - id: grieving_mother_done
+      source:
+        - *a5
+      source_text: 'If the Grieving Mother quest has already succeeded, treat a 6 as if you rolled #2.'
+      when:
+        type: all
+        conditions:
+          - &a6
+            type: all
+            conditions:
+              - *a4
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: ghosts_make_contact
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: grieving_mother_succeeded
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: ghost_event
+          value:
+            type: literal
+            value: 2
+    - id: no_wizard
+      source:
+        - *a5
+      source_text:
+        If there are no wizards in the party, ignore the Protector and head out without any
+        ghostly events.
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wizard_in_party
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: ghost_event
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: ghosts_make_contact
+          value:
+            type: literal
+            value: false
+    - id: select_event
+      source:
+        - *a5
+      source_text: Apply the selected Ghostly Event once; there is no time to change plans afterwards.
+      when: *a6
+      rule_refs:
+        - character.settlement.estate.departure
+      effects:
+        - type: set
+          target: selected
+          value:
+            type: literal
+            value: true
+    - id: event_1
+      source:
+        - *a5
+      source_text: 'The Family Heirlooms: two rolls on the Wonderful Treasure Chart; each hero loses 1 Energy.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 1
+      rule_refs:
+        - character.settlement.ghost_event.1
+      effects: []
+    - id: event_2
+      source:
+        - *a5
+      source_text: 'Guardian Spirits: +1 Luck for all heroes during the coming quest.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 2
+      rule_refs:
+        - character.settlement.ghost_event.2
+      effects: []
+    - id: event_3
+      source:
+        - *a5
+      source_text: 'The Hidden Treasure: a Side Quest Card leads to an extra door to R10 with no
+        encounters inside.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 3
+      rule_refs:
+        - character.settlement.ghost_event.3
+      effects: []
+    - id: event_4
+      source:
+        - *a5
+      source_text: 'Spiritual Guides: all heroes get +5 CS/+5 RS during the quest.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 4
+      rule_refs:
+        - character.settlement.ghost_event.4
+      effects: []
+    - id: event_5
+      source:
+        - *a5
+      source_text: 'Protector: any wizard only miscasts on 97–00 during the coming quest.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 5
+      rule_refs:
+        - character.settlement.ghost_event.5
+      effects: []
+    - id: event_6
+      source:
+        - *a5
+      source_text: 'The Grieving Mother: start the Grieving Mother side quest.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 6
+      rule_refs:
+        - character.settlement.ghost_event.6
+      effects:
+        - type: set
+          target: grieving_mother_triggered
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: grieving_mother
+    - id: event_7
+      source:
+        - *a7
+      source_text: 'Angered Ghost: any rations from the crops, hen house and pigsty are lost.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 7
+      rule_refs:
+        - character.settlement.ghost_event.7
+      effects: []
+      substeps:
+        - id: crop_holding_unsupplied
+          source:
+            - *a7
+          source_text: Where crop rations are kept until used is not stated; the caller supplies the
+            reading. Without it no rations are lost.
+          when:
+            type: not
+            condition:
+              type: any
+              conditions:
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: crop_rations_holding
+                  right:
+                    type: literal
+                    value: held_at_estate
+                - type: compare
+                  operator: eq
+                  left:
+                    type: field
+                    name: crop_rations_holding
+                  right:
+                    type: literal
+                    value: carried_by_party
+          effects:
+            - type: unresolved
+              issue_id: issue.estate.furnishing_usage_boundaries
+        - id: crops_held_at_estate
+          source:
+            - *a7
+          source_text: 'held_at_estate reading: the rations waiting at the estate are lost.'
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: crop_rations_holding
+            right:
+              type: literal
+              value: held_at_estate
+          effects:
+            - type: set
+              target: crop_rations_lost
+              value:
+                type: field
+                name: estate_crop_rations
+            - type: set
+              target: estate_crop_rations
+              value:
+                type: literal
+                value: 0
+        - id: crops_carried_by_party
+          source:
+            - *a7
+          source_text: 'carried_by_party reading: the crop rations the party carries are lost.'
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: crop_rations_holding
+            right:
+              type: literal
+              value: carried_by_party
+          effects:
+            - type: set
+              target: crop_rations_lost
+              value:
+                type: field
+                name: party_crop_rations
+            - type: set
+              target: party_crop_rations
+              value:
+                type: literal
+                value: 0
+    - id: event_8
+      source:
+        - *a7
+      source_text: 'Restless Night: all heroes start the next quest with -2 Energy (minimum 0).'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 8
+      rule_refs:
+        - character.settlement.ghost_event.8
+      effects: []
+    - id: event_9
+      source:
+        - *a7
+      source_text:
+        'Lost Item: one randomised item of one randomised hero stays at the estate until after
+        the next dungeon.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 9
+      rule_refs:
+        - character.settlement.ghost_event.9
+      effects: []
+    - id: event_10
+      source:
+        - *a7
+      source_text:
+        'The Curse: every hero suffers an individual curse from the Curse Table until back in
+        the city.'
+      when:
+        type: all
+        conditions:
+          - *a6
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ghost_event
+            right:
+              type: literal
+              value: 10
+      rule_refs:
+        - character.settlement.ghost_event.10
+      effects: []
+  entry_step: reset
+  exit_step: event_10

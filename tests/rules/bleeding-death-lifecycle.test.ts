@@ -69,6 +69,7 @@ describe('Bleeding death and replacement — rendered PDF122', () => {
     const result = run(bleed, {
       phase: 'timer',
       advanced_rule_enabled: true,
+      timer_processed: true,
       turns: 5,
       elapsed_turns: elapsed,
       bleeding_out: true,
@@ -81,11 +82,13 @@ describe('Bleeding death and replacement — rendered PDF122', () => {
     { advanced_rule_enabled: false },
     { bleeding_out: false },
     { dead: true },
+    { timer_processed: false },
   ];
   it.each(timerExclusions)('does not expire an ineligible timer %j', (override) => {
     const result = run(bleed, {
       phase: 'timer',
       advanced_rule_enabled: true,
+      timer_processed: true,
       turns: 5,
       elapsed_turns: 6,
       bleeding_out: true,

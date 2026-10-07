@@ -305,13 +305,14 @@ describe('Printed external poison cures — rendered PDF122 / 80', () => {
     expect(later.state.hit_points).toBe(-2);
     expect(later.steps).not.toContain('poison_loss');
   });
-  it('a supplied failed treatment pays its existing fee without clearing poison state', () => {
+  it('a supplied failed treatment surfaces the undefined outcome without charging or clearing poison', () => {
     const result = run(
       { ...treatment, treatment_succeeds: false },
       'procedure.settlement_buy_sell_and_service',
     );
+    expect(result.unresolved).toContain('issue.settlement.illness_treatment_limits');
     expect(result.state).toMatchObject({
-      coins: 400,
+      coins: 500,
       poisoned: true,
       already_poisoned: true,
       remaining_poison_rolls: 3,

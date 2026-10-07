@@ -1,0 +1,353 @@
+- id: procedure.random_quest_selection
+  name: Random Quest objective-room and chapter quest selection
+  section_id: section.quest_book_i.random_quests
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 243
+      printed_page: 241
+      heading: Random Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    To embark on a Random Quest, first roll on the table to determine the Objective Room (6 means
+    roll again). Once that is determined, consult the corresponding chapter and roll which quest to
+    embark upon. These quests can be played over and over. One selection belongs to one random
+    quest offer; the room, once rolled, is kept. The second-stage die is not printed, so the
+    chapter quest is a supplied outcome. Acceptance, departure and the quest itself are separate.
+  issues:
+    - issue.quest.random_quest_second_stage
+  fields:
+    offer_id:
+      type: string
+      role: input
+      description:
+        Actual random quest offer from the settlement visit (procedure.settlement_arrival). A new
+        offer, including a later repeat of the same quest, starts a fresh selection.
+    selection_offer_id:
+      type: string
+      role: state
+      description: Offer this selection belongs to. Empty for a fresh selection; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's offer matches the saved selection. Reset on every call.
+    objective_room_roll:
+      type: number
+      role: input
+      description: Actual 1d6 Objective Room roll for this call.
+      integer: true
+      minimum: 1
+      maximum: 6
+    reroll_objective_room:
+      type: boolean
+      role: output
+      description: The latest room roll was 6, so the table must be rolled again.
+    selected_objective_room:
+      type: string
+      role: state
+      description: Objective Room chapter selected by the first 1–5 result.
+    roll_quest_in_selected_chapter:
+      type: boolean
+      role: state
+      description: The room is known and the chapter quest roll comes next.
+    room_selected:
+      type: boolean
+      role: state
+      description: A 1–5 room result is kept; later rolls for this offer cannot replace it.
+    chapter_quest_supplied:
+      type: boolean
+      role: input
+      description:
+        The actual second-stage chapter quest result is supplied. The book prints no die or
+        mapping for it.
+    chapter_quest_id:
+      type: string
+      role: input
+      description: Supplied canonical quest id from the selected chapter.
+    chapter_quest_room:
+      type: string
+      role: input
+      description: Objective Room chapter that the supplied quest belongs to.
+    quest_selected:
+      type: boolean
+      role: state
+      description: The chapter quest for this offer is chosen and kept.
+    selected_quest_id:
+      type: string
+      role: state
+      description: Kept chapter quest id for this offer.
+    acceptance_handoff_processed:
+      type: boolean
+      role: state
+      description: The selected quest has been handed to quest acceptance once.
+  dependencies:
+    - key: room_table
+      label: Random Quests objective room table
+      object_id: table.quest.random_quests.objective_room
+    - key: chapter
+      label: Quests in the selected Objective Room chapter; the second-stage roll is not printed
+      section_id: section.quest_book_i
+    - key: acceptance
+      label: Party acceptance of the selected quest as a fresh quest instance
+      object_id: procedure.quest_acceptance
+  steps:
+    - id: check_owner
+      source: *a1
+      source_text:
+        Bind a fresh selection to its offer. A call for another offer cannot roll, select or hand
+        off this one.
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reroll_objective_room
+          value:
+            type: literal
+            value: false
+      substeps:
+        - id: bind_offer
+          source: *a1
+          source_text: A fresh selection takes the offer of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: selection_offer_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: selection_offer_id
+              value:
+                type: field
+                name: offer_id
+        - id: owner
+          source: *a1
+          source_text: Only the bound offer continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: selection_offer_id
+            right:
+              type: field
+              name: offer_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+    - id: roll_objective_room
+      source: *a1
+      source_text:
+        First roll on the table to determine the Objective Room. A 6 means roll again; only the
+        first 1–5 result selects the room.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_selected
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - core.quest_book.random_quests.result_1
+        - core.quest_book.random_quests.result_2
+        - core.quest_book.random_quests.result_3
+        - core.quest_book.random_quests.result_4
+        - core.quest_book.random_quests.result_5
+        - core.quest_book.random_quests.result_6
+      effects: []
+      substeps:
+        - id: keep_room
+          source: *a1
+          source_text: Once the Objective Room is determined, it is kept for this offer.
+          when:
+            type: compare
+            operator: lte
+            left:
+              type: field
+              name: objective_room_roll
+            right:
+              type: literal
+              value: 5
+          effects:
+            - type: set
+              target: room_selected
+              value:
+                type: literal
+                value: true
+    - id: second_stage_unresolved
+      source: *a1
+      source_text:
+        Consult the corresponding chapter and roll which quest to embark upon. No die or mapping is
+        printed, so without a supplied result the chapter quest stays open.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_selected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapter_quest_supplied
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.random_quest_second_stage
+    - id: select_chapter_quest
+      source: *a1
+      source_text:
+        Keep the supplied chapter quest once, only if it belongs to the selected Objective Room
+        chapter.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_selected
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapter_quest_supplied
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: chapter_quest_room
+            right:
+              type: field
+              name: selected_objective_room
+        - type: set
+          target: selected_quest_id
+          value:
+            type: field
+            name: chapter_quest_id
+        - type: set
+          target: quest_selected
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: roll_quest_in_selected_chapter
+          value:
+            type: literal
+            value: false
+    - id: acceptance_handoff
+      source: *a1
+      source_text:
+        Hand the selected quest to the party's acceptance once. The handoff does not accept,
+        depart or start the quest.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_selected
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acceptance_handoff_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: acceptance_handoff_processed
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: acceptance
+  entry_step: check_owner
+  exit_step: acceptance_handoff

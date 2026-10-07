@@ -2016,56 +2016,75 @@
       effects:
         - type: unresolved
           issue_id: issue.phase4.recovery_bounds
-    - id: restore_luck
-      source_text: Once Luck is restored, later spending is not restored until a new settlement visit.
+    - id: paid_hp
+      source_text:
+        Paid lodging or owned-home rest gives each hero 2d6 HP for the night. HP above the recorded
+        maximum stays the open recovery_bounds boundary, so that roll is not applied; it does not
+        block the Mana, Energy and Luck restoration below.
       when:
         type: all
         conditions:
           - &a8
             type: all
             conditions:
-              - type: all
+              - *a7
+              - type: any
                 conditions:
-                  - *a7
-                  - type: any
-                    conditions:
-                      - type: compare
-                        operator: eq
-                        left:
-                          type: field
-                          name: lodging_kind
-                        right:
-                          type: literal
-                          value: inn
-                      - type: compare
-                        operator: eq
-                        left:
-                          type: field
-                          name: lodging_kind
-                        right:
-                          type: literal
-                          value: estate
                   - type: compare
-                    operator: gte
+                    operator: eq
                     left:
                       type: field
-                      name: hp_roll
+                      name: lodging_kind
                     right:
                       type: literal
-                      value: 2
-              - &a10
-                type: compare
+                      value: inn
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: lodging_kind
+                    right:
+                      type: literal
+                      value: estate
+              - type: compare
                 operator: gte
                 left:
                   type: field
-                  name: maximum_hit_points
+                  name: hp_roll
                 right:
-                  type: sum
-                  values:
-                    - type: field
-                      name: hit_points
-                    - type: field
-                      name: hp_roll
+                  type: literal
+                  value: 2
+          - &a10
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: maximum_hit_points
+            right:
+              type: sum
+              values:
+                - type: field
+                  name: hit_points
+                - type: field
+                  name: hp_roll
+      effects:
+        - type: set
+          target: hit_points
+          value:
+            type: sum
+            values:
+              - type: field
+                name: hit_points
+              - type: field
+                name: hp_roll
+    - id: restore_luck
+      source_text:
+        Paid lodging restores Luck automatically. Once Luck is restored, later spending is not
+        restored until a new settlement visit.
+      when:
+        type: all
+        conditions:
+          - *a8
           - type: compare
             operator: eq
             left:
@@ -2086,7 +2105,9 @@
             type: literal
             value: true
     - id: paid_recovery
-      source_text: Paid lodging or owned-home rest restores Mana/Energy and 2d6 HP once for this hero and night.
+      source_text:
+        Paid lodging or owned-home rest automatically restores Mana and Energy once for this hero
+        and night, whatever the HP roll does.
       when: *a8
       effects:
         - type: set
@@ -2099,15 +2120,6 @@
           value:
             type: field
             name: maximum_energy
-        - type: set
-          target: hit_points
-          value:
-            type: sum
-            values:
-              - type: field
-                name: hit_points
-              - type: field
-                name: hp_roll
         - type: set
           target: hero_recovery_day
           value:
@@ -2590,7 +2602,10 @@
     treatment_succeeds:
       type: boolean
       role: input
-      description: treatment succeeds
+      description:
+        Supplied treatment outcome. Mental treatment uses treatment_roll instead. For disease or
+        poison only true is source-defined; false surfaces issue.settlement.illness_treatment_limits
+        without charging or curing.
     purchase_price:
       type: number
       role: output
@@ -3683,12 +3698,77 @@
             right:
               type: field
               name: day
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: treatment_succeeds
+            right:
+              type: literal
+              value: true
       effects:
         - type: set
           target: transaction_eligible
           value:
             type: literal
             value: true
+    - id: illness_treatment_limit
+      source_text:
+        The monks treat most illnesses for 100 c and one day. The book defines no failure roll,
+        does not name the illnesses they cannot treat and does not say whether the fee is due
+        then. A supplied unsuccessful outcome is not charged, does not consume the day and does
+        not cure; it surfaces the open boundary instead.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 144
+          printed_page: 142
+          heading: Cure Disease and Poison
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: cure_disease
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: cure_poison
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: treatment_succeeds
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.illness_treatment_limits
     - id: mental_eligibility
       source_text:
         Only one disorder treatment attempt between quests; require an existing disorder and
@@ -4185,3 +4265,4 @@
   exit_step: collect_reward
   issues:
     - issue.settlement.price_modifier_combination
+    - issue.settlement.illness_treatment_limits

@@ -1,0 +1,665 @@
+- id: procedure.spider_queen_campaign
+  name: Lair of the Spider Queen campaign progression
+  section_id: section.quest_book_i.lair_of_the_spider_queen
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 237
+      printed_page: 235
+      heading: Lair of the Spider Queen
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 239
+      printed_page: 237
+      heading: 'Level 1: The Entrance — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a4
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 240
+      printed_page: 238
+      heading: 'Level 2: The Basement — objective room'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a5
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 242
+      printed_page: 240
+      heading: 'Level 3: The Tomb of the Spider Queen — aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Campaign start: Whiteport. Travel to White 40 to accept the quest and continue the
+    campaign. The three levels follow each other without a return to the surface: the Entrance
+    statue reveals a stair down to the Basement, whose objective room (the stairs, C16) takes the
+    heroes to the Tomb. After the Tomb the heroes may leave without walking back through the
+    dungeon, but Overland Travel must be done. Once back in Whiteport they receive the reward, 1200
+    c per hero. This procedure owns only the campaign order and the once-only reward.'
+  issues:
+    - issue.quest.campaign_progression_boundaries
+  fields:
+    campaign_id:
+      type: string
+      role: input
+      description: Actual Lair of the Spider Queen campaign instance of this call.
+    campaign_owner_id:
+      type: string
+      role: state
+      description: Campaign instance this progression belongs to. Empty for a fresh campaign; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's campaign instance matches the saved one. Reset on every call.
+    phase:
+      type: string
+      role: input
+      description:
+        start, start_quest, complete, choose or return (Dead Rising) / start, accept, complete
+        or return (Spider Queen).
+    stage:
+      type: string
+      role: state
+      description: Campaign position. Empty before the campaign starts.
+    next_quest_id:
+      type: string
+      role: state
+      description: Quest the campaign requires next.
+    quest_in_progress:
+      type: boolean
+      role: state
+      description: The required next quest has been started and not yet completed.
+    completed_quest_id:
+      type: string
+      role: input
+      description: Actual quest whose outcome this call reports.
+    quest_outcome:
+      type: string
+      role: input
+      description:
+        'Actual outcome of that quest: completed, fled (where the quest allows it), failed or
+        abandoned.'
+    completion_accepted:
+      type: boolean
+      role: output
+      description:
+        This call reports a completion that advances the campaign. Cleared by the transition it
+        triggers.
+    location:
+      type: string
+      role: input
+      description: 'Actual place of this call: whiteport, white_40 or another settlement or hex.'
+    level_in_progress:
+      type: boolean
+      role: state
+      description: The party is in the dungeon on the current level.
+    dungeon_exit_without_retracing:
+      type: boolean
+      role: state
+      description: After the Tomb the heroes may leave without walking back through the dungeon.
+    reward_processed:
+      type: boolean
+      role: state
+      description: The Whiteport reward has been granted once.
+    campaign_return_completed_in_whiteport:
+      type: boolean
+      role: state
+      description: The party is back in Whiteport after the Tomb; input to the reward rule.
+    reward_per_hero:
+      type: number
+      role: output
+      description: Coins each hero receives in Whiteport, from the reward rule.
+      integer: true
+      minimum: 0
+    sarcophagus_findings_done:
+      type: boolean
+      role: input
+      description: The Tomb sarcophagus findings are done; input to the return rule.
+    dungeon_return_eventless:
+      type: boolean
+      role: output
+      description: From the return rule.
+    retrace_dungeon_not_required:
+      type: boolean
+      role: output
+      description: From the return rule.
+    overland_travel_required:
+      type: boolean
+      role: output
+      description: From the return rule.
+    reward_location:
+      type: string
+      role: output
+      description: From the return rule.
+  dependencies:
+    - key: quests
+      label: The accepted campaign quest and each level as its own dungeon lifecycle
+      object_id: procedure.quest_acceptance
+    - key: travel
+      label: Overland Travel to White 40 and back to Whiteport
+      object_id: procedure.travel_daily_movement
+  steps:
+    - id: check_owner
+      source: &a2
+        - *a1
+      source_text: Bind a fresh campaign progression to its instance; another instance cannot advance it.
+      substeps:
+        - id: bind_campaign
+          source: *a2
+          source_text: A fresh progression takes the campaign instance of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_owner_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: campaign_owner_id
+              value:
+                type: field
+                name: campaign_id
+        - id: owner
+          source: *a2
+          source_text: Only the bound campaign instance continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_owner_id
+            right:
+              type: field
+              name: campaign_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+    - id: start_campaign
+      source:
+        - *a1
+      source_text: 'Campaign start: Whiteport.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: start
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: whiteport
+      effects:
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: travel_to_site
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.spider_queen.entrance
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: reward_processed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: dungeon_exit_without_retracing
+          value:
+            type: literal
+            value: false
+    - id: accept_at_site
+      source:
+        - *a1
+      source_text: Travel to White 40 to accept the quest and continue the campaign; Level 1 starts there.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: accept
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: travel_to_site
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: white_40
+      effects:
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: l1
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: true
+    - id: accept_completion
+      source:
+        - *a1
+      source_text: Only the actual completion of the current level advances the campaign.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_in_progress
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completed_quest_id
+            right:
+              type: field
+              name: next_quest_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_outcome
+            right:
+              type: literal
+              value: completed
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: true
+    - id: unhandled_outcome
+      source:
+        - *a1
+      source_text:
+        The campaign text gives the order of its quests and where to go next, but not what
+        happens to the campaign when one of them is failed or abandoned. Such an outcome changes
+        nothing here.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: complete
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_in_progress
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completed_quest_id
+            right:
+              type: field
+              name: next_quest_id
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_outcome
+                right:
+                  type: literal
+                  value: failed
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: quest_outcome
+                right:
+                  type: literal
+                  value: abandoned
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.campaign_progression_boundaries
+    - id: entrance_to_basement
+      source:
+        - *a3
+      source_text: The statue slides away, revealing a stair down; the heroes continue straight into Level 2.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: l1
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: l2
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.spider_queen.basement
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: true
+    - id: basement_to_tomb
+      source:
+        - *a4
+      source_text: The objective room is the stairs (C16), which take the heroes down to Level 3.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: l2
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: l3
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: quest.spider_queen.tomb
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: true
+    - id: leave_tomb
+      source:
+        - *a5
+      source_text:
+        Once done, the heroes may leave without walking back through the dungeon; Overland
+        Travel to Whiteport must still be done.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: completion_accepted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: l3
+      effects:
+        - type: set
+          target: completion_accepted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: return
+        - type: set
+          target: next_quest_id
+          value:
+            type: literal
+            value: ''
+        - type: set
+          target: quest_in_progress
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: dungeon_exit_without_retracing
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: travel
+      rule_refs:
+        - core.quest.spider_queen_tomb.return
+    - id: whiteport_reward
+      source:
+        - *a5
+        - *a1
+      source_text: Once back in Whiteport, the heroes receive their reward of 1200 c per hero, once.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: return
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: stage
+            right:
+              type: literal
+              value: return
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: location
+            right:
+              type: literal
+              value: whiteport
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: reward_processed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: campaign_return_completed_in_whiteport
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: reward_processed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: stage
+          value:
+            type: literal
+            value: complete
+      substeps:
+        - id: apply_reward_rule
+          source:
+            - *a5
+            - *a1
+          source_text: Apply the printed reward once the return to Whiteport is recorded.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: campaign_return_completed_in_whiteport
+            right:
+              type: literal
+              value: true
+          rule_refs:
+            - core.quest.spider_queen_tomb.reward
+          effects: []
+  entry_step: check_owner
+  exit_step: whiteport_reward

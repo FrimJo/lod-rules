@@ -1,0 +1,947 @@
+- id: procedure.grieving_mother
+  name: The Grieving Mother side quest lifecycle
+  section_id: section.buying_an_estate.side_quest_the_grieving_mother
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 164
+      printed_page: 162
+      heading: 'Side Quest: The Grieving Mother'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: Entering the Side Objective Room
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a8
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: Aftermath – If You Fail
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a10
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 165
+      printed_page: 163
+      heading: Aftermath – If You Bring Back the Remains
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Started by Ghostly Event 6, the side quest takes place in the same dungeon as the next
+    quest, with one Side Quest Card added to the pile. The drawn card is put aside and the next card
+    leads through a hidden door to the side Objective Room (R17) with two giant spiders. After the
+    first combat turn the door slams shut. Once the spiders are beaten, one action places the
+    remains in a backpack (ENC 8). If the main quest finishes before the card is drawn, the heroes
+    may keep searching or end the quest, and the side quest fails. Failure makes the next Ghostly
+    Event #8. Remains brought back are buried at the estate and a magical Longsword (+2 DMG) is
+    found the next morning.'
+  issues:
+    - issue.quest.grieving_mother_outcome_boundaries
+    - issue.quest.grieving_mother_wandering_activation
+  fields:
+    occurrence_id:
+      type: string
+      role: input
+      description: Actual Grieving Mother occurrence of this call. A retry after failure is a new occurrence.
+    occurrence_owner_id:
+      type: string
+      role: state
+      description: Occurrence this lifecycle belongs to. Empty for a fresh one; never rebound.
+    owner_matches:
+      type: boolean
+      role: output
+      description: This call's occurrence matches the saved one. Reset on every call.
+    phase:
+      type: string
+      role: input
+      description: setup, card_drawn, first_turn_end, spiders_beaten, pick_up, wandering_monster,
+        end_quest or return_estate.
+    grieving_mother_triggered:
+      type: boolean
+      role: input
+      description: Ghostly Event 6 started the quest (procedure.estate_ghostly_events).
+    next_main_quest_instance_id:
+      type: string
+      role: input
+      description: Actual next quest whose dungeon hosts the side quest.
+    host_quest_instance_id:
+      type: string
+      role: state
+      description: Dungeon (main quest instance) that hosts this occurrence.
+    side_quest_status:
+      type: string
+      role: state
+      description: Empty, active, returning, succeeded or failed.
+    side_card_drawn:
+      type: boolean
+      role: state
+      description: The Side Quest Card has been drawn and the side room reached.
+    door_slammed:
+      type: boolean
+      role: state
+      description: The hidden door has slammed shut after the first combat turn.
+    spiders_dead:
+      type: boolean
+      role: state
+      description: The two giant spiders in the side room are beaten.
+    remains_carried:
+      type: boolean
+      role: state
+      description: The remains are in a hero backpack.
+    carrier_hero_id:
+      type: string
+      role: state
+      description: Hero who placed the remains in a backpack.
+    actor_hero_id:
+      type: string
+      role: input
+      description: Actual hero spending the pick-up action.
+    actor_has_action:
+      type: boolean
+      role: input
+      description: That hero has an action left this turn.
+    action_cost:
+      type: number
+      role: output
+      description: Actions spent in this call.
+      integer: true
+    wandering_activation_supplied:
+      type: boolean
+      role: input
+      description: The caller has decided when the light-opening spider Wandering Monsters start.
+    back_at_estate:
+      type: boolean
+      role: input
+      description: The party is back at the estate after the dungeon.
+    forced_ghost_event:
+      type: number
+      role: state
+      description: 'Estate state: Ghostly Event owed before the next quest (8 after failure), or 0.'
+      integer: true
+    grieving_mother_succeeded:
+      type: boolean
+      role: state
+      description: 'Estate state: the remains were brought back and buried.'
+    longsword_awarded:
+      type: boolean
+      role: state
+      description: The magical Longsword has been found once.
+    side_quest_card_drawn:
+      type: boolean
+      role: state
+      description: Input to the side quest card rule, recorded by this procedure.
+    first_turn_finished:
+      type: boolean
+      role: state
+      description: Input to the door slam rule, recorded by this procedure.
+    spiders_beaten:
+      type: boolean
+      role: state
+      description: Input to the remains pick-up rule, recorded by this procedure.
+    side_quest_failed:
+      type: boolean
+      role: state
+      description: Input to the failure rule, recorded by this procedure.
+    remains_buried:
+      type: boolean
+      role: state
+      description: Input to the success rule, recorded by this procedure.
+    objective:
+      type: string
+      role: output
+      description: Printed side-quest task.
+    location:
+      type: string
+      role: output
+      description: Location relative to the main quest.
+    side_quest_cards_to_add:
+      type: number
+      role: output
+      description: One additional card; lifecycle inserts it exactly once.
+      integer: true
+      minimum: 0
+    encounter_source:
+      type: string
+      role: output
+      description: Main quest encounter source.
+    set_side_quest_card_aside:
+      type: boolean
+      role: output
+      description: Set the Side Quest Card aside.
+    draw_next_card:
+      type: boolean
+      role: output
+      description: Pull the next card; no invented card contents.
+    next_card_leads_to_side_objective:
+      type: boolean
+      role: output
+      description: Replacement card leads to side Objective Room.
+    hidden_door_location:
+      type: string
+      role: output
+      description: One of the walls, supplied geometry.
+    next_reading:
+      type: string
+      role: output
+      description: Printed reading instruction.
+    door_kind:
+      type: string
+      role: output
+      description: Regular door, despite being hidden.
+    roll_for_lock:
+      type: boolean
+      role: output
+      description: Usual lock determination.
+    roll_for_trap:
+      type: boolean
+      role: output
+      description: Usual trap determination.
+    room_tile:
+      type: string
+      role: output
+      description: Printed tile.
+    outside_opening:
+      type: string
+      role: output
+      description: Relative placement of exit.
+    may_leave_via_opening:
+      type: boolean
+      role: output
+      description: Exit permission.
+    remains_location:
+      type: string
+      role: output
+      description: One of the squares in front of the door; no invented coordinate.
+    giant_spiders:
+      type: number
+      role: output
+      description: Initial enemy count.
+      integer: true
+      minimum: 0
+    spider_placement:
+      type: string
+      role: output
+      description: Opposite corners.
+    items_beside_remains:
+      type: string
+      role: output
+      description: Described items; no invented sale values or condition statistics.
+    hidden_door_closed:
+      type: boolean
+      role: output
+      description: Door slams closed.
+    door_table_result:
+      type: number
+      role: output
+      description: Treat the lock as a printed Door Table roll of 10.
+      integer: true
+      minimum: 0
+    heroes_inside_trapped:
+      type: boolean
+      role: output
+      description: Those inside are trapped with the spiders.
+    pickup_action_cost:
+      type: number
+      role: output
+      description: One action, preserved as action rather than invented Action Points.
+      integer: true
+      minimum: 0
+    remains_enc:
+      type: number
+      role: output
+      description: ENC carried by one backpack.
+      integer: true
+      minimum: 0
+    backpacks_required:
+      type: number
+      role: output
+      description: One backpack holds the remains.
+      integer: true
+      minimum: 0
+    later_wandering_monster:
+      type: boolean
+      role: input
+      description:
+        Supplied confirmation that a Wandering Monster occurs after the chosen interpretation
+        of from this point forward. Activation timing remains
+        issue.quest.grieving_mother_wandering_activation.
+    spider_roll:
+      type: number
+      role: input
+      description: Supplied 1d2 Giant spiders.
+      integer: true
+      minimum: 1
+      maximum: 2
+      dice:
+        count: 1
+        sides: 2
+    wandering_monster_origin:
+      type: string
+      role: output
+      description: Outside opening from which the light comes.
+    automatic_ghostly_event:
+      type: boolean
+      role: output
+      description: No random occurrence roll for this event.
+    next_ghostly_event:
+      type: number
+      role: output
+      description: 'Forced next event is #8.'
+      integer: true
+      minimum: 0
+    ghostly_event_time:
+      type: string
+      role: output
+      description: Before the next quest.
+    mother_never_seen_again:
+      type: boolean
+      role: output
+      description: Printed successful resolution.
+    reward_item:
+      type: string
+      role: output
+      description: Printed reward item.
+    reward_magical:
+      type: boolean
+      role: output
+      description: Longsword is magical.
+    reward_damage_bonus:
+      type: number
+      role: output
+      description: Additional DMG.
+      integer: true
+      minimum: 0
+    reward_time:
+      type: string
+      role: output
+      description: Next morning.
+    reward_location:
+      type: string
+      role: output
+      description: Dining table.
+  dependencies:
+    - key: dungeon
+      label: The next quest’s dungeon and its card pile
+      object_id: procedure.quest_dungeon_lifecycle
+    - key: reward
+      label: Magical Longsword +2 DMG
+      object_id: equipment.quest.grieving_mother_longsword
+  steps:
+    - id: check_owner
+      source:
+        - *a1
+      source_text: Bind a fresh occurrence; another occurrence cannot change it.
+      substeps:
+        - id: bind
+          source:
+            - *a1
+          source_text: A fresh occurrence takes the id of its first call.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: occurrence_owner_id
+            right:
+              type: literal
+              value: ''
+          effects:
+            - type: set
+              target: occurrence_owner_id
+              value:
+                type: field
+                name: occurrence_id
+        - id: owner
+          source:
+            - *a1
+          source_text: Only the bound occurrence continues.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: occurrence_owner_id
+            right:
+              type: field
+              name: occurrence_id
+          effects:
+            - type: set
+              target: owner_matches
+              value:
+                type: literal
+                value: true
+      effects:
+        - type: set
+          target: owner_matches
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: action_cost
+          value:
+            type: literal
+            value: 0
+    - id: setup
+      source:
+        - *a1
+      source_text: 'Location: the same dungeon as the next quest. Add one Side Quest Card to the pile.'
+      when:
+        type: all
+        conditions:
+          - &a3
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: owner_matches
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: setup
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_status
+            right:
+              type: literal
+              value: ''
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: grieving_mother_triggered
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: next_main_quest_instance_id
+            right:
+              type: literal
+              value: ''
+      rule_refs:
+        - core.quest.grieving_mother.setup
+      effects:
+        - type: set
+          target: side_quest_status
+          value:
+            type: literal
+            value: active
+        - type: set
+          target: host_quest_instance_id
+          value:
+            type: field
+            name: next_main_quest_instance_id
+        - type: set
+          target: side_card_drawn
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: door_slammed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: spiders_dead
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: remains_carried
+          value:
+            type: literal
+            value: false
+    - id: card_drawn
+      source: &a4
+        - *a1
+        - *a2
+      source_text:
+        Put the drawn card aside; the next card leads through a hidden door (a regular door,
+        rolled for lock and trap) to the side Objective Room, R17, with two giant spiders.
+      when:
+        type: all
+        conditions:
+          - &a5
+            type: all
+            conditions:
+              - *a3
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: side_quest_status
+                right:
+                  type: literal
+                  value: active
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: card_drawn
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: side_card_drawn
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: side_quest_card_drawn
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: card_drawn_rules
+          source: *a4
+          source_text: Apply the printed rules for this checkpoint.
+          rule_refs:
+            - core.quest.grieving_mother.side_quest_card
+            - core.quest.grieving_mother.hidden_door
+            - core.quest.grieving_mother.objective_room
+          effects: []
+    - id: door_slams
+      source: &a6
+        - *a2
+      source_text: After the first turn of combat the hidden door slams shut, locked as a 10 on the Door Table.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: first_turn_end
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: door_slammed
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: door_slammed
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: first_turn_finished
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: door_slams_rules
+          source: *a6
+          source_text: Apply the printed rules for this checkpoint.
+          rule_refs:
+            - core.quest.grieving_mother.door_slam
+          effects: []
+    - id: spiders_beaten
+      source:
+        - *a2
+      source_text: The side room spiders are beaten.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: spiders_beaten
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: spiders_dead
+          value:
+            type: literal
+            value: true
+    - id: pick_up_remains
+      source: &a7
+        - *a2
+      source_text: Once the spiders are beaten, a hero spends one action to place the remains in a
+        backpack (ENC 8), once.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: pick_up
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spiders_dead
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: remains_carried
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actor_has_action
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: remains_carried
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: carrier_hero_id
+          value:
+            type: field
+            name: actor_hero_id
+        - type: set
+          target: action_cost
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: spiders_beaten
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: pick_up_remains_rules
+          source: *a7
+          source_text: Apply the printed rules for this checkpoint.
+          rule_refs:
+            - core.quest.grieving_mother.remains_pickup
+          effects: []
+    - id: wandering_open
+      source:
+        - *a2
+      source_text: When the light-opening spider Wandering Monsters start is not settled by the text.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: wandering_monster
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wandering_activation_supplied
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.grieving_mother_wandering_activation
+    - id: wandering_spiders
+      source:
+        - *a2
+      source_text: From then on each Wandering Monster is 1d2 Giant spiders from the light opening.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: wandering_monster
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: wandering_activation_supplied
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - core.quest.grieving_mother.wandering_spiders
+      effects: []
+    - id: end_before_card
+      source: &a9
+        - *a1
+        - *a8
+      source_text:
+        'If the quest is finished before the card is drawn and the heroes end it, the side
+        quest fails, and the next Ghostly Event is #8.'
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: end_quest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: side_quest_status
+          value:
+            type: literal
+            value: failed
+        - type: set
+          target: forced_ghost_event
+          value:
+            type: literal
+            value: 8
+        - type: set
+          target: side_quest_failed
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: end_before_card_rules
+          source: *a9
+          source_text: Apply the printed rules for this checkpoint.
+          rule_refs:
+            - core.quest.grieving_mother.failure
+          effects: []
+    - id: end_with_remains
+      source:
+        - *a2
+      source_text: Leaving the dungeon with the remains takes them home to the estate.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: end_quest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: remains_carried
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: side_quest_status
+          value:
+            type: literal
+            value: returning
+    - id: end_without_remains
+      source:
+        - *a2
+      source_text: Leaving after reaching the side room without the remains is not described.
+      when:
+        type: all
+        conditions:
+          - *a5
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: end_quest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_card_drawn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: remains_carried
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: unresolved
+          issue_id: issue.quest.grieving_mother_outcome_boundaries
+    - id: bury_remains
+      source:
+        - *a10
+      source_text:
+        Back at the estate the remains are buried; the next morning a magical Longsword (+2
+        DMG) is on the dining table. Once.
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: return_estate
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: side_quest_status
+            right:
+              type: literal
+              value: returning
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: back_at_estate
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: longsword_awarded
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: side_quest_status
+          value:
+            type: literal
+            value: succeeded
+        - type: set
+          target: grieving_mother_succeeded
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: longsword_awarded
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: remains_buried
+          value:
+            type: literal
+            value: true
+      substeps:
+        - id: success_rule
+          source:
+            - *a10
+          source_text: The old lady is never seen again; the reward is the magical Longsword.
+          rule_refs:
+            - core.quest.grieving_mother.success
+          effects: []
+  entry_step: check_owner
+  exit_step: bury_remains

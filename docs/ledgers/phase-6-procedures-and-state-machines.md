@@ -11,15 +11,15 @@ issues instead of being invented.
 
 ## Batch plan
 
-| Batch | Scope                                                                              | Status      |
-| ----- | ---------------------------------------------------------------------------------- | ----------- |
-| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted   |
-| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted   |
-| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted   |
-| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted   |
-| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted   |
-| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted   |
-| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | In progress |
+| Batch | Scope                                                                              | Status                       |
+| ----- | ---------------------------------------------------------------------------------- | ---------------------------- |
+| 1     | Dungeon loop: threat, door/chest, rest, searching                                  | Extracted                    |
+| 2     | Locked doors (force/crowbar/pick), wandering-monster movement, trap resolution     | Extracted                    |
+| 3     | Initiative/activation procedure, encounters, initial setup, dungeon generation     | Extracted                    |
+| 4     | Combat procedures: attack resolution, damage, bleeding out                         | Extracted                    |
+| 5     | Travel, settlement visit, buying/selling, repair, identifying                      | Extracted                    |
+| 6     | Character creation, levelling, learning spells/prayers, training, guild activities | Extracted                    |
+| 7     | State machines: hero condition, rest interruption semantics, quest lifecycle       | Complete at documented scope |
 
 State machines are added only where the source genuinely governs transitions by current state;
 every other candidate stays a plain procedure. `procedure.dungeon_turn` and
@@ -1222,3 +1222,21 @@ The remaining quest/campaign/estate/personal-quest units, travel/settlement rest
 reconciliation, original candidate-loop audit and Phase5/6 exit acceptance remain
 required. Package F and Phase6 Batch7 are not closed. Historical counts and
 checkpoints above remain historical; current per-unit gates are in the lifecycle ledger.
+
+## Batch 7 complete at documented scope — 7 October 2026
+
+Package F (Batch 7) is accepted at the reduced scope of
+[corpus-completion-plan.md](../corpus-completion-plan.md) Step 1. The
+[acceptance manifest](../../tests/fixtures/acceptance/package-f.json) has 41 implemented, 10
+covered by another model, 1 nonprocedural and 43 `catalogue_scope` rows, and none pending.
+Shared lifecycles, condition and rest audits, campaigns and the estate are modelled. Quest
+Book I and personal-quest rows without a bespoke lifecycle keep their catalogue records and
+name their deferred ordered lifecycle; those lifecycles are optional work (plan §6). Unit
+evidence is in the [lifecycle ledger](lifecycle-procedures.md).
+
+The original Phases 0–6 exit checklist
+(`tests/fixtures/acceptance/phases-0-6.json`) was reconciled the same day: 76 of 85 rows are
+verified and 9 stay pending with named work (table inventory confirmation, untyped dice in
+text cells, embedded-restriction audit, procedure/rule duplication audit, the remaining
+mapped core tables, and the embarking, healing, events and dungeon-identification
+candidates). Its status stays `open`, so Phase 6 is not yet closed. No independent review.

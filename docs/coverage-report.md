@@ -8,7 +8,7 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 675 / 675 | 100% |
-| extracted | 348 / 675 | 52% |
+| extracted | 349 / 675 | 52% |
 | reviewed | 0 / 675 | 0% |
 
 Total sections tracked: 675
@@ -81,7 +81,7 @@ None. Every node in the structural map has been mapped.
 | rules | 360 | 159 | 156 |
 | tables | 201 | 339 | 135 |
 | examples | 14 | 411 | 250 |
-| procedures | 92 | 368 | 215 |
+| procedures | 103 | 358 | 214 |
 | entities | 230 | 332 | 113 |
 
 ## Remaining tables
@@ -141,6 +141,7 @@ None. Every node in the structural map has been mapped.
 | section.settlements.settlement_events | companions_compendium |
 | section.settlements.caelkirk | companions_compendium |
 | section.settlements.freyfell | companions_compendium |
+| section.buying_an_estate.furnishing_the_manor | companions_compendium |
 | section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance | bestiary |
 | section.psychology.table | bestiary |
 | section.alchemists_guild.table | false_prophet |
