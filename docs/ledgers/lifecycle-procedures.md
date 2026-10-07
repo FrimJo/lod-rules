@@ -1646,3 +1646,16 @@ against that saved owner. Main/side records and eligible repeats remain distinct
 no universal repeat or completion rule is inferred. Source availability and map
 geometry remain supplied, with the existing review boundaries preserved. The
 omitted Taking on Quests heading is included in the reconciled inventory.
+
+## Catalogue-scope acceptance disposition — 7 October 2026
+
+The Package F manifest accepts a new row disposition, `catalogue_scope`. It closes a Quest Book I
+or personal-quest heading at reduced scope: the quest's catalogue records exist, but its own
+ordered lifecycle is not modelled. The checker allows it only under `section.quest_book_i.` or
+`section.backgrounds.`, and requires at least one resolving `quest.*` record. The row lists the
+shared lifecycle rows it relies on in `shared_lifecycle_rows`. Each must be a manifest row that is
+`implemented` or `covered_by_another_model`. The unmodelled ordered work goes in `deferred_work`,
+which must not be empty. Non-empty `remaining_work` is rejected; such a row stays `pending`. The
+two new fields are rejected on any other disposition. A matching obligation disposition, `catalogue_scope`, is allowed only inside such a row and needs catalogue records. No real rows use the disposition yet,
+because the shared campaign rows are still pending. Synthetic fixtures in
+`tests/schema/lifecycle-acceptance.test.ts` cover each guard.

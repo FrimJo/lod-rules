@@ -25,14 +25,15 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 Step 1 of the [prioritised plan](corpus-completion-plan.md#3-prioritised-work): close
 Package F at reduced scope.
 
-1. Add the `catalogue_scope` disposition to `tests/fixtures/acceptance/package-f.json` and
-   `tests/schema/lifecycle-acceptance.test.ts`.
-2. Finish the five condition/rest audit rows, the shared quest selector and campaign rows,
-   and the estate lifecycle (PDF 160–166).
-3. Close the remaining Quest Book I and personal-quest rows as `catalogue_scope`, then run
+1. Done: the `catalogue_scope` disposition (`shared_lifecycle_rows`, `deferred_work`) is in
+   the acceptance schema and checker. No real rows use it yet.
+2. Next: the five condition/rest audit rows, then the shared quest selector and campaign rows,
+   then the estate lifecycle (PDF 160–166).
+3. Then close the remaining Quest Book I and personal-quest rows as `catalogue_scope` and run
    the Phase 5/6 exit reconciliation.
 
-After Step 1, start the core-chapter reconcile/extract/review loop (Step 2).
+Step 2 can start in parallel: its tooling (`npm run report:chapters`, `npm run review`, the
+`corpus-reviewer` agent) exists. Pilot on Introduction and Game Basics.
 
 ## Evidence ledgers
 

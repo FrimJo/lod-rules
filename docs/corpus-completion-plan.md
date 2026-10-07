@@ -32,7 +32,7 @@ current position and next unit are in [extraction-checkpoint.md](extraction-chec
 | Canonical files (`npm run validate`) | 440, passing                                                                                            |
 | Tests (`npm test`)                   | 3,732 passing, 2 optional provider tests skipped                                                        |
 | Sections extracted / reviewed        | 347 / 675 extracted (51%), 0 independently reviewed; 35 compatibility redirects excluded                |
-| Unfinished non-quest sections        | 289 (Quest Book I and backgrounds excluded)                                                             |
+| Unfinished non-quest sections        | 267, of which 99 have no citing record (`npm run report:chapters`)                                      |
 | Procedures / state machines          | 99 / 2                                                                                                  |
 | Review records                       | 138: 121 unresolved, 17 resolved (most by published designer rulings)                                   |
 | Package F manifest                   | 95 entries: 27 implemented, 3 shared model, 1 narrative-only, 64 pending                                |
@@ -59,7 +59,7 @@ else. That has stopped paying for itself:
   the model against itself, not against the PDF.
 - Quest catalogues (setup, Threat, special rules, rewards, local entities and tables) are
   already extracted and are what rules lookups and the helper app consume.
-- Core chapters are much weaker. 289 non-quest sections are unfinished. Most of the gap is
+- Core chapters are much weaker. 267 non-quest sections are unfinished. Most of the gap is
   undispositioned components (`not_started` rather than extracted or `not_applicable`), but
   some is missing extraction: Basic Stats, The Tiles and Difficulty have no records citing them.
 - Nothing has been independently reviewed. Every answer the retrieval tools give rests on
@@ -78,8 +78,9 @@ Run these in order. Each step has an exit condition; shared gates are in
 Package F (Phase 6 Batch 7) stays required for shared lifecycle models and becomes optional for
 per-quest ordered lifecycles.
 
-1. Add a disposition to the acceptance manifest and `tests/schema/lifecycle-acceptance.test.ts`,
-   for example `catalogue_scope`. It may close a quest or personal-quest row only when:
+1. **Done 7 October.** Add the `catalogue_scope` disposition to the acceptance manifest schema
+   and checker (`shared_lifecycle_rows`, `deferred_work`). It may close a quest or
+   personal-quest row only when:
    - its catalogue records exist and resolve;
    - the shared lifecycle models it relies on are `implemented` (quest acceptance, departure,
      shared dungeon progression, Threat events, reading, aftermath);
@@ -128,9 +129,21 @@ For each chapter:
 4. **Independent review** (Phase 9, below) of the chapter by someone other than the extractor,
    recorded as review evidence. Only then may its sections become `reviewed`.
 
-Do the first iteration of 4 only after the review-record schema from Phase 9 exists. Prioritise
-review of the chapters players consult most: Combat, Into the Dungeons, Settlements, Character
-Basics.
+Tooling (in place since 7 October):
+
+- `npm run report:chapters -- --chapter <name>` lists each chapter's unfinished sections, open
+  components and citing records. "No records" sections are a reconcile list, not confirmed
+  gaps: many are part, chapter-root or front/back-matter nodes, and a generated table may be
+  cited through its parent heading.
+- Independent review uses the `corpus-reviewer` agent (`.claude/agents/corpus-reviewer.md`),
+  review records under `review/independent/`, and `npm run review -- digest|check`. The format,
+  digest and staleness rules are in the [extraction guide](extraction-guide.md#independent-review).
+- Only an `extracted` section can be promoted to `reviewed`, so reconcile a section to
+  `extracted` before reviewing it. The reviewer reports findings; the extraction side applies
+  corrections and a new review run confirms them.
+
+Prioritise review of the chapters players consult most: Combat, Into the Dungeons, Settlements,
+Character Basics.
 
 **Exit:** every non-quest section is `extracted` or has justified exclusions, and has
 independent-review evidence.

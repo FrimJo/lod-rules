@@ -112,6 +112,58 @@ looks malformed, columns interleave, text order is suspicious, symbols are missi
 diagram carries rules, or footnotes appear detached. Record the result with
 `extraction.visually_verified: true`. OCR is a last resort, not a first choice.
 
+## Independent review
+
+`reviewed` means a reviewer other than the extractor compared the canonical records with the
+rendered PDF and recorded the evidence. Nothing becomes `reviewed` without a record.
+
+**Records** live in `review/independent/<chapter>.yaml` as YAML arrays, validated by
+`schemas/independent-review.schema.json`. Each record has an id `review.<unit>.<n>`; a
+`reviewer` (`agent` with `model` and `run_id`, or `human` with `name`) whose `independence`
+states it did not author the extraction and did not use extraction ledgers as evidence; a
+`date`; a `scope` of section ids plus every PDF page actually rendered (with its printed page
+from `pages.yaml`); the `examined_objects` with per-object digests; the `digest`; `findings`;
+an `outcome`; and a `summary`. Each finding names its section, optionally an examined object,
+a kind, a description, a source reference and a disposition: `corrected` (the verified change),
+`recorded_as_issue` (an `issue.*` id in `review/ambiguities.yaml`), `no_change_needed`, or
+`open` (with a proposed correction). `passed` allows no open or corrected findings,
+`passed_with_corrections` needs at least one verified correction and none open, and `failed`
+needs at least one finding. A passing record must inspect every PDF page of its sections.
+
+**Digest** (`lod-review-digest/v1`, `scripts/validate/independent-review.ts`). The examined
+objects are the scoped sections (their `sections.yaml` and coverage rows), every term, rule,
+table, entity, procedure, state machine and test case whose `section_id` is in scope, and every
+issue related to one of those. Each object is hashed as SHA-256 over canonical JSON of
+`{ kind, id, content }`: keys sorted at every depth, array order kept, no whitespace, so YAML
+layout, comments and file placement do not matter. `status: reviewed` is hashed as `extracted`
+so promotion does not invalidate the evidence. The content digest hashes the algorithm name,
+the SHA-256 of the canonical PDF, the sorted section ids and the sorted `[id, kind, digest]`
+list.
+
+**Staleness.** `npm run validate` allows a coverage row, a coverage component or an object to be
+`reviewed` only if the latest record covering its section (by date, then id) passed, has no
+open findings, and its digest still matches the corpus. Any material edit, added or removed
+object, related-issue change or replaced PDF makes it stale; the error names the section and the
+changed, added or removed objects. Because promotion hashes as `extracted`, only rows and
+components that were `extracted` (or `not_applicable`) when reviewed can be promoted. A stale
+record that backs nothing is history, not an error.
+
+```bash
+npm run review -- digest section.combat --descendants   # scope, pages, objects, digest
+npm run review -- check                                 # fresh / stale / invalid records
+```
+
+**Agent protocol.** The reviewer is the `corpus-reviewer` subagent
+(`.claude/agents/corpus-reviewer.md`), run in a fresh context on one bounded unit. It renders
+every page itself, reads only the PDF, the canonical YAML and `pages.yaml` (never
+`docs/ledgers/` or the extraction checkpoint; tests are supporting evidence only), and writes
+only its review record and new unresolved issues.
+
+**Correct, then re-review.** The reviewer does not fix the corpus. Errors become `open` findings
+with proposed corrections, and the record fails. The extraction side applies the corrections
+(which also makes the record stale), then a new review run checks them against the page and
+writes a new record whose findings are `corrected`. Only that record can back `reviewed`.
+
 ## Before finishing a change
 
 ```bash

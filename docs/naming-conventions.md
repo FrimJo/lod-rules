@@ -34,13 +34,16 @@ Machine-checked pattern (`schemas/common.schema.json`):
 | Structural section | `section.`          | `section.game_basics`                              |
 | Test fixture       | `test.`             | `test.check.equal`                                 |
 | Issue record       | `issue.`            | `issue.0042`                                       |
+| Independent review | `review.`           | `review.combat.1`                                  |
 | Gold decision case | `gold.`             | `gold.check.failure`                               |
 
 Source documents use their own namespace in `source/manifest.yaml`, for example
 `rulebook.second_printing.eng` and `bestiary`.
 
 `gold.` ids live in `tests/fixtures/semantic-decisions-gold/` and are not corpus
-objects. They are not registered in the global id table.
+objects. They are not registered in the global id table. `review.<unit>.<n>` ids name
+independent review records in `review/independent/`; they are evidence about the corpus,
+not corpus objects, and are not registered either.
 
 ## File naming
 
