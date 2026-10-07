@@ -1,7 +1,7 @@
 /**
  * Pure helpers for calibrating the Jev relevance filter against labelled pools: the policy
  * grid, scoring, selection with stated loss bounds, and the inputs a result depends on.
- * `calibrate-filter.ts` does the I/O. See docs/jev-filter-calibration-plan.md.
+ * `calibrate-filter.ts` does the I/O. See docs/ask-quality-evaluation.md#filter-calibration-plan.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
