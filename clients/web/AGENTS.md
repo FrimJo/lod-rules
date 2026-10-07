@@ -4,6 +4,24 @@ TanStack Start (Vite) rules Q&A consumer. It calls the root `scripts/ask` pipeli
 server and shows the evidence first; an OpenRouter model writes an answer only when the reader
 asks for one (or opts into automatic answers). It is **not** part of the canonical corpus.
 
+## Game master's table (`/gm`)
+
+A second island in the same app: `src/routes/gm.tsx` and `src/gm/`. It tracks a dungeon run
+for the Game Master (Threat, light sources, Party Morale, each hero's Sanity and conditions,
+rations, rests, Wandering Monster tokens) and lists the follow-ups the book asks for. It is
+browser-only: state lives in `localStorage`, no server function or LLM is involved, and the
+only shared code is the rulebook viewer for page citations.
+
+- `src/gm/rules.ts` holds the rulebook facts it runs on, each with a page citation and the
+  corpus record id. `tests/gm-rules.test.ts` reads those records back through
+  `runRetrievalTool` and fails when a value or page drifts from the corpus. Change a fact in
+  the corpus first; never make the table "know" something the corpus does not.
+- `src/gm/engine.ts` is a pure reducer; `tests/gm-engine.test.ts` covers it. Keep rules out
+  of the components.
+- Where the corpus has not extracted a rule yet (the Threat tables on p. 89, the post-battle
+  Threat increase, the effects of darkness) the table says so and asks the Game Master. Do
+  not fill those gaps in the client; extract them into the corpus.
+
 ## Boundaries
 
 - Never write or modify files under `corpus/`, `schemas/`, or `review/`.
@@ -11,6 +29,8 @@ asks for one (or opts into automatic answers). It is **not** part of the canonic
   package's own checks instead.
 - Shared logic lives in `../../scripts/`; import from there rather than duplicating ask
   behavior in the client.
+- `src/gm/` reads rulebook content only from `src/gm/rules.ts`, which the corpus-consistency
+  test pins to corpus records.
 
 ## Commands
 

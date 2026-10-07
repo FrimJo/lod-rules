@@ -82,6 +82,46 @@ The server serves single pages as small standalone PDFs (`/api/rulebook-page/:pd
 pdf-lib) because opening the whole book makes pdf.js read most of its 40 MB. `/api/rulebook`
 serves the full file with byte-range support for "Open PDF".
 
+## Game master's table
+
+`/gm` (for example http://localhost:1234/gm) is a tracker for running a dungeon, built from
+the same corpus. It exists because the rulebook's bookkeeping is where games go wrong: a torch
+is spent by a Threat roll below Threat, the lantern burns half its oil, Party Morale moves on
+fifteen different events, Sanity has its own table and resets after a mental condition, a rest
+costs a ration and risks an ambush, and a quest may place a Wandering Monster whenever Threat
+is increased to a certain value.
+
+Tell the table what happens and it rolls out the printed consequences, keeps a log with page
+chips that open the rulebook pane, and lists what to resolve next:
+
+- **Turn**: pick the quest (start, minimum and maximum Threat and the Wandering Monster
+  thresholds come from the quest tables); `New turn` (or `N`) asks for the Scenario die once
+  the party has passed the first door; a 9 or 0 asks for a Threat roll. Door opened, tile
+  revealed (with the encounter chance, +10 after four empty tiles), battle begins and ends,
+  short rest (ration, recovery, ambush roll against 5 + Threat, +10 per later rest).
+- **Threat**: 20 lowers by 5, above Threat adds 1, at or below asks you to roll on the printed
+  Threat table and enter its decrease (those tables are not in the corpus yet). Door +1,
+  forcing a lock +2, crowbar +1, portcullis failure +1, perks, and a prompt for the
+  post-battle increase (also not in the corpus yet). Quest thresholds place a Wandering
+  Monster token.
+- **Light**: torches, lanterns and headlamps with carriers, spares and Lamp Oil. A Threat roll
+  below Threat spends torches and burns half a lantern; an unmodified attack roll of 90 or
+  more puts a torch out; a head wound destroys a headlamp. Shows the +5 Fear/Terror and
+  carrier Perception bonuses while anything burns, and says plainly that the effects of
+  darkness are not in the corpus.
+- **Party Morale**: start value from each hero's RES ÷ 10 (plus Natural Leader and the
+  Powerstone), every row of the morale table as a button, the linked Sanity losses applied to
+  the hero it happened to, wavering below half (−20 RES) and the flight at 0.
+- **Heroes**: Sanity dots, mental conditions rolled at 0 Sanity (duplicates roll again, Sanity
+  resets to 8 minus conditions), and the conditions that feed back into the table (Acute
+  Stress adds Threat per battle, Jumpy adds Threat on a Scenario 0), plus wounded, bleeding
+  out, poisoned and diseased reminders that surface during rests and after battles.
+
+State is saved in `localStorage` (`lod-rules:gm-table`); `Undo` (⌘Z) steps back within the
+session and `Reset` clears the table. `src/gm/rules.ts` carries the facts with their page
+citations and corpus record ids; `tests/gm-rules.test.ts` checks them against the corpus and
+`tests/gm-engine.test.ts` covers the reducer.
+
 ## Deploying to Vercel
 
 The production build is a [Nitro](https://nitro.build) server. `vite build` picks the preset
@@ -152,4 +192,4 @@ review; a record already labelled in another tab is never overwritten. Held-out 
 left out unless you include them; label those once, after the policy is chosen. The side panel
 tracks progress towards 300 labels and 60 relevant records that Jev doubts.
 
-`npm run typecheck` checks this package. `npm test` runs the ruling citation, source-serving, retrieval-mode, record-text, grading-review and filter-calibration regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.
+`npm run typecheck` checks this package. `npm test` runs the ruling citation, source-serving, retrieval-mode, record-text, grading-review, filter-calibration, Game master's table engine and corpus-consistency regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.
