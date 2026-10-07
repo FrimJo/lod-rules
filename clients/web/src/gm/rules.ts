@@ -3,8 +3,7 @@
  * from and, where the corpus has one, the record id. `tests/gm-rules.test.ts` checks these
  * values against the corpus so the table cannot drift from the book. Nothing here is
  * invented: where the corpus has not extracted a rule yet (the Threat tables on p. 89, the
- * post-battle Threat increase, the effects of darkness) the table says so and asks the
- * Game Master instead.
+ * effects of darkness) the table says so and asks the Game Master instead.
  */
 export interface Cite {
   /** Printed folio, or null for an unnumbered page. */
@@ -91,6 +90,24 @@ export const CITES = {
     pdf: 89,
     heading: 'The Threat Level',
     recordId: 'procedure.threat_roll',
+  },
+  threatIncrease: {
+    page: 88,
+    pdf: 89,
+    heading: 'Increasing Threat Level',
+    recordId: 'core.threat.increase.battle_won',
+  },
+  threatDoorOrCobweb: {
+    page: 88,
+    pdf: 89,
+    heading: 'Increasing Threat Level',
+    recordId: 'core.threat.increase.door_chest_or_cobweb',
+  },
+  threatMax: {
+    page: 88,
+    pdf: 89,
+    heading: 'Max Threat Level',
+    recordId: 'core.threat.max_level',
   },
   threatTables: {
     page: 89,
@@ -249,6 +266,8 @@ export const THREAT = {
   floor: 2,
   natural20: -5,
   missIncrease: 1,
+  /** The party wins a battle. */
+  battleWon: 1,
   cite: CITES.threatLevel,
 } as const;
 
@@ -257,6 +276,7 @@ export type ThreatSourceId =
   | 'force_lock'
   | 'crowbar'
   | 'portcullis_failed'
+  | 'cobweb_cleared'
   | 'battle_won'
   | 'lucky_git'
   | 'gods_favourite'
@@ -304,12 +324,18 @@ export const THREAT_SOURCES: ReadonlyArray<ThreatSource> = [
     cite: CITES.portcullis,
   },
   {
+    id: 'cobweb_cleared',
+    label: 'Cobweb opening cleared',
+    delta: 1,
+    detail: 'Clearing a cobweb opening (2 AP, weapon or torch) increases Threat by 1.',
+    cite: CITES.threatDoorOrCobweb,
+  },
+  {
     id: 'battle_won',
     label: 'Battle won',
-    delta: null,
-    detail:
-      'Turn step 4: increase Threat if a battle is won. The amount is printed on p. 88 but is not in the corpus yet, so enter it.',
-    cite: CITES.threatLevel,
+    delta: THREAT.battleWon,
+    detail: 'The party wins a battle: increase the Threat Level by 1 (turn step 4).',
+    cite: CITES.threatIncrease,
   },
   {
     id: 'lucky_git',
@@ -1189,8 +1215,8 @@ export function questById(id: string | null | undefined): QuestPreset | undefine
 export const GAPS = {
   threatTables:
     'The two Threat tables on p. 89 (party not in battle: 1d20; in battle: 1d10) are not in the corpus yet. Roll on the printed table, carry out the event, and enter the Threat decrease printed beside it.',
-  battleWon:
-    'The Threat increase for a won battle is printed on p. 88 but is not in the corpus yet. Enter the printed amount.',
+  maxLevel:
+    'The book says reaching the quest max triggers a Wandering Monster. It does not say whether Threat can rise past the max or whether staying at it triggers again; the table holds Threat at the max.',
   darkness:
     'The corpus records what a lit light source gives (+5 Fear/Terror for all, +5/+10 Perception for the carrier) and that Night Vision ignores darkness. It does not yet record what darkness does to everyone else; check the rulebook.',
   thresholdCrossed:
