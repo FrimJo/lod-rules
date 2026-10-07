@@ -1,0 +1,559 @@
+- id: test.gameplay_example.turn_1_scenario_die
+  name: Turn 1 Scenario die 2 does not trigger a Threat Roll
+  section_id: section.game_basics.gameplay_example
+  source:
+    - &p22
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 20
+      pdf_page: 22
+      heading: Gameplay Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The players roll the Scenario die, 1d10, and get a 2. Since the quest requires a 9 or
+    10 to trigger a Threat Roll, nothing happens.
+  kind: source_example
+  procedure_id: procedure.scenario_die
+  inputs:
+    scenario_die_roll: 2
+    threat_trigger: 9
+  expected:
+    state: {}
+    events: []
+    trace:
+      - procedure.scenario_die
+    unresolved: []
+    steps:
+      - roll
+- id: test.gameplay_example.chest_open_roll
+  name: Azira's chest roll of d10 3 and d6 6 is Open on the Door Table but trapped
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: Azira spends one action moving up to the chest and the second to try to open it.
+    She rolls 1d6 to see if it is trapped and 1d10 to see if it is locked. To speed things up she
+    rolls both dice at the same time. The d10 ends up a 3, telling her that the chest is unlocked,
+    but the d6 shows a 6, meaning that it is trapped.
+  kind: source_example
+  procedure_id: procedure.open_door_or_chest
+  issues:
+    - issue.gameplay_example.chest_threat
+    - issue.gameplay_example.trap_table
+  inputs:
+    threat_level: 9
+    d6_roll: 6
+    d10_roll: 3
+    locked: false
+    is_chest: true
+    trap_prevents_opening: false
+    adjacent: true
+    initial_entrance: false
+  expected:
+    state:
+      threat_level: 10
+      action_points_spent: 1
+      door_table_result: Open
+    events:
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: procedure.trap_resolution
+      - type: invoke
+        dependency: table.dungeon.door_chest_difficulty
+      - type: invoke
+        dependency: table.treasure.furniture
+    trace:
+      - procedure.open_door_or_chest
+    unresolved: []
+    steps:
+      - spend
+      - increase_threat
+      - roll_open
+      - trapped
+      - check_locked
+      - reveal
+      - chest_reveal
+- id: test.gameplay_example.azira_perception
+  name: Azira's Perception roll of 56 against 45 fails to spot the chest trap
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: Azira makes a roll on her perception (45) to determine if she spots the trap, but
+    unfortunately, the roll ends up 56. Unaware of the trap, she opens the chest and triggers it.
+  kind: source_example
+  rule_ids:
+    - core.check.standard
+    - core.check.success
+    - core.check.automatic_failure
+  inputs:
+    roll: 56
+    effective_value: 45
+  expected:
+    state:
+      outcome: failure
+    events: []
+    trace:
+      - core.check.standard
+    unresolved: []
+    steps: []
+- id: test.gameplay_example.trap_party_morale
+  name: Triggering the chest trap lowers Party Morale from 12 to 11
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: Nothing of any real importance has happened, so Party Morale is 12 ... Furthermore,
+    triggering a trap reduces her Sanity by 1 point, and the Party Morale by 1.
+  kind: source_example
+  rule_ids:
+    - character.morale.event.trap
+  inputs:
+    morale: 12
+    occurrences: 1
+  expected:
+    state:
+      morale: 11
+    events: []
+    trace:
+      - character.morale.event.trap
+    unresolved: []
+    steps: []
+- id: test.gameplay_example.azira_trap_damage
+  name: Azira takes 3 trap damage with no Natural Armour, going from 9 to 6 Hit Points
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: She rolls 1d4 for the damage, resulting in 3 Points of Damage. She has no Natural
+    Armour to reduce the damage, so she must remove the 3 points from her total of 9 leaving her
+    at 6 Hit Points.
+  kind: source_example
+  rule_ids:
+    - combat.damage.basic
+    - character.hit_points.loss
+  issues:
+    - issue.gameplay_example.trap_table
+  inputs:
+    weapon_damage: 3
+    damage_bonus: 0
+    natural_armour: 0
+    armour: 0
+    hit_points: 9
+  expected:
+    state:
+      damage_taken: 3
+      hit_points: 6
+    events: []
+    trace:
+      - combat.damage.basic
+      - character.hit_points.loss
+    unresolved: []
+    steps: []
+- id: test.gameplay_example.chest_furniture_roll
+  name: A Chest roll of 1 on the Furniture table gives 1 Wonderful Treasure
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: After opening the chest Azira looks up the entry for a chest on the Furniture Table
+    and rolls 1d10. A result of 1 indicates that she has found a Wonderful Treasure.
+  kind: source_example
+  rule_ids:
+    - character.treasure.furniture.chest
+  inputs:
+    search_allowed: true
+    roll: 1
+  expected:
+    state:
+      chest_contents: 1 Wonderful Treasure.
+    events:
+      - type: invoke
+        dependency: table.treasure.furniture.chest
+    trace:
+      - character.treasure.furniture.chest
+    unresolved: []
+    steps: []
+- id: test.gameplay_example.door_opened_locked
+  name: Belleck opens the door, Threat 9 to 10, not trapped, and Door Table 8 is Locked
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p22
+  status: extracted
+  confidence: high
+  source_text: Belleck decides to open the door on his first action. First, he increases the Threat
+    Level by +1 to 10. Rolling the d6 and d10, he gets a 2 and 8 respectively, meaning that the door
+    is not trapped, but locked, with 15 Hit Points.
+  kind: source_example
+  procedure_id: procedure.open_door_or_chest
+  issues:
+    - issue.gameplay_example.chest_threat
+  inputs:
+    threat_level: 9
+    d6_roll: 2
+    d10_roll: 8
+    locked: true
+    is_chest: false
+    trap_prevents_opening: false
+    adjacent: true
+    initial_entrance: false
+  expected:
+    state:
+      threat_level: 10
+      action_points_spent: 1
+      door_table_result: Locked
+    events:
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: table.dungeon.door_chest_difficulty
+      - type: invoke
+        dependency: procedure.locked_door_and_close
+    trace:
+      - procedure.open_door_or_chest
+    unresolved: []
+    steps:
+      - spend
+      - increase_threat
+      - roll_open
+      - check_locked
+      - locked_handoff
+      - reveal
+- id: test.gameplay_example.belleck_bashes_door
+  name: Belleck's 9 damage leaves the locked door at 6 HP and raises Threat to 12
+  section_id: section.game_basics.gameplay_example
+  source:
+    - &p23
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 21
+      pdf_page: 23
+      heading: Gameplay Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Belleck spends his second action to bash down the door. The strike hits automatically,
+    causing 1d10+1 Points of Damage to the door. The result is 9, which leaves the door with 6 Hit
+    Points. The noise caused by this raises the Threat Level by +2 resulting in 12.
+  kind: source_example
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: force
+    is_locked: true
+    door_hp: 15
+    attack_damage: 9
+    threat_level: 10
+  expected:
+    state:
+      door_hp: 6
+      threat_level: 12
+      action_points_spent: 1
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - force
+- id: test.gameplay_example.grol_breaks_door
+  name: Grol's 6 damage breaks the door and raises Threat by 2 more
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+  status: extracted
+  confidence: high
+  source_text:
+    Grol uses his first action to strike the door with his shortsword, causing 6 Points of
+    Damage which is enough to break the door. The Threat Level is once again raised 2 points and the
+    door is removed.
+  kind: source_example
+  procedure_id: procedure.locked_door_and_close
+  inputs:
+    approach: force
+    is_locked: true
+    door_hp: 6
+    attack_damage: 6
+    threat_level: 12
+  expected:
+    state:
+      is_locked: false
+      door_hp: 0
+      threat_level: 14
+      action_points_spent: 1
+      is_open: true
+    events: []
+    trace:
+      - procedure.locked_door_and_close
+    unresolved: []
+    steps:
+      - choose_approach
+      - force
+      - door_reaches_zero
+- id: test.gameplay_example.room_encounter
+  name: A room roll of 34 is an encounter; placing the spider ends the turn
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+  status: extracted
+  confidence: high
+  source_text: Next, they roll 1d100 to see if the room is populated resulting in 34. Since a result
+    of 50 or below results in an encounter in a room, the players roll on the quest-specified
+    Encounter List, which reveals a Giant Spider.
+  kind: source_example
+  procedure_id: procedure.encounters
+  issues:
+    - issue.gameplay_example.spider_turn
+  inputs:
+    tile_kind: room
+    empty_streak: 0
+    streak_bonus_supplied: 0
+    room_modifier: 0
+    roll: 34
+    highest_level: 1
+    monster_roll: 1
+    quest_override: true
+    quest_result: Giant Spider
+    monster_data_supplied: true
+    monster_result: Giant Spider
+    placement_supplied: true
+    melee_distance_valid: true
+    melee_randomized: true
+    ranged_farthest_in_los: true
+    facing_valid: true
+  expected:
+    state:
+      base_chance: 50
+      encounter_chance: 50
+      encounter_present: true
+      turn_ended: true
+      streak_after: 0
+      enemies_placed: true
+      selected_monsters: Giant Spider
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: procedure.initiative
+    trace:
+      - procedure.encounters
+    unresolved: []
+    steps:
+      - room
+      - chance
+      - encounter
+      - quest_override
+      - place
+- id: test.gameplay_example.spider_initiative
+  name: Bashed-door initiative gives the Giant Spider 3 tokens (changelog 2.21 entry 27)
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+    - &cl27
+      document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 3
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 27
+  status: extracted
+  confidence: high
+  source_text: Last, but not least, 4 initiative tokens for the heroes and one for the spider are
+    added to the dice bag. Changelog 2.21 entry 27, marked Fixed, says the Giant Spider should have
+    3 Initiative tokens as the door was bashed.
+  kind: source_example
+  procedure_id: procedure.initiative
+  issues:
+    - issue.gameplay_example.spider_turn
+  inputs:
+    enemies_placed: true
+    first_turn: true
+    eligible_heroes: 4
+    eligible_enemies: 1
+    named_monsters_alive: 0
+    bashed_room_door: true
+    door_encounter: true
+    hero_perfect_hearing: false
+    enemy_perfect_hearing: false
+    use_hearing_bonus: false
+    overwatch_heroes: 0
+    supplied_hero_bonus: 0
+    supplied_enemy_bonus: 0
+  expected:
+    state:
+      hero_tokens: 4
+      enemy_tokens: 3
+      extra_activations: 0
+      start_new_turn: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.initiative
+    unresolved: []
+    steps:
+      - base
+      - bashed
+      - new_turn
+- id: test.gameplay_example.threat_roll_in_battle
+  name: Turn 3 Threat Roll of 10 triggers the in-battle table and the Threat Level drops by 3
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+  status: extracted
+  confidence: medium
+  source_text: The Scenario die ends up a 10, indicating that a Threat Roll is required. The players
+    roll 1d20, resulting in 10, which is lower than the current Threat Level ... Since they are in
+    battle, they roll 1d10 on the 'Threat table in combat', resulting in a 5. The spider gains the
+    Frenzy Rule! That also means that the Threat Level is decreased by 3 according to the table.
+  kind: source_example
+  procedure_id: procedure.threat_roll
+  issues:
+    - issue.gameplay_example.chest_threat
+    - issue.gameplay_example.threat_table_result
+  inputs:
+    threat_level: 14
+    threat_roll: 10
+    in_battle: true
+    threat_decrease: -3
+  expected:
+    state:
+      threat_level: 11
+      original_threat_level: 14
+    events:
+      - type: invoke
+        dependency: Threat table — party is in battle (page 89)
+    trace:
+      - procedure.threat_roll
+    unresolved: []
+    steps:
+      - roll
+      - triggered
+      - in_battle
+      - decrease
+- id: test.gameplay_example.power_attack_threshold
+  name: Belleck's Power Attack needs 61 or less and his 53 hits
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+    - &p24
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 22
+      pdf_page: 24
+      heading: Gameplay Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: To optimise his chances, Belleck decides to make a Power Attack against the spider,
+    adding +20 on his chance to hit, but costing him both of his Action Points ... His Combat Skill
+    is 46 and he rolls 53. Adding 20 to his CS, but subtracting the -5 for the spider's ability to
+    avoid the strike means he must roll 61 or less to hit.
+  kind: source_example
+  procedure_id: procedure.combat_preparation
+  inputs:
+    mode: melee
+    action: power
+    adjacent: true
+    doorway_opposite: false
+    reach_valid: false
+    in_los: true
+    outdoors: false
+    enemy_adjacent: false
+    ranged_exception: false
+    loaded: true
+    ammunition_available: true
+    straight_model_block: false
+    large_or_flying: false
+    target_large: false
+    from_behind: false
+    target_prone: false
+    height_advantage: false
+    target_shield: false
+    target_parry: false
+    enemy_power_restriction_resolved: true
+    enemy_to_hit_suppressed: false
+    shield_suppressed: false
+    aim_valid: false
+    charge_path_valid: false
+    target_aiming: false
+    distance: 1
+    skill: 46
+    enemy_to_hit: 5
+    melee_weapon_modifier: 0
+    half_height_obstacles: 0
+    other_modifier: 0
+  expected:
+    state:
+      attack_eligible: true
+      action_points_spent: 2
+      action_modifier: 20
+      position_modifier: 0
+      height_modifier: 0
+      shield_modifier: 0
+      parry_modifier: 0
+      to_hit_modifier: -5
+      obstacle_modifier: 0
+      aim_modifier: 0
+      threshold: 61
+    events: []
+    trace:
+      - procedure.combat_preparation
+    unresolved: []
+    steps:
+      - requirements
+      - eligible
+      - power
+      - evasion
+      - threshold_melee
+- id: test.gameplay_example.spider_damage
+  name: 7 damage less the spider's 1 Natural Armour is 6
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p24
+  status: extracted
+  confidence: high
+  source_text:
+    The strike hits its mark, causing 1d10+1 of damage, in this case 7. The spider's thick
+    skin deducts 1 Point of Damage though, giving a final result of 6.
+  kind: source_example
+  rule_ids:
+    - combat.damage.basic
+  inputs:
+    weapon_damage: 7
+    damage_bonus: 0
+    natural_armour: 1
+    armour: 0
+  expected:
+    state:
+      damage_taken: 6
+    events: []
+    trace:
+      - combat.damage.basic
+    unresolved: []
+    steps: []

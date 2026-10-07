@@ -539,6 +539,20 @@
       type: boolean
       role: input
       description: search allowed
+    roll:
+      type: number
+      role: input
+      description: 1d10 rolled on the Chest entry.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    chest_contents:
+      type: string
+      role: output
+      description: Printed Chest result for the roll.
   when:
     type: compare
     operator: eq
@@ -549,6 +563,15 @@
       type: literal
       value: true
   effects:
+    - type: lookup
+      table_id: table.treasure.furniture.chest
+      key_column: roll
+      key:
+        type: field
+        name: roll
+      value_column: result
+      target: chest_contents
+      on_missing_issue: issue.phase4.lookup_domain
     - type: invoke
       dependency: findings
   dependencies:

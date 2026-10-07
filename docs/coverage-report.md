@@ -8,8 +8,8 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 675 / 675 | 100% |
-| extracted | 349 / 675 | 52% |
-| reviewed | 0 / 675 | 0% |
+| extracted | 376 / 675 | 56% |
+| reviewed | 27 / 675 | 4% |
 
 Total sections tracked: 675
 
@@ -77,12 +77,12 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 411 | 253 |
-| rules | 360 | 159 | 156 |
-| tables | 201 | 339 | 135 |
-| examples | 14 | 411 | 250 |
-| procedures | 103 | 358 | 214 |
-| entities | 230 | 332 | 113 |
+| glossary | 11 | 408 | 256 |
+| rules | 370 | 142 | 163 |
+| tables | 201 | 319 | 155 |
+| examples | 16 | 391 | 268 |
+| procedures | 103 | 334 | 238 |
+| entities | 230 | 306 | 139 |
 
 ## Remaining tables
 
@@ -106,11 +106,10 @@ None. Every node in the structural map has been mapped.
 
 ## Remaining examples
 
-3 of this kind still need their contents extracted.
+2 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
-| section.game_basics.gameplay_example | Gameplay Example | 20-22 |
 | section.backgrounds.character_creation_example | Character Creation Example | 47 |
 | section.combat.combat_example | Combat Example | 122 |
 

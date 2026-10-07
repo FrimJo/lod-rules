@@ -234,12 +234,9 @@ describe('real corpus', () => {
     expect(chapterNames.indexOf('game_basics')).toBeLessThan(chapterNames.indexOf('combat'));
   });
 
-  it('flags Difficulty as having no records and Basic Stats as terms only', () => {
-    expect(byId.get('section.game_basics.difficulty')).toMatchObject({
-      noRecords: true,
-      pdfPages: '19',
-      printedPages: '17',
-    });
+  it('drops reconciled Difficulty and flags Basic Stats as terms only', () => {
+    // Difficulty had no records until the Step 2 pilot extracted it.
+    expect(byId.has('section.game_basics.difficulty')).toBe(false);
     expect(byId.get('section.character_basics.the_character.basic_stats')?.termsOnly).toBe(true);
   });
 });

@@ -246,6 +246,7 @@ describe('traps: PDF 92 and 101', () => {
         const r = run('procedure.open_door_or_chest', {
           threat_level: 3,
           d6_roll: 6,
+          d10_roll: locked ? 8 : 3,
           locked,
           is_chest,
           trap_prevents_opening: !resolved.state.opening_eligible,
@@ -254,12 +255,14 @@ describe('traps: PDF 92 and 101', () => {
           r.events.some((e) => e.type === 'invoke' && e.dependency === 'procedure.encounters'),
         ).toBe(!locked && !is_chest);
         expect(r.steps.includes('chest_reveal')).toBe(!locked && is_chest);
+        expect(r.state.door_table_result).toBe(locked ? 'Locked' : 'Open');
       }
   });
   it('never reveals with a surviving detected trap', () => {
     const r = run('procedure.open_door_or_chest', {
       threat_level: 3,
       d6_roll: 6,
+      d10_roll: 3,
       locked: false,
       is_chest: false,
       trap_prevents_opening: true,
@@ -321,6 +324,7 @@ describe('Door Table and opening boundaries: PDF 101', () => {
     const opened = run('procedure.open_door_or_chest', {
       threat_level: 5,
       d6_roll: 1,
+      d10_roll: 8,
       locked: lock.state.is_locked!,
       is_chest: false,
       trap_prevents_opening: false,

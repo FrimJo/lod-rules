@@ -45,6 +45,20 @@
       integer: true
       minimum: 1
       maximum: 6
+    d10_roll:
+      type: number
+      role: input
+      description: Printed 1d10 from the simultaneous roll, keying the Door Table; the 0 face is 10.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    door_table_result:
+      type: string
+      role: output
+      description: Door/chest column of the Door Table row for d10_roll (Open or Locked).
     locked:
       type: boolean
       role: input
@@ -238,6 +252,15 @@
     - id: check_locked
       source_text: Then check the Door Table to see if it is locked. See 'Locked' below.
       effects:
+        - type: lookup
+          table_id: table.dungeon.door_chest_difficulty
+          key_column: result
+          key:
+            type: field
+            name: d10_roll
+          value_column: door_chest
+          target: door_table_result
+          on_missing_issue: issue.phase4.lookup_domain
         - type: invoke
           dependency: door_table
       when:

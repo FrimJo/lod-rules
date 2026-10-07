@@ -73,6 +73,8 @@ describe('issue resolutions', () => {
       'issue.sanity.miscast_loss',
       'issue.movement.pit_down_test',
       'issue.traps.disarm_lockpick',
+      'issue.gameplay_example.trap_sanity',
+      'issue.gameplay_example.spider_turn',
     ]);
     expect(validate(context.issues)).toBe(true);
   });
