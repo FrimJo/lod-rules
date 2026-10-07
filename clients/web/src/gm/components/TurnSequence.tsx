@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isWavering, lightSummary } from '../engine.ts';
-import { CITES, TURN_SEQUENCE } from '../rules.ts';
+import { CITES, THREAT, TURN_SEQUENCE } from '../rules.ts';
 import { CiteChip, DieInput, useGm } from './common.tsx';
 
 type SequenceView = 'steps' | 'list';
@@ -40,7 +40,7 @@ export function TurnSequence() {
   const current = Math.min(state.turnStep, TURN_SEQUENCE.length - 1);
   const step = TURN_SEQUENCE[current]!;
   const last = current === TURN_SEQUENCE.length - 1;
-  const asSteps = view === 'steps' && started;
+  const asSteps = view === 'steps';
 
   return (
     <div className="gm-sequence-block">
@@ -63,8 +63,9 @@ export function TurnSequence() {
               <li key={item.id}>
                 <button
                   type="button"
-                  className={`gm-step-dot${i < current ? ' done' : i === current ? ' current' : ''}`}
-                  aria-current={i === current ? 'step' : undefined}
+                  className={`gm-step-dot${!started ? '' : i < current ? ' done' : i === current ? ' current' : ''}`}
+                  aria-current={started && i === current ? 'step' : undefined}
+                  disabled={!started}
                   aria-label={`Step ${i + 1}: ${item.text}`}
                   title={item.text}
                   onClick={() => dispatch({ type: 'turn_step', step: i })}
@@ -76,7 +77,7 @@ export function TurnSequence() {
           </ol>
           <div className="gm-step-card" aria-live="polite">
             <span className="gm-step-count">
-              Step {current + 1} of {TURN_SEQUENCE.length}
+              {started ? `Step ${current + 1} of ${TURN_SEQUENCE.length}` : 'Turn not started'}
             </span>
             <h4 className="gm-step-title">{step.text}</h4>
             {step.sub && (
@@ -86,23 +87,41 @@ export function TurnSequence() {
                 ))}
               </ol>
             )}
-            <StepBody id={step.id} />
+            {started ? (
+              <StepBody id={step.id} />
+            ) : (
+              <p className="gm-step-note">
+                Start the first turn once the heroes stand on the starting tile; the table then
+                walks you through these steps.
+              </p>
+            )}
           </div>
           <div className="gm-step-nav">
-            <button
-              type="button"
-              className="gm-secondary"
-              disabled={current === 0}
-              onClick={() => dispatch({ type: 'turn_step', step: current - 1 })}
-            >
-              Back
-            </button>
-            {last ? (
-              <button type="button" className="gm-primary" onClick={() => dispatch({ type: 'new_turn' })} title="Shortcut: N">
+            {started && (
+              <button
+                type="button"
+                className="gm-secondary"
+                disabled={current === 0}
+                onClick={() => dispatch({ type: 'turn_step', step: current - 1 })}
+              >
+                Back
+              </button>
+            )}
+            {!started || last ? (
+              <button
+                type="button"
+                className="gm-primary"
+                onClick={() => dispatch({ type: 'new_turn' })}
+                title="Shortcut: N"
+              >
                 Start turn {state.turn + 1}
               </button>
             ) : (
-              <button type="button" className="gm-primary" onClick={() => dispatch({ type: 'turn_step', step: current + 1 })}>
+              <button
+                type="button"
+                className="gm-primary"
+                onClick={() => dispatch({ type: 'turn_step', step: current + 1 })}
+              >
                 Next step
               </button>
             )}
@@ -112,7 +131,11 @@ export function TurnSequence() {
         <>
           <ol className="gm-sequence">
             {TURN_SEQUENCE.map((item, i) => (
-              <li key={item.id} className={started && i === current ? 'active' : ''} aria-current={started && i === current ? 'step' : undefined}>
+              <li
+                key={item.id}
+                className={started && i === current ? 'active' : ''}
+                aria-current={started && i === current ? 'step' : undefined}
+              >
                 {item.text}
                 {item.sub && (
                   <ol>
@@ -126,8 +149,8 @@ export function TurnSequence() {
           </ol>
           {!started && (
             <p className="gm-hint">
-              Press <kbd>New turn</kbd> once the heroes stand on the starting tile; the table then walks you through
-              these steps.
+              Press <kbd>New turn</kbd> once the heroes stand on the starting tile; the table then
+              walks you through these steps.
             </p>
           )}
         </>
@@ -157,17 +180,27 @@ function StepBody({ id }: { id: string }) {
               <CiteChip cite={CITES.scenarioDie} />
             </p>
           ) : scenario ? (
-            <DieInput sides={10} label="Scenario die (1d10)" onCommit={(value) => dispatch({ type: 'scenario_roll', value })} />
+            <DieInput
+              sides={10}
+              label="Scenario die (1d10)"
+              onCommit={(value) => dispatch({ type: 'scenario_roll', value })}
+            />
           ) : threatRoll ? (
             <>
               <p className="gm-step-note warn">{threatRoll.detail}</p>
-              <DieInput sides={20} label="Threat roll (1d20)" onCommit={(value) => dispatch({ type: 'threat_roll', value })} />
+              <DieInput
+                sides={20}
+                label="Threat roll (1d20)"
+                onCommit={(value) => dispatch({ type: 'threat_roll', value })}
+              />
             </>
           ) : (
             <p className="gm-step-note done">Nothing left to roll this step.</p>
           )}
           <p className="gm-step-note">
-            {lit === 0 ? 'No light source is lit.' : `${lit} light source${lit === 1 ? '' : 's'} lit.`}
+            {lit === 0
+              ? 'No light source is lit.'
+              : `${lit} light source${lit === 1 ? '' : 's'} lit.`}
             {relights.length > 0 ? ' A light went out: relight or remove it in Resolve now.' : ''}
           </p>
         </div>
@@ -183,15 +216,20 @@ function StepBody({ id }: { id: string }) {
       );
     case 'wandering': {
       const move = state.pending.find((p) => p.key === 'wm-move');
-      if (state.wanderingMonsters === 0) return <p className="gm-step-note done">No Wandering Monster tokens on the board.</p>;
+      if (state.wanderingMonsters === 0)
+        return <p className="gm-step-note done">No Wandering Monster tokens on the board.</p>;
       return (
         <div className="gm-step-body">
           <p className="gm-step-note">
-            {state.wanderingMonsters === 1 ? 'One token' : `${state.wanderingMonsters} tokens`} to move.{' '}
-            {move?.detail ?? ''} <CiteChip cite={CITES.wanderingMonsters} />
+            {state.wanderingMonsters === 1 ? 'One token' : `${state.wanderingMonsters} tokens`} to
+            move. {move?.detail ?? ''} <CiteChip cite={CITES.wanderingMonsters} />
           </p>
           {move && (
-            <button type="button" className="gm-secondary" onClick={() => dispatch({ type: 'dismiss_prompt', id: move.id })}>
+            <button
+              type="button"
+              className="gm-secondary"
+              onClick={() => dispatch({ type: 'dismiss_prompt', id: move.id })}
+            >
               Moved
             </button>
           )}
@@ -199,13 +237,12 @@ function StepBody({ id }: { id: string }) {
       );
     }
     case 'threat': {
-      const amount = state.pending.find((p) => p.key === 'threat-amount-battle_won');
-      if (!state.threat.enabled) return <p className="gm-step-note">This quest does not use Threat.</p>;
+      if (!state.threat.enabled)
+        return <p className="gm-step-note">This quest does not use Threat.</p>;
       return (
-        <p className={`gm-step-note${amount ? ' warn' : ''}`}>
-          {amount
-            ? 'A battle was won this turn: enter the increase in Resolve now.'
-            : 'Pressing Battle won below records the increase. Nothing pending.'}
+        <p className="gm-step-note">
+          A won battle increases Threat by {THREAT.battleWon}. Pressing Battle won below applies it.{' '}
+          <CiteChip cite={CITES.threatIncrease} />
         </p>
       );
     }
@@ -215,9 +252,15 @@ function StepBody({ id }: { id: string }) {
       const living = state.heroes.filter((h) => !h.dead);
       return (
         <div className="gm-step-body">
-          <p className={`gm-step-note${wavering || (state.morale.current === 0 && state.morale.start > 0) ? ' warn' : ''}`}>
+          <p
+            className={`gm-step-note${wavering || (state.morale.current === 0 && state.morale.start > 0) ? ' warn' : ''}`}
+          >
             Party Morale {state.morale.current} of {state.morale.start}
-            {state.morale.start > 0 && state.morale.current === 0 ? ': the party flees.' : wavering ? ': wavering, −20 RES.' : '.'}
+            {state.morale.start > 0 && state.morale.current === 0
+              ? ': the party flees.'
+              : wavering
+                ? ': wavering, −20 RES.'
+                : '.'}
           </p>
           {living.length > 0 && (
             <p className="gm-step-note">
@@ -226,8 +269,10 @@ function StepBody({ id }: { id: string }) {
           )}
           {conditions.length > 0 && (
             <p className="gm-step-note warn">
-              {conditions.length === 1 ? 'A hero is at 0 Sanity' : `${conditions.length} heroes are at 0 Sanity`}: roll the
-              mental condition in Resolve now.
+              {conditions.length === 1
+                ? 'A hero is at 0 Sanity'
+                : `${conditions.length} heroes are at 0 Sanity`}
+              : roll the mental condition in Resolve now.
             </p>
           )}
         </div>
