@@ -234,7 +234,7 @@ daily/visit markers and composed traces. See [the accounting ledger](travel-sett
 for state ownership, source evidence and unresolved boundaries. Batch 5 is extracted
 within this bounded scope; independent review and later lifecycle work remain pending.
 
-The [combat/treasure source checkpoint](combat-treasure-source-audit.md) includes
+The [combat/treasure source checkpoint](phase-5-entities-and-tables.md#combat-and-treasure-source-audit--28-september-2026) includes
 rendered-page evidence and corrected disease eligibility/recovery, with 1,417 tests
 passing at that checkpoint. The settlement trinket overlap belongs to the nested
 selector inside event 4; outer event 5 is Sale. Neither this audit nor passing tests

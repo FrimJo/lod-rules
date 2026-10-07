@@ -4,14 +4,14 @@ This is the historical Phase 4 milestone audit. Counts and deferred work below d
 that milestone, not the current corpus. Phase 5 catalogues and Phase 6 procedures have since
 started; see their [catalogue ledger](phase-5-entities-and-tables.md),
 [procedure ledger](phase-6-procedures-and-state-machines.md), and the
-[current project status](../README.md#status).
+[current project status](../../README.md#status).
 
 Phases 0–3 are complete. Phase 4 is extracted and tested across all 21 priority areas below.
 This is an extraction audit, not an independent review: new records remain `extracted`,
 and larger source headings retain partial coverage. No runtime or build outputs were added.
 
-The authoritative source is [Rulebook-2nd-printing-ENGa.pdf](../source/Rulebook-2nd-printing-ENGa.pdf).
-Printed/PDF pairs below come from [pages.yaml](../corpus/source-map/pages.yaml); notably
+The authoritative source is [Rulebook-2nd-printing-ENGa.pdf](../../source/Rulebook-2nd-printing-ENGa.pdf).
+Printed/PDF pairs below come from [pages.yaml](../../corpus/source-map/pages.yaml); notably
 The Turn is printed 88 / PDF 89. Existing IDs, compatibility redirects, original review issues,
 and pilot records are retained.
 
@@ -85,15 +85,15 @@ has 606 canonical sections and three compatibility redirects, with exactly one c
 ID. There are 68 glossary terms and 110 lookup forms. Twenty-two headings were added, including
 separate DB and NA table nodes, while old IDs remain valid.
 
-- [Phase 4 table tests](../tests/tables/phase-four.test.ts) independently transcribe the eight
+- [Phase 4 table tests](../../tests/tables/phase-four.test.ts) independently transcribe the eight
   printed matrices and the prose skill mapping. They check all 50 Sell and Repair rows, signed
   dice losses, printed zero, markers, footnotes, typed links and round-trip preservation.
-- [Schema tests](../tests/schema/phase-four.test.ts) reject malformed operations, unknown fields,
+- [Schema tests](../../tests/schema/phase-four.test.ts) reject malformed operations, unknown fields,
   invalid references, unsupported lookup inputs, bad provenance, wrong timing kinds, invalid
   dice/ranges, random-table gaps/overlaps and unresolved effects pointing at closed issues.
-- [Interaction tests](../tests/rules/phase-four.test.ts) exercise explicit precedence, rounding,
+- [Interaction tests](../../tests/rules/phase-four.test.ts) exercise explicit precedence, rounding,
   AP allocation, magic durability and unresolved boundary interactions against canonical YAML.
-- Canonical [fixtures](../tests/examples/) distinguish `source_example` from `derived_case`,
+- Canonical [fixtures](../../tests/examples) distinguish `source_example` from `derived_case`,
   identify contributing rules, and retain old regressions. They cover check/lookup boundaries,
   resources, Luck restrictions, encumbrance, damage/breakage, every condition/table outcome and
   lifecycle events. Adjacency, LOS and movement diagrams provide source-backed spatial cases;
@@ -143,10 +143,10 @@ Phase 4 issues were added; none is silently closed by an implementation conventi
 This index lists every added object, its exact source section, page references, fixture IDs,
 and unresolved/dependency links. Source examples for existing check/perfect rules and the
 progression table remain indexed by the [Phase 3 audit](phase-3-pilot.md). The glossary and
-alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
-[aliases.yaml](../corpus/glossary/aliases.yaml).
+alias additions are canonical in [terms.yaml](../../corpus/glossary/terms.yaml) and
+[aliases.yaml](../../corpus/glossary/aliases.yaml).
 
-### [corpus/rules/characters/core-stats.yaml](../corpus/rules/characters/core-stats.yaml)
+### [corpus/rules/characters/core-stats.yaml](../../corpus/rules/characters/core-stats.yaml)
 
 - `character.skill.stat_independence` — `section.character_basics.the_character.skills`; printed/PDF 25/27. Fixtures: `test.character.skill.stat_independence.stat_increase`.
 - `character.skill.known` — `section.character_basics.the_character.skills`; printed/PDF 25/27. Fixtures: `test.character.skill.known.ordinary`.
@@ -166,7 +166,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `character.movement.initial` — `section.character_basics.the_character.movement_m`; printed/PDF 25/27. Fixtures: `test.character.movement.initial.default`.
 - `character.luck.initial` — `section.creating_your_character.final_touches`; printed/PDF 31/33. Fixtures: `test.character.luck.initial.non_halfling`.
 
-### [corpus/rules/characters/hit-points.yaml](../corpus/rules/characters/hit-points.yaml)
+### [corpus/rules/characters/hit-points.yaml](../../corpus/rules/characters/hit-points.yaml)
 
 - `combat.damage.basic` — `section.combat.dealing_damage`; printed/PDF 119/121. Fixtures: `test.combat.damage.basic.protected`, `test.combat.damage.basic.exact_protection`.
 - `combat.damage.negative_uncertain` — `section.combat.dealing_damage`; printed/PDF 119/121. Fixtures: `test.combat.damage.negative_uncertain.excess_protection`. Review: `issue.phase4.damage_floor`.
@@ -182,7 +182,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `character.hit_points.bleeding_time` — `section.combat.bleeding_out.advanced_rule`; printed/PDF 120/122. Fixtures: `test.character.hit_points.bleeding_time.optional`, `test.character.hit_points.bleeding_time.disabled`.
 - `character.death.replacement` — `section.combat.bleeding_out`; printed/PDF 120/122. Fixtures: `test.character.death.replacement.next_visit`.
 
-### [corpus/rules/core/actions-timing-recovery.yaml](../corpus/rules/core/actions-timing-recovery.yaml)
+### [corpus/rules/core/actions-timing-recovery.yaml](../../corpus/rules/core/actions-timing-recovery.yaml)
 
 - `core.action_points.allocation` — `section.game_basics.action_points_ap`; printed/PDF 19/21. Fixtures: `test.core.action_points.allocation.hero_dungeon`, `test.core.action_points.allocation.enemy_skirmish`.
 - `core.action_points.spend` — `section.into_the_dungeons.the_turn`; printed/PDF 88/89. Fixtures: `test.core.action_points.spend.one_action`, `test.core.action_points.spend.insufficient`.
@@ -213,7 +213,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `core.optional.sanity` — `section.game_basics.complexity`; printed/PDF 19/21. Fixtures: `test.core.optional.sanity.guidance`.
 - `core.optional.scenario_and_threat` — `section.game_basics.complexity`; printed/PDF 19/21. Fixtures: `test.core.optional.scenario_and_threat.guidance`.
 
-### [corpus/rules/core/core-boundaries.yaml](../corpus/rules/core/core-boundaries.yaml)
+### [corpus/rules/core/core-boundaries.yaml](../../corpus/rules/core/core-boundaries.yaml)
 
 - `character.sanity.indulgence_cap_uncertain` — `section.psychology.sanity.reducing_insanity`; printed/PDF 53/55. Fixtures: `test.character.sanity.indulgence_cap_uncertain.above_eight`. Review: `issue.phase4.sanity_maximum`.
 - `character.condition.trauma_expiry` — `section.psychology.table`; printed/PDF 55/57. Fixtures: `test.character.condition.trauma_expiry.exit`.
@@ -224,18 +224,18 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `core.action_points.move` — `section.combat.different_combat_actions`; printed/PDF 107/109. Fixtures: `test.core.action_points.move.move`.
 - `character.encumbrance.feedback_uncertain` — `section.equipment.encumbrance`; printed/PDF 51/53. Fixtures: `test.character.encumbrance.feedback_uncertain.feedback`. Review: `issue.phase4.encumbrance_feedback`.
 
-### [corpus/rules/core/dependency-links.yaml](../corpus/rules/core/dependency-links.yaml)
+### [corpus/rules/core/dependency-links.yaml](../../corpus/rules/core/dependency-links.yaml)
 
 - `core.turn.psychology` — `section.game_basics.turn_sequence`; printed/PDF 18/20. Fixtures: `test.core.turn.psychology.references`. Dependencies: `table.psychology.sanity_losses` (Check applicable Sanity changes); `table.psychology.morale_adjustments` (Check applicable Party Morale changes).
 - `character.condition.arachnophobia_other_encounters` — `section.psychology.table`; printed/PDF 55/57. Fixtures: `test.character.condition.arachnophobia_other_encounters.not_spider`. Review: `issue.phase4.arachnophobia_scope`.
 
-### [corpus/rules/core/dice-conventions.yaml](../corpus/rules/core/dice-conventions.yaml)
+### [corpus/rules/core/dice-conventions.yaml](../../corpus/rules/core/dice-conventions.yaml)
 
 - `core.rounding.up` — `section.introduction.abbreviations_and_terminology`; printed/PDF 14/16. Fixtures: `test.core.rounding.up.fraction`, `test.core.rounding.up.integer`.
 - `core.rounding.down` — `section.introduction.abbreviations_and_terminology`; printed/PDF 14/16. Fixtures: `test.core.rounding.down.fraction`, `test.core.rounding.down.integer`.
 - `core.dice.percentile` — `section.introduction.dice_rolling_and_skill_checks`; printed/PDF 16/18. Fixtures: `test.core.dice.percentile.printed_double_zero`.
 
-### [corpus/rules/core/spatial-primitives.yaml](../corpus/rules/core/spatial-primitives.yaml)
+### [corpus/rules/core/spatial-primitives.yaml](../../corpus/rules/core/spatial-primitives.yaml)
 
 - `core.spatial.adjacent` — `section.game_basics.the_tiles.adjacent`; printed/PDF 18/20. Fixtures: `test.core.spatial.adjacent.orthogonal`, `test.core.spatial.adjacent.diagonal`, `test.core.spatial.adjacent.same`, `test.core.spatial.adjacent.distant`, `test.core.spatial.adjacent.diagram_north_west`, `test.core.spatial.adjacent.diagram_north`, `test.core.spatial.adjacent.diagram_north_east`, `test.core.spatial.adjacent.diagram_west`, `test.core.spatial.adjacent.diagram_east`, `test.core.spatial.adjacent.diagram_south_west`, `test.core.spatial.adjacent.diagram_south`, `test.core.spatial.adjacent.diagram_south_east`.
 - `core.model.footprint` — `section.game_basics.models`; printed/PDF 18/20. Fixtures: `test.core.model.footprint.large`, `test.core.model.footprint.normal`.
@@ -258,7 +258,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `core.movement.zone_of_control` — `section.combat.zone_of_control_zoc`; printed/PDF 107/109. Fixtures: `test.core.movement.zone_of_control.within`, `test.core.movement.zone_of_control.enter`.
 - `core.spatial.zone_of_control` — `section.combat.zone_of_control_zoc`; printed/PDF 107/109. Fixtures: `test.core.spatial.zone_of_control.front_diagonal`, `test.core.spatial.zone_of_control.rear`.
 
-### [corpus/rules/equipment/encumbrance-durability.yaml](../corpus/rules/equipment/encumbrance-durability.yaml)
+### [corpus/rules/equipment/encumbrance-durability.yaml](../../corpus/rules/equipment/encumbrance-durability.yaml)
 
 - `character.encumbrance.penalty` — `section.equipment.encumbrance`; printed/PDF 51/53. Fixtures: `test.character.encumbrance.penalty.at_strength`, `test.character.encumbrance.penalty.over_strength`, `test.character.encumbrance.penalty.at_hard_limit`.
 - `character.encumbrance.limit` — `section.equipment.encumbrance`; printed/PDF 51/53. Fixtures: `test.character.encumbrance.limit.limit`, `test.character.encumbrance.limit.exceeded`.
@@ -292,7 +292,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `character.equipment.combine_price_rows` — `section.appendix_iii_equipment.general_equipment.sell_and_repair_table`; printed/PDF 184/186. Fixtures: `test.character.equipment.combine_price_rows.final_row`.
 - `character.durability.repair_location` — `section.settlements.repair_equipment`; printed/PDF 145/147. Fixtures: `test.character.durability.repair_location.blacksmith`.
 
-### [corpus/rules/psychology/party-morale.yaml](../corpus/rules/psychology/party-morale.yaml)
+### [corpus/rules/psychology/party-morale.yaml](../../corpus/rules/psychology/party-morale.yaml)
 
 - `character.morale.member_contribution` — `section.psychology.party_morale`; printed/PDF 56/58, 31/33. Fixtures: `test.character.morale.member_contribution.wilbur`, `test.character.morale.member_contribution.round_before_sum`.
 - `character.morale.sum_contributions` — `section.psychology.party_morale`; printed/PDF 56/58. Fixtures: `test.character.morale.sum_contributions.second_member`.
@@ -319,7 +319,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `character.morale.reset` — `section.psychology.party_morale`; printed/PDF 56/58. Fixtures: `test.character.morale.reset.exit`.
 - `character.morale.outside_bounds` — `section.psychology.party_morale`; printed/PDF 56/58. Fixtures: `test.character.morale.outside_bounds.negative`. Review: `issue.phase4.morale_threshold`.
 
-### [corpus/rules/psychology/sanity.yaml](../corpus/rules/psychology/sanity.yaml)
+### [corpus/rules/psychology/sanity.yaml](../../corpus/rules/psychology/sanity.yaml)
 
 - `character.sanity.initial` — `section.psychology.sanity`; printed/PDF 53/55. Fixtures: `test.character.sanity.initial.initial`.
 - `character.sanity.loss.terror` — `section.psychology.sanity`; printed/PDF 53/55. Fixtures: `test.character.sanity.loss.terror.event`.
@@ -354,7 +354,7 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `character.sanity.treatment` — `section.settlements.treat_mental_conditions`; printed/PDF 145/147. Fixtures: `test.character.sanity.treatment.attempt_cost`, `test.character.sanity.treatment.limit`.
 - `character.sanity.treatment_success` — `section.settlements.treat_mental_conditions`; printed/PDF 145/147. Fixtures: `test.character.sanity.treatment_success.five`, `test.character.sanity.treatment_success.six`.
 
-### [corpus/entities/conditions/sanity.yaml](../corpus/entities/conditions/sanity.yaml)
+### [corpus/entities/conditions/sanity.yaml](../../corpus/entities/conditions/sanity.yaml)
 
 - `condition.hate` — `section.psychology.table`; printed/PDF 55/57.
 - `condition.acute_stress` — `section.psychology.table`; printed/PDF 55/57.
@@ -366,22 +366,22 @@ alias additions are canonical in [terms.yaml](../corpus/glossary/terms.yaml) and
 - `condition.claustrophobia` — `section.psychology.table`; printed/PDF 55/57.
 - `condition.depression` — `section.psychology.table`; printed/PDF 55/57.
 
-### [corpus/tables/character/core-stats.yaml](../corpus/tables/character/core-stats.yaml)
+### [corpus/tables/character/core-stats.yaml](../../corpus/tables/character/core-stats.yaml)
 
 - `table.character.skill_bases` — `section.character_basics.the_character.skills_list`; printed/PDF 26/28.
 - `table.character.damage_bonus` — `section.creating_your_character.choosing_your_species.table_2`; printed/PDF 27/29.
 - `table.character.natural_armour` — `section.creating_your_character.damage_bonus_and_natural_armour.natural_armour_table`; printed/PDF 27/29.
 - `table.character.stat_maxima` — `section.levelling_up.stats_and_skills_maximum.table`; printed/PDF 58/60.
 
-### [corpus/tables/equipment/encumbrance-durability.yaml](../corpus/tables/equipment/encumbrance-durability.yaml)
+### [corpus/tables/equipment/encumbrance-durability.yaml](../../corpus/tables/equipment/encumbrance-durability.yaml)
 
 - `table.equipment.sell_and_repair` — `section.appendix_iii_equipment.general_equipment.sell_and_repair_table`; printed/PDF 184/186.
 
-### [corpus/tables/psychology/party-morale.yaml](../corpus/tables/psychology/party-morale.yaml)
+### [corpus/tables/psychology/party-morale.yaml](../../corpus/tables/psychology/party-morale.yaml)
 
 - `table.psychology.morale_adjustments` — `section.psychology.party_morale.table`; printed/PDF 56/58.
 
-### [corpus/tables/psychology/sanity.yaml](../corpus/tables/psychology/sanity.yaml)
+### [corpus/tables/psychology/sanity.yaml](../../corpus/tables/psychology/sanity.yaml)
 
 - `table.psychology.sanity_losses` — `section.psychology.sanity.table`; printed/PDF 53/55.
 - `table.psychology.mental_conditions` — `section.psychology.table`; printed/PDF 55/57.

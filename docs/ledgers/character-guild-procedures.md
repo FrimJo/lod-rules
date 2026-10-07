@@ -6,7 +6,7 @@ Phase 6 Batch 6 is extracted within the inventory below and its package gate has
 Package E is next. This is not a claim of
 Phase 6 completion or Phase 9 independently reviewed coverage.
 
-The user’s [completion plan](corpus-completion-plan.md) requires D → E → F, then the
+The user’s [completion plan](../corpus-completion-plan.md) requires D → E → F, then the
 comprehensive Phases 7–10 passes before compilation/retrieval. No later gate is bypassed.
 
 ## Heading inventory
