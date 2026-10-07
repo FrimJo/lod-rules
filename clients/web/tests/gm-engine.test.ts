@@ -190,14 +190,18 @@ test('quest thresholds place a Wandering Monster when Threat is increased to the
   assert.equal(backUp.wanderingMonsters, 2, 'decreasing below and increasing back to it places another');
 });
 
-test('Threat is capped at the quest maximum and a quest without Threat ignores changes', () => {
+test('reaching the quest maximum triggers a Wandering Monster and Threat is held there', () => {
   let state = reduceAll(withParty(), [
     { type: 'set_quest', questId: 'quest.dead_rising.highwaymen' },
     { type: 'set_threat', level: 17 },
     { type: 'threat_source', source: 'force_lock' },
   ]);
   assert.equal(state.threat.level, 18);
-  assert.match(lastLog(state), /quest maximum/);
+  assert.ok(state.log.some((l) => /quest maximum/.test(l.text)));
+  assert.equal(state.wanderingMonsters, 1);
+  assert.deepEqual(prompts(state), ['wandering_monster']);
+  const held = reduce(state, { type: 'threat_source', source: 'open_door' });
+  assert.equal(held.wanderingMonsters, 1, 'staying at the max does not trigger again');
   state = reduce(withParty(), { type: 'set_quest', questId: 'quest.dead_rising.burning_village' });
   assert.equal(state.threat.enabled, false);
   assert.equal(reduce(state, { type: 'threat_source', source: 'open_door' }).threat.level, state.threat.level);
@@ -214,9 +218,9 @@ test('a dice start Threat asks for the roll and the minimum follows it', () => {
 });
 
 test('sources without a printed amount ask the Game Master for it', () => {
-  let state = reduce(withParty(), { type: 'threat_source', source: 'battle_won' });
+  let state = reduce(withParty(), { type: 'threat_source', source: 'custom' });
   assert.deepEqual(prompts(state), ['threat_amount']);
-  state = reduce(state, { type: 'threat_source', source: 'battle_won', amount: 2 });
+  state = reduce(state, { type: 'threat_source', source: 'custom', amount: 2 });
   assert.equal(state.threat.level, 4);
   assert.deepEqual(prompts(state), []);
 });
@@ -326,7 +330,7 @@ test('reaching 0 Sanity asks for a mental condition; duplicates roll again and S
   assert.equal(hero(state, 'Ilse').sanity, 6);
 });
 
-test('battles: demons cost morale and Sanity, Acute Stress adds Threat, a win asks for the increase', () => {
+test('battles: demons cost morale and Sanity, Acute Stress adds Threat, a win adds 1 Threat', () => {
   let state = withParty();
   const ilse = hero(state, 'Ilse').id;
   state = reduceAll(state, [
@@ -343,7 +347,9 @@ test('battles: demons cost morale and Sanity, Acute Stress adds Threat, a win as
   assert.equal(hero(state, 'Ilse').sanity, 6);
   state = reduce(state, { type: 'battle_end', won: true });
   assert.equal(state.inBattle, false);
-  assert.deepEqual(prompts(state), ['threat_amount']);
+  assert.equal(state.threat.level, 4, 'the party wins a battle: +1 Threat');
+  assert.deepEqual(prompts(state), []);
+  assert.equal(reduce(reduce(state, { type: 'battle_start', demons: false }), { type: 'battle_end', won: false }).threat.level, 5);
 });
 
 test('a short rest costs a ration, heals morale up to the start value and risks an ambush', () => {

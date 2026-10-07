@@ -425,6 +425,26 @@ function changeThreat(
       : `Threat ${prev} → ${next} (${reason}).${note}`,
     cite,
   );
+  if (next > prev && state.threat.max !== null && next === state.threat.max) {
+    result = { ...result, wanderingMonsters: result.wanderingMonsters + 1 };
+    result = log(
+      result,
+      'explore',
+      `Threat reached the quest max of ${next}: a Wandering Monster is triggered. Token placed.`,
+      CITES.threatMax,
+    );
+    result = prompt(
+      result,
+      `wm-max-${result.nextId}`,
+      `Wandering Monster appears: Threat reached the quest max of ${next}`,
+      { kind: 'wandering_monster', threshold: next, crossed: false },
+      {
+        detail: `Place the token on the start tile, just outside the door. ${GAPS.maxLevel}`,
+        cite: CITES.threatMax,
+        severity: 'danger',
+      },
+    );
+  }
   if (next > prev) {
     for (const threshold of state.threat.thresholds) {
       if (next === threshold) {
@@ -930,15 +950,8 @@ export function reduce(state: GmState, event: GmEvent): GmState {
         `Battle ends${event.won ? ', won' : ''}. The heroes continue the turn with their remaining actions.`,
         CITES.endOfBattle,
       );
-      if (event.won && state.threat.enabled) {
-        result = prompt(
-          result,
-          'threat-amount-battle_won',
-          'Battle won: increase Threat (turn step 4)',
-          { kind: 'threat_amount', source: 'battle_won' },
-          { detail: GAPS.battleWon, cite: CITES.turnSequence, severity: 'warn' },
-        );
-      }
+      if (event.won && state.threat.enabled)
+        result = changeThreat(result, THREAT.battleWon, 'battle won', CITES.threatIncrease);
       const bleeding = result.heroes.filter((h) => !h.dead && h.statuses.includes('bleeding_out'));
       if (bleeding.length > 0) {
         result = prompt(

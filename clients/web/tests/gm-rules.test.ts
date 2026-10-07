@@ -14,6 +14,7 @@ import {
   MORALE_EVENTS,
   QUESTS,
   SANITY_LOSSES,
+  THREAT_SOURCES,
   type Cite,
 } from '../src/gm/rules.ts';
 
@@ -158,4 +159,21 @@ test('quest Threat presets match the quest tables and threshold rules', () => {
     if (quest.thresholds.length > 0)
       assert.ok(quest.records.thresholds?.length, `${quest.id} thresholds have a record`);
   }
+});
+
+test('fixed Threat sources from Increasing Threat Level match the corpus rules', () => {
+  const printed: { [source: string]: [string, RegExp] } = {
+    battle_won: ['core.threat.increase.battle_won', /Increase Threat Level by 1:\s*- The party wins a battle\./],
+    cobweb_cleared: ['core.threat.increase.door_chest_or_cobweb', /Increase Threat Level by 1:[^]*a cobweb opening is cleared/],
+    open_door: ['core.threat.increase.door_chest_or_cobweb', /Increase Threat Level by 1:[^]*a door or chest is opened/],
+    force_lock: ['core.threat.increase.force_open', /Increase Threat Level by 2:[^]*force open a door or chest/],
+    crowbar: ['core.threat.increase.force_open_crowbar', /using a crowbar in which case the Threat\s+Level is increased by 1/],
+  };
+  for (const [id, [recordId, text]] of Object.entries(printed)) {
+    const source = THREAT_SOURCES.find((s) => s.id === id)!;
+    assert.match(get(recordId).text ?? '', text, `${id} wording`);
+    const amount = Number(/Increase Threat Level by (\d)/.exec(get(recordId).text ?? '')?.[1]);
+    assert.equal(source.delta, id === 'crowbar' ? 1 : amount, `${id} amount`);
+  }
+  assert.match(get('core.threat.max_level').text ?? '', /equals that value, it will trigger a Wandering Monster/);
 });
