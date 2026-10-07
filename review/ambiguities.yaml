@@ -527,9 +527,17 @@
   type: ambiguity
   summary: Mana is WISx1,5, but the inspected definition does not prescribe
     rounding for an odd WIS. Preserve the exact multiplication; do not silently
-    floor or ceil a fractional initial pool.
+    floor or ceil a fractional initial pool. Wisdom (PDF 26) prints "Mana is equal to
+    WISx1,5." and Mana (PDF 29) "the starting mana is equal to the wizard’s WISx1,5.",
+    both without rounding. The Magic chapter (PDF 64) prints "Mana, and it is equal to
+    the wizard's WISx1,5 (RDU)". Changelog 2.21 entries 139 ("Page 24 added (RDD) at
+    Wisdom.") and 141 ("Page 27 added (RDD) at Mana.") add rounding down to the two
+    Character pages, which then disagree with the printed RDU on PDF 64; no entry
+    changes PDF 64. The ruling does not settle which rounding applies, so the issue
+    stays unresolved and no effect is changed.
   related:
     - character.mana.initial
+    - core.magic.mana
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -539,7 +547,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 27
@@ -548,7 +556,38 @@
       extraction:
         method: text
         confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 62
+      pdf_page: 64
+      heading: Mana
+      extraction:
+        method: text
+        confidence: high
         visually_verified: false
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 139
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 141
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: unresolved
 - id: issue.phase4.damage_floor
   type: ambiguity
@@ -2279,16 +2318,8 @@
   related:
     - procedure.character_improve
     - procedure.character_level_up
+    - character.advancement.cost_doubling
   source:
-    - document: rulebook.second_printing.eng
-      file: source/Rulebook-2nd-printing-ENGa.pdf
-      pdf_page: 60
-      printed_page: 58
-      heading: Levelling Up
-      extraction:
-        method: text
-        confidence: high
-        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 61
@@ -4968,6 +4999,377 @@
       heading: Ghostly Events Table — Angered Ghost
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.character_basics.identify_attempts
+  type: conflicting
+  summary:
+    The Arcane Art skill entry (PDF 28) says "Each wizard may try to identify the properties of
+    an object once during a quest. If successful, you may roll to see what kind of enchantment it
+    has. If all fail, the object cannot be used until identified in town." Identifying (Magic Items,
+    PDF 70) says identification "is done with a successful Arcane Arts roll. If that fails, the item
+    cannot be used. Only one attempt can be made per party and object." The first allows one attempt
+    per wizard each quest; the second allows one attempt per party and object, with no quest window.
+    The PDF 28 entry also adds an enchantment roll that the PDF 70 paragraph does not mention.
+    Neither passage is chosen over the other.
+  related:
+    - character.skill.arcane_arts.identify
+    - character.skill.arcane_arts.unidentified
+    - character.magic_item.identify
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 26
+      pdf_page: 28
+      heading: Arcane Art (WIS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 68
+      pdf_page: 70
+      heading: Identifying
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.character_basics.foraging_travel
+  type: conflicting
+  summary:
+    The Foraging skill entry (PDF 28) says "Roll once (for the entire party), during travel. If
+    you succeed, you receive 1 Ration of food." Rations and Resting (PDF 126) says "In lieu of
+    rations, the party may try the Foraging Skill once per day" and "If they succeed, each character
+    will have enough food for the day." The passages differ on how often the party rolls (once
+    during travel, or once per day) and on the yield (1 Ration, or food for every character for that
+    day). character.skill.foraging keeps the PDF 28 wording and procedure.travel_food_and_rest keeps
+    the PDF 126 wording.
+  related:
+    - character.skill.foraging
+    - procedure.travel_food_and_rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 26
+      pdf_page: 28
+      heading: Foraging (CON)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Rations and Resting
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.character_basics.barter_terms
+  type: ambiguity
+  summary: The Barter skill entry (PDF 28) says "A successful roll lets you buy equipment at a 10%
+    discount and sell parts at a 10% higher price." It does not say whether the higher selling price
+    applies only to parts or to everything sold, and it gives no rounding for a price that is not a
+    whole number of coins after the 10% change. Buying and Selling (PDF 144) does not mention
+    Barter. The rules keep the printed percentages exactly and apply the selling premium only to
+    parts.
+  related:
+    - character.skill.barter.buy_discount
+    - character.skill.barter.sell_parts
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 26
+      pdf_page: 28
+      heading: Barter (WIS)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 142
+      pdf_page: 144
+      heading: Buying and Selling
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.character_basics.perks_at_level_one
+  type: conflicting
+  summary:
+    Perks (PDF 27) says "Most heroes do not have Perks at Level 1, but will acquire them as they
+    grow more experienced." Every one of the eight profession entries on PDF 34–41 (Alchemist,
+    Barbarian, Ranger, Rogue, Thief, Warrior, Warrior Priest, Wizard) lists "Heroic Force of Will
+    (page 168)" under Perks, so every starting hero has at least one Perk at Level 1. Changelog
+    2.21 entry 140 ("Page 25 changed and added 'All heroes get the "Heroic Force of Will" perk at
+    the start.'") is a candidate designer ruling for the conflict; character.perk.acquisition
+    still quotes only the printed sentence and links no issue.
+  related:
+    - character.perk.acquisition
+    - character.profession.adjustments
+    - perk.heroic_force_of_will
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Perks
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 32
+      pdf_page: 34
+      heading: Alchemist
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 39
+      pdf_page: 41
+      heading: Wizard
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 140
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: resolved
+  resolution:
+    summary:
+      Designer ruling, changelog 2.21 entry 140 ("Page 25 changed and added 'All heroes get the
+      "Heroic Force of Will" perk at the start.'"). Page 25 is the printed folio of the Perks
+      paragraph (PDF 27). The ruling states that every hero starts with Heroic Force of Will,
+      which agrees with the eight profession entries on PDF 34–41. The printed "Most heroes do not
+      have Perks at Level 1" stays quoted verbatim in character.perk.acquisition, which has no
+      executable effect; the starting Perk is already granted by each profession, so no effect
+      changes.
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 23
+        printed_page: null
+        heading: '2.21'
+        locator:
+          row: 140
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+- id: issue.character_basics.settlement_visit_label
+  type: rulebook_undefined
+  summary: >-
+    term.settlement_visit is named "Settlement visit", but that name is a corpus label, not a
+    printed headword. The Luck (L) paragraph (PDF 26–27) that the term quotes never uses the
+    phrase; it bounds the period with "once the hero is back in a settlement", "while in the
+    settlement" and "until the hero returns to a settlement once more". The phrase itself is
+    printed elsewhere without a definition: Perfect Result (PDF 21) limits each permanent +1 to
+    "once between each settlement visit", and Rest and Recuperation (PDF 147) says spent luck
+    "will not be restored until the next visit to a settlement". The book never defines when a
+    settlement visit begins or ends (for example, whether passing through a settlement while
+    travelling counts), so the term's quotation is the Luck boundary only and does not settle
+    the other uses.
+  related:
+    - term.settlement_visit
+    - character.luck.settlement_reset
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 24
+      pdf_page: 26
+      heading: Luck (L)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Luck (L)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 19
+      pdf_page: 21
+      heading: Perfect Result
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Rest and Recuperation
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.embarking.start_settlement_die
+  type: rulebook_undefined
+  summary:
+    Embarking on your First Quest (PDF 59) says "you should randomise what settlement the party
+    is in" and lists eight numbered entries, the eighth being "Re-roll.". It does not name the die.
+    Eight entries suggest a d8, but the book does not say so; the table keeps the printed numbers 1
+    to 8 and the rule takes a supplied result.
+  related:
+    - table.settlement.start_settlement
+    - core.quest.start_settlement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 57
+      pdf_page: 59
+      heading: Embarking on your First Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.embarking.campaign_name
+  type: possible_typo
+  summary: >-
+    Embarking on your First Quest (PDF 59) calls 'Spring Cleaning' "the first quest of the Rising
+    Dead Campaign", but the Quest Book I campaign heading on PDF 224 is "The Dead Rising"
+    (subtitled "Campaign"), whose first entry is "Quest 1: Spring Cleaning". The book does not
+    say whether "Rising Dead" is an alternative name or a transposition; the corpus binds the
+    pointer to section.quest_book_i.the_dead_rising.
+  related:
+    - core.quest.first_quests
+    - section.quest_book_i.the_dead_rising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 57
+      pdf_page: 59
+      heading: Embarking on your First Quest
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 222
+      pdf_page: 224
+      heading: The Dead Rising
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.creating_your_character.thief_class_6_ranged
+  type: ambiguity
+  summary: >-
+    The Thief Limitations say "A Thief may never use armour heavier than Tier 3 or weapons heavier
+    than Class 2." The weapon-class text on the same chapter's first page says "Generally, the
+    higher the class, the heavier the weapon" but "Ranged Weapons in class 6 may not be heavy per
+    se; nevertheless, they require two hands to operate", and the example adds "Class 6 is not heavy
+    but requires 2 hands." The book does not say whether "heavier than Class 2" bars every weapon
+    whose class number exceeds 2 (so all class 6 ranged weapons) or only weapons that are actually
+    heavier, which would leave class 6 ranged weapons open to a Thief.
+    character.profession.thief.equipment_limits currently compares the class number (weapon_class
+    <= 2).
+  related:
+    - character.profession.thief.equipment_limits
+    - character.creation.strength_weapon_class
+    - profession.thief
+    - table.equipment.weapon_class_strength
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 36
+      pdf_page: 38
+      heading: Limitations
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 27
+      pdf_page: 29
+      heading: Strength and Weapon Class
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.creating_your_character.halfling_lucky_stacking
+  type: ambiguity
+  summary: >-
+    The Halfling trait reads "Lucky (Starts with 1 Point of Luck)." (PDF 31), and Character Basics
+    says "Traits are basically talents" and "The traits given to all characters are, in fact,
+    talents" (PDF 27). The Common Talent Lucky reads "You gain +1 Luck Point." (PDF 175), and the
+    level table gives Luck 0 at level 1 (PDF 60). Read as the talent applied to a level 1 Luck of 0,
+    both give 1 Luck, but the book does not say whether the parenthesis restates the talent's +1 or
+    sets a starting value of 1 to which the talent's +1 is also added. species.halfling grants
+    talent.lucky (whose rule adds +1) and character.species.halfling.initial_luck sets Luck to 1;
+    applying both as written could give 2. The book also does not say whether a Halfling may choose
+    Lucky again when a level-up or Jack of all trades choice lands on it.
+  related:
+    - species.halfling
+    - character.species.halfling.initial_luck
+    - character.talent.lucky.luck
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 29
+      pdf_page: 31
+      heading: Halfling
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 25
+      pdf_page: 27
+      heading: Traits; Talents
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 173
+      pdf_page: 175
+      heading: Lucky
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 58
+      pdf_page: 60
+      heading: Levelling Up
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: unresolved

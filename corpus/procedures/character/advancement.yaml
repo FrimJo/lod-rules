@@ -49,10 +49,13 @@
         visually_verified: false
   status: extracted
   confidence: high
-  source_text: Once enough experience is obtained, level up in a settlement. Each new level grants
-    +1d2 Hit Points and 15 Improvement Points; Luck and Energy increases use the progression table.
-    Talent and Perk choices use their profession/level tables. Saved Improvement Points carry
-    forward. Level Up costs 0 Activity Points.
+  source_text:
+    Once you obtain enough experience, you may level up when you are back in a settlement.
+    ... You have 15 Improvement Points to spend on stat and skill increases. ... Every time your
+    hero levels up, they may choose a Talent from the category shown in the table below. Every other
+    level up, the same goes for a Perk. ... Level Up | Any Settlement | 0 ... When the heroes get
+    some rest, they can reflect upon their recent adventures. One obvious effect of this may be that
+    they will level up if they have enough experience.
   fields:
     in_settlement:
       type: boolean
@@ -163,7 +166,7 @@
       label: Perk categories.
   steps:
     - id: lookup_level
-      source_text: Consult the next progression row.
+      source_text: Level | XP requirement | Hit Point increase | Luck increase | Energy
       effects:
         - type: set
           target: advanced
@@ -236,7 +239,7 @@
                   type: field
                   name: required_experience
     - id: advance
-      source_text: Grant each new level once; keep cumulative experience and carried Improvement Points.
+      source_text: Once you obtain enough experience, you may level up when you are back in a settlement.
       when: *a1
       effects:
         - type: invoke
@@ -286,7 +289,7 @@
             type: literal
             value: true
     - id: luck
-      source_text: Luck increases by +1 at levels 2, 5 and 8.
+      source_text: Level | XP requirement | Hit Point increase | Luck increase | Energy
       when:
         type: all
         conditions:
@@ -332,7 +335,7 @@
             value: 1
           duration: permanent
     - id: energy
-      source_text: Energy increases by +1 at levels 2, 4, 7 and 9.
+      source_text: Level | XP requirement | Hit Point increase | Luck increase | Energy
       when:
         type: all
         conditions:
@@ -411,11 +414,13 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Each level supplies 15 Improvement Points. The printed profession costs buy +1. A stat
-    or skill may increase at most +5 per level; Hit Points at most +2. Once a stat or skill passes
-    70 the cost doubles. Spare points may be saved until the next level; racial stat maxima and
-    natural skill maximum 80 apply.
+  source_text: You have 15 Improvement Points to spend on stat and skill increases. The table below
+    tells you how many Improvement Points it costs to increase a stat or skill by +1. No skill or
+    stat may be increased more than +5 per level. Hit points may only be increased by +2 per level.
+    Once a stat or skill passes 70, the cost is doubled. Your heroes may save any spare Improvement
+    points until the next time they level up. ... However, there is a maximum value for each stat
+    depending on their race. ... The natural value of a skill can never exceed 80, including talents
+    that give an unconditioned bonus of the value.
   fields:
     session_open:
       type: boolean
@@ -516,7 +521,7 @@
       label: Increasing a basic stat after play begins does not raise a skill.
   steps:
     - id: initialize
-      source_text: Select one stat, skill or Hit Point increase.
+      source_text: Whenever your hero levels up, you may choose which basic stats and skills to increase.
       effects:
         - type: set
           target: valid_subject
@@ -549,7 +554,9 @@
             type: literal
             value: 0
     - id: kind_stat
-      source_text: Use the row matching the selected stat, skill or Hit Points.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: any
         conditions:
@@ -605,7 +612,9 @@
             type: literal
             value: true
     - id: kind_skill
-      source_text: Use the row matching the selected stat, skill or Hit Points.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: any
         conditions:
@@ -714,7 +723,9 @@
             type: literal
             value: 80
     - id: kind_hit_points
-      source_text: Use the row matching the selected stat, skill or Hit Points.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: any
         conditions:
@@ -738,7 +749,9 @@
             type: literal
             value: true
     - id: unavailable
-      source_text: A dash does not offer an improvement for that profession.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: any
         conditions:
@@ -785,7 +798,9 @@
             type: literal
             value: false
     - id: profession_domain
-      source_text: Only the printed professions have cost columns.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: not
         condition:
@@ -862,7 +877,9 @@
             type: literal
             value: false
     - id: cost_str_barbarian
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -904,7 +921,9 @@
             type: literal
             value: 2
     - id: cost_str_warrior
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -946,7 +965,9 @@
             type: literal
             value: 2
     - id: cost_str_ranger
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -988,7 +1009,9 @@
             type: literal
             value: 3
     - id: cost_str_warrior_priest
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1030,7 +1053,9 @@
             type: literal
             value: 3
     - id: cost_str_wizard
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1072,7 +1097,9 @@
             type: literal
             value: 5
     - id: cost_str_thief
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1114,7 +1141,9 @@
             type: literal
             value: 5
     - id: cost_str_rogue
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1156,7 +1185,9 @@
             type: literal
             value: 3
     - id: cost_str_alchemist
-      source_text: Read the selected profession cost for STR from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1198,7 +1229,9 @@
             type: literal
             value: 5
     - id: cost_dex_barbarian
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1240,7 +1273,9 @@
             type: literal
             value: 2
     - id: cost_dex_warrior
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1282,7 +1317,9 @@
             type: literal
             value: 2
     - id: cost_dex_ranger
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1324,7 +1361,9 @@
             type: literal
             value: 2
     - id: cost_dex_warrior_priest
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1366,7 +1405,9 @@
             type: literal
             value: 3
     - id: cost_dex_wizard
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1408,7 +1449,9 @@
             type: literal
             value: 4
     - id: cost_dex_thief
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1450,7 +1493,9 @@
             type: literal
             value: 2
     - id: cost_dex_rogue
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1492,7 +1537,9 @@
             type: literal
             value: 2
     - id: cost_dex_alchemist
-      source_text: Read the selected profession cost for DEX from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1534,7 +1581,9 @@
             type: literal
             value: 4
     - id: cost_con_barbarian
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1576,7 +1625,9 @@
             type: literal
             value: 2
     - id: cost_con_warrior
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1618,7 +1669,9 @@
             type: literal
             value: 2
     - id: cost_con_ranger
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1660,7 +1713,9 @@
             type: literal
             value: 1
     - id: cost_con_warrior_priest
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1702,7 +1757,9 @@
             type: literal
             value: 3
     - id: cost_con_wizard
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1744,7 +1801,9 @@
             type: literal
             value: 4
     - id: cost_con_thief
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1786,7 +1845,9 @@
             type: literal
             value: 4
     - id: cost_con_rogue
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1828,7 +1889,9 @@
             type: literal
             value: 3
     - id: cost_con_alchemist
-      source_text: Read the selected profession cost for CON from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1870,7 +1933,9 @@
             type: literal
             value: 4
     - id: cost_wis_barbarian
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1912,7 +1977,9 @@
             type: literal
             value: 5
     - id: cost_wis_warrior
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1954,7 +2021,9 @@
             type: literal
             value: 5
     - id: cost_wis_ranger
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -1996,7 +2065,9 @@
             type: literal
             value: 4
     - id: cost_wis_warrior_priest
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2038,7 +2109,9 @@
             type: literal
             value: 3
     - id: cost_wis_wizard
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2080,7 +2153,9 @@
             type: literal
             value: 2
     - id: cost_wis_thief
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2122,7 +2197,9 @@
             type: literal
             value: 3
     - id: cost_wis_rogue
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2164,7 +2241,9 @@
             type: literal
             value: 4
     - id: cost_wis_alchemist
-      source_text: Read the selected profession cost for WIS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2206,7 +2285,9 @@
             type: literal
             value: 2
     - id: cost_res_barbarian
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2248,7 +2329,9 @@
             type: literal
             value: 3
     - id: cost_res_warrior
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2290,7 +2373,9 @@
             type: literal
             value: 3
     - id: cost_res_ranger
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2332,7 +2417,9 @@
             type: literal
             value: 3
     - id: cost_res_warrior_priest
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2374,7 +2461,9 @@
             type: literal
             value: 2
     - id: cost_res_wizard
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2416,7 +2505,9 @@
             type: literal
             value: 3
     - id: cost_res_thief
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2458,7 +2549,9 @@
             type: literal
             value: 3
     - id: cost_res_rogue
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2500,7 +2593,9 @@
             type: literal
             value: 3
     - id: cost_res_alchemist
-      source_text: Read the selected profession cost for RES from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2542,7 +2637,9 @@
             type: literal
             value: 3
     - id: cost_cs_barbarian
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2584,7 +2681,9 @@
             type: literal
             value: 1
     - id: cost_cs_warrior
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2626,7 +2725,9 @@
             type: literal
             value: 1
     - id: cost_cs_ranger
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2668,7 +2769,9 @@
             type: literal
             value: 3
     - id: cost_cs_warrior_priest
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2710,7 +2813,9 @@
             type: literal
             value: 2
     - id: cost_cs_wizard
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2752,7 +2857,9 @@
             type: literal
             value: 5
     - id: cost_cs_thief
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2794,7 +2901,9 @@
             type: literal
             value: 5
     - id: cost_cs_rogue
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2836,7 +2945,9 @@
             type: literal
             value: 3
     - id: cost_cs_alchemist
-      source_text: Read the selected profession cost for CS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2878,7 +2989,9 @@
             type: literal
             value: 3
     - id: cost_rs_barbarian
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2920,7 +3033,9 @@
             type: literal
             value: 3
     - id: cost_rs_warrior
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -2962,7 +3077,9 @@
             type: literal
             value: 2
     - id: cost_rs_ranger
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3004,7 +3121,9 @@
             type: literal
             value: 1
     - id: cost_rs_warrior_priest
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3046,7 +3165,9 @@
             type: literal
             value: 2
     - id: cost_rs_wizard
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3088,7 +3209,9 @@
             type: literal
             value: 4
     - id: cost_rs_thief
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3130,7 +3253,9 @@
             type: literal
             value: 2
     - id: cost_rs_rogue
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3172,7 +3297,9 @@
             type: literal
             value: 3
     - id: cost_rs_alchemist
-      source_text: Read the selected profession cost for RS from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3214,7 +3341,9 @@
             type: literal
             value: 3
     - id: cost_dodge_barbarian
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3256,7 +3385,9 @@
             type: literal
             value: 3
     - id: cost_dodge_warrior
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3298,7 +3429,9 @@
             type: literal
             value: 3
     - id: cost_dodge_ranger
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3340,7 +3473,9 @@
             type: literal
             value: 3
     - id: cost_dodge_warrior_priest
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3382,7 +3517,9 @@
             type: literal
             value: 3
     - id: cost_dodge_wizard
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3424,7 +3561,9 @@
             type: literal
             value: 3
     - id: cost_dodge_thief
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3466,7 +3605,9 @@
             type: literal
             value: 1
     - id: cost_dodge_rogue
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3508,7 +3649,9 @@
             type: literal
             value: 3
     - id: cost_dodge_alchemist
-      source_text: Read the selected profession cost for Dodge from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3550,7 +3693,9 @@
             type: literal
             value: 4
     - id: cost_pick_lock_barbarian
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3592,7 +3737,9 @@
             type: literal
             value: 5
     - id: cost_pick_lock_warrior
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3634,7 +3781,9 @@
             type: literal
             value: 5
     - id: cost_pick_lock_ranger
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3676,7 +3825,9 @@
             type: literal
             value: 5
     - id: cost_pick_lock_warrior_priest
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3718,7 +3869,9 @@
             type: literal
             value: 5
     - id: cost_pick_lock_wizard
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3760,7 +3913,9 @@
             type: literal
             value: 4
     - id: cost_pick_lock_thief
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3802,7 +3957,9 @@
             type: literal
             value: 1
     - id: cost_pick_lock_rogue
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3844,7 +4001,9 @@
             type: literal
             value: 3
     - id: cost_pick_lock_alchemist
-      source_text: Read the selected profession cost for Pick Lock from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3886,7 +4045,9 @@
             type: literal
             value: 4
     - id: cost_perception_barbarian
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3928,7 +4089,9 @@
             type: literal
             value: 4
     - id: cost_perception_warrior
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -3970,7 +4133,9 @@
             type: literal
             value: 4
     - id: cost_perception_ranger
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4012,7 +4177,9 @@
             type: literal
             value: 2
     - id: cost_perception_warrior_priest
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4054,7 +4221,9 @@
             type: literal
             value: 4
     - id: cost_perception_wizard
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4096,7 +4265,9 @@
             type: literal
             value: 2
     - id: cost_perception_thief
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4138,7 +4309,9 @@
             type: literal
             value: 1
     - id: cost_perception_rogue
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4180,7 +4353,9 @@
             type: literal
             value: 3
     - id: cost_perception_alchemist
-      source_text: Read the selected profession cost for Perception from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4222,7 +4397,9 @@
             type: literal
             value: 2
     - id: cost_heal_barbarian
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4264,7 +4441,9 @@
             type: literal
             value: 4
     - id: cost_heal_warrior
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4306,7 +4485,9 @@
             type: literal
             value: 4
     - id: cost_heal_ranger
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4348,7 +4529,9 @@
             type: literal
             value: 2
     - id: cost_heal_warrior_priest
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4390,7 +4573,9 @@
             type: literal
             value: 2
     - id: cost_heal_wizard
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4432,7 +4617,9 @@
             type: literal
             value: 2
     - id: cost_heal_thief
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4474,7 +4661,9 @@
             type: literal
             value: 4
     - id: cost_heal_rogue
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4516,7 +4705,9 @@
             type: literal
             value: 3
     - id: cost_heal_alchemist
-      source_text: Read the selected profession cost for Heal from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4558,7 +4749,9 @@
             type: literal
             value: 3
     - id: cost_arcane_arts_wizard
-      source_text: Read the selected profession cost for Arcane Arts from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4600,7 +4793,9 @@
             type: literal
             value: 1
     - id: cost_battle_prayers_warrior_priest
-      source_text: Read the selected profession cost for Battle Prayers from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4642,7 +4837,9 @@
             type: literal
             value: 1
     - id: cost_foraging_barbarian
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4684,7 +4881,9 @@
             type: literal
             value: 4
     - id: cost_foraging_warrior
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4726,7 +4925,9 @@
             type: literal
             value: 4
     - id: cost_foraging_ranger
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4768,7 +4969,9 @@
             type: literal
             value: 1
     - id: cost_foraging_warrior_priest
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4810,7 +5013,9 @@
             type: literal
             value: 4
     - id: cost_foraging_wizard
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4852,7 +5057,9 @@
             type: literal
             value: 5
     - id: cost_foraging_thief
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4894,7 +5101,9 @@
             type: literal
             value: 4
     - id: cost_foraging_rogue
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4936,7 +5145,9 @@
             type: literal
             value: 3
     - id: cost_foraging_alchemist
-      source_text: Read the selected profession cost for Foraging from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -4978,7 +5189,9 @@
             type: literal
             value: 4
     - id: cost_barter_barbarian
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5020,7 +5233,9 @@
             type: literal
             value: 5
     - id: cost_barter_warrior
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5062,7 +5277,9 @@
             type: literal
             value: 4
     - id: cost_barter_ranger
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5104,7 +5321,9 @@
             type: literal
             value: 3
     - id: cost_barter_warrior_priest
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5146,7 +5365,9 @@
             type: literal
             value: 3
     - id: cost_barter_wizard
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5188,7 +5409,9 @@
             type: literal
             value: 1
     - id: cost_barter_thief
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5230,7 +5453,9 @@
             type: literal
             value: 2
     - id: cost_barter_rogue
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5272,7 +5497,9 @@
             type: literal
             value: 3
     - id: cost_barter_alchemist
-      source_text: Read the selected profession cost for Barter from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5314,7 +5541,9 @@
             type: literal
             value: 3
     - id: cost_alchemy_barbarian
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5356,7 +5585,9 @@
             type: literal
             value: 5
     - id: cost_alchemy_warrior
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5398,7 +5629,9 @@
             type: literal
             value: 5
     - id: cost_alchemy_ranger
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5440,7 +5673,9 @@
             type: literal
             value: 4
     - id: cost_alchemy_warrior_priest
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5482,7 +5717,9 @@
             type: literal
             value: 4
     - id: cost_alchemy_wizard
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5524,7 +5761,9 @@
             type: literal
             value: 3
     - id: cost_alchemy_thief
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5566,7 +5805,9 @@
             type: literal
             value: 4
     - id: cost_alchemy_rogue
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5608,7 +5849,9 @@
             type: literal
             value: 4
     - id: cost_alchemy_alchemist
-      source_text: Read the selected profession cost for Alchemy from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5650,7 +5893,9 @@
             type: literal
             value: 1
     - id: cost_hit_points_barbarian
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5692,7 +5937,9 @@
             type: literal
             value: 5
     - id: cost_hit_points_warrior
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5734,7 +5981,9 @@
             type: literal
             value: 5
     - id: cost_hit_points_ranger
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5776,7 +6025,9 @@
             type: literal
             value: 10
     - id: cost_hit_points_warrior_priest
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5818,7 +6069,9 @@
             type: literal
             value: 10
     - id: cost_hit_points_wizard
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5860,7 +6113,9 @@
             type: literal
             value: 10
     - id: cost_hit_points_thief
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5902,7 +6157,9 @@
             type: literal
             value: 10
     - id: cost_hit_points_rogue
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5944,7 +6201,9 @@
             type: literal
             value: 10
     - id: cost_hit_points_alchemist
-      source_text: Read the selected profession cost for Hit points +1 from the Improvement Point table.
+      source_text:
+        The table below tells you how many Improvement Points it costs to increase a stat or
+        skill by +1.
       when:
         type: all
         conditions:
@@ -5986,7 +6245,7 @@
             type: literal
             value: 10
     - id: maximum_str
-      source_text: Use the racial maximum for this basic stat.
+      source_text: However, there is a maximum value for each stat depending on their race.
       when:
         type: all
         conditions:
@@ -6017,7 +6276,7 @@
           target: maximum
           on_missing_issue: issue.phase4.lookup_domain
     - id: maximum_dex
-      source_text: Use the racial maximum for this basic stat.
+      source_text: However, there is a maximum value for each stat depending on their race.
       when:
         type: all
         conditions:
@@ -6048,7 +6307,7 @@
           target: maximum
           on_missing_issue: issue.phase4.lookup_domain
     - id: maximum_con
-      source_text: Use the racial maximum for this basic stat.
+      source_text: However, there is a maximum value for each stat depending on their race.
       when:
         type: all
         conditions:
@@ -6079,7 +6338,7 @@
           target: maximum
           on_missing_issue: issue.phase4.lookup_domain
     - id: maximum_wis
-      source_text: Use the racial maximum for this basic stat.
+      source_text: However, there is a maximum value for each stat depending on their race.
       when:
         type: all
         conditions:
@@ -6110,7 +6369,7 @@
           target: maximum
           on_missing_issue: issue.phase4.lookup_domain
     - id: maximum_res
-      source_text: Use the racial maximum for this basic stat.
+      source_text: However, there is a maximum value for each stat depending on their race.
       when:
         type: all
         conditions:
@@ -6181,7 +6440,7 @@
               - type: literal
                 value: 2
     - id: boundary_cost
-      source_text: The 70-to-71 price depends on the explicit supplied boundary interpretation.
+      source_text: Once a stat or skill passes 70, the cost is doubled.
       when:
         type: all
         conditions:
@@ -6229,7 +6488,7 @@
               - type: field
                 name: boundary_cost_multiplier
     - id: unresolved_boundary
-      source_text: The text does not specify whether the increase crossing 70 is already doubled.
+      source_text: Once a stat or skill passes 70, the cost is doubled.
       when:
         type: all
         conditions:
@@ -6277,7 +6536,7 @@
         - type: unresolved
           issue_id: issue.character.improvement_seventy_boundary
     - id: unresolved_hp_limit
-      source_text: The relationship of automatic +1d2 HP and the +2-per-level wording is not explicit.
+      source_text: Hit points may only be increased by +2 per level.
       when:
         type: all
         conditions:
@@ -6317,7 +6576,8 @@
         - type: unresolved
           issue_id: issue.character.level_hit_point_limit
     - id: check_purchase
-      source_text: Respect available points, per-level limits and natural maxima.
+      source_text: No skill or stat may be increased more than +5 per level. Hit points may only be
+        increased by +2 per level.
       effects:
         - type: require
           condition: &a2
@@ -6428,7 +6688,7 @@
                           type: field
                           name: hp_purchase_limit
     - id: purchase_point
-      source_text: Purchase exactly +1 and retain unspent points.
+      source_text: You have 15 Improvement Points to spend on stat and skill increases.
       when: *a2
       effects:
         - type: add
@@ -6481,7 +6741,7 @@
   confidence: high
   source_text:
     Every time your hero levels up, they may choose a Talent from the category shown in the
-    table. Every other level up, the same goes for a Perk.
+    table below. Every other level up, the same goes for a Perk.
   fields:
     session_open:
       type: boolean
@@ -6552,8 +6812,8 @@
   steps:
     - id: initialize
       source_text:
-        Every level may grant a talent; every other level a perk from the printed profession
-        category.
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       effects:
         - type: set
           target: expected_category
@@ -6571,7 +6831,9 @@
             type: literal
             value: ''
     - id: category_barbarian_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6602,7 +6864,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_barbarian_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6633,7 +6897,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_warrior_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6664,7 +6930,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_warrior_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6695,7 +6963,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_ranger_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6726,7 +6996,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_ranger_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6757,7 +7029,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_warrior_priest_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6788,7 +7062,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_warrior_priest_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6819,7 +7095,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_wizard_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6850,7 +7128,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_wizard_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6881,7 +7161,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_thief_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6912,7 +7194,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_thief_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6943,7 +7227,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_rogue_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -6974,7 +7260,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_rogue_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -7005,7 +7293,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_alchemist_talent
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -7036,7 +7326,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: category_alchemist_perk
-      source_text: Read the printed level and profession category.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -7067,7 +7359,9 @@
           target: expected_category
           on_missing_issue: issue.phase4.lookup_domain
     - id: choose_talent
-      source_text: Apply the selected catalogue ability once; its effects remain a dependency handoff.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -7149,7 +7443,9 @@
             type: literal
             value: true
     - id: choose_perk
-      source_text: Apply the selected catalogue ability once; its effects remain a dependency handoff.
+      source_text:
+        Every time your hero levels up, they may choose a Talent from the category shown in the
+        table below. Every other level up, the same goes for a Perk.
       when:
         type: all
         conditions:
@@ -7215,7 +7511,6 @@
   status: extracted
   confidence: high
   source_text: Your heroes may save any spare Improvement points until the next time they level up.
-    Talent and Perk choices are optional.
   fields:
     session_open:
       type: boolean
@@ -7234,7 +7529,7 @@
   dependencies: []
   steps:
     - id: finish
-      source_text: Preserve spare Improvement Points and close the current session.
+      source_text: Your heroes may save any spare Improvement points until the next time they level up.
       when:
         type: all
         conditions:

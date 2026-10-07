@@ -75,6 +75,7 @@ describe('issue resolutions', () => {
       'issue.traps.disarm_lockpick',
       'issue.gameplay_example.trap_sanity',
       'issue.gameplay_example.spider_turn',
+      'issue.character_basics.perks_at_level_one',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

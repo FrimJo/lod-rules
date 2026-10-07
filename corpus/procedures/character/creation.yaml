@@ -71,7 +71,7 @@
   dependencies: []
   steps:
     - id: check_reroll
-      source_text: Two rerolls in total, including Hit Points; never reroll a reroll.
+      source_text: You may make 2 rerolls in this process, including when rolling for Hit Points.
       effects:
         - type: set
           target: reroll_applied
@@ -141,7 +141,7 @@
                       type: literal
                       value: 10
     - id: accept_reroll
-      source_text: You may choose the highest result.
+      source_text: You may never reroll a reroll, but you may choose the highest result.
       when: *a1
       effects:
         - type: set
@@ -166,7 +166,7 @@
             type: literal
             value: true
     - id: keep_highest
-      source_text: You may choose the highest result.
+      source_text: You may never reroll a reroll, but you may choose the highest result.
       when:
         type: all
         conditions:
@@ -294,7 +294,7 @@
   dependencies: []
   steps:
     - id: check_allocation
-      source_text: Distribute 15 points, no more than 10 to one stat.
+      source_text: However, no stat may have more than 10 points of these 15, so you must divide the points.
       effects:
         - type: require
           condition: &a2
@@ -335,7 +335,7 @@
                   type: literal
                   value: 15
     - id: allocate
-      source_text: Add the chosen points once to the rolled stats.
+      source_text: Each hero gains an extra 15 points that may be distributed on their stats.
       when: *a2
       effects:
         - type: add
@@ -383,7 +383,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 32
       printed_page: 30
-      heading: Skills; Free Skill
+      heading: Profession and Talents; Skills; Free Skill
       extraction:
         method: text
         confidence: high
@@ -392,9 +392,10 @@
   confidence: high
   source_text:
     Each Skill is calculated as the skill’s basic stat plus a profession-specific modifier.
-    A Skill Level can never be negative. You may choose one skill that has a negative modifier to
-    improve. This Skill Value gains a modifier of +10. Talent skill bonuses do not change the basic
-    stat.
+    ... A Skill Level can never be negative. ... You may choose one skill that has a negative
+    modifier to improve. This Skill Value gains a modifier of +10. ... Some Talents may also add to
+    your Skill Values. In such cases, the Skill Level is increased, but the basic stat remains
+    unchanged.
   fields:
     creation_open:
       type: boolean
@@ -449,7 +450,7 @@
         modifiers.
   steps:
     - id: check_skill
-      source_text: One chosen negative-modifier skill may gain +10.
+      source_text: You may choose one skill that has a negative modifier to improve.
       effects:
         - type: set
           target: free_skill_bonus
@@ -505,13 +506,13 @@
                           type: literal
                           value: 0
     - id: calculate_skill
-      source_text: Basic stat plus profession modifier; skill bonuses leave the stat unchanged.
+      source_text: Each Skill is calculated as the skill’s basic stat plus a profession-specific modifier.
       when: *a3
       effects:
         - type: invoke
           dependency: profession
     - id: free_skill
-      source_text: Choose one skill with a negative modifier.
+      source_text: This Skill Value gains a modifier of +10.
       when:
         type: all
         conditions:
@@ -616,9 +617,9 @@
   status: extracted
   confidence: high
   source_text: Roll 1d4 for each piece of equipment and add that damage to the Character Sheet. A
-    piece of equipment will always have at least 1 Point of Durability left. Equipment bought before
-    the game needs no availability roll, but damage is rolled on all things that could potentially
-    be damaged.
+    piece of equipment will always have at least 1 Point of Durability left. ... The benefit of
+    doing this is that you do not need to roll on availability. ... The downside is that you will
+    need to roll for damage on all things that could potentially be damaged.
   fields:
     before_game:
       type: boolean
@@ -660,7 +661,9 @@
   dependencies: []
   steps:
     - id: apply_wear
-      source_text: Roll damage while retaining at least 1 durability.
+      source_text:
+        Roll 1d4 for each piece of equipment and add that damage to the Character Sheet. A
+        piece of equipment will always have at least 1 Point of Durability left.
       when:
         type: all
         conditions:
@@ -772,10 +775,13 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Choose species; roll stats and Hit Points; specialise; choose profession and talents,
-    skills, spells/prayers and optional background; resolve starting equipment; calculate final
-    values and Party Morale. Baseline resources must be established before applying modifiers;
-    dependency outcomes are supplied, not executed by invocation.
+  source_text:
+    The first step in creating your character is to choose your species. ... Once you have
+    chosen, it is time to roll your stats. ... Each hero gains an extra 15 points that may be
+    distributed on their stats. ... The next task is to choose one of the professions which are
+    described from page 32 on. ... Your hero will have some starting gear, but it has been used for
+    quite some time and is worn. ... Once you have gotten your spells, prayers, and equipment in
+    place you are almost ready.
   fields:
     phase:
       type: string
@@ -942,7 +948,7 @@
         after-start stores use availability and mint condition.
   steps:
     - id: check_phase
-      source_text: Creation follows species, stats, specialisation, profession, equipment and final touches.
+      source_text: The first step in creating your character is to choose your species.
       effects:
         - type: require
           condition:
@@ -997,8 +1003,17 @@
                   type: literal
                   value: finish
     - id: choose_dwarf
-      source_text: Choose species first. Baselines are established before talent and background changes.
+      source_text: The first step in creating your character is to choose your species.
       source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Choosing Your Species
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 30
@@ -1082,8 +1097,17 @@
             type: literal
             value: species
     - id: choose_elf
-      source_text: Choose species first. Baselines are established before talent and background changes.
+      source_text: The first step in creating your character is to choose your species.
       source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Choosing Your Species
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 30
@@ -1167,8 +1191,17 @@
             type: literal
             value: species
     - id: choose_halfling
-      source_text: Choose species first. Baselines are established before talent and background changes.
+      source_text: The first step in creating your character is to choose your species.
       source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Choosing Your Species
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 31
@@ -1252,8 +1285,17 @@
             type: literal
             value: species
     - id: choose_human
-      source_text: Choose species first. Baselines are established before talent and background changes.
+      source_text: The first step in creating your character is to choose your species.
       source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 29
+          printed_page: 27
+          heading: Choosing Your Species
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 31
@@ -1338,8 +1380,8 @@
             value: species
     - id: resolve_rolls
       source_text:
-        Roll stats and HP. Two rerolls shared across these rolls; optional roll-all-then-assign
-        remains a choice.
+        Once you have chosen, it is time to roll your stats. ... Now it is time to determine
+        how many Hit Points your character has.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1402,7 +1444,7 @@
             type: literal
             value: rolled
     - id: specialise
-      source_text: Distribute 15 points, at most 10 to one stat, using the allocation procedure.
+      source_text: Each hero gains an extra 15 points that may be distributed on their stats.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1457,7 +1499,7 @@
             type: literal
             value: specialised
     - id: choose_alchemist
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1528,7 +1570,7 @@
             type: literal
             value: profession
     - id: choose_barbarian
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1599,7 +1641,7 @@
             type: literal
             value: profession
     - id: choose_ranger
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1670,7 +1712,7 @@
             type: literal
             value: profession
     - id: choose_rogue
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1741,7 +1783,7 @@
             type: literal
             value: profession
     - id: choose_thief
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1812,7 +1854,7 @@
             type: literal
             value: profession
     - id: choose_warrior
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1883,7 +1925,7 @@
             type: literal
             value: profession
     - id: choose_warrior_priest
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1954,7 +1996,7 @@
             type: literal
             value: profession
     - id: choose_wizard
-      source_text: Choose profession and its talents; apply skills and optional background before final values.
+      source_text: The next task is to choose one of the professions which are described from page 32 on.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -2027,8 +2069,9 @@
             type: literal
             value: profession
     - id: equip
-      source_text: Resolve starting gear, small backpack unless otherwise noted, wear, and optional
-        purchases/lending/pooling.
+      source_text:
+        Your hero will have some starting gear, but it has been used for quite some time and is
+        worn. ... All heroes start the game with a small backpack, unless otherwise noted.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -2085,7 +2128,9 @@
             type: literal
             value: equipped
     - id: finish
-      source_text: Divide each hero’s RES by 10 and drop the decimal, then add contributions to Party Morale.
+      source_text:
+        To calculate the Party Morale (PM) you divide your RES by 10 and then drop the decimal.
+        When all characters have done the same, you add it together to get your PM.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf

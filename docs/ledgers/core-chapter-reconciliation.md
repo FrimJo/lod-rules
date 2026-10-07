@@ -303,3 +303,234 @@ and whose wording I read: `core.quest.end_uncertain`, `core.dice.percentile`,
 the page, but `core.los.trace` joins two sentences from different paragraphs, and
 `core.model.footprint` drops the lead-in "The only rule to remember is that".
 
+## Tier 2 — Character Basics, Creating Your Character, Levelling Up — 7 October 2026
+
+Scope: the 63 sections under `section.party_management` (the part node, PDF 25), `section.character_basics`
+(16), `section.creating_your_character` (34), `section.levelling_up` (11) and
+`section.embarking_on_your_first_quest` (1). All 63 are now
+`extracted`. None is `reviewed`.
+
+### Pages inspected
+
+Every page was rendered and read, not only text-dumped:
+
+| PDF   | Printed | Content                                                                                                    |
+| ----- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| 25    | (none)  | Party Management divider                                                                                   |
+| 26    | 24      | Character Basics; The Character; Basic Stats; DB; NA; Energy; Luck                                         |
+| 27    | 25      | Luck (end); Movement; Sanity; Species and Traits; HP; Profession; Skills; Perks; Talents                   |
+| 28    | 26      | Skills List                                                                                                |
+| 29    | 27      | Choosing Your Species; Strength and Weapon Class table and example; DB/NA tables; Hit Points; Mana; Energy |
+| 30–31 | 28–29   | Dwarf, Elf, Halfling, Human                                                                                |
+| 32    | 30      | Profession and Talents; Free Skill example; Starting Equipment                                             |
+| 33    | 31      | Final Touches; Wilbur example                                                                              |
+| 34–41 | 32–39   | The eight professions and their skill tables                                                               |
+| 59    | 57      | Embarking on your First Quest                                                                              |
+| 60    | 58      | Levelling Up table; Stats and Skills Maximum, example and table                                            |
+| 61    | 59      | Increasing your Skills and Basic Stats table; Elves box                                                    |
+| 62    | 60      | Talents and Perks tables; Halflings box                                                                    |
+
+To check cross-references, these were also rendered: PDF 51 (printed 49, the Equipment copy of
+the weapon class table) and changelog page 23 (2.21 entries 135–149). Text was compared, not
+rendered, for PDF 64 (Mana, RDU), PDF 70 (Identifying), PDF 126 (Rations and Resting), PDF 134
+and 146 (Level Up activity) and PDF 144 (Buying and Selling). The FAQ has no entry for these pages
+beyond the existing Ranger bow ruling.
+
+### Per-section disposition
+
+Character Basics:
+
+| Section                                  | Disposition                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `section.party_management`               | All not applicable: divider page.                                                                                                                                         |
+| `section.character_basics`               | Rules: new `character.party.composition`. The Companions’ Expansion is now `external_references: companions_compendium`.                                                  |
+| `.the_character`                         | All not applicable: two introductory sentences.                                                                                                                           |
+| `.basic_stats`                           | Glossary (five stat terms). Rules: new `character.stat.basic_stats` and `character.stat.{strength,constitution,dexterity,wisdom,resolve}.effects`.                        |
+| `.damage_bonus_db`, `.natural_armour_na` | Rules: new `character.damage_bonus.definition`, `character.natural_armour.definition`. Glossary: tier 1 terms (see below).                                                |
+| `.energy_e`, `.luck_l`, `.movement_m`    | Already represented. `character.energy.initial` now also cites the Energy run-in on PDF 29.                                                                               |
+| `.sanity`                                | Rules: new `character.sanity.zero_disorder`. "page 53" bound to `section.psychology.sanity`.                                                                              |
+| `.species`                               | Glossary: new `term.trait`. Rules: new `character.species.choice`, `character.species.traits_are_talents`. Entities not applicable (catalogued under their own headings). |
+| `.hit_points_hp`                         | Rules: new `character.hit_points.definition`.                                                                                                                             |
+| `.profession`                            | Rules: new `character.profession.adjustments`. Glossary and entities not applicable.                                                                                      |
+| `.skills`                                | Rules: new `character.skill.profession_levels`; existing `.stat_independence`, `.known`.                                                                                  |
+| `.perks`, `.talents`                     | Rules: new `character.perk.acquisition`, `character.talent.acquisition`, `character.ability.kinds_summary` (the boxed summary). Page pointers bound to Appendix I and II. |
+| `.skills_list`                           | Glossary: nine new skill terms. Rules: 19 new `character.skill.*` rules, one or more per skill entry. Table already extracted.                                            |
+
+Creating your Character:
+
+| Section                                                                                     | Disposition                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `section.creating_your_character`                                                           | Rules: new `character.creation.hit_points` for the Hit Points run-in. The Energy run-in is a second source of `character.energy.initial`. Tables are the species stat rows.                                                    |
+| `.choosing_your_species`                                                                    | Rules: new `character.creation.species_first`, `.roll_stats`, `.roll_all_option`, `.strength_weapon_class`. Examples: four new fixtures.                                                                                       |
+| `.choosing_your_species.table`                                                              | Represented by `table.equipment.weapon_class_strength`, which now also cites PDF 29 (same six rows as PDF 51). It had no record before.                                                                                        |
+| `.choosing_your_species.table_2`, `.damage_bonus_and_natural_armour(.natural_armour_table)` | Already represented. Parent tables component set to extracted (child rows).                                                                                                                                                    |
+| `.mana`                                                                                     | Already represented; issue updated (below).                                                                                                                                                                                    |
+| `.profession_and_talents`                                                                   | Rules: new `character.creation.profession_talents`, `character.skill.starting_value`, `character.skill.free_skill`, `character.creation.spells_and_prayers`, `character.creation.background_optional`. Example: new fixture.   |
+| `.starting_equipment`                                                                       | Rules: new `character.creation.starting_coins`, `.small_backpack`, `.buy_before_game`, `.buy_after_start`.                                                                                                                     |
+| `.final_touches`                                                                            | Rules: new `character.creation.starting_sanity` (links `character.sanity.initial`, which already exists in Psychology), `character.level.initial`, `character.creation.party_morale`, `character.creation.repeat_until_party`. |
+| Species, profession and table rows                                                          | Already extracted. Notes rewritten to stand alone. Rules set to not applicable for Elf, Human and Warrior, whose pages have no rule paragraph.                                                                                 |
+
+Levelling Up:
+
+| Section                                   | Disposition                                                                                                                   |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `section.levelling_up`                    | Already represented (`character.level.*`, table, procedure). Rules and tables moved from extracting to extracted.             |
+| `.stats_and_skills_maximum`               | Already represented, including the CS 80 example fixture. `character.stat.maximum_*` quote "However, there is…" verbatim now. |
+| `.increasing_your_skills_and_basic_stats` | Rules: new `character.advancement.improvement_points`, `.increase_limits`, `.cost_doubling`, `.save_points`.                  |
+| `.talents_and_perks`                      | Rules: new `character.advancement.talent_and_perk_choice`.                                                                    |
+| `.elves`, `.halflings`                    | All not applicable: setting fiction boxes.                                                                                    |
+
+Most new rules on these pages are `definition` records: the paragraph names a mechanic whose
+operative rule is elsewhere (Damage Bonus, Hit Points, weapon class, Party Morale). They quote the
+text and link the operative record as a dependency, as tier 1 did for `core.overview.threat_level`.
+Executable new rules: Sanity zero, Dodge, Arcane Arts learning and identification limits, Barter,
+Heal, Foraging, Pick Locks (five rules), Perception, Battle Prayers, starting skill, Free Skill,
+starting coins, backpack, buying before and after the game, starting level, Improvement Points,
+increase limits and cost doubling.
+
+Embarking on your First Quest (added to this unit on request; PDF 59 / printed 57 per
+`pages.yaml`, one section with no children):
+
+| Section                                 | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `section.embarking_on_your_first_quest` | Table: new `table.settlement.start_settlement` (the eight numbered start settlements, 8 = Re-roll.; no die named: `issue.embarking.start_settlement_die`). Rules: new `core.quest.start_settlement`, `core.quest.first_quests`, `core.quest.locations_listed`, `core.quest.return_for_reward`; existing `core.quest.location`, `core.quest.travel`. The ‘Entering the Dungeon’ pointer has no matching chapter and is kept in `unresolved_references`. Derived fixtures `test.core.quest.start_settlement.windfair` and `.reroll`. |
+
+### Changed existing records
+
+- Procedures `procedure.character_creation*` (5) and `procedure.character_level_up`,
+  `.character_improve`, `.character_level_ability`, `.character_finish_advancement`: every
+  `source_text` (top level and steps) now quotes the page; paraphrases were replaced. Effects
+  were not changed. The species-choice steps also cite PDF 29.
+- `species.dwarf`, `.elf`, `.halfling`, `.human`: `source_text` now matches the page ("Hit
+  Points: 1d6+8" has no full stop) and marks the gap to Limitations and Special with "...". The
+  species rules and fixtures now cite the printed headings (Limitations, Special, Halfling)
+  instead of invented ones.
+- `test.character.wilbur_morale_example` now quotes the example itself.
+- `table.equipment.weapon_class_strength` gained the PDF 29 source.
+- `visually_verified: true` on the in-scope rules and terms whose wording was read.
+- Sections: `see_also` bindings for the page pointers listed in the coverage notes, and
+  `external_references: [companions_compendium]` on Character Basics.
+
+### Examples
+
+| Example                                   | Classification | Fixture                                                                                                               |
+| ----------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Weapon class 3, 5 and 6 (PDF 29)          | Executable     | `test.character.creation.weapon_class_example.{class_3_two_hands,class_3_one_hand,class_5_one_hand,class_6_one_hand}` |
+| Warrior Free Skill on Pick Locks (PDF 32) | Executable     | `test.character.creation.free_skill_example` (-20 becomes -10)                                                        |
+| Wilbur RES 37 (PDF 33)                    | Executable     | existing `test.character.wilbur_morale_example`, text corrected                                                       |
+| Warrior CS 80 (PDF 60)                    | Executable     | existing `test.skill.book_effective_value`                                                                            |
+
+The "Character creation example" pointer on PDF 33 refers to the example after Backgrounds
+(`section.backgrounds.character_creation_example`), which is outside this scope.
+
+### Issues
+
+New, unresolved: `issue.embarking.start_settlement_die`, `issue.character_basics.identify_attempts` (one try per wizard per quest on PDF
+28, one per party and object on PDF 70), `issue.character_basics.foraging_travel` (once during
+travel for 1 Ration on PDF 28, once per day feeding everyone on PDF 126),
+`issue.character_basics.barter_terms` (whether the selling premium covers only parts; no
+rounding).
+
+Updated: `issue.phase4.mana_rounding`. Changelog 2.21 entries 139 and 141 add RDD to the Wisdom
+and Mana lines, but the Magic chapter (PDF 64) prints RDU and no entry changes it. The issue
+stays unresolved and no effect changed. Changelog 2.21 entry 140 adds "All heroes get the
+"Heroic Force of Will" perk at the start." to printed page 25; every profession already grants
+it, so nothing changed.
+
+### Tier 1 records left unchanged
+
+`term.damage_bonus`, `term.natural_armour`, `term.hit_points`, `term.movement`, `term.skill`,
+`term.perk` and `term.talent` belong to the reviewed Abbreviations and Terminology section. They
+could cite the matching Character Basics page as a second source; that would make the
+Introduction review stale, so it is left for the review follow-up. `term.hit_points` says
+"knocked out" where PDF 27 says "bleeding out".
+
+### Tests
+
+- `tests/examples/characters/character-basics.yaml`: 19 derived cases for the new skill and
+  Sanity rules.
+- `tests/examples/character/creation-and-levelling.yaml`: 5 source-example fixtures and 9
+  derived cases.
+- `tests/reports/chapters.test.ts`: Basic Stats is no longer terms-only; the real-corpus check
+  now uses Coins (no records).
+
+### Gates
+
+`npm run validate`, `npm test`, `npm run report:coverage`, `npm run lint`, `git diff --check`
+and `npm run review -- digest <chapter> --descendants` for the three chapters were run at the
+end of this unit; results are in the session report. Digest `section.party_management` without
+`--descendants`, or it pulls in Backgrounds, Equipment and Psychology. No review record was
+written.
+
+## Tier 2 review corrections — 7 October 2026
+
+Extraction-side corrections for the open findings of `review.embarking.1`,
+`review.character_basics.1`, `review.levelling_up.1` and `review.creating_your_character.1`.
+Each finding was checked against PDF pages rendered with PDFKit (PDF 21, 26–27, 29–31, 35–41,
+59–62 and 147, plus changelog PDF 23). The review records were not edited and nothing was set
+`reviewed`; the four records are now stale and need a new review run.
+
+### Embarking on your First Quest
+
+- `core.quest.travel` (PDF 59): `source_text` now ends with the printed clause "…to reach their
+  Quest Site, according to the description given in the ‘Travelling and Skirmishes’ chapter."
+  The pointer is bound in `see_also` and as a dependency on `section.travelling_and_skirmishes`.
+
+### Character Basics
+
+- `section.character_basics.the_character.luck_l`: the section row ends on printed 25 / PDF 27,
+  where the Luck paragraph ends.
+- `term.settlement_visit`: the id and name are kept because rules use the term as a timing
+  reference. The definition now quotes both printed sentences that bound the period (PDF 26–27)
+  and cites both pages. The glossary schema has no field for a corpus-coined label, so the
+  label status is recorded in the new unresolved `issue.character_basics.settlement_visit_label`
+  and in the `luck_l` coverage note. The reviewer suggested that the book never names a
+  settlement visit. That is not quite right: Perfect Result (PDF 21) prints "once between each
+  settlement visit" and Rest and Recuperation (PDF 147) prints "the next visit to a
+  settlement". The issue says that the phrase is printed but never defined, and that the Luck
+  paragraph does not use it. It links no Game Basics object, so `review.game_basics.2` stays
+  fresh.
+- `character.perk.acquisition`: now links `issue.character_basics.perks_at_level_one`. Changelog
+  2.21 entry 140 ("Page 25 changed and added 'All heroes get the "Heroic Force of Will" perk at
+  the start.'") states the rule outright, so the issue is resolved under the official-rulings
+  convention. The printed sentence stays verbatim. No effect changes, because every profession
+  already grants `perk.heroic_force_of_will`. The perks coverage note,
+  `review/designer-published-rulings.md` and the resolved-issue list in
+  `tests/schema/review.test.ts` were updated to match.
+
+### Levelling Up
+
+- `table.character.improvement_costs`: the paraphrased footnote is removed (`footnotes: []`).
+  PDF 61 prints no footnote, and the paragraph is quoted by the `character.advancement.*` rules.
+- `table.character.stat_maxima`: the heading is now "Stats and Skills Maximum", the method is
+  `table`, `locator.table` is "Uncaptioned stat maxima table", and `source_text` is the full
+  printed sentence "However, there is a maximum value for each stat depending on their race."
+- Coverage notes for `section.levelling_up.table` (PDF 60, `table.character.level_progression`),
+  `…increasing_your_skills_and_basic_stats.table` (PDF 61, `table.character.improvement_costs`),
+  `…talents_and_perks.table_talents` and `…table_perks` (PDF 62,
+  `table.character.talent_progression` / `perk_progression`) were rewritten to stand alone,
+  each naming its single page and its table id.
+- `issue.character.improvement_seventy_boundary`: the PDF 60 source is dropped, and
+  `character.advancement.cost_doubling` is added to `related`.
+
+### Creating your Character
+
+- Headings now match the printed run-in headings. The four profession `equipment_limits` rules
+  (Barbarian, Ranger, Rogue, Wizard) use "Limitations", and so do the 8 matching source
+  headings in `tests/examples/characters/profession-catalogue.yaml`. The six profession skill
+  tables use "Skills", with `locator.table` "<Profession> Skills" as Alchemist already does.
+  The species stat tables use "Dwarf", "Elf", "Halfling" and "Human".
+  `table.character.damage_bonus` and `.natural_armour` use "Damage Bonus and Natural Armour".
+  Every heading was checked on PDF 29–31 and 35–41.
+- `character.profession.thief.treasure_choice`: the extractor note in
+  `unresolved_references` is removed. The page has no unbound pointer, and `see_also` still
+  binds `section.treasure`.
+- `species.dwarf`: the Hate Goblins grant is bound to `talent.hate`, and its qualifier stays
+  Goblins.
+- `species.halfling`: added a `talent.lucky` grant ("Lucky (Starts with 1 Point of Luck).").
+  `character.species.halfling.initial_luck` is kept. The pages do not say whether the trait's
+  starting Luck and the talent's +1 stack, so the new unresolved
+  `issue.creating_your_character.halfling_lucky_stacking` records that, and the rule links it.
+- Reviewer's minor note: the Alchemist and Thief rows now mark `tables: not_applicable`, as the
+  other six professions do, because each skill table is its own `.table_skills` row.
+- The Dwarf and Halfling coverage notes now mention the bindings and the new issue.

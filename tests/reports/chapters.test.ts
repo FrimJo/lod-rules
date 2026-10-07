@@ -234,9 +234,16 @@ describe('real corpus', () => {
     expect(chapterNames.indexOf('game_basics')).toBeLessThan(chapterNames.indexOf('combat'));
   });
 
-  it('drops reconciled Difficulty and flags Basic Stats as terms only', () => {
-    // Difficulty had no records until the Step 2 pilot extracted it.
+  it('drops reconciled Difficulty and Basic Stats and flags Coins as having no records', () => {
+    // Difficulty had no records until the Step 2 pilot extracted it, and Basic Stats was cited
+    // only by glossary terms until tier 2. Neither is unfinished any more.
     expect(byId.has('section.game_basics.difficulty')).toBe(false);
-    expect(byId.get('section.character_basics.the_character.basic_stats')?.termsOnly).toBe(true);
+    expect(byId.has('section.character_basics.the_character.basic_stats')).toBe(false);
+    expect(byId.get('section.equipment.coins')).toMatchObject({
+      noRecords: true,
+      termsOnly: false,
+      pdfPages: '51',
+      printedPages: '49',
+    });
   });
 });

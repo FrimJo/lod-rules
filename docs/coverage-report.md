@@ -8,8 +8,8 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 675 / 675 | 100% |
-| extracted | 376 / 675 | 56% |
-| reviewed | 27 / 675 | 4% |
+| extracted | 408 / 675 | 60% |
+| reviewed | 90 / 675 | 13% |
 
 Total sections tracked: 675
 
@@ -77,23 +77,22 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 11 | 408 | 256 |
-| rules | 370 | 142 | 163 |
-| tables | 201 | 319 | 155 |
-| examples | 16 | 391 | 268 |
-| procedures | 103 | 334 | 238 |
-| entities | 230 | 306 | 139 |
+| glossary | 25 | 377 | 273 |
+| rules | 385 | 120 | 170 |
+| tables | 208 | 293 | 174 |
+| examples | 18 | 362 | 295 |
+| procedures | 103 | 311 | 261 |
+| entities | 230 | 274 | 171 |
 
 ## Remaining tables
 
-13 of this kind still need their contents extracted.
+12 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
 | section.front_matter.index_of_art.table | Index of Art table | 9 |
 | section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
 | section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
-| section.creating_your_character.choosing_your_species.table | Choosing Your Species table | 27 |
 | section.into_the_dungeons.table | Into the Dungeons table | 89 |
 | section.into_the_dungeons.table_2 | Into the Dungeons table 2 | 89 |
 | section.into_the_dungeons.table_3 | Into the Dungeons table 3 | 89 |
@@ -120,6 +119,7 @@ None. Every node in the structural map has been mapped.
 | section.introduction | bestiary, charts_compendium, quest_book_ii |
 | section.front_matter.index_of_art | bestiary, charts_compendium, quest_book_ii |
 | section.back_matter.index | bestiary |
+| section.character_basics | companions_compendium |
 | section.psychology | bestiary |
 | section.embarking_on_your_first_quest | quest_book_ii |
 | section.magic | bestiary |
