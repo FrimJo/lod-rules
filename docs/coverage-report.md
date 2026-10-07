@@ -8,7 +8,7 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 675 / 675 | 100% |
-| extracted | 347 / 675 | 51% |
+| extracted | 348 / 675 | 52% |
 | reviewed | 0 / 675 | 0% |
 
 Total sections tracked: 675
@@ -78,7 +78,7 @@ None. Every node in the structural map has been mapped.
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
 | glossary | 11 | 411 | 253 |
-| rules | 359 | 160 | 156 |
+| rules | 360 | 159 | 156 |
 | tables | 201 | 339 | 135 |
 | examples | 14 | 411 | 250 |
 | procedures | 92 | 368 | 215 |

@@ -1,0 +1,510 @@
+- id: core.threat.starting_level
+  name: The Threat Level — starting level
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Threat Level indicates the risk for something bad to happen to the party. As the
+    quest progresses, the Threat Level will increase. The quest starts at a given Threat Level
+    which is then adjusted depending on what happens in the dungeon.
+  type: definition
+  scope: dungeon
+  fields:
+    quest_start_threat_level:
+      type: number
+      role: input
+      description: Starting Threat Level given by the quest.
+      integer: true
+      minimum: 0
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  effects:
+    - type: set
+      target: threat_level
+      value:
+        type: field
+        name: quest_start_threat_level
+  see_also:
+    - section.into_the_dungeons.the_scenario_die
+- id: core.threat.new_level_reset
+  name: The Threat Level — reset on a new dungeon level
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: In a multilevel dungeon the Threat level is always reset on a new level.
+  type: trigger
+  scope: dungeon
+  fields:
+    entered_new_dungeon_level:
+      type: boolean
+      role: input
+      description: The party has moved on to a new level of a multilevel dungeon.
+    threat_level_reset:
+      type: boolean
+      role: output
+      description: The Threat Level is reset. The book does not say what value it resets to; see the
+        linked issue.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: entered_new_dungeon_level
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: threat_level_reset
+      value:
+        type: literal
+        value: true
+    - type: unresolved
+      issue_id: issue.threat.new_level_reset_value
+  issues:
+    - issue.threat.new_level_reset_value
+- id: core.threat.floor
+  name: Decreasing Threat Level — floor
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Decreasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once something bad has happened, the Threat Level is decreased by the appropriate
+    number listed in the tables on page 89. The Threat Level can also be lowered by certain Perks
+    or certain events. The Threat Level can never go below 2, or the minimum level set by the
+    quest.
+  type: constraint
+  scope: dungeon
+  fields:
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+    threat_minimum:
+      type: number
+      role: input
+      description: 2, or the minimum level set by the quest.
+      integer: true
+      minimum: 0
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: threat_level
+        right:
+          type: field
+          name: threat_minimum
+  dependencies:
+    - key: threat_roll
+      label: Threat Level roll and the decrease from the page 89 tables
+      object_id: procedure.threat_roll
+  see_also:
+    - section.into_the_dungeons.table
+    - section.into_the_dungeons.table_2
+- id: core.threat.max_level
+  name: Max Threat Level — Wandering Monster
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Max Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: Some quests will dictate a max level for the threat. If the threat ever equals that
+    value, it will trigger a Wandering Monster.
+  type: trigger
+  scope: dungeon
+  fields:
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+    quest_max_threat_level:
+      type: number
+      role: input
+      description: Max level for the threat dictated by the quest.
+      integer: true
+      minimum: 0
+    wandering_monster_triggered:
+      type: boolean
+      role: output
+      description: A Wandering Monster is triggered.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: threat_level
+    right:
+      type: field
+      name: quest_max_threat_level
+  effects:
+    - type: set
+      target: wandering_monster_triggered
+      value:
+        type: literal
+        value: true
+    - type: invoke
+      dependency: wandering_monster
+  dependencies:
+    - key: wandering_monster
+      label: Wandering Monsters
+      object_id: procedure.wandering_monster
+  issues:
+    - issue.threat.max_level_semantics
+- id: core.threat.increase.battle_won
+  name: Increasing Threat Level — the party wins a battle
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Increasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    The Threat Level is increased by a multitude of different things, including certain events.
+    Increase Threat Level by 1:
+    - The party wins a battle.
+  type: trigger
+  scope: dungeon
+  fields:
+    party_won_battle:
+      type: boolean
+      role: input
+      description: The party has won a battle.
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: party_won_battle
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: literal
+        value: 1
+      duration: until_dungeon_exit
+  term_refs:
+    - term.battle
+  issues:
+    - issue.threat.battle_won_scope
+  see_also:
+    - section.game_basics.turn_sequence
+    - section.combat.end_of_battle
+- id: core.threat.increase.door_chest_or_cobweb
+  name: Increasing Threat Level — door or chest opened, or cobweb opening cleared
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Increasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    Increase Threat Level by 1:
+    - The instant a door or chest is opened, or a cobweb opening is cleared.
+  type: trigger
+  scope: dungeon
+  fields:
+    door_or_chest_opened:
+      type: boolean
+      role: input
+      description: A door or chest has just been opened.
+    cobweb_opening_cleared:
+      type: boolean
+      role: input
+      description: A cobweb opening has just been cleared.
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: door_or_chest_opened
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: cobweb_opening_cleared
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: literal
+        value: 1
+      duration: until_dungeon_exit
+  dependencies:
+    - key: open_door_or_chest
+      label: Opening a Door or Chest
+      object_id: procedure.open_door_or_chest
+    - key: cobweb_clearing
+      label: Cobweb Covered Openings — clearing
+      object_id: core.cobweb_opening.clearing
+- id: core.threat.increase.threat_roll_exceeded
+  name: Increasing Threat Level — Threat Level roll exceeds the Threat Level
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Increasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    Increase Threat Level by 1:
+    - If a Threat Level roll exceeds the current Threat Level.
+  type: trigger
+  scope: dungeon
+  fields:
+    threat_roll:
+      type: number
+      role: input
+      description: Printed 1d20 Threat Level roll.
+      integer: true
+      minimum: 1
+      maximum: 20
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: field
+      name: threat_roll
+    right:
+      type: field
+      name: threat_level
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: literal
+        value: 1
+      duration: until_dungeon_exit
+  dependencies:
+    - key: threat_roll
+      label: Threat Level roll, which also applies the natural 20 reduction
+      object_id: procedure.threat_roll
+- id: core.threat.increase.force_open
+  name: Increasing Threat Level — attempting to force open a door or chest
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Increasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    Increase Threat Level by 2:
+    - Attempting to force open a door or chest (unless using a crowbar in which case the Threat
+      Level is increased by 1).
+  type: trigger
+  scope: dungeon
+  fields:
+    force_open_attempted:
+      type: boolean
+      role: input
+      description: An attempt is made to force open a door or chest.
+    using_crowbar:
+      type: boolean
+      role: input
+      description: The attempt uses a crowbar; handled by core.threat.increase.force_open_crowbar.
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: force_open_attempted
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: using_crowbar
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: literal
+        value: 2
+      duration: until_dungeon_exit
+  dependencies:
+    - key: locked_door
+      label: Locked doors and chests
+      object_id: procedure.locked_door_and_close
+- id: core.threat.increase.force_open_crowbar
+  name: Increasing Threat Level — forcing with a crowbar
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: Increasing Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: |-
+    Increase Threat Level by 2:
+    - Attempting to force open a door or chest (unless using a crowbar in which case the Threat
+      Level is increased by 1).
+  type: exception
+  scope: dungeon
+  fields:
+    force_open_attempted:
+      type: boolean
+      role: input
+      description: An attempt is made to force open a door or chest.
+    using_crowbar:
+      type: boolean
+      role: input
+      description: The attempt uses a crowbar.
+    threat_level:
+      type: number
+      role: state
+      description: Current Threat Level.
+      integer: true
+      minimum: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: force_open_attempted
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: using_crowbar
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: add
+      target: threat_level
+      value:
+        type: literal
+        value: 1
+      duration: until_dungeon_exit
+  overrides:
+    - core.threat.increase.force_open
+  dependencies:
+    - key: locked_door
+      label: Locked doors and chests
+      object_id: procedure.locked_door_and_close
