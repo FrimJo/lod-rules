@@ -1,7 +1,7 @@
 # Phase 2 glossary and ontology
 
-Phase 2 is extracted, not independently reviewed. The corpus contains 55 term records,
-90 reverse-index forms. The original glossary pass recorded eight unresolved issues;
+Phase 2 is extracted, not independently reviewed. The Phase 2 pass produced 55 term records
+and 90 reverse-index forms; later phases have grown the glossary to 68 terms and 110 forms. The original glossary pass recorded eight unresolved issues;
 a subsequent source review retained all IDs and resolved five of those scoped concerns.
 The authoritative source is the second-printing English rulebook; PDF 12–24 were inspected
 for this scoped pass.

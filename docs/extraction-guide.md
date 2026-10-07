@@ -126,7 +126,7 @@ npm run lint
 The scoped Phase 2 extraction is complete, with unresolved issues and no independent
 review claim. See [ontology.md](ontology.md) for source units, excerpts, exclusions, and
 classification conventions. Later objects may cite existing `term.*` ids. The bounded Phase 3 rules, tables,
-procedures, entities, and fixtures are documented in [phase-3-pilot.md](phase-3-pilot.md);
+procedures, entities, and fixtures are documented in [phase-3-pilot.md](ledgers/phase-3-pilot.md);
 further extraction still requires its authorized phase.
 
 Terms and review issues require source references. Validation checks document membership,
@@ -154,7 +154,7 @@ link does not claim that its mechanics have been extracted.
 
 ## Phase 3 pilot conventions
 
-See [phase-3-pilot.md](phase-3-pilot.md) for scope, source evidence, and review status.
+See [phase-3-pilot.md](ledgers/phase-3-pilot.md) for scope, source evidence, and review status.
 New canonical collections and `tests/examples/` are discovered recursively and validated.
 Objects require precise source references and extraction status; all current pilot objects
 are `extracted`, not independently reviewed. Table rows inherit source provenance and add

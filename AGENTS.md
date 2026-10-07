@@ -37,10 +37,11 @@ Phases 5–6 and Package F are incomplete. Do not extract glossary terms, rules,
 or procedures unless the current task requires it.
 
 When the task is **corpus extraction**, **Package F acceptance**, or **continuing a phased
-batch**, read [docs/extraction-checkpoint.md](docs/extraction-checkpoint.md) first and follow
-the [Phase 5](docs/phase-5-entities-and-tables.md) and
-[Phase 6](docs/phase-6-procedures-and-state-machines.md) ledgers. Update the checkpoint doc
-with session progress; do not append that narrative here.
+batch**, read [docs/extraction-checkpoint.md](docs/extraction-checkpoint.md) first. It names
+the next unit and the evidence ledger that owns it. Priorities and exit conditions are in
+[docs/corpus-completion-plan.md](docs/corpus-completion-plan.md). Record unit evidence in the
+owning ledger under `docs/ledgers/`, and update the checkpoint's current position and next
+unit. Do not append session narrative here or to the plan.
 
 For plan structure and milestones, see
 [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md). For generated progress, see
@@ -118,7 +119,7 @@ rulings" in the extraction guide.
 | `review/`      | Ambiguities, conflicts, open questions                 | Yes                    |
 | `scripts/`     | Validate, inspect, report, (later) build               | Yes                    |
 | `tests/`       | Schema, integrity, rule and procedure fixtures         | Yes                    |
-| `docs/`        | Conventions. `coverage-report.md` is generated         | Yes, except the report |
+| `docs/`        | Conventions, plan; `ledgers/` holds evidence           | Yes, except the report |
 | `generated/`   | Build and extract dumps, gitignored                    | **Never**              |
 | `clients/web/` | Rules Q&A web client over `scripts/ask` (consumer)     | Yes, own checks        |
 | `clients/mcp/` | MCP server over `scripts/retrieve/tools.ts` (consumer) | Yes, own checks        |
@@ -204,9 +205,10 @@ Flag any of the following. Do not nitpick formatting; `npm run lint` owns that.
 
 ## Pointers
 
-- [docs/extraction-checkpoint.md](docs/extraction-checkpoint.md) — moving extraction status (read on demand)
-- [docs/phase-5-entities-and-tables.md](docs/phase-5-entities-and-tables.md) — catalogue batches and evidence
-- [docs/phase-6-procedures-and-state-machines.md](docs/phase-6-procedures-and-state-machines.md) — procedure batches and boundaries
+- [docs/README.md](docs/README.md) — map of all docs
+- [docs/corpus-completion-plan.md](docs/corpus-completion-plan.md) — prioritised remaining work and exit conditions
+- [docs/extraction-checkpoint.md](docs/extraction-checkpoint.md) — current position and next unit (read on demand)
+- [docs/ledgers/](docs/ledgers/) — per-phase and per-package extraction evidence
 - [docs/coverage-report.md](docs/coverage-report.md) — generated section/component progress
 - [docs/extraction-guide.md](docs/extraction-guide.md) — provenance, pages, uncertainty
 - [docs/naming-conventions.md](docs/naming-conventions.md) — id namespaces

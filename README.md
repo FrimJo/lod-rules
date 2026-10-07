@@ -12,40 +12,29 @@ Consumers read the corpus; they are not part of it.
 
 ## Status
 
-As of 3 October 2026, Phases 0–3 are complete and Phase 4 reusable core mechanics are
-extracted and tested across all 21 priority areas. Phases 5 and 6 are in progress:
+As of 7 October 2026:
 
-- **Phase 5 — entities and tables:** Batches 1–6 are extracted within scope. Settlement,
-  guild and estate evidence and source boundaries are in the
-  [Package A inventory](docs/package-a-completion-inventory.md). Batch 7 is accepted within catalogue scope; [quest/scenario source evidence](docs/quest-scenario-inventory.md) records all 124 inventory dispositions.
+- Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested across all 21
+  priority areas.
+- **Phase 5 — entities and tables:** Batches 1–7 are extracted within catalogue scope,
+  including every quest, personal-quest and estate catalogue record.
 - **Phase 6 — procedures and state machines:** Batches 1–6 are extracted within scope.
-  [Travel and settlement accounting](docs/travel-settlement-accounting.md) records the
-  composed effects and unresolved source boundaries. [Character and guild procedures](docs/character-guild-procedures.md) records Batch 6. Batch 7 is in progress; the [test-owned acceptance manifest](tests/fixtures/acceptance/package-f.json) records 24 implemented, three shared-model, one nonprocedural and 59 pending lifecycle headings.
-- **Phase 4.x — optional semantic decisions:** provider adapters, evaluation, caching and
-  shadow comparisons exist. Calibration and production-provider selection remain pending.
-- **Phases 7–12:** references, executable examples and review records provide groundwork for
-  Phases 7–9. The full graph, full-book example/review/coverage passes, compiled artifacts and
-  retrieval corpus remain unfinished. `build:corpus` is still a stub.
+  Batch 7 (lifecycle models) is in progress; its
+  [acceptance manifest](tests/fixtures/acceptance/package-f.json) has 27 implemented and 64
+  pending entries.
+- **Phases 7–12:** groundwork only. Nothing is independently reviewed, `build:corpus` is a
+  stub, and retrieval (lexical search, agent tools, MCP server, `ask`) is partial Phase 12.
+- **Phase 4.x — optional semantic decisions:** adapters and evaluation exist; calibration and
+  production-provider selection remain pending.
 
-The current corpus contains 1,533 rules, 669 entities, 213 tables, 97 procedures, two state
-machines and 475 executable YAML fixtures. The glossary contains 68 terms and 110 lookup forms.
-The source map covers all 286 pages and tracks 675 canonical sections plus 35 compatibility
-redirects. Coverage records 346 sections extracted (51%) and zero independently reviewed;
-component extraction can be partial within other sections. Of 135 review records, nine are
-resolved and 126 remain unresolved. Extraction and passing tests do not imply independent review.
+Coverage records 347 of 675 sections extracted (51%) and zero independently reviewed. Of 138
+review records, 17 are resolved. Extraction and passing tests do not imply independent review.
 
-Next: remaining Package F quest/campaign/estate lifecycle, travel/settlement rest reconciliation and original candidate-loop audit. Stopping the Necromancer, Tomb Raiders, shared resumable dungeon progression/reading/Threat checkpoints and First Blood now have bounded procedure evidence. Phase 5/6 exit acceptance remains open.
-Packages A–D are implemented within their documented source boundaries.
-The [settlement catalogue reconciliation](docs/settlement-source-reconciliation.md) records Package A. The
-[combat/treasure source checkpoint](docs/combat-treasure-source-audit.md) is complete;
-independent review remains separate.
-
-See the [phase status and next steps](LOD_RULES_CORPUS_PLAN.md#current-status--28-september-2026),
-[Phase 5 ledger](docs/phase-5-entities-and-tables.md),
-[Phase 6 ledger](docs/phase-6-procedures-and-state-machines.md), and generated
-[coverage report](docs/coverage-report.md). The [Phase 4 audit](docs/phase-4-core-mechanics.md)
-and [Phase 3 pilot audit](docs/phase-3-pilot.md) preserve historical milestone counts;
-[ontology](docs/ontology.md) records the Phase 2 scope.
+The prioritised remaining work is in the
+[completion plan](docs/corpus-completion-plan.md): close Package F at reduced scope, then
+reconcile, extract and independently review the core chapters. Live progress is in the
+generated [coverage report](docs/coverage-report.md); per-unit evidence is in the
+[evidence ledgers](docs/ledgers/). See [docs/README.md](docs/README.md) for a map of the docs.
 
 ## Commands
 
@@ -95,7 +84,7 @@ corpus/        canonical, human-reviewed YAML
 review/        ambiguities, conflicts, and open questions
 scripts/       validation, extraction, build, and report tooling
 tests/         schema tests and rule regression fixtures
-docs/          conventions and generated reports
+docs/          conventions, plan, generated reports; docs/ledgers/ holds extraction evidence
 generated/     build artifacts — never hand-edited, gitignored
 ```
 
