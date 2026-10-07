@@ -56,6 +56,9 @@ npm install
 npm run validate          # schema + cross-file integrity of canonical YAML
 npm test                  # vitest (schema, integrity, report)
 npm run report:coverage   # regenerates docs/coverage-report.md
+npm run report:chapters -- --chapter combat # per-chapter worklist of unfinished sections
+npm run review -- digest section.combat --descendants # review scope, pages and digest
+npm run review -- check   # list independent review records as fresh or stale
 npm run lint              # eslint + prettier --check + tsc --noEmit
 npm run lint:fix
 npx tsx scripts/extract/inspect-pdf.ts   # dumps PDF text to generated/extract/
