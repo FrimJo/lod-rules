@@ -72,7 +72,7 @@ export function isModeAvailable(mode: RetrievalMode, settings: RetrievalSettings
 /**
  * `LOD_ANALYZER` when it names an available mode, else unfiltered Jev with a key, else lexical.
  * The filter stays opt-in until a policy calibrated on reviewed labels passes; see
- * docs/jev-filter-calibration-plan.md.
+ * docs/ask-quality-evaluation.md#filter-calibration-plan.
  */
 export function defaultMode(configured: string | undefined, jevAvailable: boolean): RetrievalMode {
   const settings = { defaultMode: 'lexical' as const, jevAvailable };

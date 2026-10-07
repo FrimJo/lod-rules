@@ -6,7 +6,7 @@
  *
  * Jev answers are cached by model, question and record text in generated/ask-eval/jev-cache/,
  * so a rerun over unchanged pools makes no requests. `--check` only reports whether the stored
- * result is stale. See docs/jev-filter-calibration-plan.md.
+ * result is stale. See docs/ask-quality-evaluation.md#filter-calibration-plan.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
