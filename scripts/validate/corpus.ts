@@ -3,6 +3,12 @@ import { join } from 'node:path';
 import { parse } from 'yaml';
 import { discoverPilotFiles, emptyPilot } from './pilot-files.ts';
 import { checkPilotIntegrity } from './pilot.ts';
+import {
+  checkIndependentReviews,
+  discoverReviewFiles,
+  sourceFingerprint,
+  type ReviewRecord,
+} from './independent-review.ts';
 import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
 import {
   checkIntegrity,
@@ -83,9 +89,14 @@ export function validateCorpus(): ValidationResult {
   const loaded = new Map<SchemaName, unknown>();
   const pilot = emptyPilot();
   const pilotFiles = discoverPilotFiles();
+  const reviewFiles = discoverReviewFiles().map((path) => ({
+    path,
+    schema: 'independentReviews' as const,
+  }));
+  const reviewRecords: ReviewRecord[] = [];
   let validFiles = 0;
 
-  for (const { path, schema } of [...canonicalFiles, ...pilotFiles]) {
+  for (const { path, schema } of [...canonicalFiles, ...pilotFiles, ...reviewFiles]) {
     const absolutePath = join(repoRoot, path);
 
     if (!existsSync(absolutePath)) {
@@ -110,6 +121,11 @@ export function validateCorpus(): ValidationResult {
     }
 
     validFiles += 1;
+    if (schema === 'independentReviews') {
+      // Ids are checked across all review files by checkIndependentReviews.
+      reviewRecords.push(...((data as ReviewRecord[] | null) ?? []));
+      continue;
+    }
     if (schema in pilot) {
       (pilot[schema as keyof typeof pilot] as unknown[]).push(...(data as unknown[]));
     } else loaded.set(schema, data);
@@ -126,7 +142,7 @@ export function validateCorpus(): ValidationResult {
   }
 
   // Cross-file checks only make sense once every file parsed and matched its schema.
-  if (validFiles === canonicalFiles.length + pilotFiles.length) {
+  if (validFiles === canonicalFiles.length + pilotFiles.length + reviewFiles.length) {
     const manifest = loaded.get('manifest') as Manifest;
     const canonicalDocument = manifest.documents.find((document) => document.canonical);
 
@@ -164,6 +180,29 @@ export function validateCorpus(): ValidationResult {
         documents: manifest.documents,
         externalIds: sourceMap.externalSourceIds,
       }),
+    );
+    errors.push(
+      ...checkIndependentReviews(
+        {
+          sections: sourceMap.sections,
+          pages: sourceMap.pages,
+          coverage: sourceMap.coverage,
+          terms: loaded.get('terms') as Term[],
+          issues: loaded.get('issues') as Issue[],
+          pilot,
+          documentIds: [
+            ...manifest.documents.map((document) => document.id),
+            ...sourceMap.externalSourceIds,
+          ],
+          canonicalDocumentId: canonicalDocument?.id ?? '',
+          // Hashing the 40 MB PDF only matters once a record can be compared against it.
+          sourceSha256:
+            canonicalDocument && reviewRecords.length > 0
+              ? sourceFingerprint(join(repoRoot, 'source', canonicalDocument.file))
+              : '',
+        },
+        reviewRecords,
+      ),
     );
   }
 

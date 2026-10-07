@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/independent-review.schema.json",
+  "title": "Independent review records",
+  "description": "Evidence that a reviewer other than the extractor compared canonical records with the rendered PDF. Records live in review/independent/*.yaml. Coverage may claim `reviewed` only through a current, passing record whose content digest still matches the corpus.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/record" },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "sectionId": {
+      "$ref": "https://lod-rules/schemas/source-map.schema.json#/$defs/sectionId"
+    },
+    "inspectedPage": {
+      "description": "A canonical PDF page the reviewer rendered and read. Both page labels come from corpus/source-map/pages.yaml.",
+      "allOf": [
+        { "$ref": "https://lod-rules/schemas/source-reference.schema.json" },
+        {
+          "type": "object",
+          "required": ["pdf_page", "printed_page"],
+          "properties": {
+            "pdf_page": { "type": "integer", "minimum": 1 },
+            "printed_page": {}
+          }
+        }
+      ]
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "independence"],
+      "properties": {
+        "kind": { "enum": ["agent", "human"] },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent model id, for example claude-opus-4-1."
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent session or run identifier."
+        },
+        "name": { "type": "string", "minLength": 1, "description": "Human reviewer name." },
+        "independence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["authored_extraction", "used_extraction_ledgers", "statement"],
+          "properties": {
+            "authored_extraction": {
+              "const": false,
+              "description": "The reviewer did not author the reviewed extraction."
+            },
+            "used_extraction_ledgers": {
+              "const": false,
+              "description": "The reviewer did not use docs/ledgers/, the extraction checkpoint or extraction narrative as evidence."
+            },
+            "statement": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "agent" } } },
+          "then": { "required": ["model", "run_id"], "properties": { "model": {}, "run_id": {} } },
+          "else": { "required": ["name"], "properties": { "name": {} } }
+        }
+      ]
+    },
+    "disposition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "change"],
+          "properties": {
+            "status": { "const": "corrected" },
+            "change": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The correcting change, verified against the PDF in this review."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "issue_id"],
+          "properties": {
+            "status": { "const": "recorded_as_issue" },
+            "issue_id": {
+              "allOf": [
+                { "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id" },
+                { "type": "string", "pattern": "^issue\\." }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": { "status": { "const": "no_change_needed" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": { "const": "open" },
+            "proposed_correction": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "section_id", "description", "source", "disposition"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "transcription_error",
+            "modelling_error",
+            "missing_extraction",
+            "coverage_error",
+            "source_reference_error",
+            "uncertainty_not_recorded",
+            "ok_with_note"
+          ]
+        },
+        "section_id": { "$ref": "#/$defs/sectionId" },
+        "object_id": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id",
+          "description": "Examined object the finding concerns. Omit for missing extraction."
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "https://lod-rules/schemas/source-reference.schema.json" }
+        },
+        "disposition": { "$ref": "#/$defs/disposition" }
+      }
+    },
+    "examinedObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "digest"],
+      "properties": {
+        "id": { "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id" },
+        "kind": {
+          "enum": [
+            "section",
+            "term",
+            "rule",
+            "table",
+            "entity",
+            "procedure",
+            "state_machine",
+            "test_case",
+            "issue"
+          ]
+        },
+        "digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "reviewer",
+        "date",
+        "scope",
+        "examined_objects",
+        "digest",
+        "findings",
+        "outcome",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "allOf": [
+            { "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id" },
+            { "type": "string", "pattern": "^review\\.[a-z0-9_]+(\\.[a-z0-9_]+)+$" }
+          ]
+        },
+        "reviewer": { "$ref": "#/$defs/reviewer" },
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "ISO calendar date of the review."
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["section_ids", "pages_inspected"],
+          "properties": {
+            "section_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/sectionId" }
+            },
+            "pages_inspected": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/inspectedPage" }
+            }
+          }
+        },
+        "examined_objects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/examinedObject" }
+        },
+        "digest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "source_sha256", "content_digest"],
+          "properties": {
+            "algorithm": { "const": "lod-review-digest/v1" },
+            "source_sha256": {
+              "$ref": "#/$defs/sha256",
+              "description": "SHA-256 of the canonical PDF bytes."
+            },
+            "content_digest": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "outcome": { "enum": ["passed", "passed_with_corrections", "failed"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "supporting_evidence": {
+          "type": "array",
+          "description": "Secondary evidence such as test files run. Never a substitute for the PDF.",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
