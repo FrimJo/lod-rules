@@ -163,6 +163,14 @@ function CaseRow({ row, active }: { row: GradedCaseRow; active: boolean }) {
               .map((mode) => MODE_LABELS[mode])
               .join(', ') || 'none'}
           </span>
+          {row.staleLabels > 0 && (
+            <span
+              className="tag review-case-stale"
+              title="Labels for older text of these records; open the case to relabel them"
+            >
+              {row.staleLabels} text changed
+            </span>
+          )}
         </span>
       </Link>
     </li>

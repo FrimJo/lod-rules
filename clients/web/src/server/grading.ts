@@ -51,6 +51,8 @@ export interface GradedCaseRow {
   question: string;
   status: ReviewStatus;
   judgeCorrect: Record<QualityMode, boolean>;
+  /** Reviewer labels whose record text has changed since, so they need relabelling. */
+  staleLabels: number;
 }
 
 export interface ReviewRecord extends EvidenceRecord {
@@ -110,6 +112,7 @@ export function listGradedCases() {
     judgeCorrect: Object.fromEntries(
       QUALITY_MODES.map((mode) => [mode, c.metrics[mode]?.answerCorrect ?? false]),
     ) as Record<QualityMode, boolean>,
+    staleLabels: currentLabels(review.cases[c.id], recordTexts(c)).stale.length,
   }));
   return { rows, summary: summarizeReview(all, review) };
 }
