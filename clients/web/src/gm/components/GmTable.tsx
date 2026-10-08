@@ -95,6 +95,9 @@ export function GmTable() {
             >
               Rulebook
             </button>
+            <Link to="/character" className="icon-button" title="Walk through character creation with the book’s rules">
+              Character creator
+            </Link>
             <Link to="/" className="icon-button">
               Rules search
             </Link>

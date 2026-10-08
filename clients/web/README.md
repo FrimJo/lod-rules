@@ -82,6 +82,39 @@ The server serves single pages as small standalone PDFs (`/api/rulebook-page/:pd
 pdf-lib) because opening the whole book makes pdf.js read most of its 40 MB. `/api/rulebook`
 serves the full file with byte-range support for "Open PDF".
 
+## Character creator
+
+`/character` (for example http://localhost:1234/character) walks a player through creating a
+hero the way the book does, step by step, and ends with a sheet to copy onto the printed
+character sheet. Every step quotes the rule it applies and its page chip opens the rulebook
+there.
+
+1. **Species**: the four species with their stat rolls, Hit Points, traits and limitations.
+2. **Stats**: 1d10 per stat, one at a time or (the book's option) all five then assigned.
+   Dice are typed from the table or rolled by the app. The two creation rerolls are counted,
+   a reroll cannot be rerolled, and the higher result is kept. Hit Points are rolled here too.
+3. **Specialise**: the 15 extra points, at most 10 on one stat. Damage Bonus and Natural
+   Armour update as the stats change.
+4. **Profession**: the eight professions with their skill tables; the Free Skill (+10 on one
+   negative modifier); the talent choice where the book offers one; the human's Jack of all
+   trades random talent, with "Rangers only" and similar restrictions flagged; three Level 1
+   spells and the Arcane perk for a Wizard; two level 1 prayers and the relic for a Warrior
+   Priest.
+5. **Background** (optional): the twenty numbered Backgrounds; the Noble's 400 c and the Bad
+   Tempered Sanity and Party Morale changes flow into the sheet.
+6. **Equipment**: the profession's starting gear (a Dwarf or Halfling Ranger gets a Shortbow
+   under the designer ruling), weapon of choice checked against STR, species and the
+   profession's Class and Tier limits, purchases from the Weapons and Armour tables or as
+   free-form items, the 1d4 wear roll per weapon and armour piece, coins and encumbrance.
+7. **Sheet**: everything to write down, grouped as the character sheet groups it, with a list
+   of things to check first and a print view.
+
+The hero is saved in `localStorage` (`lod-rules:character-creator`); `Undo` (⌘Z) steps back
+within the session and `New hero` clears it. `src/character/rules.ts` carries the facts with
+their page citations and corpus record ids; `tests/character-rules.test.ts` checks them
+against the corpus and `tests/character-engine.test.ts` covers the reducer and derivations.
+Where the book is silent the page says so in a purple note instead of inventing a rule.
+
 ## Game master's table
 
 `/gm` (for example http://localhost:1234/gm) is a tracker for running a dungeon, built from
@@ -196,4 +229,4 @@ review; a record already labelled in another tab is never overwritten. Held-out 
 left out unless you include them; label those once, after the policy is chosen. The side panel
 tracks progress towards 300 labels and 60 relevant records that Jev doubts.
 
-`npm run typecheck` checks this package. `npm test` runs the ruling citation, source-serving, retrieval-mode, record-text, grading-review, filter-calibration, Game master's table engine and corpus-consistency regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.
+`npm run typecheck` checks this package. `npm test` runs the ruling citation, source-serving, retrieval-mode, record-text, grading-review, filter-calibration, Game master's table and character creator engine and corpus-consistency regressions using the root-installed `tsx` loader. The root gate ignores `clients/`.

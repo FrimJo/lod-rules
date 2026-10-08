@@ -225,6 +225,9 @@ function RulesPage() {
               </div>
             </>
           )}
+          <Link to="/character" className="icon-button" title="Walk through character creation with the book’s rules">
+            Character creator
+          </Link>
           <Link to="/gm" className="icon-button" title="Track Threat, light, morale and Sanity at the table">
             Game master’s table
           </Link>

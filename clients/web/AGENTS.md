@@ -22,6 +22,25 @@ only shared code is the rulebook viewer for page citations.
   Threat increase, the effects of darkness) the table says so and asks the Game Master. Do
   not fill those gaps in the client; extract them into the corpus.
 
+## Character creator (`/character`)
+
+A third island: `src/routes/character.tsx` and `src/character/`. It walks a player through
+the book's creation sequence (species, stat rolls with the two rerolls, 15-point
+specialisation, profession with talents, spells, prayers and the Arcane perk, optional
+Background, starting equipment with the 1d4 wear rolls, final touches) and ends with a sheet
+to copy onto the printed character sheet. Browser-only, `localStorage`, no server function.
+
+- `src/character/rules.ts` holds the rulebook facts with page citations and corpus record ids:
+  species tables, profession skill tables, every Appendix II talent, Level 1 spells, level 1
+  prayers, Arcane perks, relics, the twenty Backgrounds, the Weapons and Armour tables.
+  `tests/character-rules.test.ts` reads them back through `runRetrievalTool` and fails on
+  drift. Change a fact in the corpus first.
+- `src/character/engine.ts` is a pure reducer plus `derive()`; `tests/character-engine.test.ts`
+  covers it. Keep rules out of the components.
+- Where the book is silent (the die for a random talent, an ineligible random talent, Mana
+  rounding, the Backgrounds die, which non-weapon items take wear) the creator says so in a
+  purple "gap" note and lets the player decide. Do not fill those gaps in the client.
+
 ## Boundaries
 
 - Never write or modify files under `corpus/`, `schemas/`, or `review/`.
@@ -29,8 +48,8 @@ only shared code is the rulebook viewer for page citations.
   package's own checks instead.
 - Shared logic lives in `../../scripts/`; import from there rather than duplicating ask
   behavior in the client.
-- `src/gm/` reads rulebook content only from `src/gm/rules.ts`, which the corpus-consistency
-  test pins to corpus records.
+- `src/gm/` and `src/character/` read rulebook content only from their `rules.ts`, which the
+  corpus-consistency tests pin to corpus records.
 
 ## Commands
 

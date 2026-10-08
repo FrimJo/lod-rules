@@ -712,7 +712,7 @@ export const MENTAL_CONDITIONS: ReadonlyArray<MentalCondition> = [
     roll: { min: 8, max: 8 },
     printed: '8',
     effect:
-      'The hero becomes irrationally afraid of a specific type of monster. Randomize between Orcs and Goblins, Beasts, Undead, Reptiles, or Dark Elves. All monsters from that faction will now cause fear to the hero.',
+      'The hero becomes irrationally afraid of a specific type of monster. Randomise between Orcs and Goblins, Beasts, Undead, Reptiles, or Dark Elves. All monsters from that faction will now cause fear to the hero.',
     tracked: 'Randomise the faction; its monsters cause Fear for this hero.',
   },
   {
