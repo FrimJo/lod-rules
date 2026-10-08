@@ -8,19 +8,37 @@ asks for one (or opts into automatic answers). It is **not** part of the canonic
 
 A second island in the same app: `src/routes/gm.tsx` and `src/gm/`. It tracks a dungeon run
 for the Game Master (Threat, light sources, Party Morale, each hero's Sanity and conditions,
-rations, rests, Wandering Monster tokens) and lists the follow-ups the book asks for. It is
-browser-only: state lives in `localStorage`, no server function or LLM is involved, and the
-only shared code is the rulebook viewer for page citations.
+rations, rests, Wandering Monster tokens, standing modifiers) and resolves the follow-ups the
+book asks for. It is browser-only: state lives in `localStorage`, no server function or LLM is
+involved, and the only shared code is the rulebook viewer for page citations. It has its own
+skin (`src/gm/gm.css`, everything scoped under `.gm`); the rest of the app's look does not
+apply.
 
 - `src/gm/rules.ts` holds the rulebook facts it runs on, each with a page citation and the
-  corpus record id. `tests/gm-rules.test.ts` reads those records back through
-  `runRetrievalTool` and fails when a value or page drifts from the corpus. Change a fact in
-  the corpus first; never make the table "know" something the corpus does not.
-- `src/gm/engine.ts` is a pure reducer; `tests/gm-engine.test.ts` covers it. Keep rules out
-  of the components.
-- Where the corpus has not extracted a rule yet (the Threat tables on p. 89, the post-battle
-  Threat increase, the effects of darkness) the table says so and asks the Game Master. Do
-  not fill those gaps in the client; extract them into the corpus.
+  corpus record id: the two Threat tables, the Door Table, morale, Sanity and mental
+  condition tables, light rules, initiative token rules, enemy activation order, quest
+  presets. `tests/gm-rules.test.ts` reads those records back through `runRetrievalTool` and
+  fails when a value or page drifts from the corpus. Change a fact in the corpus first; never
+  make the table "know" something the corpus does not. Where the corpus applies a designer
+  ruling instead of the printed value (a hero's death −5, hunger −1 per hungry character, the
+  rest's +2), the row keeps the printed `effect` and carries the applied value in `ruled`.
+- `src/gm/engine.ts` is a pure reducer plus derived views (`modeOf`, `standingEffects`,
+  `initiativeBag`, `encounterChance`); `tests/gm-engine.test.ts` covers it. Keep rules out of
+  the components. State is versioned (`STATE_VERSION`); `reviveState` migrates older saved
+  tables rather than discarding them.
+- The screen is built as a cockpit, not a page: a **rim** of gauges (turn dial with the five
+  printed steps, Threat track, light, Party Morale, the party as tokens, standing effects),
+  a **stage** that shows one thing to resolve (pending prompts first, then the card for the
+  current turn step), a **"What happened?" palette** grouped by moment at the table (door,
+  tile, battle, party) where one tap applies every printed consequence, and **drawers** for
+  the details. Dice are entered on pads showing the die's faces (`DicePad.tsx`); tables the
+  book makes the Game Master roll on (Threat tables, mental conditions, Door Table) are shown
+  as tappable rows. Every citation chip peeks the heading and, where the data carries it,
+  the printed words, and opens the rulebook pane.
+- Where the book is silent (the general effects of darkness, the value Threat resets to on a
+  new dungeon level, a second Scenario-die +1, a quest threshold crossed without landing on
+  it) the table says so in `GAPS` and asks the Game Master. Do not fill those gaps in the
+  client; extract them into the corpus.
 
 ## Character creator (`/character`)
 

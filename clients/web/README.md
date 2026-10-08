@@ -124,40 +124,44 @@ fifteen different events, Sanity has its own table and resets after a mental con
 costs a ration and risks an ambush, and a quest may place a Wandering Monster whenever Threat
 is increased to a certain value.
 
-Tell the table what happens and it rolls out the printed consequences, keeps a log with page
-chips that open the rulebook pane, and lists what to resolve next:
+The screen is laid out like a cockpit for the table rather than a web page, in its own dark,
+lamp-lit skin:
 
-- **Turn**: pick the quest (start, minimum and maximum Threat and the Wandering Monster
-  thresholds come from the quest tables); `New turn` (or `N`) asks for the Scenario die once
-  the party has passed the first door; a 9 or 0 asks for a Threat roll. The five printed turn
-  steps are a click-through: each step shows what the table knows about it and takes the roll
-  it calls for, and `Show as list` swaps in the plain list (remembered per browser). Door
-  opened; next tile as one action (`Roll for enemies` rolls 1d100 against the room or corridor
-  chance, +10 after four empty tiles, and shows the outcome; a physical roll or a result the
-  quest dictates can be entered instead); battle begins and ends; short rest (ration,
-  recovery, ambush roll against 5 + Threat, +10 per later rest).
-- **Threat**: 20 lowers by 5, above Threat adds 1, at or below asks you to roll on the printed
-  Threat table and enter its decrease (those tables are not in the corpus yet). Door +1,
-  forcing a lock +2, crowbar +1, portcullis failure +1, perks, and a prompt for the
-  post-battle increase (also not in the corpus yet). Quest thresholds place a Wandering
-  Monster token.
-- **Light**: torches, lanterns and headlamps with carriers, spares and Lamp Oil. A Threat roll
-  below Threat spends torches and burns half a lantern; an unmodified attack roll of 90 or
-  more puts a torch out; a head wound destroys a headlamp. Shows the +5 Fear/Terror and
-  carrier Perception bonuses while anything burns, and says plainly that the effects of
-  darkness are not in the corpus.
-- **Party Morale**: start value from each hero's RES ÷ 10 (plus Natural Leader and the
-  Powerstone), every row of the morale table as a button, the linked Sanity losses applied to
-  the hero it happened to, wavering below half (−20 RES) and the flight at 0.
-- **Heroes**: Sanity dots, mental conditions rolled at 0 Sanity (duplicates roll again, Sanity
-  resets to 8 minus conditions), and the conditions that feed back into the table (Acute
-  Stress adds Threat per battle, Jumpy adds Threat on a Scenario 0), plus wounded, bleeding
-  out, poisoned and diseased reminders that surface during rests and after battles.
+- **The rim** is always in view: a turn dial with the five printed steps (tap a step to move
+  to it), the Threat track drawn as the numbered strip it is on the board (quest minimum,
+  maximum and Wandering Monster thresholds marked), the light as flames with the +5
+  Fear/Terror it gives, Party Morale as a banner with the wavering line, the party as tokens
+  with Sanity pips, and a strip of standing effects that are easy to forget (encounter risk
+  +10, Scenario die +1, wavering, Dwarven Ale, Acute Stress, Jumpy). When nothing is lit the
+  whole table darkens.
+- **The stage** shows one thing: the follow-up to resolve now, with the die's faces as a pad
+  to tap (the printed 0 of a d10, two taps for a d100) and the tables the book makes you roll
+  on (Threat tables, mental conditions, Door Table) as tappable rows that carry their result
+  out, or `Roll for me`. With nothing pending it shows the card for the current step with the
+  actions that belong to it: doors and chests as a checklist (Threat +1, the d10 and d6
+  together, trap and lock, then the tile and the enemy roll), the combat round from the p.
+  112 flowchart with the enemy activation order, Wandering Monster movement, the end-of-turn
+  Sanity and morale check. Before turn 1 the stage is the setup: quest, heroes with RES,
+  light and supplies, then `Enter the dungeon`.
+- **"What happened?"** is a palette of every event the book attaches a consequence to,
+  grouped by the moment at the table (at a door, on the tile, in battle, the party) instead of
+  by the tracker it changes; one tap applies all of its printed consequences (Threat, Party
+  Morale, Sanity, statuses) to the hero chosen on the chip row. It opens on the group that
+  matches the mode and can be hidden.
+- **Drawers** hold the detail: Threat (manual roll, every Threat change, tokens, the two
+  tables), light (sources, carriers, torch swings, refills, spares), Party Morale (start
+  value, Natural Leader, Powerstone, the morale and Sanity tables), each hero (name, RES,
+  Sanity, conditions, statuses), the party and supplies, the quest (including the stairs to a
+  new level), and the full log.
+- Every number has a page chip: hovering or focusing it peeks at the heading and, where the
+  table carries the printed words, the rule itself; tapping opens the rulebook pane beside
+  the table. `R` toggles the rulebook, `L` the log, `N` starts the next turn, `⌘Z` undoes.
 
-State is saved in `localStorage` (`lod-rules:gm-table`); `Undo` (⌘Z) steps back within the
-session and `Reset` clears the table. `src/gm/rules.ts` carries the facts with their page
-citations and corpus record ids; `tests/gm-rules.test.ts` checks them against the corpus and
-`tests/gm-engine.test.ts` covers the reducer.
+State is saved in `localStorage` (`lod-rules:gm-table`, version 2; version 1 tables are
+migrated); `Undo` (⌘Z) steps back within the session and `Reset` clears the table.
+`src/gm/rules.ts` carries the facts with their page citations and corpus record ids;
+`tests/gm-rules.test.ts` checks them against the corpus and `tests/gm-engine.test.ts` covers
+the reducer.
 
 ## Deploying to Vercel
 
@@ -179,13 +183,13 @@ as well as this one and runs `npm run build`. Use Node 24 (`node:sqlite`).
 
 **Environment variables.**
 
-| Variable                | Purpose                                                        |
-| ----------------------- | -------------------------------------------------------------- |
-| `ACCESS_PASSWORD`       | Shared password; every page and API call needs a sign-in       |
-| `OPENAI_ROUTER_API_KEY` | AI answers (OpenRouter). Set a credit limit on the key         |
-| `OPENAI_ROUTER_MODEL`   | Optional model id                                              |
-| `TYPESAFE_API_KEY`      | Jev retrieval modes                                            |
-| `LOD_ANALYZER`          | Optional default mode                                          |
+| Variable                | Purpose                                                  |
+| ----------------------- | -------------------------------------------------------- |
+| `ACCESS_PASSWORD`       | Shared password; every page and API call needs a sign-in |
+| `OPENAI_ROUTER_API_KEY` | AI answers (OpenRouter). Set a credit limit on the key   |
+| `OPENAI_ROUTER_MODEL`   | Optional model id                                        |
+| `TYPESAFE_API_KEY`      | Jev retrieval modes                                      |
+| `LOD_ANALYZER`          | Optional default mode                                    |
 
 **Access.** With `ACCESS_PASSWORD` set, `src/start.ts` sends every server request through
 `src/server/access.ts`. Pages redirect to `/login`, and other requests get 401 until the reader
