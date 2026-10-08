@@ -81,6 +81,10 @@ question as `heading` and no pages.
   issue stays unresolved, and only the settled effects change.
 - A ruling marked "Fixed" without a stated rule settles nothing.
 
+Publisher reference material for a later edition (the 2.5 Quick Reference Sheet, declared as
+`official_reference`) is evidence only. It shows how a value changed in later editions but
+never settles an issue for the second printing.
+
 Research notes and applied status are in `review/designer-published-rulings.md`.
 
 ## External sources are recorded, never invented

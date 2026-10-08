@@ -8,27 +8,28 @@
 >
 > **Explicitly out of scope:** the player-facing helper application, UI, chat experience, and runtime product integration.
 
-## Current status — 7 October 2026
+## Current status — 8 October 2026
 
 The phase specifications and unchecked exit criteria below are the original plan, not a live
-completion checklist. This status summary is based on the canonical corpus, coverage report
-and phase evidence ledgers. Extraction, executable fixtures and independent review are separate
-milestones; completing an early phase does not mean its source sections are independently reviewed.
+completion checklist. This status summary is based on the canonical corpus, coverage report,
+independent review records and phase evidence ledgers. Extraction, executable fixtures and
+independent review are separate milestones; completing an early phase does not mean its source
+sections are independently reviewed.
 
 | Phase | Status | Evidence and remaining work |
 | --- | --- | --- |
 | 0 — Repository bootstrap | Complete | Source manifest, conventions, schemas, validation, tests and lint tooling are present. |
-| 1 — Structural map | Complete | All 286 pages mapped; 675 canonical sections and 35 compatibility redirects. Newly discovered structural gaps are still recorded in review. |
-| 2 — Glossary and ontology | Complete within scoped extraction | 68 terms and 110 lookup forms; scope and distinctions recorded in [ontology](docs/ontology.md). |
+| 1 — Structural map | Complete | All 286 pages mapped; 679 canonical sections and 36 compatibility redirects. Structural corrections found during review (page spans, run-in parents) are applied in `sections.yaml`. |
+| 2 — Glossary and ontology | Complete within scoped extraction | 114 terms; scope and distinctions recorded in [ontology](docs/ontology.md). Terms are added as chapters are reconciled. |
 | 3 — Schema pilot | Complete | Representative extraction and executable fixtures; see the historical [pilot audit](docs/ledgers/phase-3-pilot.md). |
-| 4 — Core mechanics | Extracted and tested | All 21 priority areas covered; independent review and unresolved boundaries remain. See the [Phase 4 audit](docs/ledgers/phase-4-core-mechanics.md). |
-| 5 — Entities and tables | In progress | Batches 1–6 extracted within catalogue scope; [Package A inventory](docs/ledgers/package-a-completion-inventory.md) records source evidence and boundaries. Batch 7 is accepted within catalogue scope; [quest/scenario evidence](docs/ledgers/quest-scenario-inventory.md) records all 124 inventory dispositions. See the [Phase 5 ledger](docs/ledgers/phase-5-entities-and-tables.md). |
-| 6 — Procedures and state machines | In progress | Batches 1–6 extracted within scope. Packages B/C implement travel and settlement accounting; [the accounting ledger](docs/ledgers/travel-settlement-accounting.md) records composition and source boundaries. [Package D](docs/ledgers/character-guild-procedures.md) records character and guild procedures. Batch 7 has a [pending lifecycle inventory](docs/ledgers/lifecycle-procedures.md). See the [Phase 6 ledger](docs/ledgers/phase-6-procedures-and-state-machines.md). |
-| 7 — Dependency graph and precedence | Groundwork only | References and explicit overrides exist; comprehensive graph generation and analysis are pending. |
-| 8 — Examples as executable tests | Partial | Source examples and derived regression fixtures exist; full-book example conversion and trace coverage remain pending. |
-| 9 — Ambiguity, conflict and external-dependency review | Ongoing groundwork | 138 review records: 121 unresolved and 17 resolved, most by published designer rulings. Comprehensive review remains pending; unavailable external books remain explicit dependencies. |
-| 10 — Full-book coverage pass | Pending | 347 of 675 sections extracted (51%); zero independently reviewed. Now run chapter by chapter with Phases 8–9; see the [completion plan](docs/corpus-completion-plan.md#step-2--core-chapter-loop-reconcile-extract-review). Other sections may have extracted components. |
-| 11 — Build generated artifacts | Not implemented | `npm run build:corpus` remains a stub; JSON bundles, SQLite and compiled graph outputs are pending. |
+| 4 — Core mechanics | Extracted and tested | All 21 priority areas covered; the chapters holding most of them (Game Basics, Character Basics, Equipment, Psychology, Magic, Alchemy, Prayers, Into the Dungeons, Combat) are now independently reviewed. See the [Phase 4 audit](docs/ledgers/phase-4-core-mechanics.md). |
+| 5 — Entities and tables | Complete at catalogue scope | Batches 1–7 extracted; all quest, personal-quest and estate catalogue records exist. [Package A](docs/ledgers/package-a-completion-inventory.md) and [quest/scenario evidence](docs/ledgers/quest-scenario-inventory.md) record the boundaries. Independent review of catalogue chapters is Step 2 tiers 5–7 and Step 3 (Alchemy and Prayers are done). |
+| 6 — Procedures and state machines | Complete at documented scope | Batches 1–7. Packages B/C (travel and settlement accounting), D (character and guild procedures) and F (lifecycle models) are accepted: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 at `catalogue_scope`. Per-quest ordered lifecycles are optional deferred work. See the [Phase 6 ledger](docs/ledgers/phase-6-procedures-and-state-machines.md) and [lifecycle ledger](docs/ledgers/lifecycle-procedures.md). |
+| 7 — Dependency graph and precedence | Groundwork only | References and explicit overrides exist; comprehensive graph generation and analysis are pending (Step 4). |
+| 8 — Examples as executable tests | In progress, chapter by chapter | Runs inside the Step 2 core-chapter loop: every printed example in a reconciled chapter is classified and executable ones are fixtures. Chapters not yet reconciled still hold unclassified examples. |
+| 9 — Independent review | In progress, chapter by chapter | Schema-validated review records under `review/independent/` with content digests and staleness checks. Twenty-four fresh passing records back 309 reviewed sections. Issues: 221 records, 196 unresolved and 25 resolved (most by published designer rulings). |
+| 10 — Full-book coverage pass | In progress | 504 of 679 sections extracted (74%), 309 independently reviewed (46%). Step 2 tiers 1–5 are closed (Introduction through Combat). Tiers 6–7 cover 115 unfinished non-quest sections, 43 with no citing record; see `npm run report:chapters`. |
+| 11 — Build generated artifacts | Not implemented | `npm run build:corpus` remains a stub; JSON bundles, SQLite and compiled graph outputs are pending (Step 5). |
 | 12 — Semantic retrieval corpus | Partial groundwork | Lexical canonical-record retrieval, shared agent tools (CLI and MCP server), the `ask` pipeline and labelled question-analysis evaluation exist; comprehensive Phase 12 remains unfinished. See [retrieval evidence](docs/retrieval.md). |
 
 The additional **Phase 4.x semantic-decision layer** has provider adapters, a gold evaluation
@@ -36,23 +37,44 @@ set, caching, cascade and shadow comparisons. Calibration and production-provide
 remain pending. This is derived judgment metadata, not Phase 12 retrieval or independent corpus
 review. See [semantic decisions](docs/semantic-decisions.md).
 
-Current inventory (3 October): 1,533 rules, 669 entities, 213 tables, 97 procedures, two state machines
-and 475 executable YAML fixtures. Counts describe stored objects, not completeness of their
-source headings. The generated [coverage report](docs/coverage-report.md) is the section and
-component progress reference. Historical phase audits retain their milestone counts.
+Current inventory (8 October): 1,798 rules, 669 entities, 221 tables, 113 procedures,
+two state machines, 114 glossary terms and 669 executable YAML fixtures. Counts describe stored
+objects, not completeness of their source headings. The generated
+[coverage report](docs/coverage-report.md) is the section and component progress reference.
+Historical phase audits retain their milestone counts.
 
-Live Package F checkpoint (7 October): the [test-owned acceptance manifest](tests/fixtures/acceptance/package-f.json) has 95 entries: 27 implemented, three covered by shared models, one narrative-only and 64 pending. Necromancer, Tomb Raiders, shared resumable dungeon progression/reading/Threat events and First Blood have bounded procedure evidence. Phase 5 exit reconciliation and Phase 6 Batch 7/candidate-loop acceptance remain open; no comprehensive phase closure or independent review is claimed.
+Package F closed on 7 October: the [test-owned acceptance manifest](tests/fixtures/acceptance/package-f.json)
+is `accepted` with 95 entries and no pending rows. The Phase 0–6 exit checklist
+(`tests/fixtures/acceptance/phases-0-6.json`) has 79 of 85 rows verified; the 6 open rows are
+assigned to Step 2 tier 7, Phase 7 and Phase 10 in the completion plan.
+
+Independent review so far (records dated 7–8 October): Introduction, Game Basics, Character
+Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest, Party Management,
+Equipment, Psychology, Academic Skills, Magic, Magic Items, Enchantments, Alchemy, Prayers, the
+Dungeoneering and Combat part node, Into the Dungeons, Treasure and Combat.
+Tiers 1–3 failed their first review on provenance findings (shortened quotations, invented
+headings or footnotes, missing citations, coverage notes that did not stand alone). In tier 4
+the extractors fixed provenance up front; two units passed first time and the other four failed
+on typed-condition modelling gaps (a missing rule branch, an over-broad procedure gate, an
+untyped requirement) and one table-shading transcription, all corrected by separate agents and
+passed with corrections on re-review (Magic needed two correction rounds). In tier 5 (eight
+units) the part node and Treasure passed first time; the other six failed on typed-condition gaps
+(missing actor, weapon and state qualifiers; the 91–00 automatic failure absent from attack rolls)
+and remaining paraphrase in older procedures, and passed with corrections after one to three
+correction rounds.
 
 ### Next steps
 
 Re-prioritised on 7 October 2026; the full order, exit conditions and rationale are in
-[the completion plan](docs/corpus-completion-plan.md#3-prioritised-work).
+[the completion plan](docs/corpus-completion-plan.md#3-prioritised-work). The live position and
+next unit are in [the extraction checkpoint](docs/extraction-checkpoint.md).
 
-1. Close Package F at reduced scope: finish the shared lifecycle, condition/rest audit and
-   estate rows, and accept per-quest ordered lifecycles at catalogue scope (now optional).
-2. Core-chapter loop: reconcile coverage components against the PDF, extract genuine
-   omissions, convert worked examples and independently review each chapter (Phases 8–10
-   brought forward, with Phase 9 review records first).
+1. **Done 7 October.** Close Package F at reduced scope.
+2. Core-chapter loop (Phases 8–10 together, with Phase 9 review records): reconcile coverage
+   components against the PDF, extract genuine omissions, convert worked examples and
+   independently review each chapter. Tiers 1–5 are done. Next: tier 6
+   (Travelling and Skirmishes, Settlements, guilds, Inner Sanctum, Buying an Estate) and tier 7
+   (Appendices I–V, Adding a Third Dimension, front and back matter).
 3. Apply the same loop to Quest Book I, backgrounds and the estate side quest.
 4. Dependency graph and precedence (Phase 7).
 5. Deterministic JSON bundles, graph and manifest (Phase 11; SQLite optional), then complete

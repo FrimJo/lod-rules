@@ -25,17 +25,18 @@ This file holds the plan and a single dated status snapshot; it is not a session
 Per-unit evidence and historical gate counts live in the [evidence ledgers](ledgers/); the
 current position and next unit are in [extraction-checkpoint.md](extraction-checkpoint.md).
 
-## 2. Status — 7 October 2026
+## 2. Status — 8 October 2026
 
 | Measure                              | Value                                                                                                   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Canonical files (`npm run validate`) | 440, passing                                                                                            |
-| Tests (`npm test`)                   | 3,732 passing, 2 optional provider tests skipped                                                        |
-| Sections extracted / reviewed        | 347 / 675 extracted (51%), 0 independently reviewed; 35 compatibility redirects excluded                |
-| Unfinished non-quest sections        | 267, of which 99 have no citing record (`npm run report:chapters`)                                      |
-| Procedures / state machines          | 99 / 2                                                                                                  |
-| Review records                       | 138: 121 unresolved, 17 resolved (most by published designer rulings)                                   |
-| Package F manifest                   | 95 entries: 27 implemented, 3 shared model, 1 narrative-only, 64 pending                                |
+| Canonical files (`npm run validate`) | 512, passing                                                                                            |
+| Tests (`npm test`)                   | 4,134 passing, 2 optional provider tests skipped                                                        |
+| Sections extracted / reviewed        | 504 / 679 extracted (74%), 309 independently reviewed (46%); 36 compatibility redirects excluded        |
+| Unfinished non-quest sections        | 115, of which 43 have no citing record (`npm run report:chapters`); tiers 1–5 are closed                |
+| Procedures / state machines          | 113 / 2                                                                                                 |
+| Review records                       | 221: 196 unresolved, 25 resolved (most by published designer rulings)                                   |
+| Independent review records           | 24 fresh passing records under `review/independent/` (`npm run review -- check`)                        |
+| Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope            |
 | Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` is empty                                                      |
 | Phase 12 retrieval                   | Lexical retrieval, agent tools, MCP server and `ask` pipeline exist ([§5](#phase-12--retrieval-corpus)) |
 
@@ -45,7 +46,8 @@ when a step below closes, not after every unit.
 
 **Done within documented scope:** Phases 0–3; Phase 4 core mechanics; Phase 5 Batches 1–7
 (catalogues, including all quest, personal-quest and estate catalogue records); Phase 6
-Batches 1–6 (Packages A–D). Published designer rulings are applied per the
+Batches 1–7 (Packages A–F); Step 2 tiers 1–5 (Introduction through Combat, reconciled and
+independently reviewed). Published designer rulings are applied per the
 [extraction guide](extraction-guide.md).
 
 ### Why the order changed
@@ -103,8 +105,8 @@ complete at the documented scope in the [Phase 6 ledger](ledgers/phase-6-procedu
 
 **Outcome:** Package F is `accepted` (41 implemented, 10 covered by another model, 1
 nonprocedural, 43 `catalogue_scope`). The estate's source-silent readings are caller-supplied
-inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 76 of 85
-rows verified; the 9 still pending are assigned below and close with the steps that own them.
+inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 79 of 85
+rows verified; the 6 still pending are assigned below and close with the steps that own them.
 
 ### Step 2 — Core-chapter loop: reconcile, extract, review
 
@@ -116,8 +118,9 @@ at a time. Work in dependency order:
    (its starting-settlement roll on PDF 59 has no record)
 3. Equipment, Psychology
 4. Magic, Magic Items, Enchantments, Alchemy, Prayers
-5. Into the Dungeons, Treasure, Combat (open exit rows: Healing PDF 100, Identifying Items
-   PDF 98, optional Dungeon Events PDF 105, and the mapped table nodes on PDF 91/94/104/105/119)
+5. Into the Dungeons, Treasure, Combat (done 8 October; closed the exit rows for Healing PDF 100,
+   Identifying Items and Potions PDF 100, optional Dungeon Events PDF 107, and the table nodes on
+   PDF 91/94–98/104/105/115/119/121)
 6. Travelling and Skirmishes, Settlements, guilds, Inner Sanctum, Buying an Estate
 7. Appendices I–V, Adding a Third Dimension, front and back matter
 

@@ -7,19 +7,20 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 675 / 675 | 100% |
-| extracted | 408 / 675 | 60% |
-| reviewed | 90 / 675 | 13% |
+| mapped | 679 / 679 | 100% |
+| extracted | 504 / 679 | 74% |
+| reviewed | 309 / 679 | 46% |
 
-Total sections tracked: 675
+Total sections tracked: 679
 
-35 compatibility redirects are excluded from all extraction counts above and below.
+36 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
 | Preserved ID | Canonical section |
 | --- | --- |
 | section.magic.casting_spells.table_3 | section.magic.casting_spells.table_2 |
+| section.into_the_dungeons.table_3 | section.into_the_dungeons.table_2 |
 | section.settlements.settlement_events.table_2 | section.settlements.settlement_events.table |
 | section.settlements.settlement_events.table_3 | section.settlements.settlement_events.table |
 | section.settlements.settlement_events.table_4 | section.settlements.settlement_events.table |
@@ -62,9 +63,9 @@ Total sections tracked: 675
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 383 |
+| subsection | 388 |
 | appendix | 5 |
-| table | 183 |
+| table | 182 |
 | example | 3 |
 | optional_rule | 3 |
 | scenario_rule | 37 |
@@ -77,40 +78,31 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 25 | 377 | 273 |
-| rules | 385 | 120 | 170 |
-| tables | 208 | 293 | 174 |
-| examples | 18 | 362 | 295 |
-| procedures | 103 | 311 | 261 |
-| entities | 230 | 274 | 171 |
+| glossary | 66 | 185 | 428 |
+| rules | 425 | 48 | 206 |
+| tables | 215 | 119 | 345 |
+| examples | 26 | 186 | 467 |
+| procedures | 113 | 160 | 406 |
+| entities | 232 | 128 | 319 |
 
 ## Remaining tables
 
-12 of this kind still need their contents extracted.
+4 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
 | section.front_matter.index_of_art.table | Index of Art table | 9 |
 | section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
 | section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
-| section.into_the_dungeons.table | Into the Dungeons table | 89 |
-| section.into_the_dungeons.table_2 | Into the Dungeons table 2 | 89 |
-| section.into_the_dungeons.table_3 | Into the Dungeons table 3 | 89 |
-| section.into_the_dungeons.table_4 | Into the Dungeons table 4 | 92-96 |
-| section.into_the_dungeons.table_red_levers | Red Levers | 102 |
-| section.into_the_dungeons.table_5 | Into the Dungeons table 5 | 103 |
-| section.combat.detailed_acting_with_enemies.table | Detailed acting with enemies table | 117 |
-| section.combat.detailed_acting_with_enemies.table_2 | Detailed acting with enemies table 2 | 117 |
 | section.appendix_iii_equipment.general_equipment.table | General Equipment table | 184 |
 
 ## Remaining examples
 
-2 of this kind still need their contents extracted.
+1 of this kind still need their contents extracted.
 
 | Node | Title | Printed pages |
 | --- | --- | --- |
 | section.backgrounds.character_creation_example | Character Creation Example | 47 |
-| section.combat.combat_example | Combat Example | 122 |
 
 ## Sections citing external sources
 
@@ -131,7 +123,6 @@ None. Every node in the structural map has been mapped.
 | section.quest_book_i.introduction | quest_book_ii |
 | section.quest_book_i.lair_of_the_spider_queen | bestiary |
 | section.introduction.game_components | bestiary, charts_compendium, quest_book_ii |
-| section.psychology.sanity | bestiary |
 | section.magic.dispelling_magic | bestiary |
 | section.into_the_dungeons.encounters | bestiary |
 | section.combat.hero_attacking | bestiary |
