@@ -1,0 +1,651 @@
+- id: procedure.enemy_attack
+  name: Enemy Attack
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parrying or Dodging
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Dealing Damage
+      heading: Hit Area (Only When Hitting Heroes)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text:
+    'Check enemy behaviour card → Determine attack type → Standard? Make test against CS /
+    Power? Make test against CS+20 → Success? → no! Did attacker roll “00”? → yes! Does attacker
+    have a weapon? → yes! Attacker drops weapon! / no! Attacker falls over! / no! Attack misses! →
+    yes! Target in Parry Stance? → yes! Target may: • Dodge (+15 bonus) • Parry with shield (CS+15)
+    • Parry with weapon (CS) / no! Target may: • Dodge without bonus • Parry with shield (CS-15) →
+    How is target defending? → Weapon Parry? Success? yes! Parried! no! Did you roll “95-00”? yes!
+    Weapon durability -1 → Shield Parry? Success? yes! Roll damage → DMG > DEF no! Parried! yes!
+    Shield durability -1 → DMG- Shield’s DEF transferred to arm and arm armour / no! Did you roll
+    “95-00”? yes! Shield durability -1 → Dodge? Success? yes! Dodged attack! → Not? → Roll 1d6 for
+    hit area → DMG according to monster card → DMG > DEF no! Blocked by armour / yes! Subtract
+    wounds (DMG - DEF) → Subtract 1 durability from armour in area → Torso hit? yes! Roll 1d10 to
+    determine location → -1 durability to item stored in that slot / no! Head hit? yes! -1 Sanity /
+    no! That’s all!'
+  issues:
+    - issue.combat.enemy_attack_flowchart
+    - issue.combat.behaviour_card_naming
+    - issue.combat.shield_threshold
+  unresolved_references:
+    - 'Target may: the defence options, thresholds and use limits are procedure.hero_defence; this
+      procedure takes its supplied result.'
+    - 'DMG- Shield’s DEF transferred to arm and arm armour: the chart draws this box into the line
+      that reaches "Roll 1d6 for hit area"; Parry with a Shield (PDF 120) sends the rest of the
+      damage to the arm. This procedure hands the spillover to procedure.combat_damage and does not
+      roll a hit area for it.'
+  fields:
+    attack_type:
+      type: string
+      role: input
+      description: standard or power, from the enemy behaviour card.
+    cs:
+      type: number
+      role: input
+      description: The enemy’s CS.
+    attack_threshold:
+      type: number
+      role: output
+      description: Value the attack roll must not exceed.
+    attack_roll:
+      type: number
+      role: input
+      description: The enemy’s attack roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    has_weapon:
+      type: boolean
+      role: input
+      description: The attacker has a weapon.
+    drops_weapon:
+      type: boolean
+      role: output
+      description: The attacker drops its weapon.
+    falls_over:
+      type: boolean
+      role: output
+      description: The attacker falls over.
+    outcome:
+      type: string
+      role: output
+      description: Terminal box of the chart that was reached.
+    target:
+      type: string
+      role: state
+      description: Who is struck; always a hero in this chart.
+    parry_stance:
+      type: boolean
+      role: input
+      description: The target hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: 'How the target is defending: none, dodge, shield or weapon (resolved by
+        procedure.hero_defence).'
+    defence_succeeded:
+      type: boolean
+      role: input
+      description: The defence succeeded (supplied from procedure.hero_defence).
+    defence_roll:
+      type: number
+      role: input
+      description: The defence roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    weapon_durability_loss:
+      type: number
+      role: output
+      description: Durability the parrying weapon loses.
+    shield_durability_loss:
+      type: number
+      role: output
+      description: Durability the shield loses on a 95-00 failed parry.
+    shield_parry_succeeded:
+      type: boolean
+      role: state
+      description: The shield parry succeeded.
+    incoming_damage:
+      type: number
+      role: input
+      description: DMG according to monster card (rolled damage).
+    shield_def:
+      type: number
+      role: input
+      description: The shield’s DEF.
+    remaining_damage:
+      type: number
+      role: output
+      description: Damage transferred to the arm after a shield parry.
+    shield_damage:
+      type: number
+      role: output
+      description: Points of Damage the shield takes after a successful parry.
+    spill_location:
+      type: string
+      role: output
+      description: Where the rest of the damage goes after a shield parry.
+    hit_area_roll:
+      type: number
+      role: input
+      description: The 1d6 hit area roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    hit_location:
+      type: string
+      role: output
+      description: Printed hit location.
+    armour_def:
+      type: number
+      role: input
+      description: DEF of the armour in the hit area.
+    wounds:
+      type: number
+      role: output
+      description: Wounds subtracted (DMG − DEF).
+    armour_durability_loss:
+      type: number
+      role: output
+      description: Durability the armour in the area loses.
+    sanity_loss:
+      type: number
+      role: output
+      description: Sanity lost on a head hit.
+  dependencies:
+    - key: defence
+      label: Target may dodge or parry
+      object_id: procedure.hero_defence
+    - key: damage
+      label: DMG- Shield’s DEF transferred to arm and arm armour
+      object_id: procedure.combat_damage
+    - key: armour
+      label: Subtract 1 durability from armour in area
+      object_id: character.durability.armour_damage
+    - key: quick_slots
+      label: Roll 1d10 to determine location → -1 durability to item stored in that slot
+      object_id: character.durability.quick_slot_hit
+    - key: sanity
+      label: Head hit → -1 Sanity
+      object_id: character.sanity.loss.head_wound
+  steps:
+    - id: check_behaviour_card
+      source_text: Check enemy behaviour card → Determine attack type
+      effects:
+        - type: set
+          target: target
+          value:
+            type: literal
+            value: hero
+    - id: standard_test
+      source_text: Standard? → Make test against CS
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: attack_type
+        right:
+          type: literal
+          value: standard
+      rule_refs:
+        - combat.enemy.attack_threshold.standard
+      effects: []
+    - id: power_test
+      source_text: Power? → Make test against CS+20
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: attack_type
+        right:
+          type: literal
+          value: power
+      rule_refs:
+        - combat.enemy.attack_threshold.power
+      effects: []
+    - id: attack_misses
+      source_text: Success? → no! → Did attacker roll “00”? → no! → Attack misses!
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: attack_roll
+            right:
+              type: field
+              name: attack_threshold
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: attack_roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: attack_misses
+    - id: attacker_fumbles
+      source_text:
+        Success? → no! → Did attacker roll “00”? → yes! → Does attacker have a weapon? → yes!
+        Attacker drops weapon! / no! Attacker falls over!
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: attack_roll
+            right:
+              type: field
+              name: attack_threshold
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_roll
+            right:
+              type: literal
+              value: 100
+      rule_refs:
+        - combat.enemy.fumble.drops_weapon
+        - combat.enemy.fumble.falls_over
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: attacker_fumbles
+    - id: target_defends
+      source_text: Success? → yes! → Target in Parry Stance?
+      when:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: attack_roll
+        right:
+          type: field
+          name: attack_threshold
+      effects: []
+      substeps:
+        - id: in_parry_stance
+          source_text:
+            'yes! → Target may: • Dodge (+15 bonus) • Parry with shield (CS+15) • Parry with weapon
+            (CS)'
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: invoke
+              dependency: defence
+        - id: not_in_parry_stance
+          source_text: 'no! → Target may: • Dodge without bonus • Parry with shield (CS-15)'
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: false
+          effects:
+            - type: invoke
+              dependency: defence
+        - id: dodged
+          source_text: How is target defending? → Dodge? → Success? → yes! → Dodged attack!
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: dodge
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: outcome
+              value:
+                type: literal
+                value: dodged_attack
+        - id: weapon_parried
+          source_text: Weapon Parry? → Success? → yes! → Parried!
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: weapon
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: outcome
+              value:
+                type: literal
+                value: parried
+        - id: weapon_parry_fumble
+          source_text: Weapon Parry? → Success? → no! → Did you roll “95-00”? → yes! → Weapon durability -1
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: weapon
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: defence_roll
+                right:
+                  type: literal
+                  value: 95
+          effects:
+            - type: set
+              target: weapon_durability_loss
+              value:
+                type: literal
+                value: 1
+        - id: shield_parried
+          source_text: Shield Parry? → Success? → yes! → Roll damage → DMG > DEF
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: shield
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: shield_parry_succeeded
+              value:
+                type: literal
+                value: true
+          substeps:
+            - id: shield_def_subtracted
+              source_text:
+                Roll damage → DMG > DEF (A successful parry with a shield subtracts the shield’s DEF
+                from the damage.)
+              rule_refs:
+                - combat.defence.shield_parry.spillover
+                - combat.defence.shield_parry.absorbed
+              effects: []
+            - id: shield_blocks
+              source_text: DMG > DEF → no! → Parried!
+              when:
+                type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: incoming_damage
+                right:
+                  type: field
+                  name: shield_def
+              effects:
+                - type: set
+                  target: outcome
+                  value:
+                    type: literal
+                    value: parried
+            - id: shield_spillover
+              source_text:
+                DMG > DEF → yes! → Shield durability -1 → DMG- Shield’s DEF transferred to arm and arm
+                armour
+              when:
+                type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: incoming_damage
+                right:
+                  type: field
+                  name: shield_def
+              effects:
+                - type: set
+                  target: outcome
+                  value:
+                    type: literal
+                    value: transferred_to_arm
+                - type: invoke
+                  dependency: damage
+        - id: shield_parry_fumble
+          source_text: Shield Parry? → Success? → no! → Did you roll “95-00”? → yes! → Shield durability -1
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: shield
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: defence_roll
+                right:
+                  type: literal
+                  value: 95
+          effects:
+            - type: set
+              target: shield_durability_loss
+              value:
+                type: literal
+                value: 1
+        - id: hit_area
+          source_text: Not? / Success? no! → Roll 1d6 for hit area → DMG according to monster card → DMG > DEF
+          when:
+            type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence
+                right:
+                  type: literal
+                  value: none
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: defence_succeeded
+                right:
+                  type: literal
+                  value: false
+          rule_refs:
+            - combat.damage.hit_area
+          effects: []
+          substeps:
+            - id: blocked_by_armour
+              source_text: DMG > DEF → no! → Blocked by armour
+              when:
+                type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: incoming_damage
+                right:
+                  type: field
+                  name: armour_def
+              effects:
+                - type: set
+                  target: outcome
+                  value:
+                    type: literal
+                    value: blocked_by_armour
+            - id: subtract_wounds
+              source_text:
+                DMG > DEF → yes! → Subtract wounds (DMG - DEF) → Subtract 1 durability from armour in
+                area
+              when:
+                type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: incoming_damage
+                right:
+                  type: field
+                  name: armour_def
+              effects:
+                - type: set
+                  target: wounds
+                  value:
+                    type: arithmetic
+                    operator: subtract
+                    values:
+                      - type: field
+                        name: incoming_damage
+                      - type: field
+                        name: armour_def
+                - type: set
+                  target: armour_durability_loss
+                  value:
+                    type: literal
+                    value: 1
+                - type: set
+                  target: outcome
+                  value:
+                    type: literal
+                    value: wounds_subtracted
+                - type: invoke
+                  dependency: armour
+              substeps:
+                - id: torso_hit
+                  source_text:
+                    Torso hit? → yes! → Roll 1d10 to determine location → -1 durability to item stored in
+                    that slot
+                  when:
+                    type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hit_location
+                    right:
+                      type: literal
+                      value: Torso (check gear)
+                  effects:
+                    - type: invoke
+                      dependency: quick_slots
+                - id: head_hit
+                  source_text: Torso hit? → no! → Head hit? → yes! → -1 Sanity
+                  when:
+                    type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hit_location
+                    right:
+                      type: literal
+                      value: Head
+                  effects:
+                    - type: set
+                      target: sanity_loss
+                      value:
+                        type: literal
+                        value: 1
+                    - type: invoke
+                      dependency: sanity
+  entry_step: check_behaviour_card
+  exit_step: target_defends

@@ -46,7 +46,6 @@ const attack: State = {
   large_attacker: false,
   use_bloodlust: false,
   power_reroll: false,
-  chosen_fast_immunity: false,
   magic_weapon: false,
   defence_supplied: false,
   defence_negates_damage: false,
@@ -90,6 +89,7 @@ const thrown: State = {
   in_los: true,
   nonadjacent_obstacle: false,
   through_door: false,
+  in_front_of_door: false,
   adjacent_to_door: false,
   target_large: false,
   scatter_supplied: true,
@@ -231,7 +231,7 @@ describe('combat preparation and resolution: PDF 109–116, 121', () => {
         .threshold,
     ).toBe(15);
   });
-  it('aim breaks for each printed interruption and is forbidden in Overwatch', () => {
+  it('aim breaks for each printed interruption and needs a Ranged Weapon; Overwatch adds no gate', () => {
     const a = {
       ranged_weapon: true,
       next_action: true,
@@ -239,12 +239,47 @@ describe('combat preparation and resolution: PDF 109–116, 121', () => {
       target_left_los: false,
       model_crossed_los: false,
       lost_hp: false,
-      overwatch: false,
     };
     expect(run('combat_aim', a).state.aim_bonus).toBe(10);
     for (const key of ['target_left_los', 'model_crossed_los', 'lost_hp'])
       expect(run('combat_aim', { ...a, [key]: true }).state.aim_bonus).toBe(0);
-    expect(run('combat_aim', { ...a, overwatch: true }).state.aim_bonus).toBeUndefined();
+    expect(run('combat_aim', { ...a, ranged_weapon: false }).state.aim_bonus).toBeUndefined();
+    // PDF 107 forbids Perks and Talents for aiming during an Overwatch shot, not the Aim action.
+    expect(run('combat_aim', { ...a, overwatch: true }).state.aim_bonus).toBe(10);
+  });
+  it('91-00 always misses even when modifiers push CS/RS above 90 (PDF 18)', () => {
+    expect(run('combat_attack', { ...attack, roll: 90, threshold: 110 }).state.hit).toBe(true);
+    for (const roll of [91, 99])
+      expect(run('combat_attack', { ...attack, roll, threshold: 110 }).state.hit).toBe(false);
+    const fumble = run('combat_attack', { ...attack, roll: 100, threshold: 110 });
+    expect(fumble.state).toMatchObject({ hit: false, durability: 5 });
+    expect(fumble.trace).toContain('character.durability.fumble');
+    expect(run('combat_attack', { ...attack, roll: 100, magic_weapon: true }).unresolved).toEqual([
+      'issue.phase4.durability_overlap',
+    ]);
+  });
+  it('100 on a ranged shot past a model returns the shooting-past issue instead of choosing', () => {
+    const shot = {
+      ...attack,
+      mode: 'ranged',
+      passed_models: true,
+      incidental_target_supplied: true,
+    };
+    const r = run('combat_attack', { ...shot, roll: 100, threshold: 110 });
+    expect(r.unresolved).toContain('issue.combat.shooting_past_fumble');
+    expect(r.state.hit).toBe(false);
+    expect(r.state.damage_target).toBeUndefined();
+    expect(r.trace).toContain('character.durability.fumble');
+    const ninetyNine = run('combat_attack', { ...shot, roll: 99, threshold: 110 });
+    expect(ninetyNine.unresolved).not.toContain('issue.combat.shooting_past_fumble');
+    expect(ninetyNine.state).toMatchObject({ hit: true, damage_target: 'model D' });
+    const clear = run('combat_attack', {
+      ...shot,
+      passed_models: false,
+      roll: 100,
+      threshold: 110,
+    });
+    expect(clear.unresolved).not.toContain('issue.combat.shooting_past_fumble');
   });
   it('charge still hands off shove when supplied defence negates all damage', () => {
     const r = run('combat_attack', {
@@ -291,14 +326,28 @@ describe('hero defence: PDF 120', () => {
         .defence_eligible,
     ).toBe(false);
   });
-  it('weapon 95 damages once, Fast exempts, 100 overlap unresolved; dodge fumble falls', () => {
+  it('weapon 95 damages once, Fast parry outside stance damages on 90-00, 100 overlap unresolved; dodge fumble falls', () => {
     expect(run('hero_defence', { ...defence, defence: 'weapon', roll: 95 }).state.durability).toBe(
       5,
     );
     expect(
-      run('hero_defence', { ...defence, defence: 'weapon', roll: 95, fast_weapon: true }).state
+      run('hero_defence', { ...defence, defence: 'weapon', roll: 92, fast_weapon: true }).state
         .durability,
     ).toBe(6);
+    const fast = { ...defence, defence: 'weapon', parry_stance: false, fast_weapon: true };
+    expect(
+      run('hero_defence', { ...fast, fast_parries_this_turn: 0, roll: 30 }).state,
+    ).toMatchObject({ defence_eligible: true, using_fast_parry: true, defence_succeeded: true });
+    expect(
+      run('hero_defence', { ...fast, fast_parries_this_turn: 0, roll: 92 }).state.durability,
+    ).toBe(5);
+    expect(
+      run('hero_defence', { ...fast, fast_parries_this_turn: 1, roll: 30 }).state.defence_eligible,
+    ).toBe(false);
+    expect(
+      run('hero_defence', { ...fast, fast_weapon: false, fast_parries_this_turn: 0, roll: 30 })
+        .state.defence_eligible,
+    ).toBe(false);
     expect(run('hero_defence', { ...defence, defence: 'weapon', roll: 100 }).unresolved).toContain(
       'issue.phase4.durability_overlap',
     );
@@ -321,9 +370,21 @@ describe('thrown preparations: PDF 117', () => {
       }).state.threshold,
     ).toBe(40);
     expect(
-      run('thrown_preparation', { ...thrown, through_door: true, adjacent_to_door: true }).state
+      run('thrown_preparation', { ...thrown, through_door: true, in_front_of_door: true }).state
         .threshold,
     ).toBe(50);
+    // adjacent to the door but not in one of the two squares in front of it: the -10 applies
+    expect(
+      run('thrown_preparation', { ...thrown, through_door: true, adjacent_to_door: true }).state
+        .threshold,
+    ).toBe(40);
+  });
+  it('a throw is an RS check: 91-00 always fails (PDF 18)', () => {
+    expect(run('thrown_preparation', { ...thrown, rs: 95, roll: 90 }).state.hit).toBe(true);
+    expect(run('thrown_preparation', { ...thrown, rs: 95, roll: 91 }).state).toMatchObject({
+      hit: false,
+      impact_square: 'adjacent target square',
+    });
   });
   it('misses scatter beside target except nonadjacent doorway; large area is centre + other covered squares', () => {
     expect(run('thrown_preparation', { ...thrown, roll: 51 }).state.impact_square).toBe(
@@ -417,6 +478,23 @@ describe('damage and bleeding checkpoints: PDF 121–122', () => {
     expect(resolved.state.hit_points).toBe(6);
     expect(resolved.trace.filter((id) => id === 'character.hit_points.loss')).toHaveLength(1);
   });
+  it('an enemy taken below 0 HP dies; negative HP stays an open question only for heroes', () => {
+    const enemy = {
+      ...damage,
+      target_is_hero: false,
+      natural_armour: 0,
+      armour: 2,
+      weapon_damage: 7,
+      damage_bonus: 2,
+      hit_points: 6,
+    };
+    const r = run('combat_damage', enemy);
+    expect(r.state).toMatchObject({ hit_points: -1, dead: true });
+    expect(r.unresolved).not.toContain('issue.phase4.zero_and_negative');
+    expect(run('combat_damage', { ...damage, hit_points: 3 }).unresolved).toContain(
+      'issue.phase4.zero_and_negative',
+    );
+  });
 });
 
 describe('shove and typed follow-ups (PDF 111–112, 121–122)', () => {
@@ -431,6 +509,7 @@ describe('shove and typed follow-ups (PDF 111–112, 121–122)', () => {
       second_can_move: false,
       destination_lava_or_chasm: false,
       destination_trap: false,
+      displacement_case: 'straight_free',
       roll: 26,
       damage_bonus: 1,
       target_dex: 35,
@@ -438,11 +517,42 @@ describe('shove and typed follow-ups (PDF 111–112, 121–122)', () => {
     expect(run('combat_shove', s).state.models_moved).toBe(1);
     expect(run('combat_shove', { ...s, roll: 25 }).state.shove_succeeded).toBe(false);
     expect(run('combat_shove', { ...s, roll: 100 }).state.shover_prone).toBe(true);
-    expect(run('combat_shove', { ...s, straight_free: false }).state.target_prone).toBe(true);
     expect(
-      run('combat_shove', { ...s, straight_free: false, second_model: true, second_can_move: true })
-        .state.models_moved,
+      run('combat_shove', { ...s, straight_free: false, displacement_case: 'blocked' }).state
+        .target_prone,
+    ).toBe(true);
+    expect(
+      run('combat_shove', {
+        ...s,
+        straight_free: false,
+        second_model: true,
+        second_can_move: true,
+        displacement_case: 'push_model_behind',
+      }).state.models_moved,
     ).toBe(2);
+    // the book leaves open whether a free diagonal or the model behind comes first: both are allowed
+    const either = {
+      ...s,
+      straight_free: false,
+      diagonal_free: true,
+      second_model: true,
+      second_can_move: true,
+    };
+    expect(run('combat_shove', { ...either, displacement_case: 'diagonal' }).state).toMatchObject({
+      models_moved: 1,
+      destination: 'diagonal_back',
+    });
+    expect(
+      run('combat_shove', { ...either, displacement_case: 'push_model_behind' }).state.models_moved,
+    ).toBe(2);
+    // a supplied case whose conditions do not hold is rejected and moves nothing
+    const rejected = run('combat_shove', {
+      ...s,
+      straight_free: false,
+      displacement_case: 'straight_free',
+    });
+    expect(rejected.events).toContainEqual({ type: 'require', satisfied: false });
+    expect(rejected.state).toMatchObject({ models_moved: 0, destination: 'none' });
     expect(run('combat_shove', { ...s, destination_lava_or_chasm: true }).state).toMatchObject({
       xp_awarded: true,
       loot_allowed: false,
@@ -599,6 +709,7 @@ it('charge-derived shove spends no additional AP; party loss prevents rescue', (
     second_can_move: false,
     destination_lava_or_chasm: false,
     destination_trap: false,
+    displacement_case: 'straight_free',
   });
   expect(shove.state.action_points_spent).toBe(0);
   const rescued = run('bleeding_out', {

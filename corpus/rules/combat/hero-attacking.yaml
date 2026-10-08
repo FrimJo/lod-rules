@@ -1,0 +1,173 @@
+- id: combat.hero_attacking.enemy_no_defence_roll
+  name: enemies never roll to dodge or parry
+  section_id: section.combat.hero_attacking
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 115
+      printed_page: 113
+      heading: Hero Attacking
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    An enemy will never roll to dodge or parry. Instead, there is a ‘To Hit’ modifier noted
+    in the Enemies’ stats, which symbolises its evasive moves.
+  type: constraint
+  scope: global
+  fields:
+    defender_is_enemy:
+      type: boolean
+      role: input
+      description: the attacked model is an enemy
+    may_roll_dodge_or_parry:
+      type: boolean
+      role: output
+      description: the defender rolls to dodge or parry
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: defender_is_enemy
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: may_roll_dodge_or_parry
+      value:
+        type: literal
+        value: false
+- id: combat.hero_attacking.to_hit
+  name: enemy ‘To Hit’ subtraction
+  section_id: section.combat.hero_attacking
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 115
+      printed_page: 113
+      heading: Hero Attacking
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This number should be subtracted from the hero’s CS/RS before attacking. If the enemy
+    performed a Power Attack last turn, this subtraction is ignored since that all-out attack left
+    the enemy vulnerable. Likewise, if the attack is from behind, the ‘To Hit’ modifier is ignored.
+  issues:
+    - issue.combat.power_timing
+  type: modifier
+  scope: global
+  fields:
+    enemy_to_hit:
+      type: number
+      role: input
+      description: the enemy’s ‘To Hit’ value (X)
+      minimum: 0
+    enemy_power_attacked_last_turn:
+      type: boolean
+      role: input
+      description: the enemy performed a Power Attack last turn (timing per issue)
+    from_behind:
+      type: boolean
+      role: input
+      description: the attack is from behind
+    skill_modifier:
+      type: number
+      role: state
+      description: modifier to the hero’s CS or RS
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_power_attacked_last_turn
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: from_behind
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: add
+      target: skill_modifier
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: enemy_to_hit
+          - type: literal
+            value: -1
+      duration: check
+  dependencies:
+    - key: bestiary_to_hit
+      label: Enemy ‘To Hit’ value from the Monster Card or the Bestiary table
+      external_document: bestiary
+  uses_tables:
+    - table.combat.melee_modifiers
+    - table.combat.ranged_modifiers
+- id: combat.hero_attacking.modifiers_cumulative
+  name: Hero Attacking modifiers are cumulative
+  section_id: section.combat.hero_attacking
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 115
+      printed_page: 113
+      heading: Hero Attacking
+      locator:
+        table: Factor in close combat; Factor when shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All modifiers are cumulative. The value for X can be found on the Monster Card or in
+    the table in the Bestiary.
+  type: calculation
+  scope: global
+  fields:
+    skill:
+      type: number
+      role: input
+      description: the hero’s CS or RS
+    applicable_modifier_total:
+      type: number
+      role: input
+      description: sum of every applicable Hero Attacking table modifier
+    modified_skill:
+      type: number
+      role: output
+      description: CS or RS after modifiers
+  effects:
+    - type: set
+      target: modified_skill
+      value:
+        type: sum
+        values:
+          - type: field
+            name: skill
+          - type: field
+            name: applicable_modifier_total
+  dependencies:
+    - key: bestiary_to_hit
+      label: X (‘To Hit’) from the Monster Card or the Bestiary table
+      external_document: bestiary
+  uses_tables:
+    - table.combat.melee_modifiers
+    - table.combat.ranged_modifiers

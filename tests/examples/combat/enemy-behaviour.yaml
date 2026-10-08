@@ -1,0 +1,486 @@
+- id: test.combat.humanoid_behaviour.make_room
+  name: printed explanation for option 1, an adjacent enemy makes room before attacking
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        paragraph: option 1, italic explanation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Here, the enemy is adjacent to a hero. It will spend its first action trying to make
+    room for more enemies, either by moving or shoving. It will, however, only try to shove once.
+    The next action must be an attack (see number 2 below), whether the shove succeeded or not.
+  kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: true
+    can_make_room: true
+    room_attempted_this_turn: false
+  expected:
+    state:
+      action: make_room_or_shove
+      next_action: attack
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.make_room
+    unresolved: []
+    steps:
+      - option_1
+- id: test.combat.humanoid_behaviour.attack_after_room
+  name: derived case, after trying to make room the enemy attacks by the table (roll 4, Standard Attack)
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.humanoid_close_combat_behaviour: adjacent enemy that has
+    already tried to make room this turn rolls 4 on the option 2 table.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: true
+    can_make_room: true
+    room_attempted_this_turn: true
+    action_points_left: 2
+    wounded: false
+    attack_roll: 4
+  expected:
+    state:
+      attack_result: Standard Attack
+      action: standard_attack
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - standard_attack
+- id: test.combat.humanoid_behaviour.power_wounded
+  name: derived case, a wounded enemy rolling 6 goes into Parry stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.humanoid_close_combat_behaviour: adjacent wounded enemy
+    rolls 6 (Power Attack (if wounded, Parry stance)).'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: true
+    attack_roll: 6
+  expected:
+    state:
+      attack_result: Power Attack (if wounded, Parry stance)
+      action: parry_stance
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - power_attack_wounded
+- id: test.combat.humanoid_behaviour.use_skill
+  name: derived case, roll 8 with a Special Talent uses it
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.humanoid_close_combat_behaviour: adjacent enemy with a
+    usable Special Talent rolls 8.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: false
+    attack_roll: 8
+    has_skill_or_talent: true
+  expected:
+    state:
+      attack_result: Use Skill/Special Talent. If N/A, attack.
+      action: use_skill_or_special_talent
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - use_skill
+- id: test.combat.humanoid_behaviour.skill_not_available
+  name: derived case, roll 8 without a Skill or Special Talent attacks
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.humanoid_close_combat_behaviour: adjacent enemy without a
+    Skill or Special Talent rolls 8 (If N/A, attack).'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: false
+    attack_roll: 8
+    has_skill_or_talent: false
+  expected:
+    state:
+      attack_result: Use Skill/Special Talent. If N/A, attack.
+      action: attack
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - skill_not_available
+- id: test.combat.humanoid_behaviour.approach_parry
+  name: derived case for the option 3 explanation, a Parry stance result means no move
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        paragraph: option 3, italic explanation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case quoting the option 3 explanation: "In this case, the enemy is close
+    enough to reach a hero with one move. If you roll for a Parry Stance on the enemy''s first
+    action, the enemy will simply go into that stance without moving. A coward maybe?" The roll 1
+    is chosen from the printed 1-2.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: false
+    within_m: true
+    approach_roll: 1
+  expected:
+    state:
+      approach_result: Parry stance (forfeits 2nd action).
+      action: parry_stance
+      forfeits_second_action: true
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.approach
+    unresolved: []
+    steps:
+      - option_3
+      - approach_parry_stance
+- id: test.combat.humanoid_behaviour.move_into_close_combat
+  name: derived case, option 3 roll 5 moves into close combat
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.humanoid_close_combat_behaviour: enemy within M but not
+    adjacent rolls 5 on the option 3 table.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: false
+    within_m: true
+    approach_roll: 5
+  expected:
+    state:
+      approach_result:
+        'Move into CC in to following priority order: - A hero that has not been attacked
+        this turn (within M). - A position where the enemy can attack from behind. - A position with
+        height advantage. - Closest hero.'
+      action: move_into_close_combat
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.approach
+    unresolved: []
+    steps:
+      - option_3
+      - move_into_close_combat
+- id: test.combat.humanoid_behaviour.charge
+  name: derived case, option 3 roll 9 charges the closest hero
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.humanoid_close_combat_behaviour: enemy within M rolls 9 and
+    is able to charge.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: false
+    within_m: true
+    approach_roll: 9
+    can_charge: true
+  expected:
+    state:
+      approach_result: Charge Attack closest hero. In unable, move adjacent to the closest hero.
+      action: charge_attack_closest_hero
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.approach
+    unresolved: []
+    steps:
+      - option_3
+      - charge_attack
+- id: test.combat.humanoid_behaviour.charge_unable
+  name: derived case, option 3 roll 9 unable to charge moves adjacent
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.humanoid_close_combat_behaviour: enemy within M rolls 9 but
+    is unable to charge.'
+  kind: derived_case
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: false
+    within_m: true
+    approach_roll: 9
+    can_charge: false
+  expected:
+    state:
+      approach_result: Charge Attack closest hero. In unable, move adjacent to the closest hero.
+      action: move_adjacent_to_closest_hero
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.approach
+    unresolved: []
+    steps:
+      - option_3
+      - charge_unable
+- id: test.combat.humanoid_behaviour.advance
+  name: printed explanation for option 4, an enemy further away than it can move walks towards the
+    closest hero
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        paragraph: option 4, italic explanation
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: That is, if the enemy is further away than it can move, it will walk towards the closest hero.
+  kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  inputs:
+    adjacent: false
+    within_m: false
+  expected:
+    state:
+      action: move_towards_closest_hero
+      avoid_traps: true
+      may_climb: true
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.advance
+    unresolved: []
+    steps:
+      - option_4
+- id: test.combat.shield_parry_example.berthram
+  name: printed Parry with a Shield example, Berthram parries 8 damage with a DEF 6 shield
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parry with a Shield
+      locator:
+        paragraph: Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    "Example: Berthram manages to parry an incoming strike causing 8 Points of Damage. His
+    shield's DEF is 6, reducing Damage to 2. Since the shield fails to negate all damage, it will
+    incur 1 Point of Damage. The remaining 2 Points of Damage are transferred to Berthram’s arm.
+    However, as he is using a padded jacket, the armour absorbs the rest of the damage. Had the
+    damage been higher than the DEF value of the armour, it would take 1 Point of Damage, and break
+    if it reached 6 points."
+  kind: source_example
+  rule_ids:
+    - combat.defence.shield_parry.spillover
+    - combat.defence.shield_parry.absorbed
+  unresolved_references:
+    - The padded jacket absorbing the 2 points needs its DEF from the armour table; the example does
+      not print it, so the arm step is not asserted.
+  inputs:
+    shield_parry_succeeded: true
+    incoming_damage: 8
+    shield_def: 6
+  expected:
+    state:
+      remaining_damage: 2
+      shield_damage: 1
+      spill_location: arm
+    events: []
+    trace:
+      - combat.defence.shield_parry.spillover
+    unresolved: []
+    steps: []
+- id: test.combat.humanoid_behaviour.parry_first_action_two_ap
+  name:
+    'Humanoid option 2: Parry rolled on the first action with 2 AP becomes a Standard Attack, then
+    Parry Stance'
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        paragraph: option 2, italic explanation
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll on the table to see what kind of attack the enemy will perform. First you roll
+    1d10 if it will make an attack or use a Special Skill or Talent. Check the Bestiary to see if
+    the enemy has any such abilities. If you roll Parry in the first action, treat that as the
+    second action and perform a Standard Attack first.
+  kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  unresolved_references:
+    - The explanation gives no roll; 1 is one of the printed 1-2 Parry Stance* results. The enemy is
+      taken as adjacent with no room to make, not wounded, and with both AP left on its first
+      action.
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: false
+    attack_roll: 1
+  expected:
+    state:
+      attack_result: Parry Stance*
+      action: standard_attack
+      next_action: parry_stance
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+      - combat.enemy_behaviour.humanoid_close_combat.parry_with_two_ap
+    unresolved: []
+    steps:
+      - option_2
+      - parry_with_two_ap

@@ -1,0 +1,1835 @@
+- id: combat.damage.roll
+  name: Rolling damage
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Roll damage according to the weapon or monster damage noted in the Monster Table. Add a
+    damage bonus if your hero or the monster is strong enough for that.
+  type: procedure_rule
+  scope: battle
+  fields:
+    weapon_or_monster_damage:
+      type: number
+      role: input
+      description: Damage rolled for the weapon or the monster damage noted in the Monster Table.
+    damage_bonus:
+      type: number
+      role: input
+      description: Damage bonus, if strong enough for one.
+    weapon_damage:
+      type: number
+      role: output
+      description: Rolled damage before protection.
+  effects:
+    - type: set
+      target: weapon_damage
+      value:
+        type: field
+        name: weapon_or_monster_damage
+  dependencies:
+    - key: monster_table
+      label: monster damage noted in the Monster Table
+      external_document: bestiary
+    - key: damage_bonus
+      label: Damage bonus
+      object_id: character.damage_bonus.lookup
+  term_refs:
+    - term.damage
+    - term.damage_bonus
+- id: combat.damage.bloodlust
+  name: Bloodlust
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Dealing Damage
+      heading: Bloodlust
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If your hero's hit roll is 01-05, you may roll Damage twice and choose the highest roll.
+  type: choice
+  scope: battle
+  fields:
+    attacker:
+      type: string
+      role: input
+      description: hero or enemy.
+    hit_roll:
+      type: number
+      role: input
+      description: The hit roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    damage_rolls:
+      type: number
+      role: output
+      description: Damage rolls made; the highest is chosen.
+  effects:
+    - type: set
+      target: damage_rolls
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attacker
+        right:
+          type: literal
+          value: hero
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: hit_roll
+        right:
+          type: literal
+          value: 5
+  term_refs:
+    - term.bloodlust
+- id: combat.damage.bloodlust.enemies
+  name: Enemies ignore bloodlust
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Dealing Damage
+      heading: Bloodlust
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Luckily, enemies ignore bloodlust.
+  type: exception
+  scope: battle
+  fields:
+    attacker:
+      type: string
+      role: input
+      description: hero or enemy.
+    damage_rolls:
+      type: number
+      role: output
+      description: Damage rolls made.
+  effects:
+    - type: set
+      target: damage_rolls
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attacker
+    right:
+      type: literal
+      value: enemy
+  term_refs:
+    - term.bloodlust
+- id: combat.damage.hit_area
+  name: Hit Area
+  section_id: section.combat.dealing_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Dealing Damage
+      heading: Hit Area (Only When Hitting Heroes)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When striking enemies, we ignore where the blow lands. However, when the enemy strikes
+    a hero, we must check where this strike lands. This is done according to the table below.
+    Rolling 1d6 together with the two Hit Dice helps speed things up.
+  type: lookup
+  scope: battle
+  fields:
+    target:
+      type: string
+      role: input
+      description: hero or enemy.
+    hit_area_roll:
+      type: number
+      role: input
+      description: The 1d6 hit area roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    hit_location:
+      type: string
+      role: output
+      description: Printed hit location.
+  effects:
+    - type: lookup
+      table_id: table.combat.hit_location
+      key_column: roll
+      key:
+        type: field
+        name: hit_area_roll
+      value_column: location
+      target: hit_location
+      on_missing_issue: issue.combat.enemy_attack_flowchart
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target
+    right:
+      type: literal
+      value: hero
+  uses_tables:
+    - table.combat.hit_location
+- id: combat.damage.acidic
+  name: Acidic Damage ignores NA
+  section_id: section.combat.different_kinds_of_damage.acidic_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Acidic Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Acidic Damage may also be caused by magic and alchemy. This kind of damage ignores NA.
+  type: modifier
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    natural_armour_applies:
+      type: boolean
+      role: output
+      description: Natural Armour is subtracted.
+  effects:
+    - type: set
+      target: natural_armour_applies
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: damage_type
+    right:
+      type: literal
+      value: acidic
+  term_refs:
+    - term.acidic_damage
+    - term.natural_armour
+- id: combat.damage.acidic.negated
+  name: Acid negated
+  section_id: section.combat.different_kinds_of_damage.acidic_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Acidic Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once damage has been resolved, roll 1d6. On a roll of 1-3 the acid has been negated.
+  type: random_resolution
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    continuation_roll:
+      type: number
+      role: input
+      description: The 1d6 rolled once damage has been resolved.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    continues_next_turn:
+      type: boolean
+      role: output
+      description: The damage continues next turn.
+  effects:
+    - type: set
+      target: continues_next_turn
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: acidic
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: continuation_roll
+        right:
+          type: literal
+          value: 3
+- id: combat.damage.acidic.continues
+  name: Acid continues next turn
+  section_id: section.combat.different_kinds_of_damage.acidic_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Acidic Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 71
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: On a roll of 4-6, the acid will continue to damage the character next turn, but the
+    damage is halved (rounded down) to a minimum of 1. The acid is then negated.
+  type: random_resolution
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    continuation_roll:
+      type: number
+      role: input
+      description: The 1d6 rolled once damage has been resolved.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    continues_next_turn:
+      type: boolean
+      role: output
+      description: The damage continues next turn.
+    negated_after_next_turn:
+      type: boolean
+      role: output
+      description: The acid is then negated.
+  effects:
+    - type: set
+      target: continues_next_turn
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: negated_after_next_turn
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: acidic
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: continuation_roll
+        right:
+          type: literal
+          value: 4
+  issues:
+    - issue.damage_follow_up.continuation_basis
+  dependencies:
+    - key: continuation
+      label: Next-turn continuation
+      object_id: procedure.elemental_continuation
+- id: combat.damage.fire
+  name: Fire Damage ignores NA and armour
+  section_id: section.combat.different_kinds_of_damage.fire_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Magic, alchemy and some creatures can cause Fire Damage. This kind of damage ignores
+    both NA and armour.
+  type: modifier
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    natural_armour_applies:
+      type: boolean
+      role: output
+      description: Natural Armour is subtracted.
+    armour_applies:
+      type: boolean
+      role: output
+      description: Armour is subtracted.
+  effects:
+    - type: set
+      target: natural_armour_applies
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: armour_applies
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: damage_type
+    right:
+      type: literal
+      value: fire
+  term_refs:
+    - term.fire_damage
+    - term.natural_armour
+- id: combat.damage.fire.extinguished
+  name: Fire extinguished
+  section_id: section.combat.different_kinds_of_damage.fire_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once damage has been resolved, roll 1d6. On a roll of 1-3 the fire has been extinguished.
+  type: random_resolution
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    continuation_roll:
+      type: number
+      role: input
+      description: The 1d6 rolled once damage has been resolved.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    continues_next_turn:
+      type: boolean
+      role: output
+      description: The damage continues next turn.
+  effects:
+    - type: set
+      target: continues_next_turn
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: fire
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: continuation_roll
+        right:
+          type: literal
+          value: 3
+- id: combat.damage.fire.continues
+  name: Fire continues next turn
+  section_id: section.combat.different_kinds_of_damage.fire_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 71
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: On a roll of 4-6, the fire will continue to damage the character next turn, but the
+    damage is halved (rounded down) to a minimum of 1. The fire is then extinguished.
+  type: random_resolution
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    continuation_roll:
+      type: number
+      role: input
+      description: The 1d6 rolled once damage has been resolved.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    continues_next_turn:
+      type: boolean
+      role: output
+      description: The damage continues next turn.
+    negated_after_next_turn:
+      type: boolean
+      role: output
+      description: The fire is then extinguished.
+  effects:
+    - type: set
+      target: continues_next_turn
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: negated_after_next_turn
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: fire
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: continuation_roll
+        right:
+          type: literal
+          value: 4
+  issues:
+    - issue.damage_follow_up.continuation_basis
+  dependencies:
+    - key: continuation
+      label: Next-turn continuation
+      object_id: procedure.elemental_continuation
+- id: combat.damage.frost
+  name: Frost Damage may stun
+  section_id: section.combat.different_kinds_of_damage.frost_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Frost Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Frost Damage has a 50% chance of causing stun, that is, the target loses one of its APs
+    next turn.
+  type: random_resolution
+  scope: global
+  fields:
+    damage_type:
+      type: string
+      role: input
+      description: acidic, fire, frost, magic or normal.
+    frost_stun_result:
+      type: boolean
+      role: input
+      description: The 50% chance of causing stun came up.
+    stunned:
+      type: boolean
+      role: output
+      description: The target is stunned.
+    next_turn_ap_loss:
+      type: number
+      role: output
+      description: APs lost next turn.
+  effects:
+    - type: set
+      target: stunned
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_turn_ap_loss
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_type
+        right:
+          type: literal
+          value: frost
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: frost_stun_result
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.stun.ap_and_overlap
+  term_refs:
+    - term.frost_damage
+    - term.stun
+- id: combat.damage.magic
+  name: Magic damage
+  section_id: section.combat.different_kinds_of_damage.magic_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Magic Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Damage caused by spells, prayers, scrolls, magic weapons or items are considered magic
+    damage. In most cases, this works as normal damage, but some creatures like demons suffers
+    further complications by magic damage.
+  type: definition
+  scope: global
+  fields:
+    damage_source:
+      type: string
+      role: input
+      description: spell, prayer, scroll, magic_weapon, magic_item or other.
+    magic_damage:
+      type: boolean
+      role: output
+      description: The damage is magic damage.
+  effects:
+    - type: set
+      target: magic_damage
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_source
+        right:
+          type: literal
+          value: spell
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_source
+        right:
+          type: literal
+          value: prayer
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_source
+        right:
+          type: literal
+          value: scroll
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_source
+        right:
+          type: literal
+          value: magic_weapon
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: damage_source
+        right:
+          type: literal
+          value: magic_item
+  issues:
+    - issue.magic.creature_complications
+  term_refs:
+    - term.magic_damage
+- id: combat.damage.magic.complications
+  name: Creatures with magic damage complications
+  section_id: section.combat.different_kinds_of_damage.magic_damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Magic Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In most cases, this works as normal damage, but some creatures like demons suffers
+    further complications by magic damage.
+  type: exception
+  scope: global
+  fields:
+    magic_damage:
+      type: boolean
+      role: input
+      description: The damage is magic damage.
+    target_has_complications:
+      type: boolean
+      role: input
+      description: The target is a creature that suffers further complications by magic damage.
+  effects:
+    - type: unresolved
+      issue_id: issue.magic.creature_complications
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magic_damage
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_has_complications
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.magic.creature_complications
+- id: combat.damage.stun
+  name: Stun
+  section_id: section.combat.different_kinds_of_damage.stun
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Stun
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Some weapons or special rules will stun a hero or an enemy. A stunned model loses 1 AP
+    during its next turn.
+  type: resource_change
+  scope: global
+  fields:
+    stunned:
+      type: boolean
+      role: input
+      description: The model is stunned.
+    next_turn_ap_loss:
+      type: number
+      role: output
+      description: AP lost during its next turn.
+  effects:
+    - type: set
+      target: next_turn_ap_loss
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: stunned
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.stun.ap_and_overlap
+  dependencies:
+    - key: next_turn
+      label: Next-turn AP loss
+      object_id: procedure.stun_next_turn
+  term_refs:
+    - term.stun
+- id: combat.poison.exposure
+  name: Poison exposure
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If a hero or enemy is hit by poison and takes damage, then the effect of poison may
+    kick in. Make a CON test, applying any modifier for the poison. If this fails, the target is
+    poisoned and,
+  type: trigger
+  scope: global
+  fields:
+    hit_by_poison:
+      type: boolean
+      role: input
+      description: The hero or enemy is hit by poison.
+    damage_taken:
+      type: number
+      role: input
+      description: Damage taken from the hit.
+    con:
+      type: number
+      role: input
+      description: Constitution of the target.
+    poison_modifier:
+      type: number
+      role: input
+      description: Modifier for the poison.
+    con_roll:
+      type: number
+      role: input
+      description: The CON test roll.
+      minimum: 1
+      maximum: 100
+      integer: true
+    poisoned:
+      type: boolean
+      role: output
+      description: The target is poisoned.
+  effects:
+    - type: set
+      target: poisoned
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hit_by_poison
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: damage_taken
+        right:
+          type: literal
+          value: 0
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: con_roll
+        right:
+          type: sum
+          values:
+            - type: field
+              name: con
+            - type: field
+              name: poison_modifier
+  issues:
+    - issue.combat.enemy_poison_damage
+  dependencies:
+    - key: follow_up
+      label: Poison exposure and checks
+      object_id: procedure.damage_follow_up
+  term_refs:
+    - term.poison
+    - term.constitution
+- id: combat.poison.checks
+  name: Poison CON tests
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: at the start of its next turn, and 1d10 turns after that, the hero will have to make
+    another CON test. Each time the hero fails, they will lose 1 HP.
+  type: resource_change
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is poisoned.
+    check_failed:
+      type: boolean
+      role: input
+      description: This CON test failed.
+    hp_loss:
+      type: number
+      role: output
+      description: HP lost to this test.
+  effects:
+    - type: set
+      target: hp_loss
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poisoned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: check_failed
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.combat.enemy_poison_damage
+    - issue.poison.remaining_check_exhaustion
+- id: combat.poison.check_count
+  name: Number of poison CON tests
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If this fails, the target is poisoned and, at the start of its next turn, and 1d10
+    turns after that, the hero will have to make another CON test.
+  type: duration
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The target became poisoned.
+    check_turns_roll:
+      type: number
+      role: input
+      description: The 1d10 turns roll.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    checks_remaining:
+      type: number
+      role: output
+      description: CON tests still to make, counting the start of the next turn.
+  effects:
+    - type: set
+      target: checks_remaining
+      value:
+        type: sum
+        values:
+          - type: literal
+            value: 1
+          - type: field
+            name: check_turns_roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: poisoned
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.poison.remaining_check_exhaustion
+- id: combat.poison.cure
+  name: Curing poison
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Poison can be cured by consuming a Cure Poison potion, or by visiting the Chapel of
+    Metheia back in the city.
+  type: procedure_rule
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is poisoned.
+    cure_completed:
+      type: boolean
+      role: input
+      description: A Cure Poison potion was consumed or the Chapel visit completed.
+    cured:
+      type: boolean
+      role: output
+      description: The poison is cured.
+  effects:
+    - type: set
+      target: cured
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poisoned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: cure_completed
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.poison.chapel_treatment_route
+  dependencies:
+    - key: cure
+      label: Cure Poison potion or Chapel of Metheia
+      object_id: procedure.poison_cure
+- id: combat.poison.immune
+  name: Immune system beats the poison
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A CON test of 01-05 means that immune system has beaten the poison. The effect of it is
+    gone and any remaining rolls are ignored.
+  type: override
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is poisoned.
+    con_roll:
+      type: number
+      role: input
+      description: The CON test roll.
+      minimum: 1
+      maximum: 100
+      integer: true
+    poison_beaten:
+      type: boolean
+      role: output
+      description: The immune system has beaten the poison.
+    checks_remaining:
+      type: number
+      role: output
+      description: Remaining rolls.
+  effects:
+    - type: set
+      target: poison_beaten
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: checks_remaining
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poisoned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: con_roll
+        right:
+          type: literal
+          value: 5
+- id: combat.poison.negative_hp
+  name: Poison below 0 HP
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero reaching 0 HP will continue to lose HP from poison, giving the hero a negative
+    HP that must be healed before the hero wakes up.
+  type: exception
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is poisoned.
+    hit_points:
+      type: number
+      role: input
+      description: Current HP.
+    continues_losing_hp:
+      type: boolean
+      role: output
+      description: Poison keeps reducing HP below 0.
+    must_heal_before_waking:
+      type: boolean
+      role: output
+      description: Negative HP must be healed before the hero wakes up.
+  effects:
+    - type: set
+      target: continues_losing_hp
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: must_heal_before_waking
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poisoned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: hit_points
+        right:
+          type: literal
+          value: 0
+  issues:
+    - issue.phase4.zero_and_negative
+- id: combat.poison.rest
+  name: Poison during a rest
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the party takes a rest (in a dungeon, while traveling, or at an inn), roll all the
+    remaining rolls.
+  type: procedure_rule
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is poisoned.
+    resting:
+      type: boolean
+      role: input
+      description: The party takes a rest.
+    roll_all_remaining:
+      type: boolean
+      role: output
+      description: All remaining rolls are made.
+  effects:
+    - type: set
+      target: roll_all_remaining
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poisoned
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: resting
+        right:
+          type: literal
+          value: true
+- id: combat.poison.rest_death
+  name: Reaching 0 HP from poison during a rest
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the hero reaches 0 Hit Points during a rest, the hero dies.
+  type: trigger
+  scope: global
+  fields:
+    resting:
+      type: boolean
+      role: input
+      description: The party is resting.
+    hp_lost_to_poison_roll:
+      type: boolean
+      role: input
+      description: the hero reached 0 HP by failing one of the remaining poison CON tests rolled during the rest
+    hit_points:
+      type: number
+      role: input
+      description: Current HP.
+    dead:
+      type: boolean
+      role: output
+      description: The hero dies.
+  effects:
+    - type: set
+      target: dead
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: resting
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hp_lost_to_poison_roll
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: hit_points
+        right:
+          type: literal
+          value: 0
+- id: combat.poison.no_repeat
+  name: No second poisoning until cured
+  section_id: section.combat.different_kinds_of_damage.poison
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A poisoned hero cannot be poisoned again until cured.
+  type: constraint
+  scope: global
+  fields:
+    poisoned:
+      type: boolean
+      role: input
+      description: The hero is already poisoned.
+    may_be_poisoned:
+      type: boolean
+      role: output
+      description: The hero can be poisoned.
+  effects:
+    - type: set
+      target: may_be_poisoned
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: poisoned
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.poison.remaining_check_exhaustion
+- id: combat.disease.exposure
+  name: Disease exposure avoided
+  section_id: section.combat.different_kinds_of_damage.disease
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Disease
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Heroes may contract diseases either from enemies or various events. If wounded by a
+    creature that causes disease, or if there is any other indication that a hero may contract a
+    disease, make a CON roll, applying any modifier from the disease. If successful, there is no
+    effect, and the hero manages to avoid the sickness.
+  type: trigger
+  scope: global
+  fields:
+    disease_exposure:
+      type: boolean
+      role: input
+      description:
+        Wounded by a creature that causes disease, or another indication that the hero may
+        contract a disease.
+    con:
+      type: number
+      role: input
+      description: Constitution of the hero.
+    disease_modifier:
+      type: number
+      role: input
+      description: Modifier from the disease.
+    con_roll:
+      type: number
+      role: input
+      description: The CON roll.
+      minimum: 1
+      maximum: 100
+      integer: true
+    diseased:
+      type: boolean
+      role: output
+      description: The hero contracted the disease.
+  effects:
+    - type: set
+      target: diseased
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: disease_exposure
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: con_roll
+        right:
+          type: sum
+          values:
+            - type: field
+              name: con
+            - type: field
+              name: disease_modifier
+  term_refs:
+    - term.disease
+    - term.constitution
+- id: combat.disease.effect
+  name: Disease effect
+  section_id: section.combat.different_kinds_of_damage.disease
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Disease
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If it fails however, the hero loses half its CON and STR (RDD) after any ongoing battle
+    is over until cured.
+  type: calculation
+  scope: global
+  fields:
+    disease_exposure:
+      type: boolean
+      role: input
+      description: An exposure roll was required.
+    con:
+      type: number
+      role: input
+      description: Constitution of the hero.
+    str:
+      type: number
+      role: input
+      description: Strength of the hero.
+    disease_modifier:
+      type: number
+      role: input
+      description: Modifier from the disease.
+    con_roll:
+      type: number
+      role: input
+      description: The CON roll.
+      minimum: 1
+      maximum: 100
+      integer: true
+    diseased:
+      type: boolean
+      role: output
+      description: The hero contracted the disease.
+    con_loss:
+      type: number
+      role: output
+      description: CON lost (half, rounded down).
+    str_loss:
+      type: number
+      role: output
+      description: STR lost (half, rounded down).
+    applies_after_battle:
+      type: boolean
+      role: output
+      description: The loss applies after any ongoing battle is over.
+  effects:
+    - type: set
+      target: diseased
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: con_loss
+      value:
+        type: arithmetic
+        operator: floor
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: con
+              - type: literal
+                value: 2
+    - type: set
+      target: str_loss
+      value:
+        type: arithmetic
+        operator: floor
+        values:
+          - type: arithmetic
+            operator: divide
+            values:
+              - type: field
+                name: str
+              - type: literal
+                value: 2
+    - type: set
+      target: applies_after_battle
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: disease_exposure
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: con_roll
+        right:
+          type: sum
+          values:
+            - type: field
+              name: con
+            - type: field
+              name: disease_modifier
+  issues:
+    - issue.disease.concurrent_effects
+  dependencies:
+    - key: follow_up
+      label: Disease exposure and recovery
+      object_id: procedure.damage_follow_up
+  term_refs:
+    - term.rounded_down
+- id: combat.disease.cure
+  name: Curing disease
+  section_id: section.combat.different_kinds_of_damage.disease
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Disease
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Disease can be cured by consuming a potion to cure disease or by visiting the sick wards.
+  type: procedure_rule
+  scope: global
+  fields:
+    diseased:
+      type: boolean
+      role: input
+      description: The hero is diseased.
+    cure_completed:
+      type: boolean
+      role: input
+      description: A potion to cure disease was consumed or the sick wards visit completed.
+    cured:
+      type: boolean
+      role: output
+      description: The disease is cured.
+  effects:
+    - type: set
+      target: cured
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: diseased
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: cure_completed
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: cure
+      label: Potion to cure disease or the sick wards
+      object_id: procedure.disease_cure
+- id: combat.disease.rest_recovery
+  name: Beating a disease during a rest
+  section_id: section.combat.different_kinds_of_damage.disease
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Disease
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Whenever the party takes a rest, in a dungeon, during travel, or at an inn, the hero
+    may make a CON test. On a result of 01-05, the immune system finally beats the disease, and the
+    hero is cured.
+  type: random_resolution
+  scope: global
+  fields:
+    diseased:
+      type: boolean
+      role: input
+      description: The hero is diseased.
+    resting:
+      type: boolean
+      role: input
+      description: The party takes a rest.
+    con_roll:
+      type: number
+      role: input
+      description: The CON test roll.
+      minimum: 1
+      maximum: 100
+      integer: true
+    cured:
+      type: boolean
+      role: output
+      description: The hero is cured.
+  effects:
+    - type: set
+      target: cured
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: diseased
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: resting
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: con_roll
+        right:
+          type: literal
+          value: 5

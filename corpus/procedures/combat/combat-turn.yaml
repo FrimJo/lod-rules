@@ -1,0 +1,480 @@
+- id: procedure.combat_turn
+  name: Combat Turn flowchart
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Pull initiative token. What kind of token? Hero? Is there a Hero/Mercenary that has not
+    acted? yes! Choose a character to act with. Remove Stunned, Parry Stance or Power Attack tokens.
+    Perform chosen action(s). Enemy? Is there an Enemy that has not acted? yes! Check Quick
+    Reference card to see what enemy to act with. Remove Stunned, Parry Stance or Power Attack
+    tokens. Perform action(s) according to Enemy behaviour card. no! Last token in the bag? yes!
+    Move wandering monster(s). Refill initiative bag, removing tokens for each casualty. Roll
+    scenario die. ... If at any point all heroes or all enemies are dead the sequence ends. Any
+    hero/mercenary that has not acted during the combat turn may then act as normal.
+  see_also:
+    - section.into_the_dungeons.initiative
+    - section.combat.end_of_battle
+    - section.into_the_dungeons.activation
+  unresolved_references:
+    - The chart asks "Last token in the bag?" only on the branch where the drawn token has no
+      unacted Hero/Mercenary or Enemy left; every "Perform" box loops straight back to "Pull
+      initiative token". It does not show what happens when the model of the last token in the bag
+      has acted.
+  issues:
+    - issue.0001
+  fields:
+    token_kind:
+      type: string
+      role: input
+      description: 'kind of the pulled initiative token: hero or enemy'
+    hero_or_mercenary_unacted:
+      type: boolean
+      role: input
+      description: a Hero/Mercenary has not acted this combat turn
+    enemy_unacted:
+      type: boolean
+      role: input
+      description: an Enemy has not acted this combat turn
+    last_token_in_bag:
+      type: boolean
+      role: input
+      description: the pulled token was the last token in the bag
+    all_heroes_dead:
+      type: boolean
+      role: input
+      description: all heroes are dead
+    all_enemies_dead:
+      type: boolean
+      role: input
+      description: all enemies are dead
+    activated_side:
+      type: string
+      role: output
+      description: hero, enemy or none
+    remove_status_tokens:
+      type: boolean
+      role: output
+      description: remove the activated model’s Stunned, Parry Stance or Power Attack tokens
+    wandering_monsters_moved:
+      type: boolean
+      role: output
+      description: move wandering monster(s)
+    initiative_bag_refilled:
+      type: boolean
+      role: output
+      description: refill the initiative bag, removing tokens for each casualty
+    scenario_die_rolled:
+      type: boolean
+      role: output
+      description: roll the scenario die
+    sequence_ended:
+      type: boolean
+      role: output
+      description: the combat turn sequence ends
+    unacted_heroes_may_act:
+      type: boolean
+      role: output
+      description: any hero/mercenary that has not acted may act as normal
+    pull_next_token:
+      type: boolean
+      role: output
+      description: return to Pull initiative token
+  dependencies:
+    - key: hero_activation
+      label: Choose a character to act with and perform the chosen action(s)
+      object_id: procedure.activation
+    - key: enemy_choice
+      label: Check Quick Reference card to see what enemy to act with
+      object_id: procedure.enemy_priority
+    - key: enemy_behaviour
+      label: Perform action(s) according to Enemy behaviour card
+      section_id: section.combat.acting_with_enemies
+    - key: wandering_monsters
+      label: Move wandering monster(s)
+      object_id: procedure.wandering_monster
+    - key: refill_bag
+      label: Refill initiative bag, removing tokens for each casualty
+      object_id: procedure.initiative
+    - key: scenario_die
+      label: Roll scenario die
+      object_id: procedure.scenario_die
+  steps:
+    - id: reset
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: Pull initiative token.
+      effects:
+        - type: set
+          target: activated_side
+          value:
+            type: literal
+            value: none
+        - type: set
+          target: remove_status_tokens
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: wandering_monsters_moved
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: initiative_bag_refilled
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: scenario_die_rolled
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: sequence_ended
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: unacted_heroes_may_act
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: pull_next_token
+          value:
+            type: literal
+            value: false
+    - id: sequence_ends
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: If at any point all heroes or all enemies are dead the sequence ends. Any
+        hero/mercenary that has not acted during the combat turn may then act as normal.
+      when:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_heroes_dead
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_enemies_dead
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: sequence_ended
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: unacted_heroes_may_act
+          value:
+            type: literal
+            value: true
+    - id: hero_token
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        Hero? Is there a Hero/Mercenary that has not acted? yes! Choose a character to act
+        with. Remove Stunned, Parry Stance or Power Attack tokens. Perform chosen action(s).
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_heroes_dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_enemies_dead
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: token_kind
+            right:
+              type: literal
+              value: hero
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hero_or_mercenary_unacted
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: activated_side
+          value:
+            type: literal
+            value: hero
+        - type: set
+          target: remove_status_tokens
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: hero_activation
+    - id: enemy_token
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        Enemy? Is there an Enemy that has not acted? yes! Check Quick Reference card to see
+        what enemy to act with. Remove Stunned, Parry Stance or Power Attack tokens. Perform
+        action(s) according to Enemy behaviour card.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_heroes_dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_enemies_dead
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: token_kind
+            right:
+              type: literal
+              value: enemy
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_unacted
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: activated_side
+          value:
+            type: literal
+            value: enemy
+        - type: invoke
+          dependency: enemy_choice
+        - type: set
+          target: remove_status_tokens
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: enemy_behaviour
+    - id: end_of_bag
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: no! Last token in the bag? yes! Move wandering monster(s). Refill initiative bag,
+        removing tokens for each casualty. Roll scenario die.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_heroes_dead
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: all_enemies_dead
+                right:
+                  type: literal
+                  value: false
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: token_kind
+                    right:
+                      type: literal
+                      value: hero
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hero_or_mercenary_unacted
+                    right:
+                      type: literal
+                      value: false
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: token_kind
+                    right:
+                      type: literal
+                      value: enemy
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: enemy_unacted
+                    right:
+                      type: literal
+                      value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: last_token_in_bag
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: set
+          target: wandering_monsters_moved
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: wandering_monsters
+        - type: set
+          target: initiative_bag_refilled
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: refill_bag
+        - type: set
+          target: scenario_die_rolled
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: scenario_die
+    - id: loop
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 114
+          printed_page: 112
+          heading: Combat Turn
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: Pull initiative token.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_heroes_dead
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: all_enemies_dead
+            right:
+              type: literal
+              value: false
+      effects:
+        - type: set
+          target: pull_next_token
+          value:
+            type: literal
+            value: true
+  entry_step: reset
+  exit_step: loop

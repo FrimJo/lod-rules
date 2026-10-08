@@ -6,15 +6,57 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 120
       printed_page: 118
-      heading: parry with a weapon
+      heading: Parry with a Weapon
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 179
+      printed_page: 177
+      heading: Weapons
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: One hero defence attempt. Dodge limit is per battle; parry is once per turn. Supplied
-    talent/perk eligibility and modifiers augment, never replace, source restrictions.
+  source_text: Dodging and parrying can only be done if the attack comes through the hero’s ZOC. ...
+    If not in Parry Stance, you can dodge (Dodge) 1 attack and parry 1 attack with a shield (CS-15),
+    or If in Parry Stance, you may dodge 1 attack using dodge (Dodge+15), and parry 1 attack with a
+    shield (CS+15), or a weapon (CS).
   fields:
     incoming_hit:
       type: boolean
@@ -103,6 +145,12 @@
       type: number
       role: input
       description: durability
+    fast_parries_this_turn:
+      type: number
+      role: input
+      description: parries already made this turn using the Fast special rule outside Parry Stance
+      minimum: 0
+      integer: true
     defence_eligible:
       type: boolean
       role: output
@@ -147,6 +195,22 @@
       type: boolean
       role: output
       description: Parry fumble rule input
+    is_hero:
+      type: boolean
+      role: output
+      description: the defending model is a hero
+    weapon_parry:
+      type: boolean
+      role: output
+      description: the defence roll is a parry with a weapon
+    using_fast_parry:
+      type: boolean
+      role: output
+      description: the weapon parry is made with the Fast special rule outside Parry Stance
+    parry_allowed:
+      type: boolean
+      role: output
+      description: the Fast special rule allows the parry
   dependencies:
     - key: damage
       label: Apply arm protection to supplied spillover
@@ -158,14 +222,24 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: start
+          heading: Parrying or Dodging
           extraction:
-            method: text
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: If Not in a Parry Stance
+          extraction:
+            method: image
             confidence: high
             visually_verified: true
       source_text:
-        Defence requires incoming attack through ZOC, resolved Power restriction, and eligible
-        equipment/use count.
+        Dodging and parrying can only be done if the attack comes through the hero’s ZOC. ...
+        If your hero performed a Power Attack in its last action, dodging or parrying is not
+        allowed.
       effects:
         - type: set
           target: defence_eligible
@@ -182,20 +256,63 @@
           value:
             type: literal
             value: false
+        - type: set
+          target: is_hero
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: weapon_parry
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: using_fast_parry
+          value:
+            type: literal
+            value: false
     - id: dodge
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: dodge
+          heading: Parrying or Dodging
           extraction:
-            method: text
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: If Not in a Parry Stance
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 109
+          printed_page: 107
+          heading: Aim
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: Aim
+          extraction:
+            method: image
             confidence: high
             visually_verified: true
       source_text:
-        Unused dodge allowed once per battle unless explicit talent/perk grants more. Aiming
-        forbids dodge.
+        Dodging can only be done ONCE during a battle by each character, unless a Talent or
+        Perk specifies otherwise. ... the hero may try to dodge an attack by making a Dodge Skill
+        Check. ... An aiming model cannot dodge
       when:
         type: all
         conditions:
@@ -283,12 +400,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: dodge stance
+          heading: Dodge
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Parry Stance gives +15 Dodge.
+      source_text:
+        As long as the hero has an unused dodge, one incoming strike or arrow may be dodged
+        with a +15 modifier on the Dodge Skill.
       when:
         type: all
         conditions:
@@ -332,16 +451,28 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: weapon
+          heading: If in Parry Stance
           extraction:
-            method: text
+            method: image
             confidence: high
             visually_verified: true
-      source_text: Weapon parry requires Parry Stance; roll CS, with supplied talent/weapon modifiers.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: Parry with a Weapon
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        'If the hero has taken up a Parry Stance, then one dodge AND one parry is permissible:
+        ... To manage this, you must succeed with a CS test.'
       when:
         type: all
         conditions:
-          - type: all
+          - &a2
+            type: all
             conditions:
               - type: compare
                 operator: eq
@@ -427,18 +558,114 @@
           value:
             type: literal
             value: 1
+        - type: set
+          target: weapon_parry
+          value:
+            type: literal
+            value: true
+    - id: fast_weapon_parry
+      source:
+        - *a1
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: Parry with a Weapon
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        Weapon may be used to parry once per turn even though the hero did not choose the Parry
+        Stance ... To manage this, you must succeed with a CS test.
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: parry_stance
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fast_weapon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_ready
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: fast_parries_this_turn
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: defence_eligible
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: defence_threshold
+          value:
+            type: sum
+            values:
+              - type: field
+                name: cs
+              - type: field
+                name: talent_modifier
+        - type: set
+          target: parries_used
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: weapon_parry
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: using_fast_parry
+          value:
+            type: literal
+            value: true
+      rule_refs:
+        - combat.weapon.special.fast
     - id: shield
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: shield
+          heading: If Not in a Parry Stance
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Shield parry once per turn at CS-15 outside stance.
+      source_text: If the hero is equipped with a shield, he may also parry 1 attack per turn with CS -15.
       when:
         type: all
         conditions:
@@ -528,12 +755,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: shield stance
+          heading: Parry with a Shield
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Shield in Parry Stance instead uses CS+15.
+      source_text:
+        A shield is somewhat easier to parry with, especially if you are prepared. To succeed,
+        you must roll below CS +15.
       when:
         type: all
         conditions:
@@ -579,13 +808,33 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: success
+          heading: If Not in a Parry Stance
           extraction:
-            method: text
+            method: image
             confidence: high
             visually_verified: true
-      source_text: Dodge uses skill check; weapon parry 95–100 fails even above that skill. Shield
-        equality is not silently resolved.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: Parry with a Weapon
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: Parry with a Shield
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If successful, that attack fails to hit. ... To manage this, you must succeed with a CS
+        test. However, if you roll 95-00 you not only fail ... To succeed, you must roll below CS
+        +15.
       when:
         type: all
         conditions:
@@ -681,12 +930,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: shield equality
+          heading: Parry with a Shield
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Exact shield threshold conflicts with the general check convention; supply a resolution.
+      source_text: To succeed, you must roll below CS +15.
       when:
         type: all
         conditions:
@@ -739,12 +988,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: shield equality supplied
+          heading: Parry with a Shield
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Accept supplied resolution only at ambiguous equality.
+      source_text: To succeed, you must roll below CS +15.
       when:
         type: all
         conditions:
@@ -800,12 +1049,23 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: avoid
+          heading: If Not in a Parry Stance
           extraction:
-            method: text
+            method: image
             confidence: high
             visually_verified: true
-      source_text: Successful dodge/weapon parry negates damage.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 120
+          printed_page: 118
+          heading: Parry with a Weapon
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If successful, that attack fails to hit. ... A successful parry with a weapon negates
+        all damage since a well performed parry diverts the force away from the target.
       when:
         type: all
         conditions:
@@ -852,12 +1112,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: shield absorbs
+          heading: Parry with a Shield
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Shield subtracts DEF; when all damage negated nothing spills.
+      source_text: A successful parry with a shield subtracts the shield’s DEF from the damage.
       when:
         type: all
         conditions:
@@ -907,12 +1167,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: spillover
+          heading: Parry with a Shield
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Damage exceeding shield DEF damages shield once and spills onto arm, where armour applies.
+      source_text:
+        If the damage is higher than the shield’s DEF, the shield will take 1 Point of Damage.
+        The rest of the damage spills onto the arm of the hero which is protected by any armour.
       when:
         type: all
         conditions:
@@ -969,12 +1231,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 112
           printed_page: 110
-          heading: dodge fumble
+          heading: Fumble
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Fumbling dodge causes hero to fall over.
+            visually_verified: true
+      source_text: A hero fumbling when dodging or shoving will fall over and become prone.
       when:
         type: all
         conditions:
@@ -1014,12 +1276,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: weapon damage
+          heading: Parry with a Weapon
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Weapon parry 95–99 inflicts durability damage unless Fast; reuse existing rule.
+      source_text: However, if you roll 95-00 you not only fail, but the weapon also takes 1 Point of Damage.
       when:
         type: all
         conditions:
@@ -1043,7 +1305,7 @@
             operator: eq
             left:
               type: field
-              name: fast_weapon
+              name: using_fast_parry
             right:
               type: literal
               value: false
@@ -1072,12 +1334,24 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 120
           printed_page: 118
-          heading: parry overlap
+          heading: Parry with a Weapon
           extraction:
-            method: text
+            method: image
             confidence: high
             visually_verified: true
-      source_text: At 100 weapon damage overlaps general fumble; keep unresolved instead of double applying.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 112
+          printed_page: 110
+          heading: Fumble
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        However, if you roll 95-00 you not only fail, but the weapon also takes 1 Point of
+        Damage. ... A hero rolling 100 when attacking or parrying damages his weapon or shield.
+        Deduct 1 point of durability.
       when:
         type: all
         conditions:
@@ -1101,7 +1375,7 @@
             operator: eq
             left:
               type: field
-              name: fast_weapon
+              name: using_fast_parry
             right:
               type: literal
               value: false
@@ -1116,18 +1390,60 @@
       effects:
         - type: unresolved
           issue_id: issue.phase4.durability_overlap
+    - id: fast_weapon_damage
+      source:
+        - *a1
+      source_text: ... but the weapon is damaged on 90-00.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence_eligible
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: weapon
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: using_fast_parry
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 90
+      effects: []
+      rule_refs:
+        - combat.weapon.special.fast.damage
     - id: shield_fumble
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 112
           printed_page: 110
-          heading: shield fumble
+          heading: Fumble
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Shield fumble costs one durability.
+            visually_verified: true
+      source_text: A hero rolling 100 when attacking or parrying damages his weapon or shield.
       when:
         type: all
         conditions:
@@ -1167,12 +1483,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 112
           printed_page: 110
-          heading: shield fumble damage
+          heading: Fumble
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Reuse existing shield fumble damage rule.
+            visually_verified: true
+      source_text: Deduct 1 point of durability.
       when:
         type: all
         conditions:
@@ -1209,6 +1525,12 @@
     - issue.combat.power_timing
     - issue.combat.shield_threshold
     - issue.phase4.durability_overlap
+    - issue.combat.fast_parry_in_stance
+  unresolved_references:
+    - Fast (PDF 179) lets a weapon parry once per turn outside Parry Stance and damages the weapon
+      on 90-00. The procedure applies the 90-00 damage to that out-of-stance Fast parry only; a Fast
+      weapon parrying in Parry Stance uses the 95-00 Parry with a Weapon rule
+      (issue.combat.fast_parry_in_stance).
 - id: procedure.thrown_preparation
   name: thrown preparation
   section_id: section.combat.throwing_potions
@@ -1217,16 +1539,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 117
       printed_page: 115
-      heading: throwing potions
+      heading: Throwing Potions
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 18
+      printed_page: 16
+      heading: Dice Rolling and Skill Checks
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Throw a (Tr) preparation at an enemy or square in LOS. Supply all geometric outcomes. A
-    miss scatters; damage remains a handoff.
+  source_text: A (Tr) behind the name of the potion indicates that the potion is used as a thrown
+    weapon. These can be aimed at an enemy, or at any other square within LOS. Contrary to ordinary
+    missile weapons, you can lob your potion over friends, foes and obstacles, hitting someone
+    further away. A successful RS is required to hit, and if you miss, the potion instead hits a
+    random square adjacent to the target.
   fields:
     is_thrown_preparation:
       type: boolean
@@ -1244,10 +1578,14 @@
       type: boolean
       role: input
       description: through door
+    in_front_of_door:
+      type: boolean
+      role: input
+      description: the thrower stands in one of the two squares directly in front of the door
     adjacent_to_door:
       type: boolean
       role: input
-      description: adjacent to door
+      description: the thrower is adjacent to the door (decides where a failed toss lands)
     target_large:
       type: boolean
       role: input
@@ -1314,12 +1652,16 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: prepare
+          heading: Throwing Potions
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Requires (Tr) and target in LOS. Lobbing over models/obstacles is allowed.
+            visually_verified: true
+      source_text:
+        A (Tr) behind the name of the potion indicates that the potion is used as a thrown
+        weapon. These can be aimed at an enemy, or at any other square within LOS. Contrary to
+        ordinary missile weapons, you can lob your potion over friends, foes and obstacles, hitting
+        someone further away.
       when:
         type: all
         conditions:
@@ -1356,12 +1698,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: obstacle
+          heading: Lobbing Over a Model or Obstacle
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: A single -10 for obstacles/models not adjacent to thrower, regardless of count.
+            visually_verified: true
+      source_text: If your hero tosses the potion over an obstacle or a model, they incur a -10 RS
+        modifier unless these are adjacent to the hero. This is a single modifier no matter how many
+        models or obstacles there are between the hero and the target.
       when:
         type: all
         conditions:
@@ -1405,12 +1749,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: door
+          heading: Throwing Through a Door Opening
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Through door -10 unless directly in either of two front squares.
+            visually_verified: true
+      source_text:
+        If your hero decides to throw the potion through a door opening, they incur a -10 RS
+        modifier, unless they are standing in one of the two squares directly in front of the door.
       when:
         type: all
         conditions:
@@ -1442,7 +1788,7 @@
             operator: eq
             left:
               type: field
-              name: adjacent_to_door
+              name: in_front_of_door
             right:
               type: literal
               value: false
@@ -1462,12 +1808,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: large
+          heading: Throwing at a large enemy
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Large/X-large target gives +10 RS.
+            visually_verified: true
+      source_text:
+        Throwing a potion at a large or X-large enemy is easier and the throwing hero may add
+        +10 to the RS skill.
       when:
         type: all
         conditions:
@@ -1511,12 +1859,16 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: hit
+          heading: Throwing Potions
           extraction:
-            method: text
+            method: image
             confidence: high
-            visually_verified: false
-      source_text: Successful RS hits chosen enemy/square.
+            visually_verified: true
+        - *a1
+      source_text:
+        A successful RS is required to hit ... A result equal to or less than the skill or stat
+        level will result in a success. ... A roll of 91-00 is always a failure, no matter what your
+        skill level or modifiers are.
       when:
         type: all
         conditions:
@@ -1545,13 +1897,13 @@
               type: field
               name: threshold
           - type: compare
-            operator: lt
+            operator: lte
             left:
               type: field
               name: roll
             right:
               type: literal
-              value: 100
+              value: 90
       effects:
         - type: set
           target: hit
@@ -1569,12 +1921,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: scatter
+          heading: Throwing Potions
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Miss hits random adjacent target square; supply random square.
+            visually_verified: true
+      source_text: ... and if you miss, the potion instead hits a random square adjacent to the target.
       when:
         type: all
         conditions:
@@ -1640,12 +1992,14 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: door scatter
+          heading: Throwing Through a Door Opening
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text: Nonadjacent doorway miss instead hits random one of two squares in front of door.
+            visually_verified: true
+      source_text:
+        If not adjacent to the door, and the toss is a failure, it hits one of the two squares
+        in front of the door randomly. See the diagram below for explanation.
       when:
         type: all
         conditions:
@@ -1709,14 +2063,15 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: large area
+          heading: Area of effect and large enemies
           extraction:
             method: text
             confidence: high
-            visually_verified: false
+            visually_verified: true
       source_text:
-        Large/X-large covering centre suffers normal centre DMG +1 per other affected square it
-        covers, not repeated centre/adjacent rolls.
+        Some thrown potions will affect several squares. If such a potion hits a square covered
+        by a large or X-large enemy, it takes the normal DMG for the centre square, +1 point of DMG
+        per other square of the affected area it covers.
       when:
         type: all
         conditions:
@@ -1778,14 +2133,12 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 117
           printed_page: 115
-          heading: resolve
+          heading: Throwing Potions
           extraction:
             method: text
             confidence: high
-            visually_verified: false
-      source_text:
-        Other models in remaining squares take preparation effect normally. Supply damage-type
-        resolution separately.
+            visually_verified: true
+      source_text: Other enemies standing in the remaining squares take damage as normal.
       when:
         type: all
         conditions:
@@ -1836,16 +2189,19 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 121
       printed_page: 119
-      heading: dealing damage
+      heading: Dealing Damage
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Resolve one supplied hit after defence. Reuse damage and HP rules. Armour durability
-    and struck Quick Slot effects are separate supplied handoffs; never subtract dependency damage
-    twice.
+  source_text:
+    Roll damage according to the weapon or monster damage noted in the Monster Table. Add a
+    damage bonus if your hero or the monster is strong enough for that. Subtract the target’s
+    Natural Armour and any other armour. This is the number of Hit Points to subtract from the
+    target. An enemy dies when it is reduced to 0 Hit Points. A hero that reaches 0 is knocked out
+    and starts bleeding out.
   fields:
     hit_resolved:
       type: boolean
@@ -1966,7 +2322,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: damage formula
+          heading: Dealing Damage
           extraction:
             method: text
             confidence: high
@@ -2001,7 +2357,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: apply hp
+          heading: Dealing Damage
           extraction:
             method: text
             confidence: high
@@ -2056,7 +2412,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: location head
+          heading: Hit Area (Only When Hitting Heroes)
           extraction:
             method: text
             confidence: high
@@ -2122,7 +2478,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: location arms
+          heading: Hit Area (Only When Hitting Heroes)
           extraction:
             method: text
             confidence: high
@@ -2188,7 +2544,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: location torso
+          heading: Hit Area (Only When Hitting Heroes)
           extraction:
             method: text
             confidence: high
@@ -2254,7 +2610,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: location legs
+          heading: Hit Area (Only When Hitting Heroes)
           extraction:
             method: text
             confidence: high
@@ -2320,7 +2676,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: armour
+          heading: Dealing Damage
           extraction:
             method: text
             confidence: high
@@ -2356,7 +2712,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: quick slot
+          heading: Quick Slots and Damage
           extraction:
             method: text
             confidence: high
@@ -2416,7 +2772,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: enemy zero
+          heading: Dealing Damage
           extraction:
             method: text
             confidence: high
@@ -2481,7 +2837,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: hero zero
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -2613,7 +2969,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 121
           printed_page: 119
-          heading: negative hp
+          heading: Dealing Damage
           extraction:
             method: text
             confidence: high
@@ -2648,6 +3004,14 @@
                 right:
                   type: literal
                   value: 0
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_is_hero
+                right:
+                  type: literal
+                  value: true
           - type: compare
             operator: gte
             left:
@@ -2678,7 +3042,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: bleeding
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -2759,7 +3123,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 122
       printed_page: 120
-      heading: bleeding out
+      heading: Bleeding out
       extraction: &a3
         method: text
         confidence: high
@@ -2767,8 +3131,10 @@
   status: extracted
   confidence: high
   source_text:
-    'Resolve one bleeding-out checkpoint: initial zero, rescue, after-battle bandage, party
-    loss or explicitly enabled time limit. Full condition lifecycle remains deferred.'
+    'When the heroes reach 0 Hit Points, they are knocked down and start bleeding out. They
+    are unable to do anything. To get back on their feet during the fight they will need: ... Once the
+    battle is over, and there are companions left standing, one of these may apply a bandage to a
+    fallen friend.'
   fields:
     phase:
       type: string
@@ -2945,7 +3311,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: zero
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3004,7 +3370,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: timer
+          heading: Advanced Rule
           extraction:
             method: text
             confidence: high
@@ -3070,7 +3436,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: rescue
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3177,7 +3543,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: healed
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3298,7 +3664,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: bandage
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3403,7 +3769,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: party lost
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3516,7 +3882,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: no help
+          heading: Bleeding out
           extraction:
             method: text
             confidence: high
@@ -3604,7 +3970,7 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 122
           printed_page: 120
-          heading: expired
+          heading: Advanced Rule
           extraction:
             method: text
             confidence: high

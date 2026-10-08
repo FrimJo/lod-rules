@@ -1,0 +1,3077 @@
+- id: combat.who_can_fight.adjacent
+  name: adjacent models may strike
+  section_id: section.combat.who_can_fight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Models that are adjacent may strike at each other.
+  type: constraint
+  scope: global
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: the attacker and target are adjacent
+    may_strike:
+      type: boolean
+      role: output
+      description: the attacker may strike the target
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: adjacent
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: may_strike
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.adjacent
+- id: combat.who_can_fight.reach
+  name: Reach strike across one square
+  section_id: section.combat.who_can_fight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Models equipped with a weapon with the Reach Special Rule, can strike at an enemy 1
+    square away, even if there is a friendly (not enemy) model in between.
+  see_also:
+    - section.appendix_iii_equipment.weapons.table
+  type: exception
+  scope: global
+  fields:
+    weapon_has_reach:
+      type: boolean
+      role: input
+      description: the striking weapon has the Reach Special Rule
+    squares_between:
+      type: number
+      role: input
+      description: squares between the striker and the enemy
+      minimum: 0
+      integer: true
+    enemy_model_between:
+      type: boolean
+      role: input
+      description: an enemy model stands in the square in between
+    may_strike:
+      type: boolean
+      role: output
+      description: the attacker may strike the target
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon_has_reach
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: squares_between
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_model_between
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: set
+      target: may_strike
+      value:
+        type: literal
+        value: true
+- id: combat.who_can_fight.missile_range
+  name: Missile Weapon reach
+  section_id: section.combat.who_can_fight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Models equipped with Missile Weapons have a maximum reach of 10 squares in a dungeon,
+    and unlimited range outdoors.
+  type: constraint
+  scope: global
+  fields:
+    weapon_is_missile_weapon:
+      type: boolean
+      role: input
+      description: the model attacks with a Missile Weapon
+    outdoors:
+      type: boolean
+      role: input
+      description: the shot is made outdoors rather than in a dungeon
+    distance:
+      type: number
+      role: input
+      description: distance to the target in squares
+      minimum: 0
+      integer: true
+    within_range:
+      type: boolean
+      role: output
+      description: the target is within the Missile Weapon reach
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_is_missile_weapon
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: outdoors
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: distance
+            right:
+              type: literal
+              value: 10
+    - type: set
+      target: within_range
+      value:
+        type: literal
+        value: true
+- id: combat.who_can_fight.long_range_adjacent
+  name: Long Range Weapons and adjacent enemies
+  section_id: section.combat.who_can_fight
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Long Range Weapons may not normally be fired if an enemy is standing adjacent to the firer.
+  issues:
+    - issue.combat.long_range_weapons
+  type: constraint
+  scope: global
+  fields:
+    weapon_is_long_range_weapon:
+      type: boolean
+      role: input
+      description: the firer uses a Long Range Weapon (supplied; the book does not define the category)
+    enemy_adjacent:
+      type: boolean
+      role: input
+      description: an enemy is standing adjacent to the firer
+    exception_applies:
+      type: boolean
+      role: input
+      description: another printed rule lets this weapon fire while an enemy is adjacent
+    may_fire:
+      type: boolean
+      role: output
+      description: the Long Range Weapon may be fired
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: weapon_is_long_range_weapon
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_adjacent
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: exception_applies
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: may_fire
+      value:
+        type: literal
+        value: true
+- id: combat.action.cost.zero
+  name: 0 AP combat actions
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'A model may choose any of these actions, in any combination during their turn: 0 AP: -
+    Change facing. - Praying.'
+  type: calculation
+  scope: global
+  fields:
+    action:
+      type: string
+      role: input
+      description: chosen combat action
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the action
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: change_facing
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: praying
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 0
+  term_refs:
+    - term.action_points
+- id: combat.action.cost.one
+  name: 1 AP combat actions
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '1 AP: - Move. - Open a door. - Standard Attack. - Parry Stance. - Change gear. -
+    Shove. - Aim. - Load/reload Ranged Weapons. - Stand up (if lying down). - Pick up a dropped
+    weapon. - Exchange gear between two Heroes. - Cast a Quick Spell/Read a Scroll. - Apply
+    bandages. - Break down a door.'
+  type: calculation
+  scope: global
+  fields:
+    action:
+      type: string
+      role: input
+      description: chosen combat action
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the action
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: open_door
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: standard_attack
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: parry_stance
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: change_gear
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: shove
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: aim
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: load_reload_ranged_weapon
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: stand_up
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: pick_up_dropped_weapon
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: exchange_gear
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: cast_quick_spell
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: read_scroll
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: apply_bandage
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: break_down_door
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+  term_refs:
+    - term.action_points
+    - term.quick_spell
+    - term.magic_scroll
+- id: combat.action.cost.two
+  name: 2 AP combat actions
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: '2 AP: - Pick a lock. - Power Attack. - Charge Attack. - Cast a Standard Spell. -
+    Search through furniture or a corpse.'
+  type: calculation
+  scope: global
+  fields:
+    action:
+      type: string
+      role: input
+      description: chosen combat action
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the action
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: pick_lock
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: power_attack
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: charge_attack
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: cast_standard_spell
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action
+        right:
+          type: literal
+          value: search_furniture_or_corpse
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 2
+  term_refs:
+    - term.action_points
+    - term.standard_spell
+- id: combat.action.aim
+  name: Aim bonus
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    By spending 1 AP to aim with a Ranged Weapon at a specific target, a model will gain a
+    +10 modifier in the next action when shooting at that target. If the projectile is not fired in
+    the next action, this bonus is lost. If the target moves out of sight, the bonus is lost. If
+    another model moves through the LOS between the shooter and the target, even if it does not stop
+    to block LOS, the bonus is lost. If an aiming model loses HP for some reason, the bonus is lost.
+  see_also:
+    - section.combat.hero_attacking.table
+  type: modifier
+  scope: global
+  fields:
+    ranged_weapon:
+      type: boolean
+      role: input
+      description: the model aimed with a Ranged Weapon
+    aimed_at_target:
+      type: boolean
+      role: input
+      description: the model spent 1 AP aiming a Ranged Weapon at this target
+    fired_next_action:
+      type: boolean
+      role: input
+      description: the projectile is fired in the next action, at that target
+    target_left_sight:
+      type: boolean
+      role: input
+      description: the target moved out of sight
+    model_crossed_los:
+      type: boolean
+      role: input
+      description: another model moved through the LOS between shooter and target
+    aimer_lost_hp:
+      type: boolean
+      role: input
+      description: the aiming model lost HP
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this shot
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ranged_weapon
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: aimed_at_target
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fired_next_action
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_left_sight
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: model_crossed_los
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: aimer_lost_hp
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+- id: combat.action.aim.exposed
+  name: aiming model is exposed
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An aiming model cannot dodge and becomes easier to hit (any negative modifier other
+    than cover is ignored when attacking an enemy that is aiming).
+  type: constraint
+  scope: global
+  fields:
+    target_aiming:
+      type: boolean
+      role: input
+      description: the target model is aiming
+    may_dodge:
+      type: boolean
+      role: output
+      description: the target may dodge
+    ignore_non_cover_negative_modifiers:
+      type: boolean
+      role: output
+      description: negative attack modifiers other than cover are ignored
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target_aiming
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: may_dodge
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: ignore_non_cover_negative_modifiers
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.dodge
+- id: combat.action.aim.limit
+  name: one AP of aim per shot
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only 1 AP can be spent on aiming for each shot.
+  type: constraint
+  scope: global
+  fields:
+    aim_ap_spent:
+      type: number
+      role: input
+      description: AP already spent aiming for this shot
+      minimum: 0
+      integer: true
+    may_aim:
+      type: boolean
+      role: output
+      description: the model may spend AP aiming for this shot
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: aim_ap_spent
+        right:
+          type: literal
+          value: 0
+    - type: set
+      target: may_aim
+      value:
+        type: literal
+        value: true
+- id: combat.action.apply_bandage.other
+  name: apply bandage to an adjacent hero
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Apply Bandage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If you have a bandage equipped in a Quick Slot you can apply that to an adjacent hero
+    if you succeed with a Healing Roll. This cannot be done if either of the two heroes have enemies
+    adjacent. The wounded hero loses 1 AP as well.
+  see_also:
+    - section.equipment.carrying_equipment
+    - section.combat.bleeding_out
+  type: constraint
+  scope: global
+  fields:
+    bandage_in_quick_slot:
+      type: boolean
+      role: input
+      description: the bandage is equipped in a Quick Slot
+    target_adjacent:
+      type: boolean
+      role: input
+      description: the wounded hero is adjacent
+    enemies_adjacent_to_either:
+      type: boolean
+      role: input
+      description: either hero has enemies adjacent
+    healing_roll_succeeded:
+      type: boolean
+      role: input
+      description: the Healing Roll succeeded
+    bandage_applied:
+      type: boolean
+      role: output
+      description: the bandage is applied
+    wounded_hero_ap_lost:
+      type: number
+      role: output
+      description: AP the wounded hero loses
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: bandage_in_quick_slot
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_adjacent_to_either
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: healing_roll_succeeded
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: bandage_applied
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: wounded_hero_ap_lost
+      value:
+        type: literal
+        value: 1
+  term_refs:
+    - term.quick_slot
+    - term.heal
+- id: combat.action.apply_bandage.self
+  name: apply bandage to oneself
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Apply Bandage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may apply a bandage to themselves if there are no enemies in LOS by spending 2 AP.
+  type: exception
+  scope: global
+  fields:
+    is_hero:
+      type: boolean
+      role: input
+      description: the acting model is a hero
+    enemies_in_los:
+      type: boolean
+      role: input
+      description: any enemy is in LOS of the hero
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the action
+    may_self_bandage:
+      type: boolean
+      role: output
+      description: the hero may bandage themselves
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_in_los
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_self_bandage
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 2
+  term_refs:
+    - term.line_of_sight
+- id: combat.action.change_gear
+  name: Change Gear from Quick Slots
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Change Gear (Quick Slots Only)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You can equip anything from one of your ready slots into your hand. For instance, you
+    could grab and drink a Healing Potion using this action. This also includes getting back to a
+    fighting stance afterwards. This could also be used to change weapons or toss an alchemical
+    firebomb.
+  see_also:
+    - section.equipment.carrying_equipment
+  type: constraint
+  scope: global
+  fields:
+    item_in_quick_slot:
+      type: boolean
+      role: input
+      description: the item is in one of the hero’s ready (Quick) slots
+    may_equip:
+      type: boolean
+      role: output
+      description: the item may be equipped into the hand with this action
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_in_quick_slot
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: may_equip
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.quick_slot
+- id: combat.action.break_down_door
+  name: Break Down a Door needs no adjacent enemy
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Break Down a Door
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to break down a door if there are no enemies adjacent. More details on
+    this are given in the ‘Into the Dungeon’ chapter.
+  see_also:
+    - section.into_the_dungeons
+  type: constraint
+  scope: global
+  fields:
+    is_hero:
+      type: boolean
+      role: input
+      description: the acting model is a hero
+    enemies_adjacent:
+      type: boolean
+      role: input
+      description: enemies are adjacent to the hero
+    may_try:
+      type: boolean
+      role: output
+      description: the hero may try to break down the door
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_adjacent
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_try
+      value:
+        type: literal
+        value: true
+- id: combat.action.cast_spell
+  name: Cast a Spell AP cost
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Cast a Spell
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This may require both 1 or 2 AP. Details for this are described in the ‘Magic’ chapter.
+  see_also:
+    - section.magic
+  type: calculation
+  scope: global
+  fields:
+    spell_kind:
+      type: string
+      role: input
+      description: quick or standard spell
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of casting
+  effects:
+    - type: choice
+      selection: spell_kind
+      options:
+        - id: quick
+          effects:
+            - type: set
+              target: action_cost
+              value:
+                type: literal
+                value: 1
+        - id: standard
+          effects:
+            - type: set
+              target: action_cost
+              value:
+                type: literal
+                value: 2
+  term_refs:
+    - term.quick_spell
+    - term.standard_spell
+- id: combat.action.change_facing
+  name: Change Facing timing
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Change Facing
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 160
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This can be done freely at the start of a model’s actions or when all its actions are
+    done. Once you are finished with a model and start moving another, you may not go back and
+    change the facing of the first model.
+  see_also:
+    - section.into_the_dungeons.moving_and_facing
+  issues:
+    - issue.combat.change_facing_timing
+  type: constraint
+  scope: global
+  fields:
+    during_activation:
+      type: boolean
+      role: input
+      description:
+        "the facing change happens at a point in the model's activation (changelog 2.21 entry
+        160: at any point)"
+    moved_on_to_another_model:
+      type: boolean
+      role: input
+      description: the player has finished with this model and started moving another
+    may_change_facing:
+      type: boolean
+      role: output
+      description: the model may change facing now
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: during_activation
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: moved_on_to_another_model
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_change_facing
+      value:
+        type: literal
+        value: true
+- id: combat.action.charge.requirements
+  name: Charge Attack requirements
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Charge Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 67
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    In order to charge an enemy, there must be at least 1 empty square between you and the
+    enemy. A charge must also be done in a straight or strict diagonal line and may not pass a
+    square covered more than 50% by an obstacle. The character is allowed change facing before
+    charging. You must move (up to your max M) adjacent to the enemy (any of the 3 squares in front
+    of the enemy) and perform a standard attack.
+  issues:
+    - issue.combat.charge_move_wording
+  type: constraint
+  scope: global
+  fields:
+    empty_squares_between:
+      type: number
+      role: input
+      description: empty squares between the charger and the enemy
+      minimum: 0
+      integer: true
+    straight_or_strict_diagonal:
+      type: boolean
+      role: input
+      description: the charge path is a straight or strict diagonal line
+    passes_obstacle_over_half:
+      type: boolean
+      role: input
+      description: the path passes a square covered more than 50% by an obstacle
+    path_length:
+      type: number
+      role: input
+      description: squares moved by the charge
+      minimum: 0
+      integer: true
+    movement:
+      type: number
+      role: input
+      description: the charger’s M
+      minimum: 0
+      integer: true
+    ends_in_front_of_enemy:
+      type: boolean
+      role: input
+      description: the charge ends in one of the 3 squares in front of the enemy
+    charge_allowed:
+      type: boolean
+      role: output
+      description: the Charge Attack may be made
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: empty_squares_between
+            right:
+              type: literal
+              value: 1
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_or_strict_diagonal
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: passes_obstacle_over_half
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: path_length
+            right:
+              type: field
+              name: movement
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ends_in_front_of_enemy
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: charge_allowed
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.movement
+- id: combat.action.charge.bonus
+  name: Charge momentum bonus
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Charge Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Your momentum will give you +10 CS.
+  type: modifier
+  scope: global
+  fields:
+    charging:
+      type: boolean
+      role: input
+      description: the attack is a Charge Attack
+    combat_modifier:
+      type: number
+      role: state
+      description: CS modifier for this attack
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: charging
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: combat_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  term_refs:
+    - term.combat_skill
+- id: combat.action.charge.stagger
+  name: successful Charge Attack staggers
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Charge Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful Charge Attack will stagger the target even if it does not lose HP (and
+    manages to parry or dodge) and it is considered to be shoved in all respects and must be moved
+    away from the charger following the direction of the charge when possible. You may then enter
+    the square of the target if no other factors limit this.
+  type: trigger
+  scope: global
+  fields:
+    charge_succeeded:
+      type: boolean
+      role: input
+      description: the Charge Attack succeeded, whether or not the target lost HP
+    target_shoved:
+      type: boolean
+      role: output
+      description: the target is treated as shoved and moved away along the charge direction when possible
+    charger_may_enter_square:
+      type: boolean
+      role: output
+      description: the charger may enter the target’s square if nothing else limits it
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: charge_succeeded
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: target_shoved
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: charger_may_enter_square
+      value:
+        type: literal
+        value: true
+- id: combat.action.exchange_gear
+  name: Exchanging Gear
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Exchanging Gear
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This can only be done by player-controlled models, and only models that are not
+    adjacent to an enemy. Only equipment from a Quick Slot may be exchanged and it costs 1 AP for
+    both models. They must be within 4 squares of each other, and if you draw a straight line
+    between them, there may be no other models in the squares passed by that line. Potions and beef
+    jerky may be consumed as part of that action.
+  see_also:
+    - section.equipment.carrying_equipment
+  type: constraint
+  scope: global
+  fields:
+    both_player_controlled:
+      type: boolean
+      role: input
+      description: both models are player-controlled
+    either_adjacent_to_enemy:
+      type: boolean
+      role: input
+      description: either model is adjacent to an enemy
+    item_from_quick_slot:
+      type: boolean
+      role: input
+      description: the exchanged equipment comes from a Quick Slot
+    distance:
+      type: number
+      role: input
+      description: squares between the two models
+      minimum: 0
+      integer: true
+    models_on_line:
+      type: boolean
+      role: input
+      description: another model is in a square passed by the straight line between them
+    exchange_allowed:
+      type: boolean
+      role: output
+      description: the exchange may be made
+    ap_cost_each:
+      type: number
+      role: output
+      description: AP each of the two models spends
+    may_consume_potion_or_jerky:
+      type: boolean
+      role: output
+      description: potions and beef jerky may be consumed as part of the action
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: both_player_controlled
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: either_adjacent_to_enemy
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_from_quick_slot
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: distance
+            right:
+              type: literal
+              value: 4
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: models_on_line
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: exchange_allowed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: ap_cost_each
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: may_consume_potion_or_jerky
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.quick_slot
+- id: combat.action.reload.ammunition
+  name: reloading needs ammunition
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Loading/Reloading a Ranged Weapon
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    As long as a model has arrows/bolts in a quiver, a model can reload a bow or crossbow.
+    Enemies have an unlimited supply of arrows. A sling can also be reloaded this way.
+  type: constraint
+  scope: global
+  fields:
+    is_enemy:
+      type: boolean
+      role: input
+      description: the reloading model is an enemy
+    ammunition_in_quiver:
+      type: boolean
+      role: input
+      description: the model has arrows/bolts in a quiver
+    may_reload:
+      type: boolean
+      role: output
+      description: the bow, crossbow or sling may be reloaded
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_enemy
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ammunition_in_quiver
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: may_reload
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.reload
+- id: combat.action.reload.bow_sling_cost
+  name: bow and sling reload cost
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Loading/Reloading a Ranged Weapon
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Bows and slings cost 1 AP to reload but to can also be reloaded freely while moving as
+    long as the model is not climbing. This does not apply to crossbows.
+  type: calculation
+  scope: global
+  fields:
+    weapon:
+      type: string
+      role: input
+      description: bow, sling or crossbow
+    reload_cost:
+      type: number
+      role: output
+      description: AP spent on the reload
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon
+        right:
+          type: literal
+          value: bow
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: weapon
+        right:
+          type: literal
+          value: sling
+  effects:
+    - type: set
+      target: reload_cost
+      value:
+        type: literal
+        value: 1
+- id: combat.action.reload.moving_free
+  name: free bow and sling reload while moving
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Loading/Reloading a Ranged Weapon
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Bows and slings cost 1 AP to reload but to can also be reloaded freely while moving as
+    long as the model is not climbing. This does not apply to crossbows.
+  type: exception
+  scope: global
+  fields:
+    weapon:
+      type: string
+      role: input
+      description: bow, sling or crossbow
+    reloading_while_moving:
+      type: boolean
+      role: input
+      description: the reload is done while the model moves
+    climbing:
+      type: boolean
+      role: input
+      description: the model is climbing
+    reload_cost:
+      type: number
+      role: output
+      description: AP spent on the reload
+  when:
+    type: all
+    conditions:
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: bow
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon
+            right:
+              type: literal
+              value: sling
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reloading_while_moving
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: climbing
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: set
+      target: reload_cost
+      value:
+        type: literal
+        value: 0
+  overrides:
+    - combat.action.reload.bow_sling_cost
+- id: combat.action.move
+  name: Move allowance per action
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Move
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A model may move up to its full M. If a model decides to move in their second action as
+    well, they only move half their movement (Rounded down) in the 2nd action. A model may move
+    diagonally, even diagonally between friendly models but may not move through certain obstacles
+    or other models.
+  see_also:
+    - section.into_the_dungeons.moving_and_facing
+  type: calculation
+  scope: global
+  fields:
+    movement:
+      type: number
+      role: input
+      description: the model’s M
+      minimum: 0
+      integer: true
+    move_action:
+      type: string
+      role: input
+      description: first or second move action of the turn
+    movement_allowance:
+      type: number
+      role: output
+      description: squares the model may move in this action
+  effects:
+    - type: choice
+      selection: move_action
+      options:
+        - id: first
+          effects:
+            - type: set
+              target: movement_allowance
+              value:
+                type: field
+                name: movement
+        - id: second
+          effects:
+            - type: set
+              target: movement_allowance
+              value:
+                type: arithmetic
+                operator: floor
+                values:
+                  - type: arithmetic
+                    operator: divide
+                    values:
+                      - type: field
+                        name: movement
+                      - type: literal
+                        value: 2
+  term_refs:
+    - term.movement
+    - term.rounded_down
+- id: combat.action.parry_stance
+  name: Parry Stance
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Parry Stance
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When adopting the Parry Stance, the model prepares for impact. Raising a shield if
+    possible, and carefully monitoring the enemy for potential movements. A Parry Stance will give a
+    hero a bonus to parrying as described on page 118. An enemy taking a Parry Stance will also be
+    harder to hit.
+  see_also:
+    - section.combat.parry_with_a_weapon
+    - section.combat.hero_attacking.table
+  type: definition
+  scope: global
+  fields:
+    model_kind:
+      type: string
+      role: input
+      description: hero or enemy taking the Parry Stance
+    parry_stance_defence_applies:
+      type: boolean
+      role: output
+      description: the hero uses the Parry Stance parrying bonuses of page 118
+    harder_to_hit:
+      type: boolean
+      role: output
+      description: the enemy in Parry Stance is harder to hit (Hero Attacking table)
+  effects:
+    - type: choice
+      selection: model_kind
+      options:
+        - id: hero
+          effects:
+            - type: set
+              target: parry_stance_defence_applies
+              value:
+                type: literal
+                value: true
+        - id: enemy
+          effects:
+            - type: set
+              target: harder_to_hit
+              value:
+                type: literal
+                value: true
+- id: combat.action.pick_lock
+  name: Pick a Lock in combat
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Pick a Lock
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to pick a lock if there are no enemies adjacent. If this succeeds, the
+    door is also opened as part of this action.
+  see_also:
+    - section.into_the_dungeons.opening_a_door_or_chest
+  type: constraint
+  scope: global
+  fields:
+    is_hero:
+      type: boolean
+      role: input
+      description: the acting model is a hero
+    enemies_adjacent:
+      type: boolean
+      role: input
+      description: enemies are adjacent to the hero
+    lock_picked:
+      type: boolean
+      role: input
+      description: the lock-picking attempt succeeded
+    may_try:
+      type: boolean
+      role: output
+      description: the hero may try to pick the lock
+    door_opened:
+      type: boolean
+      role: output
+      description: the door is opened as part of this action
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_adjacent
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_try
+      value:
+        type: literal
+        value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: lock_picked
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: door_opened
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.pick_locks
+- id: combat.action.prayer
+  name: Prayer timing
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Prayer
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This can be done at any time during a priest's turn, but once you have finished acting
+    with the priest and acted with someone else, you may not go back to pray.
+  see_also:
+    - section.prayers
+  type: constraint
+  scope: global
+  fields:
+    actor_is_priest:
+      type: boolean
+      role: input
+      description: the praying model is a priest
+    during_priests_turn:
+      type: boolean
+      role: input
+      description: the prayer is made during the priest's turn
+    acted_with_someone_else:
+      type: boolean
+      role: input
+      description: the player finished acting with the priest and acted with someone else
+    may_pray:
+      type: boolean
+      role: output
+      description: the priest may pray now
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: actor_is_priest
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: during_priests_turn
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: acted_with_someone_else
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_pray
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.prayer
+- id: combat.action.power_attack.bonus
+  name: Power Attack bonus and damage re-roll
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Power Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This attack gives the model a +20 bonus to CS and a re-roll of DMG (keeping the last roll).
+  type: modifier
+  scope: global
+  fields:
+    power_attack:
+      type: boolean
+      role: input
+      description: the attack is a Power Attack
+    combat_modifier:
+      type: number
+      role: state
+      description: CS modifier for this attack
+    damage_reroll_keep_last:
+      type: boolean
+      role: output
+      description: DMG may be re-rolled, keeping the last roll
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: power_attack
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: combat_modifier
+      value:
+        type: literal
+        value: 20
+      duration: check
+    - type: set
+      target: damage_reroll_keep_last
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.combat_skill
+    - term.damage
+- id: combat.action.power_attack.bloodlust
+  name: Bloodlust during a Power Attack
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Power Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A Bloodlust result while making a Power Attack will automatically result in the attack
+    causing maximum possible DMG.
+  type: override
+  scope: global
+  fields:
+    power_attack:
+      type: boolean
+      role: input
+      description: the attack is a Power Attack
+    bloodlust:
+      type: boolean
+      role: input
+      description: the hit roll is a Bloodlust result
+    maximum_damage:
+      type: number
+      role: input
+      description: maximum possible DMG of the attack
+    damage_roll:
+      type: number
+      role: state
+      description: DMG rolled for the attack
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: power_attack
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: bloodlust
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: damage_roll
+      value:
+        type: field
+        name: maximum_damage
+- id: combat.action.power_attack.hero_exposure
+  name: hero exposed after a Power Attack
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Power Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A hero performing this may not dodge or parry until it is the hero's turn to act again.
+    Furthermore, this will give the enemy a +10 chance to hit a hero.
+  issues:
+    - issue.combat.power_timing
+  type: constraint
+  scope: global
+  fields:
+    hero_power_attacked:
+      type: boolean
+      role: input
+      description: the hero performed a Power Attack and has not yet had its next turn to act
+    may_dodge_or_parry:
+      type: boolean
+      role: output
+      description: the hero may dodge or parry
+    enemy_hit_modifier:
+      type: number
+      role: state
+      description: modifier to the enemy’s chance to hit this hero
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hero_power_attacked
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: may_dodge_or_parry
+      value:
+        type: literal
+        value: false
+    - type: add
+      target: enemy_hit_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+- id: combat.action.power_attack.enemy
+  name: enemy Power Attack
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Power Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy making a Power Attack will lose its ‘To Hit’ bonus. Large or X-large enemies
+    does not re-roll DMG but gets AP(2) instead.
+  see_also:
+    - section.appendix_iii_equipment.weapons.table
+  issues:
+    - issue.combat.power_timing
+  type: exception
+  scope: global
+  fields:
+    enemy_power_attack:
+      type: boolean
+      role: input
+      description: the enemy is making or has made a Power Attack
+    enemy_size:
+      type: string
+      role: input
+      description: normal, large or x_large
+    to_hit_applies:
+      type: boolean
+      role: output
+      description: the enemy’s ‘To Hit’ value is subtracted from attacks against it
+    damage_reroll_keep_last:
+      type: boolean
+      role: output
+      description: DMG may be re-rolled, keeping the last roll
+    armour_piercing:
+      type: number
+      role: output
+      description: AP(x) gained by the attack
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_power_attack
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: to_hit_applies
+      value:
+        type: literal
+        value: false
+    - type: choice
+      selection: enemy_size
+      options:
+        - id: normal
+          effects:
+            - type: set
+              target: damage_reroll_keep_last
+              value:
+                type: literal
+                value: true
+        - id: large
+          effects:
+            - type: set
+              target: damage_reroll_keep_last
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: armour_piercing
+              value:
+                type: literal
+                value: 2
+        - id: x_large
+          effects:
+            - type: set
+              target: damage_reroll_keep_last
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: armour_piercing
+              value:
+                type: literal
+                value: 2
+  term_refs:
+    - term.armour_piercing
+- id: combat.action.search
+  name: Searching Furniture or a Corpse in combat
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Searching Furniture or a Corpse
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to do this if the object is not adjacent to an enemy. It costs 2 AP
+    instead of the normal 1 AP though, as the hero must keep an eye on enemies at the same time.
+  see_also:
+    - section.into_the_dungeons.searching_furniture
+    - section.into_the_dungeons.searching_corpses
+  type: constraint
+  scope: global
+  fields:
+    is_hero:
+      type: boolean
+      role: input
+      description: the acting model is a hero
+    object_adjacent_to_enemy:
+      type: boolean
+      role: input
+      description: the furniture or corpse is adjacent to an enemy
+    may_search:
+      type: boolean
+      role: output
+      description: the hero may search it
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the search
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: is_hero
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: object_adjacent_to_enemy
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_search
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 2
+- id: combat.action.shove.attempt
+  name: Shove roll
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 161
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A model may try to shove another adjacent model that does not have the large Special
+    Rule by rolling higher than the target’s DEX. A character with DB may add DBx10 to the roll.
+  type: random_resolution
+  scope: global
+  fields:
+    target_adjacent:
+      type: boolean
+      role: input
+      description: the target is adjacent
+    target_large:
+      type: boolean
+      role: input
+      description: the target has the large Special Rule
+    roll:
+      type: number
+      role: input
+      description: d100 shove roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    damage_bonus:
+      type: number
+      role: input
+      description: the shoving character’s DB (0 if none)
+      minimum: 0
+      integer: true
+    target_dexterity:
+      type: number
+      role: input
+      description: the target’s DEX
+      minimum: 0
+      integer: true
+    shove_total:
+      type: number
+      role: output
+      description: roll plus DBx10
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_large
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: shove_total
+      value:
+        type: sum
+        values:
+          - type: field
+            name: roll
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: field
+                name: damage_bonus
+              - type: literal
+                value: 10
+  term_refs:
+    - term.dexterity
+    - term.damage_bonus
+- id: combat.action.shove.success
+  name: Shove succeeds above DEX
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A model may try to shove another adjacent model that does not have the large Special
+    Rule by rolling higher than the target’s DEX. A character with DB may add DBx10 to the roll.
+  type: random_resolution
+  scope: global
+  fields:
+    shove_total:
+      type: number
+      role: input
+      description: roll plus DBx10
+    target_dexterity:
+      type: number
+      role: input
+      description: the target’s DEX
+      minimum: 0
+      integer: true
+    shove_succeeded:
+      type: boolean
+      role: output
+      description: the shove succeeded
+  when:
+    type: compare
+    operator: gt
+    left:
+      type: field
+      name: shove_total
+    right:
+      type: field
+      name: target_dexterity
+  effects:
+    - type: set
+      target: shove_succeeded
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.dexterity
+  issues:
+    - issue.combat.shove_automatic_failure
+- id: combat.action.shove.displacement
+  name: Shove displacement
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If successful, the shoving model may move the targeted model one space straight back,
+    and if it is blocked, diagonally back. If there is another model behind the target, it will also
+    be moved straight back. A shove can never affect more than two models and if the shoved model
+    cannot move, it falls over instead. The shoving model may enter any space vacated by the
+    targeted model.
+  issues:
+    - issue.combat.shove_displacement_order
+  type: procedure_rule
+  scope: global
+  fields:
+    shove_succeeded:
+      type: boolean
+      role: input
+      description: the shove succeeded
+    straight_back_free:
+      type: boolean
+      role: input
+      description: the square straight behind the target is free
+    model_behind_can_move_straight_back:
+      type: boolean
+      role: input
+      description: a model behind the target can itself be moved one square straight back
+    diagonal_back_free:
+      type: boolean
+      role: input
+      description: a square diagonally behind the target is free
+    displacement_case:
+      type: string
+      role: input
+      description: straight_free, push_model_behind, diagonal or blocked
+    target_destination:
+      type: string
+      role: output
+      description: straight_back, diagonal_back or none
+    second_model_moved:
+      type: boolean
+      role: output
+      description: the model behind the target is moved straight back
+    target_falls_over:
+      type: boolean
+      role: output
+      description: the target falls over instead of moving
+    shover_may_enter_vacated:
+      type: boolean
+      role: output
+      description: the shoving model may enter the vacated space
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: shove_succeeded
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: second_model_moved
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: target_falls_over
+      value:
+        type: literal
+        value: false
+    - type: choice
+      selection: displacement_case
+      options:
+        - id: straight_free
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: straight_back_free
+            right:
+              type: literal
+              value: true
+          effects:
+            - type: set
+              target: target_destination
+              value:
+                type: literal
+                value: straight_back
+            - type: set
+              target: shover_may_enter_vacated
+              value:
+                type: literal
+                value: true
+        - id: push_model_behind
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: straight_back_free
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: model_behind_can_move_straight_back
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: second_model_moved
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: target_destination
+              value:
+                type: literal
+                value: straight_back
+            - type: set
+              target: shover_may_enter_vacated
+              value:
+                type: literal
+                value: true
+        - id: diagonal
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: straight_back_free
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: diagonal_back_free
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: target_destination
+              value:
+                type: literal
+                value: diagonal_back
+            - type: set
+              target: shover_may_enter_vacated
+              value:
+                type: literal
+                value: true
+        - id: blocked
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: straight_back_free
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: model_behind_can_move_straight_back
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: diagonal_back_free
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: target_destination
+              value:
+                type: literal
+                value: none
+            - type: set
+              target: target_falls_over
+              value:
+                type: literal
+                value: true
+- id: combat.action.shove.fumble
+  name: Shove fumble
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A fumble (00) causes the shoving model to fall over.
+  type: trigger
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: d100 shove roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    shover_falls_over:
+      type: boolean
+      role: output
+      description: the shoving model falls over
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: roll
+    right:
+      type: literal
+      value: 100
+  effects:
+    - type: set
+      target: shover_falls_over
+      value:
+        type: literal
+        value: true
+- id: combat.action.shove.lava_or_chasm
+  name: Shoving into Lava or a Chasm
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shoving into Lava or a Chasm
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There are tiles that have lava or deep chasms depicted on them. If a model is pushed
+    into these, is immediately be removed as a casualty. XP is gained, but no loot.
+  type: trigger
+  scope: global
+  fields:
+    pushed_into_lava_or_chasm:
+      type: boolean
+      role: input
+      description: the model was pushed into a lava or deep chasm square
+    removed_as_casualty:
+      type: boolean
+      role: output
+      description: the model is immediately removed as a casualty
+    xp_gained:
+      type: boolean
+      role: output
+      description: XP is gained for it
+    loot_gained:
+      type: boolean
+      role: output
+      description: loot is gained for it
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: pushed_into_lava_or_chasm
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: removed_as_casualty
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xp_gained
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: loot_gained
+      value:
+        type: literal
+        value: false
+  term_refs:
+    - term.experience_points
+- id: combat.action.shove.trap
+  name: Shoving into a Trap
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shoving into a Trap
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If there is a trap in the square entered by a shoved model, it triggers the trap
+    without any chance to detect or avoid it.
+  type: trigger
+  scope: global
+  fields:
+    trap_in_entered_square:
+      type: boolean
+      role: input
+      description: the square entered by the shoved model holds a trap
+    trap_triggered:
+      type: boolean
+      role: output
+      description: the trap is triggered
+    may_detect_or_avoid:
+      type: boolean
+      role: output
+      description: the model has a chance to detect or avoid the trap
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: trap_in_entered_square
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: trap_triggered
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: may_detect_or_avoid
+      value:
+        type: literal
+        value: false
+- id: combat.action.stand_up
+  name: Stand Up
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Stand Up
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 162
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If a model is lying down it can spend 1 AP to stand up in the same square.
+  issues:
+    - issue.combat.stand_up_prone
+  type: resource_change
+  scope: global
+  fields:
+    lying_down:
+      type: boolean
+      role: input
+      description: the model is lying down
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of standing up
+    stands_in_same_square:
+      type: boolean
+      role: output
+      description: the model stands up in the same square
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: lying_down
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: stands_in_same_square
+      value:
+        type: literal
+        value: true
+- id: combat.action.pick_up_weapon
+  name: Picking Up a Dropped Weapon
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Picking Up a Dropped Weapon
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If a model has dropped its weapon it can try to pick it up. If there are no adjacent
+    enemies, it succeeds automatically. If there are enemies adjacent, it succeeds by passing a DEX
+    Test. If a model moves away from that square for some reason, the weapon is still in that square
+    but can be picked up from any squares adjacent to the weapon.
+  type: random_resolution
+  scope: global
+  fields:
+    adjacent_to_weapon_square:
+      type: boolean
+      role: input
+      description: the model is in or adjacent to the square holding the weapon
+    enemies_adjacent:
+      type: boolean
+      role: input
+      description: enemies are adjacent to the model
+    dex_test_passed:
+      type: boolean
+      role: input
+      description: the model passed a DEX Test
+    picked_up:
+      type: boolean
+      role: output
+      description: the weapon is picked up
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent_to_weapon_square
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemies_adjacent
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dex_test_passed
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: picked_up
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.dexterity
+    - term.skill_test
+- id: combat.action.standard_attack
+  name: Standard Attack
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Standard Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This is the normal attack (with melee or Ranged Weapon) without any special modifiers.
+    As it only costs 1 AP, this can be done twice during a turn.
+  type: definition
+  scope: global
+  fields:
+    action_cost:
+      type: number
+      role: state
+      description: AP cost of the attack
+    action_modifier:
+      type: number
+      role: state
+      description: special modifier of the attack type
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: action_modifier
+      value:
+        type: literal
+        value: 0

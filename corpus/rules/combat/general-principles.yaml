@@ -1,0 +1,1027 @@
+- id: combat.principles.hit_roll
+  name: hit roll against CS or RS
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: General Principles of Combat
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Rolling below or equal to the CS or RS means that the weapon or projectile has a chance
+    to hit its intended target. However, there are certain things that may affect the chance of
+    hitting your target. A hero also has the possibility to dodge or parry an enemy’s attack.
+  see_also:
+    - section.combat.parry_with_a_weapon
+  type: random_resolution
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: d100 attack roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    modified_skill:
+      type: number
+      role: input
+      description: CS or RS after modifiers
+    may_hit:
+      type: boolean
+      role: output
+      description: the weapon or projectile has a chance to hit its intended target
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: modified_skill
+    - type: set
+      target: may_hit
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.combat_skill
+    - term.ranged_skill
+    - term.dodge
+- id: combat.fumble.dodge_or_shove
+  name: hero fumble when dodging or shoving
+  section_id: section.combat.fumble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero fumbling when dodging or shoving will fall over and become prone.
+  type: trigger
+  scope: global
+  fields:
+    is_hero:
+      type: boolean
+      role: input
+      description: the fumbling model is a hero
+    roll:
+      type: number
+      role: input
+      description: d100 roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    dodging_or_shoving:
+      type: boolean
+      role: input
+      description: the hero rolled while dodging or shoving
+    hero_prone:
+      type: boolean
+      role: output
+      description: the hero falls over and becomes prone
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_hero
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 100
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dodging_or_shoving
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: hero_prone
+      value:
+        type: literal
+        value: true
+- id: combat.fumble.enemy
+  name: fumbling enemy
+  section_id: section.combat.fumble
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      heading: Enemy Fumbles
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 68
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 123
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A fumbling enemy always falls over and stays prone for the rest of the turn.
+  see_also:
+    - section.combat.detailed_acting_with_enemies
+  issues:
+    - issue.combat.enemy_fumble
+  type: trigger
+  scope: global
+  fields:
+    roll:
+      type: number
+      role: input
+      description: d100 attack roll
+      minimum: 1
+      maximum: 100
+      integer: true
+    enemy_attacking:
+      type: boolean
+      role: input
+      description: the roll is an enemy attack
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 100
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_attacking
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: invoke
+      dependency: enemy_fumbles_weapon
+    - type: invoke
+      dependency: enemy_fumbles_fall
+  dependencies:
+    - key: enemy_fumbles_weapon
+      label: 'Enemy Fumbles: drops its weapon, if it has one'
+      object_id: combat.enemy.fumble.drops_weapon
+    - key: enemy_fumbles_fall
+      label: 'Enemy Fumbles: or falls over'
+      object_id: combat.enemy.fumble.falls_over
+- id: combat.principles.fighting_in_doorways
+  name: Fighting in Doorways
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fighting in Doorways
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Often the heroes find themselves fighting in a doorway, striking at the enemy on the
+    other side. Any character standing next to a doorway can attack or shove an enemy standing on
+    any of the opposite two squares on the other side of the doorway.
+  type: exception
+  scope: global
+  fields:
+    next_to_doorway:
+      type: boolean
+      role: input
+      description: the character stands next to a doorway
+    enemy_on_opposite_two_squares:
+      type: boolean
+      role: input
+      description: the enemy stands on one of the opposite two squares on the other side
+    may_attack_or_shove:
+      type: boolean
+      role: output
+      description: the character may attack or shove that enemy
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: next_to_doorway
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_on_opposite_two_squares
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: may_attack_or_shove
+      value:
+        type: literal
+        value: true
+- id: combat.principles.attacking_from_behind
+  name: Attacking from Behind
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Attacking from Behind
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 115
+      printed_page: 113
+      heading: Hero Attacking
+      locator:
+        table: Factor when shooting
+        row: Attacking from the back (also loses its ‘To Hit’ value)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 163
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Striking or shooting a target from behind adds +20 to the CS of the attacker.
+  see_also:
+    - section.combat.hero_attacking.table
+  type: modifier
+  scope: global
+  fields:
+    from_behind:
+      type: boolean
+      role: input
+      description: the target is struck or shot from behind
+    skill_modifier:
+      type: number
+      role: state
+      description: modifier to the attacker’s CS (striking) or RS (shooting)
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: from_behind
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: skill_modifier
+      value:
+        type: literal
+        value: 20
+      duration: check
+  uses_tables:
+    - table.combat.melee_modifiers
+    - table.combat.ranged_modifiers
+- id: combat.principles.height_advantage
+  name: Height Advantage
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Height Advantage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Height Advantage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A character attacking from above will does so at +10 CS or RS. This represents their
+    improved view of the situation. This bonus is not cumulative with Large-Sized Monsters.
+  type: modifier
+  scope: global
+  fields:
+    attacking_from_above:
+      type: boolean
+      role: input
+      description: the character attacks from above
+    large_monster_bonus_applies:
+      type: boolean
+      role: input
+      description: the Large-Sized Monsters bonus already applies to this attack
+    skill_modifier:
+      type: number
+      role: state
+      description: modifier to CS or RS
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attacking_from_above
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: large_monster_bonus_applies
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: add
+      target: skill_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+- id: combat.principles.unarmed
+  name: Unarmed Combat
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Unarmed Combat
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A character without a weapon may attack with fist and kicks. An unarmed attack causes 1d4 DMG.
+  type: calculation
+  scope: global
+  fields:
+    has_weapon:
+      type: boolean
+      role: input
+      description: the character has a weapon
+    damage_die_sides:
+      type: number
+      role: output
+      description: sides of the DMG die
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: has_weapon
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: damage_die_sides
+      value:
+        type: literal
+        value: 4
+  term_refs:
+    - term.damage
+- id: combat.principles.dual_wielding
+  name: Dual Wielding parry bonus
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Dual Wielding
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Some heroes may learn how to wield two weapons at the same time. This provides a small
+    bonus to DMG but also adds +5 when parrying with weapons. The DMG bonus is found in the Weapons
+    table.
+  see_also:
+    - section.appendix_iii_equipment.weapons.table
+  type: modifier
+  scope: global
+  fields:
+    dual_wielding:
+      type: boolean
+      role: input
+      description: the hero wields two weapons
+    parrying_with_weapons:
+      type: boolean
+      role: input
+      description: the hero parries with weapons
+    parry_modifier:
+      type: number
+      role: state
+      description: modifier to the weapon parry
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dual_wielding
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parrying_with_weapons
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: add
+      target: parry_modifier
+      value:
+        type: literal
+        value: 5
+      duration: check
+  uses_tables:
+    - table.equipment.weapons
+- id: combat.principles.shooting_large.bonus
+  name: shooting at Large-Sized Monsters
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting at Large-Sized Monsters and Flyers
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When shooting at Large-Sized or X-Large Monsters, your heroes gain a RS +10 bonus.
+  type: modifier
+  scope: global
+  fields:
+    shooter_is_hero:
+      type: boolean
+      role: input
+      description: the shooter is a hero
+    shooting:
+      type: boolean
+      role: input
+      description: the attack is a shot with a Ranged Weapon
+    target_large_or_x_large:
+      type: boolean
+      role: input
+      description: the target is a Large-Sized or X-Large Monster
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this shot
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shooter_is_hero
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shooting
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_large_or_x_large
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+  term_refs:
+    - term.ranged_skill
+- id: combat.principles.shooting_large.targeting
+  name: targeting large and flying Monsters
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting at Large-Sized Monsters and Flyers
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Large, X-large and flying Monsters can always be targeted if they are in LOS, even if
+    there are other models in the way. They do have the benefit of cover from half-height obstacles
+    though, and models in between do count as such obstacles. Flyers do not block LOS.
+  type: exception
+  scope: global
+  fields:
+    target_large_x_large_or_flying:
+      type: boolean
+      role: input
+      description: the target is a Large, X-large or flying Monster
+    in_los:
+      type: boolean
+      role: input
+      description: the target is in LOS
+    may_target:
+      type: boolean
+      role: output
+      description: the target may be shot even with other models in the way
+    models_between_count_as_half_height:
+      type: boolean
+      role: output
+      description: models in between count as half-height obstacles
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_large_x_large_or_flying
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_los
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: may_target
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: models_between_count_as_half_height
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.line_of_sight
+- id: combat.principles.flyers_los
+  name: Flyers do not block LOS
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting at Large-Sized Monsters and Flyers
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Flyers do not block LOS.
+  type: exception
+  scope: global
+  fields:
+    model_is_flyer:
+      type: boolean
+      role: input
+      description: the model in the line is a Flyer
+    blocks_los:
+      type: boolean
+      role: output
+      description: the model blocks LOS
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: model_is_flyer
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: blocks_los
+      value:
+        type: literal
+        value: false
+  term_refs:
+    - term.line_of_sight
+- id: combat.principles.shooting_in_melee
+  name: Shooting in Melee
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting in Melee
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Both heroes and enemies can shoot at targets that are in melee with other models.
+    However, a Ranged Weapon cannot be used while adjacent to an enemy, unless specified otherwise
+    by other rules.
+  issues:
+    - issue.combat.long_range_weapons
+  type: constraint
+  scope: global
+  fields:
+    shooter_adjacent_to_enemy:
+      type: boolean
+      role: input
+      description: the shooter is adjacent to an enemy
+    other_rule_permits:
+      type: boolean
+      role: input
+      description: another rule specifies otherwise
+    may_shoot:
+      type: boolean
+      role: output
+      description: the Ranged Weapon may be used
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: shooter_adjacent_to_enemy
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: other_rule_permits
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: may_shoot
+      value:
+        type: literal
+        value: true
+- id: combat.principles.shooting_los
+  name: shooting needs centre-to-centre LOS
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Shooting can only be done if you can trace a LOS from the centre of the shooter's
+    square to the centre of the target's square.
+  see_also:
+    - section.game_basics.line_of_sight_los
+  type: constraint
+  scope: global
+  fields:
+    centre_to_centre_los:
+      type: boolean
+      role: input
+      description: a LOS can be traced from the centre of the shooter’s square to the centre of the
+        target’s square
+    may_shoot:
+      type: boolean
+      role: output
+      description: the shot may be made
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: centre_to_centre_los
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: may_shoot
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.line_of_sight
+- id: combat.principles.shooting_obstacles
+  name: half-height obstacles and models in the LOS
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If there are any half-height obstacles or models in the LOS when shooting, there is a
+    -10 chance of hitting your target. This is cumulative. Note that it must be the actual object
+    that interferes with the LOS line, not just the square with an object. If it’s a model, the line
+    only needs to touch the square for this rule to come into effect. Details on objects are given
+    in the dungeon objects table.
+  see_also:
+    - section.into_the_dungeons.obstacles.rule_of_fifty_percent
+    - section.combat.hero_attacking.table
+  unresolved_references:
+    - the dungeon objects table
+  type: modifier
+  scope: global
+  fields:
+    interfering_objects_and_models:
+      type: number
+      role: input
+      description:
+        half-height objects whose actual object crosses the LOS line, plus models whose square
+        the line touches
+      minimum: 0
+      integer: true
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this shot
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: interfering_objects_and_models
+          - type: literal
+            value: -10
+      duration: check
+  uses_tables:
+    - table.combat.ranged_modifiers
+- id: combat.principles.shooting_past_model
+  name: unmodified 90+ hits the model shot past
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If shooting past another model, an unmodified result of >=90 hits the other model.
+  issues:
+    - issue.combat.shooting_past_fumble
+  type: trigger
+  scope: global
+  fields:
+    shooting_past_model:
+      type: boolean
+      role: input
+      description: the shot passes another model
+    unmodified_roll:
+      type: number
+      role: input
+      description: unmodified d100 result
+      minimum: 1
+      maximum: 100
+      integer: true
+    hits_other_model:
+      type: boolean
+      role: output
+      description: the shot hits the other model instead
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shooting_past_model
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: unmodified_roll
+        right:
+          type: literal
+          value: 90
+  effects:
+    - type: set
+      target: hits_other_model
+      value:
+        type: literal
+        value: true
+- id: combat.principles.shooting_straight_line
+  name: no shooting through a model on a straight line
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You cannot shoot through a model if the shot is done along a straight line.
+  type: constraint
+  scope: global
+  fields:
+    model_on_straight_line:
+      type: boolean
+      role: input
+      description: a model stands on the straight (or diagonal) line between shooter and target
+    may_shoot:
+      type: boolean
+      role: output
+      description: the shot may be made
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: model_on_straight_line
+        right:
+          type: literal
+          value: false
+    - type: set
+      target: may_shoot
+      value:
+        type: literal
+        value: true
+- id: combat.principles.shooting_through_doorways
+  name: Shooting Through Doorways
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting Through Doorways
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When shooting through doorways, consider the opening to be as wide as the 2 squares in
+    front of it. Even though the door in reality would be much smaller, we expect that the movement
+    in battle makes a shot possible.
+  type: definition
+  scope: global
+  fields:
+    shooting_through_doorway:
+      type: boolean
+      role: input
+      description: the shot passes through a doorway
+    opening_width_squares:
+      type: number
+      role: output
+      description: width of the opening for LOS purposes, in squares
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: shooting_through_doorway
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: opening_width_squares
+      value:
+        type: literal
+        value: 2

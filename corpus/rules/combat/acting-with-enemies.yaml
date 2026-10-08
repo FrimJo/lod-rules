@@ -1,0 +1,3111 @@
+- id: combat.enemy.behaviour_roll
+  name: Behaviour Roll
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      heading: Acting with Enemies
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Enemies will act according to a Behaviour Roll. Depending on the type of enemy, their
+    actions can vary. The behaviour type of the enemy is described in the Bestiary as well as in the
+    Behaviour Tables. You can roll the Behaviour Roll at the same time as the Attack Dice to save
+    time.
+  type: procedure_rule
+  scope: battle
+  fields:
+    enemy_acting:
+      type: boolean
+      role: input
+      description: An enemy is about to act.
+    behaviour_roll_required:
+      type: boolean
+      role: output
+      description: The enemy acts according to a Behaviour Roll.
+  effects:
+    - type: set
+      target: behaviour_roll_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_acting
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.combat.behaviour_card_naming
+  dependencies:
+    - key: bestiary
+      label:
+        The behaviour type of the enemy is described in the Bestiary as well as in the Behaviour
+        Tables
+      external_document: bestiary
+  term_refs:
+    - term.behaviour_roll
+- id: combat.enemy.activation_order
+  name: Activation of Enemies
+  section_id: section.combat.activation_of_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Activation of Enemies
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Enemies are activated in a certain order so they do not block each other. Whenever you
+    draw an enemy token, activate enemies in the order described below. Consult their Behaviour Card
+    to see where they fit in the list. Randomise if there are two or more enemies that could
+    possibly act at the same time. 1. Magic User or enemy armed with Ranged Weapon. 2. An enemy
+    adjacent to a hero that could make room for more enemies. 3. Enemy adjacent to hero. 4. Enemy
+    closest to a hero and that could charge. 5. Enemy that has enough space to move its full
+    movement. 6. Random enemy.
+  type: procedure_rule
+  scope: battle
+  fields:
+    enemy_token_drawn:
+      type: boolean
+      role: input
+      description: An enemy token was drawn.
+    activation_order_applies:
+      type: boolean
+      role: output
+      description: Enemies are activated in the printed order.
+  effects:
+    - type: set
+      target: activation_order_applies
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_token_drawn
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.combat.behaviour_card_naming
+  dependencies:
+    - key: priority
+      label: Activation order 1–6 with randomised ties
+      object_id: procedure.enemy_priority
+- id: combat.enemy.basic.facing
+  name: Enemy facing at end of turn
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'There are some basic rules that apply to all enemies: ... An enemy will always end its
+    turn with as few heroes behind it as possible. Turn the enemy to the most favourable position.'
+  type: constraint
+  scope: battle
+  fields:
+    ending_turn:
+      type: boolean
+      role: input
+      description: The enemy is ending its turn.
+    facing:
+      type: string
+      role: output
+      description: Facing chosen at the end of the turn.
+  effects:
+    - type: set
+      target: facing
+      value:
+        type: literal
+        value: fewest_heroes_behind
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ending_turn
+    right:
+      type: literal
+      value: true
+- id: combat.enemy.basic.facing_missile
+  name: Enemy turns its back towards the missile weapon
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If it has to choose between turning its back to an adjacent hero or a hero further away
+    with missile weapons, it will turn its back towards the missile weapon.
+  type: constraint
+  scope: battle
+  fields:
+    ending_turn:
+      type: boolean
+      role: input
+      description: The enemy is ending its turn.
+    choice_adjacent_or_missile:
+      type: boolean
+      role: input
+      description: It must choose between an adjacent hero and a hero further away with missile weapons.
+    back_towards:
+      type: string
+      role: output
+      description: Which hero the enemy turns its back towards.
+  effects:
+    - type: set
+      target: back_towards
+      value:
+        type: literal
+        value: missile_weapon
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ending_turn
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: choice_adjacent_or_missile
+        right:
+          type: literal
+          value: true
+- id: combat.enemy.basic.pit_hero
+  name: Enemies ignore heroes in a pit
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    An enemy cannot attack heroes that have fallen into a pit. Therefore, they ignore that
+    hero when choosing actions.
+  type: constraint
+  scope: battle
+  fields:
+    hero_in_pit:
+      type: boolean
+      role: input
+      description: The hero has fallen into a pit.
+    may_attack_hero:
+      type: boolean
+      role: output
+      description: The enemy may attack that hero.
+    ignore_hero:
+      type: boolean
+      role: output
+      description: The enemy ignores that hero when choosing actions.
+  effects:
+    - type: set
+      target: may_attack_hero
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: ignore_hero
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hero_in_pit
+    right:
+      type: literal
+      value: true
+- id: combat.enemy.basic.pit_fall.normal
+  name: Normal sized enemy falls into a pit
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Normal sized enemies that fall into pits disappear without XP or loot.
+  type: trigger
+  scope: battle
+  fields:
+    fell_into_pit:
+      type: boolean
+      role: input
+      description: The enemy fell into a pit.
+    enemy_size:
+      type: string
+      role: input
+      description: normal, large or x_large.
+    removed:
+      type: boolean
+      role: output
+      description: The enemy disappears.
+    xp_awarded:
+      type: boolean
+      role: output
+      description: XP is awarded.
+    loot_awarded:
+      type: boolean
+      role: output
+      description: Loot is awarded.
+  effects:
+    - type: set
+      target: removed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: xp_awarded
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: loot_awarded
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fell_into_pit
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_size
+        right:
+          type: literal
+          value: normal
+- id: combat.enemy.basic.pit_fall.large
+  name: Large creature ends up in a pit
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Large creatures end their turn if they end up in pit. The next activation they act as
+    if they were standing on normal ground and can fight and move without restrictions.
+  type: trigger
+  scope: battle
+  fields:
+    fell_into_pit:
+      type: boolean
+      role: input
+      description: The creature ended up in a pit.
+    enemy_size:
+      type: string
+      role: input
+      description: normal, large or x_large.
+    turn_ends:
+      type: boolean
+      role: output
+      description: The creature ends its turn.
+    next_activation_unrestricted:
+      type: boolean
+      role: output
+      description: Next activation it acts as if on normal ground.
+  effects:
+    - type: set
+      target: turn_ends
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: next_activation_unrestricted
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: fell_into_pit
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_size
+        right:
+          type: literal
+          value: large
+- id: combat.enemy.basic.pit_fall.x_large
+  name: X-Large creatures ignore pits
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: X-Large creatures ignore pits completely.
+  type: exception
+  scope: battle
+  fields:
+    enemy_size:
+      type: string
+      role: input
+      description: normal, large or x_large.
+    ignores_pits:
+      type: boolean
+      role: output
+      description: The creature ignores pits completely.
+  effects:
+    - type: set
+      target: ignores_pits
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: enemy_size
+    right:
+      type: literal
+      value: x_large
+- id: combat.enemy.basic.prone
+  name: Prone enemy stands up
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy that is prone will always spend its first action to stand up.
+  type: constraint
+  scope: battle
+  fields:
+    prone:
+      type: boolean
+      role: input
+      description: The enemy is prone.
+    first_action:
+      type: string
+      role: output
+      description: The enemy’s first action.
+  effects:
+    - type: set
+      target: first_action
+      value:
+        type: literal
+        value: stand_up
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: prone
+    right:
+      type: literal
+      value: true
+- id: combat.enemy.basic.lost_weapon
+  name: Enemy picks up a lost weapon
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy that has lost it weapon will pick up the weapon before doing anything else.
+  type: constraint
+  scope: battle
+  fields:
+    lost_weapon:
+      type: boolean
+      role: input
+      description: The enemy has lost its weapon.
+    can_reach_weapon:
+      type: boolean
+      role: input
+      description: The enemy can reach the weapon.
+    next_action:
+      type: string
+      role: output
+      description: What the enemy does before anything else.
+  effects:
+    - type: set
+      target: next_action
+      value:
+        type: literal
+        value: pick_up_weapon
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: lost_weapon
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: can_reach_weapon
+        right:
+          type: literal
+          value: true
+  see_also:
+    - section.combat.detailed_acting_with_enemies
+- id: combat.enemy.basic.lost_weapon_unreachable
+  name: Enemy cannot reach its lost weapon
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If it cannot reach the weapon, it will go into Parry stance.
+  type: constraint
+  scope: battle
+  fields:
+    lost_weapon:
+      type: boolean
+      role: input
+      description: The enemy has lost its weapon.
+    can_reach_weapon:
+      type: boolean
+      role: input
+      description: The enemy can reach the weapon.
+    next_action:
+      type: string
+      role: output
+      description: What the enemy does.
+  effects:
+    - type: set
+      target: next_action
+      value:
+        type: literal
+        value: parry_stance
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: lost_weapon
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: can_reach_weapon
+        right:
+          type: literal
+          value: false
+- id: combat.enemy.basic.unclear
+  name: Unclear situations favour the enemy
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There may be situations in which the rules do not provide a clear answer. In such
+    cases, move the model in the most favourable way for the enemy. No cheating!
+  type: choice
+  scope: battle
+  fields:
+    rules_unclear:
+      type: boolean
+      role: input
+      description: The rules do not provide a clear answer.
+    resolution:
+      type: string
+      role: output
+      description: How the model is moved.
+  effects:
+    - type: set
+      target: resolution
+      value:
+        type: literal
+        value: most_favourable_for_enemy
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rules_unclear
+    right:
+      type: literal
+      value: true
+- id: combat.enemy.basic.unclear_tie
+  name: Equal possibilities are randomised
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Basic Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If there are several equal possibilities, randomise!
+  type: random_resolution
+  scope: battle
+  fields:
+    rules_unclear:
+      type: boolean
+      role: input
+      description: The rules do not provide a clear answer.
+    equal_possibilities:
+      type: boolean
+      role: input
+      description: There are several equal possibilities.
+    resolution:
+      type: string
+      role: output
+      description: How the model is moved.
+  effects:
+    - type: set
+      target: resolution
+      value:
+        type: literal
+        value: randomise
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rules_unclear
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: equal_possibilities
+        right:
+          type: literal
+          value: true
+- id: combat.enemy.door.open
+  name: Enemies open closed doors
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'A closed door will not stop enemies from trying to attack the heroes and they will
+    continue to move towards them. Once they reach the closed door, they will have to open it. The
+    first enemy to reach the door and still have 1 AP left is the one who is considered to open the
+    door. This normally requires 1 AP. There are some exceptions though:'
+  type: procedure_rule
+  scope: battle
+  fields:
+    at_closed_door:
+      type: boolean
+      role: input
+      description: The enemy has reached the closed door.
+    first_with_ap:
+      type: boolean
+      role: input
+      description: It is the first enemy to reach the door and still have 1 AP left.
+    opens_door:
+      type: boolean
+      role: output
+      description: This enemy is considered to open the door.
+    door_ap_cost:
+      type: number
+      role: output
+      description: AP required to get through the door.
+  effects:
+    - type: set
+      target: opens_door
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: door_ap_cost
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_closed_door
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_with_ap
+        right:
+          type: literal
+          value: true
+- id: combat.enemy.door.lower_undead
+  name: Lower Undead open doors with 2 AP
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Lower Undead requires 2 AP to open a door.
+  type: exception
+  scope: battle
+  fields:
+    at_closed_door:
+      type: boolean
+      role: input
+      description: The enemy has reached the closed door.
+    first_with_ap:
+      type: boolean
+      role: input
+      description: First enemy at the door with 1 AP left.
+    creature_kind:
+      type: string
+      role: input
+      description:
+        lower_undead, no_hands (no hands or not intelligent enough to operate a door), ethereal
+        or other.
+    opens_door:
+      type: boolean
+      role: output
+      description: This enemy opens the door.
+    door_ap_cost:
+      type: number
+      role: output
+      description: AP required.
+  effects:
+    - type: set
+      target: opens_door
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: door_ap_cost
+      value:
+        type: literal
+        value: 2
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_closed_door
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_with_ap
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: lower_undead
+  overrides:
+    - combat.enemy.door.open
+- id: combat.enemy.door.no_hands
+  name: Creatures that cannot operate a door break through
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Creatures that don’t have hands or reasonably won’t have the intelligence to operate a
+    door requires 1d6 AP to get through. Once through, the door is considered broken.
+  type: exception
+  scope: battle
+  fields:
+    at_closed_door:
+      type: boolean
+      role: input
+      description: The enemy has reached the closed door.
+    first_with_ap:
+      type: boolean
+      role: input
+      description: First enemy at the door with 1 AP left.
+    creature_kind:
+      type: string
+      role: input
+      description: lower_undead, no_hands, ethereal or other.
+    large:
+      type: boolean
+      role: input
+      description: The creature is Large.
+    door_ap_roll:
+      type: number
+      role: input
+      description: The 1d6 AP roll.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    door_ap_cost:
+      type: number
+      role: output
+      description: AP required.
+    door_broken_once_through:
+      type: boolean
+      role: output
+      description: Once through, the door is considered broken.
+  effects:
+    - type: set
+      target: door_ap_cost
+      value:
+        type: field
+        name: door_ap_roll
+    - type: set
+      target: door_broken_once_through
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_closed_door
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_with_ap
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: no_hands
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: large
+        right:
+          type: literal
+          value: false
+  overrides:
+    - combat.enemy.door.open
+- id: combat.enemy.door.no_hands_large
+  name: Large creatures that cannot operate a door
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Creatures that don’t have hands or reasonably won’t have the intelligence to operate a
+    door requires 1d6 AP to get through. Once through, the door is considered broken. Large
+    creatures in this category only require 1d3 AP for this.
+  type: exception
+  scope: battle
+  fields:
+    at_closed_door:
+      type: boolean
+      role: input
+      description: The enemy has reached the closed door.
+    first_with_ap:
+      type: boolean
+      role: input
+      description: First enemy at the door with 1 AP left.
+    creature_kind:
+      type: string
+      role: input
+      description: lower_undead, no_hands, ethereal or other.
+    large:
+      type: boolean
+      role: input
+      description: The creature is Large.
+    door_ap_roll_large:
+      type: number
+      role: input
+      description: The 1d3 AP roll.
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    door_ap_cost:
+      type: number
+      role: output
+      description: AP required.
+    door_broken_once_through:
+      type: boolean
+      role: output
+      description: Once through, the door is considered broken.
+  effects:
+    - type: set
+      target: door_ap_cost
+      value:
+        type: field
+        name: door_ap_roll_large
+    - type: set
+      target: door_broken_once_through
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_closed_door
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_with_ap
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: no_hands
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: large
+        right:
+          type: literal
+          value: true
+  overrides:
+    - combat.enemy.door.open
+- id: combat.enemy.door.iron_wedges
+  name: Iron Wedges add 3 turns
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: A door blocked with Iron Wedges will add 3 turns ... to the above-mentioned
+    requirements. The effect of Iron wedges and Magically sealed doors are cumulative, so you could
+    use both on the same door. Ethereal creatures ignore doors unless they are magically sealed and
+    may move through even if their comrades are stuck at the door.
+  type: modifier
+  scope: battle
+  fields:
+    iron_wedges:
+      type: boolean
+      role: input
+      description: The door is blocked with Iron Wedges.
+    creature_kind:
+      type: string
+      role: input
+      description: ethereal or another creature kind
+    iron_wedge_turns:
+      type: number
+      role: output
+      description: Turns added by Iron Wedges.
+  effects:
+    - type: set
+      target: iron_wedge_turns
+      value:
+        type: literal
+        value: 3
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: iron_wedges
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: ethereal
+  see_also:
+    - section.into_the_dungeons.wandering_monsters
+    - section.appendix_iii_equipment.general_equipment
+  issues:
+    - issue.phase6.iron_wedges_movement
+    - issue.combat.door_turns_and_ap
+- id: combat.enemy.door.magically_sealed
+  name: Magically sealed doors add 1d3 turns
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: A door blocked with Iron Wedges will add 3 turns and a magically sealed door will add
+    1d3 turns to the above-mentioned requirements. The effect of Iron wedges and Magically sealed
+    doors are cumulative, so you could use both on the same door.
+  type: modifier
+  scope: battle
+  fields:
+    magically_sealed:
+      type: boolean
+      role: input
+      description: The door is magically sealed.
+    creature_kind:
+      type: string
+      role: input
+      description: lower_undead, no_hands, ethereal or other.
+    sealed_turns_roll:
+      type: number
+      role: input
+      description: The 1d3 turns roll.
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    sealed_door_turns:
+      type: number
+      role: output
+      description: Turns added by the magical seal.
+  effects:
+    - type: set
+      target: sealed_door_turns
+      value:
+        type: field
+        name: sealed_turns_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magically_sealed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: ethereal
+  issues:
+    - issue.combat.door_turns_and_ap
+- id: combat.enemy.door.ethereal
+  name: Ethereal creatures ignore doors
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Ethereal creatures ignore doors unless they are magically sealed and may move through
+    even if their comrades are stuck at the door.
+  type: exception
+  scope: battle
+  fields:
+    creature_kind:
+      type: string
+      role: input
+      description: lower_undead, no_hands, ethereal or other.
+    magically_sealed:
+      type: boolean
+      role: input
+      description: The door is magically sealed.
+    ignores_door:
+      type: boolean
+      role: output
+      description: The creature ignores the door.
+  effects:
+    - type: set
+      target: ignores_door
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: ethereal
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magically_sealed
+        right:
+          type: literal
+          value: false
+- id: combat.enemy.door.ethereal_sealed
+  name: Magically sealed doors slow ethereal creatures
+  section_id: section.combat.acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A magically sealed door will slow them down for 1d3 turns.
+  type: exception
+  scope: battle
+  fields:
+    creature_kind:
+      type: string
+      role: input
+      description: lower_undead, no_hands, ethereal or other.
+    magically_sealed:
+      type: boolean
+      role: input
+      description: The door is magically sealed.
+    sealed_turns_roll:
+      type: number
+      role: input
+      description: The 1d3 turns roll.
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    sealed_door_turns:
+      type: number
+      role: output
+      description: Turns the ethereal creature is slowed down.
+  effects:
+    - type: set
+      target: sealed_door_turns
+      value:
+        type: field
+        name: sealed_turns_roll
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: creature_kind
+        right:
+          type: literal
+          value: ethereal
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: magically_sealed
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.combat.door_turns_and_ap
+- id: combat.enemy_behaviour.top_down
+  name: Enemies follow numbered options from the top down
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      heading: Detailed acting with enemies
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The enemy will follow the numbered options from the top down, stopping and performing
+    the first action that fits the situation. Once that action is performed, and the enemy still has
+    Action Points, start over from the top again.
+  type: procedure_rule
+  scope: battle
+  fields:
+    action_performed:
+      type: boolean
+      role: input
+      description: The enemy has performed an action.
+    action_points_left:
+      type: number
+      role: input
+      description: Action Points the enemy still has.
+    restart_from_top:
+      type: boolean
+      role: output
+      description: Start over from the top of the numbered options.
+  effects:
+    - type: set
+      target: restart_from_top
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action_performed
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: action_points_left
+        right:
+          type: literal
+          value: 0
+  dependencies:
+    - key: humanoid_example
+      label: Humanoid with Close-Combat Weapon
+      object_id: procedure.humanoid_close_combat_behaviour
+- id: combat.enemy.choosing_targets
+  name: Choosing Targets
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Choosing Targets
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the enemy has a choice between adjacent targets, target one that has not been
+    targeted by another enemy.
+  type: constraint
+  scope: battle
+  fields:
+    choice_between_adjacent_targets:
+      type: boolean
+      role: input
+      description: The enemy has a choice between adjacent targets.
+    untargeted_target_available:
+      type: boolean
+      role: input
+      description: One of them has not been targeted by another enemy.
+    target_choice:
+      type: string
+      role: output
+      description: Which target the enemy picks.
+  effects:
+    - type: set
+      target: target_choice
+      value:
+        type: literal
+        value: not_targeted_by_another_enemy
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: choice_between_adjacent_targets
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: untargeted_target_available
+        right:
+          type: literal
+          value: true
+- id: combat.enemy.choosing_targets.stick_with_target
+  name: 'Choosing Targets: stick with the target for the turn'
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Choosing Targets
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Once the target has been decided, the enemy will stick with that target for that turn.
+    Next turn, it revaluates who to strike.
+  type: constraint
+  scope: battle
+  fields:
+    target_decided:
+      type: boolean
+      role: input
+      description: The enemy has decided its target.
+    target_fixed_for_turn:
+      type: boolean
+      role: output
+      description: The enemy sticks with the target for that turn.
+    reevaluate_next_turn:
+      type: boolean
+      role: output
+      description: Next turn the enemy re-evaluates who to strike.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target_decided
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: target_fixed_for_turn
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: reevaluate_next_turn
+      value:
+        type: literal
+        value: true
+- id: combat.enemy.fumble.drops_weapon
+  name: Enemy fumble drops its weapon
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Enemy Fumbles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 68
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 123
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy that rolls 100 when attacking drops its weapon, if it has one, or falls over.
+  type: trigger
+  scope: battle
+  fields:
+    attack_roll:
+      type: number
+      role: input
+      description: The enemy’s attack roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    has_weapon:
+      type: boolean
+      role: input
+      description: The enemy has a weapon.
+    drops_weapon:
+      type: boolean
+      role: output
+      description: The enemy drops its weapon.
+  effects:
+    - type: set
+      target: drops_weapon
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attack_roll
+        right:
+          type: literal
+          value: 100
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_weapon
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.combat.enemy_fumble
+- id: combat.enemy.fumble.falls_over
+  name: Enemy fumble without a weapon falls over
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Enemy Fumbles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 68
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 123
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy that rolls 100 when attacking drops its weapon, if it has one, or falls over.
+  type: trigger
+  scope: battle
+  fields:
+    attack_roll:
+      type: number
+      role: input
+      description: The enemy’s attack roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    has_weapon:
+      type: boolean
+      role: input
+      description: The enemy has a weapon.
+    falls_over:
+      type: boolean
+      role: output
+      description: The enemy falls over.
+  effects:
+    - type: set
+      target: falls_over
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attack_roll
+        right:
+          type: literal
+          value: 100
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_weapon
+        right:
+          type: literal
+          value: false
+  issues:
+    - issue.combat.enemy_fumble
+- id: combat.enemy.fumble.recovery
+  name: Recovering from an enemy fumble
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Enemy Fumbles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Picking up the weapon requires one Action and a successful DEX roll. Standing up costs
+    one Action. It will continue until it succeeds.
+  type: resource_change
+  scope: battle
+  fields:
+    recovering:
+      type: string
+      role: input
+      description: pick_up_weapon or stand_up.
+    action_cost:
+      type: number
+      role: output
+      description: Actions the attempt costs.
+    dex_roll_required:
+      type: boolean
+      role: output
+      description: A successful DEX roll is required.
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_roll_required
+      value:
+        type: literal
+        value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: recovering
+    right:
+      type: literal
+      value: pick_up_weapon
+- id: combat.enemy.fumble.stand_up
+  name: Standing up after an enemy fumble
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Enemy Fumbles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Standing up costs one Action.
+  type: resource_change
+  scope: battle
+  fields:
+    recovering:
+      type: string
+      role: input
+      description: pick_up_weapon or stand_up.
+    action_cost:
+      type: number
+      role: output
+      description: Actions the attempt costs.
+    dex_roll_required:
+      type: boolean
+      role: output
+      description: A DEX roll is required.
+  effects:
+    - type: set
+      target: action_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_roll_required
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: recovering
+    right:
+      type: literal
+      value: stand_up
+- id: combat.defence.through_zoc
+  name: Dodging and parrying need an attack through the ZOC
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parrying or Dodging
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Dodging and parrying can only be done if the attack comes through the hero’s ZOC. They
+    can be done against arrows or strikes, unless a Talent or Perk states otherwise.
+  type: constraint
+  scope: battle
+  fields:
+    through_zoc:
+      type: boolean
+      role: input
+      description: The attack comes through the hero’s ZOC.
+    attack_type:
+      type: string
+      role: input
+      description: strike or arrow
+    talent_or_perk_forbids:
+      type: boolean
+      role: input
+      description: a Talent or Perk states that this arrow or strike cannot be dodged or parried
+    may_defend:
+      type: boolean
+      role: output
+      description: the hero may dodge or parry this attack
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: through_zoc
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_type
+                right:
+                  type: literal
+                  value: strike
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_type
+                right:
+                  type: literal
+                  value: arrow
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent_or_perk_forbids
+            right:
+              type: literal
+              value: false
+    - type: set
+      target: may_defend
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.zone_of_control
+    - term.dodge
+    - term.parry
+- id: combat.defence.dodge_once
+  name: Dodging once per battle
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parrying or Dodging
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Dodging can only be done ONCE during a battle by each character, unless a Talent or
+    Perk specifies otherwise.
+  type: constraint
+  scope: battle
+  fields:
+    dodges_used_this_battle:
+      type: number
+      role: input
+      description: Dodges this character has used this battle.
+      minimum: 0
+      integer: true
+    talent_or_perk_exception:
+      type: boolean
+      role: input
+      description: A Talent or Perk specifies otherwise.
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: dodges_used_this_battle
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: talent_or_perk_exception
+            right:
+              type: literal
+              value: true
+  term_refs:
+    - term.dodge
+    - term.battle
+- id: combat.defence.power_attack_restriction
+  name: No dodge or parry after a Power Attack
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If your hero performed a Power Attack in its last action, dodging or parrying is not allowed.
+  type: constraint
+  scope: battle
+  fields:
+    power_attack_last_action:
+      type: boolean
+      role: input
+      description: The hero performed a Power Attack in its last action.
+    defence_allowed:
+      type: boolean
+      role: output
+      description: Dodging or parrying is allowed.
+  effects:
+    - type: set
+      target: defence_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: power_attack_last_action
+    right:
+      type: literal
+      value: true
+  issues:
+    - issue.combat.power_timing
+- id: combat.defence.dodge
+  name: Dodge outside Parry Stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If not, the hero may try to dodge an attack by making a Dodge Skill Check. If
+    successful, that attack fails to hit. ... If not in Parry Stance, you can dodge (Dodge) 1 attack
+    and parry 1 attack with a shield (CS-15), or
+  type: calculation
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: none, dodge, shield or weapon.
+    dodge_skill:
+      type: number
+      role: input
+      description: The hero’s Dodge skill.
+    defence_threshold:
+      type: number
+      role: output
+      description: Value the defence roll must not exceed.
+  effects:
+    - type: set
+      target: defence_threshold
+      value:
+        type: field
+        name: dodge_skill
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parry_stance
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: defence
+        right:
+          type: literal
+          value: dodge
+  term_refs:
+    - term.dodge
+- id: combat.defence.shield_outside_stance
+  name: Shield parry outside Parry Stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If the hero is equipped with a shield, he may also parry 1 attack per turn with CS -15.
+    ... If not in Parry Stance, you can dodge (Dodge) 1 attack and parry 1 attack with a shield
+    (CS-15), or
+  type: calculation
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: none, dodge, shield or weapon.
+    cs:
+      type: number
+      role: input
+      description: The hero’s Combat Skill.
+    defence_threshold:
+      type: number
+      role: output
+      description: Value the defence roll must not exceed.
+    parries_per_turn:
+      type: number
+      role: output
+      description: Attacks that may be parried per turn.
+  effects:
+    - type: set
+      target: defence_threshold
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: cs
+          - type: literal
+            value: 15
+    - type: set
+      target: parries_per_turn
+      value:
+        type: literal
+        value: 1
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parry_stance
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: defence
+        right:
+          type: literal
+          value: shield
+- id: combat.defence.parry_stance
+  name: Dodge and parry in Parry Stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If in Parry Stance
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'If the hero has taken up a Parry Stance, then one dodge AND one parry is permissible:
+    ... If in Parry Stance, you may dodge 1 attack using dodge (Dodge+15), and parry 1 attack with a
+    shield (CS+15), or a weapon (CS).'
+  type: constraint
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    dodges_permitted:
+      type: number
+      role: output
+      description: Dodges permitted.
+    parries_permitted:
+      type: number
+      role: output
+      description: Parries permitted.
+  effects:
+    - type: set
+      target: dodges_permitted
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: parries_permitted
+      value:
+        type: literal
+        value: 1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: parry_stance
+    right:
+      type: literal
+      value: true
+- id: combat.defence.parry_stance.dodge
+  name: Dodge in Parry Stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: If in Parry Stance
+      heading: Dodge
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: As long as the hero has an unused dodge, one incoming strike or arrow may be dodged
+    with a +15 modifier on the Dodge Skill.
+  type: modifier
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: none, dodge, shield or weapon.
+    dodge_skill:
+      type: number
+      role: input
+      description: The hero’s Dodge skill.
+    defence_threshold:
+      type: number
+      role: output
+      description: Value the defence roll must not exceed.
+  effects:
+    - type: set
+      target: defence_threshold
+      value:
+        type: sum
+        values:
+          - type: field
+            name: dodge_skill
+          - type: literal
+            value: 15
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parry_stance
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: defence
+        right:
+          type: literal
+          value: dodge
+  term_refs:
+    - term.dodge
+- id: combat.defence.weapon_parry
+  name: Parry with a Weapon
+  section_id: section.combat.parry_with_a_weapon
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: If in Parry Stance
+      heading: Parry with a Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful parry with a weapon negates all damage since a well performed parry
+    diverts the force away from the target. To manage this, you must succeed with a CS test.
+    However, if you roll 95-00 you not only fail, but the weapon also takes 1 Point of Damage.
+  type: calculation
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: none, dodge, shield or weapon.
+    cs:
+      type: number
+      role: input
+      description: The hero’s Combat Skill.
+    defence_roll:
+      type: number
+      role: input
+      description: The parry roll, 00 read as 100.
+      minimum: 1
+      maximum: 100
+      integer: true
+    defence_succeeded:
+      type: boolean
+      role: output
+      description: The parry succeeded.
+    negates_damage:
+      type: boolean
+      role: output
+      description: All damage is negated.
+  effects:
+    - type: set
+      target: defence_succeeded
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: negates_damage
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parry_stance
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: defence
+        right:
+          type: literal
+          value: weapon
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: defence_roll
+        right:
+          type: field
+          name: cs
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: defence_roll
+        right:
+          type: literal
+          value: 95
+  see_also:
+    - section.equipment.weapon_durability
+- id: combat.defence.shield_parry
+  name: Parry with a Shield in Parry Stance
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: If in Parry Stance
+      heading: Parry with a Shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
+      locator:
+        region: summary box
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A shield is somewhat easier to parry with, especially if you are prepared. To succeed,
+    you must roll below CS +15.
+  type: calculation
+  scope: battle
+  fields:
+    parry_stance:
+      type: boolean
+      role: input
+      description: The hero is in Parry Stance.
+    defence:
+      type: string
+      role: input
+      description: none, dodge, shield or weapon.
+    cs:
+      type: number
+      role: input
+      description: The hero’s Combat Skill.
+    shield_threshold:
+      type: number
+      role: output
+      description: CS +15; the roll must be below it.
+  effects:
+    - type: set
+      target: shield_threshold
+      value:
+        type: sum
+        values:
+          - type: field
+            name: cs
+          - type: literal
+            value: 15
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: parry_stance
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: defence
+        right:
+          type: literal
+          value: shield
+  issues:
+    - issue.combat.shield_threshold
+- id: combat.defence.shield_parry.spillover
+  name: Shield parry damage spills onto the arm
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: If in Parry Stance
+      heading: Parry with a Shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful parry with a shield subtracts the shield’s DEF from the damage. If the
+    damage is higher than the shield’s DEF, the shield will take 1 Point of Damage. The rest of the
+    damage spills onto the arm of the hero which is protected by any armour.
+  type: calculation
+  scope: battle
+  fields:
+    shield_parry_succeeded:
+      type: boolean
+      role: input
+      description: The shield parry succeeded.
+    incoming_damage:
+      type: number
+      role: input
+      description: Damage of the parried strike.
+    shield_def:
+      type: number
+      role: input
+      description: The shield’s DEF.
+    remaining_damage:
+      type: number
+      role: output
+      description: Damage that spills onto the arm.
+    shield_damage:
+      type: number
+      role: output
+      description: Points of Damage the shield takes.
+    spill_location:
+      type: string
+      role: output
+      description: Where the rest of the damage goes.
+  effects:
+    - type: set
+      target: remaining_damage
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: field
+            name: incoming_damage
+          - type: field
+            name: shield_def
+    - type: set
+      target: shield_damage
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: spill_location
+      value:
+        type: literal
+        value: arm
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shield_parry_succeeded
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gt
+        left:
+          type: field
+          name: incoming_damage
+        right:
+          type: field
+          name: shield_def
+  see_also:
+    - section.equipment.armour_and_shield_durability
+- id: combat.defence.shield_parry.absorbed
+  name: Shield parry absorbs all damage
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: If in Parry Stance
+      heading: Parry with a Shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful parry with a shield subtracts the shield’s DEF from the damage. If the
+    damage is higher than the shield’s DEF, the shield will take 1 Point of Damage.
+  type: calculation
+  scope: battle
+  fields:
+    shield_parry_succeeded:
+      type: boolean
+      role: input
+      description: The shield parry succeeded.
+    incoming_damage:
+      type: number
+      role: input
+      description: Damage of the parried strike.
+    shield_def:
+      type: number
+      role: input
+      description: The shield’s DEF.
+    remaining_damage:
+      type: number
+      role: output
+      description: Damage that spills onto the arm.
+    shield_damage:
+      type: number
+      role: output
+      description: Points of Damage the shield takes.
+  effects:
+    - type: set
+      target: remaining_damage
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: shield_damage
+      value:
+        type: literal
+        value: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: shield_parry_succeeded
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: incoming_damage
+        right:
+          type: field
+          name: shield_def
+- id: combat.enemy_behaviour.humanoid_close_combat.make_room
+  name: Humanoid with Close-Combat Weapon, option 1
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 1. If adjacent to a hero, make room for more enemies to attack if possible. Shove if
+    necessary. Only shove once per turn, then attack (see 2).
+  type: procedure_rule
+  scope: battle
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: The enemy is adjacent to a hero.
+    can_make_room:
+      type: boolean
+      role: input
+      description: Room can be made for more enemies to attack.
+    room_attempted_this_turn:
+      type: boolean
+      role: input
+      description: The enemy has already tried to make room (moving or shoving) this turn.
+    action:
+      type: string
+      role: output
+      description: The action the enemy performs.
+    next_action:
+      type: string
+      role: output
+      description: The action that must follow.
+  effects:
+    - type: set
+      target: action
+      value:
+        type: literal
+        value: make_room_or_shove
+    - type: set
+      target: next_action
+      value:
+        type: literal
+        value: attack
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: can_make_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: room_attempted_this_turn
+        right:
+          type: literal
+          value: false
+- id: combat.enemy_behaviour.humanoid_close_combat.attack
+  name: Humanoid with Close-Combat Weapon, option 2
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 2. If adjacent, attack according to the table.
+  type: lookup
+  scope: battle
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: The enemy is adjacent to a hero.
+    attack_roll:
+      type: number
+      role: input
+      description: The 1d10 roll on the option 2 table.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    attack_result:
+      type: string
+      role: output
+      description: Printed Action cell from the option 2 table.
+  effects:
+    - type: lookup
+      table_id: table.combat.humanoid_close_combat.attack
+      key_column: roll
+      key:
+        type: field
+        name: attack_roll
+      value_column: action
+      target: attack_result
+      on_missing_issue: issue.combat.humanoid_behaviour_text
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: adjacent
+    right:
+      type: literal
+      value: true
+  uses_tables:
+    - table.combat.humanoid_close_combat.attack
+- id: combat.enemy_behaviour.humanoid_close_combat.parry_with_two_ap
+  name: Parry Stance with 2 AP left
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        paragraph: option 2, italic explanation
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        table: Uncaptioned table under option 2 (1d10 / Action)
+        row: 1-2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll on the table to see what kind of attack the enemy will perform. First you roll
+    1d10 if it will make an attack or use a Special Skill or Talent. Check the Bestiary to see if
+    the enemy has any such abilities. If you roll Parry in the first action, treat that as the
+    second action and perform a Standard Attack first. ... *If the enemy has 2 AP left, then make a
+    standard attack before going into Parry stance.
+  type: exception
+  scope: battle
+  fields:
+    attack_result:
+      type: string
+      role: output
+      description: Printed Action cell from the option 2 table.
+    action_points_left:
+      type: number
+      role: input
+      description: Action Points the enemy has left.
+      minimum: 1
+      maximum: 2
+      integer: true
+    action:
+      type: string
+      role: output
+      description: The action the enemy performs.
+    next_action:
+      type: string
+      role: output
+      description: The action that must follow.
+  effects:
+    - type: set
+      target: action
+      value:
+        type: literal
+        value: standard_attack
+    - type: set
+      target: next_action
+      value:
+        type: literal
+        value: parry_stance
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: attack_result
+        right:
+          type: literal
+          value: Parry Stance*
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: action_points_left
+        right:
+          type: literal
+          value: 2
+- id: combat.enemy_behaviour.humanoid_close_combat.approach
+  name: Humanoid with Close-Combat Weapon, option 3
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: '3. If within M spaces of a hero, but not adjacent, roll 1d610:'
+  type: lookup
+  scope: battle
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: The enemy is adjacent to a hero.
+    within_m:
+      type: boolean
+      role: input
+      description: The enemy is within M spaces of a hero.
+    approach_roll:
+      type: number
+      role: input
+      description: The 1d10 roll on the option 3 table (printed "1d610").
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    approach_result:
+      type: string
+      role: output
+      description: Printed Action cell from the option 3 table.
+  effects:
+    - type: lookup
+      table_id: table.combat.humanoid_close_combat.approach
+      key_column: roll
+      key:
+        type: field
+        name: approach_roll
+      value_column: action
+      target: approach_result
+      on_missing_issue: issue.combat.humanoid_behaviour_text
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: within_m
+        right:
+          type: literal
+          value: true
+  issues:
+    - issue.combat.humanoid_behaviour_text
+  uses_tables:
+    - table.combat.humanoid_close_combat.approach
+- id: combat.enemy_behaviour.humanoid_close_combat.advance
+  name: Humanoid with Close-Combat Weapon, option 4
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    4. If more than M spaces away from a hero, move towards the closest hero. Always avoid
+    traps not placed by heroes if possible. May climb objects if needed.
+  type: procedure_rule
+  scope: battle
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: The enemy is adjacent to a hero.
+    within_m:
+      type: boolean
+      role: input
+      description: The enemy is within M spaces of a hero.
+    action:
+      type: string
+      role: output
+      description: The action the enemy performs.
+    avoid_traps:
+      type: boolean
+      role: output
+      description: Traps not placed by heroes are avoided if possible.
+    may_climb:
+      type: boolean
+      role: output
+      description: The enemy may climb objects if needed.
+  effects:
+    - type: set
+      target: action
+      value:
+        type: literal
+        value: move_towards_closest_hero
+    - type: set
+      target: avoid_traps
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: may_climb
+      value:
+        type: literal
+        value: true
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: within_m
+        right:
+          type: literal
+          value: false
+- id: combat.enemy.attack_threshold.standard
+  name: Enemy Standard attack test
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Check enemy behaviour card → Determine attack type → Standard? → Make test against CS
+  type: calculation
+  scope: battle
+  fields:
+    attack_type:
+      type: string
+      role: input
+      description: standard or power.
+    cs:
+      type: number
+      role: input
+      description: The enemy’s CS.
+    attack_threshold:
+      type: number
+      role: output
+      description: Value the attack roll must not exceed.
+  effects:
+    - type: set
+      target: attack_threshold
+      value:
+        type: field
+        name: cs
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attack_type
+    right:
+      type: literal
+      value: standard
+- id: combat.enemy.attack_threshold.power
+  name: Enemy Power attack test
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Check enemy behaviour card → Determine attack type → Power? → Make test against CS+20
+  type: calculation
+  scope: battle
+  fields:
+    attack_type:
+      type: string
+      role: input
+      description: standard or power.
+    cs:
+      type: number
+      role: input
+      description: The enemy’s CS.
+    attack_threshold:
+      type: number
+      role: output
+      description: Value the attack roll must not exceed.
+  effects:
+    - type: set
+      target: attack_threshold
+      value:
+        type: sum
+        values:
+          - type: field
+            name: cs
+          - type: literal
+            value: 20
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: attack_type
+    right:
+      type: literal
+      value: power

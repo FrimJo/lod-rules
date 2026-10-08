@@ -1,0 +1,270 @@
+- id: test.combat.turn_hero_token
+  name: 'Combat Turn: hero token with an unacted hero'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived branch of procedure.combat_turn: hero token, a Hero/Mercenary has not acted.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: hero
+    hero_or_mercenary_unacted: true
+    enemy_unacted: true
+    last_token_in_bag: false
+    all_heroes_dead: false
+    all_enemies_dead: false
+  expected:
+    state:
+      activated_side: hero
+      remove_status_tokens: true
+      wandering_monsters_moved: false
+      initiative_bag_refilled: false
+      scenario_die_rolled: false
+      sequence_ended: false
+      unacted_heroes_may_act: false
+      pull_next_token: true
+    events:
+      - type: invoke
+        dependency: procedure.activation
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - hero_token
+      - loop
+- id: test.combat.turn_enemy_token
+  name: 'Combat Turn: enemy token with an unacted enemy'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived branch of procedure.combat_turn: enemy token, an Enemy has not acted.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: enemy
+    hero_or_mercenary_unacted: true
+    enemy_unacted: true
+    last_token_in_bag: false
+    all_heroes_dead: false
+    all_enemies_dead: false
+  expected:
+    state:
+      activated_side: enemy
+      remove_status_tokens: true
+      wandering_monsters_moved: false
+      initiative_bag_refilled: false
+      scenario_die_rolled: false
+      sequence_ended: false
+      unacted_heroes_may_act: false
+      pull_next_token: true
+    events:
+      - type: invoke
+        dependency: procedure.enemy_priority
+      - type: invoke
+        dependency: Perform action(s) according to Enemy behaviour card
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - enemy_token
+      - loop
+- id: test.combat.turn_no_unacted_not_last
+  name: 'Combat Turn: no unacted hero, more tokens in the bag'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived branch of procedure.combat_turn: hero token, no Hero/Mercenary left to act,
+    not the last token.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: hero
+    hero_or_mercenary_unacted: false
+    enemy_unacted: true
+    last_token_in_bag: false
+    all_heroes_dead: false
+    all_enemies_dead: false
+  expected:
+    state:
+      activated_side: none
+      remove_status_tokens: false
+      wandering_monsters_moved: false
+      initiative_bag_refilled: false
+      scenario_die_rolled: false
+      sequence_ended: false
+      unacted_heroes_may_act: false
+      pull_next_token: true
+    events: []
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - loop
+- id: test.combat.turn_last_token
+  name: 'Combat Turn: last token with no unacted enemy ends the round of tokens'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived branch of procedure.combat_turn: enemy token, no Enemy left to act, last token
+    in the bag.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: enemy
+    hero_or_mercenary_unacted: true
+    enemy_unacted: false
+    last_token_in_bag: true
+    all_heroes_dead: false
+    all_enemies_dead: false
+  expected:
+    state:
+      activated_side: none
+      remove_status_tokens: false
+      wandering_monsters_moved: true
+      initiative_bag_refilled: true
+      scenario_die_rolled: true
+      sequence_ended: false
+      unacted_heroes_may_act: false
+      pull_next_token: true
+    events:
+      - type: invoke
+        dependency: procedure.wandering_monster
+      - type: invoke
+        dependency: procedure.initiative
+      - type: invoke
+        dependency: procedure.scenario_die
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - end_of_bag
+      - loop
+- id: test.combat.turn_all_enemies_dead
+  name: 'Combat Turn: all enemies dead ends the sequence'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived branch of procedure.combat_turn: all enemies are dead.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: hero
+    hero_or_mercenary_unacted: true
+    enemy_unacted: true
+    last_token_in_bag: false
+    all_heroes_dead: false
+    all_enemies_dead: true
+  expected:
+    state:
+      activated_side: none
+      remove_status_tokens: false
+      wandering_monsters_moved: false
+      initiative_bag_refilled: false
+      scenario_die_rolled: false
+      sequence_ended: true
+      unacted_heroes_may_act: true
+      pull_next_token: false
+    events: []
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - sequence_ends
+- id: test.combat.turn_all_heroes_dead
+  name: 'Combat Turn: all heroes dead ends the sequence'
+  section_id: section.combat.combat_turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 114
+      printed_page: 112
+      heading: Combat Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived branch of procedure.combat_turn: all heroes are dead.'
+  kind: derived_case
+  procedure_id: procedure.combat_turn
+  inputs:
+    token_kind: enemy
+    hero_or_mercenary_unacted: true
+    enemy_unacted: true
+    last_token_in_bag: false
+    all_heroes_dead: true
+    all_enemies_dead: false
+  expected:
+    state:
+      activated_side: none
+      remove_status_tokens: false
+      wandering_monsters_moved: false
+      initiative_bag_refilled: false
+      scenario_die_rolled: false
+      sequence_ended: true
+      unacted_heroes_may_act: true
+      pull_next_token: false
+    events: []
+    trace:
+      - procedure.combat_turn
+    unresolved: []
+    steps:
+      - reset
+      - sequence_ends

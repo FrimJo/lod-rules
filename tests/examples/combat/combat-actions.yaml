@@ -1,0 +1,390 @@
+- id: test.combat.shove_example_success
+  name: 'Shove example: DB 1 against DEX 35 succeeds from 26'
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: A hero with DB 1 is pushing an enemy with DEX 35. The hero may then add DBx10
+    (1x10=10) to the roll, making everything from 26 and up a success.'
+  kind: source_example
+  rule_ids:
+    - combat.action.shove.attempt
+    - combat.action.shove.success
+  inputs:
+    target_adjacent: true
+    target_large: false
+    roll: 26
+    damage_bonus: 1
+    target_dexterity: 35
+  expected:
+    state:
+      shove_total: 36
+      shove_succeeded: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.shove.attempt
+      - combat.action.shove.success
+    unresolved: []
+    steps: []
+- id: test.combat.shove_example_25_fails
+  name: 'Shove example boundary: 25 with DB 1 does not beat DEX 35'
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: A hero with DB 1 is pushing an enemy with DEX 35. The hero may then add DBx10
+    (1x10=10) to the roll, making everything from 26 and up a success.'
+  kind: derived_case
+  rule_ids:
+    - combat.action.shove.attempt
+    - combat.action.shove.success
+  inputs:
+    target_adjacent: true
+    target_large: false
+    roll: 25
+    damage_bonus: 1
+    target_dexterity: 35
+  expected:
+    state:
+      shove_total: 35
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.shove.attempt
+    unresolved: []
+    steps: []
+- id: test.combat.shove_caption_wizard_diagonal
+  name: 'Shoving caption: object behind the Gnoll moves it diagonally back'
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Shoving. In the lower example, the Wizard shoves the Gnoll. Since there is an object
+    behind the Gnoll, it is instead moved diagonally back to a free square. Had there been two
+    possible diagonal squares, the Wizard would decide which one the Gnoll would end up in.
+  kind: source_example
+  rule_ids:
+    - combat.action.shove.displacement
+  inputs:
+    shove_succeeded: true
+    straight_back_free: false
+    model_behind_can_move_straight_back: false
+    diagonal_back_free: true
+    displacement_case: diagonal
+  expected:
+    state:
+      second_model_moved: false
+      target_falls_over: false
+      target_destination: diagonal_back
+      shover_may_enter_vacated: true
+    events: []
+    trace:
+      - combat.action.shove.displacement
+    unresolved: []
+    steps: []
+- id: test.combat.shove_caption_fighter_pushes_back_gnoll
+  name: 'Shoving caption: the Gnoll at the back moves straight back'
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The fighter in the top example also tries to push a Gnoll. The table is once again in
+    the way. In this case any movement diagonally is also blocked (by the table and another Gnoll).
+    However, the Gnoll at the back would move one square straight back so as to avoid his stumbling
+    companion and, therefore, create space for the pushed Gnoll. If the Gnoll at the back could not
+    be moved, or if was some other obstacle instead of a Gnoll, the shoved Gnoll would fall over.
+  kind: source_example
+  rule_ids:
+    - combat.action.shove.displacement
+  inputs:
+    shove_succeeded: true
+    straight_back_free: false
+    model_behind_can_move_straight_back: true
+    diagonal_back_free: false
+    displacement_case: push_model_behind
+  expected:
+    state:
+      second_model_moved: true
+      target_falls_over: false
+      target_destination: straight_back
+      shover_may_enter_vacated: true
+    events: []
+    trace:
+      - combat.action.shove.displacement
+    unresolved: []
+    steps: []
+- id: test.combat.shove_caption_fighter_blocked_falls
+  name: 'Shoving caption: if the back Gnoll could not move, the shoved Gnoll falls over'
+  section_id: section.combat.different_combat_actions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The fighter in the top example also tries to push a Gnoll. The table is once again in
+    the way. In this case any movement diagonally is also blocked (by the table and another Gnoll).
+    However, the Gnoll at the back would move one square straight back so as to avoid his stumbling
+    companion and, therefore, create space for the pushed Gnoll. If the Gnoll at the back could not
+    be moved, or if was some other obstacle instead of a Gnoll, the shoved Gnoll would fall over.
+  kind: source_example
+  rule_ids:
+    - combat.action.shove.displacement
+  inputs:
+    shove_succeeded: true
+    straight_back_free: false
+    model_behind_can_move_straight_back: false
+    diagonal_back_free: false
+    displacement_case: blocked
+  expected:
+    state:
+      second_model_moved: false
+      target_falls_over: true
+      target_destination: none
+    events: []
+    trace:
+      - combat.action.shove.displacement
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_example_a_cannot_fire
+  name: 'Shooting example: A cannot fire through D on a straight line'
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: Characters A, B and C are all armed with ranged weapons and try to fire at E.
+    Character A cannot fire because there is a character (D) standing in the straight line between A
+    and E. It would be the same if this line was diagonal. Characters B and C can both fire. B
+    suffers a -10 modifier to RS as the shot passes a square with a model. C gets a -20 modifier as
+    the shot touches both the square of D and F. If any of shooter’s roll >=90, the shot will
+    instead hit a model that affected the LOS. In the case of B, it would hit D, but shooter C would
+    have to randomize between F and D.'
+  kind: source_example
+  rule_ids:
+    - combat.principles.shooting_straight_line
+  inputs:
+    model_on_straight_line: true
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.principles.shooting_straight_line
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_example_b_minus_10
+  name: 'Shooting example: B passes one model square for -10 RS'
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: Characters A, B and C are all armed with ranged weapons and try to fire at E.
+    Character A cannot fire because there is a character (D) standing in the straight line between A
+    and E. It would be the same if this line was diagonal. Characters B and C can both fire. B
+    suffers a -10 modifier to RS as the shot passes a square with a model. C gets a -20 modifier as
+    the shot touches both the square of D and F. If any of shooter’s roll >=90, the shot will
+    instead hit a model that affected the LOS. In the case of B, it would hit D, but shooter C would
+    have to randomize between F and D.'
+  kind: source_example
+  rule_ids:
+    - combat.principles.shooting_straight_line
+    - combat.principles.shooting_obstacles
+  inputs:
+    model_on_straight_line: false
+    interfering_objects_and_models: 1
+    ranged_modifier: 0
+  expected:
+    state:
+      may_shoot: true
+      ranged_modifier: -10
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.principles.shooting_straight_line
+      - combat.principles.shooting_obstacles
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_example_c_minus_20
+  name: 'Shooting example: C touches the squares of D and F for -20 RS'
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: Characters A, B and C are all armed with ranged weapons and try to fire at E.
+    Character A cannot fire because there is a character (D) standing in the straight line between A
+    and E. It would be the same if this line was diagonal. Characters B and C can both fire. B
+    suffers a -10 modifier to RS as the shot passes a square with a model. C gets a -20 modifier as
+    the shot touches both the square of D and F. If any of shooter’s roll >=90, the shot will
+    instead hit a model that affected the LOS. In the case of B, it would hit D, but shooter C would
+    have to randomize between F and D.'
+  kind: source_example
+  rule_ids:
+    - combat.principles.shooting_straight_line
+    - combat.principles.shooting_obstacles
+  inputs:
+    model_on_straight_line: false
+    interfering_objects_and_models: 2
+    ranged_modifier: 0
+  expected:
+    state:
+      may_shoot: true
+      ranged_modifier: -20
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.principles.shooting_straight_line
+      - combat.principles.shooting_obstacles
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_example_b_90_hits_d
+  name: 'Shooting example: B rolling 90 hits D instead'
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: Characters A, B and C are all armed with ranged weapons and try to fire at E.
+    Character A cannot fire because there is a character (D) standing in the straight line between A
+    and E. It would be the same if this line was diagonal. Characters B and C can both fire. B
+    suffers a -10 modifier to RS as the shot passes a square with a model. C gets a -20 modifier as
+    the shot touches both the square of D and F. If any of shooter’s roll >=90, the shot will
+    instead hit a model that affected the LOS. In the case of B, it would hit D, but shooter C would
+    have to randomize between F and D.'
+  kind: source_example
+  rule_ids:
+    - combat.principles.shooting_past_model
+  inputs:
+    shooting_past_model: true
+    unmodified_roll: 90
+  expected:
+    state:
+      hits_other_model: true
+    events: []
+    trace:
+      - combat.principles.shooting_past_model
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_example_b_89_hits_target
+  name: 'Shooting example boundary: unmodified 89 does not hit the model shot past'
+  section_id: section.combat.general_principles_of_combat
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: Characters A, B and C are all armed with ranged weapons and try to fire at E.
+    Character A cannot fire because there is a character (D) standing in the straight line between A
+    and E. It would be the same if this line was diagonal. Characters B and C can both fire. B
+    suffers a -10 modifier to RS as the shot passes a square with a model. C gets a -20 modifier as
+    the shot touches both the square of D and F. If any of shooter’s roll >=90, the shot will
+    instead hit a model that affected the LOS. In the case of B, it would hit D, but shooter C would
+    have to randomize between F and D.'
+  kind: derived_case
+  rule_ids:
+    - combat.principles.shooting_past_model
+  inputs:
+    shooting_past_model: true
+    unmodified_roll: 89
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []

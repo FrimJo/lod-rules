@@ -1,0 +1,401 @@
+- id: combat.throwing.target
+  name: thrown potion targets
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Throwing Potions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A (Tr) behind the name of the potion indicates that the potion is used as a thrown
+    weapon. These can be aimed at an enemy, or at any other square within LOS. Contrary to ordinary
+    missile weapons, you can lob your potion over friends, foes and obstacles, hitting someone
+    further away.
+  type: exception
+  scope: global
+  fields:
+    potion_throwable:
+      type: boolean
+      role: input
+      description: the potion is marked (Tr)
+    target_square_in_los:
+      type: boolean
+      role: input
+      description: the target enemy or square is within LOS
+    may_throw:
+      type: boolean
+      role: output
+      description: the potion may be thrown at the target, lobbed over models and obstacles
+  effects:
+    - type: require
+      condition:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: potion_throwable
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: target_square_in_los
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: may_throw
+      value:
+        type: literal
+        value: true
+  term_refs:
+    - term.throwable_potion
+    - term.line_of_sight
+- id: combat.throwing.miss
+  name: missed throw lands adjacent to the target
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Throwing Potions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A successful RS is required to hit, and if you miss, the potion instead hits a random
+    square adjacent to the target.
+  type: random_resolution
+  scope: global
+  fields:
+    rs_succeeded:
+      type: boolean
+      role: input
+      description: the RS test succeeded
+    lands_on:
+      type: string
+      role: output
+      description: target or random_adjacent_square
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rs_succeeded
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: lands_on
+      value:
+        type: literal
+        value: random_adjacent_square
+  term_refs:
+    - term.ranged_skill
+- id: combat.throwing.lobbing
+  name: Lobbing Over a Model or Obstacle
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Lobbing Over a Model or Obstacle
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If your hero tosses the potion over an obstacle or a model, they incur a -10 RS
+    modifier unless these are adjacent to the hero. This is a single modifier no matter how many
+    models or obstacles there are between the hero and the target.
+  type: modifier
+  scope: global
+  fields:
+    lobbed_over_non_adjacent:
+      type: boolean
+      role: input
+      description: the potion is tossed over at least one obstacle or model not adjacent to the hero
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this throw
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: lobbed_over_non_adjacent
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: literal
+        value: -10
+      duration: check
+- id: combat.throwing.door_opening
+  name: throwing through a door opening
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Throwing Through a Door Opening
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If your hero decides to throw the potion through a door opening, they incur a -10 RS
+    modifier, unless they are standing in one of the two squares directly in front of the door.
+  type: modifier
+  scope: global
+  fields:
+    through_door_opening:
+      type: boolean
+      role: input
+      description: the potion is thrown through a door opening
+    in_front_of_door:
+      type: boolean
+      role: input
+      description: the hero stands in one of the two squares directly in front of the door
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this throw
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: through_door_opening
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_front_of_door
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: literal
+        value: -10
+      duration: check
+- id: combat.throwing.door_miss
+  name: missed throw through a door
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Throwing Through a Door Opening
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If not adjacent to the door, and the toss is a failure, it hits one of the two squares
+    in front of the door randomly. See the diagram below for explanation.
+  type: override
+  scope: global
+  fields:
+    through_door_opening:
+      type: boolean
+      role: input
+      description: the potion is thrown through a door opening
+    adjacent_to_door:
+      type: boolean
+      role: input
+      description: the hero is adjacent to the door
+    rs_succeeded:
+      type: boolean
+      role: input
+      description: the RS test succeeded
+    lands_on:
+      type: string
+      role: output
+      description: target, random_adjacent_square or random_square_in_front_of_door
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: through_door_opening
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: adjacent_to_door
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: rs_succeeded
+        right:
+          type: literal
+          value: false
+  effects:
+    - type: set
+      target: lands_on
+      value:
+        type: literal
+        value: random_square_in_front_of_door
+  overrides:
+    - combat.throwing.miss
+- id: combat.throwing.large_enemy
+  name: Throwing at a large enemy
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Throwing at a large enemy
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Throwing a potion at a large or X-large enemy is easier and the throwing hero may add
+    +10 to the RS skill.
+  type: modifier
+  scope: global
+  fields:
+    target_large_or_x_large:
+      type: boolean
+      role: input
+      description: the target is a large or X-large enemy
+    ranged_modifier:
+      type: number
+      role: state
+      description: RS modifier for this throw
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: target_large_or_x_large
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: add
+      target: ranged_modifier
+      value:
+        type: literal
+        value: 10
+      duration: check
+- id: combat.throwing.area_large_enemy
+  name: Area of effect and large enemies
+  section_id: section.combat.throwing_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Area of effect and large enemies
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Some thrown potions will affect several squares. If such a potion hits a square covered
+    by a large or X-large enemy, it takes the normal DMG for the centre square, +1 point of DMG per
+    other square of the affected area it covers. Other enemies standing in the remaining squares
+    take damage as normal.
+  type: calculation
+  scope: global
+  fields:
+    area_effect_potion:
+      type: boolean
+      role: input
+      description: the thrown potion affects several squares
+    hits_square_covered_by_large_or_x_large:
+      type: boolean
+      role: input
+      description: the potion hits a square covered by a large or X-large enemy
+    normal_damage:
+      type: number
+      role: input
+      description: normal DMG of the potion for the centre square
+    other_covered_squares:
+      type: number
+      role: input
+      description: other squares of the affected area the large enemy covers
+      minimum: 0
+      integer: true
+    large_enemy_damage:
+      type: number
+      role: output
+      description: DMG taken by the large or X-large enemy
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: area_effect_potion
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: hits_square_covered_by_large_or_x_large
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: large_enemy_damage
+      value:
+        type: sum
+        values:
+          - type: field
+            name: normal_damage
+          - type: field
+            name: other_covered_squares

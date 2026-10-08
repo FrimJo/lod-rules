@@ -1,0 +1,963 @@
+- id: test.combat.pick_lock.hero
+  name: 'Pick a Lock: a hero with no adjacent enemies may try'
+  section_id: section.combat.different_combat_actions
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Pick a Lock
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to pick a lock if there are no enemies adjacent. If this succeeds, the
+    door is also opened as part of this action.
+  kind: derived_case
+  rule_ids:
+    - combat.action.pick_lock
+  inputs:
+    is_hero: true
+    enemies_adjacent: false
+    lock_picked: true
+  expected:
+    state:
+      may_try: true
+      door_opened: true
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.pick_lock
+    unresolved: []
+    steps: []
+- id: test.combat.pick_lock.not_a_hero
+  name: 'Pick a Lock: only a hero may try'
+  section_id: section.combat.different_combat_actions
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: A hero may try to pick a lock if there are no enemies adjacent. If this succeeds, the
+    door is also opened as part of this action.
+  kind: derived_case
+  rule_ids:
+    - combat.action.pick_lock
+  inputs:
+    is_hero: false
+    enemies_adjacent: false
+    lock_picked: true
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.pick_lock
+    unresolved: []
+    steps: []
+- id: test.combat.break_down_door.hero
+  name: 'Break Down a Door: a hero with no adjacent enemies may try'
+  section_id: section.combat.different_combat_actions
+  source: &a2
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Break Down a Door
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to break down a door if there are no enemies adjacent. More details on
+    this are given in the ‘Into the Dungeon’ chapter.
+  kind: derived_case
+  rule_ids:
+    - combat.action.break_down_door
+  inputs:
+    is_hero: true
+    enemies_adjacent: false
+  expected:
+    state:
+      may_try: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.break_down_door
+    unresolved: []
+    steps: []
+- id: test.combat.break_down_door.not_a_hero
+  name: 'Break Down a Door: only a hero may try'
+  section_id: section.combat.different_combat_actions
+  source: *a2
+  status: extracted
+  confidence: high
+  source_text: A hero may try to break down a door if there are no enemies adjacent. More details on
+    this are given in the ‘Into the Dungeon’ chapter.
+  kind: derived_case
+  rule_ids:
+    - combat.action.break_down_door
+  inputs:
+    is_hero: false
+    enemies_adjacent: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.break_down_door
+    unresolved: []
+    steps: []
+- id: test.combat.search.hero
+  name: 'Searching Furniture or a Corpse: a hero may search for 2 AP'
+  section_id: section.combat.different_combat_actions
+  source: &a3
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Searching Furniture or a Corpse
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may try to do this if the object is not adjacent to an enemy. It costs 2 AP
+    instead of the normal 1 AP though, as the hero must keep an eye on enemies at the same time.
+  kind: derived_case
+  rule_ids:
+    - combat.action.search
+  inputs:
+    is_hero: true
+    object_adjacent_to_enemy: false
+    action_cost: 1
+  expected:
+    state:
+      action_cost: 2
+      may_search: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.search
+    unresolved: []
+    steps: []
+- id: test.combat.search.not_a_hero
+  name: 'Searching Furniture or a Corpse: only a hero may search'
+  section_id: section.combat.different_combat_actions
+  source: *a3
+  status: extracted
+  confidence: high
+  source_text: A hero may try to do this if the object is not adjacent to an enemy. It costs 2 AP
+    instead of the normal 1 AP though, as the hero must keep an eye on enemies at the same time.
+  kind: derived_case
+  rule_ids:
+    - combat.action.search
+  inputs:
+    is_hero: false
+    object_adjacent_to_enemy: false
+    action_cost: 1
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.search
+    unresolved: []
+    steps: []
+- id: test.combat.apply_bandage.self_hero
+  name: 'Apply Bandage: a hero with no enemies in LOS bandages themselves for 2 AP'
+  section_id: section.combat.different_combat_actions
+  source: &a4
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Apply Bandage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero may apply a bandage to themselves if there are no enemies in LOS by spending 2 AP.
+  kind: derived_case
+  rule_ids:
+    - combat.action.apply_bandage.self
+  inputs:
+    is_hero: true
+    enemies_in_los: false
+    action_cost: 1
+  expected:
+    state:
+      action_cost: 2
+      may_self_bandage: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.apply_bandage.self
+    unresolved: []
+    steps: []
+- id: test.combat.apply_bandage.self_not_hero
+  name: 'Apply Bandage: only a hero may bandage themselves'
+  section_id: section.combat.different_combat_actions
+  source: *a4
+  status: extracted
+  confidence: high
+  source_text: A hero may apply a bandage to themselves if there are no enemies in LOS by spending 2 AP.
+  kind: derived_case
+  rule_ids:
+    - combat.action.apply_bandage.self
+  inputs:
+    is_hero: false
+    enemies_in_los: false
+    action_cost: 1
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.apply_bandage.self
+    unresolved: []
+    steps: []
+- id: test.combat.aim.ranged_weapon
+  name: 'Aim: aiming with a Ranged Weapon adds +10 to the next shot'
+  section_id: section.combat.different_combat_actions
+  source: &a5
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Aim
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    By spending 1 AP to aim with a Ranged Weapon at a specific target, a model will gain a
+    +10 modifier in the next action when shooting at that target.
+  kind: derived_case
+  rule_ids:
+    - combat.action.aim
+  inputs:
+    ranged_weapon: true
+    aimed_at_target: true
+    fired_next_action: true
+    target_left_sight: false
+    model_crossed_los: false
+    aimer_lost_hp: false
+    ranged_modifier: 0
+  expected:
+    state:
+      ranged_modifier: 10
+    events: []
+    trace:
+      - combat.action.aim
+    unresolved: []
+    steps: []
+- id: test.combat.aim.no_ranged_weapon
+  name: 'Aim: the bonus needs a Ranged Weapon'
+  section_id: section.combat.different_combat_actions
+  source: *a5
+  status: extracted
+  confidence: high
+  source_text:
+    By spending 1 AP to aim with a Ranged Weapon at a specific target, a model will gain a
+    +10 modifier in the next action when shooting at that target.
+  kind: derived_case
+  rule_ids:
+    - combat.action.aim
+  inputs:
+    ranged_weapon: false
+    aimed_at_target: true
+    fired_next_action: true
+    target_left_sight: false
+    model_crossed_los: false
+    aimer_lost_hp: false
+    ranged_modifier: 0
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.prayer.priest_turn
+  name: "Prayer: a priest may pray during the priest's turn"
+  section_id: section.combat.different_combat_actions
+  source: &a6
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Prayer
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This can be done at any time during a priest's turn, but once you have finished acting
+    with the priest and acted with someone else, you may not go back to pray.
+  kind: derived_case
+  rule_ids:
+    - combat.action.prayer
+  inputs:
+    actor_is_priest: true
+    during_priests_turn: true
+    acted_with_someone_else: false
+  expected:
+    state:
+      may_pray: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.prayer
+    unresolved: []
+    steps: []
+- id: test.combat.prayer.not_priest
+  name: 'Prayer: a model that is not a priest may not pray'
+  section_id: section.combat.different_combat_actions
+  source: *a6
+  status: extracted
+  confidence: high
+  source_text:
+    This can be done at any time during a priest's turn, but once you have finished acting
+    with the priest and acted with someone else, you may not go back to pray.
+  kind: derived_case
+  rule_ids:
+    - combat.action.prayer
+  inputs:
+    actor_is_priest: false
+    during_priests_turn: true
+    acted_with_someone_else: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.prayer
+    unresolved: []
+    steps: []
+- id: test.combat.prayer.outside_priest_turn
+  name: "Prayer: not outside the priest's turn"
+  section_id: section.combat.different_combat_actions
+  source: *a6
+  status: extracted
+  confidence: high
+  source_text:
+    This can be done at any time during a priest's turn, but once you have finished acting
+    with the priest and acted with someone else, you may not go back to pray.
+  kind: derived_case
+  rule_ids:
+    - combat.action.prayer
+  inputs:
+    actor_is_priest: true
+    during_priests_turn: false
+    acted_with_someone_else: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.prayer
+    unresolved: []
+    steps: []
+- id: test.combat.change_facing.mid_activation
+  name: 'Change Facing: allowed between actions under changelog entry 160'
+  section_id: section.combat.different_combat_actions
+  source: &a7
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Change Facing
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 160
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This can be done freely at the start of a model’s actions or when all its actions are
+    done. Once you are finished with a model and start moving another, you may not go back and
+    change the facing of the first model.
+  kind: derived_case
+  rule_ids:
+    - combat.action.change_facing
+  inputs:
+    during_activation: true
+    moved_on_to_another_model: false
+  expected:
+    state:
+      may_change_facing: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.action.change_facing
+    unresolved: []
+    steps: []
+- id: test.combat.change_facing.after_moving_another
+  name: 'Change Facing: not after moving on to another model'
+  section_id: section.combat.different_combat_actions
+  source: *a7
+  status: extracted
+  confidence: high
+  source_text: This can be done freely at the start of a model’s actions or when all its actions are
+    done. Once you are finished with a model and start moving another, you may not go back and
+    change the facing of the first model.
+  kind: derived_case
+  rule_ids:
+    - combat.action.change_facing
+  inputs:
+    during_activation: true
+    moved_on_to_another_model: true
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.action.change_facing
+    unresolved: []
+    steps: []
+- id: test.combat.missile_range.dungeon_ten
+  name: 'Who Can Fight?: a Missile Weapon reaches 10 squares in a dungeon'
+  section_id: section.combat.who_can_fight
+  source: &a8
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Models equipped with Missile Weapons have a maximum reach of 10 squares in a dungeon,
+    and unlimited range outdoors.
+  kind: derived_case
+  rule_ids:
+    - combat.who_can_fight.missile_range
+  inputs:
+    weapon_is_missile_weapon: true
+    outdoors: false
+    distance: 10
+  expected:
+    state:
+      within_range: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - combat.who_can_fight.missile_range
+    unresolved: []
+    steps: []
+- id: test.combat.missile_range.dungeon_eleven
+  name: 'Who Can Fight?: a Missile Weapon does not reach 11 squares in a dungeon'
+  section_id: section.combat.who_can_fight
+  source: *a8
+  status: extracted
+  confidence: high
+  source_text: Models equipped with Missile Weapons have a maximum reach of 10 squares in a dungeon,
+    and unlimited range outdoors.
+  kind: derived_case
+  rule_ids:
+    - combat.who_can_fight.missile_range
+  inputs:
+    weapon_is_missile_weapon: true
+    outdoors: false
+    distance: 11
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.who_can_fight.missile_range
+    unresolved: []
+    steps: []
+- id: test.combat.missile_range.not_missile
+  name: 'Who Can Fight?: the 10-square limit applies only to Missile Weapons'
+  section_id: section.combat.who_can_fight
+  source: *a8
+  status: extracted
+  confidence: high
+  source_text: Models equipped with Missile Weapons have a maximum reach of 10 squares in a dungeon,
+    and unlimited range outdoors.
+  kind: derived_case
+  rule_ids:
+    - combat.who_can_fight.missile_range
+  inputs:
+    weapon_is_missile_weapon: false
+    outdoors: false
+    distance: 11
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.long_range_adjacent.blocked
+  name: 'Who Can Fight?: a Long Range Weapon is not fired with an enemy adjacent'
+  section_id: section.combat.who_can_fight
+  source: *a8
+  status: extracted
+  confidence: high
+  source_text: Long Range Weapons may not normally be fired if an enemy is standing adjacent to the firer.
+  kind: derived_case
+  rule_ids:
+    - combat.who_can_fight.long_range_adjacent
+  inputs:
+    weapon_is_long_range_weapon: true
+    enemy_adjacent: true
+    exception_applies: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.who_can_fight.long_range_adjacent
+    unresolved: []
+    steps: []
+- id: test.combat.long_range_adjacent.other_weapon
+  name: 'Who Can Fight?: the adjacency limit applies only to Long Range Weapons'
+  section_id: section.combat.who_can_fight
+  source: *a8
+  status: extracted
+  confidence: high
+  source_text: Long Range Weapons may not normally be fired if an enemy is standing adjacent to the firer.
+  kind: derived_case
+  rule_ids:
+    - combat.who_can_fight.long_range_adjacent
+  inputs:
+    weapon_is_long_range_weapon: false
+    enemy_adjacent: true
+    exception_applies: false
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.fumble.hero_dodge_prone
+  name: 'Fumble: a hero fumbling a dodge falls over and becomes prone'
+  section_id: section.combat.fumble
+  source: &a9
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A hero fumbling when dodging or shoving will fall over and become prone.
+  kind: derived_case
+  rule_ids:
+    - combat.fumble.dodge_or_shove
+  inputs:
+    is_hero: true
+    roll: 100
+    dodging_or_shoving: true
+  expected:
+    state:
+      hero_prone: true
+    events: []
+    trace:
+      - combat.fumble.dodge_or_shove
+    unresolved: []
+    steps: []
+- id: test.combat.fumble.enemy_shove_not_hero_rule
+  name: 'Fumble: the hero dodge-or-shove rule does not apply to an enemy'
+  section_id: section.combat.fumble
+  source: *a9
+  status: extracted
+  confidence: high
+  source_text: A hero fumbling when dodging or shoving will fall over and become prone.
+  kind: derived_case
+  rule_ids:
+    - combat.fumble.dodge_or_shove
+  inputs:
+    is_hero: false
+    roll: 100
+    dodging_or_shoving: true
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_large.hero_shot
+  name: 'Shooting at Large-Sized Monsters: a hero shooting gains RS +10'
+  section_id: section.combat.general_principles_of_combat
+  source: &a10
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting at Large-Sized Monsters and Flyers
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When shooting at Large-Sized or X-Large Monsters, your heroes gain a RS +10 bonus.
+  kind: derived_case
+  rule_ids:
+    - combat.principles.shooting_large.bonus
+  inputs:
+    shooter_is_hero: true
+    shooting: true
+    target_large_or_x_large: true
+    ranged_modifier: 0
+  expected:
+    state:
+      ranged_modifier: 10
+    events: []
+    trace:
+      - combat.principles.shooting_large.bonus
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_large.enemy_shot
+  name: 'Shooting at Large-Sized Monsters: the bonus is for heroes'
+  section_id: section.combat.general_principles_of_combat
+  source: *a10
+  status: extracted
+  confidence: high
+  source_text: When shooting at Large-Sized or X-Large Monsters, your heroes gain a RS +10 bonus.
+  kind: derived_case
+  rule_ids:
+    - combat.principles.shooting_large.bonus
+  inputs:
+    shooter_is_hero: false
+    shooting: true
+    target_large_or_x_large: true
+    ranged_modifier: 0
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.shooting_large.melee
+  name: 'Shooting at Large-Sized Monsters: the bonus is for shooting only'
+  section_id: section.combat.general_principles_of_combat
+  source: *a10
+  status: extracted
+  confidence: high
+  source_text: When shooting at Large-Sized or X-Large Monsters, your heroes gain a RS +10 bonus.
+  kind: derived_case
+  rule_ids:
+    - combat.principles.shooting_large.bonus
+  inputs:
+    shooter_is_hero: true
+    shooting: false
+    target_large_or_x_large: true
+    ranged_modifier: 0
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.throwing.area_large_enemy
+  name: 'Area of effect: a large enemy takes centre DMG +1 per other covered square'
+  section_id: section.combat.throwing_potions
+  source: &a11
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 117
+      printed_page: 115
+      heading: Area of effect and large enemies
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Some thrown potions will affect several squares. If such a potion hits a square covered
+    by a large or X-large enemy, it takes the normal DMG for the centre square, +1 point of DMG per
+    other square of the affected area it covers.
+  kind: derived_case
+  rule_ids:
+    - combat.throwing.area_large_enemy
+  inputs:
+    area_effect_potion: true
+    hits_square_covered_by_large_or_x_large: true
+    normal_damage: 6
+    other_covered_squares: 2
+  expected:
+    state:
+      large_enemy_damage: 8
+    events: []
+    trace:
+      - combat.throwing.area_large_enemy
+    unresolved: []
+    steps: []
+- id: test.combat.throwing.single_square_potion
+  name: 'Area of effect: the large-enemy count applies only to potions affecting several squares'
+  section_id: section.combat.throwing_potions
+  source: *a11
+  status: extracted
+  confidence: high
+  source_text:
+    Some thrown potions will affect several squares. If such a potion hits a square covered
+    by a large or X-large enemy, it takes the normal DMG for the centre square, +1 point of DMG per
+    other square of the affected area it covers.
+  kind: derived_case
+  rule_ids:
+    - combat.throwing.area_large_enemy
+  inputs:
+    area_effect_potion: false
+    hits_square_covered_by_large_or_x_large: true
+    normal_damage: 6
+    other_covered_squares: 2
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.defence.through_zoc_strike
+  name: 'Parrying or Dodging: a strike through the ZOC may be defended'
+  section_id: section.combat.detailed_acting_with_enemies
+  source: &a12
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parrying or Dodging
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Dodging and parrying can only be done if the attack comes through the hero’s ZOC. They
+    can be done against arrows or strikes, unless a Talent or Perk states otherwise.
+  kind: derived_case
+  rule_ids:
+    - combat.defence.through_zoc
+  inputs:
+    through_zoc: true
+    attack_type: strike
+    talent_or_perk_forbids: false
+  expected:
+    state:
+      may_defend: true
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - combat.defence.through_zoc
+    unresolved: []
+    steps: []
+- id: test.combat.defence.outside_zoc
+  name: 'Parrying or Dodging: an attack outside the ZOC may not be defended'
+  section_id: section.combat.detailed_acting_with_enemies
+  source: *a12
+  status: extracted
+  confidence: high
+  source_text:
+    Dodging and parrying can only be done if the attack comes through the hero’s ZOC. They
+    can be done against arrows or strikes, unless a Talent or Perk states otherwise.
+  kind: derived_case
+  rule_ids:
+    - combat.defence.through_zoc
+  inputs:
+    through_zoc: false
+    attack_type: strike
+    talent_or_perk_forbids: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - combat.defence.through_zoc
+    unresolved: []
+    steps: []
+- id: test.combat.defence.talent_forbids_arrow
+  name: 'Parrying or Dodging: a Talent or Perk may forbid defending an arrow'
+  section_id: section.combat.detailed_acting_with_enemies
+  source: *a12
+  status: extracted
+  confidence: high
+  source_text:
+    Dodging and parrying can only be done if the attack comes through the hero’s ZOC. They
+    can be done against arrows or strikes, unless a Talent or Perk states otherwise.
+  kind: derived_case
+  rule_ids:
+    - combat.defence.through_zoc
+  inputs:
+    through_zoc: true
+    attack_type: arrow
+    talent_or_perk_forbids: true
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: false
+    trace:
+      - combat.defence.through_zoc
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.door.iron_wedges
+  name: 'Enemies and doors: Iron Wedges add 3 turns'
+  section_id: section.combat.acting_with_enemies
+  source: &a13
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      heading: Enemies and doors
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A door blocked with Iron Wedges will add 3 turns ... Ethereal creatures ignore doors
+    unless they are magically sealed
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.door.iron_wedges
+  inputs:
+    iron_wedges: true
+    creature_kind: humanoid
+  expected:
+    state:
+      iron_wedge_turns: 3
+    events: []
+    trace:
+      - combat.enemy.door.iron_wedges
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.door.iron_wedges_ethereal
+  name: 'Enemies and doors: an ethereal creature ignores a wedged door that is not magically sealed'
+  section_id: section.combat.acting_with_enemies
+  source: *a13
+  status: extracted
+  confidence: high
+  source_text: A door blocked with Iron Wedges will add 3 turns ... Ethereal creatures ignore doors
+    unless they are magically sealed
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.door.iron_wedges
+  inputs:
+    iron_wedges: true
+    creature_kind: ethereal
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.choosing_targets.untargeted
+  name: 'Choosing Targets: prefer an adjacent target no other enemy targets, then stick with it'
+  section_id: section.combat.detailed_acting_with_enemies
+  source: &a14
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Choosing Targets
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the enemy has a choice between adjacent targets, target one that has not been
+    targeted by another enemy. Once the target has been decided, the enemy will stick with that
+    target for that turn. Next turn, it revaluates who to strike.
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.choosing_targets
+    - combat.enemy.choosing_targets.stick_with_target
+  inputs:
+    choice_between_adjacent_targets: true
+    untargeted_target_available: true
+    target_decided: true
+  expected:
+    state:
+      target_choice: not_targeted_by_another_enemy
+      target_fixed_for_turn: true
+      reevaluate_next_turn: true
+    events: []
+    trace:
+      - combat.enemy.choosing_targets
+      - combat.enemy.choosing_targets.stick_with_target
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.choosing_targets.all_targeted
+  name:
+    'Choosing Targets: with every adjacent target already targeted the enemy still sticks with its
+    choice'
+  section_id: section.combat.detailed_acting_with_enemies
+  source: *a14
+  status: extracted
+  confidence: high
+  source_text: If the enemy has a choice between adjacent targets, target one that has not been
+    targeted by another enemy. Once the target has been decided, the enemy will stick with that
+    target for that turn. Next turn, it revaluates who to strike.
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.choosing_targets
+    - combat.enemy.choosing_targets.stick_with_target
+  inputs:
+    choice_between_adjacent_targets: true
+    untargeted_target_available: false
+    target_decided: true
+  expected:
+    state:
+      target_fixed_for_turn: true
+      reevaluate_next_turn: true
+    events: []
+    trace:
+      - combat.enemy.choosing_targets.stick_with_target
+    unresolved: []
+    steps: []

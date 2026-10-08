@@ -1,0 +1,54 @@
+- id: test.combat.poison.rest_death
+  name: 'Poison: a hero failing a remaining poison test during a rest dies at 0 HP'
+  section_id: section.combat.different_kinds_of_damage.poison
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the party takes a rest (in a dungeon, while traveling, or at an inn), roll all the
+    remaining rolls. If the hero reaches 0 Hit Points during a rest, the hero dies.
+  kind: derived_case
+  rule_ids:
+    - combat.poison.rest_death
+  inputs:
+    resting: true
+    hp_lost_to_poison_roll: true
+    hit_points: 0
+  expected:
+    state:
+      dead: true
+    events: []
+    trace:
+      - combat.poison.rest_death
+    unresolved: []
+    steps: []
+- id: test.combat.poison.rest_zero_not_poison
+  name: 'Poison: a resting hero at 0 HP without a poison roll is not killed by this rule'
+  section_id: section.combat.different_kinds_of_damage.poison
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: If the party takes a rest (in a dungeon, while traveling, or at an inn), roll all the
+    remaining rolls. If the hero reaches 0 Hit Points during a rest, the hero dies.
+  kind: derived_case
+  rule_ids:
+    - combat.poison.rest_death
+  inputs:
+    resting: true
+    hp_lost_to_poison_roll: false
+    hit_points: 0
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []

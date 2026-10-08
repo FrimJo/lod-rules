@@ -1,20 +1,30 @@
 - id: test.combat.variya_charge
-  name: variya charge
+  name:
+    'printed Combat Example, Variya charges: CS 45 +10 charge -10 Gnoll defence +5 Great Weapon =
+    50, two AP'
   section_id: section.combat.combat_example
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 124
       printed_page: 122
-      heading: combat example
+      heading: Combat Example
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: Round 1
   status: extracted
   confidence: high
-  source_text: 'PDF 124: Variya CS45 +10 charge -10 defence +5 Great Weapon =50, two AP. Roll22 hits.'
+  source_text: Round 1. Variya the Barbarian is facing two ferocious Gnolls. It is her turn to act
+    and, since she has 2 squares between her and the Gnolls, she does what every self-respecting
+    Berserker would do, and charges them. She decides to target the one on the left with the
+    two-handed axe. She spends 2 Action Points to move up to the Gnoll and strike with her own Great
+    Axe. With a CS of 45, she ends up with having to roll below 50. (+10 for charging, -10 for the
+    Gnoll’s defence, +5 CS since the Gnoll has a Great Weapon.
   kind: source_example
+  procedure_id: procedure.combat_preparation
   inputs:
     mode: melee
     action: charge
@@ -70,25 +80,64 @@
       - charge
       - evasion
       - threshold_melee
-  procedure_id: procedure.combat_preparation
-- id: test.combat.variya_damage
-  name: variya damage
+- id: test.combat.variya_hit
+  name: printed Combat Example, Variya rolls 22 against 50 and hits
   section_id: section.combat.combat_example
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 124
       printed_page: 122
-      heading: combat example
+      heading: Combat Example
+      locator:
+        paragraph: Round 1
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'PDF 124: damage result6, Gnoll armour2, total damage4. No Natural Armour is included
-    in the printed arithmetic.'
+  source_text: With a CS of 45, she ends up with having to roll below 50. (+10 for charging, -10 for
+    the Gnoll’s defence, +5 CS since the Gnoll has a Great Weapon. She rolls a 22 which is a hit.
   kind: source_example
+  rule_ids:
+    - core.check.success
+  inputs:
+    roll: 22
+    effective_value: 50
+  expected:
+    state:
+      outcome: success
+    events: []
+    trace:
+      - core.check.success
+    unresolved: []
+    steps: []
+- id: test.combat.variya_damage
+  name: printed Combat Example, 1d12+2 damage of 6 against Gnoll Armour 2 gives 4
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        paragraph: Round 1
+  status: extracted
+  confidence: high
+  source_text: Next, she rolls 1d12+2 for damage which results in 6 Points of Damage. The Gnoll has
+    Armour 2, which gives a total damage of 4. Not the best of strikes, but it will do.
+  kind: source_example
+  rule_ids:
+    - combat.damage.basic
+  unresolved_references:
+    - The printed arithmetic subtracts only Armour 2; no Natural Armour is stated, so it is supplied
+      as 0.
   inputs:
     weapon_damage: 6
     damage_bonus: 0
@@ -102,26 +151,275 @@
     unresolved: []
     events: []
     steps: []
-  rule_ids:
-    - combat.damage.basic
-- id: test.combat.variya_second_target
-  name: variya second target
+- id: test.combat.gnoll_power_behaviour
+  name: printed Combat Example, the struck Gnoll rolls 6 on its Behaviour Roll and makes a Power Attack
   section_id: section.combat.combat_example
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 124
       printed_page: 122
-      heading: combat example
+      heading: Combat Example
+      locator:
+        paragraph: Round 1, second paragraph
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'PDF124: CS45 -10 defence -10 stance -5 shield =20. The example ends before a result
-    for this attack.'
+  source_text:
+    Now it is time for the Gnolls to act. The one Variya struck rolls a 6 on its Behaviour
+    Roll which means it will make a Power Attack. (It has no Special Talents so that roll is
+    skipped).
   kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  issues:
+    - issue.combat.example_conflicts
+  unresolved_references:
+    - Adjacency and room to make are not printed; the Gnoll is taken as adjacent with no room to
+      make, and not wounded, as the printed Power Attack implies.
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: false
+    attack_roll: 6
+  expected:
+    state:
+      attack_result: Power Attack (if wounded, Parry stance)
+      action: power_attack
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - power_attack
+- id: test.combat.gnoll_power_attack_dodged
+  name: printed Combat Example, the Gnoll Power Attack hits with 37 against CS 40 +20 and Variya dodges
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      locator:
+        paragraph: Round 1, second paragraph
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: With its CS of 40, and the Power Bonus of +20, it easily lands a hit with a result of
+    37. As Variya did not take a Parry Stance, she cannot parry, but she may dodge. She rolls 27,
+    which is below her Dodge Skill Level and she avoids the axe.
+  kind: source_example
+  procedure_id: procedure.enemy_attack
+  unresolved_references:
+    - Variya’s Dodge Skill Level is not printed; the successful dodge the example states is supplied
+      as defence_succeeded.
+  inputs:
+    attack_type: power
+    cs: 40
+    attack_roll: 37
+    parry_stance: false
+    defence: dodge
+    defence_succeeded: true
+  expected:
+    state:
+      target: hero
+      attack_threshold: 60
+      outcome: dodged_attack
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.power
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - power_test
+      - target_defends
+      - not_in_parry_stance
+      - dodged
+- id: test.combat.gnoll_standard_then_parry
+  name: printed Combat Example, the other Gnoll rolls 2 with 2 AP and makes a Standard Attack first
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      locator:
+        paragraph: Round 1, second paragraph
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Next up is the other Gnoll, who rolls 2 on its behaviour, which means a Standard Attack.
+  kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  issues:
+    - issue.combat.example_conflicts
+  unresolved_references:
+    - Adjacency is not printed; the Gnoll is taken as adjacent with no room to make and 2 AP left at
+      the start of its activation.
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 2
+    wounded: false
+    attack_roll: 2
+  expected:
+    state:
+      attack_result: Parry Stance*
+      action: standard_attack
+      next_action: parry_stance
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+      - combat.enemy_behaviour.humanoid_close_combat.parry_with_two_ap
+    unresolved: []
+    steps:
+      - option_2
+      - parry_with_two_ap
+- id: test.combat.gnoll_second_roll_parry
+  name: printed Combat Example, the second Behaviour Roll of 1 with 1 AP left is Parry Stance
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      locator:
+        paragraph: Round 1, second paragraph
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The first roll is 54, which, luckily, is a miss. Now, on its second Behaviour Roll it
+    rolls a 1, and chooses to go into Parry Stance.
+  kind: source_example
+  procedure_id: procedure.humanoid_close_combat_behaviour
+  issues:
+    - issue.combat.example_conflicts
+  unresolved_references:
+    - 'The 54 miss is not asserted: this Gnoll’s CS is not printed.'
+  inputs:
+    adjacent: true
+    can_make_room: false
+    room_attempted_this_turn: false
+    action_points_left: 1
+    wounded: false
+    attack_roll: 1
+  expected:
+    state:
+      attack_result: Parry Stance*
+      action: parry_stance
+    events: []
+    trace:
+      - procedure.humanoid_close_combat_behaviour
+      - combat.enemy_behaviour.humanoid_close_combat.attack
+    unresolved: []
+    steps:
+      - option_2
+      - parry_stance
+- id: test.combat.variya_frenzy_damage
+  name: printed Combat Example, Variya rolls 7+2 against the Gnoll’s Armour 2
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      locator:
+        paragraph: Round 2
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Variya hits and proceeds to roll 7+2 on her damage. Since the Gnoll only has 6 Hit
+    Points left, it dies from the first strike.
+  kind: source_example
+  rule_ids:
+    - combat.damage.basic
+    - character.hit_points.loss
+    - combat.enemy.zero_hp
+  issues:
+    - issue.combat.example_conflicts
+  unresolved_references:
+    - The Gnoll’s Armour 2 is stated in Round 1. Seven damage takes the six-HP Gnoll to -1; "reduced
+      to 0 Hit Points" covers that, as the example says it dies.
+  inputs:
+    weapon_damage: 7
+    damage_bonus: 2
+    natural_armour: 0
+    armour: 2
+    hit_points: 6
+  expected:
+    state:
+      damage_taken: 7
+      hit_points: -1
+      dead: true
+    events: []
+    trace:
+      - combat.damage.basic
+      - character.hit_points.loss
+      - combat.enemy.zero_hp
+    unresolved: []
+    steps: []
+- id: test.combat.variya_second_target
+  name: printed Combat Example, Variya needs 20 or less against the defending Gnoll
+  section_id: section.combat.combat_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 124
+      printed_page: 122
+      heading: Combat Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        paragraph: Round 2
+  status: extracted
+  confidence: high
+  source_text: Variya, in her frenzy, is now allowed to strike again and strikes at the defending
+    Gnoll. To hit it, she needs to roll 20 or less (CS 45, -10 Gnoll defence, and -10 for Parry
+    Stance and -5 for the shield). May her axe strike true!
+  kind: source_example
+  procedure_id: procedure.combat_preparation
+  issues:
+    - issue.combat.example_conflicts
+  unresolved_references:
+    - The example ends before a result for this attack.
   inputs:
     mode: melee
     action: standard
@@ -178,6 +476,3 @@
       - stance
       - evasion
       - threshold_melee
-  procedure_id: procedure.combat_preparation
-  issues:
-    - issue.combat.example_conflicts

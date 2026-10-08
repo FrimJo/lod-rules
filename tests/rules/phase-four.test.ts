@@ -53,6 +53,7 @@ describe('Phase 4 reusable rule interactions', () => {
         'character.durability.overlap_uncertain',
       ],
       {
+        is_hero: true,
         roll: 100,
         attacking_or_parrying: true,
         durability: 6,
@@ -72,6 +73,7 @@ describe('Phase 4 reusable rule interactions', () => {
         'character.durability.overlap_uncertain',
       ],
       {
+        is_hero: true,
         roll: 95,
         attacking_or_parrying: true,
         durability: 6,

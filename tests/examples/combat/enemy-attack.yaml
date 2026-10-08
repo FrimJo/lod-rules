@@ -1,0 +1,554 @@
+- id: test.procedure.enemy_attack.miss
+  name: derived case, a Standard attack roll of 55 against CS 40 misses
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.enemy_attack: Standard attack, CS 40, roll 55.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 55
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      outcome: attack_misses
+    events: []
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - attack_misses
+- id: test.procedure.enemy_attack.fumble_drops_weapon
+  name: derived case, an armed attacker rolling 00 drops its weapon
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.enemy_attack: Standard attack, CS 40, roll 100, attacker
+    has a weapon.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 100
+    has_weapon: true
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      drops_weapon: true
+      outcome: attacker_fumbles
+    events: []
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.enemy.fumble.drops_weapon
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - attacker_fumbles
+- id: test.procedure.enemy_attack.fumble_falls_over
+  name: derived case, an unarmed attacker rolling 00 falls over
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.enemy_attack: Standard attack, CS 40, roll 100, attacker
+    has no weapon.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 100
+    has_weapon: false
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      falls_over: true
+      outcome: attacker_fumbles
+    events: []
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.enemy.fumble.falls_over
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - attacker_fumbles
+- id: test.procedure.enemy_attack.torso_wounds
+  name: derived case, an undefended hit to the torso subtracts wounds and checks the Quick Slots
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), target not in
+    Parry Stance and not defending, hit area 4, DMG 6 against DEF 2.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: false
+    defence: none
+    hit_area_roll: 4
+    incoming_damage: 6
+    armour_def: 2
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      hit_location: Torso (check gear)
+      wounds: 4
+      armour_durability_loss: 1
+      outcome: wounds_subtracted
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+      - type: invoke
+        dependency: character.durability.armour_damage
+      - type: invoke
+        dependency: character.durability.quick_slot_hit
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.damage.hit_area
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - not_in_parry_stance
+      - hit_area
+      - subtract_wounds
+      - torso_hit
+- id: test.procedure.enemy_attack.blocked_by_armour
+  name: derived case, damage not above the armour DEF is blocked
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), no defence,
+    hit area 6, DMG 3 against DEF 4.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: false
+    defence: none
+    hit_area_roll: 6
+    incoming_damage: 3
+    armour_def: 4
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      hit_location: Legs
+      outcome: blocked_by_armour
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.damage.hit_area
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - not_in_parry_stance
+      - hit_area
+      - blocked_by_armour
+- id: test.procedure.enemy_attack.weapon_parried
+  name: derived case, a successful weapon parry ends the attack
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), target in
+    Parry Stance parries with its weapon successfully.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: true
+    defence: weapon
+    defence_succeeded: true
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      outcome: parried
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - in_parry_stance
+      - weapon_parried
+- id: test.procedure.enemy_attack.weapon_parry_fumble_head
+  name: derived case, a failed weapon parry on 96 costs weapon durability and a head hit costs Sanity
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), weapon parry
+    fails with 96, hit area 1, DMG 5 against DEF 0.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: true
+    defence: weapon
+    defence_succeeded: false
+    defence_roll: 96
+    hit_area_roll: 1
+    incoming_damage: 5
+    armour_def: 0
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      weapon_durability_loss: 1
+      hit_location: Head
+      wounds: 5
+      armour_durability_loss: 1
+      outcome: wounds_subtracted
+      sanity_loss: 1
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+      - type: invoke
+        dependency: character.durability.armour_damage
+      - type: invoke
+        dependency: character.sanity.loss.head_wound
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.damage.hit_area
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - in_parry_stance
+      - weapon_parry_fumble
+      - hit_area
+      - subtract_wounds
+      - head_hit
+- id: test.procedure.enemy_attack.shield_blocks
+  name: derived case, a successful shield parry with DMG not above the shield DEF is parried
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), shield parry
+    succeeds, DMG 5 against shield DEF 6.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: true
+    defence: shield
+    defence_succeeded: true
+    incoming_damage: 5
+    shield_def: 6
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      shield_parry_succeeded: true
+      remaining_damage: 0
+      shield_damage: 0
+      outcome: parried
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.defence.shield_parry.absorbed
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - in_parry_stance
+      - shield_parried
+      - shield_def_subtracted
+      - shield_blocks
+- id: test.procedure.enemy_attack.shield_spillover
+  name: derived case, a successful shield parry with DMG above the shield DEF transfers the rest to
+    the arm
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), shield parry
+    succeeds, DMG 8 against shield DEF 6.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: true
+    defence: shield
+    defence_succeeded: true
+    incoming_damage: 8
+    shield_def: 6
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      shield_parry_succeeded: true
+      remaining_damage: 2
+      shield_damage: 1
+      spill_location: arm
+      outcome: transferred_to_arm
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+      - type: invoke
+        dependency: procedure.combat_damage
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.defence.shield_parry.spillover
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - in_parry_stance
+      - shield_parried
+      - shield_def_subtracted
+      - shield_spillover
+- id: test.procedure.enemy_attack.shield_parry_fumble
+  name: derived case, a failed shield parry on 97 costs shield durability before the hit area
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Standard attack hits (roll 20), target not in
+    Parry Stance, shield parry fails with 97, hit area 2, DMG 4 against DEF 1.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: standard
+    cs: 40
+    attack_roll: 20
+    parry_stance: false
+    defence: shield
+    defence_succeeded: false
+    defence_roll: 97
+    hit_area_roll: 2
+    incoming_damage: 4
+    armour_def: 1
+  expected:
+    state:
+      target: hero
+      attack_threshold: 40
+      shield_durability_loss: 1
+      hit_location: Arms
+      wounds: 3
+      armour_durability_loss: 1
+      outcome: wounds_subtracted
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+      - type: invoke
+        dependency: character.durability.armour_damage
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.standard
+      - combat.damage.hit_area
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - standard_test
+      - target_defends
+      - not_in_parry_stance
+      - shield_parry_fumble
+      - hit_area
+      - subtract_wounds
+- id: test.procedure.enemy_attack.dodge_failed
+  name: derived case, a failed dodge leads to the hit area
+  section_id: section.combat.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.enemy_attack: Power attack (CS 40 +20) hits with 55, dodge
+    fails, hit area 3, DMG 7 against DEF 3.'
+  kind: derived_case
+  procedure_id: procedure.enemy_attack
+  inputs:
+    attack_type: power
+    cs: 40
+    attack_roll: 55
+    parry_stance: false
+    defence: dodge
+    defence_succeeded: false
+    hit_area_roll: 3
+    incoming_damage: 7
+    armour_def: 3
+  expected:
+    state:
+      target: hero
+      attack_threshold: 60
+      hit_location: Torso (check gear)
+      wounds: 4
+      armour_durability_loss: 1
+      outcome: wounds_subtracted
+    events:
+      - type: invoke
+        dependency: procedure.hero_defence
+      - type: invoke
+        dependency: character.durability.armour_damage
+      - type: invoke
+        dependency: character.durability.quick_slot_hit
+    trace:
+      - procedure.enemy_attack
+      - combat.enemy.attack_threshold.power
+      - combat.damage.hit_area
+    unresolved: []
+    steps:
+      - check_behaviour_card
+      - power_test
+      - target_defends
+      - not_in_parry_stance
+      - hit_area
+      - subtract_wounds
+      - torso_hit

@@ -1,0 +1,521 @@
+- id: procedure.humanoid_close_combat_behaviour
+  name: Humanoid with Close-Combat Weapon
+  section_id: section.combat.detailed_acting_with_enemies
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      heading: Detailed acting with enemies
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: As an example, we will look at a humanoid enemy armed with a Close-combat weapon. The
+    enemy will follow the numbered options from the top down, stopping and performing the first
+    action that fits the situation. Once that action is performed, and the enemy still has Action
+    Points, start over from the top again.
+  issues:
+    - issue.combat.humanoid_behaviour_text
+  unresolved_references:
+    - 'Check the Bestiary to see if the enemy has any such abilities: whether the enemy has a Skill
+      or Special Talent is supplied as has_skill_or_talent; the Bestiary is not present.'
+    - One run of this procedure chooses one action. Starting over from the top once the action is
+      performed is combat.enemy_behaviour.top_down.
+  fields:
+    adjacent:
+      type: boolean
+      role: input
+      description: The enemy is adjacent to a hero.
+    can_make_room:
+      type: boolean
+      role: input
+      description: Room can be made for more enemies to attack.
+    room_attempted_this_turn:
+      type: boolean
+      role: input
+      description: The enemy has already tried to make room (moving or shoving) this turn.
+    within_m:
+      type: boolean
+      role: input
+      description: The enemy is within M spaces of a hero.
+    attack_roll:
+      type: number
+      role: input
+      description: The 1d10 roll on the option 2 table.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    approach_roll:
+      type: number
+      role: input
+      description: The 1d10 roll on the option 3 table (printed "1d610").
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    action_points_left:
+      type: number
+      role: input
+      description: Action Points the enemy has left.
+      minimum: 1
+      maximum: 2
+      integer: true
+    wounded:
+      type: boolean
+      role: input
+      description: The enemy is wounded.
+    has_skill_or_talent:
+      type: boolean
+      role: input
+      description: The Bestiary gives the enemy a Skill or Special Talent it can use.
+    can_charge:
+      type: boolean
+      role: input
+      description: The enemy is able to Charge Attack the closest hero.
+    action:
+      type: string
+      role: output
+      description: The action the enemy performs.
+    next_action:
+      type: string
+      role: output
+      description: The action that must follow.
+    attack_result:
+      type: string
+      role: output
+      description: Printed Action cell from the option 2 table.
+    approach_result:
+      type: string
+      role: output
+      description: Printed Action cell from the option 3 table.
+    forfeits_second_action:
+      type: boolean
+      role: output
+      description: The second action is forfeited.
+    avoid_traps:
+      type: boolean
+      role: output
+      description: Traps not placed by heroes are avoided if possible.
+    may_climb:
+      type: boolean
+      role: output
+      description: The enemy may climb objects if needed.
+  dependencies: []
+  steps:
+    - id: option_1
+      source_text:
+        1. If adjacent to a hero, make room for more enemies to attack if possible. Shove if
+        necessary. Only shove once per turn, then attack (see 2).
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: can_make_room
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: room_attempted_this_turn
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - combat.enemy_behaviour.humanoid_close_combat.make_room
+      effects: []
+    - id: option_2
+      source_text: 2. If adjacent, attack according to the table.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: true
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: can_make_room
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: room_attempted_this_turn
+                right:
+                  type: literal
+                  value: true
+      rule_refs:
+        - combat.enemy_behaviour.humanoid_close_combat.attack
+      effects: []
+      substeps:
+        - id: parry_with_two_ap
+          source_text:
+            1-2 Parry Stance* ... *If the enemy has 2 AP left, then make a standard attack before
+            going into Parry stance.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Parry Stance*
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: action_points_left
+                right:
+                  type: literal
+                  value: 2
+          rule_refs:
+            - combat.enemy_behaviour.humanoid_close_combat.parry_with_two_ap
+          effects: []
+        - id: parry_stance
+          source_text: 1-2 Parry Stance*
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Parry Stance*
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: action_points_left
+                right:
+                  type: literal
+                  value: 1
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: parry_stance
+        - id: standard_attack
+          source_text: 3-5 Standard Attack
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: attack_result
+            right:
+              type: literal
+              value: Standard Attack
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: standard_attack
+        - id: power_attack
+          source_text: 6 Power Attack (if wounded, Parry stance)
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Power Attack (if wounded, Parry stance)
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: wounded
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: power_attack
+        - id: power_attack_wounded
+          source_text: 6 Power Attack (if wounded, Parry stance)
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Power Attack (if wounded, Parry stance)
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: wounded
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: parry_stance
+        - id: use_skill
+          source_text: 7-10 Use Skill/Special Talent. If N/A, attack.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Use Skill/Special Talent. If N/A, attack.
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: has_skill_or_talent
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: use_skill_or_special_talent
+        - id: skill_not_available
+          source_text: 7-10 Use Skill/Special Talent. If N/A, attack.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: attack_result
+                right:
+                  type: literal
+                  value: Use Skill/Special Talent. If N/A, attack.
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: has_skill_or_talent
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: attack
+    - id: option_3
+      source_text: '3. If within M spaces of a hero, but not adjacent, roll 1d610:'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: within_m
+            right:
+              type: literal
+              value: true
+      rule_refs:
+        - combat.enemy_behaviour.humanoid_close_combat.approach
+      effects: []
+      substeps:
+        - id: approach_parry_stance
+          source_text: 1-2 Parry stance (forfeits 2nd action).
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: approach_result
+            right:
+              type: literal
+              value: Parry stance (forfeits 2nd action).
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: parry_stance
+            - type: set
+              target: forfeits_second_action
+              value:
+                type: literal
+                value: true
+        - id: move_into_close_combat
+          source_text:
+            '3-6 Move into CC in to following priority order: - A hero that has not been attacked
+            this turn (within M). - A position where the enemy can attack from behind. - A position
+            with height advantage. - Closest hero.'
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: approach_result
+            right:
+              type: literal
+              value:
+                'Move into CC in to following priority order: - A hero that has not been attacked this turn
+                (within M). - A position where the enemy can attack from behind. - A position with
+                height advantage. - Closest hero.'
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: move_into_close_combat
+        - id: charge_attack
+          source_text: 7-10 Charge Attack closest hero. In unable, move adjacent to the closest hero.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach_result
+                right:
+                  type: literal
+                  value: Charge Attack closest hero. In unable, move adjacent to the closest hero.
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: can_charge
+                right:
+                  type: literal
+                  value: true
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: charge_attack_closest_hero
+        - id: charge_unable
+          source_text: 7-10 Charge Attack closest hero. In unable, move adjacent to the closest hero.
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: approach_result
+                right:
+                  type: literal
+                  value: Charge Attack closest hero. In unable, move adjacent to the closest hero.
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: can_charge
+                right:
+                  type: literal
+                  value: false
+          effects:
+            - type: set
+              target: action
+              value:
+                type: literal
+                value: move_adjacent_to_closest_hero
+    - id: option_4
+      source_text:
+        4. If more than M spaces away from a hero, move towards the closest hero. Always avoid
+        traps not placed by heroes if possible. May climb objects if needed.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: adjacent
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: within_m
+            right:
+              type: literal
+              value: false
+      rule_refs:
+        - combat.enemy_behaviour.humanoid_close_combat.advance
+      effects: []
+  entry_step: option_1
+  exit_step: option_4
