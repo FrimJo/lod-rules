@@ -594,7 +594,9 @@
   summary: Dealing Damage gives Wpn DMG + DB - NA - Armour, without specifying the
     result when protection exceeds damage. Do not turn negative damage into
     healing or invent a zero/minimum-damage rule.
-  related: []
+  related:
+    - combat.damage.negative_uncertain
+    - procedure.combat_damage
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -617,6 +619,7 @@
     - character.hit_points.loss
     - character.hit_points.zero
     - character.hit_points.permanent_injury
+    - combat.poison.negative_hp
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -646,6 +649,7 @@
   related:
     - character.durability.fumble
     - character.durability.weapon_parry
+    - character.durability.dissipation
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -738,7 +742,9 @@
     whether a cured historical diagnosis remains excluded by already has been
     diagnosed with. No automatic clamp, cascading diagnoses, or
     repeated-diagnosis policy is supplied.
-  related: []
+  related:
+    - procedure.acute_stress
+    - character.sanity.trauma_trigger
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -753,7 +759,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 55
       pdf_page: 57
-      heading: Condition table
+      heading: Psychology
+      locator:
+        table: Uncaptioned mental conditions table
       extraction:
         method: text
         confidence: high
@@ -763,7 +771,12 @@
   type: ambiguity
   summary: Arachnophobia describes spiders but then says Treat all encounters as
     causing Terror. The scope of all is not explicit; do not silently restrict
-    it to spiders or extend it to every encounter.
+    it to spiders or extend it to every encounter. Designer changelog 2.21 entry 37 proposes the
+    spiders-only wording ("Description of 'Arachnophobia' should probably mention spiders
+    in 2nd sentence. i.e., 'Sll encounters against Spiders cause Terror.'") and is marked
+    Fixed, but the answer column is empty and no designer rule is stated, so it settles
+    nothing. The second printing still prints "Treat all encounters as causing Terror."
+    and the question stays unresolved.
   related:
     - condition.arachnophobia
   source:
@@ -771,9 +784,24 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 55
       pdf_page: 57
-      heading: Arachnophobia
+      heading: Psychology
+      locator:
+        table: Uncaptioned mental conditions table
+        row: 6 Arachnophobia
+        column: Effect
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 4
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 37
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: unresolved
@@ -798,7 +826,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 55
       pdf_page: 57
-      heading: Depression
+      heading: Psychology
+      locator:
+        table: Uncaptioned mental conditions table
+        row: 0 Depression
       extraction:
         method: text
         confidence: high
@@ -858,7 +889,13 @@
     transition; do not use <= or >= to silently settle it. Recalculation from
     RES after a morale-induced RES penalty, overlapping events, below-zero
     morale, and values above initial morale also lack a universal policy.
-  related: []
+  related:
+    - character.morale.wavering
+    - character.morale.recovered
+    - character.morale.threshold_uncertain
+    - character.morale.outside_bounds
+    - test.character.morale.threshold_uncertain.equal
+    - test.character.morale.outside_bounds.negative
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1263,6 +1300,7 @@
     - section.into_the_dungeons.the_threat_level
     - section.into_the_dungeons.opening_a_door_or_chest
     - procedure.open_door_or_chest
+    - core.threat.increase.door_chest_or_cobweb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1282,19 +1320,51 @@
         method: text
         confidence: high
         visually_verified: true
-  status: unresolved
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 24
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        row: 155
+  status: resolved
+  resolution:
+    summary: Designer ruling, changelog 2.21 entry 155 (rendered changelog page 24), which
+      rewords the Threat list entry to "The instant a door or chest is checked, or a cobweb
+      opening is cleared" because a door or chest can be left unlocked but still closed. The
+      Threat Level therefore rises once, when the door or chest is checked, which is step 1 of
+      Opening a Door or Chest; the list entry and the step describe the same single +1, not two.
+      The printed "opened" wording stays verbatim as source_text.
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 24
+        printed_page: null
+        heading: '2.21'
+        extraction:
+          method: text
+          confidence: high
+          visually_verified: true
+        locator:
+          row: 155
 - id: issue.phase6.furniture_treasure_table_location
   type: conflicting
   summary: 'The furniture treasure table is cited inconsistently. Searching
-    Furniture (page 97) sends the reader to “chapter III: ‘Treasures’”; the
-    Treasure chapter (page 106) says to roll on the Furniture Treasure Table “in
-    Appendix III”; the furniture treasure tables are printed in Appendix V. The
-    printed citations remain inconsistent; Batch 5 binds the actual Appendix V
-    furniture table without correcting the quoted wording.'
+    Furniture (page 97) sends the reader to “chapter III: ‘Treasures’” and the
+    “Furniture Table”; the Treasure chapter (page 106) says to roll on the
+    “Furniture Treasure Table in Appendix III”, but Appendix III is Equipment and the
+    furniture treasure tables are printed in Appendix V (“Treasure found in
+    Furniture”, pages 191–193). The quoted wording stays as printed; the rules and
+    procedures bind the Appendix V furniture table.'
   related:
     - section.into_the_dungeons.searching_furniture
     - section.treasure.searching_furniture
     - procedure.search_furniture
+    - character.treasure.furniture_search
     - procedure.open_door_or_chest
     - table.treasure.furniture
   source:
@@ -1321,6 +1391,8 @@
       pdf_page: 194
       printed_page: 192
       heading: Treasure found in Furniture
+      locator:
+        table: Furniture / Findings
       extraction:
         method: text
         confidence: high
@@ -1329,7 +1401,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 195
       printed_page: 193
-      heading: Furniture continued
+      heading: Treasure found in Furniture
+      locator:
+        table: Furniture / Findings
       extraction:
         method: text
         confidence: high
@@ -1424,15 +1498,18 @@
           visually_verified: true
 - id: issue.phase6.iron_wedges_movement
   type: conflicting
-  summary: The Iron Wedges equipment entry says that any enemy needs 6 AP to pass
-    the door. Wandering Monsters says an Iron Wedged door stops the token and
-    requires a roll of 5–6 to continue through on the next turn. The passages
-    give different movement costs/procedures. Preserve both statements; do not
-    select precedence.
+  summary: 'The Iron Wedges equipment entry says that any enemy needs 6 AP to pass the door.
+    Wandering Monsters says an Iron Wedged door stops the token and requires a roll of 5–6 to
+    continue through on the next turn. Enemies and doors (PDF 118) gives a third version: a
+    door blocked with Iron Wedges "will add 3 turns" to the enemies'' door requirements. The
+    passages give different movement costs/procedures. Preserve all three statements; do not
+    select precedence. Changelog 2.21 entry 122 lists the versions and is marked "Fixed"
+    without the chosen mechanic.'
   related:
     - section.into_the_dungeons.wandering_monsters
     - section.appendix_iii_equipment.general_equipment
     - procedure.wandering_monster
+    - combat.enemy.door.iron_wedges
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1452,6 +1529,27 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 20
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 122
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
   status: unresolved
 - id: issue.phase6.crowbar_action_cost
   type: ambiguity
@@ -1490,14 +1588,18 @@
     separately.
   related:
     - section.magic.focus
+    - core.magic.focus
+    - test.core.magic.focus_example.ozmor
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 66
       printed_page: 64
-      heading: Focus example
+      heading: Focus
+      locator:
+        paragraph: Example
       extraction:
-        method: text
+        method: image
         confidence: high
         visually_verified: true
   status: unresolved
@@ -1510,6 +1612,8 @@
   related:
     - section.magic.magic_scrolls
     - section.magic.miscast
+    - core.magic.scroll.destroyed
+    - core.magic.miscast.threshold.wounded
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1517,7 +1621,17 @@
       printed_page: 65
       heading: Magic Scrolls
       extraction:
-        method: text
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      section: Casting Spells
+      heading: Miscast
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: unresolved
@@ -1745,6 +1859,7 @@
     is recorded, but absolute immunity is not inferred.
   related:
     - equipment.alchemy.potion_of_fire_protection
+    - character.alchemy.preparation.potion_of_fire_protection
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1765,21 +1880,25 @@
   related:
     - procedure.combat_attack
     - procedure.hero_defence
+    - combat.action.power_attack.hero_exposure
+    - combat.action.power_attack.enemy
+    - combat.hero_attacking.to_hit
+    - combat.defence.power_attack_restriction
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 111
       printed_page: 109
-      heading: Combat
+      heading: Power Attack
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 115
       printed_page: 113
-      heading: Combat
+      heading: Hero Attacking
       extraction:
         method: text
         confidence: high
@@ -1788,7 +1907,8 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 120
       printed_page: 118
-      heading: Combat
+      section: Detailed acting with enemies
+      heading: If Not in a Parry Stance
       extraction:
         method: text
         confidence: high
@@ -1801,21 +1921,25 @@
     falls over. Both are retained; no consequence is selected automatically.
   related:
     - procedure.combat_attack
+    - combat.fumble.enemy
+    - combat.enemy.fumble.drops_weapon
+    - combat.enemy.fumble.falls_over
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 112
       printed_page: 110
-      heading: Combat
+      heading: Fumble
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 120
       printed_page: 118
-      heading: Combat
+      section: Detailed acting with enemies
+      heading: Enemy Fumbles
       extraction:
         method: text
         confidence: high
@@ -1857,21 +1981,24 @@
     requires a supplied resolution.
   related:
     - procedure.hero_defence
+    - combat.defence.shield_parry
+    - procedure.enemy_attack
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 112
       printed_page: 110
-      heading: Combat
+      heading: General Principles of Combat
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 120
       printed_page: 118
-      heading: Combat
+      section: Detailed acting with enemies
+      heading: Parry with a Shield
       extraction:
         method: text
         confidence: high
@@ -1879,14 +2006,23 @@
   status: unresolved
 - id: issue.combat.example_conflicts
   type: ambiguity
-  summary: PDF 124 calls behaviour roll 2 a Standard Attack whereas PDF 119 gives
-    1–2 Parry Stance (with an initial Standard Attack when two AP remain). The
-    example spends an AP on Frenzy, calls the six-HP Gnoll wounded after losing
-    four HP, describes enemy dodge/parry despite PDF 115 never rolling these,
-    and kills the six-HP Gnoll with 7+2 minus armour 2 (seven damage). Preserve
-    these as example statements, not global overrides.
+  summary:
+    'PDF 124 calls behaviour roll 2 a Standard Attack. PDF 119 gives 1-2 Parry Stance*, and its
+    footnote makes a standard attack first when the enemy has 2 AP left, which matches; but the
+    example then makes a second Behaviour Roll (1) and goes into Parry Stance instead of entering
+    the stance by the footnote. The example spends an AP on Frenzy. It calls the Gnoll "the wounded
+    Gnoll" in Round 2, but its HP total can be worked out from the page: Round 1 deals 4 damage and
+    Round 2 says "the Gnoll only has 6 Hit Points left", so it had 10 HP and has lost 4 (40%), below
+    the 50% (RDU) Wounded threshold on PDF 121. It also says the Gnoll may not dodge or parry after
+    its Power Attack although PDF 115 never rolls enemy defence. Preserve these as example
+    statements, not global overrides.'
   related:
     - section.combat.combat_example
+    - test.combat.variya_second_target
+    - test.combat.gnoll_standard_then_parry
+    - test.combat.gnoll_second_roll_parry
+    - test.combat.gnoll_power_behaviour
+    - test.combat.variya_frenzy_damage
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -1901,16 +2037,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 119
       printed_page: 117
-      heading: Combat
+      heading: Detailed acting with enemies
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 121
       printed_page: 119
-      heading: Combat
+      section: Dealing Damage
+      heading: Wounded
       extraction:
         method: text
         confidence: high
@@ -1919,7 +2056,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 124
       printed_page: 122
-      heading: Combat
+      heading: Combat Example
       extraction:
         method: text
         confidence: high
@@ -2138,6 +2275,7 @@
   related:
     - table.settlement.activity_schedule_example
     - table.settlement.activities
+    - procedure.learn_prayer
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3302,6 +3440,9 @@
     - procedure.damage_follow_up
     - section.combat.different_kinds_of_damage
     - section.combat.different_kinds_of_damage.poison
+    - combat.poison.checks
+    - combat.poison.check_count
+    - combat.poison.no_repeat
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3330,6 +3471,7 @@
     - table.settlement.activities
     - character.settlement.cure
     - procedure.settlement_buy_sell_and_service
+    - combat.poison.cure
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3372,12 +3514,14 @@
   related:
     - procedure.damage_follow_up
     - section.combat.different_kinds_of_damage
+    - combat.disease.effect
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 121
       printed_page: 119
-      heading: disease
+      section: Different Kinds of Damage
+      heading: Disease
       extraction:
         method: text
         confidence: high
@@ -3385,23 +3529,27 @@
   status: unresolved
 - id: issue.damage_follow_up.continuation_basis
   type: ambiguity
-  summary: Fire/Acidic damage continues next turn at half damage rounded down to
-    minimum 1. Acidic ignores Natural Armour but not armour; the passage does
-    not explicitly state whether the halved amount is before or after armour or
-    whether armour is applied again. Preserve a supplied halving/protection
-    basis and separate completed damage resolution; do not silently select one
-    numeric interpretation. Distinct hits use distinct contexts; aggregation of
-    overlapping elemental continuations is not defined here.
+  summary: Fire/Acidic damage continues next turn at half damage rounded down to minimum 1. Acidic
+    ignores Natural Armour but not armour; the passage does not explicitly state whether the
+    halved amount is before or after armour or whether armour is applied again. Preserve a
+    supplied halving/protection basis and separate completed damage resolution; do not
+    silently select one numeric interpretation. Distinct hits use distinct contexts;
+    aggregation of overlapping elemental continuations is not defined here. The passages also
+    do not say when in the next turn the damage applies; changelog 2.21 entry 71 asks exactly
+    this and is marked "Fixed" without stating an answer, so it settles nothing.
   related:
     - procedure.damage_follow_up
     - procedure.elemental_continuation
     - section.combat.different_kinds_of_damage
+    - combat.damage.acidic.continues
+    - combat.damage.fire.continues
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 121
       printed_page: 119
-      heading: Acidic Damage; Fire Damage
+      section: Different Kinds of Damage
+      heading: Acidic Damage
       extraction:
         method: text
         confidence: high
@@ -3410,7 +3558,19 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 122
       printed_page: 120
-      heading: Fire Damage continuation; Frost Damage
+      section: Different Kinds of Damage
+      heading: Fire Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 71
       extraction:
         method: text
         confidence: high
@@ -3428,6 +3588,8 @@
     - procedure.stun_next_turn
     - procedure.damage_follow_up
     - combat.weapon.special.stun
+    - combat.damage.frost
+    - combat.damage.stun
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3461,6 +3623,8 @@
   related:
     - procedure.damage_follow_up
     - section.combat.different_kinds_of_damage.magic_damage
+    - combat.damage.magic
+    - combat.damage.magic.complications
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3525,10 +3689,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Mental conditions table
+      heading: Psychology
       locator:
-        table: Mental conditions table
-        row: 2–3 Acute Stress
+        table: Uncaptioned mental conditions table
+        row: 2-3 Acute Stress
         column: Effect
       extraction:
         method: text
@@ -3558,9 +3722,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 4 Lingering Trauma
         column: Effect
       extraction: &a1
@@ -3599,9 +3763,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 7 Jumpy
         column: Effect
       extraction: &a2
@@ -3637,9 +3801,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 0 Depression
         column: Effect
       extraction: &a3
@@ -3675,9 +3839,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 9 Claustrophobia
         column: Effect
       extraction:
@@ -3703,9 +3867,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 8 Irrational Fear
         column: Effect
       extraction:
@@ -3734,9 +3898,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 6 Arachnophobia
         column: Effect
       extraction:
@@ -3768,9 +3932,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
       locator:
-        table: Mental conditions table
+        table: Uncaptioned mental conditions table
         row: 1 Hate
         column: Effect
       extraction:
@@ -4042,7 +4206,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 57
       printed_page: 55
-      heading: Psychology table
+      heading: Psychology
+      locator:
+        table: Uncaptioned mental conditions table
       extraction:
         method: text
         confidence: high
@@ -5368,6 +5534,2113 @@
       printed_page: 58
       pdf_page: 60
       heading: Levelling Up
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.psychology.hero_dies_morale_penalty
+  type: conflicting
+  summary: The Party Morale adjustment table prints A hero dies with Effect -6
+    (rulebook PDF 58, printed 56), and character.morale.event.hero_dies encodes
+    -6. Designer changelog 2.21 entry 36 quotes the same cell ("Party Morale -
+    table 'A Hero dies -> Effect -6'. On the Quest Sheet, effect is -5, which is
+    right ?") and answers "QRS is correct", marked Fixed, which reads as a ruling
+    that the Quick Reference Sheet value -5 is the correct penalty. The second
+    printing still prints -6 and the corpus records no ruling for this row. The
+    printed -6 stays verbatim; whether executable effects should follow the
+    changelog (-5) is not settled here, and the abbreviation QRS is not expanded
+    in the changelog itself.
+  related:
+    - character.morale.event.hero_dies
+    - table.psychology.morale_adjustments
+    - test.character.morale.event.hero_dies.once
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero dies
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 4
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 36
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: resolved
+  resolution:
+    summary: Designer ruling, changelog 2.21 entry 36, which quotes the printed
+      cell "A Hero dies -> Effect -6", asks whether the Quest Sheet value -5 is
+      right and answers "QRS is correct". A hero dying lowers Party Morale by 5.
+      The table's printed -6 stays quoted as source_text; executable effects
+      follow the ruling.
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 4
+        printed_page: null
+        heading: '2.21'
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+        locator:
+          row: 36
+- id: issue.equipment.mithril_encumbrance_floor
+  type: rulebook_undefined
+  summary: >-
+    Mithril (Equipment, printed 51) gives weapons "-2 ENC" and armour and shields "-1 ENC" as
+    flat modifiers with no stated minimum. The Weapons table (printed 177) prints a Sling at
+    Enc 1 and the Armour table (printed 178) prints Padded Cap, Cloak and Leather Cap at Enc 1,
+    so a Mithril version of such an item would have 0 or negative encumbrance. The book does
+    not say whether encumbrance is floored at 0 (or 1), nor whether a negative value would
+    reduce the hero's total encumbrance. character.equipment.mithril.weapon and
+    .armour_or_shield apply the printed subtraction without a floor; do not infer one.
+  related:
+    - character.equipment.mithril.weapon
+    - character.equipment.mithril.armour_or_shield
+    - equipment.weapon.sling
+    - character.encumbrance.penalty
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 51
+      pdf_page: 53
+      heading: Mithril
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 177
+      pdf_page: 179
+      heading: Weapons
+      locator:
+        table: Weapons
+        row: Sling
+        column: Enc
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 178
+      pdf_page: 180
+      heading: Armour and Shields
+      locator:
+        table: Armour
+        row: Padded Cap
+        column: Enc
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.psychology.asylum_priests_or_monks
+  type: possible_typo
+  summary: Under Reducing Insanity, or Increasing Sanity (rulebook PDF 55, printed 53)
+    the book prints "Finally, the priests the at the asylum are known to be able to
+    remedy some mental illnesses." The doubled article ("the priests the at the") is
+    a misprint, and the same page's run-in heading The Asylum calls the same people
+    "the monks at the asylum", as does Treat Mental Conditions on PDF 147. The
+    corpus quotes the misprint verbatim in character.sanity.recovery_routes. Nothing
+    mechanical depends on it, but priests and monks are not reconciled anywhere in
+    the rulebook.
+  related:
+    - character.sanity.recovery_routes
+    - character.sanity.asylum_pointer
+    - character.settlement.asylum
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 53
+      pdf_page: 55
+      heading: Reducing Insanity, or Increasing Sanity
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 53
+      pdf_page: 55
+      heading: The Asylum
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Treat Mental Conditions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.psychology.indulgence_inn_precondition
+  type: ambiguity
+  summary: >-
+    Reducing Insanity, or Increasing Sanity (rulebook PDF 55, printed 53) lets a
+    character "consume copious amounts of alcohol" for 1d3*100 coins to improve Sanity
+    by 1d6 with no stated precondition. Tending to those Memories (PDF 147, printed 145)
+    describes the same purchase as a follow-up to an inn stay: "If the heroes spend at
+    least one night in an inn, each hero regains 1d3 Points of Sanity. If that is not
+    enough, the hero can try to drown their memories in ale or other pleasures. This
+    will increase the hero's sanity by a further 1d6". The book does not say whether
+    the paid 1d6 requires the inn night first, or whether it can be bought on its own
+    as PDF 55 reads. character.sanity.indulgence encodes no precondition;
+    procedure.sanity_recovery treats it as a separate route. issue.sanity.recovery_scope
+    covers repetition and the cap but not this ordering question.
+  related:
+    - character.sanity.indulgence
+    - character.sanity.inn_recovery
+    - procedure.sanity_recovery
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 53
+      pdf_page: 55
+      heading: Reducing Insanity, or Increasing Sanity
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 145
+      pdf_page: 147
+      heading: Tending to those Memories
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.psychology.trauma_short_break_wording
+  type: ambiguity
+  summary: The Lingering Trauma Table (rulebook PDF 57, printed 55) lists trigger 5 as
+    "Party takes a short break." The rest of the book names the party action "rest"
+    ("Taking a short rest" in the Party Morale adjustment table on PDF 58, and the Rest
+    rules), and "short break" is not defined or used anywhere else. The book does not say
+    whether a short break is the same action as a short rest, nor whether an interrupted rest
+    counts. table.psychology.lingering_trauma keeps the printed wording verbatim;
+    procedure.lingering_trauma matches the persisted trigger text against a supplied event
+    and does not equate the two phrases. Record the equivalence only if a source settles it.
+  related:
+    - table.psychology.lingering_trauma
+    - character.sanity.trauma_trigger
+    - procedure.trauma_selection
+    - procedure.lingering_trauma
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 55
+      pdf_page: 57
+      heading: Lingering Trauma Table
+      locator:
+        table: Lingering Trauma Table
+        row: '5'
+        column: Trigger
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Taking a short rest
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.stat_potion_duration
+  type: conflicting
+  summary: 'Potion of Strength and Potion of Wisdom (PDF 81) each print two durations in
+    one paragraph: "It will last until the end of the next battle. That means it can be
+    drunk in between battles." and then "It lasts until the end of the current battle. If
+    not in battle, it lasts until the end of the next battle (or the end of dungeon if
+    there are no more battles)." The other stat potions (Constitution, Courage, Dexterity)
+    print only the second form. The rules keep both readings in one duration value and do
+    not choose between a potion drunk in battle lasting to the end of that battle or to the
+    end of the next one.'
+  related:
+    - character.alchemy.preparation.potion_of_strength
+    - character.alchemy.preparation.potion_of_wisdom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: Potion of Strength
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 81
+      printed_page: 79
+      heading: Potion of Wisdom
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.dragons_breath_geometry
+  type: conflicting
+  summary: 'Potion of Dragon’s Breath (PDF 80): the paragraph allows 1d8 Fire Damage in
+    the adjacent square, or 1d4 in the adjacent square "and one square adjacent to that
+    square", described as "a straight line away from the hero, or two connected squares
+    adjacent from the hero". The figure caption lists four ways, adding "1: Flaming two
+    squares sideways" and "3: Two squares diagonally (2dx1d4 fire damage)", and the
+    diagram draws option 3 across a diagonal. Whether the diagonal and sideways shapes are
+    legal, and whether "2dx1d4" means 2x1d4, is not settled by the text; the rule records
+    the paragraph geometry and notes the diagram.'
+  related:
+    - character.alchemy.preparation.potion_of_dragons_breath
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: Potion of Dragon’s Breath
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: Potion of Dragon’s Breath
+      locator:
+        region: figure and caption in the right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.gathering_exquisite_roll
+  type: ambiguity
+  summary: Gathering Ingredients says "If you roll 01-10 when gathering, all of the
+    ingredients become *Exquisite." The paragraph involves two kinds of roll (the
+    Alchemy skill roll and the two Ingredients Table rolls) and does not say which
+    one the 01-10 applies to. Harvesting parts (PDF 74) ties its 01-10 to "the
+    Alchemy test"; the gathering rule follows that reading but the page does not
+    state it. The asterisk on *Exquisite has no matching note on the page.
+  related:
+    - character.alchemy.gathering.exquisite
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: Gathering Ingredients
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.flowchart_recipe_record
+  type: ambiguity
+  summary: The Making a potion flowchart (PDF 77) follows a successful mix without a
+    known recipe with "Randomly determine which potion you've created" and then
+    "Write down your recipe for future reference" before adding the potion to the
+    character sheet. The Mixing Potions and Making a recipe text (PDF 76) never
+    says that a randomly created potion's components become a known recipe that
+    later grants the +10 recipe modifier. Both printings are kept; the random
+    success rule does not grant a recipe.
+  related:
+    - character.alchemy.mix.success.random
+    - procedure.alchemy_making_a_potion
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart boxes after "Known recipe? no!"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Mixing Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.magic.enemy_caster_casting
+  type: rulebook_undefined
+  summary: >-
+    The printed Magic chapter (PDF 64–68) defines casting, Miscast, Focus, Perfect Cast and
+    Increased Power for the wizard; for enemy casters it states only the dispel skill ("Ranged
+    Skills/2 (RDD) for enemy casters", Dispelling Magic) and refers to ‘Behaviour for Magic
+    Casters’ in the Bestiary. It does not say which skill an enemy Magic User casts with, whether
+    an enemy can miscast, or how many AP an enemy spell takes. Changelog 2.21 entry 149 ("Page 63
+    Made ‘wounded’ in Bold font. Added ‘Enemy Magic User casting spells. Enemy Magic Users use RS
+    for casting Spells. They do not miscast, they simply fail casting the spell. All their spells
+    take 1AP to cast, unless otherwise stated. (See mini Spell Cards).’") adds that paragraph to a
+    later printing. The rendered PDF 65 (printed 63) prints neither the bold "wounded" nor the
+    paragraph, so the entry is cited as evidence only and no canonical enemy-casting rule is
+    recorded. core.magic.miscast and the miscast thresholds apply to the wizard as printed;
+    whether they apply to enemy casters is undefined in this PDF.
+  related:
+    - core.magic.miscast
+    - procedure.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      section: Casting Spells
+      heading: Miscast
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Dispelling Magic
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 149
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.magic.flowchart_prose_conflicts
+  type: conflicting
+  summary: >-
+    The Hero Spell Casting flowchart (PDF 68, printed 66) differs from the prose on PDF 65–66 in
+    three places. (1) Its Miscast branch reads "Deduct mana for spell, (unless it was an
+    incantation)", while Miscast (PDF 65) says "the Mana is used as though the spell had failed",
+    which Casting Spells defines as half the listed Mana (RDU); the chart's Incantation branch also
+    ends in "Incantation failed" with no Mana deduction, while Casting Spells charges half Mana on
+    any failure. (2) The chart's "Make Dispel roll using Enemy's RS" omits the halving; Dispelling
+    Magic prints "Ranged Skills/2 (RDD) for enemy casters". (3) The chart's threshold footnote says
+    "-5 if caster injured" where Miscast says "A wounded caster miscasts on 90 or higher". The
+    rules follow the prose (core.magic.miscast, core.magic.casting.failure, core.magic.dispel,
+    core.magic.miscast.threshold.wounded) and cite the chart as a second source; the differences
+    are recorded, not reconciled.
+  related:
+    - core.magic.miscast
+    - core.magic.casting.failure
+    - core.magic.dispel
+    - core.magic.dispel.enemy_conditions
+    - core.magic.miscast.threshold.wounded
+    - procedure.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      heading: Casting Spells
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      section: Casting Spells
+      heading: Miscast
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Dispelling Magic
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.enchantments.powerstone_consumption
+  type: rulebook_undefined
+  summary: >-
+    Requirements for Magic Items (PDF 71) says "If the enchantment succeeds, the item gains the
+    magical traits from the Powerstone. If the enchantment fails, the object is destroyed, but the
+    stone may be used again." The failure clause implies the stone is normally spent, but the book
+    never states whether a successful enchantment consumes the Powerstone, nor whether a stone can
+    enchant more than one object over time. The Enchant Item spell entry (PDF 189, "requires a
+    powerstone ... fused with an object") does not settle it either. The enchant rules record this
+    on the rule as an unresolved reference; this issue makes it a tracked gap. Do not infer
+    consumption on success.
+  related:
+    - character.magic_item.enchant.success
+    - character.magic_item.enchant.failure
+    - term.powerstone
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 69
+      pdf_page: 71
+      heading: Requirements for Magic Items
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.magic.miscast_threshold_above_vs_at
+  type: conflicting
+  summary: >-
+    Miscast (PDF 65) prints "A result of 95 or more indicates a miscast" and "A wounded caster
+    miscasts on 90 or higher", so a roll equal to the threshold is a miscast. The Hero Spell
+    Casting flowchart (PDF 68) asks "Roll above miscast threshold?" with the footnote "*Miscast
+    Threshold • Base 95", under which a roll of exactly 95 would not be a miscast, and the Focus
+    example (PDF 66) likewise says "any roll above 85 will now result in a Miscast" after two
+    Focus actions (95 - 2 x 5 = 85). The book does not reconcile "or more" with "above". The
+    corpus follows the prose (core.magic.miscast and procedure.hero_spell_casting fire on roll >=
+    miscast_threshold; test.procedure.hero_spell_casting.miscast_ends_turn asserts a roll of 95
+    against threshold 95 is a miscast). This is a fourth flowchart/prose difference not listed in
+    issue.magic.flowchart_prose_conflicts and the general form of issue.magic.focus_example.
+  related:
+    - core.magic.miscast
+    - core.magic.miscast.threshold.normal
+    - core.magic.miscast.threshold.wounded
+    - procedure.hero_spell_casting
+    - test.procedure.hero_spell_casting.miscast_ends_turn
+    - issue.magic.flowchart_prose_conflicts
+    - issue.magic.focus_example
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      section: Casting Spells
+      heading: Miscast
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      locator:
+        region: Roll above miscast threshold?; *Miscast Threshold footnote
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Focus
+      locator:
+        paragraph: Example
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.magic.miscast_row1_mana
+  type: rulebook_undefined
+  summary: >-
+    Miscast table row 1 (PDF 65) prints "Any DMG or Healing effect of the spell is maximized. Any
+    other spell is cast without the need to spend any Mana." The Mana charged for a maximized DMG
+    or Healing spell on this row is not stated: the Miscast paragraph says "the Mana is used as
+    though the spell had failed" (half the listed Mana, RDU), while row 2 separately prints "The
+    wizard consumes Mana as if the spell succeeded", and "Any other spell ... without the need to
+    spend any Mana" implies the DMG or Healing spell does spend some Mana. The book does not say
+    whether that is the failed-spell half or the full cost. core.magic.miscast.outcome_1_damage
+    sets only maximize_damage_healing and leaves mana_spent to core.magic.miscast (half, RDU); no
+    rule should assert full or zero Mana for this branch until the book or a ruling settles it.
+  related:
+    - core.magic.miscast
+    - core.magic.miscast.outcome_1_damage
+    - core.magic.miscast.outcome_1_other
+    - table.magic.miscast
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 63
+      pdf_page: 65
+      section: Casting Spells
+      heading: Miscast
+      locator:
+        table: Uncaptioned miscast table (1d10 / Effect)
+        row: '1'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.magic.dispel_cost_on_failure
+  type: rulebook_undefined
+  summary: >-
+    Dispelling Magic (PDF 66) prints "To cancel another wizard’s spell is exhausting and therefore,
+    a dispelling hero Wizard loses 15 Mana, or 1d3 Sanity (and remaining Mana) if the Wizard does
+    not have enough Mana." The sentence does not say whether the 15 Mana (or Sanity) is lost on
+    every dispel attempt or only when the Arcane Arts/2 (RDD) test succeeds and the spell is in
+    fact cancelled; "To cancel" points at success, "a dispelling hero Wizard" at the attempt.
+    core.magic.dispel.cost.mana and core.magic.dispel.cost.sanity apply the cost without a success
+    condition, which is one reading. Preserve the wording; do not condition the cost on success
+    without a ruling.
+  related:
+    - core.magic.dispel
+    - core.magic.dispel.success
+    - core.magic.dispel.cost.mana
+    - core.magic.dispel.cost.sanity
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Dispelling Magic
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.prayers.be_gone_range_origin
+  type: ambiguity
+  summary: Be Gone! (PDF 83) says "Any ethereal creature within 4 squares must make a
+    successful RES test at the start of their turn or lose 1d3 HP" without saying what
+    the 4 squares are measured from. The neighbouring prayers Smite The Heretics! and
+    Stay Thy Hand! both say "within 4 squares of the priest". The priest is the likely
+    origin but the book does not say so; character.prayer.be_gone models an unanchored
+    distance field.
+  related:
+    - character.prayer.be_gone
+    - prayer.be_gone
+    - character.prayer.smite_the_heretics
+    - character.prayer.stay_thy_hand
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      section: Level 3 prayers
+      heading: Be Gone!
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.prayers.second_prayer_while_active
+  type: rulebook_undefined
+  summary: Duration (PDF 82) says "Only one prayer can be active at once." The book does
+    not say whether offering a new prayer while one is active is not allowed, or
+    replaces (cancels) the active prayer, nor whether the limit is per priest or per
+    party when more than one Warrior Priest is present. procedure.offer_prayer refuses
+    the offering (active_prayers must be 0) and scopes the count to "this priest"; keep
+    that as an interpretation, not a printed rule.
+  related:
+    - character.prayer.duration
+    - procedure.offer_prayer
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Duration
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.prayers.hp_loss_vs_damage
+  type: rulebook_undefined
+  summary: Smite The Heretics! ("lose 1 HP") and Be Gone! ("lose 1d3 HP") on PDF 83 are
+    phrased as HP loss, not as DMG. The book does not say whether Natural Armour or
+    Armour reduce this loss as they do for damage ("Damage taken = Wpn DMG + DB - NA -
+    Armour"). character.prayer.smite_the_heretics and character.prayer.be_gone list
+    combat.damage.basic as a damage_resolution dependency; do not infer from that link
+    that armour applies.
+  related:
+    - character.prayer.smite_the_heretics
+    - character.prayer.be_gone
+    - combat.damage.basic
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      section: Level 2 prayers
+      heading: Smite The Heretics!
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 83
+      printed_page: 81
+      section: Level 3 prayers
+      heading: Be Gone!
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.prayers.learning_location
+  type: conflicting
+  summary: Learning New Prayers (PDF 82) says learning "is done in the Inner Sanctum in
+    Silver City" and The Inner Sanctum (PDF 158) prices it there, but the Available
+    Actions table (PDF 134) lists "Learn a Prayer" at "Temple Grounds" with no settlement
+    restriction, and the Silver City example (PDF 133) has the priest visit the "temple
+    grounds" to learn a prayer. The book does not say whether Temple Grounds and the Inner
+    Sanctum are the same place or whether prayers can be learned outside Silver City.
+    Preserve both wordings.
+  related:
+    - character.prayer.learning_restriction
+    - procedure.learn_prayer
+    - character.settlement.guild.inner_sanctum.learning
+    - table.settlement.activities
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Learning New Prayers
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Activities in a Settlement
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Learning a New Prayer
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.simplified_interactions
+  type: ambiguity
+  summary: >-
+    The boxed Simplified Alchemy rule (PDF 76) replaces the component counts (4/6/8), makes the
+    result a free choice on success, loses the components on failure and says to ignore exquisite
+    components. It does not say whether the +10 recipe modifier of Mixing Potions still applies,
+    whether the empty bottle is kept on a failed roll (the standard Failed Alchemy test keeps it),
+    or whether the Alchemical Tools, empty bottle and location requirements of Mixing Potions
+    carry over. The corpus currently gates character.alchemy.mix.recipe_bonus on the simplified
+    rule being off; the page neither states nor denies that.
+  related:
+    - character.alchemy.simplified.weak
+    - character.alchemy.simplified.standard
+    - character.alchemy.simplified.supreme
+    - character.alchemy.mix.recipe_bonus
+    - character.alchemy.mix.failure
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Simplified Alchemy
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Mixing Potions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.potions_table_location
+  type: ambiguity
+  summary: >-
+    Mixing Potions (PDF 76) says a successful mix without a recipe rolls "on the Potions Table in
+    the ‘Treasure’ chapter". The Treasure chapter (PDF 108, printed 106) prints no potions table;
+    the Tables of Potions are printed under Appendix V Treasures (PDF 197, printed 195). The
+    corpus points character.alchemy.mix.success.random at the appendix table; the printed
+    cross-reference is kept verbatim.
+  related:
+    - character.alchemy.mix.success.random
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Mixing Potions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 108
+      printed_page: 106
+      heading: Treasure
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Tables of Potions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.alchemy.tools_for_gathering_harvesting
+  type: ambiguity
+  summary: >-
+    Gathering Ingredients (PDF 73) and Harvesting parts (PDF 74) require only an Alchemy roll or
+    test; neither names Alchemical Tools, which the chapter requires only for Mixing Potions (PDF
+    76). The Alchemist tools card reproduced as the Example of Treasure Card (PDF 108) says
+    "These tools are needed to make a successful harvest of parts or gathering of ingredients."
+    The chapter text and the card disagree on whether the tools are a precondition for gathering
+    and harvesting; character.alchemy.gathering and character.alchemy.harvest follow the chapter
+    text and model no tool requirement.
+  related:
+    - character.alchemy.gathering
+    - character.alchemy.harvest
+    - character.alchemy.mix
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 73
+      printed_page: 71
+      heading: Gathering Ingredients
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 74
+      printed_page: 72
+      heading: Harvesting parts
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 108
+      printed_page: 106
+      heading: Example of Treasure Card
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.movement.rope_climb_action
+  type: ambiguity
+  summary: Climbing Pits on PDF 93 prices climbing out of a pit without a rope as "a DEX test and
+    2 AP", then says "Climbing with a rope takes 1 Action." The book does not say whether this
+    "Action" is 1 AP or a different unit. core.movement.pit.up_with_rope models it as an action
+    cost of 1, in the same unit as the 2 AP of the unaided climb.
+  related:
+    - core.movement.pit.up_with_rope
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Climbing Pits
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.dungeon_events.table_not_printed
+  type: rulebook_undefined
+  summary: >-
+    Dungeon events (optional rule) on PDF 107 (printed 105) says "Roll on the table and resolve
+    the event. Roll 1d6 to determine the column for the d12." No dungeon events table is printed
+    on that page, on the following pages, or anywhere else in this PDF; the index entry "Events
+    (Dungeon) (See Dungeon Events)" points only to this rule, and the page names no other book.
+    The trigger conditions are extracted (core.dungeon_event.eligible_room, .trigger_roll,
+    .once_per_room); what a triggered event does is undefined in this PDF, and no table is
+    invented.
+  related:
+    - core.dungeon_event.resolve
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Dungeon events (optional rule)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.levers.count_and_deck
+  type: ambiguity
+  summary: >-
+    Preparing the Lever Deck (PDF 103) says "you must first decide how many levers there are
+    clustered together" and then fixes the deck at "1 black card and 1d4+1 red cards". It does not
+    say whether the number of levers is the number of cards (so the 1d4+1 roll decides it) or a
+    separate choice, nor whether a drawn card is removed from the deck or shuffled back before the
+    next lever is pulled ("Once any event has been dealt with, you are free to pull another
+    lever"). core.lever.deck types the card counts as printed and leaves the lever count and the
+    fate of drawn cards to the caller.
+  related:
+    - core.lever.deck
+    - core.lever.activate
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Preparing the Lever Deck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Activating a Lever
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.healing.enemies_adjacent_scope
+  type: ambiguity
+  summary: >-
+    Healing (PDF 100) lets a hero bandage an adjacent hero for 1 AP, but "This cannot be done with
+    enemies adjacent" does not say adjacent to the healer, to the wounded hero, or to either.
+    core.healing.bandage_adjacent_hero takes a single caller-supplied enemies_adjacent flag.
+  related:
+    - core.healing.bandage_adjacent_hero
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Healing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.initiative.named_large_token_stacking
+  type: rulebook_undefined
+  summary: >-
+    Named Monsters (PDF 106, printed 104) adds "another token per named monster, as long as that
+    named monster is alive". This PDF prints no extra Initiative token for Large monsters; that
+    rule is not on PDF 106 and the Bestiary, which holds monster special rules, is not present.
+    The official FAQ answers "Large creatures get +1 Initiative tokens and so do named monsters.
+    Do they stack?" with "Yes!", and changelog 2.21 entry 159 ("Page 104, Changed layout of page
+    to add in 'Named Monsters', If the Named Monster is also Large than a total of 3 tokens are
+    added.") adds that sentence to a later printing. Our PDF does not print it, so the ruling is
+    recorded, not applied. procedure.initiative adds the named-monster token to the caller's
+    supplied enemy bonus tokens, so a Large token supplied from the Bestiary would add to it, but
+    no Large token is modelled from this book.
+  related:
+    - procedure.initiative
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 104
+      pdf_page: 106
+      heading: Named Monsters
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: Large creatures get +1 Initiative tokens and so do named monsters. Do they stack?
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 24
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 159
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.threat.once_only_repeat
+  type: rulebook_undefined
+  summary: 'The not-in-battle Threat table result 20 reads "Add +1 on all Scenario die roll for
+    the remainder of the dungeon. This can only happen once." The book does not say what happens
+    when a 20 is rolled on that table again in the same dungeon: whether the roll is ignored,
+    rerolled, or still reduces the Threat Level by 10 without a second bonus.
+    procedure.scenario_die carries the bonus through its supplied threat_trigger, lowered by one
+    at most once.'
+  related:
+    - table.dungeon.threat_not_in_battle
+    - procedure.scenario_die
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is not in battle:'
+      locator:
+        table: Uncaptioned 1d20 / Result / Threat decrease table
+        row: '20'
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.threat.natural_twenty_high_level
+  type: ambiguity
+  summary: 'The Threat Level text says "If the result is 20, reduce the Threat Level by 5. If the
+    result is equal to or below the Threat Level, it means that something bad just happened."
+    The Start of Turn sequence chart on PDF 90 asks "20?" only on the >Threat branch, so with a
+    Threat Level of 20 or more a roll of 20 would go to the Threat table instead. The text and
+    the chart agree whenever the Threat Level is below 20. procedure.threat_roll follows the
+    text: a 20 always takes the -5 and never rolls on the table.'
+  related:
+    - procedure.threat_roll
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 88
+      pdf_page: 89
+      heading: The Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      section: The Threat Level
+      heading: Start of Turn sequence
+      locator:
+        region: Start of Turn sequence chart
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.wandering.door_roll
+  type: ambiguity
+  summary: 'Wandering Monsters says a closed door stops the token and "If it rolls 2-6 next turn,
+    the door is opened", and a magically sealed or Iron Wedged door needs "5-6 to continue through
+    the door next turn, instead of the normal 2-6". The same paragraph uses a 1d6 each turn for
+    direction (1 away from the heroes, 2-6 towards them). The book does not say whether the door
+    roll is that direction roll or a separate roll, nor what a 1 does to a token waiting at the
+    door. procedure.wandering_monster takes door_roll as a supplied value.'
+  related:
+    - procedure.wandering_monster
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.change_facing_timing
+  type: conflicting
+  summary: 'Change Facing (PDF 110, printed 108) prints "This can be done freely at the start of a
+    model’s actions or when all its actions are done." The 0 AP list on PDF 109 lists "Change
+    facing." Changelog 2.21 entry 160 reads "Page 108 Changed wording: Change Facing: This can be
+    done freely at any point in a model''s activation." and is marked Fixed. Question: may a model
+    change facing between its own actions?'
+  related:
+    - combat.action.change_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Change Facing
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 160
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: resolved
+  resolution:
+    summary:
+      'Designer ruling, changelog 2.21 entry 160, which states the corrected rule: change facing
+      "can be done freely at any point in a model''s activation." Applied:
+      combat.action.change_facing keeps the printed source_text, and its requirement follows the
+      ruling (any point during the activation). The printed second sentence still applies: once the
+      player has finished with the model and started moving another, its facing cannot be changed.'
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 25
+        printed_page: null
+        heading: '2.21'
+        locator:
+          row: 160
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 110
+        printed_page: 108
+        heading: Change Facing
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+- id: issue.combat.stand_up_prone
+  type: ambiguity
+  summary: 'Stand Up (PDF 112, printed 110) prints "If a model is lying down it can spend 1 AP to
+    stand up in the same square." The 1 AP list (PDF 109) says "Stand up (if lying down)." Fumble on
+    the same page says a hero "will fall over and become prone", and the Hero Attacking table (PDF
+    115) has "Attacking an enemy lying down". Changelog 2.21 entry 162 reads "Page 110 added ‘prone’
+    to Stand Up." and is marked Fixed without the new text. The entry is a terminology change that
+    states no mechanical rule, so it is evidence only (recorded, not applied), unlike entries 160
+    and 67, which state their corrected rule and are applied. Our PDF does not print "prone" under
+    Stand Up, and the corpus does not equate "lying down" with "prone". Open question: does Stand Up
+    apply to a prone model in the same way?'
+  related:
+    - combat.action.stand_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Stand Up
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Different Combat Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 162
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.charge_move_wording
+  type: conflicting
+  summary: Charge Attack (PDF 110, printed 108) prints "You must move (up to your max M) adjacent to
+    the enemy (any of the 3 squares in front of the enemy) and perform a standard attack." Changelog
+    2.21 entry 67 quotes an earlier wording ("in front of the you") and gives "You may move (up to
+    your max M) adjacent to the enemy (any of the 3 squares in front of the enemy) and perform a
+    standard attack.", marked Fixed. Our PDF already has "in front of the enemy" but keeps "must".
+  related:
+    - combat.action.charge.requirements
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 110
+      printed_page: 108
+      heading: Charge Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 10
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 67
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: resolved
+  resolution:
+    summary:
+      'Designer ruling, changelog 2.21 entry 67, which states the corrected sentence ("You may
+      move ..."). Applied: combat.action.charge.requirements keeps the printed source_text and its
+      effects follow the ruled sentence. The executable requirements do not change, because under
+      both wordings the charger moves up to its M to one of the 3 squares in front of the enemy and
+      performs a standard attack, and the printed requirement of at least 1 empty square between
+      charger and enemy still applies.'
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 10
+        printed_page: null
+        heading: '2.21'
+        locator:
+          row: 67
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 110
+        printed_page: 108
+        heading: Charge Attack
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+- id: issue.combat.long_range_weapons
+  type: rulebook_undefined
+  summary:
+    'Who Can Fight? (PDF 109) says "Long Range Weapons may not normally be fired if an enemy is
+    standing adjacent to the firer." This is the only place the book uses "Long Range Weapons". It
+    defines neither the category nor the exceptions that "normally" leaves room for. Shooting in
+    Melee (PDF 113) states the general rule for any "Ranged Weapon": it "cannot be used while
+    adjacent to an enemy, unless specified otherwise by other rules." Both are kept with their own
+    wording; the corpus does not equate Long Range Weapons with Ranged or Missile Weapons.'
+  related:
+    - combat.who_can_fight.long_range_adjacent
+    - combat.principles.shooting_in_melee
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 109
+      printed_page: 107
+      heading: Who Can Fight?
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Shooting in Melee
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.shove_displacement_order
+  type: ambiguity
+  summary: Shove (PDF 111) says the shoving model "may move the targeted model one space straight
+    back, and if it is blocked, diagonally back. If there is another model behind the target, it
+    will also be moved straight back." It does not say which applies when the square straight back
+    holds a model that could be pushed and a diagonal square is also free. The Shoving caption (PDF
+    112) shows the model behind being pushed only when both diagonals are blocked.
+    combat.action.shove.displacement and procedure.combat_shove take the case as a supplied input
+    and allow either branch when its conditions hold.
+  related:
+    - combat.action.shove.displacement
+    - procedure.combat_shove
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.enemy_poison_damage
+  type: rulebook_undefined
+  summary: Poison (PDF 122) starts with "If a hero or enemy is hit by poison", but the follow-up
+    CON tests, the 1 HP loss, the 0 HP and rest rules and the cure speak only of "the hero". The
+    book does not say how a poisoned enemy loses HP. Changelog 2.21 entry 165 adds "Enemies, once
+    poisoned take 1HP DMG every turn. See Poison page 120." to a later printing; our PDF does not
+    print that sentence, so it is recorded, not applied.
+  related:
+    - combat.poison.exposure
+    - combat.poison.checks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      section: Different Kinds of Damage
+      heading: Poison
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 165
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.behaviour_card_naming
+  type: ambiguity
+  summary: The enemy material names its data source several ways. Acting with Enemies (PDF 118)
+    says the behaviour type is "described in the Bestiary as well as in the Behaviour Tables" and
+    tells you to "Consult their Behaviour Card"; Dealing Damage (PDF 121) uses "the Monster
+    Table"; the Enemy Attack chart (PDF 123) says "Check enemy behaviour card" and "DMG according
+    to monster card". The book does not say whether these are one card or table. Changelog 2.21
+    entry 164 changes "Behaviour Card" into "Monster Card" on that page in a later printing; our
+    PDF prints "Behaviour Card", so the change is recorded, not applied.
+  related:
+    - combat.enemy.behaviour_roll
+    - combat.enemy.activation_order
+    - procedure.enemy_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Activation of Enemies
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 164
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.door_turns_and_ap
+  type: ambiguity
+  summary: Enemies and doors (PDF 118) gives the door requirements in AP (1 AP, 2 AP for Lower
+    Undead, 1d6 or 1d3 AP for creatures that cannot operate a door), then says Iron Wedges "add 3
+    turns" and a magically sealed door "will add 1d3 turns to the above-mentioned requirements". It
+    does not say how turns are added to an AP cost, whether the added turns are spent before or
+    after the AP, or who rolls the 1d3. The turns are kept as a separate output beside the AP cost.
+  related:
+    - combat.enemy.door.iron_wedges
+    - combat.enemy.door.magically_sealed
+    - combat.enemy.door.ethereal_sealed
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 118
+      printed_page: 116
+      section: Acting with Enemies
+      heading: Enemies and doors
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.humanoid_behaviour_text
+  type: possible_typo
+  summary: Option 3 of Humanoid with Close-Combat Weapon (PDF 119) says "roll 1d610" while its
+    table header prints 1d10 and its rows run 1-10; the 1d10 domain is used and the printed text is
+    kept. The 7-10 row prints "In unable, move adjacent to the closest hero", read as "If unable".
+    The 3-6 row prints "Move into CC in to following priority order". None of these is corrected in
+    the quoted text.
+  related:
+    - table.combat.humanoid_close_combat.approach
+    - combat.enemy_behaviour.humanoid_close_combat.approach
+    - procedure.humanoid_close_combat_behaviour
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.enemy_attack_flowchart
+  type: conflicting
+  summary: The Enemy Attack chart (PDF 123) and the prose differ in two places. After a successful
+    shield parry with DMG > DEF, the chart draws "DMG- Shield's DEF transferred to arm and arm
+    armour" into the line that reaches "Roll 1d6 for hit area", while Parry with a Shield (PDF 120)
+    says the rest of the damage spills onto the arm. The chart's "Subtract wounds (DMG - DEF)"
+    leaves out Natural Armour, which the Dealing Damage formula (PDF 121) subtracts. Both are kept;
+    procedure.enemy_attack hands spillover to the arm without a new hit area roll and takes DEF as
+    supplied.
+  related:
+    - procedure.enemy_attack
+    - combat.damage.hit_area
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 123
+      printed_page: 121
+      heading: Enemy Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      section: Detailed acting with enemies
+      heading: Parry with a Shield
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.movement.pit_climb_up_failure
+  type: ambiguity
+  summary: Climbing Pits (PDF 93) ends "If the test fails, the hero falls into the pit taking
+    damage as outlined on the exploration or trap card." The official FAQ settles only that
+    climbing down needs no DEX Test, so the sentence cannot refer to climbing down. The book does
+    not say whether it refers to the DEX test for climbing up (a hero already at the bottom who
+    "falls into the pit"), to a test printed on the exploration or trap card, or to both. It also
+    does not say whether a failed climb-up still costs the 2 AP or leaves the hero at the bottom.
+    core.movement.pit_failure applies the fall and the card damage to any failed test that is not a
+    climb down.
+  related:
+    - core.movement.pit_failure
+    - core.movement.pit.up_without_rope
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 93
+      printed_page: 91
+      heading: Climbing Pits
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.faq_gamefound
+      file: source/vonbraus-faq-2026-10-03.html
+      heading: Does a hero have to make a DEX test to climb DOWN into a pit? The text in the
+        rulebook contradicts itself.
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+  status: unresolved
+- id: issue.threat.extra_exploration_card_source
+  type: rulebook_undefined
+  summary: 'The not-in-battle Threat table result 13-15 reads "Add one extra Exploration Card on
+    top of each pile on the table." The book does not say where the extra cards come from (the
+    Exploration Cards left out when the Dungeon Deck was built, or another source), whether each
+    is a room or a corridor card, whether cards with a B in their ID or the Objective room Card
+    may be drawn, or what "each pile on the table" covers once routes have been exhausted or
+    redistributed. table.dungeon.threat_not_in_battle keeps the printed row as text; no draw rule
+    is invented.'
+  related:
+    - table.dungeon.threat_not_in_battle
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is not in battle:'
+      locator:
+        table: Uncaptioned 1d20 / Result / Threat decrease table
+        row: 13-15
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.humanoid_wounded_parry_two_ap
+  type: rulebook_undefined
+  summary: 'Humanoid with Close-Combat Weapon, option 2 table (PDF 119): row 6 reads "Power Attack
+    (if wounded, Parry stance)", and only row 1-2 "Parry Stance*" carries the asterisk footnote
+    "*If the enemy has 2 AP left, then make a standard attack before going into Parry stance." The
+    italic explanation says more broadly "If you roll Parry in the first action, treat that as the
+    second action and perform a Standard Attack first." The book does not say whether a wounded
+    enemy that rolls 6 with 2 AP left goes straight into Parry stance or first makes a Standard
+    Attack as for the asterisked row.'
+  related:
+    - procedure.humanoid_close_combat_behaviour
+    - combat.enemy_behaviour.humanoid_close_combat.parry_with_two_ap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 119
+      printed_page: 117
+      section: Detailed acting with enemies
+      heading: Humanoid with Close-Combat Weapon
+      locator:
+        table: Uncaptioned table under option 2 (1d10 / Action)
+        row: '6'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.disease.wounded_trigger_wording
+  type: ambiguity
+  summary: 'Disease (PDF 121) triggers the CON roll "If wounded by a creature that causes disease".
+    On the same page, Wounded defines "wounded" as a hero or enemy that "loses 50% of their HP
+    (RDU)". The book does not say whether the Disease trigger uses that defined status (the hit
+    must leave the hero at or past half HP lost) or the plain sense of taking damage from such a
+    creature. combat.disease.exposure takes the trigger as a supplied boolean and does not choose.'
+  related:
+    - combat.disease.exposure
+    - character.hit_points.wounded
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Different Kinds of Damage
+      heading: Disease
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      section: Dealing Damage
+      heading: Wounded
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.shove_automatic_failure
+  type: conflicting
+  summary: Dice Rolling and Skill Checks (PDF 18) says that whenever you roll to see if a character
+    has succeeded with a skill (including hitting its target in combat) or a stat check, "A roll of
+    91-00 is always a failure, no matter what your skill level or modifiers are." The attack and
+    throw hit steps (procedure.combat_attack, procedure.thrown_preparation) apply it, because PDF 18
+    names hitting a target in combat and both are roll-under CS/RS checks. Shove (PDF 111) instead
+    succeeds "by rolling higher than the target’s DEX", and the Shove example (PDF 112) calls
+    "everything from 26 and up a success" for DB 1 against DEX 35, while "A fumble (00) causes the
+    shoving model to fall over." The book does not say whether the 91-00 automatic failure applies
+    to this roll-over test. Read literally it would make rolls of 91-99 fail a shove; the example's
+    "26 and up" says they succeed. combat.action.shove.success and procedure.combat_shove treat
+    91-99 as successes and only 100 as a fumble, and return this issue.
+  related:
+    - combat.action.shove.success
+    - procedure.combat_shove
+    - test.combat.shove_example_success
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 18
+      printed_page: 16
+      heading: Dice Rolling and Skill Checks
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Shove
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.searching.in_battle_search_conflict
+  type: conflicting
+  summary: >-
+    Searching Corpses (PDF 99, printed 97) allows corpse searches only "Once you have defeated an
+    enemy and the battle is over", and Searching Furniture (same page) forbids a furniture search
+    "when there are enemies in LOS to any party member". The Combat chapter's Searching Furniture
+    or a Corpse (PDF 111, printed 109) lets a hero search either "if the object is not adjacent to
+    an enemy" for 2 AP "instead of the normal 1 AP", and the 2 AP list on PDF 109 includes "Search
+    through furniture or a corpse". The book does not say which governs a search while a battle is
+    running: the Into the Dungeons prohibitions or the Combat chapter permission.
+    core.searching.corpses and procedure.search_furniture follow the Into the Dungeons text only.
+  related:
+    - core.searching.corpses
+    - procedure.search_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 99
+      printed_page: 97
+      heading: Searching Corpses
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 99
+      printed_page: 97
+      heading: Searching Furniture
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 111
+      printed_page: 109
+      heading: Searching Furniture or a Corpse
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.rest.without_ration
+  type: rulebook_undefined
+  summary: >-
+    Rest (PDF 100, printed 98) says a short rest "costs one ration of food", and the checklist says
+    "Deduct 1 ration of food from the party." Neither passage says whether a party with no rations
+    left may rest at all, or rests and goes hungry. procedure.rest accepts a rest only when
+    party_rations is at least 1, which is an unrecorded reading. The going-hungry penalty (Party
+    Morale -4, confirmed by changelog 2.21 entry 124) belongs to travelling and is not linked to
+    the dungeon rest by the book.
+  related:
+    - procedure.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 100
+      printed_page: 98
+      heading: Rest; Checklist when Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.door.initial_entrance_trap
+  type: rulebook_undefined
+  summary: >-
+    Initial Setup (PDF 88, printed 86) says the starting tile's door into the dungeon "is always
+    unlocked and does not increase the Threat Level", and says nothing about traps. Opening a Door
+    or Chest (PDF 101, printed 99) rolls 1d10 and 1d6 together, the d6 deciding a trap. The book
+    does not say whether the entrance door still rolls the d6 for a trap. procedure.open_door_or_chest
+    skips the Threat increase and the Door Table for the entrance but still runs the trap roll,
+    which is an unrecorded reading.
+  related:
+    - procedure.open_door_or_chest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 88
+      printed_page: 86
+      heading: Initial Setup
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 101
+      printed_page: 99
+      heading: Opening a Door or Chest
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.fast_parry_in_stance
+  type: ambiguity
+  summary: The Fast special rule (Weapons, PDF 179) reads "Weapon may be used to parry once per turn
+    even though the hero did not choose the Parry Stance, but the weapon is damaged on 90-00." Parry
+    with a Weapon (PDF 120) damages the weapon on "95-00". The book does not say whether the 90-00
+    damage applies only to the parry made outside Parry Stance or to every parry with a Fast weapon,
+    including one made in Parry Stance. procedure.hero_defence applies 90-00 to the out-of-stance
+    Fast parry only and the 95-00 rule to a Fast weapon parrying in Parry Stance.
+  related:
+    - procedure.hero_defence
+    - combat.weapon.special.fast.damage
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 179
+      printed_page: 177
+      heading: Weapons
+      locator:
+        table: table.equipment.weapons
+        region: printed special-rule definition
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 120
+      printed_page: 118
+      heading: Parry with a Weapon
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.turn.changelog_turn_wording
+  type: conflicting
+  summary: 'The Turn on PDF 89 prints "During a turn, all models on the table will move.", "The
+    players may choose in which order to act with the heroes as long as there are no enemies on
+    the table." and "If enemies are placed on the table, all remaining actions for the heroes are
+    lost and a new turn starts." Changelog 2.21 entries 152-154 (rendered changelog page 24, all
+    marked Fixed, citing "Page 88 The Turn", which is this page''s printed folio) change the first
+    to "will act", remove "as long as there are no enemies on the table" and change the third to
+    open "As soon as enemies are placed on the table". Entries 152 and 154 are rewordings. Entry
+    153 states a changed text that drops the no-enemies condition from the hero-order sentence,
+    which could mean the players also choose which hero acts once enemies are on the table
+    (alongside the Initiative tokens), or could be an editorial cut because initiative governs
+    then. The entries are not recorded in review/designer-published-rulings.md and no corpus
+    object cites them; core.turn.hero_order keeps the printed enemies_present false condition.
+    Whether entry 153 is a stated rule to apply under the Official rulings policy (as entry 155
+    was) is undecided.'
+  related:
+    - section.into_the_dungeons.the_turn
+    - core.turn.hero_order
+    - core.turn.enemies_placed
+    - term.turn
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 89
+      printed_page: 88
+      heading: The Turn
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 24
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        row: 152-154
+  status: unresolved
+- id: issue.threat.changelog_disarmed_cannot_fight
+  type: conflicting
+  summary: 'The in-battle Threat table row 7 (Disarmed!) on PDF 91 prints "If they fail, they will
+    have no weapon and cannot fight." Changelog 2.21 entry 156 (rendered changelog page 24, marked
+    Fixed) reads "Page 89 Removed at ''Disarmed'' ''can not fight''. (New rules have added
+    ''Unarmed Combat''.)" This PDF already prints Unarmed Combat on PDF 113 (printed 111): "A
+    character without a weapon may attack with fist and kicks. An unarmed attack causes 1d4 DMG."
+    So the printed "cannot fight" also conflicts with that page, and the entry, which states the
+    removal as a changed text, would settle it. table.dungeon.threat_in_battle keeps the printed
+    text and no object cites the entry; it is not recorded in
+    review/designer-published-rulings.md. Whether a disarmed hero who fails the DEX Test may make
+    unarmed attacks is undecided in the corpus.'
+  related:
+    - section.into_the_dungeons.table_2
+    - table.dungeon.threat_in_battle
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 91
+      printed_page: 89
+      heading: 'If the party is in battle:'
+      locator:
+        table: Uncaptioned 1d10 / Result / Threat decrease table
+        row: '7'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 24
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        row: 156
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Unarmed Combat
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.combat.shooting_past_fumble
+  type: conflicting
+  summary: 'Obstacles and LOS When Shooting (PDF 113) says "If shooting past another model, an
+    unmodified result of >=90 hits the other model.", and the shooting example on the same page
+    repeats "If any of shooter’s roll >=90, the shot will instead hit a model that affected the
+    LOS." A roll of 100 is >=90. The Hero Attack chart (PDF 116) sends a failed RS check to "Did you
+    roll “00”?", whose yes branch is "Deduct 1 point of durability from the weapon" and then
+    "Missed!", and Fumble (PDF 112) says a hero rolling 100 when attacking damages the weapon. The
+    book does not say whether a roll of 100 on a shot past another model hits that model (as the
+    >=90 rule says), misses (as the chart says), or both damages the weapon and hits the other
+    model. For rolls of 90-99 only the specific >=90 sentence speaks to the shot past a model; 100 is
+    the only roll that also meets the printed fumble rules. combat.principles.shooting_past_model applies to any unmodified roll of
+    90 or more, including 100; procedure.combat_attack applies the >=90 rule to rolls of 90-99 and
+    returns this issue for a roll of 100 on a ranged shot past a model.'
+  related:
+    - combat.principles.shooting_past_model
+    - procedure.combat_attack
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 113
+      printed_page: 111
+      heading: Obstacles and LOS When Shooting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 116
+      printed_page: 114
+      heading: Hero Attack
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 112
+      printed_page: 110
+      heading: Fumble
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.psychology.hungry_morale_penalty
+  type: conflicting
+  summary: >-
+    The Party Morale adjustment table prints "Party is hungry / Lack of food is always bad for
+    motivation / -2" (rulebook PDF 58, printed 56), while Rations and Resting in Travelling and
+    Skirmishes says of a party that fails to forage "They go hungry and temporarily lose half
+    their Constitution (RDD). ... Party Morale is also lowered by 4. This lasts until they eat
+    again." (PDF 126-127, printed 124-125). Designer changelog 2.21 gives two answers in the same
+    table: entry 124 quotes both passages and answers "Minus 4 is correct", and entry 148,
+    following entry 147's change to the same page 56 table, changes the row to "A character is
+    hungry" / "Lack of food is always bad for motivation and is cumulative" / "-1/char."
+    ("Having more party members, like more mercenaries, adds more negativity in the party").
+    The 2.5 Quick Reference Sheet, a later edition, prints "A Party member is hungry (per
+    member) -2" and is evidence only. Entry 148 does not say whether "cumulative" also
+    overrides PDF 127's "This is not cumulative, so it does not matter how many days you go
+    hungry"; its own note ties it to the number of party members.
+  related:
+    - character.morale.event.hungry
+    - table.psychology.morale_adjustments
+    - test.character.morale.event.hungry.once
+    - test.character.morale.event.hungry.single_character
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Party is hungry
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 124
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 148
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.qrs_2_5
+      file: source/vonbraus-qrs-2.5.pdf
+      pdf_page: 2
+      printed_page: null
+      heading: Party Morale
+      locator:
+        row: A Party member is hungry (per member)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: resolved
+  resolution:
+    summary: >-
+      Designer ruling, changelog 2.21 entry 148, applied by user decision on 8 October 2026 over
+      entry 124's flat -4: the row becomes "A character is hungry", -1 per hungry character,
+      cumulative across party members (mercenaries included). The table's printed -2 stays
+      quoted as source_text; character.morale.event.hungry takes the number of hungry
+      characters and lowers Party Morale by 1 for each. Entry 124 is superseded; the 2.5 Quick
+      Reference Sheet is later-edition evidence only.
+    source:
+      - document: vonbraus.changelog_2_2x
+        file: source/vonbraus-changelog-2.2x.pdf
+        pdf_page: 23
+        printed_page: null
+        heading: '2.21'
+        extraction:
+          method: image
+          confidence: high
+          visually_verified: true
+        locator:
+          row: 148
+- id: issue.psychology.hungry_morale_duration_and_travel_penalty
+  type: rulebook_undefined
+  summary: >-
+    Changelog 2.21 entry 148 (applied to character.morale.event.hungry) changes the Party Morale
+    table row to "A character is hungry" / "Lack of food is always bad for motivation and is
+    cumulative" / "-1/char." and explains only that "Having more party members, like more
+    mercenaries, adds more negativity in the party". It does not address Rations and Resting
+    (PDF 126-127, printed 124-125), which says a party that goes hungry has "Party Morale is also
+    lowered by 4. This lasts until they eat again. This is not cumulative, so it does not matter
+    how many days you go hungry." Neither the book nor the ruling says (a) whether the "-1/char."
+    penalty is applied again on each further day without food or, as PDF 127 says of the -4, only
+    once until the party eats; (b) whether it lasts until the party eats again, since the table
+    row states no duration; or (c) whether the Rations and Resting -4, which
+    procedure.travel_food_and_rest step hunger_morale applies once, still stands beside the
+    per-character table penalty, is replaced by it, or both apply to the same hunger. Entry 124
+    ("Minus 4 is correct"), now recorded as superseded, was the only ruling that tied the two
+    passages together. For a party of four the two values coincide; for any other size, or with
+    mercenaries, they differ.
+  related:
+    - character.morale.event.hungry
+    - procedure.travel_food_and_rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Party is hungry
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 148
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 124
       extraction:
         method: image
         confidence: high
