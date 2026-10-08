@@ -33,6 +33,7 @@ export function diceRange(expr: DiceExpr): { min: number; max: number } {
 }
 
 export function formatDice(expr: DiceExpr): string {
-  const sign = expr.modifier > 0 ? `+${expr.modifier}` : expr.modifier < 0 ? `${expr.modifier}` : '';
+  const sign =
+    expr.modifier > 0 ? `+${expr.modifier}` : expr.modifier < 0 ? `${expr.modifier}` : '';
   return `${expr.count}d${expr.sides}${sign}`;
 }
