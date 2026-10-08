@@ -287,14 +287,52 @@ simpler policy without a cap was adopted. That choice was made after held-out re
 been seen, but held-out had no reviewer labels yet. The held-out reviewer labels collected
 next are the test of `calibrated-1`.
 
-Still to do: label held-out, then regrade answers under `calibrated-1`. The web default
-stays `jev` (the union) until both are done.
+Still to do: regrade answers under `calibrated-1` (held-out was labelled on 8 October; see
+below). The web default stays `jev` (the union) until the regrade is done.
+
+## Held-out test of `calibrated-1` — 8 October 2026
+
+All 33 held-out questions were reviewed in `/review` (330 record labels, 114 answer verdicts),
+and development and validation gained a few more labels. `calibrate-filter.ts` replayed the
+103 pools against the current corpus (`a081dd46`) on Jev pinned to `jev-1.13.0`, which is
+what `jev-latest` resolved to that day (`TYPESAFE_DEFAULT_MODEL` in
+`scripts/decisions/pins.ts`). Pinning changes the cache key, so all 1,165 Jev answers were
+requested again. A run the same day on `jev-latest` gave the same picture within one or two
+records per cell.
+
+Labels: 690 reviewer labels count. Another 106 are ignored as stale because the record text
+changed after the graded case files were written (6 October): the corpus was edited between
+grading and labelling. Held-out keeps 201 reviewer labels (68 direct, 27 supporting, 106
+irrelevant). Jev's p(irrelevant) separates relevant from irrelevant with an AUC of 0.92
+against held-out reviewer labels (development 0.77, validation 0.94).
+
+`calibrated-1` (unchanged: 0.95, tables and procedures 0.99, linked records protected, no
+cap):
+
+| Split       | Pool | Dropped | Required lost | Direct lost | Supporting lost | Reviewer-relevant loss (95 % bound) | Noise removed | Precision   |
+| ----------- | ---- | ------- | ------------- | ----------- | --------------- | ----------------------------------- | ------------- | ----------- |
+| development | 364  | 81      | 0             | 1           | 4 (2 reviewer)  | 5 % (≤ 11 %)                        | 44 %          | 41 % → 51 % |
+| validation  | 359  | 93      | 0             | 0           | 1 (judge)       | 0 % (≤ 5 %)                         | 48 %          | 37 % → 50 % |
+| held-out    | 339  | 76      | 0             | 0           | 1 (reviewer)    | 1 % (≤ 5 %)                         | 44 %          | 38 % → 48 % |
+
+On held-out it drops no required or direct record. The one supporting loss is
+`quest.great_crypt.stopping_necromancer` (`ragnalf_stats`, p = 0.99), already listed above.
+The held-out direct record Jev doubts most, `table.character.alchemist_skills`
+(`alchemy_harvest`, p = 0.95), is kept by the 0.99 table threshold. `calibrated-1` passes
+held-out.
+
+The development direct loss is `character.treasure.curse_reroll` in `curses` ("If result
+regards the same magical benefit, reroll.", p = 0.98). Its reviewer label was changed from
+irrelevant to direct after `calibrated-1` was chosen, and direct is the confirmed reading.
+No threshold that removes meaningful noise keeps it, so the sweep now finds no policy
+eligible on development + validation. `calibrated-1` stays adopted: held-out was the test,
+and recalibrating on held-out labels would spend it. This record is a known exception for the
+next calibration.
 
 ## Filter calibration plan
 
 Status: tooling implemented 5 October 2026. Development and validation were labelled and
-`calibrated-1` was adopted on 6 October 2026. Still to do: held-out labels, an answer
-regrade, and the web default switch. Results so far are in the sections above; the filter
+`calibrated-1` was adopted on 6 October 2026. Held-out was labelled and passed on 8 October 2026. Still to do: an answer regrade and the web default switch. Results so far are in the sections above; the filter
 is described in [retrieval.md](retrieval.md#ask-pipeline).
 
 ### Goal
@@ -398,9 +436,9 @@ Extend `calibrate-filter.ts` rather than writing a new tool.
 
 | Item                    | State                                                                                                                                                                                                                  |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.1 Jev relevance cache | Already in place: `memoModel` keys on model id, question, record text and prompt. `calibrate-filter.ts` warns when the model id is a floating alias such as `jev-latest`; set `TYPESAFE_DEFAULT_MODEL` to pin one.     |
+| 1.1 Jev relevance cache | Already in place: `memoModel` keys on model id, question, record text and prompt. `calibrate-filter.ts` warns when the model id is a floating alias such as `jev-latest`. Jev is pinned to `jev-1.13.0` in `pins.ts`.  |
 | 1.2 Label text hashes   | `CaseReview.recordHashes`; stale labels are ignored by calibration and flagged in `/review`. Labels saved before this have no hash and stay trusted.                                                                   |
 | 1.3 Regrade             | Rerun `run-quality.ts` with the current retrieval. The previous grades are in `generated/ask-quality-2026-10-05-before-heading/`.                                                                                      |
 | 2 Record queue          | `/review?view=records`, buckets as above, progress against the targets.                                                                                                                                                |
 | 3 Policy choice         | Done 6 October: 391 reviewer labels, `calibrated-1` (0.95; tables and procedures 0.99; linked protected; no cap). See [Filter calibration on reviewed labels](#filter-calibration-on-reviewed-labels--6-october-2026). |
-| 4 Adopt                 | `CALIBRATED_FILTER` in `ranking.ts`, pinned in `tests/ask/ranking.test.ts`. Web default stays `jev` until held-out is labelled and answers are regraded. `calibrate-filter.ts --check` detects a stale result.         |
+| 4 Adopt                 | `CALIBRATED_FILTER` in `ranking.ts`, pinned in `tests/ask/ranking.test.ts`. Held-out passed 8 October. Web default stays `jev` until answers are regraded. `calibrate-filter.ts --check` detects a stale result.       |
