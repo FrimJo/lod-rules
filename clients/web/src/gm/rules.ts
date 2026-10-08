@@ -240,6 +240,80 @@ export const CITES = {
     heading: 'Triggering Wandering Monsters',
     recordId: 'core.quest_book.threat_threshold_monster',
   },
+  threatTableNotInBattle: {
+    page: 89,
+    pdf: 91,
+    heading: 'If the party is not in battle:',
+    recordId: 'table.dungeon.threat_not_in_battle',
+  },
+  threatTableInBattle: {
+    page: 89,
+    pdf: 91,
+    heading: 'If the party is in battle:',
+    recordId: 'table.dungeon.threat_in_battle',
+  },
+  threatNewLevel: {
+    page: 88,
+    pdf: 89,
+    heading: 'The Threat Level',
+    recordId: 'core.threat.new_level_reset',
+  },
+  doorTable: {
+    page: 99,
+    pdf: 101,
+    heading: 'Opening a Door or Chest',
+    recordId: 'table.dungeon.door_chest_difficulty',
+  },
+  chestTable: {
+    page: 192,
+    pdf: 194,
+    heading: 'Chest',
+    recordId: 'table.treasure.furniture.chest',
+  },
+  objectiveChestTable: {
+    page: 193,
+    pdf: 195,
+    heading: 'Objective Chest',
+    recordId: 'table.treasure.furniture.objective_chest',
+  },
+  thiefTreasure: {
+    page: 36,
+    pdf: 38,
+    heading: 'Special',
+    recordId: 'character.profession.thief.treasure_choice',
+  },
+  combatTurn: { page: 112, pdf: 114, heading: 'Combat Turn', recordId: 'procedure.combat_turn' },
+  enemyPriority: {
+    page: 116,
+    pdf: 118,
+    heading: 'Activation of Enemies',
+    recordId: 'procedure.enemy_priority',
+  },
+  initiativeTokens: {
+    page: 104,
+    pdf: 106,
+    heading: 'Initiative',
+    recordId: 'procedure.initiative',
+  },
+  permanentInjury: {
+    page: 120,
+    pdf: 122,
+    heading: 'Bleeding out',
+    recordId: 'character.hit_points.permanent_injury',
+  },
+  partyLoss: {
+    page: 120,
+    pdf: 122,
+    heading: 'Bleeding out',
+    recordId: 'character.hit_points.party_loss',
+  },
+  poison: { page: 120, pdf: 122, heading: 'Poison', recordId: 'combat.poison.checks' },
+  lingeringTrauma: {
+    page: 55,
+    pdf: 57,
+    heading: 'Lingering Trauma Table',
+    recordId: 'table.psychology.lingering_trauma',
+  },
 } as const satisfies Record<string, Cite>;
 
 /** The five steps of a dungeon turn, as printed. */
@@ -361,6 +435,445 @@ export const THREAT_SOURCES: ReadonlyArray<ThreatSource> = [
   },
 ];
 
+export type ThreatTableRowId =
+  | 'wandering_monster'
+  | 'extra_exploration_card'
+  | 'encounter_risk'
+  | 'trap'
+  | 'scenario_die_bonus'
+  | 'disturbance_in_the_void'
+  | 'greenish_tint'
+  | 'forged_under_pressure'
+  | 'healing'
+  | 'frenzy'
+  | 'disarmed'
+  | 'fearsome'
+  | 'reinforcements'
+  | 'onwards';
+
+/** What the table can carry out on its own when a row comes up; the rest is for the Game Master. */
+export type ThreatTableEffect = 'wandering_monster' | 'encounter_risk' | 'trap' | 'scenario_bonus';
+
+export interface ThreatTableRow {
+  id: ThreatTableRowId;
+  roll: { min: number; max: number };
+  printed: string;
+  /** Verbatim result text. */
+  result: string;
+  /** Printed Threat decrease (negative). */
+  decrease: number;
+  /** Short name for the stage and the log. */
+  short: string;
+  effect?: ThreatTableEffect;
+}
+
+export interface ThreatTable {
+  dice: '1d20' | '1d10';
+  sides: 20 | 10;
+  label: string;
+  cite: Cite;
+  rows: ReadonlyArray<ThreatTableRow>;
+}
+
+/** The two Threat tables on p. 89, in printed order. */
+export const THREAT_TABLES: { notInBattle: ThreatTable; inBattle: ThreatTable } = {
+  notInBattle: {
+    dice: '1d20',
+    sides: 20,
+    label: 'Party not in battle',
+    cite: CITES.threatTableNotInBattle,
+    rows: [
+      {
+        id: 'wandering_monster',
+        roll: { min: 1, max: 12 },
+        printed: '1-12',
+        result: 'A Wandering Monster has appeared.',
+        decrease: -5,
+        short: 'Wandering Monster',
+        effect: 'wandering_monster',
+      },
+      {
+        id: 'extra_exploration_card',
+        roll: { min: 13, max: 15 },
+        printed: '13-15',
+        result: 'Add one extra Exploration Card on top of each pile on the table.',
+        decrease: -5,
+        short: 'Extra Exploration Cards',
+      },
+      {
+        id: 'encounter_risk',
+        roll: { min: 16, max: 17 },
+        printed: '16-17',
+        result:
+          'The risk of encounters goes up by 10 in all rooms and corridors for the rest of the quest. This is cumulative, but max is 70%.',
+        decrease: -6,
+        short: 'Encounter risk +10',
+        effect: 'encounter_risk',
+      },
+      {
+        id: 'trap',
+        roll: { min: 18, max: 19 },
+        printed: '18-19',
+        result: 'A hero has sprung a trap!',
+        decrease: -7,
+        short: 'Trap sprung',
+        effect: 'trap',
+      },
+      {
+        id: 'scenario_die_bonus',
+        roll: { min: 20, max: 20 },
+        printed: '20',
+        result:
+          'Add +1 on all Scenario die roll for the remainder of the dungeon. This can only happen once.',
+        decrease: -10,
+        short: 'Scenario die +1',
+        effect: 'scenario_bonus',
+      },
+    ],
+  },
+  inBattle: {
+    dice: '1d10',
+    sides: 10,
+    label: 'Party in battle',
+    cite: CITES.threatTableInBattle,
+    rows: [
+      {
+        id: 'disturbance_in_the_void',
+        roll: { min: 1, max: 1 },
+        printed: '1',
+        result:
+          'A disturbance in the Void. There is a sudden shift in the Void, and this sudden shift leaves any Spell Caster in shock. Spell Casters may do nothing during the coming turn, not even dodge or parry.',
+        decrease: -2,
+        short: 'A disturbance in the Void',
+      },
+      {
+        id: 'greenish_tint',
+        roll: { min: 2, max: 2 },
+        printed: '2',
+        result:
+          'Greenish tint. It suddenly dawns on the heroes that the greenish tint on the blade or claw of the enemies is some kind of poison. The enemy gains the Poisonous Special Rule.',
+        decrease: -2,
+        short: 'Greenish tint',
+      },
+      {
+        id: 'forged_under_pressure',
+        roll: { min: 3, max: 3 },
+        printed: '3',
+        result:
+          'Forged under pressure. While under pressure, some will break, and some will harden. One enemy gain +15 CS until dead.',
+        decrease: -3,
+        short: 'Forged under pressure',
+      },
+      {
+        id: 'healing',
+        roll: { min: 4, max: 5 },
+        printed: '4-5',
+        result:
+          'Healing. One wounded enemy on the table (the one with the highest XP level, or random) will heal 1d10 Hit Points. This may occur through use of a healing potion, by some divine intervention from the gods, or through sheer will.',
+        decrease: -3,
+        short: 'Healing',
+      },
+      {
+        id: 'frenzy',
+        roll: { min: 6, max: 6 },
+        printed: '6',
+        result:
+          'Frenzy. One enemy starts roaring with rage and attacks with renewed strength. The enemy gains the Frenzy Special Rule until dead.',
+        decrease: -3,
+        short: 'Frenzy',
+      },
+      {
+        id: 'disarmed',
+        roll: { min: 7, max: 7 },
+        printed: '7',
+        result:
+          'Disarmed! Whether by a disarming move from one of the enemies or due to clumsiness, one random hero drops his weapon. The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so. If they fail, they will have no weapon and cannot fight. They may continue to try to pick it up, spending one AP per try.',
+        decrease: -3,
+        short: 'Disarmed!',
+      },
+      {
+        id: 'fearsome',
+        roll: { min: 8, max: 8 },
+        printed: '8',
+        result:
+          'Fearsome! One enemy seems to grow in its presence, becoming more fearsome by the minute. The enemy gains the Fear Special Rule. There is no level cap for this fear, but Talents for ignoring fear still work.',
+        decrease: -4,
+        short: 'Fearsome!',
+      },
+      {
+        id: 'reinforcements',
+        roll: { min: 9, max: 9 },
+        printed: '9',
+        result:
+          'Reinforcements. Roll on the Encounter Table and place the new encounter just outside a random door, open or not, ready to enter a tile where there are heroes. They will act last in the current turn. If the door was previously unopened, it will henceforth be considered unlocked and not trapped.',
+        decrease: -4,
+        short: 'Reinforcements',
+      },
+      {
+        id: 'onwards',
+        roll: { min: 10, max: 10 },
+        printed: '10',
+        result:
+          'Onwards! One enemy breaks out in a fierce roar, boosting his fellows and making them fight with renewed energy. All enemies gain +10 CS until end of battle.',
+        decrease: -6,
+        short: 'Onwards!',
+      },
+    ],
+  },
+};
+
+export function threatTableFor(inBattle: boolean): ThreatTable {
+  return inBattle ? THREAT_TABLES.inBattle : THREAT_TABLES.notInBattle;
+}
+
+export function threatTableRow(inBattle: boolean, roll: number): ThreatTableRow | undefined {
+  return threatTableFor(inBattle).rows.find((row) => roll >= row.roll.min && roll <= row.roll.max);
+}
+
+export interface DoorTableRow {
+  id: string;
+  roll: { min: number; max: number };
+  printed: string;
+  locked: boolean;
+  /** Printed difficulty: pick-lock modifier and door HP, or null for an open door. */
+  difficulty: string | null;
+  pickModifier: number | null;
+  hp: number | null;
+}
+
+/** The Door Table (1d10, 0 read as 10), in printed order. */
+export const DOOR_TABLE: ReadonlyArray<DoorTableRow> = [
+  {
+    id: 'open',
+    roll: { min: 1, max: 6 },
+    printed: '1-6',
+    locked: false,
+    difficulty: null,
+    pickModifier: null,
+    hp: null,
+  },
+  {
+    id: 'locked_7',
+    roll: { min: 7, max: 7 },
+    printed: '7',
+    locked: true,
+    difficulty: 'Pick lock: 0, HP 10',
+    pickModifier: 0,
+    hp: 10,
+  },
+  {
+    id: 'locked_8',
+    roll: { min: 8, max: 8 },
+    printed: '8',
+    locked: true,
+    difficulty: 'Pick lock: -10, HP 15',
+    pickModifier: -10,
+    hp: 15,
+  },
+  {
+    id: 'locked_9',
+    roll: { min: 9, max: 9 },
+    printed: '9',
+    locked: true,
+    difficulty: 'Pick lock: -15, HP 20',
+    pickModifier: -15,
+    hp: 20,
+  },
+  {
+    id: 'locked_0',
+    roll: { min: 10, max: 10 },
+    printed: '0',
+    locked: true,
+    difficulty: 'Pick lock: -20, HP 25',
+    pickModifier: -20,
+    hp: 25,
+  },
+];
+
+export function doorTableRow(roll: number): DoorTableRow | undefined {
+  return DOOR_TABLE.find((row) => roll >= row.roll.min && roll <= row.roll.max);
+}
+
+export const DOOR = {
+  /** A 6 on the d6 rolled with the door means a trap. */
+  trapOn: 6,
+  forceThreat: 2,
+  crowbarThreat: 1,
+  crowbarDamage: '8+DB',
+  pickActions: 2,
+  cite: CITES.openDoor,
+} as const;
+
+export interface ChestTableRow {
+  id: string;
+  roll: { min: number; max: number };
+  printed: string;
+  /** The Findings cell as printed. */
+  result: string;
+  fine: number;
+  wonderful: number;
+}
+
+export interface ChestTable {
+  id: 'chest' | 'objective_chest';
+  title: string;
+  cite: Cite;
+  rows: ReadonlyArray<ChestTableRow>;
+}
+
+/**
+ * The Chest and Objective Chest rows of Treasure found in Furniture (1d10). The treasures
+ * themselves are Treasure Cards drawn from the Fine and Wonderful piles; the cards are not in
+ * this book, so the table only says how many of each to draw.
+ */
+export const CHEST_TABLES: Record<ChestTable['id'], ChestTable> = {
+  chest: {
+    id: 'chest',
+    title: 'Chest',
+    cite: CITES.chestTable,
+    rows: [
+      {
+        id: 'row_1',
+        roll: { min: 1, max: 1 },
+        printed: '1',
+        result: '1 Wonderful Treasure.',
+        fine: 0,
+        wonderful: 1,
+      },
+      {
+        id: 'row_2',
+        roll: { min: 2, max: 4 },
+        printed: '2-4',
+        result: '2 Fine Treasures.',
+        fine: 2,
+        wonderful: 0,
+      },
+      {
+        id: 'row_3',
+        roll: { min: 5, max: 8 },
+        printed: '5-8',
+        result: '1 Fine Treasure.',
+        fine: 1,
+        wonderful: 0,
+      },
+      {
+        id: 'row_4',
+        roll: { min: 9, max: 10 },
+        printed: '9-10',
+        result: 'Nothing.',
+        fine: 0,
+        wonderful: 0,
+      },
+    ],
+  },
+  objective_chest: {
+    id: 'objective_chest',
+    title: 'Objective Chest',
+    cite: CITES.objectiveChestTable,
+    rows: [
+      {
+        id: 'row_1',
+        roll: { min: 1, max: 3 },
+        printed: '1-3',
+        result: '1 Fine treasure, 2 Wonderful Treasures.',
+        fine: 1,
+        wonderful: 2,
+      },
+      {
+        id: 'row_2',
+        roll: { min: 4, max: 7 },
+        printed: '4-7',
+        result: '2 Fine treasure, 1 Wonderful Treasure.',
+        fine: 2,
+        wonderful: 1,
+      },
+      {
+        id: 'row_3',
+        roll: { min: 8, max: 10 },
+        printed: '8-10',
+        result: '3 Fine Treasures.',
+        fine: 3,
+        wonderful: 0,
+      },
+    ],
+  },
+};
+
+export function chestTableRow(table: ChestTable['id'], roll: number): ChestTableRow | undefined {
+  return CHEST_TABLES[table].rows.find((row) => roll >= row.roll.min && roll <= row.roll.max);
+}
+
+export const THIEF_TREASURE =
+  'A thief may always draw two Treasure Cards and keep one. If the card says to draw from a higher tier, the thief draws only one card from that pile.';
+
+/** Enemy activation order, as printed under Activation of Enemies. */
+export const ENEMY_PRIORITY: ReadonlyArray<string> = [
+  'Magic User or enemy armed with Ranged Weapon.',
+  'An enemy adjacent to a hero that could make room for more enemies.',
+  'Enemy adjacent to hero.',
+  'Enemy closest to a hero and that could charge.',
+  'Enemy that has enough space to move its full movement.',
+  'Random enemy.',
+];
+
+/** The combat turn flowchart on p. 112, one card per branch. */
+export const COMBAT_ROUND: ReadonlyArray<{ id: string; title: string; text: string }> = [
+  {
+    id: 'pull',
+    title: 'Pull an initiative token',
+    text: 'Draw a token from the bag without looking.',
+  },
+  {
+    id: 'hero',
+    title: 'Hero token',
+    text: 'Choose a hero or mercenary that has not acted. Remove Stunned, Parry Stance or Power Attack tokens, then perform the chosen actions.',
+  },
+  {
+    id: 'enemy',
+    title: 'Enemy token',
+    text: 'Check the Quick Reference card to see which enemy acts (the order below). Remove Stunned, Parry Stance or Power Attack tokens, then act according to the Enemy behaviour card.',
+  },
+  {
+    id: 'last',
+    title: 'Last token in the bag',
+    text: 'Move Wandering Monsters, refill the initiative bag removing tokens for each casualty, then roll the Scenario die. If all heroes or all enemies are dead the sequence ends; heroes that have not acted may then act as normal.',
+  },
+];
+
+export const INITIATIVE = {
+  /** Enemies get this many tokens more than their number when the door was bashed down. */
+  bashedDoor: 2,
+  /** One extra token per named monster, as long as it is alive. */
+  namedMonster: 1,
+  /** One extra token for the side with Perfect Hearing on the first turn after a door; none if both have it. */
+  perfectHearing: 1,
+  /** Enemies ambushing a resting party start with 3 extra tokens. */
+  restAmbush: 3,
+  cite: CITES.initiativeTokens,
+} as const;
+
+export const POISON = {
+  /** Printed cadence of the Poison Tests after a poisoning. */
+  cadence: 'CON test at the start of the next turn, and 1d10 turns after that.',
+  cite: CITES.poison,
+} as const;
+
+export const INJURY = {
+  /** Reaching 0 HP also costs a permanent 1d4 off a random basic stat or HP. */
+  permanent: '1d4 permanent reduction of a basic stat or HP. Randomize which one.',
+  cite: CITES.permanentInjury,
+} as const;
+
+/** The Lingering Trauma Table (1d6), in printed order. */
+export const LINGERING_TRAUMA: ReadonlyArray<{ id: string; printed: string; trigger: string }> = [
+  { id: 'trigger_1', printed: '1', trigger: 'A trap is sprung by the party.' },
+  { id: 'trigger_2', printed: '2', trigger: 'A portcullis falls down.' },
+  { id: 'trigger_3', printed: '3', trigger: 'A companion is reduced to 0 Hit Points.' },
+  { id: 'trigger_4', printed: '4', trigger: 'A miscast in the party.' },
+  { id: 'trigger_5', printed: '5', trigger: 'Party takes a short break.' },
+  { id: 'trigger_6', printed: '6', trigger: 'The party opens a chest.' },
+];
+
 export type LightKind = 'torch' | 'lantern' | 'headlamp';
 
 export interface LightRules {
@@ -455,6 +968,10 @@ export interface MoraleEvent {
   sanity?: LinkedSanity;
   /** Hero status the event switches on. */
   status?: HeroStatus | 'dead';
+  /** A published designer ruling that replaces the printed effect; the corpus applies it. */
+  ruled?: number;
+  /** What the ruling says, for the log and the peek. */
+  ruling?: string;
 }
 
 /** The Party Morale table, in printed order. */
@@ -463,6 +980,8 @@ export const MORALE_EVENTS: ReadonlyArray<MoraleEvent> = [
     id: 'hero_dies',
     situation: 'A hero dies',
     effect: -6,
+    ruled: -5,
+    ruling: 'Designer ruling (changelog 2.21): -5, not the printed -6.',
     flavour: 'Things suddenly become real…we are all going to die!',
     perHero: true,
     status: 'dead',
@@ -497,8 +1016,10 @@ export const MORALE_EVENTS: ReadonlyArray<MoraleEvent> = [
     id: 'hungry',
     situation: 'Party is hungry',
     effect: -2,
+    ruled: -1,
+    ruling: 'Designer ruling (changelog 2.21): -1 for each hungry character, not a flat -2.',
     flavour: 'Lack of food is always bad for motivation',
-    perHero: false,
+    perHero: true,
   },
   {
     id: 'fear',
@@ -543,6 +1064,8 @@ export const MORALE_EVENTS: ReadonlyArray<MoraleEvent> = [
     id: 'short_rest',
     situation: 'Taking a short rest',
     effect: 1,
+    ruled: 2,
+    ruling: 'The rest checklist on p. 98 gives +2, up to the start value; the corpus follows it.',
     flavour: 'Resting is a good way to calm the nerves.',
     perHero: false,
   },
@@ -622,7 +1145,12 @@ export const SANITY_LOSSES: ReadonlyArray<SanityLoss> = [
   { id: 'disease', situation: 'Contracting a disease', loss: 1, printed: '-1' },
   { id: 'poison', situation: 'Getting poisoned', loss: 1, printed: '-1' },
   { id: 'miscast', situation: 'Miscasting a spell', loss: null, printed: '-1d3' },
-  { id: 'room_event', situation: 'Certain room events', loss: null, printed: 'See Exploration Card' },
+  {
+    id: 'room_event',
+    situation: 'Certain room events',
+    loss: null,
+    printed: 'See Exploration Card',
+  },
 ];
 
 export const SANITY = {
@@ -686,7 +1214,8 @@ export const MENTAL_CONDITIONS: ReadonlyArray<MentalCondition> = [
     name: 'Fear of the Dark',
     roll: { min: 5, max: 5 },
     printed: '5',
-    effect: 'The hero has developed an irrational fear of the dark and all Resolve Tests are at -10.',
+    effect:
+      'The hero has developed an irrational fear of the dark and all Resolve Tests are at -10.',
     tracked: 'All Resolve Tests at -10.',
   },
   {
@@ -694,7 +1223,8 @@ export const MENTAL_CONDITIONS: ReadonlyArray<MentalCondition> = [
     name: 'Arachnophobia',
     roll: { min: 6, max: 6 },
     printed: '6',
-    effect: 'The hero finds all kinds of spiders terrifying. Treat all encounters as causing Terror.',
+    effect:
+      'The hero finds all kinds of spiders terrifying. Treat all encounters as causing Terror.',
     tracked: 'Spiders cause Terror for this hero.',
   },
   {
@@ -780,8 +1310,9 @@ export const HERO_STATUSES: Record<HeroStatus, { label: string; reminder: string
   },
   poisoned: {
     label: 'Poisoned',
-    reminder: 'Remaining Poison Tests are made during a rest.',
-    cite: CITES.restPoison,
+    reminder:
+      'CON test at the start of the next turn, and 1d10 turns after that; remaining Poison Tests are made during a rest.',
+    cite: CITES.poison,
   },
   diseased: {
     label: 'Diseased',
@@ -1213,8 +1744,14 @@ export function questById(id: string | null | undefined): QuestPreset | undefine
 
 /** What the rulebook does not say, so the table never pretends it does. */
 export const GAPS = {
-  threatTables:
-    'The two Threat tables on p. 89 (party not in battle: 1d20; in battle: 1d10) are not in the corpus yet. Roll on the printed table, carry out the event, and enter the Threat decrease printed beside it.',
+  scenarioBonusAgain:
+    'The table says the +1 on Scenario die rolls can only happen once, and it already applies. The printed Threat decrease is applied here; undo it if you rule otherwise.',
+  newLevelValue:
+    'The book says the Threat Level is reset on a new level of a multilevel dungeon, but not to what value. The table resets it to the quest start value.',
+  deathStartValue:
+    'The book gives the Party Morale start value once, from the heroes who set out; it does not say the start value changes when a hero dies, so the table keeps it.',
+  battleScenarioStart:
+    'The combat turn flowchart rolls the Scenario die when the last initiative token is drawn, not when enemies are first placed.',
   maxLevel:
     'The book says reaching the quest max triggers a Wandering Monster. It does not say whether Threat can rise past the max or whether staying at it triggers again; the table holds Threat at the max.',
   darkness:

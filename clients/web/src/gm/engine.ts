@@ -10,9 +10,13 @@
  */
 import {
   CITES,
+  CHEST_TABLES,
+  DOOR,
   ENCOUNTER,
   GAPS,
   HERO_STATUSES,
+  INITIATIVE,
+  INJURY,
   LIGHT_RULES,
   MENTAL_CONDITIONS,
   MORALE,
@@ -23,7 +27,13 @@ import {
   THREAT,
   THREAT_SOURCES,
   TURN_SEQUENCE,
+  chestTableRow,
+  doorTableRow,
   questById,
+  threatTableFor,
+  threatTableRow,
+  type ChestTable,
+  type ChestTableRow,
   type Cite,
   type HeroStatus,
   type LightKind,
@@ -32,7 +42,7 @@ import {
   type ThreatSourceId,
 } from './rules.ts';
 
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
 
 export interface Hero {
   id: string;
@@ -70,6 +80,23 @@ export interface ThreatState {
   thresholds: number[];
 }
 
+/** The two dice rolled together when a door or chest is opened, once the Game Master has entered them. */
+export interface DoorRoll {
+  d10: number;
+  d6: number;
+  trapped: boolean;
+  locked: boolean;
+  /** Printed difficulty of a locked door or chest. */
+  difficulty: string | null;
+}
+
+/** The chest's treasure roll, once the Game Master has entered it. */
+export interface ChestRoll {
+  table: ChestTable['id'];
+  d10: number;
+  rowId: string;
+}
+
 export type PromptRequest =
   | { kind: 'scenario_roll' }
   | { kind: 'threat_roll' }
@@ -79,8 +106,16 @@ export type PromptRequest =
   | { kind: 'sanity_condition'; heroId: string; duplicateOf?: MentalConditionId }
   | { kind: 'rest_resolve'; risk: number }
   | { kind: 'wandering_monster'; threshold: number; crossed: boolean }
-  | { kind: 'battle_start'; reason: string }
+  | { kind: 'battle_start'; reason: string; barred?: boolean }
   | { kind: 'light_relight'; lightId: string }
+  /** The door or chest checklist: Threat is already up by 1; the rolls and the tile follow. */
+  | { kind: 'door'; chest: boolean; rolled: DoorRoll | null }
+  /** An open chest: 1d10 on the Chest (or Objective Chest) table says which Treasure Cards to draw. */
+  | { kind: 'chest'; rolled: ChestRoll | null }
+  /** A trap: from the Threat table a random hero, from a door or chest the opener; say whether it went off. */
+  | { kind: 'trap'; source: 'threat_table' | 'door' | 'chest' }
+  /** Heroes bleeding out after a battle or during a rest: each is bandaged back up or dies. */
+  | { kind: 'bleeding'; heroIds: string[]; context: 'battle' | 'rest' }
   | { kind: 'confirm' };
 
 export interface Prompt {
@@ -131,9 +166,19 @@ export interface GmState {
   version: typeof STATE_VERSION;
   questId: string | null;
   turn: number;
+  /** Level of a multilevel dungeon; Threat resets when it changes. */
+  dungeonLevel: number;
   entrancePassed: boolean;
   scenarioEnabled: boolean;
   scenarioTrigger: number;
+  /** +1 on every Scenario die roll after the not-in-battle Threat table result 20 (once). */
+  scenarioBonus: number;
+  /** Turn in which the Scenario die was last rolled; 0 when never. */
+  scenarioTurn: number;
+  /** Cumulative +10 to every encounter roll from the Threat table result 16–17. */
+  encounterBonus: number;
+  /** Dwarven Ale was drunk this quest: all tests −10, RES +20. */
+  dwarvenAle: boolean;
   inBattle: boolean;
   resting: boolean;
   /** 0-based index into `TURN_SEQUENCE`: where the Game Master is in the current turn. */
@@ -176,15 +221,32 @@ export type GmEvent =
   | { type: 'threat_adjust'; delta: number; reason: string; cite?: Cite }
   | { type: 'threat_source'; source: ThreatSourceId; amount?: number }
   | { type: 'threat_roll'; value: number }
+  /** The printed Threat table roll (1d20 not in battle, 1d10 in battle): the table carries the row out. */
+  | { type: 'threat_table_roll'; value: number }
+  /** A Threat table result entered by hand, for rows the Game Master resolves from the book. */
   | { type: 'threat_table_result'; decrease: number; event: string }
+  | { type: 'set_encounter_bonus'; bonus: number }
   | { type: 'pass_entrance' }
   | { type: 'new_turn' }
+  | { type: 'new_level' }
   | { type: 'turn_step'; step: number }
   | { type: 'scenario_roll'; value: number }
+  /** Brings back a Scenario die prompt that was dismissed unrolled. */
+  | { type: 'scenario_request' }
+  /** Brings back the mental condition prompt for a hero at 0 Sanity. */
+  | { type: 'sanity_condition_request'; heroId: string }
+  /** A bleeding hero bandaged or healed back up. */
+  | { type: 'hero_recover'; id: string }
   | { type: 'set_in_battle'; inBattle: boolean }
-  | { type: 'battle_start'; demons: boolean }
+  | { type: 'battle_start'; demons: boolean; bag?: InitiativeBagInput }
   | { type: 'battle_end'; won: boolean }
-  | { type: 'door_open'; entrance?: boolean }
+  | { type: 'door_open'; entrance?: boolean; chest?: boolean }
+  /** The 1d10 and 1d6 rolled together for an opened door or chest. */
+  | { type: 'door_roll'; d10: number; d6: number }
+  /** The 1d10 on the Chest or Objective Chest table for an opened chest. */
+  | { type: 'chest_roll'; table: ChestTable['id']; d10: number }
+  /** A trap from the Threat table: who sprang it, and whether the Perception roll saved them. */
+  | { type: 'trap_resolve'; heroId: string | null; triggered: boolean }
   /** A tile placed: with a 1d100 `roll` the table decides whether enemies appear; otherwise `encounter` says so. */
   | { type: 'tile_revealed'; kind: 'room' | 'corridor'; roll?: number; encounter?: boolean }
   | { type: 'wm_place' }
@@ -207,7 +269,12 @@ export type GmEvent =
   | { type: 'hero_status'; id: string; status: HeroStatus; on: boolean }
   | { type: 'hero_head_wound'; id: string }
   | { type: 'hero_condition_remove'; id: string; condition: MentalConditionId }
-  | { type: 'morale_event'; event: MoraleEventId; heroId?: string; status?: 'poisoned' | 'diseased' }
+  | {
+      type: 'morale_event';
+      event: MoraleEventId;
+      heroId?: string;
+      status?: 'poisoned' | 'diseased';
+    }
   | { type: 'morale_adjust'; delta: number; reason: string; capAtStart?: boolean; cite?: Cite }
   | {
       type: 'set_morale';
@@ -231,9 +298,14 @@ export function initialState(): GmState {
     version: STATE_VERSION,
     questId: null,
     turn: 0,
+    dungeonLevel: 1,
     entrancePassed: false,
     scenarioEnabled: true,
     scenarioTrigger: SCENARIO.threatTrigger,
+    scenarioBonus: 0,
+    scenarioTurn: 0,
+    encounterBonus: 0,
+    dwarvenAle: false,
     inBattle: false,
     resting: false,
     turnStep: 0,
@@ -280,22 +352,168 @@ export function threatFloor(threat: ThreatState): number {
 /** Ambush chance during a rest: (5 + Threat)%, +10% per rest after the first, max 70%. */
 export function ambushRisk(threatLevel: number, restsTaken: number): number {
   const later = Math.max(0, restsTaken - 1);
-  return Math.min(
-    REST.ambushCap,
-    REST.ambushBase + threatLevel + later * REST.ambushPerLaterRest,
-  );
+  return Math.min(REST.ambushCap, REST.ambushBase + threatLevel + later * REST.ambushPerLaterRest);
 }
 
-/** Encounter chance for the next tile: room 50% or corridor 30%, +10 after four empty tiles. */
-export function encounterChance(kind: 'room' | 'corridor', streak: number): number {
+/**
+ * Encounter chance for the next tile: room 50% or corridor 30%, +10 after four empty tiles,
+ * plus the cumulative +10s from the Threat table, never above 70%.
+ */
+export function encounterChance(kind: 'room' | 'corridor', streak: number, bonus = 0): number {
   const base = kind === 'room' ? ENCOUNTER.room : ENCOUNTER.corridor;
-  const bonus = streak >= ENCOUNTER.streakTiles ? ENCOUNTER.streakBonus : 0;
-  return Math.min(ENCOUNTER.cap, base + bonus);
+  const streakBonus = streak >= ENCOUNTER.streakTiles ? ENCOUNTER.streakBonus : 0;
+  return Math.min(ENCOUNTER.cap, base + streakBonus + bonus);
 }
 
 /** A 1d100 result at or under the encounter chance means enemies are on the tile. */
-export function encounterRolled(kind: 'room' | 'corridor', streak: number, roll: number): boolean {
-  return roll <= encounterChance(kind, streak);
+export function encounterRolled(
+  kind: 'room' | 'corridor',
+  streak: number,
+  roll: number,
+  bonus = 0,
+): boolean {
+  return roll <= encounterChance(kind, streak, bonus);
+}
+
+/** What the Game Master tells the table about the enemies when a battle starts. */
+export interface InitiativeBagInput {
+  enemies: number;
+  named?: number;
+  /** The heroes bashed the door down: enemies get 2 tokens more than their number. */
+  bashedDoor?: boolean;
+  /** The enemies ambushed a resting party: 3 extra enemy tokens (none if the door was barred). */
+  restAmbush?: boolean;
+  perfectHearing?: 'none' | 'heroes' | 'enemies' | 'both';
+  /** Heroes on Overwatch put no token in the bag. */
+  overwatch?: number;
+}
+
+export interface InitiativeBag {
+  heroTokens: number;
+  enemyTokens: number;
+  notes: string[];
+}
+
+/** The initiative bag for the first turn of a battle, from the printed token rules. */
+export function initiativeBag(state: GmState, input: InitiativeBagInput): InitiativeBag {
+  const standing = state.heroes.filter((h) => !h.dead && !h.statuses.includes('bleeding_out'));
+  const overwatch = Math.min(standing.length, Math.max(0, input.overwatch ?? 0));
+  const notes: string[] = [];
+  let heroTokens = standing.length - overwatch;
+  let enemyTokens =
+    Math.max(0, input.enemies) + Math.max(0, input.named ?? 0) * INITIATIVE.namedMonster;
+  if (overwatch > 0) notes.push(`${overwatch} on Overwatch: no token.`);
+  if ((input.named ?? 0) > 0) notes.push(`+${input.named} for named monsters while they live.`);
+  if (input.bashedDoor) {
+    enemyTokens += INITIATIVE.bashedDoor;
+    notes.push(`Door bashed down: +${INITIATIVE.bashedDoor} enemy tokens, first turn only.`);
+  }
+  if (input.restAmbush) {
+    enemyTokens += INITIATIVE.restAmbush;
+    notes.push(`Ambush during the rest: +${INITIATIVE.restAmbush} enemy tokens.`);
+  }
+  if (input.perfectHearing === 'heroes') {
+    heroTokens += INITIATIVE.perfectHearing;
+    notes.push('Perfect Hearing: +1 hero token on the first turn.');
+  } else if (input.perfectHearing === 'enemies') {
+    enemyTokens += INITIATIVE.perfectHearing;
+    notes.push('Perfect Hearing: +1 enemy token on the first turn.');
+  } else if (input.perfectHearing === 'both') {
+    notes.push('Both sides have Perfect Hearing: no extra token.');
+  }
+  return { heroTokens, enemyTokens, notes };
+}
+
+export interface StandingEffect {
+  id: string;
+  label: string;
+  detail: string;
+  cite: Cite;
+  tone: 'warn' | 'danger' | 'info';
+}
+
+/** Modifiers that stay in force until something ends them: the things easiest to forget. */
+export function standingEffects(state: GmState): StandingEffect[] {
+  const effects: StandingEffect[] = [];
+  if (state.encounterBonus > 0)
+    effects.push({
+      id: 'encounter-bonus',
+      label: `Encounter risk +${state.encounterBonus}`,
+      detail: 'In all rooms and corridors for the rest of the quest (max 70%).',
+      cite: CITES.threatTableNotInBattle,
+      tone: 'warn',
+    });
+  if (state.scenarioBonus > 0)
+    effects.push({
+      id: 'scenario-bonus',
+      label: `Scenario die +${state.scenarioBonus}`,
+      detail: 'On every Scenario die roll for the remainder of the dungeon.',
+      cite: CITES.threatTableNotInBattle,
+      tone: 'warn',
+    });
+  if (state.morale.start > 0 && state.morale.current === 0)
+    effects.push({
+      id: 'morale-zero',
+      label: 'Party flees',
+      detail:
+        'Party Morale is 0: the party leaves the dungeon as soon as it is not locked in combat.',
+      cite: CITES.moraleFlee,
+      tone: 'danger',
+    });
+  else if (isWavering(state))
+    effects.push({
+      id: 'wavering',
+      label: 'Wavering: −20 RES',
+      detail: `Party Morale is below half of ${state.morale.start}. All heroes suffer −20 RES until it rises above that.`,
+      cite: CITES.moraleWavering,
+      tone: 'danger',
+    });
+  if (state.dwarvenAle)
+    effects.push({
+      id: 'dwarven-ale',
+      label: 'Dwarven Ale',
+      detail: MORALE.dwarvenAle,
+      cite: CITES.consumables,
+      tone: 'info',
+    });
+  for (const hero of state.heroes) {
+    if (hero.dead) continue;
+    for (const id of hero.conditions) {
+      const condition = MENTAL_CONDITIONS.find((c) => c.id === id);
+      if (!condition?.tracked) continue;
+      effects.push({
+        id: `${hero.id}-${id}`,
+        label: `${hero.name}: ${condition.name}`,
+        detail: condition.tracked,
+        cite:
+          id === 'jumpy'
+            ? CITES.jumpy
+            : id === 'acute_stress'
+              ? CITES.acuteStress
+              : CITES.mentalConditions,
+        tone: 'warn',
+      });
+    }
+  }
+  if (state.questId === 'quest.great_crypt.tomb_raiders')
+    effects.push({
+      id: 'tomb-raiders',
+      label: 'Objective room: Threat roll above Threat also brings a Wandering Monster',
+      detail: 'Tomb Raiders quest rule, while at least one hero is in the objective room.',
+      cite: { page: 260, pdf: 262, heading: 'Tomb Raiders Threat' },
+      tone: 'info',
+    });
+  return effects;
+}
+
+/** Exploring, in battle, or resting: the mode decides which table and which actions apply. */
+export type GmMode = 'prepare' | 'explore' | 'battle' | 'rest';
+
+export function modeOf(state: GmState): GmMode {
+  if (state.turn === 0) return 'prepare';
+  if (state.inBattle) return 'battle';
+  if (state.resting) return 'rest';
+  return 'explore';
 }
 
 export interface LightSummary {
@@ -327,6 +545,16 @@ export function conditionForRoll(value: number) {
 
 // ---------------------------------------------------------------------------------------
 // Internal helpers (each returns a new state)
+
+/** "2 Fine Treasure Cards and 1 Wonderful Treasure Card", or null for an empty chest. */
+export function treasureDraws(row: ChestTableRow): string | null {
+  const part = (n: number, tier: string) =>
+    n > 0 ? `${n} ${tier} Treasure Card${n === 1 ? '' : 's'}` : null;
+  const parts = [part(row.fine, 'Fine'), part(row.wonderful, 'Wonderful')].filter(
+    (p): p is string => p !== null,
+  );
+  return parts.length > 0 ? parts.join(' and ') : null;
+}
 
 function nextId(state: GmState, prefix: string): [GmState, string] {
   return [{ ...state, nextId: state.nextId + 1 }, `${prefix}${state.nextId}`];
@@ -404,7 +632,11 @@ function changeThreat(
   cite: Cite = CITES.threatLevel,
 ): GmState {
   if (!state.threat.enabled) {
-    return log(state, 'warn', `Threat is not used in this quest; ignored ${signed(delta)} (${reason}).`);
+    return log(
+      state,
+      'warn',
+      `Threat is not used in this quest; ignored ${signed(delta)} (${reason}).`,
+    );
   }
   const prev = state.threat.level;
   const floor = threatFloor(state.threat);
@@ -550,8 +782,14 @@ function loseSanity(
   const prev = hero.sanity;
   const next = Math.max(0, prev - amount);
   let result = updateHero(state, heroId, (h) => ({ ...h, sanity: next }));
-  const overshoot = prev - amount < 0 ? ' The book does not define Sanity below 0; it stops at 0.' : '';
-  result = log(result, 'sanity', `${hero.name}: Sanity ${prev} → ${next} (${reason}).${overshoot}`, cite);
+  const overshoot =
+    prev - amount < 0 ? ' The book does not define Sanity below 0; it stops at 0.' : '';
+  result = log(
+    result,
+    'sanity',
+    `${hero.name}: Sanity ${prev} → ${next} (${reason}).${overshoot}`,
+    cite,
+  );
   if (next === 0 && prev > 0) {
     result = prompt(
       result,
@@ -582,24 +820,67 @@ function setStatus(state: GmState, heroId: string, status: HeroStatus, on: boole
   result = log(
     result,
     'hero',
-    on ? `${hero.name} is ${info.label.toLowerCase()}. ${info.reminder}` : `${hero.name} is no longer ${info.label.toLowerCase()}.`,
+    on
+      ? `${hero.name} is ${info.label.toLowerCase()}. ${info.reminder}`
+      : `${hero.name} is no longer ${info.label.toLowerCase()}.`,
     info.cite,
   );
   return result;
 }
 
-function battleStart(state: GmState, demons: boolean, reason: string): GmState {
-  let result: GmState = { ...state, inBattle: true, resting: false, turn: state.turn + 1 };
-  result = dropPrompts(result, (p) => p.request.kind === 'battle_start');
+function battleStart(
+  state: GmState,
+  demons: boolean,
+  reason: string,
+  bag?: InitiativeBagInput,
+): GmState {
+  let result: GmState = {
+    ...state,
+    inBattle: true,
+    resting: false,
+    turn: state.turn + 1,
+    turnStep: 1,
+  };
+  result = dropPrompts(
+    result,
+    (p) => p.request.kind === 'battle_start' || p.request.kind === 'door',
+  );
   result = log(
     result,
     'battle',
-    `Battle begins (${reason}). Remaining hero actions are lost and a new turn starts: turn ${result.turn}. The book does not say whether the Scenario die is rolled again for it.`,
+    `Battle begins (${reason}). Remaining hero actions are lost and a new turn starts: turn ${result.turn}.`,
     CITES.initiative,
+  );
+  if (bag) {
+    const tokens = initiativeBag(result, bag);
+    result = log(
+      result,
+      'battle',
+      `Initiative bag: ${tokens.heroTokens} hero token${tokens.heroTokens === 1 ? '' : 's'} and ${tokens.enemyTokens} enemy token${tokens.enemyTokens === 1 ? '' : 's'} (${bag.enemies} enem${bag.enemies === 1 ? 'y' : 'ies'}).${tokens.notes.length ? ` ${tokens.notes.join(' ')}` : ''}`,
+      CITES.initiativeTokens,
+    );
+  } else {
+    result = log(
+      result,
+      'battle',
+      'Put every hero token in the bag with as many enemy tokens as there are enemies (named monsters, a bashed door, Perfect Hearing and a rest ambush add tokens).',
+      CITES.initiativeTokens,
+    );
+  }
+  result = log(
+    result,
+    'info',
+    `Each round: pull a token, act, repeat. When the last token is drawn: move Wandering Monsters, refill the bag minus casualties, roll the Scenario die. ${GAPS.battleScenarioStart}`,
+    CITES.combatTurn,
   );
   for (const hero of result.heroes) {
     if (!hero.dead && hero.conditions.includes('acute_stress')) {
-      result = changeThreat(result, 1, `${hero.name} has Acute Stress and screams`, CITES.acuteStress);
+      result = changeThreat(
+        result,
+        1,
+        `${hero.name} has Acute Stress and screams`,
+        CITES.acuteStress,
+      );
     }
   }
   if (demons) {
@@ -622,13 +903,39 @@ export function reduce(state: GmState, event: GmEvent): GmState {
     case 'note':
       return log(state, 'info', event.text);
 
-    case 'dismiss_prompt':
-      return dropPrompts(state, (p) => p.id === event.id);
+    case 'dismiss_prompt': {
+      const dismissed = state.pending.find((p) => p.id === event.id);
+      let result = dropPrompts(state, (p) => p.id === event.id);
+      if (dismissed?.request.kind === 'rest_resolve' && result.resting) {
+        result = { ...result, resting: false };
+        result = log(
+          result,
+          'rest',
+          'Rest set aside without resolving it; the party is exploring again.',
+          CITES.rest,
+        );
+      }
+      return result;
+    }
 
     case 'set_quest': {
       const quest = questById(event.questId);
       let result: GmState = { ...state, questId: event.questId };
-      if (!quest) return result;
+      if (!quest) {
+        if (state.questId === null) return result;
+        result = {
+          ...result,
+          threat: { ...state.threat, enabled: true, min: null, max: null, thresholds: [] },
+          scenarioEnabled: true,
+        };
+        result = dropPrompts(result, (p) => p.key === 'threat-start');
+        return log(
+          result,
+          'info',
+          'No quest chosen: the book’s defaults apply. Threat never below 2, no maximum, no Wandering Monster thresholds, Scenario die on.',
+          CITES.threatLevel,
+        );
+      }
       const threat: ThreatState = {
         enabled: quest.start !== null,
         level: typeof quest.start === 'number' ? quest.start : state.threat.level,
@@ -734,14 +1041,15 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       if (roll === 20) {
         result = changeThreat(result, THREAT.natural20, 'natural 20 on the Threat roll');
       } else if (roll <= level) {
+        const table = threatTableFor(state.inBattle);
         result = prompt(
           result,
           'threat-table',
           `Threat roll ${roll} is at or below Threat ${level}: something bad happens`,
           { kind: 'threat_table', inBattle: state.inBattle, roll },
           {
-            detail: `${GAPS.threatTables} ${state.inBattle ? 'The party is in battle: use the 1d10 table.' : 'The party is not in battle: use the 1d20 table.'}`,
-            cite: CITES.threatTables,
+            detail: `Roll ${table.dice} on the "${table.label}" table. The table carries the result out and lowers Threat by the printed amount.`,
+            cite: table.cite,
             severity: 'danger',
           },
         );
@@ -812,7 +1120,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           }
         }
         if (lightSummary(result).lit.length === 0) {
-          result = log(result, 'warn', `No light source is lit. ${GAPS.darkness}`, CITES.nightVision);
+          result = log(
+            result,
+            'warn',
+            `No light source is lit. ${GAPS.darkness}`,
+            CITES.nightVision,
+          );
         }
       } else if (roll === level && lit.length > 0) {
         result = log(
@@ -834,7 +1147,159 @@ export function reduce(state: GmState, event: GmEvent): GmState {
         CITES.threatTables,
       );
       if (event.decrease !== 0)
-        result = changeThreat(result, -Math.abs(event.decrease), 'Threat table decrease', CITES.threatTables);
+        result = changeThreat(
+          result,
+          -Math.abs(event.decrease),
+          'Threat table decrease',
+          CITES.threatTables,
+        );
+      return result;
+    }
+
+    case 'threat_table_roll': {
+      const open = state.pending.find((p) => p.request.kind === 'threat_table');
+      const inBattle =
+        open && open.request.kind === 'threat_table' ? open.request.inBattle : state.inBattle;
+      const table = threatTableFor(inBattle);
+      const row = threatTableRow(inBattle, event.value);
+      if (!row)
+        return log(
+          state,
+          'warn',
+          `${event.value} is not a result on the ${table.dice} Threat table.`,
+          table.cite,
+        );
+      let result = dropPrompts(state, (p) => p.key === 'threat-table');
+      result = log(
+        result,
+        'threat',
+        `Threat table (${table.dice}) ${event.value}: ${row.result}`,
+        table.cite,
+      );
+      switch (row.effect) {
+        case 'wandering_monster':
+          result = { ...result, wanderingMonsters: result.wanderingMonsters + 1 };
+          result = prompt(
+            result,
+            `wm-table-${result.nextId}`,
+            'A Wandering Monster has appeared',
+            { kind: 'confirm' },
+            {
+              detail:
+                'Token placed. Put it on the start tile, just outside the door; it moves 4 squares after the heroes have acted.',
+              cite: CITES.wanderingMonsters,
+              severity: 'danger',
+            },
+          );
+          break;
+        case 'encounter_risk':
+          result = { ...result, encounterBonus: result.encounterBonus + ENCOUNTER.streakBonus };
+          result = log(
+            result,
+            'explore',
+            `Encounter risk is now +${result.encounterBonus} in every room and corridor for the rest of the quest (max ${ENCOUNTER.cap}%).`,
+            table.cite,
+          );
+          break;
+        case 'trap':
+          result = prompt(
+            result,
+            `trap-${result.nextId}`,
+            'A hero has sprung a trap!',
+            { kind: 'trap', source: 'threat_table' },
+            {
+              detail:
+                'Draw a trap card and randomise who triggered it. That hero may still avoid it with a Perception roll; if it fails, the trap goes off.',
+              cite: CITES.traps,
+              severity: 'danger',
+            },
+          );
+          break;
+        case 'scenario_bonus':
+          if (result.scenarioBonus > 0) {
+            result = log(result, 'warn', GAPS.scenarioBonusAgain, table.cite);
+          } else {
+            result = { ...result, scenarioBonus: 1 };
+            result = log(
+              result,
+              'turn',
+              'Every Scenario die roll is now +1 for the remainder of the dungeon.',
+              table.cite,
+            );
+          }
+          break;
+        default:
+          result = prompt(
+            result,
+            `threat-event-${result.nextId}`,
+            row.short,
+            { kind: 'confirm' },
+            { detail: row.result, cite: table.cite, severity: 'danger' },
+          );
+      }
+      result = changeThreat(result, row.decrease, `Threat table: ${row.short}`, table.cite);
+      return result;
+    }
+
+    case 'trap_resolve': {
+      let result = dropPrompts(state, (p) => p.request.kind === 'trap');
+      const hero = heroById(state, event.heroId);
+      if (!event.triggered) {
+        return log(
+          result,
+          'explore',
+          `${hero ? hero.name : 'The hero'} passed the Perception roll: the trap is found but not set off. Mark the square or the door with a trap token.`,
+          CITES.traps,
+        );
+      }
+      if (!hero)
+        return log(
+          result,
+          'warn',
+          'Pick the hero who sprang the trap to apply the Party Morale and Sanity losses.',
+          CITES.traps,
+        );
+      result = reduce(result, { type: 'morale_event', event: 'trap', heroId: hero.id });
+      return result;
+    }
+
+    case 'set_encounter_bonus': {
+      const bonus = Math.max(0, Math.trunc(event.bonus));
+      if (bonus === state.encounterBonus) return state;
+      return log(
+        { ...state, encounterBonus: bonus },
+        'explore',
+        bonus === 0 ? 'Encounter risk bonus cleared.' : `Encounter risk bonus set to +${bonus}.`,
+        CITES.threatTableNotInBattle,
+      );
+    }
+
+    case 'new_level': {
+      const level = state.dungeonLevel + 1;
+      let result: GmState = { ...state, dungeonLevel: level, inBattle: false, resting: false };
+      result = log(result, 'turn', `Dungeon level ${level}.`, CITES.threatNewLevel);
+      if (state.threat.enabled && state.threat.level !== state.threat.start) {
+        result = {
+          ...result,
+          threat: {
+            ...result.threat,
+            level: Math.max(threatFloor(result.threat), result.threat.start),
+          },
+        };
+        result = log(
+          result,
+          'threat',
+          `Threat ${state.threat.level} → ${result.threat.level}: reset for the new level. ${GAPS.newLevelValue}`,
+          CITES.threatNewLevel,
+        );
+      } else if (state.threat.enabled) {
+        result = log(
+          result,
+          'threat',
+          `Threat stays at the start value ${state.threat.start}. ${GAPS.newLevelValue}`,
+          CITES.threatNewLevel,
+        );
+      }
       return result;
     }
 
@@ -856,7 +1321,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
 
     case 'new_turn': {
       let result: GmState = { ...state, turn: state.turn + 1, turnStep: 0 };
-      result = log(result, 'turn', `Turn ${result.turn}.`, CITES.turnSequence);
+      result = log(
+        result,
+        'turn',
+        state.inBattle ? `Turn ${result.turn} (combat round).` : `Turn ${result.turn}.`,
+        state.inBattle ? CITES.combatTurn : CITES.turnSequence,
+      );
       if (!state.scenarioEnabled) {
         result = log(result, 'info', 'This quest does not use the Scenario die.');
       } else if (!state.entrancePassed) {
@@ -867,14 +1337,19 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           CITES.scenarioDie,
         );
       } else {
+        const bonus = state.scenarioBonus > 0 ? ` (+${state.scenarioBonus} applies)` : '';
         result = prompt(
           result,
           'scenario',
-          'Roll the Scenario die (1d10)',
+          state.inBattle
+            ? 'Last token drawn: roll the Scenario die (1d10)'
+            : 'Roll the Scenario die (1d10)',
           { kind: 'scenario_roll' },
           {
-            detail: 'On a 9 or 0 a Threat roll follows. Some quests change this level.',
-            cite: CITES.scenarioDie,
+            detail: state.inBattle
+              ? `Move Wandering Monsters, refill the bag minus casualties, then roll. On a 9 or 0 a Threat roll follows${bonus}.`
+              : `On a 9 or 0 a Threat roll follows${bonus}. Some quests change this level.`,
+            cite: state.inBattle ? CITES.combatTurn : CITES.scenarioDie,
           },
         );
       }
@@ -895,11 +1370,23 @@ export function reduce(state: GmState, event: GmEvent): GmState {
     }
 
     case 'scenario_roll': {
-      const value = event.value;
+      const raw = event.value;
+      const value = raw + state.scenarioBonus;
       let result = dropPrompts(state, (p) => p.key === 'scenario');
       if (!state.entrancePassed)
-        result = log(result, 'warn', 'The Scenario die is not rolled before the party passes the first door.', CITES.scenarioDie);
-      result = log(result, 'turn', `Scenario die: ${value === 10 ? '0 (10)' : value}.`, CITES.scenarioDie);
+        result = log(
+          result,
+          'warn',
+          'The Scenario die is not rolled before the party passes the first door.',
+          CITES.scenarioDie,
+        );
+      result = { ...result, scenarioTurn: state.turn };
+      result = log(
+        result,
+        'turn',
+        `Scenario die: ${raw === 10 ? '0 (10)' : raw}${state.scenarioBonus > 0 ? ` +${state.scenarioBonus} = ${value}` : ''}.${raw >= 9 ? ' Any active Speed spell ends on a 9 or 0.' : ''}`,
+        CITES.scenarioDie,
+      );
       if (value >= state.scenarioTrigger && state.threat.enabled) {
         result = prompt(
           result,
@@ -913,21 +1400,80 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           },
         );
       }
-      if (value >= 9) {
-        result = log(
-          result,
-          'info',
-          'A Speed spell lasts until a Scenario die roll of 9–10: any active Speed ends.',
-          CITES.speedSpell,
-        );
-      }
-      if (value === 10) {
+      // Jumpy reads the die itself: the printed 0 face, not the result after the table's +1.
+      if (raw === 10) {
         for (const hero of state.heroes) {
           if (!hero.dead && hero.conditions.includes('jumpy'))
-            result = changeThreat(result, 2, `${hero.name} is Jumpy and screams at the noise`, CITES.jumpy);
+            result = changeThreat(
+              result,
+              2,
+              `${hero.name} is Jumpy and screams at the noise`,
+              CITES.jumpy,
+            );
         }
       }
       return result;
+    }
+
+    case 'scenario_request': {
+      if (!state.scenarioEnabled || !state.entrancePassed || state.turn === 0) return state;
+      if (state.pending.some((p) => p.request.kind === 'scenario_roll')) return state;
+      return prompt(
+        state,
+        'scenario',
+        'Roll the Scenario die (1d10)',
+        { kind: 'scenario_roll' },
+        { detail: 'On a 9 or 0 a Threat roll follows.', cite: CITES.scenarioDie },
+      );
+    }
+
+    case 'sanity_condition_request': {
+      const hero = heroById(state, event.heroId);
+      if (!hero || hero.dead || hero.sanity !== 0) return state;
+      if (
+        state.pending.some(
+          (p) => p.request.kind === 'sanity_condition' && p.request.heroId === hero.id,
+        )
+      )
+        return state;
+      return prompt(
+        state,
+        `sanity-zero-${hero.id}`,
+        `${hero.name} is at 0 Sanity: roll a mental condition`,
+        { kind: 'sanity_condition', heroId: hero.id },
+        {
+          detail:
+            'Roll 1d10 on the Mental conditions table. A condition the hero already has is rolled again. Sanity then returns to 8 minus the number of conditions.',
+          cite: CITES.sanityConditions,
+          severity: 'danger',
+        },
+      );
+    }
+
+    case 'hero_recover': {
+      const hero = heroById(state, event.id);
+      if (!hero || !hero.statuses.includes('bleeding_out')) return state;
+      let result = updateHero(state, event.id, (h) => ({
+        ...h,
+        statuses: h.statuses.filter((s) => s !== 'bleeding_out'),
+      }));
+      result = {
+        ...result,
+        pending: result.pending
+          .map((p) =>
+            p.request.kind === 'bleeding'
+              ? {
+                  ...p,
+                  request: {
+                    ...p.request,
+                    heroIds: p.request.heroIds.filter((id) => id !== event.id),
+                  },
+                }
+              : p,
+          )
+          .filter((p) => p.request.kind !== 'bleeding' || p.request.heroIds.length > 0),
+      };
+      return log(result, 'hero', `${hero.name} is back on their feet.`, CITES.bleedingOut);
     }
 
     case 'set_in_battle': {
@@ -940,7 +1486,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
     }
 
     case 'battle_start':
-      return battleStart(state, event.demons, event.demons ? 'demons' : 'enemies placed');
+      return battleStart(
+        state,
+        event.demons,
+        event.demons ? 'demons' : 'enemies placed',
+        event.bag,
+      );
 
     case 'battle_end': {
       let result: GmState = { ...state, inBattle: false };
@@ -958,7 +1509,7 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           result,
           'bandage',
           `Bleeding out after the battle: ${bleeding.map((h) => h.name).join(', ')}`,
-          { kind: 'confirm' },
+          { kind: 'bleeding', heroIds: bleeding.map((h) => h.id), context: 'battle' },
           {
             detail:
               'A standing companion who is not knocked out may bandage a bleeding hero. With standing companions but no means of help, the hero dies.',
@@ -972,33 +1523,154 @@ export function reduce(state: GmState, event: GmEvent): GmState {
 
     case 'door_open': {
       if (event.entrance) return reduce(state, { type: 'pass_entrance' });
-      let result = changeThreat(state, 1, 'door or chest opened', CITES.openDoor);
-      const room = encounterChance('room', state.encounterStreak);
-      const corridor = encounterChance('corridor', state.encounterStreak);
+      const chest = event.chest === true;
+      let result = changeThreat(state, 1, chest ? 'chest opened' : 'door opened', CITES.openDoor);
       result = prompt(
         result,
         'door',
-        'Door or chest opened: finish the checklist',
-        { kind: 'confirm' },
+        chest ? 'Chest opened' : 'Door opened',
+        { kind: 'door', chest, rolled: null },
         {
-          detail: `Roll 1d10 and 1d6 together. A 6 on the d6 means a trap: draw a trap card; the opener makes the Perception roll. Check the Door Table with the d10 (locked: force +2 Threat per try, crowbar +1, pick 2 AP). Then flip the top card and place the tile, and roll for enemies: room ${room}%, corridor ${corridor}%${
-            state.encounterStreak >= ENCOUNTER.streakTiles ? ' (four or more empty tiles: +10)' : ''
-          }. A chest: roll on the Furniture Treasure Table instead.`,
+          detail: `Threat is up by 1. Now roll 1d10 and 1d6 together: a ${DOOR.trapOn} on the d6 means a trap, the d10 reads the Door Table.`,
           cite: CITES.openDoor,
         },
       );
       return result;
     }
 
+    case 'door_roll': {
+      const open = state.pending.find((p) => p.request.kind === 'door');
+      if (!open || open.request.kind !== 'door') return state;
+      const chest = open.request.chest;
+      const row = doorTableRow(event.d10);
+      if (!row) return state;
+      const trapped = event.d6 === DOOR.trapOn;
+      const rolled: DoorRoll = {
+        d10: event.d10,
+        d6: event.d6,
+        trapped,
+        locked: row.locked,
+        difficulty: row.difficulty,
+      };
+      const thing = chest ? 'chest' : 'door';
+      let result = log(
+        state,
+        'explore',
+        `${chest ? 'Chest' : 'Door'}: d6 ${event.d6}${trapped ? ' (trapped!)' : ''}, d10 ${event.d10 === 10 ? '0' : event.d10}: ${row.locked ? `locked, ${row.difficulty}` : 'open'}.`,
+        CITES.doorTable,
+      );
+      if (trapped) {
+        result = log(
+          result,
+          'warn',
+          `Trapped ${thing}: draw a trap card. The opener makes a Perception roll with the card's modifier; the ${thing} cannot be opened until the trap is dealt with (disarm: 2 AP with Pick Locks).`,
+          CITES.traps,
+        );
+        result = prompt(
+          result,
+          `trap-${result.nextId}`,
+          `Trapped ${thing}: the opener's Perception roll`,
+          { kind: 'trap', source: chest ? 'chest' : 'door' },
+          {
+            detail: `Draw a trap card. The hero opening the ${thing} rolls Perception with the card's modifier: success finds the trap without setting it off (disarm it for 2 AP with Pick Locks, or set it off deliberately); failure triggers it.`,
+            cite: CITES.traps,
+            severity: 'danger',
+          },
+        );
+      }
+      if (row.locked)
+        result = log(
+          result,
+          'explore',
+          `Locked ${thing} (${row.difficulty}): force it (1 AP, +${DOOR.forceThreat} Threat per attempt), use a crowbar (+${DOOR.crowbarThreat} Threat, ${DOOR.crowbarDamage} damage per turn), or pick the lock (${DOOR.pickActions} AP, no Threat; a failed pick breaks, a fumble jams the lock).`,
+          CITES.lockedDoor,
+        );
+      const detail = chest
+        ? `${trapped ? 'Deal with the trap, then ' : ''}${row.locked ? `${trapped ? 'g' : 'G'}et past the lock, then ` : ''}${trapped || row.locked ? 'r' : 'R'}oll 1d10 on the Chest table (the Objective Chest table for an objective chest) for the contents.`
+        : `${trapped ? 'Deal with the trap. ' : ''}${row.locked ? 'Get past the lock. ' : ''}Then flip the top Exploration Card, place the tile and roll for enemies.`;
+      result = {
+        ...result,
+        pending: result.pending.map((p) =>
+          p.id === open.id ? { ...p, detail, request: { kind: 'door', chest, rolled } } : p,
+        ),
+      };
+      if (chest) {
+        // A chest ends with the treasure roll; the tile step is only for doors.
+        result = dropPrompts(result, (p) => p.id === open.id);
+        result = prompt(
+          result,
+          'chest',
+          'Chest: roll for the contents',
+          { kind: 'chest', rolled: null },
+          {
+            detail,
+            cite: CITES.chestTable,
+            severity: trapped || row.locked ? 'warn' : 'info',
+          },
+        );
+      }
+      return result;
+    }
+
+    case 'chest_roll': {
+      const open = state.pending.find((p) => p.request.kind === 'chest');
+      if (!open || open.request.kind !== 'chest' || open.request.rolled) return state;
+      const table = CHEST_TABLES[event.table];
+      const row = chestTableRow(event.table, event.d10);
+      if (!row) return state;
+      let result = log(
+        state,
+        'explore',
+        `${table.title}: d10 ${event.d10 === 10 ? '0' : event.d10}: ${row.result}`,
+        table.cite,
+      );
+      // Each treasure found is its own Party Morale event.
+      for (let i = 0; i < row.wonderful; i += 1)
+        result = reduce(result, { type: 'morale_event', event: 'wonderful_treasure' });
+      for (let i = 0; i < row.fine; i += 1)
+        result = reduce(result, { type: 'morale_event', event: 'fine_treasure' });
+      const draws = treasureDraws(row);
+      return {
+        ...result,
+        pending: result.pending.map((p) =>
+          p.id === open.id
+            ? {
+                ...p,
+                title: draws ? `Chest: draw ${draws}` : 'Chest: empty',
+                detail: draws
+                  ? `Draw ${draws} from the Treasure Card piles.`
+                  : 'Nothing of value inside.',
+                cite: table.cite,
+                request: {
+                  kind: 'chest',
+                  rolled: { table: event.table, d10: event.d10, rowId: row.id },
+                },
+              }
+            : p,
+        ),
+      };
+    }
+
     case 'tile_revealed': {
-      const chance = encounterChance(event.kind, state.encounterStreak);
+      const chance = encounterChance(event.kind, state.encounterStreak, state.encounterBonus);
       const encounter =
-        event.roll !== undefined ? encounterRolled(event.kind, state.encounterStreak, event.roll) : event.encounter === true;
-      const rolled = event.roll !== undefined ? `rolled ${event.roll} against ${chance}%` : `chance was ${chance}%`;
+        event.roll !== undefined
+          ? encounterRolled(event.kind, state.encounterStreak, event.roll, state.encounterBonus)
+          : event.encounter === true;
+      const rolled =
+        event.roll !== undefined
+          ? `rolled ${event.roll} against ${chance}%`
+          : `chance was ${chance}%`;
       let result = dropPrompts(state, (p) => p.key === 'door');
       result = {
         ...result,
-        lastTile: { kind: event.kind, chance, roll: event.roll ?? null, encounter, turn: state.turn },
+        lastTile: {
+          kind: event.kind,
+          chance,
+          roll: event.roll ?? null,
+          encounter,
+          turn: state.turn,
+        },
       };
       if (encounter) {
         result = { ...result, encounterStreak: 0 };
@@ -1085,7 +1757,10 @@ export function reduce(state: GmState, event: GmEvent): GmState {
     case 'light_set_lit': {
       const light = state.lights.find((l) => l.id === event.id);
       if (!light || light.lit === event.lit) return state;
-      if (event.lit && (light.spent || light.destroyed || (light.kind !== 'torch' && light.oilHalves <= 0)))
+      if (
+        event.lit &&
+        (light.spent || light.destroyed || (light.kind !== 'torch' && light.oilHalves <= 0))
+      )
         return reduce(state, { type: 'light_relight', id: event.id });
       let result = updateLight(state, event.id, (l) => ({ ...l, lit: event.lit }));
       result = log(
@@ -1106,7 +1781,10 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       if (light.kind === 'torch') {
         if (state.spares.torches < 1)
           return log(state, 'warn', `No spare torches to light for ${name}.`, CITES.lightSources);
-        let result: GmState = { ...state, spares: { ...state.spares, torches: state.spares.torches - 1 } };
+        let result: GmState = {
+          ...state,
+          spares: { ...state.spares, torches: state.spares.torches - 1 },
+        };
         result = updateLight(result, event.id, (l) => ({ ...l, lit: true, spent: false }));
         result = dropPrompts(result, (p) => p.key === `relight-${event.id}`);
         return log(
@@ -1123,10 +1801,14 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       const light = state.lights.find((l) => l.id === event.id);
       if (!light || light.kind === 'torch') return state;
       const name = lightName(state, light);
-      if (light.destroyed) return log(state, 'warn', `${name} is destroyed and cannot be refilled.`);
+      if (light.destroyed)
+        return log(state, 'warn', `${name} is destroyed and cannot be refilled.`);
       if (state.spares.lampOil < 1)
         return log(state, 'warn', `No Lamp Oil left to refill ${name}.`, CITES.lightSources);
-      let result: GmState = { ...state, spares: { ...state.spares, lampOil: state.spares.lampOil - 1 } };
+      let result: GmState = {
+        ...state,
+        spares: { ...state.spares, lampOil: state.spares.lampOil - 1 },
+      };
       result = updateLight(result, event.id, (l) => ({ ...l, oilHalves: 2, lit: true }));
       result = dropPrompts(result, (p) => p.key === `relight-${event.id}`);
       return log(
@@ -1141,7 +1823,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       const light = state.lights.find((l) => l.id === event.id);
       if (!light || light.kind !== 'torch' || !light.lit) return state;
       if (event.roll < 90)
-        return log(state, 'light', `${lightName(state, light)} swung (roll ${event.roll}): still burning.`, CITES.lightSources);
+        return log(
+          state,
+          'light',
+          `${lightName(state, light)} swung (roll ${event.roll}): still burning.`,
+          CITES.lightSources,
+        );
       let result = updateLight(state, event.id, (l) => ({ ...l, lit: false, spent: true }));
       result = log(
         result,
@@ -1211,7 +1898,10 @@ export function reduce(state: GmState, event: GmEvent): GmState {
         heroes: state.heroes.filter((h) => h.id !== event.id),
         lights: state.lights.map((l) => (l.carrierId === event.id ? { ...l, carrierId: null } : l)),
       };
-      result = dropPrompts(result, (p) => p.request.kind === 'sanity_condition' && p.request.heroId === event.id);
+      result = dropPrompts(
+        result,
+        (p) => p.request.kind === 'sanity_condition' && p.request.heroId === event.id,
+      );
       result = syncMoraleStart(result);
       return log(result, 'hero', `${hero.name} leaves the party.`);
     }
@@ -1257,20 +1947,31 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       const who = hero ? hero.name : row.perHero ? 'a hero' : 'the party';
       // The table prints +1 for a short rest; the rest checklist (p. 98) gives +2 up to the start
       // value and the corpus follows it, so the rest flow and this row agree.
-      const delta = row.id === 'short_rest' ? MORALE.restBonus : row.effect;
+      const delta = row.ruled ?? row.effect;
       let result = applyMorale(
         state,
         delta,
-        hero && row.perHero ? `${row.situation}: ${who}` : row.situation,
-        { capAtStart: row.id === 'short_rest', ...(row.id === 'short_rest' ? { cite: CITES.rest } : {}) },
+        `${hero && row.perHero ? `${row.situation}: ${who}` : row.situation}${row.ruling ? `; ${row.ruling}` : ''}`,
+        {
+          capAtStart: row.id === 'short_rest',
+          ...(row.id === 'short_rest' ? { cite: CITES.rest } : {}),
+        },
       );
       if (row.sanity) {
         if (row.sanity.kind === 'party') {
           for (const h of result.heroes)
-            if (!h.dead) result = loseSanity(result, h.id, row.sanity.loss, row.situation.toLowerCase());
+            if (!h.dead)
+              result = loseSanity(result, h.id, row.sanity.loss, row.situation.toLowerCase());
         } else if (row.sanity.kind === 'hero') {
-          if (hero) result = loseSanity(result, hero.id, row.sanity.loss, row.situation.toLowerCase());
-          else result = log(result, 'warn', `Pick the hero to apply the ${row.sanity.loss} Sanity loss (${row.situation}).`, CITES.sanity);
+          if (hero)
+            result = loseSanity(result, hero.id, row.sanity.loss, row.situation.toLowerCase());
+          else
+            result = log(
+              result,
+              'warn',
+              `Pick the hero to apply the ${row.sanity.loss} Sanity loss (${row.situation}).`,
+              CITES.sanity,
+            );
         } else {
           result = prompt(
             result,
@@ -1284,16 +1985,47 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       if (hero) {
         if (row.status === 'dead') {
           result = updateHero(result, hero.id, (h) => ({ ...h, dead: true }));
-          result = { ...result, lights: result.lights.map((l) => (l.carrierId === hero.id ? { ...l, lit: false } : l)) };
-          result = log(result, 'hero', `${hero.name} dies.`, CITES.bleedingOut);
-          result = syncMoraleStart(result);
+          result = {
+            ...result,
+            lights: result.lights.map((l) => (l.carrierId === hero.id ? { ...l, lit: false } : l)),
+          };
+          result = log(
+            result,
+            'hero',
+            `${hero.name} dies. ${GAPS.deathStartValue}`,
+            CITES.bleedingOut,
+          );
         } else if (row.status) {
           result = setStatus(result, hero.id, row.status, true);
         } else if (row.id === 'poison_or_disease' && event.status) {
           result = setStatus(result, hero.id, event.status, true);
         }
+        if (row.id === 'zero_hp') {
+          result = prompt(
+            result,
+            `injury-${hero.id}-${result.nextId}`,
+            `${hero.name} at 0 HP: roll the permanent injury`,
+            { kind: 'confirm' },
+            {
+              detail: `${INJURY.permanent} Knocked down and bleeding out: a companion's spell or a ready potion can bring them back during the battle; afterwards a standing companion may bandage them.`,
+              cite: INJURY.cite,
+              severity: 'danger',
+            },
+          );
+          const living = result.heroes.filter((h) => !h.dead);
+          if (living.length > 0 && living.every((h) => h.statuses.includes('bleeding_out')))
+            result = log(
+              result,
+              'warn',
+              'Every hero is bleeding out at the same time: the quest is lost and the heroes die.',
+              CITES.partyLoss,
+            );
+        }
       }
-      if (row.id === 'dwarven_ale') result = log(result, 'info', `Dwarven Ale: ${MORALE.dwarvenAle}`, CITES.consumables);
+      if (row.id === 'dwarven_ale') {
+        result = { ...result, dwarvenAle: true };
+        result = log(result, 'info', `Dwarven Ale: ${MORALE.dwarvenAle}`, CITES.consumables);
+      }
       return result;
     }
 
@@ -1357,7 +2089,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
         CITES.mentalConditions,
       );
       if (reset <= 0)
-        result = log(result, 'warn', 'The book does not define a Sanity reset of 0 or less.', CITES.sanityConditions);
+        result = log(
+          result,
+          'warn',
+          'The book does not define a Sanity reset of 0 or less.',
+          CITES.sanityConditions,
+        );
       return result;
     }
 
@@ -1366,9 +2103,19 @@ export function reduce(state: GmState, event: GmEvent): GmState {
 
     case 'rest_begin': {
       if (state.inBattle)
-        return log(state, 'warn', 'The party cannot rest with enemies on their tile or an adjacent tile.', CITES.rest);
+        return log(
+          state,
+          'warn',
+          'The party cannot rest with enemies on their tile or an adjacent tile.',
+          CITES.rest,
+        );
       if (state.rations < REST.rationCost)
-        return log(state, 'warn', 'A short rest costs one ration of food, and the party has none.', CITES.rest);
+        return log(
+          state,
+          'warn',
+          'A short rest costs one ration of food, and the party has none.',
+          CITES.rest,
+        );
       const restsTaken = state.restsTaken + 1;
       let result: GmState = {
         ...state,
@@ -1415,7 +2162,10 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           { cite: CITES.rest, severity: 'warn' },
         );
       }
-      result = applyMorale(result, MORALE.restBonus, 'short rest', { capAtStart: true, cite: CITES.rest });
+      result = applyMorale(result, MORALE.restBonus, 'short rest', {
+        capAtStart: true,
+        cite: CITES.rest,
+      });
       result = log(
         result,
         'rest',
@@ -1429,8 +2179,12 @@ export function reduce(state: GmState, event: GmEvent): GmState {
             result,
             `rest-bleeding-${hero.id}`,
             `${hero.name} is bleeding out untreated: CON+10 test or die`,
-            { kind: 'confirm' },
-            { detail: 'If the test succeeds, the hero regains 1d4 HP.', cite: CITES.restBleeding, severity: 'danger' },
+            { kind: 'bleeding', heroIds: [hero.id], context: 'rest' },
+            {
+              detail: 'If the test succeeds, the hero regains 1d4 HP.',
+              cite: CITES.restBleeding,
+              severity: 'danger',
+            },
           );
         if (hero.statuses.includes('poisoned'))
           result = prompt(
@@ -1443,12 +2197,17 @@ export function reduce(state: GmState, event: GmEvent): GmState {
       }
       if (event.ambushRoll !== undefined) {
         if (event.ambushRoll <= risk) {
-          result = log(result, 'rest', `Ambush roll ${event.ambushRoll} against ${risk}%: the party is ambushed!`, CITES.rest);
+          result = log(
+            result,
+            'rest',
+            `Ambush roll ${event.ambushRoll} against ${risk}%: the party is ambushed!`,
+            CITES.rest,
+          );
           result = prompt(
             result,
             'battle-start',
             'Ambushed during the rest: start the battle',
-            { kind: 'battle_start', reason: 'ambush' },
+            { kind: 'battle_start', reason: 'ambush', barred: event.barred },
             {
               detail: `Roll on the encounter table and place the enemies just outside the door the heroes came through. ${
                 event.barred
@@ -1460,10 +2219,20 @@ export function reduce(state: GmState, event: GmEvent): GmState {
             },
           );
         } else {
-          result = log(result, 'rest', `Ambush roll ${event.ambushRoll} against ${risk}%: no ambush.`, CITES.rest);
+          result = log(
+            result,
+            'rest',
+            `Ambush roll ${event.ambushRoll} against ${risk}%: no ambush.`,
+            CITES.rest,
+          );
         }
       } else {
-        result = log(result, 'warn', `Roll 1d100 for an ambush: ${risk}% or less means the party is ambushed.`, CITES.rest);
+        result = log(
+          result,
+          'warn',
+          `Roll 1d100 for an ambush: ${risk}% or less means the party is ambushed.`,
+          CITES.rest,
+        );
       }
       if (state.scenarioEnabled && state.entrancePassed) {
         result = prompt(
@@ -1471,7 +2240,10 @@ export function reduce(state: GmState, event: GmEvent): GmState {
           'scenario',
           'Roll the Scenario die for the rest (1d10)',
           { kind: 'scenario_roll' },
-          { detail: 'The Scenario die is rolled when the party takes a short rest.', cite: CITES.scenarioDie },
+          {
+            detail: 'The Scenario die is rolled when the party takes a short rest.',
+            cite: CITES.scenarioDie,
+          },
         );
       }
       return result;
@@ -1484,10 +2256,16 @@ export function reduceAll(state: GmState, events: GmEvent[]): GmState {
   return events.reduce(reduce, state);
 }
 
-/** Restores a persisted state, or starts fresh when the shape is unknown. */
+/** Restores a persisted state, or starts fresh when the shape is unknown. Version 1 tables carry over. */
 export function reviveState(value: unknown): GmState {
   if (typeof value !== 'object' || value === null) return initialState();
-  const candidate = value as Partial<GmState>;
-  if (candidate.version !== STATE_VERSION || !Array.isArray(candidate.heroes)) return initialState();
-  return { ...initialState(), ...candidate } as GmState;
+  const candidate = value as Partial<Omit<GmState, 'version'>> & { version?: unknown };
+  if (!Array.isArray(candidate.heroes)) return initialState();
+  if (candidate.version === 1) {
+    const { version: _old, ...rest } = candidate;
+    void _old;
+    return { ...initialState(), ...rest, version: STATE_VERSION };
+  }
+  if (candidate.version !== STATE_VERSION) return initialState();
+  return { ...initialState(), ...candidate, version: STATE_VERSION };
 }
