@@ -66,6 +66,7 @@ describe('issue resolutions', () => {
       'issue.phase5.ranger_species_bows',
       'issue.phase5.heirloom_sword',
       'issue.phase6.failed_threat_roll_increase',
+      'issue.phase6.door_open_threat_source',
       'issue.phase6.trap_headings_unmapped',
       'issue.combat.enemy_fumble',
       'issue.settlement.ohlnir_temple_name',
@@ -76,6 +77,10 @@ describe('issue resolutions', () => {
       'issue.gameplay_example.trap_sanity',
       'issue.gameplay_example.spider_turn',
       'issue.character_basics.perks_at_level_one',
+      'issue.psychology.hero_dies_morale_penalty',
+      'issue.combat.change_facing_timing',
+      'issue.combat.charge_move_wording',
+      'issue.psychology.hungry_morale_penalty',
     ]);
     expect(validate(context.issues)).toBe(true);
   });
@@ -282,6 +287,8 @@ describe('source-map compatibility redirects', () => {
       printed_start_page: 90,
       pdf_start_page: 92,
     });
-    expect(map.coverage.find((entry) => entry.id === target)?.status).toBe('extracted');
+    expect(['extracted', 'reviewed']).toContain(
+      map.coverage.find((entry) => entry.id === target)?.status,
+    );
   });
 });

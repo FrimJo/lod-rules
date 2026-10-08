@@ -101,7 +101,7 @@ describe('model analysis', () => {
   it('adds the chosen table to evidence even when search ranks it low', async () => {
     const model = fixtureModel((questions) => {
       const table = Object.entries(questions.table!.criteria).find(([, label]) =>
-        label.startsWith('hit location'),
+        label.toLowerCase().includes('hit location'),
       );
       return {
         ...narrowAnswers(questions),
@@ -170,7 +170,10 @@ describe('evidence', () => {
   it('brings in the rule behind a heading the question names, from any chapter', () => {
     const question = 'Can a wounded wizard still cast spells, and is a miscast more likely?';
     const evidence = gatherEvidence(retrieval, lexicalAnalysis(retrieval, question));
-    const wounded = evidence.find((i) => i.id === 'character.hit_points.wounded');
+    // The heading's defining record: the Wounded rule or the term that quotes the same sentence.
+    const wounded = evidence.find((i) =>
+      ['character.hit_points.wounded', 'term.wounded'].includes(i.id),
+    );
     expect(wounded?.why).toContain('heading:section.combat.wounded');
   });
 

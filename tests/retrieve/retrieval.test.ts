@@ -140,6 +140,7 @@ describe('lexical search', () => {
       'core.magic.miscast',
       'core.magic.miscast.threshold.normal',
       'core.magic.miscast.threshold.wounded',
+      'term.miscast',
     ]);
   });
 

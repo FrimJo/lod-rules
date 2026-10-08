@@ -226,7 +226,7 @@ describe('real corpus', () => {
   const byId = new Map(rows.map((row) => [row.id, row]));
 
   it('excludes quests and redirects, and orders Introduction first', () => {
-    expect(worklist.redirectsExcluded).toBe(35);
+    expect(worklist.redirectsExcluded).toBe(36); // +1: section.into_the_dungeons.table_3 (tier 5)
     expect(worklist.chapters[0]?.chapter).toBe('introduction');
     const chapterNames = worklist.chapters.map((chapter) => chapter.chapter);
     expect(chapterNames).not.toContain('quest_book_i');
@@ -234,16 +234,22 @@ describe('real corpus', () => {
     expect(chapterNames.indexOf('game_basics')).toBeLessThan(chapterNames.indexOf('combat'));
   });
 
-  it('drops reconciled Difficulty and Basic Stats and flags Coins as having no records', () => {
-    // Difficulty had no records until the Step 2 pilot extracted it, and Basic Stats was cited
-    // only by glossary terms until tier 2. Neither is unfinished any more.
+  it('drops reconciled Difficulty, Basic Stats, Coins and Levers and flags Kredelia as having no records', () => {
+    // Difficulty had no records until the Step 2 pilot extracted it, Basic Stats was cited only
+    // by glossary terms until tier 2, and Coins was reconciled with zero records in tier 3. None
+    // is unfinished any more. Levers gained records in tier 5. Kredelia, the Goddess of Travellers
+    // (Travelling and Skirmishes) is a later tier and still has no record.
     expect(byId.has('section.game_basics.difficulty')).toBe(false);
     expect(byId.has('section.character_basics.the_character.basic_stats')).toBe(false);
-    expect(byId.get('section.equipment.coins')).toMatchObject({
+    expect(byId.has('section.equipment.coins')).toBe(false);
+    expect(byId.has('section.into_the_dungeons.levers')).toBe(false);
+    expect(
+      byId.get('section.travelling_and_skirmishes.kredelia_the_goddess_of_travellers'),
+    ).toMatchObject({
       noRecords: true,
       termsOnly: false,
-      pdfPages: '51',
-      printedPages: '49',
+      pdfPages: '131',
+      printedPages: '129',
     });
   });
 });

@@ -23,6 +23,7 @@ const analyzer: SystemOneModel = {
       intent: { choice: 'no_match', probabilities: { no_match: 0.9 } },
       complexity: { choice: 'judgment', probabilities: { judgment: 0.9 } },
       entity: { choice: 'no_match', probabilities: { no_match: 0.9 } },
+      table: { choice: 'no_match', probabilities: { no_match: 0.9 } },
     };
     for (const id of Object.keys(questions))
       if (id.startsWith('system_')) answers[id] = { noul: 0.9 };
