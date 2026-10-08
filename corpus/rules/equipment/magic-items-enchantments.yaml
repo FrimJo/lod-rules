@@ -6,16 +6,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 70
       printed_page: 68
-      heading: identifying
+      heading: Identifying
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Before use a Magic Item must be identified with a successful Arcane Arts roll. Failure
-    leaves it unusable. One attempt per party and object; settlements offer another chance.
+  source_text: >-
+    Before your hero can use a Magic Item, it must be identified. This is done with a successful
+    Arcane Arts roll. If that fails, the item cannot be used. Only one attempt can be made per party
+    and object. However, there is a chance to identify the object in most settlements. See the
+    ‘Settlements’ chapter for details.
   scope: global
   type: modifier
   effects:
@@ -53,9 +55,15 @@
       type: boolean
       role: input
       description: arcane arts succeeded
-  unresolved_references:
-    - Settlement identification service remains a later procedure; the party/object retry limit does
-      not define its service rules.
+  see_also:
+    - section.settlements.identifying_items_and_potions
+    - section.into_the_dungeons.identifying_items_and_potions
+  issues:
+    - issue.character_basics.identify_attempts
+  dependencies:
+    - key: settlement_identification
+      label: Identifying Items and Potions (settlement service)
+      object_id: character.settlement.identification
 - id: character.magic_item.use
   name: use
   section_id: section.magic_items.identifying
@@ -64,16 +72,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 70
       printed_page: 68
-      heading: identifying
+      heading: Identifying
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Before use a Magic Item must be identified with a successful Arcane Arts roll. Failure
-    leaves it unusable. One attempt per party and object; settlements offer another chance.
+  source_text: >-
+    Before your hero can use a Magic Item, it must be identified. This is done with a successful
+    Arcane Arts roll. If that fails, the item cannot be used. Only one attempt can be made per party
+    and object. However, there is a chance to identify the object in most settlements. See the
+    ‘Settlements’ chapter for details.
   scope: global
   type: modifier
   effects:
@@ -100,16 +110,19 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 70
       printed_page: 68
-      heading: carrying magic items
+      heading: Carrying Magic Items
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    A hero may wear at most 1 magic ring and 1 magic necklace at once, including Legendary
-    Items. Several magic weapons, armour pieces and other non-jewellery items may be carried.
+  source_text: >-
+    The power imbued in Magic Items makes it impossible to carry very many, or the strain on the
+    body of the bearer is too much. Interestingly, the smaller the object, the bigger this effect
+    becomes. A hero cannot wear more than 1 magic ring and 1 magic necklace at the same time. This
+    includes Legendary Items defined as rings or necklaces. The same hero could carry several magic
+    weapons or pieces of armour, though. This includes all items not easily identified as jewellery.
   scope: global
   type: modifier
   effects:
@@ -159,22 +172,35 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 70
       printed_page: 68
-      heading: dissipating magic
+      heading: Dissipating Magic
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weapons and armour not broken can be recharged at the Wizard’s Guild and regain all
-    magical properties. The broken-item repair wording is separately unresolved.
+  source_text: >-
+    Weapons and armour can be recharged again (if not broken) at the Wizard’s Guild and will then
+    regain all of its magical properties. If the item is broken, it must first be repaired to at
+    least 1 Point of Durability.
   scope: global
   type: modifier
+  unresolved_references:
+    - 'The page says "Weapons and armour can be recharged"; it does not say whether a magic shield
+      or any other magic object can be recharged at the Wizard’s Guild.'
   effects:
     - type: require
       condition:
         type: all
         conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: weapon_or_armour
+            right:
+              type: literal
+              value: true
           - type: compare
             operator: eq
             left:
@@ -197,6 +223,10 @@
         type: literal
         value: true
   fields:
+    weapon_or_armour:
+      type: boolean
+      role: input
+      description: the item is a weapon or armour (the only item kinds the page names)
     broken:
       type: boolean
       role: input
@@ -222,10 +252,15 @@
     right:
       type: literal
       value: false
+  issues:
+    - issue.phase4.magic_breakage
   dependencies:
     - key: broken_item
       label: Broken magic repair contradiction
       object_id: character.durability.magic_repair_uncertain
+    - key: guild_service
+      label: Charging Magic Items (Wizards’ Guild)
+      object_id: character.settlement.guild.wizards.charging
 - id: character.magic_item.enchant.success
   name: enchant success
   section_id: section.enchantments.requirements_for_magic_items
@@ -234,17 +269,31 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: requirements for magic items
+      heading: Enchantments
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: Requirements for Magic Items
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: A wizard must know Enchant Item, have a Powerstone and a suitable item at full
-    durability. The stone dictates the magic. Success grants its traits; failure destroys the object
-    but the stone can be reused. Only one enchantment per object. Enchanting cannot be done while
-    travelling.
+  source_text: >-
+    It cannot be done while travelling. ... A wizard must know the Enchant Item Spell and have
+    access to a Powerstone. These are rare stones with magical properties that can be found in the
+    cairns and tombs of old. The wizard also needs an item into which to imbue the magic. The item
+    must have full durability. The stone will dictate what kind of magic the item will receive, and
+    the item must be suitable for the magic as well. For example, there is no point in adding damage
+    enhancing magic to a necklace. If the enchantment succeeds, the item gains the magical traits
+    from the Powerstone. If the enchantment fails, the object is destroyed, but the stone may be
+    used again. There can only be one enchantment on an object.
   scope: global
   type: modifier
   effects:
@@ -386,17 +435,31 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: requirements for magic items
+      heading: Enchantments
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: Requirements for Magic Items
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: A wizard must know Enchant Item, have a Powerstone and a suitable item at full
-    durability. The stone dictates the magic. Success grants its traits; failure destroys the object
-    but the stone can be reused. Only one enchantment per object. Enchanting cannot be done while
-    travelling.
+  source_text: >-
+    It cannot be done while travelling. ... A wizard must know the Enchant Item Spell and have
+    access to a Powerstone. These are rare stones with magical properties that can be found in the
+    cairns and tombs of old. The wizard also needs an item into which to imbue the magic. The item
+    must have full durability. The stone will dictate what kind of magic the item will receive, and
+    the item must be suitable for the magic as well. For example, there is no point in adding damage
+    enhancing magic to a necklace. If the enchantment succeeds, the item gains the magical traits
+    from the Powerstone. If the enchantment fails, the object is destroyed, but the stone may be
+    used again. There can only be one enchantment on an object.
   scope: global
   type: modifier
   effects:
@@ -538,17 +601,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: making a magic scroll
+      heading: Enchantments
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: Making a Magic Scroll
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Knowing Magic Scribbles and the spell to write, plus fine parchment, is required. Cast
-    Magic Scribbles normally, with optional focus. Success copies the chosen spell; failure destroys
-    the parchment and requires new parchment.
+  source_text: >-
+    It cannot be done while travelling. ... This activity only requires the knowledge of the Magic
+    Scribbles spell, the spell you want to write down and some fine parchments. Cast the Magic
+    Scribbles spell as usual, using focus if you wish, and if you succeed the spell of your choice
+    has been copied down on the scroll. If you fail, the parchment has been destroyed and you must
+    use a new one.
   scope: global
   type: modifier
   effects:
@@ -636,7 +710,6 @@
     right:
       type: literal
       value: true
-  unresolved_references: []
   dependencies:
     - key: scribbles_spell
       label: Magic Scribbles
@@ -649,17 +722,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: making a magic scroll
+      heading: Enchantments
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 71
+      printed_page: 69
+      heading: Making a Magic Scroll
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Knowing Magic Scribbles and the spell to write, plus fine parchment, is required. Cast
-    Magic Scribbles normally, with optional focus. Success copies the chosen spell; failure destroys
-    the parchment and requires new parchment.
+  source_text: >-
+    It cannot be done while travelling. ... This activity only requires the knowledge of the Magic
+    Scribbles spell, the spell you want to write down and some fine parchments. Cast the Magic
+    Scribbles spell as usual, using focus if you wish, and if you succeed the spell of your choice
+    has been copied down on the scroll. If you fail, the parchment has been destroyed and you must
+    use a new one.
   scope: global
   type: modifier
   effects:
@@ -756,7 +840,6 @@
     right:
       type: literal
       value: false
-  unresolved_references: []
   dependencies:
     - key: scribbles_spell
       label: Magic Scribbles
@@ -769,15 +852,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: enchantments take time
+      heading: Enchantments Take Time
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Only one object OR two attempts (successful or not) to create scrolls between quests.
-    Each Magic Scroll takes 1 day to make.
+  source_text: >-
+    The act of creating items like this is very time-consuming and tiring. Only one object or two
+    attempts (successful or not) to create scrolls may be done between quests. Each Magic Scroll
+    takes 1 day to make.
   scope: global
   type: modifier
   effects:
@@ -824,15 +909,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 71
       printed_page: 69
-      heading: enchantments take time
+      heading: Enchantments Take Time
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Only one object OR two attempts (successful or not) to create scrolls between quests.
-    Each Magic Scroll takes 1 day to make.
+  source_text: >-
+    The act of creating items like this is very time-consuming and tiring. Only one object or two
+    attempts (successful or not) to create scrolls may be done between quests. Each Magic Scroll
+    takes 1 day to make.
   scope: global
   type: modifier
   effects:

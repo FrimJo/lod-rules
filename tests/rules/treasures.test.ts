@@ -351,9 +351,8 @@ it('preserves the visible example card without claiming any unseen Treasure Card
   expect(t.rows.map((r) => Object.values(r.cells).map((c) => c.printed))).toEqual([
     [
       'Alchemist tools',
-      'Fine Treasure',
-      'All you need to harvest and store both parts and ingredients for potions. 1 Set of Alchemist tools. These tools are needed to make a successful harvest of parts or gathering of ingredients.',
-      '1',
+      'Fine treasure',
+      'All you need to harvest and store both parts and ingredients for potions. 1 Set of alchemist tools These tools are needed to make a successful harvest of parts or gathering of ingredients.',
       '1d4',
       '200',
       '5',
@@ -361,6 +360,7 @@ it('preserves the visible example card without claiming any unseen Treasure Card
   ]);
   expect(t.footnotes[0]).toContain('state of the equipment');
   expect(t.source[0]!.pdf_page).toBe(108);
+  expect(t.rows[0]!.entity_refs).toEqual(['equipment.alchemy.alchemist_tool']);
 });
 
 // Independently read from the rendered Fountain and Water Basin rows, PDF 194–195.
@@ -389,4 +389,39 @@ it.each([
     run(ids, { choose_to_drink: true, roll: 10, healing_roll: die, alchemical_success: false })
       .state.diseased,
   ).toBe(true);
+});
+
+// Looting the Corpses of Your Enemies and Searching Furniture, rendered PDF 108 (printed 106).
+describe('Treasure chapter loot indicators and furniture search', () => {
+  const lootIds = [1, 2, 3, 4, 5, 6, 7].map((n) => `enemy_loot.branch_${n}`);
+  it.each([1, 2, 3, 4, 5] as const)('Monster Card T%i rolls on table T%i only', (n) => {
+    const result = run(lootIds, { indicator: `T${n}` });
+    expect(result.trace).toEqual([`character.treasure.enemy_loot.branch_${n}`]);
+    expect(result.events).toEqual([{ type: 'invoke', dependency: `table.treasure.t${n}` }]);
+    expect(result.state.harvest_allowed).toBeUndefined();
+    expect(result.state.no_loot).toBeUndefined();
+  });
+  it('‘Part’ allows harvesting for parts and rolls no loot table', () => {
+    const result = run(lootIds, { indicator: 'Part' });
+    expect(result.state.harvest_allowed).toBe(true);
+    expect(result.events).toEqual([{ type: 'invoke', dependency: 'table.alchemy.harvesting' }]);
+  });
+  it('‘-‘ means absolutely nothing', () => {
+    const result = run(lootIds, { indicator: '-' });
+    expect(result.state.no_loot).toBe(true);
+    expect(result.events).toEqual([]);
+  });
+  it('searching one searchable piece of furniture while adjacent costs 1 AP and rolls the table', () => {
+    const result = run(['furniture_search'], { adjacent: true, searchable: true });
+    expect(result.state.action_points_spent).toBe(1);
+    expect(result.events).toEqual([{ type: 'invoke', dependency: 'table.treasure.furniture' }]);
+  });
+  it.each([
+    [false, true],
+    [true, false],
+  ])('no furniture search when adjacent=%s, searchable=%s', (adjacent, searchable) => {
+    const result = run(['furniture_search'], { adjacent, searchable });
+    expect(result.trace).toEqual([]);
+    expect(result.state.action_points_spent).toBeUndefined();
+  });
 });
