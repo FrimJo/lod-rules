@@ -13,9 +13,7 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Adjacent character:1AP STR test. One helper in the other adjacent slot and two opposite
-    may each add10STR. Unlimited retries; failure raises Threat1.
+  source_text: 'To open a portcullis, a character must stand adjacent to the portcullis and succeed with a STR Test. By placing a hero in the other slot adjacent to the portcullis, you may add +10 to the STR value for the test. Two more heroes may chime in from the other side of the opening, should the party be separated with +10 STR per hero. It takes 1 AP to try, and it may be retried any number of times. A failure raises the Threat Level +1 due to the noise made when the heroes drop the portcullis.'
   fields:
     party_id:
       type: string
@@ -159,9 +157,7 @@
       object_id: core.check.standard
   steps:
     - id: attempt
-      source_text:
-        An adjacent character spends1AP to try. A hero in the other slot adds10STR; up to two
-        heroes opposite each add10. Retry any number of times.
+      source_text: 'To open a portcullis, a character must stand adjacent to the portcullis ... By placing a hero in the other slot adjacent to the portcullis, you may add +10 to the STR value for the test. Two more heroes may chime in from the other side of the opening, should the party be separated with +10 STR per hero. It takes 1 AP to try, and it may be retried any number of times.'
       when:
         type: all
         conditions:
@@ -346,8 +342,7 @@
         - type: invoke
           dependency: strength_test
     - id: resolve
-      source_text: Resolve only the actual paid attempt using its saved STR and helpers. Missing or
-        mismatched results leave that attempt pending.
+      source_text: 'To open a portcullis, a character must stand adjacent to the portcullis and succeed with a STR Test.'
       when:
         type: all
         conditions:
@@ -400,14 +395,14 @@
             name: pending_target
       substeps:
         - id: strength_test
-          source_text: Succeed with a STR test; use the existing ordinary and automatic-failure check rules.
+          source_text: '... succeed with a STR Test.'
           rule_refs:
             - core.check.standard
             - core.check.success
             - core.check.automatic_failure
           effects: []
         - id: success
-          source_text: Success opens the portcullis.
+          source_text: 'To open a portcullis, a character must stand adjacent to the portcullis and succeed with a STR Test.'
           when:
             type: compare
             operator: eq
@@ -424,7 +419,7 @@
                 type: literal
                 value: true
         - id: failure
-          source_text: A failure raises Threat Level1 due to the noise made when the heroes drop the portcullis.
+          source_text: 'A failure raises the Threat Level +1 due to the noise made when the heroes drop the portcullis.'
           when:
             type: compare
             operator: eq
@@ -442,9 +437,7 @@
                 value: 1
               duration: immediate
         - id: consume_result
-          source_text:
-            The paid actual attempt has resolved. A failed attempt may be retried with another
-            actual1AP action.
+          source_text: 'It takes 1 AP to try, and it may be retried any number of times.'
           effects:
             - type: set
               target: last_action_sequence
@@ -458,3 +451,6 @@
                 value: false
   entry_step: attempt
   exit_step: resolve
+  unresolved_references:
+    - Each paid 1 AP attempt is paired with its own supplied STR Test result and helper count; a
+      missing or mismatched result leaves that attempt pending rather than resolving another one.

@@ -424,8 +424,12 @@
         region: Movement diagrams labelled A, B and 1–4
   status: extracted
   confidence: high
-  source_text: It may only move between two other models diagonally if both are friendly. A Large
-    or X-Large model can never pass diagonally between other models.
+  source_text: 'Example: Blue squares contain characters from one team. Yellow squares contain
+    characters from the other team (heroes or enemies). A character in square A could move to
+    square 1 since the diagonal movement is between two friends. Since this is not the case in when
+    trying to move to square 2 or 3, it’s not allowed. If character B did not exist, A could move to
+    square 4, because it’s not diagonally between two models. Character A could not move straight
+    to the sides or up and down as those squares are blocked by other models.'
   kind: source_example
   rule_ids:
     - core.movement.diagonal_models
@@ -459,8 +463,12 @@
         region: Movement diagrams labelled A, B and 1–4
   status: extracted
   confidence: high
-  source_text: It may only move between two other models diagonally if both are friendly. A Large
-    or X-Large model can never pass diagonally between other models.
+  source_text: 'Example: Blue squares contain characters from one team. Yellow squares contain
+    characters from the other team (heroes or enemies). A character in square A could move to
+    square 1 since the diagonal movement is between two friends. Since this is not the case in when
+    trying to move to square 2 or 3, it’s not allowed. If character B did not exist, A could move to
+    square 4, because it’s not diagonally between two models. Character A could not move straight
+    to the sides or up and down as those squares are blocked by other models.'
   kind: source_example
   rule_ids:
     - core.movement.diagonal_models
@@ -494,8 +502,12 @@
         region: Movement diagrams labelled A, B and 1–4
   status: extracted
   confidence: high
-  source_text: It may only move between two other models diagonally if both are friendly. A Large
-    or X-Large model can never pass diagonally between other models.
+  source_text: 'Example: Blue squares contain characters from one team. Yellow squares contain
+    characters from the other team (heroes or enemies). A character in square A could move to
+    square 1 since the diagonal movement is between two friends. Since this is not the case in when
+    trying to move to square 2 or 3, it’s not allowed. If character B did not exist, A could move to
+    square 4, because it’s not diagonally between two models. Character A could not move straight
+    to the sides or up and down as those squares are blocked by other models.'
   kind: source_example
   rule_ids:
     - core.movement.diagonal_models
@@ -529,8 +541,12 @@
         region: Movement diagrams labelled A, B and 1–4
   status: extracted
   confidence: high
-  source_text: It may only move between two other models diagonally if both are friendly. A Large
-    or X-Large model can never pass diagonally between other models.
+  source_text: 'Example: Blue squares contain characters from one team. Yellow squares contain
+    characters from the other team (heroes or enemies). A character in square A could move to
+    square 1 since the diagonal movement is between two friends. Since this is not the case in when
+    trying to move to square 2 or 3, it’s not allowed. If character B did not exist, A could move to
+    square 4, because it’s not diagonally between two models. Character A could not move straight
+    to the sides or up and down as those squares are blocked by other models.'
   kind: source_example
   rule_ids:
     - core.movement.diagonal_models
@@ -641,8 +657,8 @@
       - core.movement.occupied
     unresolved: []
     steps: []
-- id: test.core.movement.diagonal_border.diagram_a_to_b
-  name: diagonal border diagram a to b
+- id: test.core.movement.occupied.a_straight_blocked
+  name: occupied a straight blocked
   section_id: section.into_the_dungeons.moving_and_facing
   source:
     - document: rulebook.second_printing.eng
@@ -658,7 +674,46 @@
         region: Movement diagrams labelled A, B and 1–4
   status: extracted
   confidence: high
-  source_text: A model may never move diagonally past the black border of a tile or a door post.
+  source_text: 'Example: Blue squares contain characters from one team. Yellow squares contain
+    characters from the other team (heroes or enemies). A character in square A could move to
+    square 1 since the diagonal movement is between two friends. Since this is not the case in when
+    trying to move to square 2 or 3, it’s not allowed. If character B did not exist, A could move to
+    square 4, because it’s not diagonally between two models. Character A could not move straight
+    to the sides or up and down as those squares are blocked by other models.'
+  kind: source_example
+  rule_ids:
+    - core.movement.occupied
+  inputs:
+    occupied: true
+    explicit_permission: false
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - core.movement.occupied
+    unresolved: []
+    steps: []
+- id: test.core.movement.diagonal_border.diagram_a_to_b
+  name: diagonal border diagram a to b
+  section_id: section.into_the_dungeons.moving_and_facing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Moving and Facing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        region: Tile-border diagram labelled A and B
+  status: extracted
+  confidence: high
+  source_text: 'Example: Moving from A to B is not allowed as it touches the black outline of the
+    tile.'
   kind: source_example
   rule_ids:
     - core.movement.diagonal_border
@@ -916,6 +971,70 @@
   inputs:
     uses_half_square_rule: true
     occupied_fraction: 0.5
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.core.obstacle.half_square.torture_rack_white_square
+  name: torture rack white square
+  section_id: section.into_the_dungeons.obstacles.rule_of_fifty_percent
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 92
+      pdf_page: 94
+      heading: The rule of 50%
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        region: Torture rack diagram with the white square outlined. The book prints only the outcome (the white square is blocked, the other squares allow normal movement); the occupied_fraction value of 0.75 is an estimate read off the diagram, not a printed number.
+  status: extracted
+  confidence: medium
+  source_text: In the example to the right, that means that only the white square is blocked, and
+    the other squares allow normal movement.
+  kind: source_example
+  rule_ids:
+    - core.obstacle.half_square
+  inputs:
+    uses_half_square_rule: true
+    occupied_fraction: 0.75
+  expected:
+    state:
+      movement_affected: true
+    events: []
+    trace:
+      - core.obstacle.half_square
+    unresolved: []
+    steps: []
+- id: test.core.obstacle.half_square.torture_rack_other_squares
+  name: torture rack other squares
+  section_id: section.into_the_dungeons.obstacles.rule_of_fifty_percent
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 92
+      pdf_page: 94
+      heading: The rule of 50%
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      locator:
+        region: Torture rack diagram with the white square outlined. The book prints only the outcome (the white square is blocked, the other squares allow normal movement); the occupied_fraction value of 0.25 is an estimate read off the diagram, not a printed number.
+  status: extracted
+  confidence: medium
+  source_text: In the example to the right, that means that only the white square is blocked, and
+    the other squares allow normal movement.
+  kind: source_example
+  rule_ids:
+    - core.obstacle.half_square
+  inputs:
+    uses_half_square_rule: true
+    occupied_fraction: 0.25
   expected:
     state: {}
     events: []

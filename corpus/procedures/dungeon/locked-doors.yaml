@@ -6,17 +6,23 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 99
       pdf_page: 101
-      heading: Locked / Closing a door
+      heading: Locked
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 101
+      printed_page: 99
+      heading: Closing a door
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Locked door/chest: force it with an attack for 1 AP and +2 Threat per attempt until 0
-    HP; use a crowbar for +1 Threat and 8+DB damage each turn; or pick the lock for 2 AP without
-    further Threat. Failed picks break; a fumble jams the lock. Closing a door costs 1 AP.'
+  source_text: 'If the door or chest is locked, you can try to force it open. It takes 1 Action Point, and you automatically damage the door/chest with whatever attack you make. Once the door/chest reaches 0 HP it is opened. However, every try you make will reverberate throughout the dungeon, making your presence known to those who are listening. Add +2 Threat Level for each attempt. Another option is to use a crowbar. A crowbar will increase the Threat Level +1, but only inflicts 8+DB Damage every turn. You could also try to pick the lock which takes 2 AP but does not increase the threat any further no matter how many times you try. If the attempt succeeds, the door is opened as a part of those 2 Action Points. Remember that if you fail, the pick breaks. If you fumble when picking, the lock is jammed and the only way to open the door is to break it down. ... Doors can be closed by spending 1 AP.'
   fields:
     approach:
       type: string
@@ -106,13 +112,11 @@
       object_id: equipment.tool.lockpicks_5
   steps:
     - id: choose_approach
-      source_text:
-        If the door or chest is locked, it may be forced, opened with a crowbar, or picked.
-        Closing a door costs 1 AP.
+      source_text: 'If the door or chest is locked, you can try to force it open. ... Another option is to use a crowbar. ... You could also try to pick the lock ... Doors can be closed by spending 1 AP.'
       effects: []
       substeps:
         - id: require_locked
-          source_text: This procedure applies after the Door Table says that the door or chest is locked.
+          source_text: 'If the door or chest is locked, you can try to force it open.'
           when:
             type: all
             conditions:
@@ -144,9 +148,7 @@
                   type: literal
                   value: true
         - id: force
-          source_text:
-            It takes 1 Action Point, and you automatically damage the door/chest with whatever
-            attack you make. Every try adds +2 Threat.
+          source_text: 'It takes 1 Action Point, and you automatically damage the door/chest with whatever attack you make. ... Add +2 Threat Level for each attempt.'
           when:
             type: all
             conditions:
@@ -198,7 +200,7 @@
                           - type: field
                             name: attack_damage
         - id: crowbar
-          source_text: A crowbar adds +1 Threat and inflicts 8+DB damage every turn.
+          source_text: 'Another option is to use a crowbar. A crowbar will increase the Threat Level +1, but only inflicts 8+DB Damage every turn.'
           when:
             type: all
             conditions:
@@ -256,7 +258,7 @@
             - type: unresolved
               issue_id: issue.phase6.crowbar_action_cost
         - id: pick_success
-          source_text: Picking the lock takes 2 AP, adds no Threat, and opens the door if successful.
+          source_text: 'You could also try to pick the lock which takes 2 AP but does not increase the threat any further no matter how many times you try. If the attempt succeeds, the door is opened as a part of those 2 Action Points.'
           when:
             type: all
             conditions:
@@ -319,7 +321,7 @@
                 type: literal
                 value: false
         - id: pick_failure
-          source_text: If the attempt fails, the pick breaks.
+          source_text: 'Remember that if you fail, the pick breaks.'
           when:
             type: all
             conditions:
@@ -377,7 +379,7 @@
                 type: literal
                 value: true
         - id: pick_fumble
-          source_text: If the roll fumbles, the lock is jammed and only breaking it down can open the door.
+          source_text: 'If you fumble when picking, the lock is jammed and the only way to open the door is to break it down.'
           when:
             type: all
             conditions:
@@ -432,7 +434,7 @@
                 type: literal
                 value: true
         - id: close
-          source_text: Closing a door costs 1 AP.
+          source_text: 'Doors can be closed by spending 1 AP.'
           when:
             type: all
             conditions:
@@ -464,7 +466,7 @@
                 type: literal
                 value: false
     - id: door_reaches_zero
-      source_text: Once the door or chest reaches 0 HP it is opened.
+      source_text: 'Once the door/chest reaches 0 HP it is opened.'
       when:
         type: all
         conditions:

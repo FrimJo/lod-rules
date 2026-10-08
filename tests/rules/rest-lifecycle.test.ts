@@ -85,6 +85,7 @@ describe('rest interruption checkpoint — rendered PDF100', () => {
       party_rations: 3,
       party_morale: 5,
       enemy_bonus_tokens: barred ? 0 : 3,
+      other_heroes_start_prone: !barred,
     });
     expect(result.steps.indexOf('increase_morale')).toBeLessThan(result.steps.indexOf('ambushed'));
     expect(result.events).toContainEqual({ type: 'invoke', dependency: 'procedure.initiative' });

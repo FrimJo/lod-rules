@@ -11,6 +11,15 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 100
+      printed_page: 98
+      heading: Checklist when Resting
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: >-
@@ -109,6 +118,16 @@
       type: number
       role: output
       description: Rest ambush grants three extra enemy tokens unless door is barred.
+    awake_hero_randomised:
+      type: boolean
+      role: output
+      description: When the party is ambushed, one hero that is awake and ready is randomised.
+    other_heroes_start_prone:
+      type: boolean
+      role: output
+      description: Whether the heroes other than the randomised one start the fight prone. True
+        when the party is ambushed; false when the party barred the door with iron wedges or
+        a Seal door spell, where all heroes start the fight standing up.
     rest_completed:
       type: boolean
       role: output
@@ -516,6 +535,16 @@
             - type: invoke
               dependency: encounter_table
             - type: set
+              target: awake_hero_randomised
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: other_heroes_start_prone
+              value:
+                type: literal
+                value: true
+            - type: set
               target: enemy_bonus_tokens
               value:
                 type: literal
@@ -550,13 +579,17 @@
                   name: ambush_risk
           effects:
             - type: set
+              target: other_heroes_start_prone
+              value:
+                type: literal
+                value: false
+            - type: set
               target: enemy_bonus_tokens
               value:
                 type: literal
                 value: 0
         - id: ambush_initiative
-          source_text: The enemies start with 3 extra initiative tokens; barred doors give
-            only normal tokens. Supply this outcome to initiative preparation.
+          source_text: 'The enemies start with 3 extra initiative tokens. ... If the party bars the door with iron wedges or a Seal door spell, the door still opens but all heroes start the fight standing up and the monsters have only their normal initiative tokens.'
           when:
             type: compare
             operator: lte

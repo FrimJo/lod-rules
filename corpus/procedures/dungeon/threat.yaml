@@ -11,6 +11,31 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      section: The Threat Level
+      heading: Start of Turn sequence
+      locator:
+        region: Start of Turn sequence chart, Roll Scenario die (1d10) and the 1-8 / 9-10 branch
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is not in battle:'
+      locator:
+        table: Uncaptioned 1d20 / Result / Threat decrease table
+        row: '20'
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: |-
@@ -31,8 +56,9 @@
       type: number
       role: input
       description:
-        Roll result that demands a Threat Level roll. The book prints 9 or 0; quests may change
-        this level.
+        Lowest roll that demands a Threat Level roll. The book prints 9 or 0 (9); quests may
+        change this level. After the not-in-battle Threat table result 20 (Add +1 on all Scenario
+        die roll for the remainder of the dungeon) the caller supplies one less.
       integer: true
       minimum: 1
       maximum: 10
@@ -65,9 +91,18 @@
           dependency: threat_roll
   entry_step: roll
   exit_step: trigger_check
+  unresolved_references:
+    - 'The Start of Turn sequence chart (PDF 90) shows the same branch: Roll Scenario die (1d10),
+      1-8 to Move heroes, 9-10 to Roll Threat (1d20).'
+    - 'The not-in-battle Threat table result 20 (Add +1 on all Scenario die roll for the remainder
+      of the dungeon. This can only happen once.) is carried by threat_trigger: a +1 on a d10 roll
+      reaches 9 from a roll of 8, so the caller supplies a trigger one lower.'
+  issues:
+    - issue.threat.once_only_repeat
   see_also:
     - section.into_the_dungeons.the_threat_level
     - section.into_the_dungeons.the_turn
+    - section.into_the_dungeons.table
 - id: procedure.threat_roll
   name: Threat Level roll
   section_id: section.into_the_dungeons.the_threat_level
@@ -83,11 +118,37 @@
         visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
-      printed_page: 89
-      pdf_page: 91
-      heading: Threat Level tables
+      printed_page: 88
+      pdf_page: 89
+      section: The Threat Level
+      heading: Effect of Triggering the Threat Level
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      section: The Threat Level
+      heading: Start of Turn sequence
+      locator:
+        region: Start of Turn sequence chart
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      heading: The Threat Level
+      locator:
+        table:
+          'Uncaptioned Threat tables under If the party is not in battle: and If the party is in
+          battle:'
+      extraction:
+        method: table
         confidence: high
         visually_verified: true
   status: extracted
@@ -96,7 +157,7 @@
     When instructed to roll against the Threat Level, the player rolls 1d20. If the result is
     20, reduce the Threat Level by 5. If the result is equal to or below the Threat Level, it
     means that something bad just happened. This is the only dice roll where a high result is
-    a good thing. Whenever the threat roll is done and ends up equal to or below the Threat
+    a good thing. ... Whenever the threat roll is done and ends up equal to or below the Threat
     Level, something out of the ordinary has happened. Depending on whether the party is in
     battle or not, this will vary. Roll on the tables on page 89, execute the events, and then
     reduce the Threat Level accordingly.
@@ -105,8 +166,8 @@
       type: number
       role: state
       description:
-        Current Threat Level; the book floors it at 2 or the minimum level set by the quest.
-        Written by the natural-20 reduction and the table decrease.
+        Current Threat Level. Written by the natural-20 reduction, the table decrease and the +1
+        for a roll above the level; core.threat.floor keeps it at 2 or the quest minimum.
       integer: true
       minimum: 2
       maximum: 99
@@ -122,7 +183,7 @@
     threat_roll:
       type: number
       role: input
-      description: Printed 1d20 result.
+      description: Printed 1d20 result of the Threat Level roll.
       integer: true
       minimum: 1
       maximum: 20
@@ -134,8 +195,8 @@
       type: number
       role: input
       description:
-        Threat decrease printed beside the rolled table row; caller-supplied until the page 89
-        threat tables are extracted as table objects.
+        Threat decrease printed beside the rolled row of table.dungeon.threat_not_in_battle (1d20)
+        or table.dungeon.threat_in_battle (1d10); supplied by the caller from that row.
       integer: true
       minimum: -10
       maximum: 0
@@ -146,6 +207,15 @@
     - key: in_battle_table
       label: Threat table — party is in battle (page 89)
       section_id: section.into_the_dungeons.table_2
+    - key: not_in_battle_rows
+      label: 'If the party is not in battle: 1d20 / Result / Threat decrease'
+      object_id: table.dungeon.threat_not_in_battle
+    - key: in_battle_rows
+      label: 'If the party is in battle: 1d10 / Result / Threat decrease'
+      object_id: table.dungeon.threat_in_battle
+    - key: threat_floor
+      label: Decreasing Threat Level, floor of 2 or the quest minimum
+      object_id: core.threat.floor
   steps:
     - id: roll
       source_text: |-
@@ -205,7 +275,20 @@
       effects: []
       substeps:
         - id: not_in_battle
-          source_text: 'If the party is not in battle: (1d20 Result / Threat decrease table)'
+          source_text: 'If the party is not in battle:'
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 89
+              pdf_page: 91
+              section: The Threat Level
+              heading: 'If the party is not in battle:'
+              locator:
+                table: Uncaptioned 1d20 / Result / Threat decrease table
+              extraction:
+                method: table
+                confidence: high
+                visually_verified: true
           when:
             type: compare
             operator: eq
@@ -219,7 +302,20 @@
             - type: invoke
               dependency: not_in_battle_table
         - id: in_battle
-          source_text: 'If the party is in battle: (1d10 Result / Threat decrease table)'
+          source_text: 'If the party is in battle:'
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 89
+              pdf_page: 91
+              section: The Threat Level
+              heading: 'If the party is in battle:'
+              locator:
+                table: Uncaptioned 1d10 / Result / Threat decrease table
+              extraction:
+                method: table
+                confidence: high
+                visually_verified: true
           when:
             type: compare
             operator: eq
@@ -238,6 +334,17 @@
             number listed in the tables on page 89. The Threat Level can also be lowered by
             certain Perks or certain events. The Threat Level can never go below 2, or the
             minimum level set by the quest.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 88
+              pdf_page: 89
+              section: The Threat Level
+              heading: Decreasing Threat Level
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
           effects:
             - type: add
               target: threat_level
@@ -247,9 +354,31 @@
               duration: until_dungeon_exit
     - id: missed
       source_text: |-
-        Increase Threat Level by 1: If a Threat Level roll exceeds the current Threat Level.
-        Had the result of the Threat Level roll been above 9, nothing would have happened except
-        that the Threat Level would have been increased to 10.
+        Increase Threat Level by 1:
+        - If a Threat Level roll exceeds the current Threat Level.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          printed_page: 88
+          pdf_page: 89
+          section: The Threat Level
+          heading: Increasing Threat Level
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          printed_page: 89
+          pdf_page: 90
+          section: The Threat Level
+          heading: Start of Turn sequence
+          locator:
+            region: '>Threat branch: 20? no! to Raise Threat +1; yes! to Lower Threat -5'
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -278,6 +407,19 @@
           duration: until_dungeon_exit
   entry_step: roll
   exit_step: missed
+  unresolved_references:
+    - 'The Start of Turn sequence chart (PDF 90) draws the same branches: Roll Threat (1d20);
+      ≤Threat to Roll on Threat Table (next page) and Execute result; >Threat to 20? (yes! Lower
+      Threat -5, no! Raise Threat +1); every branch then reaches Move heroes. A natural 20 takes
+      the -5 and not the +1.'
+    - 'The Threat decrease is supplied from the rolled table row, and the floor of 2 or the quest
+      minimum is core.threat.floor; the +1 for a roll above the level is also
+      core.threat.increase.threat_roll_exceeded.'
+    - 'Executing the rolled table result (Wandering Monster, extra Exploration Card, encounter
+      risk, trap, Scenario die bonus, or the in-battle boons) is the invoked table row, not this
+      procedure.'
+  issues:
+    - issue.threat.natural_twenty_high_level
   see_also:
     - section.into_the_dungeons.the_scenario_die
     - section.into_the_dungeons.the_turn

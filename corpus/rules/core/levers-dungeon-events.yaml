@@ -1,0 +1,536 @@
+- id: core.lever.optional
+  name: Levers — activation is optional
+  section_id: section.into_the_dungeons.levers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Levers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Some rooms are equipped with levers. Activating these levers is, unless specified
+    otherwise in the quest, purely optional. Activating the correct lever may end up benefiting the
+    party, but then, activating the wrong one may cause some trouble.
+  type: choice
+  scope: dungeon
+  fields:
+    quest_specifies_otherwise:
+      type: boolean
+      role: input
+      description: The quest specifies how its levers must be handled.
+    lever_activation_optional:
+      type: boolean
+      role: output
+      description: Activating the levers is purely optional.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: quest_specifies_otherwise
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: lever_activation_optional
+      value:
+        type: literal
+        value: true
+- id: core.lever.deck
+  name: Levers — Preparing the Lever Deck
+  section_id: section.into_the_dungeons.levers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Preparing the Lever Deck
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    If you decide to interact with the levers, you must first decide how many levers there
+    are clustered together. Shuffle a deck with standard playing cards containing 1 black card and
+    1d4+1 red cards. The black card represents the lever that triggers mostly positive events,
+    whereas the red ones tend to cause more trouble. If there is a quest-specific Event connected to
+    the levers, this will be triggered by the black card.
+  issues:
+    - issue.levers.count_and_deck
+  type: random_resolution
+  scope: dungeon
+  fields:
+    red_card_roll:
+      type: number
+      role: input
+      description: Supplied 1d4 result for the red cards.
+      integer: true
+      minimum: 1
+      maximum: 4
+      dice:
+        count: 1
+        sides: 4
+    black_cards:
+      type: number
+      role: output
+      description: Black cards in the lever deck.
+      integer: true
+      minimum: 0
+    red_cards:
+      type: number
+      role: output
+      description: Red cards in the lever deck (1d4+1).
+      integer: true
+      minimum: 0
+    quest_event_trigger:
+      type: string
+      role: output
+      description: Card that triggers a quest-specific lever Event.
+  effects:
+    - type: set
+      target: black_cards
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: red_cards
+      value:
+        type: sum
+        values:
+          - type: field
+            name: red_card_roll
+          - type: literal
+            value: 1
+    - type: set
+      target: quest_event_trigger
+      value:
+        type: literal
+        value: black_card
+- id: core.lever.activate
+  name: Levers — Activating a Lever
+  section_id: section.into_the_dungeons.levers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Activating a Lever
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Activating a lever costs 1 AP and cannot be done when there are known enemies on the
+    table. Draw a card and then roll on the corresponding tables below. Once any event has been
+    dealt with, you are free to pull another lever.
+  issues:
+    - issue.levers.count_and_deck
+  type: procedure_rule
+  scope: dungeon
+  fields:
+    known_enemies_on_table:
+      type: boolean
+      role: input
+      description: There are known enemies on the table.
+    previous_event_resolved:
+      type: boolean
+      role: input
+      description: Any event from a previous lever has been dealt with.
+    activation_ap_cost:
+      type: number
+      role: output
+      description: AP to activate a lever.
+      integer: true
+      minimum: 0
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: known_enemies_on_table
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: previous_event_resolved
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: activation_ap_cost
+      value:
+        type: literal
+        value: 1
+- id: core.lever.red_card
+  name: Levers — red card drawn
+  section_id: section.into_the_dungeons.levers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Activating a Lever
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 102
+      pdf_page: 104
+      heading: Red Levers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Draw a card and then roll on the corresponding tables below. ... the red ones tend to
+    cause more trouble.
+  type: lookup
+  scope: dungeon
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: 'Colour of the drawn card: red or black.'
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: drawn_card
+    right:
+      type: literal
+      value: red
+  effects:
+    - type: invoke
+      dependency: red_levers
+  dependencies:
+    - key: red_levers
+      label: Red Levers
+      section_id: section.into_the_dungeons.table_red_levers
+      object_id: table.dungeon.red_levers
+  uses_tables:
+    - table.dungeon.red_levers
+- id: core.lever.black_card
+  name: Levers — black card drawn
+  section_id: section.into_the_dungeons.levers
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 101
+      pdf_page: 103
+      heading: Activating a Lever
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 103
+      pdf_page: 105
+      heading: Black Levers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Draw a card and then roll on the corresponding tables below. ... The black card
+    represents the lever that triggers mostly positive events ... If there is a quest-specific Event
+    connected to the levers, this will be triggered by the black card.
+  type: lookup
+  scope: dungeon
+  fields:
+    drawn_card:
+      type: string
+      role: input
+      description: 'Colour of the drawn card: red or black.'
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: drawn_card
+    right:
+      type: literal
+      value: black
+  effects:
+    - type: invoke
+      dependency: black_levers
+  dependencies:
+    - key: black_levers
+      label: Black Levers
+      section_id: section.into_the_dungeons.table_5
+      object_id: table.dungeon.black_levers
+  uses_tables:
+    - table.dungeon.black_levers
+- id: core.dungeon_event.eligible_room
+  name: Dungeon events (optional rule) — eligible rooms
+  section_id: section.into_the_dungeons.dungeon_events_optional_rule
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Dungeon events (optional rule)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Dungeon events can only be triggered in rooms where there are no encounters, and never
+    in an Objective Room.
+  type: constraint
+  scope: dungeon
+  fields:
+    dungeon_events_rule_in_use:
+      type: boolean
+      role: input
+      description: The group has chosen to play with the optional Dungeon events rule.
+    tile_kind:
+      type: string
+      role: input
+      description: room or corridor.
+    encounter_in_room:
+      type: boolean
+      role: input
+      description: There is an encounter in the room.
+    objective_room:
+      type: boolean
+      role: input
+      description: The room is an Objective Room.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dungeon_events_rule_in_use
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: tile_kind
+        right:
+          type: literal
+          value: room
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: encounter_in_room
+        right:
+          type: literal
+          value: false
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: objective_room
+        right:
+          type: literal
+          value: false
+- id: core.dungeon_event.trigger_roll
+  name: Dungeon events (optional rule) — trigger roll
+  section_id: section.into_the_dungeons.dungeon_events_optional_rule
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Dungeon events (optional rule)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The first activation a hero does, starting in a new room (not a corridor), roll 1d10.
+    On a result of 9-10, you have triggered a dungeon event.
+  type: random_resolution
+  scope: dungeon
+  fields:
+    dungeon_events_rule_in_use:
+      type: boolean
+      role: input
+      description: The group has chosen to play with the optional Dungeon events rule.
+    first_activation_in_new_room:
+      type: boolean
+      role: input
+      description: This is the first activation a hero does, starting in a new room (not a corridor).
+    event_roll:
+      type: number
+      role: input
+      description: Supplied 1d10 result.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    dungeon_event_triggered:
+      type: boolean
+      role: output
+      description: A dungeon event has been triggered.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dungeon_events_rule_in_use
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: first_activation_in_new_room
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: event_roll
+        right:
+          type: literal
+          value: 9
+  effects:
+    - type: set
+      target: dungeon_event_triggered
+      value:
+        type: literal
+        value: true
+- id: core.dungeon_event.resolve
+  name: Dungeon events (optional rule) — resolving the event
+  section_id: section.into_the_dungeons.dungeon_events_optional_rule
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Dungeon events (optional rule)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll on the table and resolve the event. Roll 1d6 to determine the column for the d12.
+  unresolved_references:
+    - the table (a d12 table with columns chosen by 1d6) that Dungeon events refers to
+  issues:
+    - issue.dungeon_events.table_not_printed
+  type: lookup
+  scope: dungeon
+  fields:
+    dungeon_events_rule_in_use:
+      type: boolean
+      role: input
+      description: The group has chosen to play with the optional Dungeon events rule.
+    dungeon_event_triggered:
+      type: boolean
+      role: input
+      description: A dungeon event has been triggered.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dungeon_events_rule_in_use
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dungeon_event_triggered
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: unresolved
+      issue_id: issue.dungeon_events.table_not_printed
+- id: core.dungeon_event.once_per_room
+  name: Dungeon events (optional rule) — one per room
+  section_id: section.into_the_dungeons.dungeon_events_optional_rule
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 105
+      pdf_page: 107
+      heading: Dungeon events (optional rule)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Only one event can be triggered in each room.
+  type: constraint
+  scope: dungeon
+  fields:
+    dungeon_events_rule_in_use:
+      type: boolean
+      role: input
+      description: The group has chosen to play with the optional Dungeon events rule.
+    event_already_triggered_in_room:
+      type: boolean
+      role: input
+      description: A dungeon event has already been triggered in this room.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dungeon_events_rule_in_use
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: event_already_triggered_in_room
+        right:
+          type: literal
+          value: false

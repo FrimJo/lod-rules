@@ -326,6 +326,60 @@
       - toward
       - obstacles
       - reveal
+- id: test.phase6.wandering.iron_wedged_door_seal_broken
+  name: a token passes an Iron Wedged door on a 5 and the seal is broken
+  section_id: section.into_the_dungeons.wandering_monsters
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Wandering Monsters
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.wandering_monster
+  inputs:
+    direction_roll: 2
+    route: toward
+    distance: 11
+    heroes_in_los: false
+    door_state: iron_wedged
+    door_roll: 5
+    chasm: false
+    cross_chasm: false
+    new_token: false
+    heroes_finished: true
+    entered_room: true
+    closed_door_blocks_los: false
+    door_held_previous_turn: true
+    waiting_at_door: true
+    chasm_held_previous_turn: false
+    crossed_chasm: false
+    cross_back_requested: false
+  expected:
+    state:
+      seal_broken: true
+      door_state: open
+      waiting_at_door: false
+      movement_stops: false
+      movement_squares: 4
+      reveal_monsters: false
+    events: []
+    trace:
+      - procedure.wandering_monster
+    unresolved: []
+    steps:
+      - move_after_heroes
+      - obstacles
+      - closed_door
+      - break_seal
+      - door_passes
 - id: test.phase6.trap.perception_avoids
   name: successful Perception detects the trap and leaves it in place
   section_id: section.into_the_dungeons.triggering_a_trap
@@ -396,6 +450,17 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 19
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 121
   status: extracted
   confidence: high
   source_text: Derived boundary case with supplied input values; this is not a printed worked example.
@@ -440,6 +505,68 @@
       - special_cases
       - card_consequences
       - missing_card
+      - opening_eligibility
+- id: test.phase6.trap.disarm_needs_tool
+  name: without a lock pick or trap disarm kit the disarm step is skipped
+  section_id: section.into_the_dungeons.disarming_a_trap
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Disarming a Trap
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 19
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: false
+      locator:
+        row: 121
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case with supplied input values; this is not a printed worked example.
+  kind: derived_case
+  procedure_id: procedure.trap_resolution
+  inputs:
+    perception_succeeded: true
+    disarm_attempted: true
+    disarm_succeeded: false
+    has_disarm_tool: false
+    deliberate_trigger: false
+    trap_detected: true
+    trap_removed: false
+    trap_triggered: false
+    is_mimic: false
+    hero_attacked_mimic: false
+    actor_is_lower_undead: false
+    door_or_chest: false
+    initial_check: false
+    actor_is_enemy: false
+    forced_entry: false
+    enters_trapped_square: false
+    card_data_supplied: false
+    card_effects_resolved: false
+  expected:
+    state:
+      trap_triggered: false
+      trap_removed: false
+      enemy_avoids_square: false
+      mimic_can_attack: false
+      opening_eligible: false
+    events: []
+    trace:
+      - procedure.trap_resolution
+    unresolved: []
+    steps:
+      - special_cases
       - opening_eligibility
 - id: test.phase6.locked_door.excess_damage
   name: excess damage

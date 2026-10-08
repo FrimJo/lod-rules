@@ -107,6 +107,15 @@ describe('wandering monsters: PDF 92', () => {
     expect(c.state.seal_broken).toBe(true);
     expect(c.state.waiting_at_door).toBe(false);
   });
+  it.each([
+    ['iron_wedged', 5, true],
+    ['iron_wedged', 4, false],
+    ['magically_sealed', 5, true],
+    ['closed', 6, false],
+  ] as const)('on %s with a %i the seal is broken: %s', (door, roll, broken) => {
+    const r = wm({ door_state: door, door_roll: roll, door_held_previous_turn: true });
+    expect(r.state.seal_broken === true).toBe(broken);
+  });
   it('stops on arrival, crosses next turn, resumes the following turn and never crosses back', () => {
     const a = wm({ chasm: true });
     const b = wm({ ...a.state, chasm_held_previous_turn: true, cross_chasm: true });

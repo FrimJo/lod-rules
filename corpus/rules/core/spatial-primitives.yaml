@@ -450,7 +450,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A model can move up to its allotted movement in straight lines, or diagonally.
@@ -488,11 +488,11 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: A model (enemy or hero) must be facing one of the sides in a square. Changing
-    facing is a free action.
+  source_text: A model (enemy or hero) must be facing one of the sides in a square. This will be
+    referred to as the model’s facing. Changing facing is a free action.
   type: constraint
   scope: global
   fields:
@@ -595,7 +595,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A model may never move straight through a square occupied by another model unless
@@ -706,7 +706,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A model may try to cross a piece of furniture by paying one extra movement point.
@@ -745,20 +745,21 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
-    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
-    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
-    there is no need of a DEX Test. It takes 1 AP.'
+  source_text: Sometimes you may find your hero at the bottom of a pit with a need to climb up.
+    This requires a DEX test and 2 AP. However, if your hero or any friend adjacent to the pit has
+    a rope, this is done without the need of a DEX Test.
+  issues:
+    - issue.movement.pit_climb_up_failure
   type: calculation
   scope: global
   fields:
     rope_available:
       type: boolean
       role: input
-      description: rope available
+      description: The hero or any friend adjacent to the pit has a rope.
     climbing_down:
       type: boolean
       role: input
@@ -813,20 +814,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
-    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
-    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
-    there is no need of a DEX Test. It takes 1 AP.'
+  source_text: However, if your hero or any friend adjacent to the pit has a rope, this is done
+    without the need of a DEX Test. Climbing with a rope takes 1 Action.
   type: calculation
   scope: global
   fields:
     rope_available:
       type: boolean
       role: input
-      description: rope available
+      description: The hero or any friend adjacent to the pit has a rope.
     climbing_down:
       type: boolean
       role: input
@@ -869,6 +868,8 @@
         right:
           type: literal
           value: true
+  issues:
+    - issue.movement.rope_climb_action
 - id: core.movement.pit.down
   name: pit down
   section_id: section.into_the_dungeons.obstacles.climbing_pits
@@ -881,7 +882,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: vonbraus.faq_gamefound
       file: source/vonbraus-faq-2026-10-03.html
       heading: Does a hero have to make a DEX test to climb DOWN into a pit? The text in the rulebook contradicts itself.
@@ -891,17 +892,16 @@
         visually_verified: false
   status: extracted
   confidence: high
-  source_text: 'Climbing Pits: This requires a DEX test and 2 AP. However, if your hero or any
-    friend adjacent to the pit has a rope, this is done without the need of a DEX Test. Climbing
-    with a rope takes 1 Action. Place the hero anywhere adjacent to the pit. Climbing down:
-    there is no need of a DEX Test. It takes 1 AP.'
+  source_text: In some odd cases, you may actually want your hero to climb down into a pit. In that
+    case, there is no need of a DEX Test. It takes 1 AP, from standing on the ledge until the hero
+    is on the bottom.
   type: calculation
   scope: global
   fields:
     rope_available:
       type: boolean
       role: input
-      description: rope available
+      description: The hero or any friend adjacent to the pit has a rope.
     climbing_down:
       type: boolean
       role: input
@@ -948,7 +948,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: vonbraus.faq_gamefound
       file: source/vonbraus-faq-2026-10-03.html
       heading: Does a hero have to make a DEX test to climb DOWN into a pit? The text in the rulebook contradicts itself.
@@ -1009,6 +1009,7 @@
     - Damage as outlined on the exploration or trap card.
   issues:
     - issue.movement.pit_down_test
+    - issue.movement.pit_climb_up_failure
 - id: core.obstacle.half_square
   name: obstacle half square
   section_id: section.into_the_dungeons.obstacles.rule_of_fifty_percent
@@ -1025,7 +1026,8 @@
   status: extracted
   confidence: high
   source_text: Sometimes an object will affect movement if it occupies more than 50% of a square.
-    However, the art of the entire torture rack will affect LOS.
+    In the example to the right, that means that only the white square is blocked, and the other
+    squares allow normal movement. However, the art of the entire torture rack will affect LOS.
   type: calculation
   scope: global
   fields:
@@ -1066,6 +1068,57 @@
         right:
           type: literal
           value: 0.5
+- id: core.obstacle.square_effects
+  name: obstacle square effects
+  section_id: section.into_the_dungeons.obstacles
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 91
+      pdf_page: 93
+      heading: Obstacles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 92
+      pdf_page: 94
+      heading: List of Obstacles
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Throughout the tiles, you will find various objects. Some of these can be interacted
+    with as outlined in the Room Description. Some will affect the LOS and some will prevent you
+    from entering that square. There are a lot of different tiles and the same obstacle might look
+    different from tile to tile to create variety. ... This is a list of different obstacles you
+    may encounter inside a dungeon. The images below are just examples and they make look
+    differently, but the Exploration card will help you identify them.
+  type: definition
+  scope: dungeon
+  fields:
+    obstacle:
+      type: string
+      role: input
+      description: The obstacle in the square, as identified from the Exploration card; the
+        artwork may look different from tile to tile.
+  effects: []
+  dependencies:
+    - key: room_description
+      label: Room Description
+  unresolved_references:
+    - as outlined in the Room Description
+  uses_tables:
+    - table.dungeon.obstacles
+  term_refs:
+    - term.line_of_sight
+  see_also:
+    - section.into_the_dungeons.reading_the_exploration_cards
+    - section.into_the_dungeons.table_4
 - id: core.movement.zone_of_control
   name: movement zone of control
   section_id: section.combat.zone_of_control_zoc
@@ -1078,7 +1131,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A model’s ZOC includes any squares directly to its side, diagonally in front, and
@@ -1138,7 +1191,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A model’s ZOC includes any squares directly to its side, diagonally in front, and

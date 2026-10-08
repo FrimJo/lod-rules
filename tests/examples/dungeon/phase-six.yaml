@@ -69,7 +69,8 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 88
       pdf_page: 89
-      heading: The Threat Level
+      section: The Threat Level
+      heading: Effect of Triggering the Threat Level
       extraction:
         method: text
         confidence: high
@@ -78,20 +79,35 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 89
       pdf_page: 90
-      heading: The Threat Level
+      section: The Threat Level
+      heading: Effect of Triggering the Threat Level
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is not in battle:'
+      locator:
+        table: Uncaptioned 1d20 / Result / Threat decrease table
+        row: 16-17
+      extraction:
+        method: table
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
   source_text: |-
-    At the start of the turn, the player rolls the Scenario die, 1d10. It ends up a 9, and
-    thus, a roll against the Threat Level must be done. The player then rolls 1d20, resulting
-    in a 7, which happens to be below the Threat Level of 9. Since the party is not in battle,
-    the player rolls on the corresponding table and gets a 16. That means the risk of
+    Example: At the start of the turn, the player rolls the Scenario die, 1d10. It ends up a 9,
+    and thus, a roll against the Threat Level must be done. The player then rolls 1d20,
+    resulting in a 7, which happens to be below the Threat Level of 9. Since the party is not in
+    battle, the player rolls on the corresponding table and gets a 16. That means the risk of
     encounters will go up for the rest of the quest. At the same time, the Threat Level is now
-    reduced by 6 points down to 3.
+    reduced by 6 points down to 3. The risk for something bad to happen is considerably lower
+    for a while.
   kind: source_example
   procedure_id: procedure.threat_roll
   inputs:
@@ -127,6 +143,18 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      section: The Threat Level
+      heading: Start of Turn sequence
+      locator:
+        region: '>Threat branch: 20? yes! to Lower Threat -5'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for the cited procedure; inputs are test
@@ -155,18 +183,29 @@
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 90
+      section: The Threat Level
+      heading: Effect of Triggering the Threat Level
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 88
       pdf_page: 89
-      heading: The Threat Level
+      section: The Threat Level
+      heading: Increasing Threat Level
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Had the result of the Threat Level roll been above 9, nothing would
-    have happened except that the Threat Level would have been increased to 10.
-  kind: derived_case
+  source_text: Had the result of the Threat Level roll been above 9, nothing would have happened
+    except that the Threat Level would have been increased to 10.
+  kind: source_example
   procedure_id: procedure.threat_roll
   inputs:
     threat_level: 9
@@ -184,6 +223,49 @@
     steps:
       - roll
       - missed
+- id: test.phase6.threat_roll.in_battle
+  name: threat roll in battle uses the 1d10 table decrease
+  section_id: section.into_the_dungeons.the_threat_level
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is in battle:'
+      locator:
+        table: Uncaptioned 1d10 / Result / Threat decrease table
+        row: '10'
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
+  kind: derived_case
+  procedure_id: procedure.threat_roll
+  inputs:
+    threat_level: 12
+    threat_roll: 12
+    in_battle: true
+    threat_decrease: -6
+  expected:
+    state:
+      threat_level: 6
+      original_threat_level: 12
+    events:
+      - type: invoke
+        dependency: Threat table — party is in battle (page 89)
+    trace:
+      - procedure.threat_roll
+    unresolved: []
+    steps:
+      - roll
+      - triggered
+      - in_battle
+      - decrease
 - id: test.phase6.open_door.clean
   name: untrapped, unlocked door opens with its checks
   section_id: section.into_the_dungeons.opening_a_door_or_chest
@@ -395,6 +477,8 @@
       party_rations: 3
       party_morale: 5
       ambush_risk: 10
+      awake_hero_randomised: true
+      other_heroes_start_prone: true
       enemy_bonus_tokens: 3
       rest_completed: true
       rest_attempt_processed: true
@@ -434,8 +518,87 @@
       - ambush_roll
       - ambushed
       - ambush_initiative
+- id: test.phase6.rest.ambushed_barred_door
+  name: an ambush with the door barred leaves all heroes standing and adds no enemy tokens
+  section_id: section.into_the_dungeons.rest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Rest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Derived boundary case for the cited procedure; inputs are test
+    values, not a book example.
+  kind: derived_case
+  procedure_id: procedure.rest
+  inputs:
+    wandering_monster_spots_party: false
+    rests_taken: 1
+    threat_level: 5
+    ambush_roll: 5
+    barred_door: true
+    party_rations: 4
+    party_morale: 3
+    all_heroes_on_same_tile: true
+    enemies_on_rest_tile: false
+    enemies_on_adjacent_tiles: false
+    rest_attempt_processed: false
+    starting_morale: 5
+  expected:
+    state:
+      party_rations: 3
+      party_morale: 5
+      ambush_risk: 10
+      awake_hero_randomised: true
+      other_heroes_start_prone: false
+      enemy_bonus_tokens: 0
+      rest_completed: true
+      rest_attempt_processed: true
+      rest_execution_allowed: true
+    events:
+      - type: invoke
+        dependency: procedure.wandering_monster
+      - type: invoke
+        dependency: procedure.rest_hp_recovery
+      - type: invoke
+        dependency: procedure.rest_energy_point_recovery
+      - type: invoke
+        dependency: procedure.rest_mana_recovery
+      - type: invoke
+        dependency: Alchemy (mixing potions)
+      - type: invoke
+        dependency: Encounter Table
+      - type: invoke
+        dependency: procedure.initiative
+    trace:
+      - procedure.rest
+    unresolved: []
+    steps:
+      - check_eligibility
+      - accept_attempt
+      - arrange
+      - bar_door
+      - deduct_ration
+      - rearrange_gear
+      - move_monsters
+      - completed
+      - increase_morale
+      - increase_hp
+      - regain_energy
+      - regain_mana
+      - brew_potions
+      - ambush_roll
+      - ambushed
+      - barred_door_defence
+      - ambush_initiative
 - id: test.phase6.search_room.with_helpers
-  name: two searching heroes stack +15 on the highest PER
+  name: three searching heroes stack +15 on the highest PER
   section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
   source:
     - document: rulebook.second_printing.eng

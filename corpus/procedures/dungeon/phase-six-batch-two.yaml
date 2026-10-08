@@ -13,9 +13,15 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: After heroes act, the token moves 4 squares. A d6 roll of 1 moves back or through a
-    random door away from the heroes; 2–6 moves towards them. If it enters a room with LOS to heroes
-    within 10 squares, reveal quest-specific monsters and set initiative.
+  source_text: >-
+    A threat roll or dungeon event may trigger a Wandering Monster. This will be represented by a
+    token as the exact nature of these monsters are still unknown. Place the token on the start
+    tile, just outside the door. When the heroes have performed all of their actions, this token
+    will move into the first room of the dungeon. The token always moves 4 squares. Once in the new
+    room, it will randomise the direction of its new move. ... If it enters a room from where it has
+    line of sight to the characters and they are within 10 squares, roll on the quest-specific
+    Monster Table and place the corresponding monsters as close to the token as possible. Then set
+    up the initiative tokens to determine who acts first.
   fields:
     direction_roll:
       type: number
@@ -135,7 +141,10 @@
       object_id: equipment.general.iron_wedges
   steps:
     - id: placement
-      source_text: Place the token on the start tile, just outside the door.
+      source_text: >-
+        A threat roll or dungeon event may trigger a Wandering Monster. This will be represented by
+        a token as the exact nature of these monsters are still unknown. Place the token on the
+        start tile, just outside the door.
       when:
         type: compare
         operator: eq
@@ -152,9 +161,9 @@
             type: literal
             value: start_tile_outside_door
     - id: move_after_heroes
-      source_text:
-        When heroes have performed all their actions, the token moves into the first room. It
-        always moves 4 squares.
+      source_text: >-
+        When the heroes have performed all of their actions, this token will move into the first
+        room of the dungeon. The token always moves 4 squares.
       when:
         type: compare
         operator: eq
@@ -181,9 +190,11 @@
             type: literal
             value: false
     - id: choose_direction
-      source_text:
-        On a 1 move back or through a random door away from heroes; on 2–6 move towards heroes.
-        Repeat the roll each turn.
+      source_text: >-
+        Once in the new room, it will randomise the direction of its new move. To decide this, roll
+        1d6. On a result of 1 it will move back to where it came from or towards/through a random
+        door leading away from the heroes, on 2-6 it moves towards the heroes. This roll will be
+        repeated every turn, meaning that the token could theoretically move back and forth.
       when:
         type: all
         conditions:
@@ -206,7 +217,9 @@
       effects: []
       substeps:
         - id: away
-          source_text: On 1 move back or through a random door away from heroes.
+          source_text: >-
+            On a result of 1 it will move back to where it came from or towards/through a random
+            door leading away from the heroes, ...
           when:
             type: compare
             operator: eq
@@ -223,7 +236,8 @@
                 type: literal
                 value: away
         - id: toward
-          source_text: On 2–6 move towards heroes.
+          source_text: >-
+            ... on 2-6 it moves towards the heroes.
           when:
             type: compare
             operator: gte
@@ -240,7 +254,9 @@
                 type: literal
                 value: toward
     - id: obstacles
-      source_text: Closed doors and chasms stop movement.
+      source_text: >-
+        A closed door will stop the token’s movement for that turn. ... A Wandering Monster that
+        reaches a chasm will stop.
       when:
         type: compare
         operator: eq
@@ -253,7 +269,10 @@
       effects: []
       substeps:
         - id: closed_door
-          source_text: Remain at the closed door until it can be passed.
+          source_text: >-
+            A closed door will stop the token’s movement for that turn. ... A magically sealed door
+            or Iron Wedged door will stop the token for that turn, ... A wandering monster will
+            remain at a closed door until it manages to pass through.
           when:
             type: any
             conditions:
@@ -293,18 +312,31 @@
                 type: literal
                 value: true
         - id: break_seal
-          source_text: A successful 5–6 passage breaks the magical seal.
+          source_text: >-
+            A magically sealed door or Iron Wedged door will stop the token for that turn, and it
+            must roll 5-6 to continue through the door next turn, instead of the normal 2-6. The
+            seal is then broken, and the token may pass through.
           when:
             type: all
             conditions:
-              - type: compare
-                operator: eq
-                left:
-                  type: field
-                  name: door_state
-                right:
-                  type: literal
-                  value: magically_sealed
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: door_state
+                    right:
+                      type: literal
+                      value: magically_sealed
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: door_state
+                    right:
+                      type: literal
+                      value: iron_wedged
               - type: compare
                 operator: eq
                 left:
@@ -328,9 +360,9 @@
                 type: literal
                 value: true
         - id: door_passes
-          source_text:
-            On a later turn ordinary doors pass on 2–6; sealed or wedged doors on 5–6. The seal is
-            broken.
+          source_text: >-
+            If it rolls 2-6 next turn, the door is opened, and the token may pass through. ... it
+            must roll 5-6 to continue through the door next turn, instead of the normal 2-6.
           when:
             type: all
             conditions:
@@ -433,7 +465,8 @@
                 type: literal
                 value: false
         - id: chasm_arrival
-          source_text: Reaching a chasm stops movement this turn.
+          source_text: >-
+            A Wandering Monster that reaches a chasm will stop.
           when:
             type: all
             conditions:
@@ -460,7 +493,9 @@
                 type: literal
                 value: true
         - id: chasm_wait
-          source_text: Remain at the chasm until the next-turn direction takes the token across.
+          source_text: >-
+            A Wandering Monster that reaches a chasm will stop. If it rolls to continue across the
+            chasm during the following turn, ...
           when:
             type: all
             conditions:
@@ -503,9 +538,10 @@
                 type: literal
                 value: true
         - id: chasm_crossing
-          source_text:
-            On the following turn, crossing ends movement on the far side. Movement resumes on the
-            turn after that.
+          source_text: >-
+            If it rolls to continue across the chasm during the following turn, it will end up on
+            the other side, but may not continue its move. On the turn after that, it will continue,
+            ...
           when:
             type: all
             conditions:
@@ -553,7 +589,9 @@
                 type: literal
                 value: true
         - id: no_crossing_back
-          source_text: The token never goes back across the chasm again.
+          source_text: >-
+            On the turn after that, it will continue, and it will never go back across the chasm
+            again.
           when:
             type: all
             conditions:
@@ -590,9 +628,11 @@
                   type: literal
                   value: false
     - id: reveal
-      source_text:
-        When entering a room, reveal within 10 squares and LOS. Closed doors block LOS. Place
-        monsters as close to the token as possible, then determine initiative.
+      source_text: >-
+        If it enters a room from where it has line of sight to the characters and they are within 10
+        squares, roll on the quest-specific Monster Table and place the corresponding monsters as
+        close to the token as possible. Then set up the initiative tokens to determine who acts
+        first. ... It also blocks LOS and delays the reveal of a token.
       when:
         type: all
         conditions:
@@ -657,14 +697,19 @@
   entry_step: placement
   exit_step: reveal
   unresolved_references:
-    - Iron Wedges equipment text requires 6 AP for an enemy to pass; this heading says a 5–6 roll
-      opens passage. Preserve both pending review.
-    - Movement geometry and exact route require supplied spatial facts.
+    - 'Iron Wedges (Appendix III) says any enemy needs 6 AP to pass a wedged door; this heading
+      says a 5-6 roll lets the token continue. Both are preserved: issue.phase6.iron_wedges_movement.'
+    - Movement geometry, the exact route and the distance to the heroes are supplied spatial facts.
+    - "The page does not say whether the 2-6 (or 5-6) roll at a closed door is the turn's 1d6
+      direction roll or a separate roll; door_roll is supplied: issue.wandering.door_roll."
   see_also:
     - section.into_the_dungeons.wandering_monsters
     - section.into_the_dungeons.obstacles
+    - section.into_the_dungeons.the_threat_level
+    - section.into_the_dungeons.table
   issues:
     - issue.phase6.iron_wedges_movement
+    - issue.wandering.door_roll
 - id: procedure.trap_resolution
   name: Detecting, triggering and disarming traps
   section_id: section.into_the_dungeons.triggering_a_trap
@@ -696,11 +741,24 @@
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 90
+      pdf_page: 92
+      heading: Mimics as Traps
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Threat or Search triggers draw a trap card and randomise who triggered it. Successful
-    Perception avoids it and leaves it in place; failure triggers card effects. Disarming takes 2 AP
-    with Pick Lock, no Lock Picks; success removes it and failure sets it off.
+  source_text: >-
+    Whenever a trap has been sprung through a Threat Roll or a Search Roll, draw a trap card and
+    randomise who has triggered the trap. The poor adventurer still has a chance to avoid the trap
+    by rolling a successful Perception Roll with all applicable modifiers. If unsuccessful, the trap
+    is triggered and damage is dealt. ... Disarming a trap takes 2 AP and is done using the Pick
+    Lock Skill. No Lock Picks are needed. A success will remove the trap, but a failure will set the
+    trap off.
   fields:
     perception_succeeded:
       type: boolean
@@ -822,7 +880,9 @@
       object_id: equipment.tool.trap_disarming_kit
   steps:
     - id: draw_card
-      source_text: Threat/Search draws a card and randomises the victim; a door/chest trap affects the opener.
+      source_text: >-
+        Whenever a trap has been sprung through a Threat Roll or a Search Roll, draw a trap card and
+        randomise who has triggered the trap.
       when:
         type: compare
         operator: eq
@@ -836,7 +896,8 @@
         - type: invoke
           dependency: trap_card
     - id: random_victim
-      source_text: Randomise who triggered a Threat/Search trap.
+      source_text: >-
+        ... randomise who has triggered the trap.
       when:
         type: all
         conditions:
@@ -863,7 +924,9 @@
             type: literal
             value: random_hero
     - id: opener
-      source_text: The hero attempting to open makes the Perception Roll.
+      source_text: >-
+        If the door or chest is trapped, the hero attempting to open must make a Perception Roll
+        (modified by applicable Talents and the modifier mentioned on the card next to the eye).
       when:
         type: all
         conditions:
@@ -890,7 +953,10 @@
             type: literal
             value: opener
     - id: perception
-      source_text: Successful Perception detects the trap without setting it off; failure triggers it.
+      source_text: >-
+        The poor adventurer still has a chance to avoid the trap by rolling a successful Perception
+        Roll with all applicable modifiers. If unsuccessful, the trap is triggered and damage is
+        dealt.
       when:
         type: all
         conditions:
@@ -913,7 +979,10 @@
       effects: []
       substeps:
         - id: avoid
-          source_text: Successful Perception leaves the trap in place until triggered or disarmed.
+          source_text: >-
+            If the perception roll is successful, the trap will not be triggered. It will remain
+            where it is until triggered or disarmed. ... If you succeed, the trap has been
+            discovered without setting it off.
           when:
             type: compare
             operator: eq
@@ -930,7 +999,8 @@
                 type: literal
                 value: true
         - id: perception_failure
-          source_text: Failure triggers the card consequences.
+          source_text: >-
+            If unsuccessful, the trap is triggered and damage is dealt.
           when:
             type: compare
             operator: eq
@@ -966,6 +1036,15 @@
             method: text
             confidence: high
             visually_verified: false
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          printed_page: 99
+          pdf_page: 101
+          heading: Traps in Doors and Chests
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
         - document: vonbraus.changelog_2_2x
           file: source/vonbraus-changelog-2.2x.pdf
           pdf_page: 19
@@ -977,8 +1056,9 @@
             visually_verified: false
           locator:
             row: 121
-      source_text: Disarming takes 2 AP using Pick Lock; no Lock Picks required. Designer ruling
-        (changelog 2.21 entry 121) requires a lock pick or trap disarm kit.
+      source_text: >-
+        Disarming a trap takes 2 AP and is done using the Pick Lock Skill. No Lock Picks are needed.
+        ... The modifier next to the cogs is applied to the disarm roll.
       when:
         type: all
         conditions:
@@ -1040,7 +1120,8 @@
           dependency: pick_lock_roll
       substeps:
         - id: disarmed
-          source_text: Success removes the trap.
+          source_text: >-
+            A success will remove the trap, ...
           when:
             type: compare
             operator: eq
@@ -1057,7 +1138,8 @@
                 type: literal
                 value: true
         - id: disarm_failed
-          source_text: Failure sets the trap off.
+          source_text: >-
+            ... but a failure will set the trap off.
           when:
             type: compare
             operator: eq
@@ -1074,7 +1156,8 @@
                 type: literal
                 value: true
     - id: deliberate
-      source_text: A detected door/chest trap can deliberately be set off for 2 AP.
+      source_text: >-
+        It can now be disarmed or deliberately set off (2 AP).
       when:
         type: all
         conditions:
@@ -1146,9 +1229,11 @@
             type: literal
             value: true
     - id: special_cases
-      source_text:
-        Enemies avoid trapped squares except Lower Undead; heroes and enemies can be shoved
-        into traps. Detected Mimics cannot attack until a hero attacks first.
+      source_text: >-
+        All enemies will avoid traps except Lower Undead who will behave as though the square is a
+        normal square. Enemies and heroes can also be shoved into traps if they are standing next to
+        them. There are also other monster special rules that could force a hero to enter a trapped
+        square. The enemies suffer damage just as a hero would.
       effects:
         - type: set
           target: enemy_avoids_square
@@ -1162,7 +1247,10 @@
             value: false
       substeps:
         - id: enemy_avoids
-          source_text: Enemies avoid traps unless Lower Undead or forced into them.
+          source_text: >-
+            All enemies will avoid traps except Lower Undead who will behave as though the square is
+            a normal square. Enemies and heroes can also be shoved into traps if they are standing
+            next to them.
           when:
             type: all
             conditions:
@@ -1197,9 +1285,9 @@
                 type: literal
                 value: true
         - id: square_entry
-          source_text:
-            Anyone entering a marked square triggers the trap. Lower Undead treat it as normal;
-            forced entry also triggers it.
+          source_text: >-
+            If the trap is in a square, the hero may leave the square. Mark it with a trap token.
+            Anyone entering that square will trigger the trap.
           when:
             type: all
             conditions:
@@ -1255,7 +1343,19 @@
                 type: literal
                 value: true
         - id: mimic_attacks
-          source_text: A detected Mimic cannot attack unless a hero attacks first.
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              printed_page: 90
+              pdf_page: 92
+              heading: Mimics as Traps
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+          source_text: >-
+            Mimics that are detected with Perception are not able to attack unless a hero attacks
+            first.
           when:
             type: all
             conditions:
@@ -1292,9 +1392,10 @@
                 type: literal
                 value: true
     - id: card_consequences
-      source_text:
-        Card specifies affected actors and consequences. Unless otherwise noted there are no
-        saving throws.
+      source_text: >-
+        If you fail to disarm the trap or deliberately set if off, you suffer the consequences. ...
+        Some traps might affect others than the individual setting it off. Unless otherwise noted,
+        there are no saving throws of any kind for those affected.
       when:
         type: all
         conditions:
@@ -1327,7 +1428,8 @@
       effects: []
       substeps:
         - id: missing_card
-          source_text: Card-specific damage, targets and modifiers cannot be invented.
+          source_text: >-
+            If unsuccessful, the trap is triggered and damage is dealt.
           when:
             type: compare
             operator: eq
@@ -1341,9 +1443,9 @@
             - type: unresolved
               issue_id: issue.phase6.trap_resolution_deferred
         - id: supplied_card
-          source_text:
-            Use the supplied card targets and saving-throw exception; resolve damage through the
-            card handoff.
+          source_text: >-
+            Some traps might affect others than the individual setting it off. Unless otherwise
+            noted, there are no saving throws of any kind for those affected.
           when:
             type: compare
             operator: eq
@@ -1372,8 +1474,8 @@
                 type: literal
                 value: true
     - id: mimic_interaction
-      source_text: These paragraphs define when a detected Mimic can attack, but do not define
-        device-style disarming or deliberately setting it off; its card is required.
+      source_text: >-
+        A detected Mimic left alone will not fight.
       when:
         type: all
         conditions:
@@ -1415,9 +1517,8 @@
         - type: unresolved
           issue_id: issue.phase6.trap_resolution_deferred
     - id: opening_eligibility
-      source_text:
-        A detected trap prevents opening until disarmed or triggered; locks remain a separate
-        requirement.
+      source_text: >-
+        That means that a trapped door or chest cannot be opened until the trap has been dealt with.
       effects:
         - type: set
           target: opening_eligible
@@ -1426,9 +1527,9 @@
             value: false
       substeps:
         - id: trap_dealt_with
-          source_text:
-            After triggering or disarming, the door/chest can be opened as part of the action,
-            subject to its lock.
+          source_text: >-
+            The door or chest can then be opened, or the square can be traversed as normal. ... The
+            door/chest is opened as part of the action.
           when:
             type: all
             conditions:
@@ -1478,11 +1579,15 @@
     - issue.phase6.trap_resolution_deferred
     - issue.traps.disarm_lockpick
   unresolved_references:
-    - Trap-card modifiers, affected actors, damage and monster characteristics are supplied inputs
-      or unresolved.
-    - Detected Mimic disarming/deliberate-trigger interactions are not defined here; resolve from
-      its card, without assuming it behaves as an ordinary device.
+    - The trap card (its modifiers next to the eye and the cogs, affected actors, damage and any
+      saving throw) is not in this book; those values are supplied inputs or unresolved.
+    - Detected Mimic disarming or deliberate triggering is not defined by these paragraphs; it is
+      resolved from its card, without assuming it behaves as an ordinary device.
+    - 'Disarming follows the designer ruling (changelog 2.21 entry 121): a lock pick or a trap
+      disarming kit is needed. The printed No Lock Picks are needed stays quoted.'
   see_also:
     - section.into_the_dungeons.triggering_a_trap
+    - section.into_the_dungeons.mimics_as_traps
     - section.into_the_dungeons.disarming_a_trap
+    - section.into_the_dungeons.traps_in_doors_and_chests
     - section.into_the_dungeons.opening_a_door_or_chest

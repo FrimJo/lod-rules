@@ -62,3 +62,29 @@ describe('The Threat Level — rendered PDF89, printed88', () => {
     );
   });
 });
+
+describe('Threat tables — rendered PDF91, printed89', () => {
+  const table = (id: string) => corpus.tables.find((t) => t.id === id)!;
+  const decrease = (id: string, roll: number): number | undefined => {
+    const row = table(id).rows.find((r) => {
+      const cell = r.cells.roll;
+      return cell?.type === 'range' && roll >= cell.min && roll <= cell.max;
+    });
+    const cell = row?.cells.decrease;
+    return cell?.type === 'number' ? cell.value : undefined;
+  };
+  it('cover 1-20 out of battle and 1-10 in battle with one row per roll', () => {
+    for (let roll = 1; roll <= 20; roll++)
+      expect(decrease('table.dungeon.threat_not_in_battle', roll)).toBeDefined();
+    for (let roll = 1; roll <= 10; roll++)
+      expect(decrease('table.dungeon.threat_in_battle', roll)).toBeDefined();
+  });
+  it('gives the -6 the worked example supplies for a table roll of 16', () => {
+    const example = corpus.testCases.find((t) => t.id === 'test.phase6.threat_roll.example')!;
+    expect(decrease('table.dungeon.threat_not_in_battle', 16)).toBe(example.inputs.threat_decrease);
+  });
+  it('prints -3 for both the Healing (4-5) and Frenzy (6) rows the Gameplay Example mixes up', () => {
+    expect(decrease('table.dungeon.threat_in_battle', 5)).toBe(-3);
+    expect(decrease('table.dungeon.threat_in_battle', 6)).toBe(-3);
+  });
+});

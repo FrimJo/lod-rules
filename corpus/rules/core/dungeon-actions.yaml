@@ -1,0 +1,908 @@
+- id: core.searching.arranging_found_items
+  name: Picking Things Up — arranging found items
+  section_id: section.into_the_dungeons.picking_things_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Picking Things Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Whenever you search corpses, rooms or furniture, you may find things you would like to
+    keep. Arranging these things as you like (in Quick Slots, Backpacks, or Equipping it) is
+    included in the AP spent to search.
+  see_also:
+    - section.into_the_dungeons.searching_furniture
+    - section.into_the_dungeons.searching_through_a_room_or_corridor
+    - section.into_the_dungeons.searching_corpses
+  type: resource_change
+  scope: dungeon
+  fields:
+    arranging_found_items:
+      type: boolean
+      role: input
+      description:
+        Things found while searching corpses, rooms or furniture are being arranged in Quick
+        Slots, Backpacks or equipped.
+    arrangement_extra_ap:
+      type: number
+      role: output
+      description: AP spent on arranging beyond the AP spent to search.
+      integer: true
+      minimum: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: arranging_found_items
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: arrangement_extra_ap
+      value:
+        type: literal
+        value: 0
+  term_refs:
+    - term.quick_slot
+    - term.furniture
+- id: core.searching.pick_up_dropped_weapon
+  name: Picking Things Up — dropped weapons outside combat
+  section_id: section.into_the_dungeons.picking_things_up
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Picking Things Up
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Dropped weapons can be picked up outside of combat without a DEX roll by spending 1 AP.
+  type: resource_change
+  scope: dungeon
+  fields:
+    in_combat:
+      type: boolean
+      role: input
+      description: The pick-up happens during combat.
+    pick_up_ap_cost:
+      type: number
+      role: output
+      description: AP spent to pick up the dropped weapon.
+      integer: true
+      minimum: 0
+    dex_roll_required:
+      type: boolean
+      role: output
+      description: A DEX roll is required to pick up the weapon.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: in_combat
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: pick_up_ap_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_roll_required
+      value:
+        type: literal
+        value: false
+- id: core.searching.corpses
+  name: Searching Corpses — when and which mode
+  section_id: section.into_the_dungeons.searching_corpses
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching Corpses
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once you have defeated an enemy and the battle is over, you can search the corpses of
+    the enemies for loot. This may be done in two ways, and this should be agreed upon by the
+    players beforehand.
+  see_also:
+    - section.treasure
+  issues:
+    - issue.0001
+  type: constraint
+  scope: dungeon
+  fields:
+    enemy_defeated:
+      type: boolean
+      role: input
+      description: The enemy whose corpse is searched has been defeated.
+    battle_over:
+      type: boolean
+      role: input
+      description: The battle is over.
+    corpse_search_mode:
+      type: string
+      role: input
+      description: 'Mode agreed upon by the players beforehand: hardcore or streamlined.'
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_defeated
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: battle_over
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: corpse_search_mode
+            right:
+              type: literal
+              value: hardcore
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: corpse_search_mode
+            right:
+              type: literal
+              value: streamlined
+  term_refs:
+    - term.battle
+- id: core.searching.corpses_hardcore
+  name: Searching Corpses — Hardcore Mode
+  section_id: section.into_the_dungeons.searching_corpses
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Hardcore Mode
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You can only search corpses that are adjacent to the hero. Searching one corpse and
+    arranging that loot anyway you like (Backpack, Quick Slot, or Equipped) takes 1 AP. The benefit
+    of this mode is that it is thematic and takes time, which means you risk triggering more
+    threats.
+  type: resource_change
+  scope: dungeon
+  fields:
+    corpse_search_mode:
+      type: string
+      role: input
+      description: Agreed corpse-search mode.
+    corpse_adjacent:
+      type: boolean
+      role: input
+      description: The corpse is adjacent to the searching hero.
+    corpse_search_ap_cost:
+      type: number
+      role: output
+      description: AP to search one corpse and arrange its loot.
+      integer: true
+      minimum: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: corpse_search_mode
+    right:
+      type: literal
+      value: hardcore
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: corpse_adjacent
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: corpse_search_ap_cost
+      value:
+        type: literal
+        value: 1
+  term_refs:
+    - term.adjacent
+    - term.quick_slot
+- id: core.searching.corpses_streamlined
+  name: Searching Corpses — Streamlined Mode
+  section_id: section.into_the_dungeons.searching_corpses
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Streamlined Mode
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Simply roll for loot from each defeated enemy after the battle and divide it between
+    the heroes as you see fit without moving any heroes or spending any Action Points. Equipment may
+    be placed in Quick Slots, Backpack, or be Equipped for free.
+  type: resource_change
+  scope: dungeon
+  fields:
+    corpse_search_mode:
+      type: string
+      role: input
+      description: Agreed corpse-search mode.
+    corpse_search_ap_cost:
+      type: number
+      role: output
+      description: AP spent searching corpses.
+      integer: true
+      minimum: 0
+    heroes_must_move:
+      type: boolean
+      role: output
+      description: Heroes must move to search.
+    loot_rolls_per_defeated_enemy:
+      type: number
+      role: output
+      description: Loot rolls for each defeated enemy.
+      integer: true
+      minimum: 0
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: corpse_search_mode
+    right:
+      type: literal
+      value: streamlined
+  effects:
+    - type: set
+      target: corpse_search_ap_cost
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: heroes_must_move
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: loot_rolls_per_defeated_enemy
+      value:
+        type: literal
+        value: 1
+  term_refs:
+    - term.action_points
+    - term.quick_slot
+- id: core.searching.furniture_adjacent_action
+  name: Searching Furniture — position and cost
+  section_id: section.into_the_dungeons.searching_furniture
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching Furniture
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A character standing next to a piece of furniture may spend one action searching that
+    furniture. No search roll is necessary in this case ...
+  type: resource_change
+  scope: dungeon
+  fields:
+    standing_next_to_furniture:
+      type: boolean
+      role: input
+      description: The character stands next to the piece of furniture.
+    furniture_search_actions:
+      type: number
+      role: output
+      description: Actions spent searching the furniture.
+      integer: true
+      minimum: 0
+    search_roll_required:
+      type: boolean
+      role: output
+      description: A search roll is required.
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: standing_next_to_furniture
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: furniture_search_actions
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: search_roll_required
+      value:
+        type: literal
+        value: false
+  dependencies:
+    - key: search_furniture
+      label: Searching Furniture
+      object_id: procedure.search_furniture
+  term_refs:
+    - term.furniture
+- id: core.searching.room_or_corridor_limits
+  name: Searching through a Room or Corridor — duration and once per room
+  section_id: section.into_the_dungeons.searching_through_a_room_or_corridor
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Searching through a Room or Corridor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    This takes the entire turn and requires a successful Perception Roll. ... The party may
+    only search each room once, no matter how many heroes participated in the search.
+  type: constraint
+  scope: dungeon
+  fields:
+    room_already_searched:
+      type: boolean
+      role: input
+      description: The party has already searched this room, whoever took part.
+    search_takes_entire_turn:
+      type: boolean
+      role: output
+      description: The search takes the entire turn.
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: room_already_searched
+        right:
+          type: literal
+          value: false
+    - type: set
+      target: search_takes_entire_turn
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: search_room_or_corridor
+      label: Searching through a Room or Corridor
+      object_id: procedure.search_room_or_corridor
+- id: core.gear.backpack_to_quick_slot_or_hands
+  name: Rearranging your Gear — from the Backpack
+  section_id: section.into_the_dungeons.rearranging_your_gear
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Rearranging your Gear
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In between battles, the professional will make sure to prepare for the next battle.
+    That may include rearranging your gear. Moving things from the Backpack to a Quick Slot or to
+    your hands costs 2 AP.
+  see_also:
+    - section.equipment.backpack
+    - section.combat.different_combat_actions
+  type: resource_change
+  scope: dungeon
+  fields:
+    in_battle:
+      type: boolean
+      role: input
+      description: The party is in a battle. Rearranging your Gear applies in between battles.
+    destination:
+      type: string
+      role: input
+      description: 'Where the item moved from the Backpack goes: quick_slot or hands.'
+    move_ap_cost:
+      type: number
+      role: output
+      description: AP to move the item from the Backpack.
+      integer: true
+      minimum: 0
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_battle
+        right:
+          type: literal
+          value: false
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: destination
+            right:
+              type: literal
+              value: quick_slot
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: destination
+            right:
+              type: literal
+              value: hands
+  effects:
+    - type: set
+      target: move_ap_cost
+      value:
+        type: literal
+        value: 2
+  term_refs:
+    - term.quick_slot
+    - term.battle
+- id: core.gear.trading
+  name: Rearranging your Gear — trading between characters
+  section_id: section.into_the_dungeons.rearranging_your_gear
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 97
+      pdf_page: 99
+      heading: Rearranging your Gear
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In between battles, the professional will make sure to prepare for the next battle.
+    That may include rearranging your gear. ... Trading gear between characters takes 1 AP for each
+    character, and they need to be in LOS of each other. No need to be adjacent as we imagine they
+    are tossing the gear to each other.
+  see_also:
+    - section.combat.different_combat_actions
+  type: resource_change
+  scope: dungeon
+  fields:
+    in_battle:
+      type: boolean
+      role: input
+      description: The party is in a battle. Rearranging your Gear applies in between battles.
+    characters_in_los:
+      type: boolean
+      role: input
+      description: The trading characters are in LOS of each other.
+    ap_cost_per_character:
+      type: number
+      role: output
+      description: AP each trading character spends.
+      integer: true
+      minimum: 0
+    adjacency_required:
+      type: boolean
+      role: output
+      description: The trading characters must be adjacent.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: in_battle
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: characters_in_los
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: ap_cost_per_character
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: adjacency_required
+      value:
+        type: literal
+        value: false
+  term_refs:
+    - term.line_of_sight
+- id: core.identify.before_use
+  name: Identifying Items and Potions — before use
+  section_id: section.into_the_dungeons.identifying_items_and_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Identifying Items and Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Magic Items and Potions must be identified before use.
+  type: constraint
+  scope: global
+  fields:
+    item_kind:
+      type: string
+      role: input
+      description: magic_item or potion.
+    identified:
+      type: boolean
+      role: input
+      description: The item has been identified.
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: magic_item
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: potion
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: identified
+        right:
+          type: literal
+          value: true
+  dependencies:
+    - key: identify_magic_item
+      label: Identifying (Magic Items)
+      section_id: section.magic_items.identifying
+      object_id: character.magic_item.identify
+    - key: identify_potion
+      label: Identifying Potions
+      section_id: section.alchemy.identifying_potions
+      object_id: character.alchemy.identify
+- id: core.identify.when_found
+  name: Identifying Items and Potions — timing and who
+  section_id: section.into_the_dungeons.identifying_items_and_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Identifying Items and Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This may be done as soon as an item is found by the person with the highest skill. No
+    need to pass the items around. It does not require an action. See identifying items on page 68
+    and potions on page 70.
+  see_also:
+    - section.magic_items.identifying
+    - section.alchemy.identifying_potions
+  issues:
+    - issue.character_basics.identify_attempts
+  type: procedure_rule
+  scope: global
+  fields:
+    item_found:
+      type: boolean
+      role: input
+      description: The Magic Item or Potion has been found.
+    identifier_has_highest_skill:
+      type: boolean
+      role: input
+      description: The identifying person has the highest relevant skill in the party.
+    identification_action_cost:
+      type: number
+      role: output
+      description: Actions spent identifying.
+      integer: true
+      minimum: 0
+    item_must_be_passed:
+      type: boolean
+      role: output
+      description: The item must be passed to the identifier.
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_found
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: identifier_has_highest_skill
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: identification_action_cost
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: item_must_be_passed
+      value:
+        type: literal
+        value: false
+- id: core.healing.bandage_adjacent_hero
+  name: Healing — bandaging an adjacent hero
+  section_id: section.into_the_dungeons.healing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Healing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: By spending 1 AP with a bandage equipped in a Quick Slot, you can use Heal on an
+    adjacent hero. This cannot be done with enemies adjacent. The wounded hero loses 1 AP as well.
+  issues:
+    - issue.healing.enemies_adjacent_scope
+  type: resource_change
+  scope: dungeon
+  fields:
+    bandage_in_quick_slot:
+      type: boolean
+      role: input
+      description: The healer has a bandage equipped in a Quick Slot.
+    target_adjacent:
+      type: boolean
+      role: input
+      description: The wounded hero is adjacent to the healer.
+    enemies_adjacent:
+      type: boolean
+      role: input
+      description: Enemies are adjacent.
+    healer_ap_cost:
+      type: number
+      role: output
+      description: AP the healer spends.
+      integer: true
+      minimum: 0
+    wounded_hero_ap_loss:
+      type: number
+      role: output
+      description: AP the wounded hero loses.
+      integer: true
+      minimum: 0
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: bandage_in_quick_slot
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_adjacent
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemies_adjacent
+        right:
+          type: literal
+          value: false
+    - type: set
+      target: healer_ap_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: wounded_hero_ap_loss
+      value:
+        type: literal
+        value: 1
+  dependencies:
+    - key: heal_skill
+      label: Heal (WIS)
+      section_id: section.character_basics.the_character.skills_list
+      object_id: character.skill.heal.bandage
+  term_refs:
+    - term.heal
+    - term.quick_slot
+    - term.adjacent
+- id: core.healing.bandage_self
+  name: Healing — bandaging oneself
+  section_id: section.into_the_dungeons.healing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Healing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If there are no visible enemies, a hero may apply a bandage themselves by spending 2 AP.
+  type: resource_change
+  scope: dungeon
+  fields:
+    visible_enemies:
+      type: boolean
+      role: input
+      description: Any enemies are visible to the hero.
+    self_bandage_ap_cost:
+      type: number
+      role: output
+      description: AP the hero spends to bandage themselves.
+      integer: true
+      minimum: 0
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: visible_enemies
+        right:
+          type: literal
+          value: false
+    - type: set
+      target: self_bandage_ap_cost
+      value:
+        type: literal
+        value: 2
+  term_refs:
+    - term.heal
+- id: core.healing.bandage_single_use
+  name: Healing — a bandage is used once
+  section_id: section.into_the_dungeons.healing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 98
+      pdf_page: 100
+      heading: Healing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The bandage can only be used once, regardless of whether the healing attempt succeeds or fails.
+  type: resource_change
+  scope: dungeon
+  fields:
+    bandage_used:
+      type: boolean
+      role: input
+      description: A healing attempt was made with the bandage, successful or not.
+    bandage_consumed:
+      type: boolean
+      role: output
+      description: The bandage is used up.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: bandage_used
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: bandage_consumed
+      value:
+        type: literal
+        value: true
