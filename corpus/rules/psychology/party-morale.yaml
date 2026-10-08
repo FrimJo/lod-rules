@@ -6,11 +6,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Calculating Party Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 31
@@ -58,11 +58,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Calculating Party Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: To calculate your party’s morale, you divide each member’s RES by 10 (RDD) and then
@@ -94,14 +94,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero dies
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 4
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        row: 36
   status: extracted
   confidence: high
-  source_text: 'A hero dies: -6. Things suddenly become real…we are all going to die!'
+  source_text: 'A hero dies / Things suddenly become real…we are all going to die! / -6'
   type: calculation
   scope: global
   fields:
@@ -123,11 +137,13 @@
         operator: multiply
         values:
           - type: literal
-            value: -6
+            value: -5
           - type: field
             name: occurrences
       duration: immediate
   optional_system: party_morale
+  issues:
+    - issue.psychology.hero_dies_morale_penalty
 - id: character.morale.event.zero_hp
   name: event zero hp
   section_id: section.psychology.party_morale
@@ -136,15 +152,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero reaches 0 Hit Points
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A hero reaches 0 Hit Points: -4. Seeing your friend in a pool of blood is sure to
-    unsettle your nerves.'
+  source_text: A hero reaches 0 Hit Points / Seeing your friend in a pool of blood is sure to unsettle your nerves. / -4
   type: calculation
   scope: global
   fields:
@@ -179,15 +197,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Party is engaged in battle with demons
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Party is engaged in battle with demons: -2. Fighting things that should not be,
-    and things that are a mockery to nature, takes its toll.'
+  source_text: Party is engaged in battle with demons / Fighting things that should not be, and things that are a mockery to nature, takes its toll. / -2
   type: calculation
   scope: global
   fields:
@@ -222,15 +242,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero fails a Terror Test
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A hero fails a Terror Test: -2. The sheer terror in the eyes of your companion is
-    frightening.'
+  source_text: A hero fails a Terror Test / The sheer terror in the eyes of your companion is frightening. / -2
   type: calculation
   scope: global
   fields:
@@ -265,14 +287,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Party is hungry
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        row: 148
   status: extracted
   confidence: high
-  source_text: 'Party is hungry: -2. Lack of food is always bad for motivation'
+  source_text: Party is hungry / Lack of food is always bad for motivation / -2
   type: calculation
   scope: global
   fields:
@@ -280,10 +316,12 @@
       type: number
       role: state
       description: morale
-    occurrences:
+    hungry_characters:
       type: number
       role: input
-      description: occurrences
+      description: >-
+        Number of hungry characters in the party (heroes and other party members such as
+        mercenaries); changelog 2.21 entry 148 makes the penalty -1 per character.
       minimum: 1
       integer: true
   effects:
@@ -294,11 +332,14 @@
         operator: multiply
         values:
           - type: literal
-            value: -2
+            value: -1
           - type: field
-            name: occurrences
+            name: hungry_characters
       duration: immediate
   optional_system: party_morale
+  issues:
+    - issue.psychology.hungry_morale_penalty
+    - issue.psychology.hungry_morale_duration_and_travel_penalty
 - id: character.morale.event.fear
   name: event fear
   section_id: section.psychology.party_morale
@@ -307,14 +348,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A character fails a Fear Test
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A character fails a Fear Test: -1. Fear spreads like a wildfire.'
+  source_text: A character fails a Fear Test / Fear spreads like a wildfire. / -1
   type: calculation
   scope: global
   fields:
@@ -349,15 +393,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero is poisoned or diseased.
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A hero is poisoned or diseased.: -1. Succumbing to a disease or poison is not the
-    glorious death of a hero.'
+  source_text: A hero is poisoned or diseased. / Succumbing to a disease or poison is not the glorious death of a hero. / -1
   type: calculation
   scope: global
   fields:
@@ -392,14 +438,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A hero springs a trap
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A hero springs a trap: -1. Few things are so unnerving as sudden, unexpected death.'
+  source_text: A hero springs a trap / Few things are so unnerving as sudden, unexpected death. / -1
   type: calculation
   scope: global
   fields:
@@ -434,14 +483,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: A Miscast
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'A Miscast: -1. Even the gods are against us! We are doomed!'
+  source_text: A Miscast / Even the gods are against us! We are doomed! / -1
   type: calculation
   scope: global
   fields:
@@ -476,15 +528,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Portcullis falling down and blocking path
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Portcullis falling down and blocking path: -1. The feeling of being trapped
-    underground is not easy on your mind.'
+  source_text: Portcullis falling down and blocking path / The feeling of being trapped underground is not easy on your mind. / -1
   type: calculation
   scope: global
   fields:
@@ -519,11 +573,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Taking a short rest
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 98
@@ -546,7 +603,7 @@
         row: 39
   status: extracted
   confidence: high
-  source_text: 'Taking a short rest: +1. Resting is a good way to calm the nerves.'
+  source_text: Taking a short rest / Resting is a good way to calm the nerves. / +1
   type: calculation
   scope: global
   fields:
@@ -584,14 +641,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Finding a Fine Treasure
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Finding a Fine Treasure: +1. This is good news! Maybe there is more?'
+  source_text: Finding a Fine Treasure / This is good news! Maybe there is more? / +1
   type: calculation
   scope: global
   fields:
@@ -626,14 +686,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Slaying a large monster
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Slaying a large monster: +2. Nothing can stop us! Our weapons are guided by the gods!'
+  source_text: Slaying a large monster / Nothing can stop us! Our weapons are guided by the gods! / +2
   type: calculation
   scope: global
   fields:
@@ -668,15 +731,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Intoxicating your party with Dwarven ale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Intoxicating your party with Dwarven ale: +3. Dwarven ale is liquid bravery, that
-    is a known fact. Just a pity that the effectiveness of the party diminishes.'
+  source_text: Intoxicating your party with Dwarven ale / Dwarven ale is liquid bravery, that is a known fact. Just a pity that the effectiveness of the party diminishes. / +3
   type: calculation
   scope: global
   fields:
@@ -703,6 +768,10 @@
             name: occurrences
       duration: immediate
   optional_system: party_morale
+  dependencies:
+    - key: dwarven_ale
+      label: Dwarven Ale consumable, whose own effect reduces the party's tests
+      object_id: character.equipment.consumable.dwarven_ale.drink
 - id: character.morale.event.wonderful_treasure
   name: event wonderful treasure
   section_id: section.psychology.party_morale
@@ -711,14 +780,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Adjusting the Morale
+      locator:
+        table: Uncaptioned Party Morale adjustment table
+        row: Finding a Wonderful Treasure
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Finding a Wonderful Treasure: +3. Gold! We will be rich!'
+  source_text: Finding a Wonderful Treasure / Gold! We will be rich! / +3
   type: calculation
   scope: global
   fields:
@@ -753,11 +825,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching Half Morale (RDD)
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: If the PM drops below half, the party will begin to waver. All heroes suffer a -20 RES.
@@ -809,11 +881,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching Half Morale (RDD)
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: As soon as the morale is raised above this threshold, the effect on RES is removed.
@@ -855,15 +927,15 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching Half Morale (RDD)
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: If the PM drops below half, the party will begin to waver. As soon as the morale is
-    raised above this threshold, the effect on RES is removed.
+  source_text: If the PM drops below half, the party will begin to waver. ... As soon as the
+    morale is raised above this threshold, the effect on RES is removed.
   type: calculation
   scope: global
   fields:
@@ -896,16 +968,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching 0 Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: If the PM ever reaches 0, the party will leave the dungeon as soon as they are not
-    locked in combat, and quickly head for civilization. There is no need to actually move your
-    heroes out of the dungeon. Instead, go straight to ‘Travel Events’ for the travel home.
+    locked in combat, and quickly head for civilization. ... There is no need to actually move
+    your heroes out of the dungeon. Instead, go straight to ‘Travel Events’ for the travel home.
   type: calculation
   scope: global
   fields:
@@ -961,7 +1033,7 @@
   dependencies:
     - key: travel_home
       label: Travel Events for the travel home
-      section_id: section.travelling_and_skirmishes
+      section_id: section.travelling_and_skirmishes.events
 - id: character.morale.retry_quest
   name: morale retry quest
   section_id: section.psychology.party_morale
@@ -970,11 +1042,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching 0 Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: You may retry the same quest after you visit a settlement.
@@ -1005,11 +1077,11 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Resetting the Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: PM is reset as soon as the party leaves the dungeon.
@@ -1052,15 +1124,15 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       printed_page: 56
       pdf_page: 58
-      heading: Party Morale
+      heading: Reaching 0 Morale
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: If the PM ever reaches 0, the party will leave the dungeon as soon as they are not
-    locked in combat.
+    locked in combat, and quickly head for civilization.
   type: calculation
   scope: global
   fields:
@@ -1097,3 +1169,68 @@
           name: starting_morale
   issues:
     - issue.phase4.morale_threshold
+- id: character.morale.definition
+  name: Party Morale measures the mood of the characters
+  section_id: section.psychology.party_morale
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Party Morale
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Party Morale (PM) is a measurement of the mood of the characters. If they suffer too
+    many setbacks, morale will start to dwindle. If it gets too low, you may end up with your
+    characters fleeing the dungeon.
+  type: definition
+  scope: global
+  fields: {}
+  effects: []
+  optional_system: party_morale
+  dependencies:
+    - key: calculation
+      label: Calculating Party Morale
+      object_id: character.morale.member_contribution
+    - key: dwindle
+      label: Morale adjustments in the dungeon
+      object_id: table.psychology.morale_adjustments
+    - key: flee
+      label: Reaching 0 Morale
+      object_id: character.morale.flee
+  term_refs:
+    - term.party_morale
+- id: character.morale.adjustment
+  name: morale adjustments are cumulative
+  section_id: section.psychology.party_morale
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 56
+      pdf_page: 58
+      heading: Adjusting the Morale
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The morale is adjusted based upon what happens in the dungeon. Every time one of the
+    situations described in the table below occurs, you must adjust the morale accordingly.
+    These are also cumulative. Consequently, if two heroes are poisoned, you suffer a -2
+    modifier.
+  type: definition
+  scope: dungeon
+  fields: {}
+  effects: []
+  optional_system: party_morale
+  uses_tables:
+    - table.psychology.morale_adjustments
+  dependencies:
+    - key: poisoned_example
+      label: A hero is poisoned or diseased, applied once per hero
+      object_id: character.morale.event.poison_or_disease
