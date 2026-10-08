@@ -6,15 +6,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 72
       printed_page: 70
-      heading: identify
+      heading: Identifying Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Found potions must be identified before use. One Alchemy attempt per hero and potion;
-    failure can be remedied in a settlement.
+  source_text: >-
+    Before using potions, they must be identified. Even though you know its content through the
+    rolls on tables, your heroes do not. They are not too eager to risk their lives by drinking
+    something they found in an old dungeon. A successful Alchemy roll is all that is needed. This
+    can be done once per hero and potion. If this fails, it can be identified in a settlement.
   type: modifier
   scope: global
   fields:
@@ -59,6 +62,10 @@
     right:
       type: field
       name: alchemy
+  see_also:
+    - section.settlements.identifying_items_and_potions
+  term_refs:
+    - term.alchemy
 - id: character.alchemy.drink
   name: drink
   section_id: section.alchemy.drinking_potions
@@ -67,15 +74,19 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 72
       printed_page: 70
-      heading: drink
+      heading: Drinking Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Drinking requires 1 action. Stat increases last 5 turns unless otherwise stated. Keep
-    the empty bottle. Identical temporary stat potions do not stack; different stats can coexist.
+  source_text: >-
+    Drinking a potion requires 1 action. Potions that increase your heroes’ stats last for 5
+    turns, unless stated otherwise. The empty bottle may be kept and used when making new potions.
+    Potions that temporarily increases a stat of your hero do not stack. That is, drinking 2
+    potions of dexterity does not give you double the effect, but you could drink one potion of
+    strength, and also one potion of dexterity, and acquire both bonuses.
   type: modifier
   scope: global
   fields:
@@ -138,15 +149,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 72
       printed_page: 70
-      heading: components
+      heading: Components for Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Ingredients come from plants; parts come from defeated monsters. Harvest or purchase
-    them at Alchemists’ Guild and certain stores.
+  source_text: >-
+    There are two different kinds of components for potions. Ingredients come from plants, whereas
+    parts come from defeated monsters. These can be harvested by a hero, but components can also
+    be purchased at the Alchemists’ Guild and certain stores.
   type: modifier
   scope: global
   fields:
@@ -169,6 +182,10 @@
       value:
         type: literal
         value: defeated monster
+  see_also:
+    - section.alchemy.gathering_ingredients
+    - section.alchemy.harvesting_parts
+    - section.alchemists_guild
 - id: character.alchemy.throwing
   name: throwing
   section_id: section.alchemy.throwing_potions
@@ -177,14 +194,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 72
       printed_page: 70
-      heading: throwing
+      heading: Throwing Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: (Tr) marks a potion used as a thrown weapon; resolution is described in Combat.
+  source_text: >-
+    A (Tr) behind the name of the potion indicates that the potion is used as a thrown weapon.
+    This is described in the ‘Combat’ chapter.
   type: modifier
   scope: global
   fields: {}
@@ -195,7 +214,10 @@
     - key: throw
       label: Thrown preparation resolution
       object_id: procedure.thrown_preparation
-  see_also: []
+  see_also:
+    - section.combat.throwing_potions
+  term_refs:
+    - term.throwable_potion
 - id: character.alchemy.gathering
   name: gathering
   section_id: section.alchemy.gathering_ingredients
@@ -204,19 +226,30 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: gathering
+      heading: Gathering Ingredients
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: During travel to/from quests, once per day use the highest Alchemical Skill. Success
-    rolls twice on Ingredients Table. A gathering roll 01-10 makes all ingredients Exquisite. Travel
-    procedure remains deferred.
+  source_text: >-
+    During Overland Travel on their way to and from a quest, the party may try to gather
+    ingredients once per day, using the hero with the highest Alchemical Skill Value. A success
+    will let you roll 2 times on the Ingredients Table.
   type: modifier
   scope: global
   fields:
+    attempts_today:
+      type: number
+      role: input
+      description: gathering attempts the party has already made this day of Overland Travel
+      integer: true
+      minimum: 0
+    alchemy_is_party_highest:
+      type: boolean
+      role: input
+      description: the rolling hero has the highest Alchemical Skill Value in the party
     roll:
       type: number
       role: input
@@ -230,6 +263,26 @@
       role: output
       description: ingredient table rolls
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: attempts_today
+        right:
+          type: literal
+          value: 0
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: alchemy_is_party_highest
+        right:
+          type: literal
+          value: true
     - type: set
       target: ingredient_table_rolls
       value:
@@ -244,6 +297,9 @@
     right:
       type: field
       name: alchemy
+  see_also:
+    - section.alchemy.table
+    - section.travelling_and_skirmishes
 - id: character.alchemy.gathering.exquisite
   name: exquisite
   section_id: section.alchemy.gathering_ingredients
@@ -252,14 +308,15 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: exquisite
+      heading: Gathering Ingredients
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 01-10 when gathering makes all gathered ingredients Exquisite.
+  source_text: >-
+    If you roll 01-10 when gathering, all of the ingredients become *Exquisite.
   type: modifier
   scope: global
   fields:
@@ -296,6 +353,8 @@
         right:
           type: literal
           value: 10
+  issues:
+    - issue.alchemy.gathering_exquisite_roll
 - id: character.alchemy.habitat.roadside
   name: roadside
   section_id: section.alchemy.habitats
@@ -304,14 +363,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: roadside
+      section: Habitats for ingredients
+      heading: Roadside
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: any hex including a road
+  source_text: >-
+    This is any hex including a road.
   type: modifier
   scope: global
   fields:
@@ -333,14 +394,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: plains
+      section: Habitats for ingredients
+      heading: Plains
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: any open green hex
+  source_text: >-
+    This is any open green hex.
   type: modifier
   scope: global
   fields:
@@ -362,14 +425,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: woods
+      section: Habitats for ingredients
+      heading: Woods
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: any hex containing trees or conceivably part of a woods
+  source_text: >-
+    Any hex that contains trees or could conceivably be seen as part of a woods.
   type: modifier
   scope: global
   fields:
@@ -391,14 +456,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: water
+      section: Habitats for ingredients
+      heading: Water
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: any hex with a water feature and any adjacent hex
+  source_text: >-
+    Any hex with a water feature and any hex adjacent to such a hex.
   type: modifier
   scope: global
   fields:
@@ -420,14 +487,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: highland
+      section: Habitats for ingredients
+      heading: Highland
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: any hex with mountain or hill features
+  source_text: >-
+    Any hex with mountain or hill features.
   type: modifier
   scope: global
   fields:
@@ -449,14 +518,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 73
       printed_page: 71
-      heading: site
+      section: Habitats for ingredients
+      heading: Site
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: quest sites marked on map
+  source_text: >-
+    These are the quest sites marked on the map.
   type: modifier
   scope: global
   fields:
@@ -478,15 +549,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 74
       printed_page: 72
-      heading: harvest
+      heading: Harvesting parts
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Passing Alchemy permits harvesting up to 3 dead enemies in LOS. An unlisted enemy
-    provides nothing usable. Quantities measure potions, not body parts.
+  source_text: >-
+    By passing an Alchemy test, a hero may collect parts from up to 3 dead enemies in LOS. The
+    table below is used to determine the type and quantity of parts that can be harvested from a
+    fallen enemy. If a specific enemy cannot be found on the list, that enemy will not provide
+    anything useable for alchemy.
   type: modifier
   scope: global
   fields:
@@ -555,6 +629,8 @@
     right:
       type: literal
       value: true
+  see_also:
+    - section.alchemy.table_2
 - id: character.alchemy.harvest.exquisite
   name: exquisite
   section_id: section.alchemy.harvesting_parts
@@ -563,14 +639,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 74
       printed_page: 72
-      heading: exquisite
+      section: Harvesting parts
+      heading: Quality
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 01-10 on the harvesting Alchemy test makes all parts from the creatures Exquisite.
+  source_text: >-
+    If the harvesting roll indicates Exquisite parts (01-10 on the Alchemy test) then all parts
+    provided from the creatures are considered Exquisite.
   type: modifier
   scope: global
   fields:
@@ -615,15 +694,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: weak
+      section: Quality
+      heading: Weak Potion
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart box "Weak?"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
-    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  source_text: >-
+    A Weak Potion requires 1 part, 1 ingredient, and 1 empty bottle to create. ... Recipe requires
+    : 1 ingredient 1 part
   type: modifier
   scope: global
   fields:
@@ -728,15 +820,29 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: standard
+      section: Quality
+      heading: Standard Potion
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart box "Standard?"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
-    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  source_text: >-
+    A Standard Potion requires either 1 part and 2 ingredients, or 2 parts and 1 ingredient to
+    create. Of course, you need an empty bottle as well. ... Recipe requires : 2 Ingredients 1
+    part -or- 1 ingredient 2 parts
   type: modifier
   scope: global
   fields:
@@ -841,15 +947,29 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: supreme
+      section: Quality
+      heading: Supreme Potion
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart box "Supreme?"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak: 1 part + 1 ingredient. Standard: 1 part + 2 ingredients or 2 parts + 1
-    ingredient. Supreme: 4 components mixing ingredients and parts. Each needs an empty bottle.'
+  source_text: >-
+    A Supreme Potion requires 4 components, and it must be a mix of ingredients and parts. An
+    empty bottle is also needed. ... Recipe requires: 3 ingredients 1 part -or- 1 ingredient 3
+    parts -or- 2 ingredients 2 parts
   type: modifier
   scope: global
   fields:
@@ -954,14 +1074,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: recipe
+      heading: Making a recipe
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Choose intended potion, then ingredients and parts following weak/standard/supreme requirements.
+  source_text: >-
+    At certain points, you will be asked to create a recipe. This procedure is different to the
+    usual mixing of potions where you often don’t know what the result will be. First, decide what
+    kind of potion the recipe will result in. Then, decide what ingredients and parts should be
+    part of the recipe. Make sure to follow the rules for weak, standard, and supreme potions.
   type: modifier
   scope: global
   fields:
@@ -989,6 +1113,8 @@
       value:
         type: literal
         value: choose intended potion
+  see_also:
+    - section.alchemy.quality
 - id: character.alchemy.mix
   name: mix
   section_id: section.alchemy.mixing_potions
@@ -997,17 +1123,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: mix
+      heading: Mixing Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Mix with Alchemical Tools and an empty bottle, in settlement, evening travel or dungeon
-    rest. Choose quality before Alchemy roll. Recipe success creates intended potion (+10); without
-    recipe success rolls on Potions Table.
+  source_text: >-
+    Mixing potions can be done while travelling (in the evening), in a settlement, or while
+    resting in a dungeon. Using your Alchemical Tools and an empty bottle, you can mix components
+    together. First, you must decide the quality of the potion you want to mix. Then make your
+    Alchemy Skill roll. ... Start You will need 1 empty bottle Potion quality? ... Make an Alchemy
+    skill check
   type: modifier
   scope: global
   fields:
@@ -1081,6 +1218,9 @@
       value:
         type: literal
         value: true
+  see_also:
+    - section.alchemy.quality
+    - section.into_the_dungeons.rest
 - id: character.alchemy.mix.recipe_bonus
   name: recipe bonus
   section_id: section.alchemy.mixing_potions
@@ -1089,14 +1229,27 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: recipe bonus
+      heading: Mixing Potions
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart "Known recipe? yes! +10 bonus"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: A followed recipe adds +10 to Alchemy.
+  source_text: >-
+    If you have followed a recipe, you may add a +10 modifier to your Alchemy Skill. ... Known
+    recipe? yes! +10 bonus
   type: modifier
   scope: global
   fields:
@@ -1145,14 +1298,29 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: exquisite bonus
+      section: Mixing Potions
+      heading: Exquisite Ingredients and Parts
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart "At least one exquisite component? yes! +10 bonus"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: An Exquisite component adds +10 irrespective of how many are used.
+  source_text: >-
+    Whenever you use an Exquisite component when mixing, the chance of success is increased by +10
+    (no matter how many exquisite components you add). ... At least one exquisite component? yes!
+    +10 bonus
   type: modifier
   scope: global
   fields:
@@ -1201,14 +1369,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: failure
+      section: Mixing Potions
+      heading: Failed Alchemy test
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart "Success? no!"
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Failed Alchemy forfeits all components except bottle.
+  source_text: >-
+    If you fail the attempt to mix a potion, all components are forfeit except the bottle. ...
+    Discard components. (You can keep the bottle)
   type: modifier
   scope: global
   fields:
@@ -1252,9 +1434,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: random
+      heading: Mixing Potions
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart "Known recipe? no!"
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
     - document: rulebook.second_printing.eng
@@ -1268,8 +1461,12 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: A successful recipe makes its intended potion; without a recipe roll on the Potions
-    Table. Potions resulting from your own mixing do not need identification before drinking.
+  source_text: >-
+    If you do not have a recipe and the skill roll is successful, roll on the Potions Table in the
+    ‘Treasure’ chapter to see what you have created. ... Randomly determine which potion you’ve
+    created Write down your recipe for future reference ... Remember that potions must be
+    identified if found before drinking. That is not necessary if the potion is a result of your
+    own mixing.
   type: modifier
   scope: global
   fields:
@@ -1331,6 +1528,10 @@
         right:
           type: literal
           value: false
+  see_also:
+    - section.appendix_v_treasures.tables_of_potions
+  issues:
+    - issue.alchemy.flowchart_recipe_record
 - id: character.alchemy.mix.success.recipe
   name: recipe
   section_id: section.alchemy.mixing_potions
@@ -1339,9 +1540,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: recipe
+      heading: Mixing Potions
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: flowchart "Known recipe? yes!"
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
     - document: rulebook.second_printing.eng
@@ -1355,8 +1567,11 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: A successful recipe makes its intended potion; without a recipe roll on the Potions
-    Table. Potions resulting from your own mixing do not need identification before drinking.
+  source_text: >-
+    If you have followed a recipe, you may add a +10 modifier to your Alchemy Skill. If the roll
+    is successful, you have created the intended potion. ... Add new potion to character sheet ...
+    Remember that potions must be identified if found before drinking. That is not necessary if
+    the potion is a result of your own mixing.
   type: modifier
   scope: global
   fields:
@@ -1426,16 +1641,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: weak
+      heading: Simplified Alchemy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
-    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
-    loses components. Only one potion of experience between quests.
+  source_text: >-
+    If you feel the Alchemy rules require too much bookkeeping, you can instead use these
+    simplified rules. Ignore the use of exquisite components. - A potion can only contain 1 unit
+    of any ingredient or part, i.e., each component must be unique. - Choose if you want to make a
+    weak, Standard or Supreme potion and make an Alchemy roll. If successful, chose freely what
+    potion you have created. If it fails, the components are lost. - A weak potion requires 4
+    components, a standard requires 6 and a supreme requires 8 components.
   type: modifier
   scope: global
   fields:
@@ -1530,16 +1749,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: standard
+      heading: Simplified Alchemy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
-    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
-    loses components. Only one potion of experience between quests.
+  source_text: >-
+    If you feel the Alchemy rules require too much bookkeeping, you can instead use these
+    simplified rules. Ignore the use of exquisite components. - A potion can only contain 1 unit
+    of any ingredient or part, i.e., each component must be unique. - Choose if you want to make a
+    weak, Standard or Supreme potion and make an Alchemy roll. If successful, chose freely what
+    potion you have created. If it fails, the components are lost. - A weak potion requires 4
+    components, a standard requires 6 and a supreme requires 8 components.
   type: modifier
   scope: global
   fields:
@@ -1634,16 +1857,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: supreme
+      heading: Simplified Alchemy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Optional Simplified Alchemy ignores Exquisite components. Each component must be
-    unique. Weak/Standard/Supreme require 4/6/8. Successful Alchemy permits free choice; failure
-    loses components. Only one potion of experience between quests.
+  source_text: >-
+    If you feel the Alchemy rules require too much bookkeeping, you can instead use these
+    simplified rules. Ignore the use of exquisite components. - A potion can only contain 1 unit
+    of any ingredient or part, i.e., each component must be unique. - Choose if you want to make a
+    weak, Standard or Supreme potion and make an Alchemy roll. If successful, chose freely what
+    potion you have created. If it fails, the components are lost. - A weak potion requires 4
+    components, a standard requires 6 and a supreme requires 8 components.
   type: modifier
   scope: global
   fields:
@@ -1738,14 +1965,15 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 76
       printed_page: 74
-      heading: experience
+      heading: Simplified Alchemy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Only one potion of experience can be made between each quest under Simplified Alchemy.
+  source_text: >-
+    You can only make one potion of experience between each quest.
   type: modifier
   scope: global
   fields:
@@ -1777,6 +2005,153 @@
     right:
       type: literal
       value: true
+- id: character.alchemy.alchemist_belt
+  name: Alchemist Belt quick slots
+  section_id: section.alchemy.alchemist_belt
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 72
+      printed_page: 70
+      heading: Alchemist Belt
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Clever alchemists have devised a special belt that they can sling across their shoulder
+    which has enough room for 6 bottles. These slots expand the standard 3 Quick Slots to 9, but
+    they can only carry potions or vials.
+  type: modifier
+  scope: global
+  fields:
+    has_alchemist_belt:
+      type: boolean
+      role: input
+      description: hero carries an Alchemist Belt
+    belt_item_is_potion_or_vial:
+      type: boolean
+      role: input
+      description: the item placed in a belt slot is a potion or vial
+    belt_slots:
+      type: number
+      role: state
+      description: slots provided by the belt
+    quick_slots:
+      type: number
+      role: state
+      description: quick slots
+  effects:
+    - type: set
+      target: belt_slots
+      value:
+        type: literal
+        value: 6
+    - type: set
+      target: quick_slots
+      value:
+        type: literal
+        value: 9
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: belt_item_is_potion_or_vial
+        right:
+          type: literal
+          value: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: has_alchemist_belt
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: quick_slots
+      label: The standard 3 Quick Slots
+      section_id: section.equipment.carrying_equipment
+      object_id: character.equipment.quick_slots
+  entity_id: equipment.alchemy.alchemist_belt
+  term_refs:
+    - term.quick_slot
+  see_also:
+    - section.equipment.carrying_equipment
+    - section.appendix_iii_equipment.general_equipment.alchemy.table
+- id: character.alchemy.harvest.quantity
+  name: harvested quantity meaning
+  section_id: section.alchemy.harvesting_parts
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 74
+      printed_page: 72
+      section: Harvesting parts
+      heading: Quantity
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    The quantity listed is not the actual number of parts collected. It is measurement for how
+    many potions you would be able to create from these parts.
+  type: definition
+  scope: global
+  fields:
+    quantity_meaning:
+      type: string
+      role: output
+      description: what the Quantity column of the harvesting table measures
+  effects:
+    - type: set
+      target: quantity_meaning
+      value:
+        type: literal
+        value: potions that can be created from the parts
+  see_also:
+    - section.alchemy.table_2
+- id: character.alchemy.quality.strengths
+  name: potion strengths
+  section_id: section.alchemy.quality
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Quality
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Potions come in 3 different strengths: Weak, Standard, and Supreme potions. The effect of
+    these differs accordingly, and they require a different amount of ingredients and parts to
+    create.
+  type: definition
+  scope: global
+  fields:
+    strengths:
+      type: string
+      role: output
+      description: the three potion strengths
+  effects:
+    - type: set
+      target: strengths
+      value:
+        type: literal
+        value: Weak, Standard, Supreme
+  see_also:
+    - section.alchemy.preparations
 - id: character.alchemy.preparation.acidic_bomb
   name: acidic bomb
   section_id: section.alchemy.preparations.acidic_bomb
@@ -1785,15 +2160,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: acidic bomb
+      heading: Acidic Bomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Thrown at enemy or square. Acidic damage to hit square, half to surrounding squares:
-    Weak 1d6, Standard 1d10, Supreme 1d12.'
+  source_text: 'This highly volatile fluid can be thrown at an enemy or a square. When it lands, it explodes causing acidic damage to the square it hits, and also half that damage to all the surrounding squares at a rate of: Weak: 1d6 DMG; Standard 1d10 DMG; Supreme: 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -1826,6 +2200,8 @@
         type: literal
         value: 0.5
   entity_id: equipment.alchemy.acidic_bomb
+  see_also:
+    - section.alchemy.throwing_potions
 - id: character.alchemy.preparation.alchemical_dust
   name: alchemical dust
   section_id: section.alchemy.preparations.alchemical_dust
@@ -1834,14 +2210,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: alchemical dust
+      heading: Alchemical Dust
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: One use covers a room. Use before searching a room or corridor to reroll and choose best result.
+  source_text: Not actually a potion at all, but rather more like a fine sand, this can be used to highlight traces of activity from others. A handful is enough to cover a room. By simply blowing this into the air, it adheres to places of activity and shines faintly. If you use this before rolling to search a room or corridor, you are allowed to reroll and choose the best result. It is enough for one use.
   type: modifier
   scope: global
   fields:
@@ -1882,14 +2258,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: bottle of experience
+      heading: Bottle of Experience
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Instantly grants 300 XP. Only one may be consumed by a hero between each dungeon.
+  source_text: Any hero that consumes this potion instantly gains the wisdom of generations past. The potion grants 300 XP. A hero can only consume one of these in between each dungeon.
   type: modifier
   scope: global
   fields:
@@ -1921,14 +2297,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: bottle of the void
+      heading: Bottle of the Void
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Open rather than consume. Any spell during the battle suffers -20 on top of CL modifier.
+  source_text: This potion is not meant to be consumed. In fact, it is not a liquid in the usual sense, but rather a manifestation of the void. When the bottle is opened, it absorbs all magic. Any spell cast during the battle will suffer a -20 modifier on top of the CL modifier.
   type: modifier
   scope: global
   fields:
@@ -1969,14 +2345,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: elixir of speed
+      heading: Elixir of Speed
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Movement +1 for rest of dungeon or until end of skirmish; no effect on Overland Map.
+  source_text: Drinking this grants the hero a Movement Bonus of +1 for the rest of the dungeon or until the end of a skirmish. It has no effect on the Overland Map.
   type: modifier
   scope: global
   fields:
@@ -2017,14 +2393,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: elixir of the archer
+      heading: Elixir of the Archer
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Coat one Ranged Weapon during travel or in dungeon for +1 DMG until next dungeon exit.
+  source_text: This ointment has borderline magical properties. Designed to be used on Ranged Weapons, any such weapon coated with this gets +1 DMG until the next time you leave a dungeon. Any Ranged Weapon may be coated with this either during travel or in the dungeon. It is enough for one weapon.
   type: modifier
   scope: global
   fields:
@@ -2074,15 +2450,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: firebomb
+      heading: Firebomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Thrown at enemy or square. Fire Damage to hit square, half to surrounding squares:
-    Weak 1d6, Standard 1d10, Supreme 1d12.'
+  source_text: 'This highly volatile fluid can be thrown at an enemy or a square. When it lands, it explodes causing Fire Damage to the square it hits, and half that damage to all the surrounding squares at a rate of: Weak 1d6 DMG; Standard 1d10 DMG; Supreme 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -2115,6 +2490,8 @@
         type: literal
         value: 0.5
   entity_id: equipment.alchemy.firebomb
+  see_also:
+    - section.alchemy.throwing_potions
 - id: character.alchemy.preparation.liquid_fire
   name: liquid fire
   section_id: section.alchemy.preparations.liquid_fire
@@ -2123,14 +2500,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: liquid fire
+      heading: Liquid Fire
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Pour on close-combat weapon, causing Fire Damage for rest of battle.
+  source_text: This potion can be poured on a close-combat weapon, setting it on fire. The weapon causes Fire Damage for the rest of the battle.
   type: modifier
   scope: global
   fields:
@@ -2171,16 +2548,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: poison
+      heading: Poison
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Apply to a weapon at any time; evaporates at next battle end even without a strike.
-    Alternatively poisons 5 projectiles, dipped as part of reloading without extra AP or time limit.
-    Enemies losing HP lose 1 HP each turn for rest of battle.
+  source_text: This poison can be applied to a weapon at any time. It lasts until the next end of a battle. Even if you do not strike anything, the poison will evaporate after the battle. The poison could also be used to poison 5 projectiles. Since these are dipped before firing, there is no time limitation and it is considered part of reloading (no extra AP needed). Enemies losing HP to such a weapon lose 1HP every turn for the rest of the battle.
   type: modifier
   scope: global
   fields:
@@ -2257,15 +2632,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: potion of constitution
+      heading: Potion of Constitution
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +10/+15/+20 CON until current battle end, or next battle
-    end if used outside battle.
+  source_text: This potion temporarily increases the Constitution of your hero. It comes in the Weak, Standard, and Supreme dilutions, granting +10, +15 and +20 Constitution, respectively. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle.
   type: modifier
   scope: global
   fields:
@@ -2297,7 +2671,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: potion of courage
+      heading: Potion of Courage
       extraction:
         method: text
         confidence: high
@@ -2306,15 +2680,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: Potion of Courage (continued)
+      heading: Potion of Courage
+      locator:
+        region: continuation at the top of the left column (no heading repeated)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +10/+15/+20 RES until current battle end, or next battle
-    end if used outside battle.
+  source_text: This potion temporarily increases the resolve of your hero. It comes in Weak, Standard, and Supreme mixtures, granting +10, +15, and +20 Resolve, respectively. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle.
   type: modifier
   scope: global
   fields:
@@ -2346,15 +2721,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of cure disease
+      heading: Potion of Cure Disease
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak succeeds 75%; Standard and Supreme 100%. Removes disease and all its negative
-    effects. Supreme also heals 1d3 HP.
+  source_text: Once consumed, the hero is cured, and all negative effects of a disease are removed. A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. Further, a Supreme will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -2377,16 +2751,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of cure poison
+      heading: Potion of Cure Poison (Antidote)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Antidote. Weak succeeds 75%; Standard and Supreme 100%. Removes poison effect. Supreme
-    also heals 1d3 HP.
+  source_text: Once consumed, the effect of poison is removed. A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. The Supreme potion will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -2409,15 +2781,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of disorientation
+      heading: Potion of Disorientation (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Thrown. Model in square hit must pass RES or forfeit next turn. Adjacent models test
-    RES+20. Does not work on undead.
+  source_text: The fume from this potion numbs the mind of anyone inhaling it. Any model in the square hit will have to make a RES test or forfeit the next turn. Any model standing next to this square must pass a RES test with +20 RES. This does not work on undead.
   type: modifier
   scope: global
   fields:
@@ -2468,6 +2839,8 @@
         type: literal
         value: forfeit next turn
   entity_id: equipment.alchemy.potion_of_disorientation
+  see_also:
+    - section.alchemy.throwing_potions
 - id: character.alchemy.preparation.potion_of_dexterity
   name: potion of dexterity
   section_id: section.alchemy.preparations.potion_of_dexterity
@@ -2476,15 +2849,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of dexterity
+      heading: Potion of Dexterity
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +5/+10/+15 DEX and same modifier to all DEX based skills.
-    Lasts until current battle end or next battle end if outside battle.
+  source_text: This potion temporarily increases the Dexterity of your hero. It comes in Weak, Standard, and Supreme versions, granting +5, +10, and +15 DEX respectively. The same bonus is applied to all DEX bases skills as well. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle.
   type: modifier
   scope: global
   fields:
@@ -2525,17 +2897,25 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of dragons breath
+      heading: Potion of Dragon’s Breath
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 80
+      printed_page: 78
+      heading: Potion of Dragon’s Breath
+      locator:
+        region: figure and caption in the right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Breathe fire once, range 2 squares. Either 1d8 Fire in adjacent square, or 1d4 Fire in
-    adjacent square and one square adjacent to it. Can form line or two connected squares adjacent
-    to hero. Diagram includes diagonal squares; caption prints 2dx1d4.
+  source_text: 'Anyone who drinks these gains the ability to breathe fire once. The fire jet has a range of 2 squares and can either cause 1d8 Fire Damage in the square adjacent to the hero, or 1d4 Fire Damage in the adjacent square and one square adjacent to that square. That means the jet can be either a spot, a straight line away from the hero, or two connected squares adjacent from the hero as they turn their head from side to side while breathing fire. ... The Dragon’s Breath can be used in 4 different ways. 1: Flaming two squares sideways (2x1d4 fire damage). 2: Two squares in a line (2x1d4 fire damage). 3: Two squares diagonally (2dx1d4 fire damage). 4: One square with 1d8 fire damage. Ignore the facing of the North Star Military Figure as it would, of course, turn in the direction the fire was going to go.'
   type: modifier
   scope: global
   fields:
@@ -2586,6 +2966,8 @@
         type: literal
         value: adjacent square plus adjacent to that square; diagram also diagonal
   entity_id: equipment.alchemy.potion_of_dragons_breath
+  issues:
+    - issue.alchemy.dragons_breath_geometry
 - id: character.alchemy.preparation.potion_of_dragon_skin
   name: potion of dragon skin
   section_id: section.alchemy.preparations.potion_of_dragon_skin
@@ -2594,15 +2976,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of dragon skin
+      heading: Potion of Dragon Skin
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: For 3 turns ignore all damage except spells or poison. Armour may still be damaged
-    normally; no HP deducted for ignored damage.
+  source_text: This potion will make the drinker's skin as hard as a Dragon’s hide. No weapon can penetrate it. Apart from damage caused by spells or poison, the hero ignores all damage for 3 turns. Please note, the armour of the hero can still be damaged in the normal way, but no HP is deducted from the hero.
   type: modifier
   scope: global
   fields:
@@ -2643,14 +3024,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: potion of energy
+      heading: Potion of Energy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +1/+2/+3 Energy until end of dungeon or skirmish.
+  source_text: This increases the energy of your hero until the end of the dungeon or the end of a skirmish. It comes in Weak, Standard, and Supreme forms, granting +1, +2, and +3 amounts of energy, respectively.
   type: modifier
   scope: global
   fields:
@@ -2682,17 +3063,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of fire protection
+      heading: Potion of Fire Protection
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Any hero that drinks this becomes impervious to Fire Damage. All DMG caused by fire is
-    reduced by 1d10. Make a separate roll each time the hero is attacked. It lasts until the end of
-    the current battle. If not in battle, it lasts until the end of the next battle.
+  source_text: Any hero that drinks this becomes impervious to Fire Damage. All DMG caused by fire is reduced by 1d10. Make a separate roll each time the hero is attacked. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle.
   type: modifier
   scope: global
   fields:
@@ -2744,14 +3122,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of health
+      heading: Potion of Health
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak, Standard and Supreme restore 1d4, 1d6 and 1d10 HP respectively.
+  source_text: This is the classic potion to heal your heroes. It comes in Weak, Standard, and Supreme formulas, which heal 1d4, 1d6, and 1d10 Hit Points, respectively.
   type: modifier
   scope: global
   fields:
@@ -2774,14 +3152,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of mana
+      heading: Potion of Mana
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak, Standard and Supreme restore 1d20, 2d20 and 3d20 Mana respectively.
+  source_text: This potion refills your wizard’s Mana level. It comes in Weak, Standard, and Supreme versions, which restore 1d20, 2d20, and 3d20 Mana, respectively.
   type: modifier
   scope: global
   fields:
@@ -2804,16 +3182,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: vial of invisibility
+      heading: Vial of Invisibility
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Invisible for one battle and unable to fight. Remove hero until battle end, then return
-    to any chosen square in original room or corridor.
+  source_text: This potion makes the drinker invisible during one battle. Unfortunately, this makes the hero invisible to themselves as well, making fighting impossible. Remove the hero from the table until the battle is over. When the battle is over, return the hero to any chosen square in the original room or corridor.
   type: modifier
   scope: global
   fields:
@@ -2863,14 +3239,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of rage
+      heading: Potion of Rage
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants Frenzy Perk effect without paying Energy for one battle.
+  source_text: This potion grants the effect of the Frenzy Perk, without paying energy. It is enough to last for one battle.
   type: modifier
   scope: global
   fields:
@@ -2908,14 +3284,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of restoration
+      heading: Potion of Restoration
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Restores hero to full health and removes any disease or poison.
+  source_text: This potion is a truly powerful form of the Potion of Health. It restores a hero to full health and removes any disease or poison.
   type: modifier
   scope: global
   fields:
@@ -2960,15 +3336,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of strength
+      heading: Potion of Strength
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +10/+15/+20 Strength. Text says until next battle and
-    current battle; between battles lasts next battle or dungeon end if no more battles.
+  source_text: A Potion of Strength increases the strength of your hero temporarily. It comes in Weak, Standard, and Supreme types, granting +10, +15, and +20 Strength, respectively. It will last until the end of the next battle. That means it can be drunk in between battles. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle (or the end of dungeon if there are no more battles).
   type: modifier
   scope: global
   fields:
@@ -2992,6 +3367,8 @@
         type: literal
         value: current_or_next_battle_or_dungeon_end
   entity_id: equipment.alchemy.potion_of_strength
+  issues:
+    - issue.alchemy.stat_potion_duration
 - id: character.alchemy.preparation.potion_of_wisdom
   name: potion of wisdom
   section_id: section.alchemy.preparations.potion_of_wisdom
@@ -3000,15 +3377,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of wisdom
+      heading: Potion of Wisdom
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Weak/Standard/Supreme grant +10/+15/+20 WIS and all WIS based skills. Current battle
-    end; between battles next battle end or dungeon end if no more battles.
+  source_text: This potion temporarily increases the Wisdom of your hero. It comes in Weak, Standard, and Supreme forms, granting +10, +15, and +20 Wisdom respectively. The same modifier is applied to all WIS based skills. It will last until the end of the next battle. That means it can be drunk in between battles. It lasts until the end of the current battle. If not in battle, it lasts until the end of the next battle (or the end of the dungeon if there are no more battles).
   type: modifier
   scope: global
   fields:
@@ -3041,6 +3417,8 @@
         type: literal
         value: current_or_next_battle_or_dungeon_end
   entity_id: equipment.alchemy.potion_of_wisdom
+  issues:
+    - issue.alchemy.stat_potion_duration
 - id: character.alchemy.preparation.vial_of_corrosion
   name: vial of corrosion
   section_id: section.alchemy.preparations.vial_of_corrosion
@@ -3049,14 +3427,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: vial of corrosion
+      heading: Vial of Corrosion
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: One quality; one vial opens one lock automatically. Spend one action adjacent to door.
+  source_text: This is a very powerful corrosive fluid used by alchemists to dissolve metal. It is primarily used by questing alchemists to open locks. This fluid only comes in one quality and one vial contains enough to open one lock. The hero must spend one action adjacent to the door to use this potion and the lock will automatically open.
   type: modifier
   scope: global
   fields:
@@ -3097,16 +3475,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: potion of smoke
+      heading: Potion of Smoke (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Thrown; obscures LOS in hit square and 8 surrounding squares. Fighting in smoke at -20
-    CS; shooting through impossible. Lasts 4 turns.
+  source_text: This vial creates a thick white smoke, obscuring LOS in the hit square and all 8 surrounding squares. Any fighting within the smoke is at -20 CS and shooting through the smoke is impossible. It lasts for 4 turns.
   type: modifier
   scope: global
   fields:
@@ -3157,6 +3533,8 @@
         type: literal
         value: 4
   entity_id: equipment.alchemy.potion_of_smoke
+  see_also:
+    - section.alchemy.throwing_potions
 - id: character.alchemy.preparation.weapon_oil
   name: weapon oil
   section_id: section.alchemy.preparations.weapon_oil
@@ -3165,14 +3543,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: weapon oil
+      heading: Weapon Oil
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Coat one edged weapon during travel or in dungeon for +1 DMG until next dungeon exit.
+  source_text: This ointment works wonders on metal, making it cut through flesh like nothing. Any edged weapon can be coated with this either during travel or in the dungeon. This will grant a +1 DMG modifier until the next time you leave a dungeon. One potion is enough for one weapon.
   type: modifier
   scope: global
   fields:
@@ -3216,20 +3594,20 @@
   entity_id: equipment.alchemy.weapon_oil
 - id: character.alchemy.quality_effect.acidic_bomb.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.acidic_bomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: weak
+      heading: Acidic Bomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  source_text: 'When it lands, it explodes causing acidic damage to the square it hits, and also half that damage to all the surrounding squares at a rate of: Weak: 1d6 DMG; Standard 1d10 DMG; Supreme: 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3274,20 +3652,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.acidic_bomb.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.acidic_bomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: standard
+      heading: Acidic Bomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  source_text: 'When it lands, it explodes causing acidic damage to the square it hits, and also half that damage to all the surrounding squares at a rate of: Weak: 1d6 DMG; Standard 1d10 DMG; Supreme: 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3332,20 +3710,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.acidic_bomb.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.acidic_bomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: supreme
+      heading: Acidic Bomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Acidic Bomb.'
+  source_text: 'When it lands, it explodes causing acidic damage to the square it hits, and also half that damage to all the surrounding squares at a rate of: Weak: 1d6 DMG; Standard 1d10 DMG; Supreme: 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3390,20 +3768,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.firebomb.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.firebomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: weak
+      heading: Firebomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  source_text: 'When it lands, it explodes causing Fire Damage to the square it hits, and half that damage to all the surrounding squares at a rate of: Weak 1d6 DMG; Standard 1d10 DMG; Supreme 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3448,20 +3826,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.firebomb.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.firebomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: standard
+      heading: Firebomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  source_text: 'When it lands, it explodes causing Fire Damage to the square it hits, and half that damage to all the surrounding squares at a rate of: Weak 1d6 DMG; Standard 1d10 DMG; Supreme 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3506,20 +3884,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.firebomb.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.firebomb
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: supreme
+      heading: Firebomb (Tr)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d6 / 1d10 / 1d12. Values from Firebomb.'
+  source_text: 'When it lands, it explodes causing Fire Damage to the square it hits, and half that damage to all the surrounding squares at a rate of: Weak 1d6 DMG; Standard 1d10 DMG; Supreme 1d12 DMG.'
   type: modifier
   scope: global
   fields:
@@ -3564,20 +3942,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_constitution.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_constitution
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: weak
+      heading: Potion of Constitution
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  source_text: It comes in the Weak, Standard, and Supreme dilutions, granting +10, +15 and +20 Constitution, respectively.
   type: modifier
   scope: global
   fields:
@@ -3609,20 +3987,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_constitution.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_constitution
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: standard
+      heading: Potion of Constitution
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  source_text: It comes in the Weak, Standard, and Supreme dilutions, granting +10, +15 and +20 Constitution, respectively.
   type: modifier
   scope: global
   fields:
@@ -3654,20 +4032,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_constitution.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_constitution
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: supreme
+      heading: Potion of Constitution
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Constitution.'
+  source_text: It comes in the Weak, Standard, and Supreme dilutions, granting +10, +15 and +20 Constitution, respectively.
   type: modifier
   scope: global
   fields:
@@ -3699,20 +4077,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_courage.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_courage
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: weak
+      heading: Potion of Courage
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  source_text: It comes in Weak, Standard, and Supreme mixtures, granting +10, +15, and +20 Resolve, respectively.
   type: modifier
   scope: global
   fields:
@@ -3744,20 +4122,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_courage.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_courage
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: standard
+      heading: Potion of Courage
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  source_text: It comes in Weak, Standard, and Supreme mixtures, granting +10, +15, and +20 Resolve, respectively.
   type: modifier
   scope: global
   fields:
@@ -3789,20 +4167,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_courage.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_courage
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 79
       printed_page: 77
-      heading: supreme
+      heading: Potion of Courage
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Courage.'
+  source_text: It comes in Weak, Standard, and Supreme mixtures, granting +10, +15, and +20 Resolve, respectively.
   type: modifier
   scope: global
   fields:
@@ -3834,20 +4212,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_disease.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_disease
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: weak
+      heading: Potion of Cure Disease
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. Further, a Supreme will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -3888,20 +4266,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_disease.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_disease
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: standard
+      heading: Potion of Cure Disease
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. Further, a Supreme will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -3942,20 +4320,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_disease.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_disease
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: supreme
+      heading: Potion of Cure Disease
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Disease.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. Further, a Supreme will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -3996,20 +4374,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_poison.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_poison
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: weak
+      heading: Potion of Cure Poison (Antidote)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. The Supreme potion will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -4050,20 +4428,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_poison.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_poison
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: standard
+      heading: Potion of Cure Poison (Antidote)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. The Supreme potion will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -4104,20 +4482,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_cure_poison.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_cure_poison
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: supreme
+      heading: Potion of Cure Poison (Antidote)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 75% / 100% / 100%; heal 1d3 HP. Values from Potion of Cure Poison.'
+  source_text: A Weak potion has a 75% chance of success, a Standard and Supreme has a 100% chance. The Supreme potion will also heal 1d3 HP.
   type: modifier
   scope: global
   fields:
@@ -4158,20 +4536,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_dexterity.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_dexterity
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: weak
+      heading: Potion of Dexterity
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  source_text: It comes in Weak, Standard, and Supreme versions, granting +5, +10, and +15 DEX respectively.
   type: modifier
   scope: global
   fields:
@@ -4203,20 +4581,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_dexterity.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_dexterity
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: standard
+      heading: Potion of Dexterity
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  source_text: It comes in Weak, Standard, and Supreme versions, granting +5, +10, and +15 DEX respectively.
   type: modifier
   scope: global
   fields:
@@ -4248,20 +4626,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_dexterity.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_dexterity
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: supreme
+      heading: Potion of Dexterity
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +5 / +10 / +15. Values from Potion of Dexterity.'
+  source_text: It comes in Weak, Standard, and Supreme versions, granting +5, +10, and +15 DEX respectively.
   type: modifier
   scope: global
   fields:
@@ -4293,20 +4671,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_energy.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_energy
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: weak
+      heading: Potion of Energy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +1, +2, and +3 amounts of energy, respectively.
   type: modifier
   scope: global
   fields:
@@ -4338,20 +4716,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_energy.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_energy
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: standard
+      heading: Potion of Energy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +1, +2, and +3 amounts of energy, respectively.
   type: modifier
   scope: global
   fields:
@@ -4383,20 +4761,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_energy.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_energy
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 80
       printed_page: 78
-      heading: supreme
+      heading: Potion of Energy
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +1 / +2 / +3. Values from Potion of Energy.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +1, +2, and +3 amounts of energy, respectively.
   type: modifier
   scope: global
   fields:
@@ -4428,20 +4806,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_health.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_health
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: weak
+      heading: Potion of Health
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  source_text: It comes in Weak, Standard, and Supreme formulas, which heal 1d4, 1d6, and 1d10 Hit Points, respectively.
   type: modifier
   scope: global
   fields:
@@ -4486,20 +4864,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_health.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_health
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: standard
+      heading: Potion of Health
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  source_text: It comes in Weak, Standard, and Supreme formulas, which heal 1d4, 1d6, and 1d10 Hit Points, respectively.
   type: modifier
   scope: global
   fields:
@@ -4544,20 +4922,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_health.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_health
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: supreme
+      heading: Potion of Health
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d4 / 1d6 / 1d10. Values from Potion of Health.'
+  source_text: It comes in Weak, Standard, and Supreme formulas, which heal 1d4, 1d6, and 1d10 Hit Points, respectively.
   type: modifier
   scope: global
   fields:
@@ -4602,20 +4980,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_mana.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_mana
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: weak
+      heading: Potion of Mana
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  source_text: It comes in Weak, Standard, and Supreme versions, which restore 1d20, 2d20, and 3d20 Mana, respectively.
   type: modifier
   scope: global
   fields:
@@ -4660,20 +5038,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_mana.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_mana
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: standard
+      heading: Potion of Mana
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  source_text: It comes in Weak, Standard, and Supreme versions, which restore 1d20, 2d20, and 3d20 Mana, respectively.
   type: modifier
   scope: global
   fields:
@@ -4718,20 +5096,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_mana.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_mana
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: supreme
+      heading: Potion of Mana
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: 1d20 / 2d20 / 3d20. Values from Potion of Mana.'
+  source_text: It comes in Weak, Standard, and Supreme versions, which restore 1d20, 2d20, and 3d20 Mana, respectively.
   type: modifier
   scope: global
   fields:
@@ -4776,20 +5154,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_strength.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_strength
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: weak
+      heading: Potion of Strength
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  source_text: It comes in Weak, Standard, and Supreme types, granting +10, +15, and +20 Strength, respectively.
   type: modifier
   scope: global
   fields:
@@ -4821,20 +5199,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_strength.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_strength
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: standard
+      heading: Potion of Strength
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  source_text: It comes in Weak, Standard, and Supreme types, granting +10, +15, and +20 Strength, respectively.
   type: modifier
   scope: global
   fields:
@@ -4866,20 +5244,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_strength.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_strength
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: supreme
+      heading: Potion of Strength
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Strength.'
+  source_text: It comes in Weak, Standard, and Supreme types, granting +10, +15, and +20 Strength, respectively.
   type: modifier
   scope: global
   fields:
@@ -4911,20 +5289,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_wisdom.weak
   name: weak
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_wisdom
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: weak
+      heading: Potion of Wisdom
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +10, +15, and +20 Wisdom respectively.
   type: modifier
   scope: global
   fields:
@@ -4956,20 +5334,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_wisdom.standard
   name: standard
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_wisdom
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: standard
+      heading: Potion of Wisdom
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +10, +15, and +20 Wisdom respectively.
   type: modifier
   scope: global
   fields:
@@ -5001,20 +5379,20 @@
     - table.alchemy.strengths
 - id: character.alchemy.quality_effect.potion_of_wisdom.supreme
   name: supreme
-  section_id: section.alchemy.preparations
+  section_id: section.alchemy.preparations.potion_of_wisdom
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 81
       printed_page: 79
-      heading: supreme
+      heading: Potion of Wisdom
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Weak / Standard / Supreme: +10 / +15 / +20. Values from Potion of Wisdom.'
+  source_text: It comes in Weak, Standard, and Supreme forms, granting +10, +15, and +20 Wisdom respectively.
   type: modifier
   scope: global
   fields:

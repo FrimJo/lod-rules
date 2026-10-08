@@ -1,0 +1,242 @@
+- id: procedure.alchemy_making_a_potion
+  name: Making a potion (flowchart)
+  section_id: section.alchemy
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 77
+      printed_page: 75
+      heading: Making a potion
+      locator:
+        region: full-page flowchart
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 76
+      printed_page: 74
+      heading: Mixing Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    Start You will need 1 empty bottle Potion quality? Weak? Standard? Supreme? Recipe requires
+    ... Known recipe? yes! +10 bonus no! At least one exquisite component? yes! +10 bonus no!
+    Make an Alchemy skill check Success? no! Discard components. (You can keep the bottle) yes!
+    Known recipe? no! Randomly determine which potion you’ve created Write down your recipe for
+    future reference yes! Add new potion to character sheet
+  see_also:
+    - section.alchemy.mixing_potions
+    - section.alchemy.quality
+    - section.alchemy.making_a_recipe
+  issues:
+    - issue.alchemy.flowchart_recipe_record
+  fields:
+    quality:
+      type: string
+      role: input
+      description: chosen potion quality (weak, standard or supreme)
+    known_recipe:
+      type: boolean
+      role: input
+      description: the alchemist follows a known recipe
+    exquisite_component:
+      type: boolean
+      role: input
+      description: at least one component used is Exquisite
+    success:
+      type: boolean
+      role: input
+      description: outcome of the Alchemy skill check, supplied by the caller
+  dependencies:
+    - key: mix
+      label: Alchemical Tools, empty bottle, quality chosen before the roll
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix
+    - key: weak
+      label: Weak Potion components
+      section_id: section.alchemy.quality
+      object_id: character.alchemy.ordinary.weak
+    - key: standard
+      label: Standard Potion components
+      section_id: section.alchemy.quality
+      object_id: character.alchemy.ordinary.standard
+    - key: supreme
+      label: Supreme Potion components
+      section_id: section.alchemy.quality
+      object_id: character.alchemy.ordinary.supreme
+    - key: recipe_bonus
+      label: +10 for a followed recipe
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix.recipe_bonus
+    - key: exquisite_bonus
+      label: +10 for at least one Exquisite component
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix.exquisite_bonus
+    - key: failure
+      label: Failed Alchemy test forfeits components except the bottle
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix.failure
+    - key: random_result
+      label: Roll on the Potions Table without a recipe
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix.success.random
+    - key: recipe_result
+      label: The intended potion is created with a recipe
+      section_id: section.alchemy.mixing_potions
+      object_id: character.alchemy.mix.success.recipe
+  steps:
+    - id: bottle
+      source_text: Start You will need 1 empty bottle
+      effects:
+        - type: invoke
+          dependency: mix
+    - id: quality
+      source_text: Potion quality? Weak? Standard? Supreme?
+      effects: []
+      substeps:
+        - id: weak
+          source_text: 'Recipe requires : 1 ingredient 1 part'
+          effects:
+            - type: invoke
+              dependency: weak
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: quality
+            right:
+              type: literal
+              value: weak
+        - id: standard
+          source_text: 'Recipe requires : 2 Ingredients 1 part -or- 1 ingredient 2 parts'
+          effects:
+            - type: invoke
+              dependency: standard
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: quality
+            right:
+              type: literal
+              value: standard
+        - id: supreme
+          source_text: 'Recipe requires: 3 ingredients 1 part -or- 1 ingredient 3 parts -or- 2 ingredients 2 parts'
+          effects:
+            - type: invoke
+              dependency: supreme
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: quality
+            right:
+              type: literal
+              value: supreme
+    - id: known_recipe_bonus
+      source_text: Known recipe? yes! +10 bonus
+      effects:
+        - type: invoke
+          dependency: recipe_bonus
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: known_recipe
+        right:
+          type: literal
+          value: true
+    - id: exquisite_bonus
+      source_text: At least one exquisite component? yes! +10 bonus
+      effects:
+        - type: invoke
+          dependency: exquisite_bonus
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: exquisite_component
+        right:
+          type: literal
+          value: true
+    - id: skill_check
+      source_text: Make an Alchemy skill check Success?
+      effects: []
+    - id: discard
+      source_text: Discard components. (You can keep the bottle)
+      effects:
+        - type: invoke
+          dependency: failure
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: success
+        right:
+          type: literal
+          value: false
+    - id: random_result
+      source_text: Randomly determine which potion you’ve created Write down your recipe for future reference
+      effects:
+        - type: invoke
+          dependency: random_result
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: success
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: known_recipe
+            right:
+              type: literal
+              value: false
+    - id: add_potion
+      source_text: Add new potion to character sheet
+      effects: []
+      substeps:
+        - id: recipe_result
+          source_text: Known recipe? yes! Add new potion to character sheet
+          effects:
+            - type: invoke
+              dependency: recipe_result
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: known_recipe
+            right:
+              type: literal
+              value: true
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: success
+        right:
+          type: literal
+          value: true
+  entry_step: bottle
+  exit_step: add_potion

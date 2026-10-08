@@ -1,0 +1,263 @@
+- id: procedure.offer_prayer
+  name: Offer a prayer
+  section_id: section.prayers.will_the_gods_listen
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: About Prayers
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Will the Gods Listen?
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Duration
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 82
+      printed_page: 80
+      heading: Interruption
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: >-
+    A prayer can be offered as a free action, parallel to moving or fighting. ... This is done
+    with such intensity that it costs 1 Point of Energy. ... The Warrior Priest must roll equal to
+    or below their Battle Prayer Skill to succeed. If successful, the prayer will take effect. If
+    the roll is 01-05, the prayer is impeccable, and no Energy is spent. In certain cases, there
+    can be an opposed Resolve Test from the enemies to avoid the effect. ... Only one prayer can be
+    active at once.
+  fields:
+    active_prayers:
+      type: number
+      role: input
+      description: Prayers of this priest already active when the new one is offered.
+      integer: true
+      minimum: 0
+    roll:
+      type: number
+      role: input
+      description: The d100 result of the Battle Prayers roll.
+      integer: true
+      minimum: 1
+      maximum: 100
+    battle_prayers:
+      type: number
+      role: input
+      description: The priest's Battle Prayers skill value.
+      integer: true
+      minimum: 0
+    action_points_spent:
+      type: number
+      role: output
+      description: Action Points the offering costs (a free action).
+    energy_spent:
+      type: number
+      role: output
+      description: Energy the offering costs after the roll.
+    impeccable:
+      type: boolean
+      role: output
+      description: Whether the roll was 01-05.
+    prayer_succeeded:
+      type: boolean
+      role: output
+      description: Whether the roll was equal to or below the skill.
+    prayer_active:
+      type: boolean
+      role: output
+      description: Whether the prayer took effect and is now the active prayer.
+    offered:
+      type: boolean
+      role: output
+      description: Whether the offering was allowed (no other prayer of this priest active).
+  dependencies:
+    - key: activation
+      label: A prayer is a free action costing 1 Point of Energy
+      object_id: character.prayer.activation
+    - key: success
+      label: Roll equal to or below Battle Prayers; opposed Resolve Test where a prayer says so
+      object_id: character.prayer.success
+    - key: impeccable
+      label: 01-05 is impeccable and spends no Energy
+      object_id: character.prayer.impeccable
+    - key: duration
+      label: One active prayer; current battle, or 4 turns between battles
+      object_id: character.prayer.duration
+    - key: interruption
+      label: Stunned, falling over, 0 HP or a failed Terror Test cancels the prayer
+      object_id: character.prayer.interruption
+    - key: perfect_result
+      label: The normal 01-05 Perfect Result options on any check
+      object_id: core.check.perfect_result
+  steps:
+    - id: offer
+      source_text: >-
+        A prayer can be offered as a free action, parallel to moving or fighting. ... Only one
+        prayer can be active at once.
+      effects:
+        - type: set
+          target: offered
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: prayer_succeeded
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: prayer_active
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: impeccable
+          value:
+            type: literal
+            value: false
+        - type: invoke
+          dependency: duration
+        - type: require
+          condition:
+            type: compare
+            operator: lt
+            left:
+              type: field
+              name: active_prayers
+            right:
+              type: literal
+              value: 1
+        - type: invoke
+          dependency: activation
+        - type: set
+          target: action_points_spent
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: offered
+          value:
+            type: literal
+            value: true
+    - id: roll_check
+      source_text: >-
+        The Warrior Priest must roll equal to or below their Battle Prayer Skill to succeed. If
+        successful, the prayer will take effect.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: offered
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: battle_prayers
+      effects:
+        - type: invoke
+          dependency: success
+        - type: set
+          target: prayer_succeeded
+          value:
+            type: literal
+            value: true
+    - id: pay_energy
+      source_text: >-
+        This is done with such intensity that it costs 1 Point of Energy. ... If the roll is 01-05,
+        the prayer is impeccable, and no Energy is spent.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: offered
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: energy_spent
+          value:
+            type: literal
+            value: 1
+      substeps:
+        - id: impeccable
+          source_text: If the roll is 01-05, the prayer is impeccable, and no Energy is spent.
+          when:
+            type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 5
+          effects:
+            - type: invoke
+              dependency: impeccable
+            - type: invoke
+              dependency: perfect_result
+            - type: set
+              target: impeccable
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: energy_spent
+              value:
+                type: literal
+                value: 0
+    - id: take_effect
+      source_text: >-
+        If successful, the prayer will take effect. In certain cases, there can be an opposed
+        Resolve Test from the enemies to avoid the effect. ... A prayer will last until the end of
+        the current battle, unless otherwise noted.
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: prayer_succeeded
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: set
+          target: prayer_active
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: interruption
+  entry_step: offer
+  exit_step: take_effect

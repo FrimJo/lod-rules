@@ -1,0 +1,438 @@
+- id: test.core.magic.focus_example.ozmor
+  name: printed Focus example, Ozmor focuses for 2 actions (Arcane Arts 73, miscast threshold 85)
+  section_id: section.magic.focus
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Focus
+      locator:
+        paragraph: Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Example: The Level 4 Wizard, Ozmor, has decided to cast the ‘Summon Demon Spell’
+    which has a Casting Value of 25. Ozmor’s Arcane Arts skill level is 53 which would give him a
+    chance of success of 28. To even the odds, he chooses to focus for 2 actions. His new chance of
+    success is now 48. At the same time, however, any roll above 85 will now result in a Miscast. He
+    rolls 49 on his casting roll. Luckily, he has the Summoner Talent, giving him a +5 which allows
+    him to summon the demon. He also uses 25 Mana since the spell succeeded. Now, all he needs to do
+    is control the demon!'
+  kind: source_example
+  rule_ids:
+    - core.magic.focus
+    - core.magic.miscast.threshold.normal
+  see_also:
+    - section.appendix_iv_spells.level_4
+  issues:
+    - issue.magic.focus_example
+  inputs:
+    focus_actions: 2
+    arcane_arts: 53
+    cast_next_possible_action: true
+    wounded: false
+    power_levels: 0
+  expected:
+    state:
+      focused_arcane_arts: 73
+      miscast_reduction: 10
+      miscast_threshold: 85
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - core.magic.focus
+      - core.magic.miscast.threshold.normal
+    unresolved: []
+    steps: []
+- id: test.core.magic.scroll_example.magic_bolt_scroll
+  name: printed Magic Scrolls example, Magic Bolt from a scroll (CV 10-10 = 0, roll 50 or lower)
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 65
+      pdf_page: 67
+      heading: Magic Scrolls
+      locator:
+        paragraph: Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Example: A Magic Bolt Spell requires the caster to be Level 3, and the CV of the
+    spell is 10. A wizard with an Arcane Arts skill of 50 would then need to roll 40 to succeed.
+    However, if this was a scroll, the Casting Value of the spell would instead be 10-10 = 0. Thus,
+    the caster would only need to roll 50 or lower to succeed. Furthermore, this could be done even
+    if the caster was Level 1, and by a non-wizard but in that case using WIS instead of Arcane
+    Arts.'
+  kind: source_example
+  rule_ids:
+    - core.magic.scroll
+    - core.magic.scroll.skill.wizard
+  see_also:
+    - section.appendix_iv_spells.level_3
+  inputs:
+    casting_value: 10
+    focus_actions: 0
+    quick_slot: false
+    wizard: true
+    arcane_arts: 50
+  expected:
+    state:
+      scroll_cv: 0
+      mana_spent: 0
+      upkeep_spent: 0
+      level_restricted: false
+      casting_threshold: 50
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - core.magic.scroll
+      - core.magic.scroll.skill.wizard
+    unresolved: []
+    steps: []
+- id: test.procedure.hero_spell_casting.ranged_focus_success
+  name: derived case, a focused ranged spell succeeds and pays full Mana
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.hero_spell_casting: ranged spell, line of sight clear,
+    one Focus AP, Arcane Arts 50 and CV 10, roll 30 on an unwounded caster.'
+  kind: derived_case
+  procedure_id: procedure.hero_spell_casting
+  inputs:
+    wounded: false
+    power_levels: 0
+    focus_actions: 1
+    spell_type: ranged
+    target_in_los: true
+    arcane_arts: 50
+    cast_next_possible_action: true
+    casting_value: 10
+    mana: 20
+    mana_cost: 7
+    roll: 30
+    ordinary_cast: true
+    choose_mana_gain: false
+    enemy_caster_present: false
+  expected:
+    state:
+      miscast_threshold: 90
+      to_hit_required: false
+      obstacle_modifier: 0
+      focused_arcane_arts: 60
+      miscast_reduction: 5
+      arcane_arts: 60
+      casting_threshold: 50
+      mana_spent: 7
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.hero_spell_casting
+      - core.magic.miscast.threshold.normal
+      - core.magic.missile
+      - core.magic.focus
+      - core.magic.casting.threshold
+      - core.magic.casting.success
+    unresolved: []
+    steps:
+      - determine_miscast_threshold
+      - spell_type
+      - ranged_line_of_sight
+      - focus
+      - casting_roll
+      - end_turn
+- id: test.procedure.hero_spell_casting.miscast_ends_turn
+  name: derived case, a roll at the miscast threshold rolls on the Miscast table and ends the turn
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.hero_spell_casting: incantation in a settlement, no
+    focus, roll 95 on an unwounded caster with Mana cost 7.'
+  kind: derived_case
+  procedure_id: procedure.hero_spell_casting
+  inputs:
+    wounded: false
+    power_levels: 0
+    focus_actions: 0
+    spell_type: incantation
+    in_settlement: true
+    arcane_arts: 50
+    casting_value: 10
+    mana: 20
+    mana_cost: 7
+    roll: 95
+    ordinary_cast: true
+    choose_mana_gain: false
+    enemy_caster_present: false
+  expected:
+    state:
+      miscast_threshold: 95
+      casting_threshold: 40
+      mana_spent: 4
+      turn_ended: true
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: table.magic.miscast
+    trace:
+      - procedure.hero_spell_casting
+      - core.magic.miscast.threshold.normal
+      - core.magic.incantation
+      - core.magic.casting.threshold
+      - core.magic.casting.failure
+      - core.magic.miscast
+    unresolved: []
+    steps:
+      - determine_miscast_threshold
+      - spell_type
+      - incantation
+      - casting_roll
+      - miscast
+      - end_turn
+- id: test.procedure.hero_spell_casting.perfect_declined_gain
+  name: derived case, a perfect cast whose caster declines the Mana gain still pays the listed Mana
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      locator:
+        region: ‘01-05’ on AA roll?; no! → Subtract mana cost for spell from mana pool
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Perfect Cast
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.hero_spell_casting: ranged spell, line of sight clear,
+    no focus, Arcane Arts 50 and CV 10, roll 03 on an unwounded caster who declines the Mana gain.'
+  kind: derived_case
+  procedure_id: procedure.hero_spell_casting
+  inputs:
+    wounded: false
+    power_levels: 0
+    focus_actions: 0
+    spell_type: ranged
+    target_in_los: true
+    arcane_arts: 50
+    casting_value: 10
+    mana: 20
+    mana_cost: 7
+    roll: 3
+    ordinary_cast: false
+    choose_mana_gain: false
+    enemy_caster_present: false
+  expected:
+    state:
+      miscast_threshold: 95
+      to_hit_required: false
+      obstacle_modifier: 0
+      casting_threshold: 40
+      mana_spent: 7
+      maximize_damage_healing: true
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.hero_spell_casting
+      - core.magic.miscast.threshold.normal
+      - core.magic.missile
+      - core.magic.casting.threshold
+      - core.magic.perfect.decline
+      - core.magic.perfect.maximize
+    unresolved: []
+    steps:
+      - determine_miscast_threshold
+      - spell_type
+      - ranged_line_of_sight
+      - casting_roll
+      - perfect_cast
+      - end_turn
+- id: test.procedure.hero_spell_casting.failed_roll_no_dispel
+  name: derived case, an enemy caster gets no dispel roll against a failed casting roll
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      locator:
+        region: Success? yes! → Enemy spell caster present and able to dispel?**
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.hero_spell_casting: ranged spell, line of sight clear,
+    no focus, Arcane Arts 50 and CV 10, roll 60 on an unwounded caster with an enemy spell caster
+    present, not busy casting and not adjacent to a hero.'
+  kind: derived_case
+  procedure_id: procedure.hero_spell_casting
+  inputs:
+    wounded: false
+    power_levels: 0
+    focus_actions: 0
+    spell_type: ranged
+    target_in_los: true
+    arcane_arts: 50
+    casting_value: 10
+    mana: 20
+    mana_cost: 7
+    roll: 60
+    ordinary_cast: true
+    choose_mana_gain: false
+    enemy_caster_present: true
+    enemy_busy_casting: false
+    enemy_adjacent_to_hero: false
+  expected:
+    state:
+      miscast_threshold: 95
+      to_hit_required: false
+      obstacle_modifier: 0
+      casting_threshold: 40
+      mana_spent: 4
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.hero_spell_casting
+      - core.magic.miscast.threshold.normal
+      - core.magic.missile
+      - core.magic.casting.threshold
+      - core.magic.casting.failure
+    unresolved: []
+    steps:
+      - determine_miscast_threshold
+      - spell_type
+      - ranged_line_of_sight
+      - casting_roll
+      - end_turn
+- id: test.procedure.hero_spell_casting.touch_spell_no_dispel
+  name: derived case, an enemy caster gets no dispel roll against a successful Touch spell
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 66
+      pdf_page: 68
+      heading: Hero Spell Casting
+      locator:
+        region: Touch? → Make skill check (AA) → Success? → Make skill check (CS+20) → Success? →
+          Execute effect of spell
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Dispelling Magic
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.hero_spell_casting: touch spell, no focus, Arcane Arts 50,
+    CS 45 and CV 10, roll 30 on an unwounded caster with an enemy spell caster present, not busy casting
+    and not adjacent to a hero. "Touch spells or Close Combat Spells cannot be dispelled."'
+  kind: derived_case
+  procedure_id: procedure.hero_spell_casting
+  inputs:
+    wounded: false
+    power_levels: 0
+    focus_actions: 0
+    spell_type: touch
+    enemy_target: true
+    cs: 45
+    target_in_los: true
+    arcane_arts: 50
+    casting_value: 10
+    mana: 20
+    mana_cost: 7
+    roll: 30
+    ordinary_cast: true
+    choose_mana_gain: false
+    enemy_caster_present: true
+    enemy_busy_casting: false
+    enemy_adjacent_to_hero: false
+  expected:
+    state:
+      miscast_threshold: 95
+      touch_threshold: 65
+      parry_allowed: true
+      dodge_allowed: true
+      casting_threshold: 40
+      mana_spent: 7
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.hero_spell_casting
+      - core.magic.miscast.threshold.normal
+      - core.magic.touch
+      - core.magic.casting.threshold
+      - core.magic.casting.success
+    unresolved: []
+    steps:
+      - determine_miscast_threshold
+      - spell_type
+      - touch
+      - casting_roll
+      - end_turn

@@ -214,6 +214,54 @@ describe('prayers (PDF 82–83)', () => {
       }).state.constitution_after,
     ).toBe(15);
   });
+  it('offering a prayer: free action, roll at or below Battle Prayers, impeccable 01-05', () => {
+    const offer = (inputs: State) =>
+      runCase({ procedure_id: 'procedure.offer_prayer', inputs } as TestCase, pilot);
+    const base = { active_prayers: 0, roll: 40, battle_prayers: 55 };
+    const success = offer(base);
+    expect(success.steps).toEqual(['offer', 'roll_check', 'pay_energy', 'take_effect']);
+    expect(success.state).toMatchObject({
+      action_points_spent: 0,
+      energy_spent: 1,
+      impeccable: false,
+      prayer_succeeded: true,
+      prayer_active: true,
+    });
+    const failed = offer({ ...base, roll: 56 });
+    expect(failed.steps).toEqual(['offer', 'pay_energy']);
+    expect(failed.state).toMatchObject({
+      energy_spent: 1,
+      prayer_succeeded: false,
+      prayer_active: false,
+    });
+    const impeccable = offer({ ...base, roll: 5 });
+    expect(impeccable.steps).toContain('impeccable');
+    expect(impeccable.state).toMatchObject({
+      energy_spent: 0,
+      impeccable: true,
+      prayer_active: true,
+    });
+    expect(impeccable.events).toContainEqual({
+      type: 'invoke',
+      dependency: 'core.check.perfect_result',
+    });
+    const busy = offer({ ...base, active_prayers: 1 });
+    expect(busy.events).toContainEqual({ type: 'require', satisfied: false });
+    expect(busy.steps).toEqual(['offer']);
+    expect(busy.state).toMatchObject({ offered: false, prayer_active: false });
+    expect(busy.state.energy_spent).toBeUndefined();
+  });
+  it('learning a new prayer needs the priest’s level and the Inner Sanctum in Silver City', () => {
+    const learn = (inputs: State) => prayer('learning_restriction', inputs);
+    expect(
+      learn({ hero_level: 2, prayer_level: 2, settlement: 'silver_city' }).state.learnable,
+    ).toBe(true);
+    for (const input of [
+      { hero_level: 1, prayer_level: 2, settlement: 'silver_city' },
+      { hero_level: 4, prayer_level: 1, settlement: 'oakheim' },
+    ])
+      expect(learn(input).events).toContainEqual({ type: 'require', satisfied: false });
+  });
   it('relic restrictions require priest, one ring and one necklace', () => {
     for (const input of [
       { warrior_priest: false, rings: 1, necklaces: 1 },
@@ -223,13 +271,13 @@ describe('prayers (PDF 82–83)', () => {
   });
 });
 
-describe('Batch 4 source audit: self-mixed identification (PDF 76 and 197)', () => {
+describe('Batch 4 source audit: self-mixed identification (PDF 76, 77 and 197)', () => {
   it.each(['random', 'recipe'])(
     '%s retains the explicit appendix exception and its source',
     (mode) => {
       const id = `character.alchemy.mix.success.${mode}`;
       const rule = pilot.rules.find((rule) => rule.id === id)!;
-      expect(rule.source.map((source) => source.pdf_page)).toEqual([76, 197]);
+      expect(rule.source.map((source) => source.pdf_page)).toEqual([76, 77, 197]);
       expect(
         run([id], { simplified: false, succeeded: true, has_recipe: mode === 'recipe' }).state
           .identification_required,

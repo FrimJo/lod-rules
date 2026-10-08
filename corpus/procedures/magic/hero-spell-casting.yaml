@@ -1,0 +1,366 @@
+- id: procedure.hero_spell_casting
+  name: Hero Spell Casting
+  section_id: section.magic.hero_spell_casting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 68
+      printed_page: 66
+      heading: Hero Spell Casting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 65
+      printed_page: 63
+      heading: Casting Spells
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: medium
+  source_text: >-
+    Start → Determine miscast threshold* → Spell type (Ranged? / Touch? / Incantation?) → Line of
+    Sight? (If needed) → Focus? → Add +10 to AA per AP → Subtract CV from AA → Make skill check
+    (AA) → Success? → Enemy spell caster present and able to dispel?** → Make Dispel roll using
+    Enemy's RS → Execute effect of spell / Roll above miscast threshold? → Miscast! → Roll on
+    Miscast Table (pg 63) → Deduct mana for spell, (unless it was an incantation) → End character
+    turn. ‘01-05’ on AA roll? → Add mana cost for spell to mana pool; otherwise Subtract mana cost
+    for spell from mana pool, or Subtract half of mana cost for spell (RDU) from mana pool on a
+    failure.
+  issues:
+    - issue.magic.flowchart_prose_conflicts
+    - issue.magic.enemy_caster_casting
+  unresolved_references:
+    - 'Execute effect of spell: the effect itself is the spell record (Appendix IV), not this
+      procedure.'
+    - 'Make skill check (CS+20) for Touch spells: the touch test is core.magic.touch; its parry and
+      dodge resolution belongs to Combat.'
+    - 'Enemy spell caster present and able to dispel?: the chart asks this only on the Ranged?
+      branch. The Touch? branch runs AA → CS+20 → Execute effect of spell and the Incantation?
+      branch runs Success? → Execute effect of spell, so neither reaches the box, and Dispelling
+      Magic prints "Touch spells or Close Combat Spells cannot be dispelled."'
+  fields:
+    wounded:
+      type: boolean
+      role: input
+      description: The caster is wounded (Miscast, PDF 65; "injured" in the chart footnote).
+    power_levels:
+      type: number
+      role: input
+      description: Power Levels added under Increased Power.
+      integer: true
+      minimum: 0
+    focus_actions:
+      type: number
+      role: input
+      description: Action Points spent on Focus before this cast.
+      integer: true
+      minimum: 0
+    miscast_threshold:
+      type: number
+      role: output
+      description: Roll at or above which the cast is a miscast.
+    spell_type:
+      type: string
+      role: input
+      description: 'Chart branch taken: ranged, touch or incantation (a Standard or Quick spell
+        without LOS or touch needs follows the ranged branch with target_in_los true).'
+    target_in_los:
+      type: boolean
+      role: input
+      description: Line of sight from caster to target (Magic Missiles).
+    to_hit_required:
+      type: boolean
+      role: output
+      description: Magic Missiles need no "to hit" roll.
+    obstacle_modifier:
+      type: number
+      role: output
+      description: Magic Missiles take no obstacle modifiers.
+    cs:
+      type: number
+      role: input
+      description: Caster's Combat Skill for the Touch spell test.
+    enemy_target:
+      type: boolean
+      role: input
+      description: The Touch spell targets an enemy (the CS+20 test is ignored for allies).
+    touch_threshold:
+      type: number
+      role: output
+      description: CS+20 for touching an enemy.
+    parry_allowed:
+      type: boolean
+      role: output
+      description: The touch may be parried.
+    dodge_allowed:
+      type: boolean
+      role: output
+      description: The touch may be dodged.
+    in_settlement:
+      type: boolean
+      role: input
+      description: Incantations can only be cast while in a settlement.
+    arcane_arts:
+      type: number
+      role: state
+      description: Arcane Arts skill; raised by Focus for this cast only.
+    cast_next_possible_action:
+      type: boolean
+      role: input
+      description: The spell is cast as the next possible action after the last focus action.
+    focused_arcane_arts:
+      type: number
+      role: output
+      description: Arcane Arts after +10 per Focus Action Point.
+    miscast_reduction:
+      type: number
+      role: output
+      description: Miscast threshold reduction from Focus (5 per Focus Action Point).
+    casting_value:
+      type: number
+      role: input
+      description: Casting Value of the spell.
+    mana:
+      type: number
+      role: input
+      description: Caster's Mana before the cast.
+    mana_cost:
+      type: number
+      role: input
+      description: Mana cost of the spell from the Spells Listing, including Increased Power.
+    casting_threshold:
+      type: number
+      role: output
+      description: Arcane Arts minus Casting Value.
+    roll:
+      type: number
+      role: input
+      description: The d100 casting roll.
+    ordinary_cast:
+      type: boolean
+      role: input
+      description: The roll is neither a perfect cast nor a miscast; supplied by the caller.
+    mana_spent:
+      type: number
+      role: output
+      description: Mana deducted for this cast.
+    choose_mana_gain:
+      type: boolean
+      role: input
+      description: On a perfect cast, the caster chooses to add the Mana cost to the pool; when
+        false the listed Mana is spent instead (core.magic.perfect.decline).
+    maximize_damage_healing:
+      type: boolean
+      role: output
+      description: DMG or healing is maximized (perfect cast).
+    mana_after:
+      type: number
+      role: output
+      description: Mana after a perfect cast with the Mana gain chosen.
+    enemy_caster_present:
+      type: boolean
+      role: input
+      description: An enemy spell caster is present to attempt a dispel.
+    enemy_busy_casting:
+      type: boolean
+      role: input
+      description: The enemy spell caster is busy casting another spell.
+    enemy_adjacent_to_hero:
+      type: boolean
+      role: input
+      description: The enemy spell caster is adjacent to a hero.
+    enemy_may_dispel:
+      type: boolean
+      role: output
+      description: The enemy spell caster may attempt to dispel.
+    turn_ended:
+      type: boolean
+      role: output
+      description: A miscast ends the wizard's turn immediately.
+  dependencies:
+    - key: miscast_table
+      label: Roll on Miscast Table (pg 63)
+      section_id: section.magic.casting_spells.table
+      object_id: table.magic.miscast
+    - key: dispel
+      label: Make Dispel roll using Enemy's RS (Ranged Skills/2 (RDD), Dispelling Magic)
+      section_id: section.magic.dispelling_magic
+      object_id: core.magic.dispel
+    - key: spells_listing
+      label: Mana cost and Casting Value come from the Spells Listing
+      section_id: section.appendix_iv_spells
+      object_id: table.spells.level_1
+  steps:
+    - id: determine_miscast_threshold
+      source_text: Start → Determine miscast threshold* (*Miscast Threshold • Base 95 • -5 if caster
+        injured • -5 per AP of Focus • -1 per point of increased power)
+      rule_refs:
+        - core.magic.miscast.threshold.normal
+        - core.magic.miscast.threshold.wounded
+      effects: []
+    - id: spell_type
+      source_text: Spell type → Ranged? / Touch? / Incantation?
+      effects: []
+      substeps:
+        - id: ranged_line_of_sight
+          source_text:
+            Ranged? → Line of Sight? (If needed) → Blocked? Can't cast ranged spell. Choose
+            different action. → Clear? → Focus?
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: spell_type
+            right:
+              type: literal
+              value: ranged
+          rule_refs:
+            - core.magic.missile
+          effects: []
+        - id: touch
+          source_text: Touch? → Make skill check (AA) applying any modifiers → Success? → Make skill
+            check (CS+20) → Success? → Execute effect of spell
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: spell_type
+            right:
+              type: literal
+              value: touch
+          rule_refs:
+            - core.magic.touch
+          effects: []
+        - id: incantation
+          source_text: Incantation? → Make skill check (AA) applying any modifiers → Success? →
+            Execute effect of spell / Incantation failed
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: spell_type
+            right:
+              type: literal
+              value: incantation
+          rule_refs:
+            - core.magic.incantation
+          effects: []
+    - id: focus
+      source_text: Focus? → yes! → Add +10 to AA per AP
+      when:
+        type: compare
+        operator: gt
+        left:
+          type: field
+          name: focus_actions
+        right:
+          type: literal
+          value: 0
+      rule_refs:
+        - core.magic.focus
+      effects:
+        - type: set
+          target: arcane_arts
+          value:
+            type: field
+            name: focused_arcane_arts
+    - id: casting_roll
+      source_text:
+        Subtract CV from AA → Make skill check (AA) → Success? → yes! Subtract mana cost for
+        spell from mana pool / no! Subtract half of mana cost for spell (RDU) from mana pool
+      rule_refs:
+        - core.magic.casting.threshold
+        - core.magic.casting.success
+        - core.magic.casting.failure
+      effects: []
+    - id: perfect_cast
+      source_text: ‘01-05’ on AA roll? → yes! → Add mana cost for spell to mana pool / no! →
+        Subtract mana cost for spell from mana pool
+      when:
+        type: compare
+        operator: lte
+        left:
+          type: field
+          name: roll
+        right:
+          type: literal
+          value: 5
+      rule_refs:
+        - core.magic.perfect
+        - core.magic.perfect.decline
+        - core.magic.perfect.maximize
+      effects: []
+    - id: enemy_dispel
+      source_text: Enemy spell caster present and able to dispel?** → yes! → Make Dispel roll using
+        Enemy's RS → Success? (**Enemy spell caster can dispel if • not busy casting another spell •
+        not adjacent to a hero)
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: spell_type
+            right:
+              type: literal
+              value: ranged
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: enemy_caster_present
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: casting_threshold
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: field
+              name: miscast_threshold
+      rule_refs:
+        - core.magic.dispel.enemy_conditions
+      effects:
+        - type: invoke
+          dependency: dispel
+    - id: miscast
+      source_text: Roll above miscast threshold? → yes! → Miscast! → Roll on Miscast Table (pg 63) →
+        Deduct mana for spell, (unless it was an incantation)
+      when:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: roll
+        right:
+          type: field
+          name: miscast_threshold
+      rule_refs:
+        - core.magic.miscast
+      effects:
+        - type: invoke
+          dependency: miscast_table
+    - id: end_turn
+      source_text: Execute effect of spell / End character turn
+      effects: []
+  entry_step: determine_miscast_threshold
+  exit_step: end_turn
