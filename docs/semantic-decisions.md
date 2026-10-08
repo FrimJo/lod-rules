@@ -79,7 +79,7 @@ normalize its answer. Cascade policy is `scripts/decisions/cascade.ts`.
 | ------------ | ------------------------------------------------------------------------------------ |
 | `structural` | Reads fields already on the rule. This is the existing Phase 4 approach              |
 | `laya`       | Local ONNX runtime                                                                   |
-| `jev`        | TypeSafe API, model pointer `jev-latest` unless `TYPESAFE_DEFAULT_MODEL` is set      |
+| `jev`        | TypeSafe API, `jev-1.13.0` (pinned) unless `TYPESAFE_DEFAULT_MODEL` is set           |
 | `llm`        | Unavailable unless a process injects a completer. There is no default network client |
 | `cascade`    | Laya, then Jev, then the LLM slot                                                    |
 | `none`       | Canonical commands keep working. Classify reports every judgment unresolved          |
@@ -164,10 +164,11 @@ The client reads `TYPESAFE_API_KEY` from the environment. `npm run decisions`
 also loads `.env.local` if a variable is not already set. The key is not
 printed, not written into reports, and not required for `npm test`.
 
-The SDK default model pointer is `jev-latest`. The report stores the model name
-the API returns. That pointer can move, so a cached Jev answer should be
-rebuilt with `--force` after a model change. The cache key includes the
-configured model name, not a content hash of the weights.
+Jev is pinned to `jev-1.13.0` (`TYPESAFE_DEFAULT_MODEL` in `scripts/decisions/pins.ts`),
+which `jev-latest` resolved to on 8 October 2026. The report stores the model name the API
+returns. The cache key includes the configured model name, not a content hash of the
+weights, so an alias such as `jev-latest` could change behind a cached answer; rebuild with
+`--force` if you set one.
 
 ```bash
 JEV_INTEGRATION=1 TYPESAFE_API_KEY=... npm test -- tests/decisions/jev.integration.test.ts

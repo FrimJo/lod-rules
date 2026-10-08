@@ -16,8 +16,11 @@ export const CALIBRATION_VERSION = 'uncalibrated-0' as const;
 
 export const TYPESAFE_SDK_VERSION = '0.6.0' as const;
 
-/** SDK default when `TYPESAFE_DEFAULT_MODEL` is unset. The response names the model actually used. */
-export const TYPESAFE_DEFAULT_MODEL = 'jev-latest' as const;
+/**
+ * Jev version used when `TYPESAFE_DEFAULT_MODEL` is unset. `jev-latest` resolved to this on
+ * 8 October 2026; caches are keyed on the name, so an alias could change behind them.
+ */
+export const TYPESAFE_DEFAULT_MODEL = 'jev-1.13.0' as const;
 
 export const LAYA_PACKAGE = '@receptron/laya' as const;
 export const LAYA_PACKAGE_VERSION = '0.1.2' as const;
