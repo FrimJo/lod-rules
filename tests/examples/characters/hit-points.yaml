@@ -10,7 +10,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for combat.damage.basic
@@ -42,7 +42,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for combat.damage.basic
@@ -74,7 +74,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for combat.damage.negative_uncertain
@@ -106,7 +106,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.loss
@@ -136,7 +136,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for combat.enemy.zero_hp
@@ -165,7 +165,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.wounded
@@ -195,7 +195,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.wounded
@@ -223,7 +223,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.zero
@@ -254,7 +254,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.rescue
@@ -286,7 +286,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.after_battle_bandage
@@ -318,7 +318,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.party_loss
@@ -348,7 +348,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.no_rescue
@@ -356,6 +356,7 @@
   rule_ids:
     - character.hit_points.no_rescue
   inputs:
+    bleeding_out: true
     standing_companion: true
     means_to_help: false
   expected:
@@ -378,7 +379,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.permanent_injury
@@ -408,7 +409,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.bleeding_time
@@ -438,7 +439,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.hit_points.bleeding_time
@@ -466,7 +467,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Derived boundary case for character.death.replacement
@@ -476,11 +477,111 @@
   inputs:
     dead: true
     next_settlement_visit: true
+    replacement_chosen: true
   expected:
     state:
       replacement_level: 1
     events: []
     trace:
       - character.death.replacement
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.zero_hp.overkill
+  name: 'zero hp overkill: an enemy taken below 0 dies'
+  section_id: section.combat.dealing_damage
+  source: &a1
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 121
+      printed_page: 119
+      heading: Dealing Damage
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: An enemy dies when it is reduced to 0 Hit Points.
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.zero_hp
+  inputs:
+    hit_points: -1
+  expected:
+    state:
+      dead: true
+    events: []
+    trace:
+      - combat.enemy.zero_hp
+    unresolved: []
+    steps: []
+- id: test.combat.enemy.zero_hp.positive
+  name: 'zero hp positive: an enemy with HP left lives'
+  section_id: section.combat.dealing_damage
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: An enemy dies when it is reduced to 0 Hit Points.
+  kind: derived_case
+  rule_ids:
+    - combat.enemy.zero_hp
+  inputs:
+    hit_points: 1
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.character.hit_points.no_rescue.not_bleeding
+  name: 'no rescue: a hero who is not bleeding out is unaffected'
+  section_id: section.combat.bleeding_out
+  source: &a2
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 122
+      printed_page: 120
+      heading: Bleeding out
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If there are still heroes standing, but they have no means to help the one bleeding
+    out, that hero will die.
+  kind: derived_case
+  rule_ids:
+    - character.hit_points.no_rescue
+  inputs:
+    bleeding_out: false
+    standing_companion: true
+    means_to_help: false
+    dead: false
+  expected:
+    state: {}
+    events: []
+    trace: []
+    unresolved: []
+    steps: []
+- id: test.character.death.replacement.declined
+  name: 'replacement: the players may decline a new hero'
+  section_id: section.combat.bleeding_out
+  source: *a2
+  status: extracted
+  confidence: high
+  source_text: A dead hero is permanently removed from the game. The players may choose to add a new
+    level 1 hero to the party the next time the enter a settlement.
+  kind: derived_case
+  rule_ids:
+    - character.death.replacement
+  inputs:
+    dead: true
+    next_settlement_visit: true
+    replacement_chosen: false
+  expected:
+    state: {}
+    events: []
+    trace: []
     unresolved: []
     steps: []

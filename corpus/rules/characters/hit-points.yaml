@@ -10,7 +10,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Damage taken = Wpn DMG + DB – NA - Armour
@@ -75,7 +75,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Subtract the target’s Natural Armour and any other armour. This is the number of Hit
@@ -123,7 +123,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: This is the number of Hit Points to subtract from the target.
@@ -164,7 +164,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: An enemy dies when it is reduced to 0 Hit Points.
@@ -187,7 +187,7 @@
         value: true
   when:
     type: compare
-    operator: eq
+    operator: lte
     left:
       type: field
       name: hit_points
@@ -273,7 +273,16 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 119
+      pdf_page: 121
+      heading: Dealing Damage
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text:
@@ -335,7 +344,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: 'To get back on their feet during the fight they will need: A Healing Spell from a
@@ -397,7 +406,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text:
@@ -459,7 +468,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: If all heroes are bleeding out at the same time, the quest is lost and the heroes die.
@@ -510,7 +519,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: If there are still heroes standing, but they have no means to help the one bleeding
@@ -518,6 +527,10 @@
   type: calculation
   scope: global
   fields:
+    bleeding_out:
+      type: boolean
+      role: input
+      description: this hero is bleeding out
     standing_companion:
       type: boolean
       role: input
@@ -539,6 +552,14 @@
   when:
     type: all
     conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: bleeding_out
+        right:
+          type: literal
+          value: true
       - type: compare
         operator: eq
         left:
@@ -567,7 +588,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A hero that reaches 0 Hit Points also suffers 1d4 permanent reduction of a basic stat
@@ -689,6 +710,10 @@
       type: boolean
       role: input
       description: next settlement visit
+    replacement_chosen:
+      type: boolean
+      role: input
+      description: the players choose to add a new level 1 hero
     replacement_level:
       type: number
       role: state
@@ -715,6 +740,14 @@
         left:
           type: field
           name: next_settlement_visit
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: replacement_chosen
         right:
           type: literal
           value: true

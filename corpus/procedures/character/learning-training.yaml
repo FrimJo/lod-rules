@@ -367,7 +367,7 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 146
@@ -397,11 +397,15 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    A Warrior Priest may learn prayers of their own level or lower in Silver City. The fee
-    is 200 c plus 100 c for each level above 1. Learning takes 1 day; only one prayer may be learned
-    between each dungeon. The two-day worked schedule conflicts with the explicit one-day rule and
-    remains recorded as an issue.
+  source_text: >-
+    A priest may learn all prayers that are the same level or lower level than the priest,
+    provided they can pay for it. This is done in the Inner Sanctum in Silver City. ... Priests
+    may learn a prayer from one of the High Priests. Each hero may learn one prayer in between
+    each visit to a dungeon. The price for learning a prayer is 200 c + 100 c per prayer level
+    above 1. It takes 1 day.
+  see_also:
+    - section.the_inner_sanctum.learning_a_new_prayer
+    - section.settlements.learn_a_spell_or_prayer
   fields:
     settlement: *a2
     profession: *a3
@@ -465,6 +469,9 @@
     - key: learning_rule
       object_id: character.settlement.guild.inner_sanctum.learning
       label: Existing catalogue learning rule.
+    - key: learning_restriction
+      object_id: character.prayer.learning_restriction
+      label: Same level or lower than the priest; done in the Inner Sanctum in Silver City.
   steps:
     - id: quote
       source_text: Learning costs 200 c plus 100 c per level above 1.
@@ -503,6 +510,8 @@
         One prayer between each dungeon; the hero must afford it, meet its level, and complete
         the reserved duration.
       effects:
+        - type: invoke
+          dependency: learning_restriction
         - type: require
           condition: &a13
             type: all
