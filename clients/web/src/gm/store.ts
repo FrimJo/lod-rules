@@ -69,6 +69,11 @@ export function dispatch(event: GmEvent): void {
   write({ present, past: [...current.past, current.present].slice(-UNDO_LIMIT) });
 }
 
+/** The table as it stands, for another island that wants to hand heroes over. */
+export function peekState(): GmState {
+  return getSnapshot().present;
+}
+
 export function undo(): void {
   const current = getSnapshot();
   const previous = current.past.at(-1);
