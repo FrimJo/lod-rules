@@ -42,22 +42,42 @@ apply.
 
 ## Character creator (`/character`)
 
-A third island: `src/routes/character.tsx` and `src/character/`. It walks a player through
-the book's creation sequence (species, stat rolls with the two rerolls, 15-point
-specialisation, profession with talents, spells, prayers and the Arcane perk, optional
-Background, starting equipment with the 1d4 wear rolls, final touches) and ends with a sheet
-to copy onto the printed character sheet. Browser-only, `localStorage`, no server function.
+A third island: `src/routes/character.tsx` and `src/character/`. It builds a whole party, one
+sheet per hero, through the book's creation sequence as nine **stations** (species, dice,
+specialise, profession, powers, background, market, loadout, sheet) and ends with a sheet to
+copy onto the printed character sheet. Browser-only, `localStorage`, no server function. It
+wears the table's skin (`src/character/character.css`, everything scoped under `.cc`) and
+reuses the table's `DicePad` for every die.
 
 - `src/character/rules.ts` holds the rulebook facts with page citations and corpus record ids:
   species tables, profession skill tables, every Appendix II talent, Level 1 spells, level 1
-  prayers, Arcane perks, relics, the twenty Backgrounds, the Weapons and Armour tables.
-  `tests/character-rules.test.ts` reads them back through `runRetrievalTool` and fails on
-  drift. Change a fact in the corpus first.
-- `src/character/engine.ts` is a pure reducer plus `derive()`; `tests/character-engine.test.ts`
-  covers it. Keep rules out of the components.
+  prayers, Arcane perks, relics, the twenty Backgrounds, the Weapons, Armour and Shield tables,
+  the general equipment tables (light, consumables, tools, miscellaneous, alchemy, jewellery),
+  the weapon and armour special rules, the carry rules, the Alchemist's kit tables, the
+  abbreviation glossary (`TERMS`) and the start-of-game data. `tests/character-rules.test.ts`
+  reads them back through `runRetrievalTool` and fails on drift. Change a fact in the corpus
+  first.
+- `src/character/engine.ts` is a pure reducer plus `derive()` per hero and `deriveParty()`;
+  `tests/character-engine.test.ts` covers it. State is a `PartyState` (version 2); a version 1
+  single-hero save is migrated. `derive()` also builds the **loadout** (hands, Hit Areas with
+  DEF, Quick Slots with `/X` stacking, backpack), the **standing effects** gear carries into
+  play (Clunky, stacked armour, backpack DEX, overload) and the **todo** queue of open
+  decisions. Keep rules out of the components.
+- The screen: a **roster** of the party down the side (completeness ring per hero, Party
+  Morale summed from RES), a **stage** with the station strip, the open questions queued
+  above the card, and the card for the current station, and a **ghost sheet** that fills in
+  as the dice land; every number on it jumps to the station that decides it. The Sheet
+  station shows every field as a tile the player ticks off while writing, and hands the
+  party to the Game Master's table (`src/character/handoff.ts`, through the table's store).
+- Every abbreviation the sheet prints (`CS`, `ENC`, `DB`, `CV`…) is a `Term` chip whose peek
+  quotes the printed definition and whose tap opens the page; weapon and armour specials
+  (`BFO`, `Stackable`…) are `SpecialChip`s the same way. Citation chips peek the heading and
+  the printed words where the data carries them.
 - Where the book is silent (the die for a random talent, an ineligible random talent, Mana
-  rounding, the Backgrounds die, which non-weapon items take wear) the creator says so in a
-  purple "gap" note and lets the player decide. Do not fill those gaps in the client.
+  rounding, the Backgrounds die, which non-weapon items take wear, the start settlement die,
+  stat maxima at creation, where an item is carried) the creator says so in a purple "the
+  book is silent" note (`GAPS` in `rules.ts`) and lets the table decide. Do not fill those
+  gaps in the client.
 
 ## Boundaries
 

@@ -84,36 +84,49 @@ serves the full file with byte-range support for "Open PDF".
 
 ## Character creator
 
-`/character` (for example http://localhost:1234/character) walks a player through creating a
-hero the way the book does, step by step, and ends with a sheet to copy onto the printed
-character sheet. Every step quotes the rule it applies and its page chip opens the rulebook
-there.
+`/character` (for example http://localhost:1234/character) builds a party for the table: one
+sheet per hero, walked through the book's creation sequence as nine stations, ending with a
+sheet to copy onto the printed character sheet. It shares the Game master's table's lamp-lit
+skin and dice pads; every page chip opens the rulebook there, and every abbreviation on the
+sheet (CS, ENC, DB, CV…) peeks its printed meaning and opens its page.
 
-1. **Species**: the four species with their stat rolls, Hit Points, traits and limitations.
-2. **Stats**: 1d10 per stat, one at a time or (the book's option) all five then assigned.
-   Dice are typed from the table or rolled by the app. The two creation rerolls are counted,
-   a reroll cannot be rerolled, and the higher result is kept. Hit Points are rolled here too.
-3. **Specialise**: the 15 extra points, at most 10 on one stat. Damage Bonus and Natural
-   Armour update as the stats change.
-4. **Profession**: the eight professions with their skill tables; the Free Skill (+10 on one
-   negative modifier); the talent choice where the book offers one; the human's Jack of all
-   trades random talent, with "Rangers only" and similar restrictions flagged; three Level 1
-   spells and the Arcane perk for a Wizard; two level 1 prayers and the relic for a Warrior
-   Priest.
-5. **Background** (optional): the twenty numbered Backgrounds; the Noble's 400 c and the Bad
-   Tempered Sanity and Party Morale changes flow into the sheet.
-6. **Equipment**: the profession's starting gear (a Dwarf or Halfling Ranger gets a Shortbow
-   under the designer ruling), weapon of choice checked against STR, species and the
-   profession's Class and Tier limits, purchases from the Weapons and Armour tables or as
-   free-form items, the 1d4 wear roll per weapon and armour piece, coins and encumbrance.
-7. **Sheet**: everything to write down, grouped as the character sheet groups it, with a list
-   of things to check first and a print view.
+1. **Species**: the four species as tiles with their base stats drawn as bars, Hit Points,
+   traits and limitations; the hero's name.
+2. **Dice**: 1d10 per stat on tap-the-face pads, one at a time or (the book's option) five
+   dice then assigned by tapping a die and a stat. The two creation rerolls are tokens that
+   are spent; a reroll cannot be rerolled and the higher die is kept. Hit Points roll here.
+3. **Specialise**: the 15 points as coins placed on 10-pip tracks, at most 10 on one stat,
+   with what the next points would unlock (Damage Bonus, Natural Armour, weapon class in one
+   hand, Dual Wield's DEX 60, the Party Morale share, Mana).
+4. **Profession**: the eight professions with headline modifiers; the skill list with the
+   Free Skill picked by tapping a negative modifier.
+5. **Powers**: species traits, profession talents and the printed choice, the human's Jack of
+   all trades roll with "Rangers only" and similar restrictions flagged, perks, the Wizard's
+   three Level 1 spells and Arcane perk, the Warrior Priest's two prayers and relic, and the
+   Alchemist's bag (three standard potions, three 1d20 ingredients, three parts, a recipe).
+6. **Background** (optional): a d20 over the twenty numbered Backgrounds, or tap one; the
+   Noble's 400 c and Bad Tempered's Sanity and Party Morale changes flow into the sheet.
+7. **Market**: the purse, the profession's starting kit with its choices (a Dwarf or Halfling
+   Ranger gets a Shortbow under the designer ruling), and shelves for the Weapons, Armour,
+   Shields and general equipment tables with fit notes (hands, Class and Tier limits, species,
+   STR) shown, not enforced.
+8. **Loadout**: the 1d4 wear roll per weapon, armour piece and shield (other gear with a
+   printed DUR is offered one), then where everything is carried: a figure of the Hit Areas
+   with the DEF of the armour on each, hands, Quick Slots with `/X` stacking, backpack, and
+   the modifiers the gear carries into play (Clunky, stacked armour, backpack DEX, overload).
+9. **Sheet**: every field as a tile grouped the way the printed sheet groups them, ticked off
+   as it is written; "Send the party to the Game master's table" adds the heroes there with
+   their RES, Night Vision and Sanity; the start settlement list and the first quests.
 
-The hero is saved in `localStorage` (`lod-rules:character-creator`); `Undo` (⌘Z) steps back
-within the session and `New hero` clears it. `src/character/rules.ts` carries the facts with
-their page citations and corpus record ids; `tests/character-rules.test.ts` checks them
-against the corpus and `tests/character-engine.test.ts` covers the reducer and derivations.
-Where the book is silent the page says so in a purple note instead of inventing a rule.
+The party lives in the roster down the side with each hero's progress and the Party Morale the
+book adds up from their RES; the ghost sheet on the other side fills in as the dice land and
+jumps to the station that decides each number. Open decisions queue above the station card.
+The party is saved in `localStorage` (`lod-rules:character-creator`); `Undo` (⌘Z) steps back
+within the session and `Reset` clears every sheet. `src/character/rules.ts` carries the facts
+with their page citations and corpus record ids; `tests/character-rules.test.ts` checks them
+against the corpus and `tests/character-engine.test.ts` covers the reducer, the loadout and
+the derivations. Where the book is silent the page says so in a purple note instead of
+inventing a rule.
 
 ## Game master's table
 
