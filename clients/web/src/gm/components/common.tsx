@@ -111,7 +111,7 @@ export function CiteChip({
       <button
         ref={anchorRef}
         type="button"
-        className={`gm-cite ${className}`.trim()}
+        className={`cite ${className}`.trim()}
         aria-label={`${cite.heading}, ${pageLabel(cite)}. Open in the rulebook.`}
         aria-describedby={id}
         onPointerEnter={(e) => e.pointerType === 'mouse' && show(250)}
@@ -126,12 +126,12 @@ export function CiteChip({
       >
         {label ?? pageLabel(cite)}
       </button>
-      <span ref={popRef} id={id} popover="manual" role="tooltip" className="gm-peek">
-        <span className="gm-peek-head">
+      <span ref={popRef} id={id} popover="manual" role="tooltip" className="peek">
+        <span className="peek-head">
           {cite.heading} · {pageLabel(cite)}
         </span>
-        {quote && <span className="gm-peek-quote">{quote}</span>}
-        <span className="gm-peek-hint">Tap to open the page</span>
+        {quote && <span className="peek-quote">{quote}</span>}
+        <span className="peek-hint">Tap to open the page</span>
       </span>
     </>
   );
@@ -178,7 +178,7 @@ export function Drawer({
           {title}
           {cite && <CiteChip cite={cite} />}
         </h2>
-        <button type="button" className="gm-x" onClick={onClose} aria-label="Close">
+        <button type="button" className="btn-x" onClick={onClose} aria-label="Close">
           ×
         </button>
       </header>
@@ -212,7 +212,7 @@ export function Stepper({
       <div className="gm-stepper-controls">
         <button
           type="button"
-          className="gm-mini"
+          className="btn-mini"
           aria-label={`Decrease ${label}`}
           disabled={value <= min}
           onClick={() => onChange(clamp(value - step))}
@@ -234,7 +234,7 @@ export function Stepper({
         />
         <button
           type="button"
-          className="gm-mini"
+          className="btn-mini"
           aria-label={`Increase ${label}`}
           disabled={max !== undefined && value >= max}
           onClick={() => onChange(clamp(value + step))}
@@ -242,7 +242,7 @@ export function Stepper({
           +
         </button>
       </div>
-      {hint && <span className="gm-hint">{hint}</span>}
+      {hint && <span className="hint">{hint}</span>}
     </div>
   );
 }
@@ -264,7 +264,7 @@ export function HeroPicker({
 }) {
   const { state } = useGm();
   const living = state.heroes.filter((hero) => !hero.dead);
-  if (living.length === 0) return <p className="gm-hint">No heroes in the party yet.</p>;
+  if (living.length === 0) return <p className="hint">No heroes in the party yet.</p>;
   return (
     <div className="gm-pick" role="group" aria-label={label}>
       <span className="gm-pick-label">{label}</span>

@@ -10,9 +10,9 @@ A second island in the same app: `src/routes/gm.tsx` and `src/gm/`. It tracks a 
 for the Game Master (Threat, light sources, Party Morale, each hero's Sanity and conditions,
 rations, rests, Wandering Monster tokens, standing modifiers) and resolves the follow-ups the
 book asks for. It is browser-only: state lives in `localStorage`, no server function or LLM is
-involved, and the only shared code is the rulebook viewer for page citations. It has its own
-skin (`src/gm/gm.css`, everything scoped under `.gm`); the rest of the app's look does not
-apply.
+involved, and the only shared code is the rulebook viewer for page citations. It wears the
+app's shared skin (see "Skin" below); `src/gm/gm.css` adds only the table's own parts,
+everything scoped under `.gm`.
 
 - `src/gm/rules.ts` holds the rulebook facts it runs on, each with a page citation and the
   corpus record id: the two Threat tables, the Door Table, morale, Sanity and mental
@@ -46,8 +46,8 @@ A third island: `src/routes/character.tsx` and `src/character/`. It builds a who
 sheet per hero, through the book's creation sequence as nine **stations** (species, dice,
 specialise, profession, powers, background, market, loadout, sheet) and ends with a sheet to
 copy onto the printed character sheet. Browser-only, `localStorage`, no server function. It
-wears the table's skin (`src/character/character.css`, everything scoped under `.cc`) and
-reuses the table's `DicePad` for every die.
+wears the app's shared skin; `src/character/character.css` adds only the creator's own parts,
+everything scoped under `.cc`. It reuses the table's `DicePad` for every die.
 
 - `src/character/rules.ts` holds the rulebook facts with page citations and corpus record ids:
   species tables, profession skill tables, every Appendix II talent, Level 1 spells, level 1
@@ -78,6 +78,26 @@ reuses the table's `DicePad` for every die.
   stat maxima at creation, where an item is carried) the creator says so in a purple "the
   book is silent" note (`GAPS` in `rules.ts`) and lets the table decide. Do not fill those
   gaps in the client.
+
+## Skin
+
+The whole app is one dark, lamp-lit skin, built for a tablet or laptop beside the board.
+`src/styles.css` (loaded by the root route) holds the tokens on `:root`, the base controls and
+every shared piece: the island shell (`.island`, `.top`, `.top-tab`, `.top-tools`, `.top-btn`,
+`.top-rulebook`, `.brand`), button
+variants (`.btn-primary`, `.btn-ghost`, `.link`, `.btn-mini`, `.btn-x`), cards (`.card`,
+`.card-head`, `.card-kicker`, `.card-title`), citation chips and their peeks (`.cite`,
+`.page-chip`, `.peek`), the dice pad (`.pad`), evidence cards (`.ev-*`) and the rulebook pane.
+Every island renders the same app bar (`src/components/AppBar.tsx`) and rulebook pane
+(`src/components/RulebookPane.tsx`). The bar has three fixed zones: the islands as tabs (`/`,
+`/character`, `/gm`; the current one marked by `aria-current`), the island's own tools passed
+in as `tools` and grouped apart from the navigation, and the Rulebook toggle in the same corner
+on every route. Put an island-specific action in its `tools`, never beside the tabs.
+Each island loads one more stylesheet from its route and scopes everything under its root
+class: `src/search.css` (`.ask`, the rules search at `/`), `src/gm/gm.css` (`.gm`) and
+`src/character/character.css` (`.cc`). Add a shared piece to `styles.css`; add an island's own
+part to its own file. `/review` is an internal tool outside this look: `src/review.css`
+overrides the tokens on its root so it stays on light paper.
 
 ## Boundaries
 

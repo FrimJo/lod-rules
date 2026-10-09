@@ -68,7 +68,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
         </p>
         <button
           type="button"
-          className="gm-ghost"
+          className="btn-ghost"
           onClick={() => dispatch({ type: 'set_threat_bounds', enabled: true })}
         >
           Use Threat anyway
@@ -93,7 +93,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
         <span className="gm-row-actions">
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Lower Threat by 1"
             disabled={threat.level <= floor}
             onClick={() =>
@@ -104,7 +104,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
           </button>
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Raise Threat by 1"
             onClick={() =>
               dispatch({ type: 'threat_adjust', delta: 1, reason: 'set by the Game Master' })
@@ -115,7 +115,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
         </span>
       </div>
 
-      <h3 className="gm-subhead">Threat roll</h3>
+      <h3 className="subhead">Threat roll</h3>
       {rolling ? (
         <>
           <label className="gm-check">
@@ -138,12 +138,12 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
           />
         </>
       ) : (
-        <button type="button" className="gm-ghost" onClick={() => setRolling(true)}>
+        <button type="button" className="btn-ghost" onClick={() => setRolling(true)}>
           Make a Threat roll (1d20)
         </button>
       )}
 
-      <h3 className="gm-subhead">Threat changes</h3>
+      <h3 className="subhead">Threat changes</h3>
       <ul className="gm-chips" aria-label="Threat changes">
         {THREAT_SOURCES.map((source) => (
           <li key={source.id}>
@@ -174,14 +174,14 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
         ))}
       </ul>
 
-      <h3 className="gm-subhead">On the board</h3>
+      <h3 className="subhead">On the board</h3>
       <div className="gm-plainrow">
         <div className="gm-stepper">
           <span className="gm-stepper-label">Wandering Monster tokens</span>
           <div className="gm-stepper-controls">
             <button
               type="button"
-              className="gm-mini"
+              className="btn-mini"
               aria-label="Remove a Wandering Monster token"
               disabled={state.wanderingMonsters === 0}
               onClick={() => dispatch({ type: 'wm_remove' })}
@@ -193,7 +193,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
             </span>
             <button
               type="button"
-              className="gm-mini"
+              className="btn-mini"
               aria-label="Place a Wandering Monster token"
               onClick={() => dispatch({ type: 'wm_place' })}
             >
@@ -209,7 +209,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
           hint="From the Threat table, +10 at a time."
         />
       </div>
-      <p className="gm-hint">
+      <p className="hint">
         Wandering Monster tokens move 4 squares after the heroes act; 1d6: 1 away, 2–6 towards.{' '}
         <CiteChip cite={CITES.wanderingMonsters} />
       </p>
@@ -237,7 +237,7 @@ function ThreatDrawer({ onClose }: { onClose: () => void }) {
           </div>
         ))}
       </details>
-      <p className="gm-hint">{GAPS.maxLevel}</p>
+      <p className="hint">{GAPS.maxLevel}</p>
     </Drawer>
   );
 }
@@ -285,9 +285,9 @@ function LightDrawer({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
       )}
-      <h3 className="gm-subhead">Add a light source</h3>
+      <h3 className="subhead">Add a light source</h3>
       <AddLight />
-      <h3 className="gm-subhead">Spares</h3>
+      <h3 className="subhead">Spares</h3>
       <div className="gm-plainrow">
         <Stepper
           label="Spare torches"
@@ -366,7 +366,7 @@ function LightRow({ light }: { light: LightSource }) {
         {light.lit ? (
           <button
             type="button"
-            className="gm-ghost"
+            className="btn-ghost"
             onClick={() => dispatch({ type: 'light_set_lit', id: light.id, lit: false })}
           >
             Goes out
@@ -375,7 +375,7 @@ function LightRow({ light }: { light: LightSource }) {
           (light.kind !== 'torch' && light.oilHalves <= 0) ? (
           <button
             type="button"
-            className="gm-primary"
+            className="btn-primary"
             disabled={(light.kind === 'torch' ? state.spares.torches : state.spares.lampOil) < 1}
             onClick={() => dispatch({ type: 'light_relight', id: light.id })}
           >
@@ -384,7 +384,7 @@ function LightRow({ light }: { light: LightSource }) {
         ) : (
           <button
             type="button"
-            className="gm-primary"
+            className="btn-primary"
             onClick={() => dispatch({ type: 'light_set_lit', id: light.id, lit: true })}
           >
             Light it
@@ -393,7 +393,7 @@ function LightRow({ light }: { light: LightSource }) {
         {light.kind === 'torch' && light.lit && (
           <button
             type="button"
-            className="gm-ghost"
+            className="btn-ghost"
             aria-expanded={swinging}
             onClick={() => setSwinging((v) => !v)}
           >
@@ -403,7 +403,7 @@ function LightRow({ light }: { light: LightSource }) {
         {light.kind !== 'torch' && light.lit && light.oilHalves < 2 && (
           <button
             type="button"
-            className="gm-ghost"
+            className="btn-ghost"
             disabled={state.spares.lampOil < 1}
             onClick={() => dispatch({ type: 'light_refill', id: light.id })}
           >
@@ -412,7 +412,7 @@ function LightRow({ light }: { light: LightSource }) {
         )}
         <button
           type="button"
-          className="gm-link"
+          className="link"
           onClick={() => dispatch({ type: 'light_remove', id: light.id })}
         >
           Remove
@@ -466,7 +466,7 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
         <span className="gm-row-actions">
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Lower morale by 1"
             disabled={morale.current <= 0}
             onClick={() =>
@@ -477,7 +477,7 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
           </button>
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Raise morale by 1"
             onClick={() =>
               dispatch({ type: 'morale_adjust', delta: 1, reason: 'set by the Game Master' })
@@ -488,8 +488,8 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
         </span>
       </div>
 
-      <h3 className="gm-subhead">Start value</h3>
-      <p className="gm-hint">
+      <h3 className="subhead">Start value</h3>
+      <p className="hint">
         Each hero’s RES ÷ 10 rounded down, summed <CiteChip cite={CITES.moraleCalculation} />, plus:
       </p>
       <label className="gm-check">
@@ -533,7 +533,7 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
             onChange={(e) => setOverride(e.target.value)}
           />
         </div>
-        <button type="submit" className="gm-ghost">
+        <button type="submit" className="btn-ghost">
           {override.trim() === '' ? 'Use the computed value' : 'Set'}
         </button>
       </form>
@@ -552,7 +552,7 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
             ))}
           </tbody>
         </table>
-        <p className="gm-hint">
+        <p className="hint">
           * The table prints +1 for a short rest; the rest checklist on p. 98 gives +
           {MORALE.restBonus} up to the start value, which the corpus follows.{' '}
           <CiteChip cite={CITES.rest} />
@@ -572,7 +572,7 @@ function MoraleDrawer({ onClose }: { onClose: () => void }) {
             ))}
           </tbody>
         </table>
-        <p className="gm-hint">{SANITY.miscastRuling}</p>
+        <p className="hint">{SANITY.miscastRuling}</p>
       </details>
     </Drawer>
   );
@@ -589,7 +589,7 @@ function PartyDrawer({ onClose }: { onClose: () => void }) {
             <li key={hero.id}>
               <button
                 type="button"
-                className="gm-link strong"
+                className="link strong"
                 onClick={() => openDrawer({ kind: 'hero', heroId: hero.id })}
               >
                 {hero.name}
@@ -602,7 +602,7 @@ function PartyDrawer({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
       )}
-      <h3 className="gm-subhead">Supplies</h3>
+      <h3 className="subhead">Supplies</h3>
       <div className="gm-plainrow">
         <Stepper
           label="Rations"
@@ -621,11 +621,11 @@ function PartyDrawer({ onClose }: { onClose: () => void }) {
           onChange={(lampOil) => dispatch({ type: 'set_spares', lampOil })}
         />
       </div>
-      <p className="gm-hint">
+      <p className="hint">
         {state.restsTaken} rest{state.restsTaken === 1 ? '' : 's'} taken this dungeon.{' '}
         <CiteChip cite={CITES.rest} />
       </p>
-      <button type="button" className="gm-link" onClick={() => openDrawer({ kind: 'quest' })}>
+      <button type="button" className="link" onClick={() => openDrawer({ kind: 'quest' })}>
         Change the quest
       </button>
     </Drawer>
@@ -638,13 +638,13 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
   if (!hero)
     return (
       <Drawer title="Hero" onClose={onClose}>
-        <p className="gm-hint">This hero has left the party.</p>
+        <p className="hint">This hero has left the party.</p>
       </Drawer>
     );
   return (
     <Drawer title={hero.name} cite={CITES.sanity} onClose={onClose}>
       <EditHero hero={hero} />
-      <h3 className="gm-subhead">Sanity</h3>
+      <h3 className="subhead">Sanity</h3>
       <div className="gm-big-row">
         <span className="gm-big">{hero.sanity}</span>
         <span className="gm-big-label">
@@ -663,7 +663,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
                 {' '}
                 <button
                   type="button"
-                  className="gm-link"
+                  className="link"
                   onClick={() => dispatch({ type: 'sanity_condition_request', heroId: hero.id })}
                 >
                   Roll the mental condition
@@ -674,7 +674,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
         <span className="gm-row-actions">
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Loses 1 Sanity"
             disabled={hero.dead || hero.sanity === 0}
             onClick={() =>
@@ -685,7 +685,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
           </button>
           <button
             type="button"
-            className="gm-mini"
+            className="btn-mini"
             aria-label="Regains 1 Sanity"
             disabled={hero.dead || hero.sanity >= hero.sanityMax}
             onClick={() =>
@@ -707,7 +707,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
                   <CiteChip cite={CITES.mentalConditions} quote={condition.effect} />
                   <button
                     type="button"
-                    className="gm-link"
+                    className="link"
                     aria-label={`Remove ${condition.name}`}
                     onClick={() =>
                       dispatch({ type: 'hero_condition_remove', id: hero.id, condition: id })
@@ -731,7 +731,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
       )}
       {!hero.dead && (
         <>
-          <h3 className="gm-subhead">Status</h3>
+          <h3 className="subhead">Status</h3>
           <div className="gm-chips">
             {(Object.keys(HERO_STATUSES) as HeroStatus[]).map((status) => {
               const on = hero.statuses.includes(status);
@@ -769,7 +769,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
               ))}
             </ul>
           )}
-          <p className="gm-hint">
+          <p className="hint">
             0 HP, death, Fear and Terror, poison and disease go in through “What happened?”, so
             morale and Sanity follow.
           </p>
@@ -777,7 +777,7 @@ function HeroDrawer({ heroId, onClose }: { heroId: string; onClose: () => void }
       )}
       <button
         type="button"
-        className="gm-link"
+        className="link"
         onClick={() => dispatch({ type: 'hero_remove', id: hero.id })}
       >
         Remove {hero.name} from the party
@@ -837,7 +837,7 @@ function EditHero({ hero }: { hero: Hero }) {
         />
         Night Vision
       </label>
-      <button type="submit" className="gm-ghost" disabled={!changed}>
+      <button type="submit" className="btn-ghost" disabled={!changed}>
         Save
       </button>
     </form>
@@ -849,11 +849,11 @@ function QuestDrawer({ onClose }: { onClose: () => void }) {
   return (
     <Drawer title="Quest" cite={CITES.questThresholds} onClose={onClose}>
       <QuestPicker />
-      <h3 className="gm-subhead">Dungeon level {state.dungeonLevel}</h3>
-      <p className="gm-hint">
+      <h3 className="subhead">Dungeon level {state.dungeonLevel}</h3>
+      <p className="hint">
         {GAPS.newLevelValue} <CiteChip cite={CITES.threatNewLevel} />
       </p>
-      <button type="button" className="gm-ghost" onClick={() => dispatch({ type: 'new_level' })}>
+      <button type="button" className="btn-ghost" onClick={() => dispatch({ type: 'new_level' })}>
         The party takes the stairs: level {state.dungeonLevel + 1}
       </button>
     </Drawer>
@@ -901,7 +901,7 @@ function LogDrawer({ onClose }: { onClose: () => void }) {
       wide
     >
       {entries.length === 0 ? (
-        <p className="gm-hint">Nothing yet.</p>
+        <p className="hint">Nothing yet.</p>
       ) : (
         <ol className="gm-log">
           {entries.map((entry, i) => {

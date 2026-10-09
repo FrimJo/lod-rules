@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RulebookViewer } from '../../components/RulebookViewer.tsx';
+import { AppBar } from '../../components/AppBar.tsx';
+import { RulebookPane } from '../../components/RulebookPane.tsx';
 import type { RulebookTarget } from '../../lib/citations.ts';
 import { getRulebook } from '../../server/functions.ts';
 import { lightSummary, modeOf } from '../engine.ts';
@@ -124,75 +124,56 @@ export function GmTable() {
   return (
     <GmContext.Provider value={ui}>
       <div
-        className={`gm mode-${mode}${target ? ' with-viewer' : ''}${dark ? ' is-dark' : ''}${state.pending.length > 0 ? ' has-prompt' : ''}`}
+        className={`gm island mode-${mode}${target ? ' with-viewer' : ''}${dark ? ' is-dark' : ''}${state.pending.length > 0 ? ' has-prompt' : ''}`}
       >
         <a className="skip-link" href="#gm-stage">
           Skip to the stage
         </a>
-        <header className="gm-top">
-          <div className="gm-top-left">
-            <Link to="/" className="gm-brand" title="Rules search">
-              <span className="gm-brand-mark" aria-hidden="true">
-                L
-              </span>
-            </Link>
-            <span className="gm-top-title">Game master’s table</span>
-          </div>
-          <div className="gm-top-actions">
-            <button
-              type="button"
-              className="gm-top-btn"
-              onClick={undo}
-              disabled={!canUndo}
-              title="Undo (⌘Z)"
-            >
-              Undo
-            </button>
-            <button
-              type="button"
-              className="gm-top-btn"
-              aria-pressed={drawer?.kind === 'log'}
-              onClick={() => openDrawer(drawer?.kind === 'log' ? null : { kind: 'log' })}
-              title="Log (L)"
-            >
-              Log
-            </button>
-            <button
-              type="button"
-              className="gm-top-btn"
-              aria-pressed={Boolean(target)}
-              onClick={() =>
-                target ? closeViewer() : openPage({ page: 18, pdf: 20, heading: 'Turn Sequence' })
-              }
-              title="Rulebook (R)"
-            >
-              Rulebook
-            </button>
-            <button
-              type="button"
-              className="gm-top-btn"
-              aria-pressed={drawer?.kind === 'quest'}
-              onClick={() => openDrawer(drawer?.kind === 'quest' ? null : { kind: 'quest' })}
-            >
-              Quest
-            </button>
-            <Link
-              to="/character"
-              className="gm-top-btn"
-              title="Walk through character creation with the book’s rules"
-            >
-              Characters
-            </Link>
-            <button
-              type="button"
-              className="gm-top-btn danger"
-              onClick={reset}
-              title="Clear the table"
-            >
-              Reset
-            </button>
-          </div>
-        </header>
+        <AppBar
+          toolsLabel="Table tools"
+          rulebookOpen={Boolean(target)}
+          onRulebook={() =>
+            target ? closeViewer() : openPage({ page: 18, pdf: 20, heading: 'Turn Sequence' })
+          }
+          tools={
+            <>
+              <button
+                type="button"
+                className="top-btn"
+                onClick={undo}
+                disabled={!canUndo}
+                title="Undo (⌘Z)"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                className="top-btn"
+                aria-pressed={drawer?.kind === 'log'}
+                onClick={() => openDrawer(drawer?.kind === 'log' ? null : { kind: 'log' })}
+                title="Log (L)"
+              >
+                Log
+              </button>
+              <button
+                type="button"
+                className="top-btn"
+                aria-pressed={drawer?.kind === 'quest'}
+                onClick={() => openDrawer(drawer?.kind === 'quest' ? null : { kind: 'quest' })}
+              >
+                Quest
+              </button>
+              <button
+                type="button"
+                className="top-btn danger"
+                onClick={reset}
+                title="Clear the table"
+              >
+                Reset
+              </button>
+            </>
+          }
+        />
 
         <div className="gm-main">
           <Rim />
@@ -208,11 +189,7 @@ export function GmTable() {
                     </li>
                   ))}
                 </ol>
-                <button
-                  type="button"
-                  className="gm-link"
-                  onClick={() => openDrawer({ kind: 'log' })}
-                >
+                <button type="button" className="link" onClick={() => openDrawer({ kind: 'log' })}>
                   Full log
                 </button>
               </div>
@@ -225,32 +202,7 @@ export function GmTable() {
           {latest ? latest.text : ''}
         </p>
 
-        {target && (
-          <aside
-            className="viewer-pane gm-viewer"
-            aria-label="Rulebook"
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                event.stopPropagation();
-                closeViewer();
-              }
-            }}
-          >
-            <div className="pane-bar">
-              <span className="pane-title">Rulebook</span>
-              <button
-                type="button"
-                className="gm-top-btn"
-                onClick={closeViewer}
-                aria-label="Close the rulebook"
-                title="Close (Esc)"
-              >
-                <span aria-hidden="true">×</span> Close
-              </button>
-            </div>
-            <RulebookViewer target={target} index={rulebook.data} onShowRecord={() => {}} />
-          </aside>
-        )}
+        {target && <RulebookPane target={target} index={rulebook.data} onClose={closeViewer} />}
       </div>
     </GmContext.Provider>
   );

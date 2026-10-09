@@ -58,7 +58,7 @@ function RerollTokens({ left }: { left: number }) {
           ↻
         </span>
       ))}
-      <span className="cc-hint inline">{left === 0 ? 'both spent' : `${left} left`}</span>
+      <span className="hint inline">{left === 0 ? 'both spent' : `${left} left`}</span>
     </span>
   );
 }
@@ -162,7 +162,7 @@ export function DiceStation() {
                 {roll.value !== null && roll.reroll === null && (
                   <button
                     type="button"
-                    className="cc-link small"
+                    className="link small"
                     disabled={!canReroll(state, roll)}
                     onClick={() => setOpen({ kind: 'stat', stat: key, reroll: true })}
                   >
@@ -201,7 +201,7 @@ export function DiceStation() {
             {state.hitPointsRoll.value !== null && state.hitPointsRoll.reroll === null && (
               <button
                 type="button"
-                className="cc-link small"
+                className="link small"
                 disabled={!canReroll(state, state.hitPointsRoll)}
                 onClick={() => setOpen({ kind: 'hp', reroll: true })}
               >
@@ -252,7 +252,7 @@ export function DiceStation() {
                     <span className="cc-diecell-links">
                       <button
                         type="button"
-                        className="cc-link small"
+                        className="link small"
                         onClick={() =>
                           setOpen(
                             isOpen && !open.reroll ? null : { kind: 'pool', index, reroll: false },
@@ -264,7 +264,7 @@ export function DiceStation() {
                       {roll.reroll === null && (
                         <button
                           type="button"
-                          className="cc-link small"
+                          className="link small"
                           disabled={!canReroll(state, roll)}
                           onClick={() => setOpen({ kind: 'pool', index, reroll: true })}
                         >
@@ -300,7 +300,7 @@ export function DiceStation() {
               {state.hitPointsRoll.value !== null && state.hitPointsRoll.reroll === null && (
                 <button
                   type="button"
-                  className="cc-link small"
+                  className="link small"
                   disabled={!canReroll(state, state.hitPointsRoll)}
                   onClick={() => setOpen({ kind: 'hp', reroll: true })}
                 >
@@ -338,7 +338,7 @@ export function DiceStation() {
               );
             })}
           </div>
-          <p className="cc-hint">
+          <p className="hint">
             Tap a rolled die, then the stat it goes to. Tap a filled stat to free its die.
           </p>
         </>
@@ -411,10 +411,10 @@ export function DiceStation() {
       )}
 
       <div className="cc-actions">
-        <button type="button" className="cc-ghost" onClick={rollAll}>
+        <button type="button" className="btn-ghost" onClick={rollAll}>
           Roll everything still empty for me
         </button>
-        <button type="button" className="cc-link" onClick={() => dispatch({ type: 'clear_rolls' })}>
+        <button type="button" className="link" onClick={() => dispatch({ type: 'clear_rolls' })}>
           Clear all dice
         </button>
       </div>

@@ -90,11 +90,11 @@ function Card({
   muted?: boolean;
 }) {
   return (
-    <section className={`gm-card${tone ? ` ${tone}` : ''}${muted ? ' muted' : ''}`}>
-      <header className="gm-card-head">
+    <section className={`card${tone ? ` ${tone}` : ''}${muted ? ' muted' : ''}`}>
+      <header className="card-head">
         <div>
-          {kicker && <span className="gm-card-kicker">{kicker}</span>}
-          <h2 className="gm-card-title">
+          {kicker && <span className="card-kicker">{kicker}</span>}
+          <h2 className="card-title">
             {title}
             {cite && <CiteChip cite={cite} />}
           </h2>
@@ -119,7 +119,7 @@ function PromptCard({ prompt }: { prompt: Prompt }) {
       cite={prompt.cite}
       tone={prompt.severity}
       actions={
-        <button type="button" className={confirm ? 'gm-primary' : 'gm-ghost'} onClick={dismiss}>
+        <button type="button" className={confirm ? 'btn-primary' : 'btn-ghost'} onClick={dismiss}>
           {confirm ? 'Done' : 'Dismiss'}
         </button>
       }
@@ -209,7 +209,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
       );
     case 'sanity_condition': {
       const hero = heroById(state, request.heroId);
-      if (!hero) return <p className="gm-hint">This hero has left the party.</p>;
+      if (!hero) return <p className="hint">This hero has left the party.</p>;
       return (
         <>
           <ol className="gm-rows" aria-label="Mental conditions table">
@@ -258,7 +258,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
           {request.crossed ? (
             <button
               type="button"
-              className="gm-primary"
+              className="btn-primary"
               onClick={() => dispatch({ type: 'wm_place' })}
             >
               Place a Wandering Monster token
@@ -266,7 +266,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
           ) : (
             <button
               type="button"
-              className="gm-primary"
+              className="btn-primary"
               onClick={() => dispatch({ type: 'dismiss_prompt', id: prompt.id })}
             >
               Token placed
@@ -274,7 +274,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
           )}
           <button
             type="button"
-            className="gm-ghost"
+            className="btn-ghost"
             onClick={() => {
               // The table already counted the token for a landed threshold; "no monster" takes it back.
               if (!request.crossed) dispatch({ type: 'wm_remove' });
@@ -296,7 +296,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
         <div className="gm-actions">
           <button
             type="button"
-            className="gm-primary"
+            className="btn-primary"
             disabled={spares < 1}
             onClick={() => dispatch({ type: 'light_relight', id: light.id })}
           >
@@ -307,7 +307,7 @@ function PromptBody({ prompt }: { prompt: Prompt }) {
           </button>
           <button
             type="button"
-            className="gm-ghost"
+            className="btn-ghost"
             onClick={() => dispatch({ type: 'light_remove', id: light.id })}
           >
             Remove it
@@ -377,7 +377,7 @@ function DoorCard({
                   cite={CITES.traps}
                   quote="The opener makes a Perception roll with the card's modifier. Success finds the trap without setting it off; it can then be disarmed (2 AP, Pick Locks) or set off deliberately. Failure triggers it."
                 />
-                <span className="gm-hint inline"> The trap is resolved from the queue below.</span>
+                <span className="hint inline"> The trap is resolved from the queue below.</span>
               </>
             )}
           </span>
@@ -404,7 +404,7 @@ function DoorCard({
             >
               <b>+{DOOR.crowbarThreat}</b> Crowbar
             </button>
-            <span className="gm-hint inline">Picking the lock adds no Threat.</span>
+            <span className="hint inline">Picking the lock adds no Threat.</span>
           </span>
         </div>
       )}
@@ -479,7 +479,7 @@ function ChestCard({ rolled }: { rolled: ChestRoll | null }) {
           {draws ? (
             <>
               draw <strong>{draws}</strong>. Party Morale +{chestMorale(hit)} applied.{' '}
-              <span className="gm-hint inline">A thief draws two cards and keeps one.</span>{' '}
+              <span className="hint inline">A thief draws two cards and keeps one.</span>{' '}
               <CiteChip cite={CITES.thiefTreasure} quote={THIEF_TREASURE} />
             </>
           ) : (
@@ -512,7 +512,7 @@ function TrapForm({ source }: { source: 'threat_table' | 'door' | 'chest' }) {
       <div className="gm-actions">
         <button
           type="button"
-          className="gm-primary"
+          className="btn-primary"
           disabled={!heroId}
           onClick={() => dispatch({ type: 'trap_resolve', heroId, triggered: true })}
         >
@@ -520,7 +520,7 @@ function TrapForm({ source }: { source: 'threat_table' | 'door' | 'chest' }) {
         </button>
         <button
           type="button"
-          className="gm-ghost"
+          className="btn-ghost"
           onClick={() => dispatch({ type: 'trap_resolve', heroId, triggered: false })}
         >
           Perception passed: not triggered
@@ -541,14 +541,14 @@ function BleedingForm({ heroIds, context }: { heroIds: string[]; context: 'battl
           <span className="gm-actions">
             <button
               type="button"
-              className="gm-primary"
+              className="btn-primary"
               onClick={() => dispatch({ type: 'hero_recover', id: hero.id })}
             >
               {context === 'rest' ? 'Passed the test: back up (+1d4 HP)' : 'Bandaged: back up'}
             </button>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               onClick={() =>
                 dispatch({ type: 'morale_event', event: 'hero_dies', heroId: hero.id })
               }
@@ -586,13 +586,13 @@ function ThreatAmountForm({ source }: { source: (typeof THREAT_SOURCES)[number][
           onChange={(e) => setAmount(e.target.value)}
         />
       </div>
-      <button type="submit" className="gm-primary" disabled={!valid}>
+      <button type="submit" className="btn-primary" disabled={!valid}>
         Apply
       </button>
       {info?.dice && (
         <button
           type="button"
-          className="gm-ghost"
+          className="btn-ghost"
           onClick={() => {
             const expr = parseDice(info.dice!);
             if (expr) dispatch({ type: 'threat_source', source, amount: -rollDice(expr) });
@@ -644,7 +644,7 @@ function RestForm({ risk }: { risk: number }) {
       {interrupted ? (
         <button
           type="button"
-          className="gm-primary"
+          className="btn-primary"
           onClick={() => dispatch({ type: 'rest_resolve', interrupted: true, barred })}
         >
           Interrupted: to battle
@@ -752,7 +752,7 @@ function BattleStartForm({ reason, barred }: { reason: string; barred: boolean }
           <span className="gm-bag-count enemy">
             <b>{bag.enemyTokens}</b> enemy
           </span>
-          <span className="gm-hint">
+          <span className="hint">
             tokens in the bag <CiteChip cite={CITES.initiativeTokens} />
           </span>
         </div>
@@ -760,14 +760,14 @@ function BattleStartForm({ reason, barred }: { reason: string; barred: boolean }
       <div className="gm-actions">
         <button
           type="button"
-          className="gm-primary"
+          className="btn-primary"
           onClick={() => dispatch({ type: 'battle_start', demons: false, bag: input })}
         >
           Battle begins
         </button>
         <button
           type="button"
-          className="gm-ghost"
+          className="btn-ghost"
           onClick={() => dispatch({ type: 'battle_start', demons: true, bag: input })}
         >
           Battle begins against demons (−2 morale, −1 Sanity each)
@@ -808,7 +808,7 @@ export function NextTile() {
         </div>
         <button
           type="button"
-          className="gm-primary"
+          className="btn-primary"
           onClick={() => dispatch({ type: 'tile_revealed', kind, roll: rollDie(100) })}
           title={`Rolls 1d100: ${chance} or less means enemies`}
         >
@@ -816,7 +816,7 @@ export function NextTile() {
         </button>
         <button
           type="button"
-          className="gm-link"
+          className="link"
           aria-expanded={manual}
           onClick={() => setManual((v) => !v)}
         >
@@ -827,7 +827,7 @@ export function NextTile() {
           quote={`A room has a 50% chance of enemies (01-50). A corridor has a 30% chance (01-30). After 4 tiles without encounters +10 until one is triggered (max 70%).${state.encounterBonus ? ` Threat table: +${state.encounterBonus} for the rest of the quest.` : ''}`}
         />
       </div>
-      <span className="gm-hint">
+      <span className="hint">
         {state.encounterStreak} encounter-free tile{state.encounterStreak === 1 ? '' : 's'} in a row
         {streak ? ` (+${ENCOUNTER.streakBonus})` : ''}
         {state.encounterBonus ? ` · Threat table +${state.encounterBonus}` : ''}. Enemies end the
@@ -843,17 +843,17 @@ export function NextTile() {
             highlight={(v) => (v <= chance ? 'bad' : undefined)}
           />
           <div className="gm-actions">
-            <span className="gm-hint inline">The quest decides:</span>
+            <span className="hint inline">The quest decides:</span>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               onClick={() => dispatch({ type: 'tile_revealed', kind, encounter: true })}
             >
               Enemies
             </button>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               onClick={() => dispatch({ type: 'tile_revealed', kind, encounter: false })}
             >
               Empty
@@ -889,7 +889,7 @@ function StepCard({ muted = false }: { muted?: boolean }) {
     <div className="gm-card-nav">
       <button
         type="button"
-        className="gm-ghost"
+        className="btn-ghost"
         disabled={current === 0}
         onClick={() => dispatch({ type: 'turn_step', step: current - 1 })}
       >
@@ -898,7 +898,7 @@ function StepCard({ muted = false }: { muted?: boolean }) {
       {last ? (
         <button
           type="button"
-          className="gm-primary big"
+          className="btn-primary big"
           onClick={() => dispatch({ type: 'new_turn' })}
           title="Shortcut: N"
         >
@@ -907,7 +907,7 @@ function StepCard({ muted = false }: { muted?: boolean }) {
       ) : (
         <button
           type="button"
-          className="gm-primary"
+          className="btn-primary"
           onClick={() => dispatch({ type: 'turn_step', step: current + 1 })}
         >
           {STEP_SHORT[current + 1]} ›
@@ -924,7 +924,7 @@ function StepCard({ muted = false }: { muted?: boolean }) {
       actions={nav}
     >
       {muted ? (
-        <p className="gm-hint">Resolve what is above first; this step’s actions come back here.</p>
+        <p className="hint">Resolve what is above first; this step’s actions come back here.</p>
       ) : (
         <StepBody id={step.id} />
       )}
@@ -955,7 +955,7 @@ function StepBody({ id }: { id: string }) {
               </p>
               <button
                 type="button"
-                className="gm-primary"
+                className="btn-primary"
                 onClick={() => dispatch({ type: 'door_open', entrance: true })}
               >
                 Entrance door opened
@@ -968,7 +968,7 @@ function StepBody({ id }: { id: string }) {
               <p className="gm-card-text">Not rolled this turn.</p>
               <button
                 type="button"
-                className="gm-ghost"
+                className="btn-ghost"
                 onClick={() => dispatch({ type: 'scenario_request' })}
               >
                 Roll it now
@@ -1004,19 +1004,19 @@ function StepBody({ id }: { id: string }) {
                   <li key={line}>{line}</li>
                 ))}
               </ol>
-              <p className="gm-hint">Randomise between enemies that could act at the same time.</p>
+              <p className="hint">Randomise between enemies that could act at the same time.</p>
             </details>
             <div className="gm-actions">
               <button
                 type="button"
-                className="gm-primary"
+                className="btn-primary"
                 onClick={() => dispatch({ type: 'battle_end', won: true })}
               >
                 Battle won (+{THREAT.battleWon} Threat)
               </button>
               <button
                 type="button"
-                className="gm-ghost"
+                className="btn-ghost"
                 onClick={() => dispatch({ type: 'battle_end', won: false })}
               >
                 Battle over, not won
@@ -1032,7 +1032,7 @@ function StepBody({ id }: { id: string }) {
             {!state.entrancePassed && (
               <button
                 type="button"
-                className="gm-primary"
+                className="btn-primary"
                 onClick={() => dispatch({ type: 'door_open', entrance: true })}
               >
                 Entrance door opened
@@ -1040,21 +1040,21 @@ function StepBody({ id }: { id: string }) {
             )}
             <button
               type="button"
-              className="gm-primary"
+              className="btn-primary"
               onClick={() => dispatch({ type: 'door_open' })}
             >
               Door opened <b>+1</b>
             </button>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               onClick={() => dispatch({ type: 'door_open', chest: true })}
             >
               Chest opened <b>+1</b>
             </button>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               disabled={state.rations < REST.rationCost || living.length === 0}
               title={
                 state.rations < REST.rationCost
@@ -1064,7 +1064,7 @@ function StepBody({ id }: { id: string }) {
               onClick={() => dispatch({ type: 'rest_begin' })}
             >
               Short rest{' '}
-              <span className="gm-hint inline">
+              <span className="hint inline">
                 1 ration
                 {state.threat.enabled
                   ? ` · ${ambushRisk(state.threat.level, state.restsTaken + 1)}% ambush`
@@ -1073,7 +1073,7 @@ function StepBody({ id }: { id: string }) {
             </button>
           </div>
           <NextTile />
-          <p className="gm-hint">
+          <p className="hint">
             Searching a room takes the whole turn and happens once per room: highest PER, +
             {SEARCH.oneHelper} with a second searcher, +{SEARCH.moreHelpers} for each after that.{' '}
             <CiteChip cite={CITES.searching} />
@@ -1099,7 +1099,7 @@ function StepBody({ id }: { id: string }) {
               {move && (
                 <button
                   type="button"
-                  className="gm-primary"
+                  className="btn-primary"
                   onClick={() => dispatch({ type: 'dismiss_prompt', id: move.id })}
                 >
                   Moved
@@ -1110,14 +1110,14 @@ function StepBody({ id }: { id: string }) {
           <div className="gm-actions">
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               onClick={() => dispatch({ type: 'wm_place' })}
             >
               + token
             </button>
             <button
               type="button"
-              className="gm-ghost"
+              className="btn-ghost"
               disabled={state.wanderingMonsters === 0}
               onClick={() => dispatch({ type: 'wm_remove' })}
             >
@@ -1167,7 +1167,7 @@ function StepBody({ id }: { id: string }) {
               hero’s token).
             </p>
           )}
-          <p className="gm-hint">
+          <p className="hint">
             Anything that happened this turn goes in through “What happened?” below; this step is
             the check that nothing was missed.
           </p>

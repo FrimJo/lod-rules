@@ -12,20 +12,20 @@ export function Prepare() {
   const ready = state.heroes.length > 0;
   return (
     <div className="gm-prepare">
-      <section className="gm-card">
-        <header className="gm-card-head">
+      <section className="card">
+        <header className="card-head">
           <div>
-            <span className="gm-card-kicker">1 · Quest</span>
-            <h2 className="gm-card-title">Which dungeon?</h2>
+            <span className="card-kicker">1 · Quest</span>
+            <h2 className="card-title">Which dungeon?</h2>
           </div>
         </header>
         <QuestPicker />
       </section>
-      <section className="gm-card">
-        <header className="gm-card-head">
+      <section className="card">
+        <header className="card-head">
           <div>
-            <span className="gm-card-kicker">2 · Party</span>
-            <h2 className="gm-card-title">
+            <span className="card-kicker">2 · Party</span>
+            <h2 className="card-title">
               Who goes in?{' '}
               <CiteChip
                 cite={CITES.moraleCalculation}
@@ -51,7 +51,7 @@ export function Prepare() {
                 </span>
                 <button
                   type="button"
-                  className="gm-link"
+                  className="link"
                   onClick={() => dispatch({ type: 'hero_remove', id: hero.id })}
                 >
                   Remove
@@ -61,11 +61,11 @@ export function Prepare() {
           </ul>
         )}
       </section>
-      <section className="gm-card">
-        <header className="gm-card-head">
+      <section className="card">
+        <header className="card-head">
           <div>
-            <span className="gm-card-kicker">3 · Light and supplies</span>
-            <h2 className="gm-card-title">
+            <span className="card-kicker">3 · Light and supplies</span>
+            <h2 className="card-title">
               What do they carry? <CiteChip cite={CITES.lightSources} />
             </h2>
           </div>
@@ -84,7 +84,7 @@ export function Prepare() {
                 </span>
                 <button
                   type="button"
-                  className="gm-link"
+                  className="link"
                   onClick={() => dispatch({ type: 'light_remove', id: light.id })}
                 >
                   Remove
@@ -115,14 +115,14 @@ export function Prepare() {
       <div className="gm-enter">
         <button
           type="button"
-          className="gm-primary big"
+          className="btn-primary big"
           disabled={!ready}
           onClick={() => dispatch({ type: 'new_turn' })}
           title="Shortcut: N"
         >
           Enter the dungeon
         </button>
-        <span className="gm-hint">
+        <span className="hint">
           {ready
             ? 'Starts turn 1 with the heroes on the starting tile. The stone-side door is unlocked and adds no Threat.'
             : 'Add at least one hero first.'}{' '}
@@ -170,7 +170,7 @@ export function QuestPicker() {
           <CiteChip cite={quest.cite} />
         </p>
       ) : (
-        <p className="gm-hint">
+        <p className="hint">
           Without a quest the book's defaults apply: Threat never below 2, no maximum, Scenario die
           on. <CiteChip cite={CITES.threatLevel} />
         </p>
@@ -237,7 +237,7 @@ export function AddHero({ autoFocus = false }: { autoFocus?: boolean }) {
         />
         Night Vision
       </label>
-      <button type="submit" className="gm-primary" disabled={!valid}>
+      <button type="submit" className="btn-primary" disabled={!valid}>
         Add{resValid ? ` (+${Math.floor(res / 10)} morale)` : ''}
       </button>
     </form>
@@ -294,7 +294,7 @@ export function AddLight() {
         <input type="checkbox" checked={lit} onChange={(e) => setLit(e.target.checked)} />
         Lit
       </label>
-      <button type="submit" className="gm-primary">
+      <button type="submit" className="btn-primary">
         Add
       </button>
     </form>

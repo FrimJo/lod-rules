@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RulebookViewer } from '../../components/RulebookViewer.tsx';
+import { AppBar } from '../../components/AppBar.tsx';
+import { RulebookPane } from '../../components/RulebookPane.tsx';
 import type { RulebookTarget } from '../../lib/citations.ts';
 import { getRulebook } from '../../server/functions.ts';
 import { derive, deriveParty, STATION_BY_ID, STATIONS, type StationId } from '../engine.ts';
@@ -115,62 +115,43 @@ export function CharacterCreator() {
 
   return (
     <CreatorContext.Provider value={ui}>
-      <div className={`cc${target ? ' with-viewer' : ''}`}>
+      <div className={`cc island${target ? ' with-viewer' : ''}`}>
         <a className="skip-link" href="#cc-stage">
           Skip to the station
         </a>
-        <header className="cc-top">
-          <div className="cc-top-left">
-            <Link to="/" className="cc-brand" title="Rules search">
-              <span className="cc-brand-mark" aria-hidden="true">
-                L
-              </span>
-            </Link>
-            <span className="cc-top-title">Character creator</span>
-          </div>
-          <div className="cc-top-actions">
-            <button
-              type="button"
-              className="cc-top-btn"
-              onClick={undo}
-              disabled={!canUndo}
-              title="Undo (⌘Z)"
-            >
-              Undo
-            </button>
-            <button
-              type="button"
-              className="cc-top-btn"
-              aria-pressed={Boolean(target)}
-              onClick={() => (target ? closeViewer() : openPage(station.cite))}
-              title="Rulebook (R)"
-            >
-              Rulebook
-            </button>
-            <Link
-              to="/gm"
-              className="cc-top-btn"
-              title="Track Threat, light, morale and Sanity at the table"
-            >
-              Game master’s table
-            </Link>
-            <button
-              type="button"
-              className="cc-top-btn danger"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    'Clear the whole party? Every sheet is lost. This cannot be undone.',
+        <AppBar
+          toolsLabel="Party tools"
+          rulebookOpen={Boolean(target)}
+          onRulebook={() => (target ? closeViewer() : openPage(station.cite))}
+          tools={
+            <>
+              <button
+                type="button"
+                className="top-btn"
+                onClick={undo}
+                disabled={!canUndo}
+                title="Undo (⌘Z)"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                className="top-btn danger"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      'Clear the whole party? Every sheet is lost. This cannot be undone.',
+                    )
                   )
-                )
-                  dispatch({ type: 'party_reset' });
-              }}
-              title="Clear every hero"
-            >
-              Reset
-            </button>
-          </div>
-        </header>
+                    dispatch({ type: 'party_reset' });
+                }}
+                title="Clear every hero"
+              >
+                Reset
+              </button>
+            </>
+          }
+        />
 
         <div className="cc-main">
           <div className="cc-columns">
@@ -196,7 +177,7 @@ export function CharacterCreator() {
                             {done && !current ? '✓' : i + 1}
                           </span>
                           <span className="cc-station-t">{s.label}</span>
-                          <span className="cc-sr">
+                          <span className="sr-only">
                             {done ? ', complete' : open ? ', still open' : ''}
                           </span>
                         </button>
@@ -225,13 +206,13 @@ export function CharacterCreator() {
                   </ol>
                 )}
 
-                <article className="cc-card" aria-labelledby="cc-card-title">
-                  <header className="cc-card-head">
+                <article className="card" aria-labelledby="card-title">
+                  <header className="card-head">
                     <div>
-                      <span className="cc-card-kicker">
+                      <span className="card-kicker">
                         {index + 1} · {station.label}
                       </span>
-                      <h2 className="cc-card-title" id="cc-card-title">
+                      <h2 className="card-title" id="card-title">
                         {station.question} <CiteChip cite={station.cite} />
                       </h2>
                     </div>
@@ -266,7 +247,7 @@ export function CharacterCreator() {
                   {previous ? (
                     <button
                       type="button"
-                      className="cc-ghost"
+                      className="btn-ghost"
                       onClick={() => goTo(previous.id)}
                       title="Previous station ([)"
                     >
@@ -278,7 +259,7 @@ export function CharacterCreator() {
                   {next && (
                     <button
                       type="button"
-                      className={`cc-primary${derived.complete[state.step] ? '' : ' soft'}`}
+                      className={`btn-primary${derived.complete[state.step] ? '' : ' soft'}`}
                       onClick={() => goTo(next.id)}
                       title="Next station (])"
                     >
@@ -293,32 +274,7 @@ export function CharacterCreator() {
           </div>
         </div>
 
-        {target && (
-          <aside
-            className="viewer-pane cc-viewer"
-            aria-label="Rulebook"
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                event.stopPropagation();
-                closeViewer();
-              }
-            }}
-          >
-            <div className="pane-bar">
-              <span className="pane-title">Rulebook</span>
-              <button
-                type="button"
-                className="cc-top-btn"
-                onClick={closeViewer}
-                aria-label="Close the rulebook"
-                title="Close (Esc)"
-              >
-                <span aria-hidden="true">×</span> Close
-              </button>
-            </div>
-            <RulebookViewer target={target} index={rulebook.data} onShowRecord={() => {}} />
-          </aside>
-        )}
+        {target && <RulebookPane target={target} index={rulebook.data} onClose={closeViewer} />}
       </div>
     </CreatorContext.Provider>
   );

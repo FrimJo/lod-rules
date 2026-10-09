@@ -128,7 +128,7 @@ export function CiteChip({
       <button
         ref={anchorRef}
         type="button"
-        className={`cc-cite ${className}`.trim()}
+        className={`cite ${className}`.trim()}
         aria-label={`${cite.heading}, ${pageLabel(cite)}. Open in the rulebook.`}
         aria-describedby={id}
         {...handlers}
@@ -140,12 +140,12 @@ export function CiteChip({
       >
         {label ?? pageLabel(cite)}
       </button>
-      <span ref={popRef} id={id} popover="manual" role="tooltip" className="cc-peek">
-        <span className="cc-peek-head">
+      <span ref={popRef} id={id} popover="manual" role="tooltip" className="peek">
+        <span className="peek-head">
           {cite.heading} · {pageLabel(cite)}
         </span>
-        {quote && <span className="cc-peek-quote">{quote}</span>}
-        <span className="cc-peek-hint">Tap to open the page</span>
+        {quote && <span className="peek-quote">{quote}</span>}
+        <span className="peek-hint">Tap to open the page</span>
       </span>
     </>
   );
@@ -202,12 +202,12 @@ function TermChip({
       >
         {children ?? term.abbr}
       </button>
-      <span ref={popRef} id={id} popover="manual" role="tooltip" className="cc-peek">
-        <span className="cc-peek-head">
+      <span ref={popRef} id={id} popover="manual" role="tooltip" className="peek">
+        <span className="peek-head">
           {term.abbr === term.name ? term.name : `${term.abbr} · ${term.name}`}
         </span>
-        <span className="cc-peek-quote">{term.text}</span>
-        <span className="cc-peek-hint">
+        <span className="peek-quote">{term.text}</span>
+        <span className="peek-hint">
           {term.cite.heading} · {pageLabel(term.cite)} · tap to open
         </span>
       </span>
@@ -239,12 +239,12 @@ export function StatName({ stat, full = false }: { stat: StatKey; full?: boolean
       >
         {full ? name.name : name.abbr}
       </button>
-      <span ref={popRef} id={id} popover="manual" role="tooltip" className="cc-peek">
-        <span className="cc-peek-head">
+      <span ref={popRef} id={id} popover="manual" role="tooltip" className="peek">
+        <span className="peek-head">
           {name.abbr} · {name.name}
         </span>
-        <span className="cc-peek-quote">{effect.text}</span>
-        <span className="cc-peek-hint">
+        <span className="peek-quote">{effect.text}</span>
+        <span className="peek-hint">
           {effect.cite.heading} · {pageLabel(effect.cite)} · tap to open
         </span>
       </span>
@@ -274,10 +274,10 @@ export function SpecialChip({ rule, text }: { rule: SpecialRule; text?: string }
       >
         {text ?? rule.key}
       </button>
-      <span ref={popRef} id={id} popover="manual" role="tooltip" className="cc-peek">
-        <span className="cc-peek-head">{rule.name}</span>
-        <span className="cc-peek-quote">{rule.text}</span>
-        <span className="cc-peek-hint">
+      <span ref={popRef} id={id} popover="manual" role="tooltip" className="peek">
+        <span className="peek-head">{rule.name}</span>
+        <span className="peek-quote">{rule.text}</span>
+        <span className="peek-hint">
           {rule.cite.heading} · {pageLabel(rule.cite)} · tap to open
         </span>
       </span>

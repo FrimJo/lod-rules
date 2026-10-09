@@ -357,7 +357,7 @@ export function SheetStation() {
           {missing.map((s, i) => (
             <span key={s.id}>
               {i > 0 && ', '}
-              <button type="button" className="cc-link" onClick={() => goTo(s.id)}>
+              <button type="button" className="link" onClick={() => goTo(s.id)}>
                 {s.label}
               </button>
             </span>
@@ -388,13 +388,13 @@ export function SheetStation() {
         </span>
         <button
           type="button"
-          className="cc-link"
+          className="link"
           onClick={() => dispatch({ type: 'clear_copied' })}
           disabled={copied === 0}
         >
           Clear ticks
         </button>
-        <button type="button" className="cc-link" onClick={() => window.print()}>
+        <button type="button" className="link" onClick={() => window.print()}>
           Print
         </button>
       </div>
@@ -448,14 +448,14 @@ export function SheetStation() {
         <div className="cc-actions">
           <button
             type="button"
-            className="cc-primary"
+            className="btn-primary"
             onClick={() => dispatch({ type: 'hero_new' })}
           >
             Make another hero
           </button>
           <button
             type="button"
-            className="cc-ghost"
+            className="btn-ghost"
             onClick={() => {
               const result = sendPartyToTable(party);
               const parts = [
@@ -471,12 +471,12 @@ export function SheetStation() {
           >
             Send the party to the Game master’s table
           </button>
-          <Link to="/gm" className="cc-link">
+          <Link to="/gm" className="link">
             Open the table
           </Link>
         </div>
         {sent && <Note tone="done">{sent}</Note>}
-        <p className="cc-hint">
+        <p className="hint">
           The table takes each hero’s name, RES, Night Vision and starting Sanity; a hero already
           there by the same name is updated.
         </p>

@@ -99,7 +99,7 @@ export function LoadoutStation() {
         aside={
           <button
             type="button"
-            className="cc-ghost small"
+            className="btn-ghost small"
             onClick={() => {
               for (const line of damageable)
                 if (line.wear === null)
@@ -156,7 +156,7 @@ export function LoadoutStation() {
                       {line.origin === 'bought' && (
                         <button
                           type="button"
-                          className="cc-link small"
+                          className="link small"
                           onClick={() =>
                             dispatch({
                               type: 'set_purchase_damageable',
@@ -195,7 +195,7 @@ export function LoadoutStation() {
           )}
         </ul>
         {optional.length > 0 && (
-          <p className="cc-hint">
+          <p className="hint">
             Wear skipped for:{' '}
             {optional.map((line, i) => (
               <span key={line.key}>
@@ -203,7 +203,7 @@ export function LoadoutStation() {
                 {line.label}{' '}
                 <button
                   type="button"
-                  className="cc-link small"
+                  className="link small"
                   onClick={() =>
                     dispatch({ type: 'set_purchase_damageable', key: line.key, damageable: true })
                   }
@@ -316,7 +316,7 @@ export function LoadoutStation() {
                 </li>
               ))}
             </ul>
-            <p className="cc-hint">
+            <p className="hint">
               Hit Area, 1d6 <CiteChip cite={CITES.hitLocation} /> · <Term abbr="NA" />{' '}
               {derived.naturalArmour === null ? '—' : `+${derived.naturalArmour}`} comes on top
               everywhere. Stacking{' '}
@@ -369,7 +369,7 @@ export function LoadoutStation() {
                   <span className="cc-small muted">Nothing at hand</span>
                 )}
               </div>
-              <p className="cc-hint">
+              <p className="hint">
                 {CARRY.quickAccessText}
                 {loadout.quick.extraFrom.length
                   ? ` Extra slots from ${loadout.quick.extraFrom.join(' and ')}.`

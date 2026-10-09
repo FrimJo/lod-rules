@@ -329,7 +329,7 @@ export function Palette() {
         </div>
         <button
           type="button"
-          className="gm-link"
+          className="link"
           aria-expanded={!folded}
           onClick={() => setFolded(!folded)}
         >

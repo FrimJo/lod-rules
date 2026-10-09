@@ -86,8 +86,8 @@ serves the full file with byte-range support for "Open PDF".
 
 `/character` (for example http://localhost:1234/character) builds a party for the table: one
 sheet per hero, walked through the book's creation sequence as nine stations, ending with a
-sheet to copy onto the printed character sheet. It shares the Game master's table's lamp-lit
-skin and dice pads; every page chip opens the rulebook there, and every abbreviation on the
+sheet to copy onto the printed character sheet. It wears the app's lamp-lit skin and
+reuses the table's dice pads; every page chip opens the rulebook there, and every abbreviation on the
 sheet (CS, ENC, DB, CV…) peeks its printed meaning and opens its page.
 
 1. **Species**: the four species as tiles with their base stats drawn as bars, Hit Points,
@@ -137,7 +137,7 @@ fifteen different events, Sanity has its own table and resets after a mental con
 costs a ration and risks an ambush, and a quest may place a Wandering Monster whenever Threat
 is increased to a certain value.
 
-The screen is laid out like a cockpit for the table rather than a web page, in its own dark,
+The screen is laid out like a cockpit for the table rather than a web page, in the app's dark,
 lamp-lit skin:
 
 - **The rim** is always in view: a turn dial with the five printed steps (tap a step to move

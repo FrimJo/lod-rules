@@ -152,41 +152,35 @@ function CitationChip({ entries, onOpen }: { entries: Entry[]; onOpen: OnOpen })
         {label}
         {entries.length > 1 && <span className="cite-count">×{entries.length}</span>}
       </button>
-      <span
-        ref={popoverRef}
-        id={popoverId}
-        popover="manual"
-        role="tooltip"
-        className="cite-preview"
-      >
+      <span ref={popoverRef} id={popoverId} popover="manual" role="tooltip" className="peek">
         {entries.slice(0, 4).map((entry) => (
-          <span key={entry.id} className="cite-preview-entry">
-            <span className="cite-preview-kind">
+          <span key={entry.id} className="peek-entry">
+            <span className="peek-kind">
               {entry.item.kind}
               {entry.item.scope === 'quest'
                 ? ` · quest: ${entry.item.quest_title ?? entry.item.quest_id}`
                 : ''}
             </span>
-            <span className="cite-preview-title">{entry.item.title}</span>
+            <span className="peek-title">{entry.item.title}</span>
             {entry.issue && (
-              <span className="cite-preview-issue">Cites an open issue recorded on this rule.</span>
+              <span className="peek-issue">Cites an open issue recorded on this rule.</span>
             )}
             {entry.pages.slice(0, 4).map((page) => (
-              <span key={page.pdf} className="cite-preview-page">
+              <span key={page.pdf} className="peek-page">
                 <strong>{pageLabel(page)}</strong>
                 {page.headings.length > 0 && ` · ${page.headings.join(', ')}`}
               </span>
             ))}
             {entry.pages.length > 4 && (
-              <span className="cite-preview-page">and {entry.pages.length - 4} more pages</span>
+              <span className="peek-page">and {entry.pages.length - 4} more pages</span>
             )}
-            <code className="cite-preview-id">{entry.id}</code>
+            <code className="peek-id">{entry.id}</code>
           </span>
         ))}
         {entries.length > 4 && (
-          <span className="cite-preview-page">and {entries.length - 4} more records</span>
+          <span className="peek-page">and {entries.length - 4} more records</span>
         )}
-        <span className="cite-preview-hint">
+        <span className="peek-hint">
           {pages.length ? 'Click to open the rulebook page' : 'Click to show the evidence record'}
         </span>
       </span>

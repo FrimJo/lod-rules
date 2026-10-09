@@ -85,7 +85,7 @@ export function ProfessionStation() {
             cite={CITES.skills}
             quote={QUOTES.skills}
             aside={
-              <span className="cc-hint">
+              <span className="hint">
                 Free Skill: tap one red modifier to lift it by +10{' '}
                 <CiteChip cite={CITES.freeSkill} quote={QUOTES.freeSkill} />
               </span>

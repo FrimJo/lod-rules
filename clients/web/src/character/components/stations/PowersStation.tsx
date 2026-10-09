@@ -154,7 +154,7 @@ function RandomTalent() {
         <div className="cc-actions">
           <button
             type="button"
-            className="cc-primary"
+            className="btn-primary"
             onClick={() =>
               dispatch({
                 type: 'set_random_talent',
@@ -169,7 +169,7 @@ function RandomTalent() {
             label={`${TALENT_CATEGORIES[category].label} table`}
           />
           <label className="cc-inline-field">
-            <span className="cc-sr">Or the talent your own die gave</span>
+            <span className="sr-only">Or the talent your own die gave</span>
             <select
               value={chosen?.id ?? ''}
               onChange={(event) =>
@@ -458,7 +458,7 @@ function AlchemistBag() {
         cite={CITES.alchemistKit}
       />
 
-      <h4 className="cc-subhead">
+      <h4 className="subhead">
         Three standard potions of choice <CiteChip cite={CITES.standardPotions} />{' '}
         <Badge tone={potions.length === 3 ? 'done' : 'plain'}>{potions.length} of 3</Badge>
       </h4>
@@ -475,9 +475,9 @@ function AlchemistBag() {
           </button>
         ))}
       </div>
-      <p className="cc-hint">A fourth pick replaces the oldest one.</p>
+      <p className="hint">A fourth pick replaces the oldest one.</p>
 
-      <h4 className="cc-subhead">
+      <h4 className="subhead">
         Three random ingredients: roll 1d20 three times <CiteChip cite={CITES.ingredients} />
       </h4>
       <div className="cc-ingredients">
@@ -491,7 +491,7 @@ function AlchemistBag() {
         ))}
       </div>
 
-      <h4 className="cc-subhead">
+      <h4 className="subhead">
         Three freely chosen parts <CiteChip cite={CITES.parts} />{' '}
         <Badge tone={parts.length === 3 ? 'done' : 'plain'}>{parts.length} of 3</Badge>
       </h4>
@@ -509,7 +509,7 @@ function AlchemistBag() {
         ))}
       </div>
 
-      <h4 className="cc-subhead">One recipe for a Weak Potion</h4>
+      <h4 className="subhead">One recipe for a Weak Potion</h4>
       <div className="cc-field">
         <label htmlFor={recipeId}>Which potion the recipe makes</label>
         <input
@@ -525,7 +525,7 @@ function AlchemistBag() {
             <option key={potion.rowId} value={potion.name} />
           ))}
         </datalist>
-        <span className="cc-hint">
+        <span className="hint">
           A Weak Potion needs 1 part, 1 ingredient and an empty bottle; which components the recipe
           names is the player’s choice at the table.
         </span>

@@ -93,7 +93,7 @@ export function SpecialiseStation() {
               <div className="cc-spec-track">
                 <button
                   type="button"
-                  className="cc-mini"
+                  className="btn-mini"
                   aria-label={`Fewer points on ${STAT_NAMES[key].abbr}`}
                   disabled={points <= 0}
                   onClick={() =>
@@ -115,7 +115,7 @@ export function SpecialiseStation() {
                 </button>
                 <button
                   type="button"
-                  className="cc-mini"
+                  className="btn-mini"
                   aria-label={`More points on ${STAT_NAMES[key].abbr}`}
                   disabled={points >= maxHere}
                   onClick={() =>

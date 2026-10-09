@@ -81,7 +81,7 @@ export function SpeciesStation() {
           </Tile>
         ))}
       </div>
-      <p className="cc-hint">
+      <p className="hint">
         Each stat is the printed base plus 1d10; the bars compare the bases. Tap a stat name to read
         what it does:{' '}
         {STAT_KEYS.map((key, i) => (
@@ -93,7 +93,7 @@ export function SpeciesStation() {
       </p>
 
       <Block title="Name" id="name" className="cc-block-inline">
-        <label htmlFor={nameId} className="cc-sr">
+        <label htmlFor={nameId} className="sr-only">
           Hero’s name
         </label>
         <input

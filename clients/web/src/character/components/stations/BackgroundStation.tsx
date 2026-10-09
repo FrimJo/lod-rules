@@ -48,7 +48,7 @@ export function BackgroundStation() {
                 <CiteChip cite={background.cite} />
                 <button
                   type="button"
-                  className="cc-link"
+                  className="link"
                   onClick={() => dispatch({ type: 'set_background_roll', roll: null })}
                 >
                   Roll again

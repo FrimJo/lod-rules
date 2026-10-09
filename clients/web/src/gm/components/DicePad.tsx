@@ -49,24 +49,24 @@ export function DicePad({
   if (isD100) {
     return (
       <div
-        className={`gm-pad d100${compact ? ' compact' : ''}`}
+        className={`pad d100${compact ? ' compact' : ''}`}
         role="group"
         aria-labelledby={`${id}-label`}
       >
-        <div className="gm-pad-head">
-          <span id={`${id}-label`} className="gm-pad-label">
+        <div className="pad-head">
+          <span id={`${id}-label`} className="pad-label">
             {label}
           </span>
-          <button type="button" className="gm-roll" onClick={rollForMe}>
+          <button type="button" className="pad-roll" onClick={rollForMe}>
             Roll {name} for me
           </button>
         </div>
-        <div className="gm-pad-row" aria-label="Tens die">
+        <div className="pad-row" aria-label="Tens die">
           {Array.from({ length: 10 }, (_, i) => i).map((t) => (
             <button
               key={t}
               type="button"
-              className={`gm-face${tens === t ? ' on' : ''}`}
+              className={`pad-face${tens === t ? ' on' : ''}`}
               aria-pressed={tens === t}
               autoFocus={autoFocus && t === 0}
               onClick={() => setTens(t)}
@@ -75,14 +75,14 @@ export function DicePad({
             </button>
           ))}
         </div>
-        <div className="gm-pad-row" aria-label="Ones die">
+        <div className="pad-row" aria-label="Ones die">
           {Array.from({ length: 10 }, (_, i) => i).map((o) => {
             const value = tens === null ? null : tens === 0 && o === 0 ? 100 : tens * 10 + o;
             return (
               <button
                 key={o}
                 type="button"
-                className={`gm-face${value !== null && highlight ? ` ${highlight(value) ?? ''}` : ''}`.trim()}
+                className={`pad-face${value !== null && highlight ? ` ${highlight(value) ?? ''}` : ''}`.trim()}
                 disabled={tens === null}
                 title={value === null ? 'Pick the tens die first' : `${value}`}
                 onClick={() => {
@@ -96,7 +96,7 @@ export function DicePad({
             );
           })}
         </div>
-        <span className="gm-hint">
+        <span className="hint">
           {tens === null
             ? 'Tens die first, then the ones die; 00 and 0 is 100.'
             : `Tens: ${tens === 0 ? '00' : tens * 10}. Now the ones die.`}
@@ -108,26 +108,26 @@ export function DicePad({
 
   return (
     <div
-      className={`gm-pad d${expr.sides}${compact ? ' compact' : ''}${faces.length > 12 ? ' many' : ''}`}
+      className={`pad d${expr.sides}${compact ? ' compact' : ''}${faces.length > 12 ? ' many' : ''}`}
       role="group"
       aria-labelledby={`${id}-label`}
     >
-      <div className="gm-pad-head">
-        <span id={`${id}-label`} className="gm-pad-label">
+      <div className="pad-head">
+        <span id={`${id}-label`} className="pad-label">
           {label}
         </span>
-        <button type="button" className="gm-roll" onClick={rollForMe}>
+        <button type="button" className="pad-roll" onClick={rollForMe}>
           Roll {name} for me
         </button>
       </div>
-      <div className="gm-pad-row">
+      <div className="pad-row">
         {faces.map((value, i) => {
           const tone = highlight?.(value);
           return (
             <button
               key={value}
               type="button"
-              className={`gm-face${tone ? ` ${tone}` : ''}`}
+              className={`pad-face${tone ? ` ${tone}` : ''}`}
               autoFocus={autoFocus && i === 0}
               aria-label={isD10 && value === 10 ? '0, read as 10' : String(value)}
               onClick={() => onCommit(value)}
@@ -137,7 +137,7 @@ export function DicePad({
           );
         })}
       </div>
-      {hint && <span className="gm-hint">{hint}</span>}
+      {hint && <span className="hint">{hint}</span>}
     </div>
   );
 }
@@ -155,24 +155,24 @@ export function DoorDice({ onCommit }: { onCommit: (d10: number, d6: number) => 
     }
   };
   return (
-    <div className="gm-pad pair" role="group" aria-labelledby={`${id}-label`}>
-      <div className="gm-pad-head">
-        <span id={`${id}-label`} className="gm-pad-label">
+    <div className="pad pair" role="group" aria-labelledby={`${id}-label`}>
+      <div className="pad-head">
+        <span id={`${id}-label`} className="pad-label">
           Roll 1d10 and 1d6 together
         </span>
-        <button type="button" className="gm-roll" onClick={() => onCommit(rollDie(10), rollDie(6))}>
+        <button type="button" className="pad-roll" onClick={() => onCommit(rollDie(10), rollDie(6))}>
           Roll both for me
         </button>
       </div>
-      <div className="gm-pair">
-        <div className="gm-pair-die">
-          <span className="gm-pair-label">d10 · Door Table</span>
-          <div className="gm-pad-row">
+      <div className="pad-pair">
+        <div className="pad-pair-die">
+          <span className="pad-pair-label">d10 · Door Table</span>
+          <div className="pad-row">
             {Array.from({ length: 10 }, (_, i) => i + 1).map((v) => (
               <button
                 key={v}
                 type="button"
-                className={`gm-face${d10 === v ? ' on' : ''}${v >= 7 ? ' bad' : ''}`}
+                className={`pad-face${d10 === v ? ' on' : ''}${v >= 7 ? ' bad' : ''}`}
                 aria-pressed={d10 === v}
                 aria-label={v === 10 ? '0, read as 10' : String(v)}
                 onClick={() => {
@@ -185,14 +185,14 @@ export function DoorDice({ onCommit }: { onCommit: (d10: number, d6: number) => 
             ))}
           </div>
         </div>
-        <div className="gm-pair-die">
-          <span className="gm-pair-label">d6 · trap on a 6</span>
-          <div className="gm-pad-row">
+        <div className="pad-pair-die">
+          <span className="pad-pair-label">d6 · trap on a 6</span>
+          <div className="pad-row">
             {Array.from({ length: 6 }, (_, i) => i + 1).map((v) => (
               <button
                 key={v}
                 type="button"
-                className={`gm-face${d6 === v ? ' on' : ''}${v === 6 ? ' bad' : ''}`}
+                className={`pad-face${d6 === v ? ' on' : ''}${v === 6 ? ' bad' : ''}`}
                 aria-pressed={d6 === v}
                 onClick={() => {
                   setD6(v);
@@ -205,7 +205,7 @@ export function DoorDice({ onCommit }: { onCommit: (d10: number, d6: number) => 
           </div>
         </div>
       </div>
-      <span className="gm-hint">
+      <span className="hint">
         1–6 open; 7, 8, 9, 0 locked, harder each step. A 6 on the d6 means a trap.
       </span>
     </div>

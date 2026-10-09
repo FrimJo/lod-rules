@@ -176,7 +176,7 @@ export function MarketStation() {
                 />
               ))}
             </div>
-            <p className="cc-hint">
+            <p className="hint">
               {profession.id === 'ranger'
                 ? QUOTES.rangerBow
                 : 'Fit notes are shown, not enforced: the book does not forbid buying a weapon you cannot yet wield.'}
@@ -238,13 +238,13 @@ export function MarketStation() {
         </div>
         <div className="cc-shelf-head">
           {shelf === 'weapon' && (
-            <span className="cc-hint">
+            <span className="hint">
               Weapons table <CiteChip cite={CITES.weapons} /> · all weapons have <Term abbr="DUR" />{' '}
               6 unless noted <CiteChip cite={CITES.durability} quote={QUOTES.durability} />
             </span>
           )}
           {shelf === 'armour' && (
-            <span className="cc-hint">
+            <span className="hint">
               Armour table <CiteChip cite={CITES.armour} /> ·{' '}
               {profession.maxArmourTier
                 ? `a ${profession.name} may never use armour heavier than Tier ${profession.maxArmourTier}`
@@ -253,19 +253,19 @@ export function MarketStation() {
             </span>
           )}
           {shelf === 'shield' && (
-            <span className="cc-hint">
+            <span className="hint">
               Shield table <CiteChip cite={CITES.shields} /> · a shield takes the off hand
             </span>
           )}
           {shelf !== 'weapon' && shelf !== 'armour' && shelf !== 'shield' && shelf !== 'other' && (
-            <span className="cc-hint">
+            <span className="hint">
               {GEAR_GROUPS[shelf].label} <CiteChip cite={GEAR_GROUPS[shelf].cite} /> ·{' '}
               <Term abbr="ENC" /> “1/3” means weight 1, three to a <Term abbr="Quick Slot" />{' '}
               <CiteChip cite={CITES.gearEnc} />
             </span>
           )}
           {shelf === 'other' && (
-            <span className="cc-hint">
+            <span className="hint">
               Anything the tables above do not list: enter it with its printed cost and ENC.
             </span>
           )}
@@ -400,7 +400,7 @@ export function MarketStation() {
                 <span className="cc-stepper" role="group" aria-label={`${p.label} quantity`}>
                   <button
                     type="button"
-                    className="cc-mini"
+                    className="btn-mini"
                     aria-label="One fewer"
                     onClick={() =>
                       dispatch({
@@ -415,7 +415,7 @@ export function MarketStation() {
                   <span className="cc-stepper-v">{p.quantity}</span>
                   <button
                     type="button"
-                    className="cc-mini"
+                    className="btn-mini"
                     aria-label="One more"
                     onClick={() =>
                       dispatch({
@@ -431,7 +431,7 @@ export function MarketStation() {
                 <span className="cc-basket-cost">{p.cost * p.quantity} c</span>
                 <button
                   type="button"
-                  className="cc-x"
+                  className="btn-x"
                   aria-label={`Remove ${p.label}`}
                   onClick={() => dispatch({ type: 'remove_purchase', key: p.key })}
                 >
@@ -446,7 +446,7 @@ export function MarketStation() {
                 <span className="cc-basket-cost">{CREATION.cookingGearCost} c</span>
                 <button
                   type="button"
-                  className="cc-x"
+                  className="btn-x"
                   aria-label="Remove cooking gear"
                   onClick={() => dispatch({ type: 'set_cooking_gear', enabled: false })}
                 >
@@ -539,14 +539,14 @@ function GearTile({ item }: { item: Gear }) {
             <button
               key={choice.label}
               type="button"
-              className="cc-ghost small"
+              className="btn-ghost small"
               onClick={() => buy(choice.cost, choice.label)}
             >
               {choice.label} · {choice.cost} c
             </button>
           ))
         ) : item.cost !== null ? (
-          <button type="button" className="cc-ghost small" onClick={() => buy(item.cost!)}>
+          <button type="button" className="btn-ghost small" onClick={() => buy(item.cost!)}>
             Buy for {item.cost} c
           </button>
         ) : null}
@@ -625,7 +625,7 @@ function OtherForm() {
         />
         Can be damaged (gets a wear roll)
       </label>
-      <button type="submit" className="cc-ghost">
+      <button type="submit" className="btn-ghost">
         Add
       </button>
     </form>

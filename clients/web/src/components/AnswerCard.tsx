@@ -133,7 +133,7 @@ export function AnswerCard({
             OpenRouter.
           </p>
         </div>
-        <button type="button" className="answer-button" onClick={generate}>
+        <button type="button" className="answer-button btn-primary" onClick={generate}>
           <SparkIcon /> Summarize with AI
         </button>
       </section>

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { AnswerCard } from '../components/AnswerCard.tsx';
 import {
@@ -8,15 +8,22 @@ import {
   RetrievalNotices,
   evidenceAnchor,
 } from '../components/EvidenceList.tsx';
-import { RulebookViewer } from '../components/RulebookViewer.tsx';
+import { AppBar } from '../components/AppBar.tsx';
+import { RulebookPane } from '../components/RulebookPane.tsx';
 import { SettingsDialog } from '../components/SettingsDialog.tsx';
 import type { RulebookTarget } from '../lib/citations.ts';
 import { MODES, type RetrievalMode } from '../lib/retrieval-modes.ts';
 import { useAnswerPreference } from '../lib/use-answer-preference.ts';
 import { useRetrievalMode } from '../lib/use-retrieval-mode.ts';
+import searchStyles from '../search.css?url';
 import { getEvidence, getRulebook, type AnswerSettings } from '../server/functions.ts';
 
-export const Route = createFileRoute('/')({ component: RulesPage });
+export const Route = createFileRoute('/')({
+  head: () => ({
+    links: [{ rel: 'stylesheet', href: searchStyles }],
+  }),
+  component: RulesPage,
+});
 
 interface Search {
   id: number;
@@ -75,6 +82,10 @@ function SearchIcon() {
   );
 }
 
+/**
+ * Rules search, built like the other islands: a top bar, a stage that shows either the start
+ * page or one question's evidence, and the rulebook one tap from every page chip.
+ */
 function RulesPage() {
   const [query, setQuery] = useState('');
   const [searches, setSearches] = useState<Search[]>([]);
@@ -181,88 +192,75 @@ function RulesPage() {
   );
 
   return (
-    <div className={`app${target ? ' with-viewer' : ''}`}>
+    <div className={`ask island${target ? ' with-viewer' : ''}`}>
       <a className="skip-link" href="#results">
         Skip to results
       </a>
-      <header className="topbar">
-        <button type="button" className="brand" onClick={() => show(null)}>
-          <span className="brand-mark" aria-hidden="true">
-            L
-          </span>
-          <span>League of Dungeoneers rules</span>
-        </button>
-        <div className="topbar-actions">
-          {searches.length > 0 && (
-            <>
-              <button
-                type="button"
-                className="icon-button"
-                popoverTarget="history-menu"
-                aria-haspopup="true"
-              >
-                History <span className="count">{searches.length}</span>
-              </button>
-              <div ref={historyRef} id="history-menu" popover="auto" className="history-menu">
-                <p className="history-title">Recent questions</p>
-                <ul>
-                  {[...searches].reverse().map((search) => (
-                    <li key={search.id}>
-                      <button
-                        type="button"
-                        aria-current={search.id === activeId ? 'true' : undefined}
-                        onClick={() => {
-                          show(search.id);
-                          historyRef.current?.hidePopover();
-                        }}
-                      >
-                        <span className="history-question">{search.question}</span>
-                        <span className="history-mode">{MODES[search.mode].label}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </>
-          )}
-          <Link to="/character" className="icon-button" title="Walk through character creation with the book’s rules">
-            Character creator
-          </Link>
-          <Link to="/gm" className="icon-button" title="Track Threat, light, morale and Sanity at the table">
-            Game master’s table
-          </Link>
-          <button
-            type="button"
-            className="icon-button"
-            aria-pressed={Boolean(target)}
-            onClick={() => (target ? closeViewer() : openContents())}
-          >
-            Rulebook
-          </button>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Search settings"
-            aria-haspopup="dialog"
-            title="Search settings"
-            onClick={() => setSettingsOpen(true)}
-          >
-            <GearIcon />
-          </button>
-        </div>
-      </header>
+      <AppBar
+        toolsLabel="Search tools"
+        rulebookOpen={Boolean(target)}
+        onRulebook={() => (target ? closeViewer() : openContents())}
+        onHome={() => show(null)}
+        tools={
+          <>
+            {searches.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className="top-btn"
+                  popoverTarget="history-menu"
+                  aria-haspopup="true"
+                >
+                  History <span className="count">{searches.length}</span>
+                </button>
+                <div ref={historyRef} id="history-menu" popover="auto" className="history-menu">
+                  <p className="history-title">Recent questions</p>
+                  <ul>
+                    {[...searches].reverse().map((search) => (
+                      <li key={search.id}>
+                        <button
+                          type="button"
+                          aria-current={search.id === activeId ? 'true' : undefined}
+                          onClick={() => {
+                            show(search.id);
+                            historyRef.current?.hidePopover();
+                          }}
+                        >
+                          <span className="history-question">{search.question}</span>
+                          <span className="history-mode">{MODES[search.mode].label}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+            <button
+              type="button"
+              className="top-btn"
+              aria-label="Search settings"
+              aria-haspopup="dialog"
+              title="Search settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <GearIcon />
+            </button>
+          </>
+        }
+      />
 
       <main className="results" id="results" ref={resultsRef} tabIndex={-1}>
         {activeId === null ? (
           <section className="home" aria-labelledby="home-title">
+            <p className="home-kicker">League of Dungeoneers · second printing</p>
             <h1 id="home-title">What does the rulebook say?</h1>
             <p className="home-lede">
-              Search the second printing of the League of Dungeoneers rulebook. Every result is the
-              book's own wording, with the page it comes from.
+              Search the rulebook. Every result is the book's own wording, with the page it comes
+              from, and the page itself is one tap away.
             </p>
             {searchForm}
             <div className="examples">
-              <p className="muted">Try one of these</p>
+              <p className="subhead">Try one of these</p>
               <ul>
                 {EXAMPLES.map((example) => (
                   <li key={example}>
@@ -297,30 +295,12 @@ function RulesPage() {
       </main>
 
       {target && (
-        <aside
-          className="viewer-pane"
-          aria-label="Rulebook"
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.stopPropagation();
-              closeViewer();
-            }
-          }}
-        >
-          <div className="pane-bar">
-            <span className="pane-title">Rulebook</span>
-            <button
-              type="button"
-              className="icon-button"
-              onClick={closeViewer}
-              aria-label="Close the rulebook"
-              title="Close (Esc)"
-            >
-              <span aria-hidden="true">×</span> Close
-            </button>
-          </div>
-          <RulebookViewer target={target} index={rulebook.data} onShowRecord={showRecord} />
-        </aside>
+        <RulebookPane
+          target={target}
+          index={rulebook.data}
+          onClose={closeViewer}
+          onShowRecord={showRecord}
+        />
       )}
 
       <SettingsDialog
@@ -381,7 +361,7 @@ function SearchForm({
           enterKeyHint="search"
           autoComplete="off"
         />
-        <button type="submit" disabled={!value.trim() || !ready}>
+        <button type="submit" className="btn-primary" disabled={!value.trim() || !ready}>
           Search
         </button>
       </div>
@@ -477,7 +457,7 @@ function ResultView({
               onCitation={onCitation}
               onCited={onCited}
             />
-            <h2 className="section-label">From the rulebook</h2>
+            <h2 className="subhead">From the rulebook</h2>
             <EvidenceList
               summary={summary}
               highlighted={highlighted}
@@ -494,6 +474,7 @@ function ResultView({
   return (
     <section className="result" aria-labelledby={titleId} hidden={hidden}>
       <header className="result-head">
+        <p className="card-kicker">Question</p>
         <h1 id={titleId}>{search.question}</h1>
         <p className="result-meta" role="status">
           {evidence.isPending
