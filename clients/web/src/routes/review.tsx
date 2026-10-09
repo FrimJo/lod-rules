@@ -3,6 +3,7 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import reviewStyles from '../review.css?url';
 import { EvidenceCard } from '../components/EvidenceList.tsx';
 import { RulebookViewer } from '../components/RulebookViewer.tsx';
 import type { RulebookTarget } from '../lib/citations.ts';
@@ -30,6 +31,10 @@ interface ReviewSearch {
 }
 
 export const Route = createFileRoute('/review')({
+  head: () => ({
+    meta: [{ title: 'Grading review · League of Dungeoneers' }],
+    links: [{ rel: 'stylesheet', href: reviewStyles }],
+  }),
   validateSearch: (search: Record<string, unknown>): ReviewSearch => ({
     ...(typeof search.case === 'string' ? { case: search.case } : {}),
     ...(search.view === 'records' ? { view: 'records' as const } : {}),
