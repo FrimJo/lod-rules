@@ -24,7 +24,7 @@ import { canonicalJson, sha256 } from '../../../../scripts/decisions/hash.ts';
 import { Retrieval } from '../../../../scripts/retrieve/index.ts';
 import { fingerprintInputs } from '../../../../scripts/retrieve/load.ts';
 import { createAjv, repoRoot } from '../../../../scripts/validate/schemas.ts';
-import { llmAdapter, llmApiKey, llmModel } from '../server/llm.ts';
+import { llmAdapter, llmApiKey, llmJudgeModel, llmModel } from '../server/llm.ts';
 import {
   ANSWER_NAMES,
   prunedMetrics,
@@ -83,6 +83,7 @@ const out = join(repoRoot, values.out!);
 mkdirSync(join(out, 'cache'), { recursive: true });
 const jev = memoModel(base, join(repoRoot, 'generated/ask-eval/jev-cache'));
 const model = llmModel();
+const judgeModel = llmJudgeModel();
 const fingerprint = fingerprintInputs(repoRoot);
 const retrieval = Retrieval.fromCorpus();
 if (fingerprintInputs(repoRoot) !== fingerprint) {
@@ -104,7 +105,7 @@ const validatorFor = (count: number): ValidateFunction<QualityJudgment> => {
 };
 let requests = 0;
 
-async function complete(system: string, user: string): Promise<string> {
+async function complete(model: string, system: string, user: string): Promise<string> {
   // Exact prompts/model form the cache key, including rubric and source text for the judge.
   const key = sha256(canonicalJson({ model, system, user }));
   const path = join(out, 'cache', `${key}.json`);
@@ -113,7 +114,7 @@ async function complete(system: string, user: string): Promise<string> {
   const abortController = new AbortController();
   const timeout = setTimeout(() => abortController.abort(), 180_000);
   try {
-    const text = await chat({
+    const { text } = await chat({
       adapter: llmAdapter(model),
       messages: [{ role: 'user', content: user }],
       systemPrompts: [system],
@@ -181,7 +182,9 @@ async function evaluate(label: (typeof labels)[number], index: number) {
 
   // Modes with identical prompts get the identical answer; answer and grade each once.
   const distinct = [...new Set(selected.map((m) => prompts[m]))];
-  const texts = await Promise.all(distinct.map((prompt) => complete(prompt, label.question)));
+  const texts = await Promise.all(
+    distinct.map((prompt) => complete(model, prompt, label.question)),
+  );
   const shift = index % distinct.length;
   const rotated = [...distinct.slice(shift), ...distinct.slice(0, shift)];
   const names = rotated.map((_, i) => ANSWER_NAMES[i]!);
@@ -216,7 +219,7 @@ async function evaluate(label: (typeof labels)[number], index: number) {
       attempt === 0 ? packet : { ...packet, previousAttemptRejected: rejection },
     );
     try {
-      const raw = await complete(judgeInstructions(names.length), user);
+      const raw = await complete(judgeModel, judgeInstructions(names.length), user);
       const parsed: unknown = JSON.parse(
         raw.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, ''),
       );
@@ -363,12 +366,13 @@ const report = {
   corpusChangedDuringRun: fingerprintInputs(repoRoot) !== fingerprint,
   labelsHash: sha256(canonicalJson(allLabels)),
   model,
-  judgeModel: model,
+  judgeModel,
   jev: jev.id,
   modes: selected,
   filterPolicy: selected.includes('filtered') ? policy : null,
-  grading:
-    'automated, unreviewed; same model family for answer and judge; one answer per distinct prompt',
+  grading: `automated, unreviewed; ${
+    judgeModel === model ? 'same model for answer and judge' : 'separate answer and judge models'
+  }; one answer per distinct prompt`,
   intendedCases: labels.length,
   completedCases: results.length,
   errors,

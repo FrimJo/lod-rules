@@ -196,13 +196,14 @@ as well as this one and runs `npm run build`. Use Node 24 (`node:sqlite`).
 
 **Environment variables.**
 
-| Variable                | Purpose                                                  |
-| ----------------------- | -------------------------------------------------------- |
-| `ACCESS_PASSWORD`       | Shared password; every page and API call needs a sign-in |
-| `OPENAI_ROUTER_API_KEY` | AI answers (OpenRouter). Set a credit limit on the key   |
-| `OPENAI_ROUTER_MODEL`   | Optional model id                                        |
-| `TYPESAFE_API_KEY`      | Jev retrieval modes                                      |
-| `LOD_ANALYZER`          | Optional default mode                                    |
+| Variable                    | Purpose                                                  |
+| --------------------------- | -------------------------------------------------------- |
+| `ACCESS_PASSWORD`           | Shared password; every page and API call needs a sign-in |
+| `OPENAI_ROUTER_API_KEY`     | AI answers (OpenRouter). Set a credit limit on the key   |
+| `OPENAI_ROUTER_MODEL`       | Optional model id                                        |
+| `OPENAI_ROUTER_JUDGE_MODEL` | Optional judge model id for the quality evaluation       |
+| `TYPESAFE_API_KEY`          | Jev retrieval modes                                      |
+| `LOD_ANALYZER`              | Optional default mode                                    |
 
 **Access.** With `ACCESS_PASSWORD` set, `src/start.ts` sends every server request through
 `src/server/access.ts`. Pages redirect to `/login`, and other requests get 401 until the reader

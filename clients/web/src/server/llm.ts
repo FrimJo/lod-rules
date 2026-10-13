@@ -2,12 +2,21 @@ import { createOpenaiChat } from '@tanstack/ai-openai';
 
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 const DEFAULT_MODEL = 'openai/gpt-6-luna';
+const DEFAULT_JUDGE_MODEL = 'openai/gpt-6-luna';
 
 type Model = Parameters<typeof createOpenaiChat>[0];
 
 /** OpenRouter model id, e.g. `openai/gpt-6-luna`; not a bare OpenAI model name. */
 export function llmModel(): string {
   return process.env.OPENAI_ROUTER_MODEL?.trim() || DEFAULT_MODEL;
+}
+
+/**
+ * OpenRouter model id for the offline quality judge. Separate from `llmModel` so the answer
+ * model can change without invalidating judge output that human reviews were made against.
+ */
+export function llmJudgeModel(): string {
+  return process.env.OPENAI_ROUTER_JUDGE_MODEL?.trim() || DEFAULT_JUDGE_MODEL;
 }
 
 export function llmApiKey(): string | undefined {

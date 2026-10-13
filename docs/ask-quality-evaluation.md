@@ -25,7 +25,10 @@ node --import tsx clients/web/src/evaluation/calibrate-filter.ts --judgments gen
 ```
 
 The runner uses the web client's TanStack/OpenAI adapter against OpenRouter and the
-configured `OPENAI_ROUTER_MODEL` (default `openai/gpt-6-luna`) for both answers and judge.
+configured `OPENAI_ROUTER_MODEL` (default `openai/gpt-6-luna`) for answers and
+`OPENAI_ROUTER_JUDGE_MODEL` (default `openai/gpt-6-luna`) for the judge. Keep the judge fixed
+when changing the answer model: human fact flags are keyed to the judge output, and a new judge
+makes them stale.
 It requires `OPENAI_ROUTER_API_KEY` and
 `TYPESAFE_API_KEY`, loading the root `.env.local` without printing credentials.
 Questions and corpus excerpts are sent to these providers. All LLM client code stays
