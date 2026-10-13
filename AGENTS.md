@@ -217,3 +217,17 @@ Flag any of the following. Do not nitpick formatting; `npm run lint` owns that.
 - [docs/naming-conventions.md](docs/naming-conventions.md) — id namespaces
 - [LOD_RULES_CORPUS_PLAN.md](LOD_RULES_CORPUS_PLAN.md) — phases and data model
 - [README.md](README.md) — human overview
+
+## Agent skills
+
+### Issue tracker
+
+Engineering work is tracked as GitHub Issues on FrimJo/lod-rules via `gh`; rulebook ambiguities stay in `review/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`, plus existing `docs/ontology.md`. See `docs/agents/domain.md`.
