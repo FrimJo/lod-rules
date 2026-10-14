@@ -77,6 +77,15 @@ const expected = [
   ],
   ['Well', 'No entry.', artPenalty, 'N/A', ''],
 ];
+const locatorTable = (source: unknown): unknown =>
+  typeof source === 'object' &&
+  source !== null &&
+  'locator' in source &&
+  typeof source.locator === 'object' &&
+  source.locator !== null &&
+  'table' in source.locator
+    ? source.locator.table
+    : undefined;
 describe('outdoor obstacle matrix', () => {
   it('retains all 110 textual cells including blanks, capitalization and strict coverage boundaries', () => {
     expect(table.rows.map((row) => table.columns.map((col) => row.cells[col.id]?.printed))).toEqual(
@@ -90,6 +99,10 @@ describe('outdoor obstacle matrix', () => {
       ...Array<number>(8).fill(129),
       ...Array<number>(8).fill(130),
     ]);
-    expect(table.footnotes[0]).toContain('Example');
+    // The book prints no footnote; the artwork-only Example column is named in each locator.
+    expect(table.footnotes).toEqual([]);
+    expect(table.source.map(locatorTable).every((t) => String(t).includes('Example column'))).toBe(
+      true,
+    );
   });
 });

@@ -13,6 +13,7 @@ const movement: State = {
   hex_index: 0,
   terrain: 'road',
   transport_mode: 'walking',
+  all_heroes_have_camels: false,
   route_legal: true,
 };
 const food: State = {
@@ -28,6 +29,10 @@ const food: State = {
   rations_available: 3,
   party_fed: false,
   hunger_morale_active: false,
+  hunger_morale_loss: 0,
+  // Four characters, no dog: changelog 2.21 entry 166 makes the hunger penalty -1 per character.
+  party_member_count: 4,
+  dog_count: 0,
   hungry: false,
   constitution: 31,
   hunger_constitution_loss: 0,
@@ -50,7 +55,6 @@ describe('travel resource accounting from PDF 126–128', () => {
     ['road', 'walking', 1, 2],
     ['off_road', 'walking', 1.5, 1.5],
     ['desert', 'walking', 2, 1],
-    ['desert', 'all_camels', 1.5, 4.5],
     ['road', 'all_riding_horses_or_camels', 1, 5],
     ['road', 'wagon_or_mule', 1, 2],
   ])('derives %s entry for %s', (terrain, transport_mode, cost, remaining) => {
@@ -62,6 +66,28 @@ describe('travel resource accounting from PDF 126–128', () => {
       hex_index: 1,
       entered_hex: true,
     });
+  });
+  it('keys the Desert Hex camel cost to the heroes, not to the riding allowance', () => {
+    // "A Desert Hex costs 2 Movement Points, unless all heroes have camels. Then it is 1,5 points
+    // per hex." is separate from "A party where all members are riding horses or camels has 6".
+    const desert = { ...movement, terrain: 'desert', all_heroes_have_camels: true };
+    expect(
+      run('travel_daily_movement', { ...desert, transport_mode: 'all_riding_horses_or_camels' })
+        .state,
+    ).toMatchObject({ terrain_cost: 1.5, movement_points: 4.5, hex_index: 1 });
+    expect(
+      run('travel_daily_movement', { ...desert, transport_mode: 'wagon_or_mule' }).state,
+    ).toMatchObject({ terrain_cost: 1.5, movement_points: 1.5, hex_index: 1 });
+    expect(
+      run('travel_daily_movement', {
+        ...movement,
+        terrain: 'desert',
+        transport_mode: 'all_riding_horses_or_camels',
+      }).state,
+    ).toMatchObject({ terrain_cost: 2, movement_points: 4, hex_index: 1 });
+    expect(
+      run('travel_daily_movement', { ...desert, transport_mode: 'all_camels' }).state.hex_index,
+    ).toBe(0);
   });
   it('does not replenish allowance on repeated steps and rejects an unaffordable hex', () => {
     const a = run('travel_daily_movement', { ...movement, terrain: 'off_road' });
@@ -170,6 +196,52 @@ describe('travel resource accounting from PDF 126–128', () => {
     const hero = run('travel_food_and_rest', { ...fallback.state, phase: 'hero' });
     expect(hero.state).toMatchObject({ constitution: 16, hungry: true });
   });
+  it('lowers Party Morale by 1 per character, mercenaries included, not dogs (changelog 2.21 entry 166)', () => {
+    // 3 heroes + 1 mercenary + 1 dog travelling with the party.
+    const mixed = run('travel_food_and_rest', {
+      ...food,
+      rations_available: 0,
+      party_member_count: 5,
+      dog_count: 1,
+    });
+    expect(mixed.state).toMatchObject({ party_morale: 4, hunger_morale_loss: 4 });
+    // Applied inline once; the Party Morale table row is a reference dependency, never invoked.
+    expect(mixed.events).not.toContainEqual({
+      type: 'invoke',
+      dependency: 'character.morale.event.hungry',
+    });
+    const pair = run('travel_food_and_rest', {
+      ...food,
+      rations_available: 0,
+      party_member_count: 2,
+    });
+    expect(pair.state).toMatchObject({ party_morale: 6, hunger_morale_loss: 2 });
+    const invalid = run('travel_food_and_rest', {
+      ...food,
+      rations_available: 0,
+      party_member_count: 1,
+      dog_count: 2,
+    });
+    expect(invalid.events).toContainEqual({ type: 'require', satisfied: false });
+    expect(invalid.state.party_morale).toBe(8);
+  });
+  it('restores the stored hunger loss even if the party changed while hungry', () => {
+    const hungry = run('travel_food_and_rest', {
+      ...food,
+      rations_available: 0,
+      party_member_count: 5,
+      dog_count: 1,
+    });
+    const secondDay = run('travel_food_and_rest', { ...hungry.state, day: 1 });
+    expect(secondDay.state.party_morale).toBe(4);
+    const fed = run('travel_food_and_rest', {
+      ...secondDay.state,
+      day: 2,
+      rations_available: 1,
+      party_member_count: 4,
+    });
+    expect(fed.state).toMatchObject({ party_morale: 8, hunger_morale_loss: 0 });
+  });
   it('applies hunger once and restores only its temporary deltas after eating', () => {
     const party = run('travel_food_and_rest', { ...food, rations_available: 0 });
     expect(party.state.party_morale).toBe(4);
@@ -248,17 +320,68 @@ describe('travel resource accounting from PDF 126–128', () => {
       run('travel_event_check', r.state).events.filter((e) => e.type === 'invoke'),
     ).toHaveLength(0);
   });
+  it.each([
+    ['road_event', 'Roads'],
+    ['wilderness_event', 'Wilderness'],
+    ['desert_event', 'Desert'],
+    ['called_for', 'Village, Camp, Standing Stones, Quest site entrance, City street'],
+  ])(
+    'uses the outdoor tiles printed for a skirmish initiated by %s (PDF 127–128)',
+    (trigger, tiles) => {
+      const r = run('travel_skirmish_setup', {
+        setup_instructions: 'supplied',
+        terrain_map: 'supplied',
+        use_3d_terrain: false,
+        skirmish_trigger: trigger,
+      });
+      expect(r.state).toMatchObject({ outdoor_tiles: tiles, distance_unit: 'squares' });
+      expect(r.unresolved).toEqual([]);
+    },
+  );
+  it('rejects a skirmish trigger the page does not print', () => {
+    const r = run('travel_skirmish_setup', {
+      setup_instructions: 'supplied',
+      terrain_map: 'supplied',
+      use_3d_terrain: false,
+      skirmish_trigger: 'dungeon_event',
+    });
+    expect(r.events).toEqual([{ type: 'require', satisfied: false }]);
+    expect(r.state.outdoor_tiles).toBeUndefined();
+  });
+  it('walks both caption routes of the PDF 126 map hex by hex', () => {
+    // Blue: road, road, off-road, off-road (1p, 2p, 3,5p, 5p). Green: off-road, road (1,5p, 2,5p).
+    const walk = (transport_mode: string, terrains: string[]) => {
+      let state: State = { ...movement, transport_mode };
+      for (const terrain of terrains)
+        state = run('travel_daily_movement', { ...state, terrain }).state;
+      return state;
+    };
+    const blue = ['road', 'road', 'off_road', 'off_road'];
+    expect(walk('all_riding_horses_or_camels', blue)).toMatchObject({
+      hex_index: 4,
+      movement_points: 1,
+    });
+    expect(walk('walking', blue)).toMatchObject({ hex_index: 2, entered_hex: false });
+    expect(walk('walking', ['off_road', 'road'])).toMatchObject({
+      hex_index: 2,
+      movement_points: 0.5,
+    });
+  });
   it('binds obstacles and combat while explicitly disabling dungeon dice', () => {
     const r = run('travel_skirmish_setup', {
       setup_instructions: 'supplied',
       terrain_map: 'supplied',
       use_3d_terrain: true,
+      skirmish_trigger: 'road_event',
     });
     expect(r.state).toMatchObject({
       threat_enabled: false,
       scenario_dice_enabled: false,
       distance_unit: 'inches',
+      outdoor_tiles: 'Roads',
     });
+    // Changelog 2.21 entry 168 (charging with 3d terrain) is recorded, not applied.
+    expect(r.unresolved).toEqual(['issue.travel.skirmish_3d_terrain_charging']);
     expect(r.events).toContainEqual({ type: 'invoke', dependency: 'table.travel.obstacles' });
     expect(r.events).toContainEqual({ type: 'invoke', dependency: 'procedure.combat_preparation' });
   });
@@ -267,12 +390,14 @@ describe('travel resource accounting from PDF 126–128', () => {
       setup_instructions: '',
       terrain_map: 'supplied',
       use_3d_terrain: false,
+      skirmish_trigger: 'road_event',
     });
     expect(blocked.events.some((e) => e.type === 'invoke')).toBe(false);
     const setup = run('travel_skirmish_setup', {
       setup_instructions: 'Road Event bandits',
       terrain_map: 'supplied',
       use_3d_terrain: false,
+      skirmish_trigger: 'road_event',
     });
     expect(setup.events).toContainEqual({
       type: 'invoke',

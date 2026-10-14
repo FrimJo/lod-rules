@@ -54,15 +54,23 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'The estate is haunted. Between every quest, the night before the planned departure,
-    the party rolls 1d10; on 7–10 the ghosts make contact and the party rolls 1d10 on the Ghostly
-    Events Table. There is then no time to change plans; head straight to the World Map. Event 6
-    starts The Grieving Mother, or counts as #2 once that quest has succeeded; event 5 is ignored
-    without a wizard. A failed Grieving Mother makes the next event #8 automatically. Hero effects
-    for the coming quest are handed to their owners; this procedure owns the once-per-interval roll,
-    the event chosen and the estate state it changes. The book does not say whether the roll needs
-    a night at the estate, whether an owed #8 replaces the rolls, or where crop rations are held;
-    the caller supplies each reading, and the procedure waits on an issue until it does.'
+  source_text: 'Between every quest, the party must roll 1d10. This is done the night before the
+    planned departure. On a result of 7-10, the ghosts have seen fit to make contact. Roll on the
+    Ghostly Events Table. ... Roll 1d10 to see what Ghostly Events have passed during the last
+    evening or night before the departure. There is no time to change plans after this, and you
+    must head straight to the World Map. ... There will automatically be a Ghostly Event before the
+    next quest, and that will be #8.'
+  unresolved_references:
+    - Hero effects for the coming quest are handed to their owners; this procedure owns the
+      once-per-interval roll, the event chosen and the estate state it changes. The book does not
+      say whether the roll needs a night at the estate, whether an owed
+      Ghostly Event 8 replaces the rolls, or where crop rations are held; the caller supplies each
+      reading, and the procedure waits on an issue until it does.
+    - 'The roll is printed under Staying at the House. Whether it applies when the party did not
+      spend that night at the estate is the ghost_roll_scope reading. After a failed Grieving
+      Mother, an owed event #8 is the interval’s event under the replaces_rolls reading; under the
+      in_addition reading it applies once and the ordinary contact roll is also made. Each new
+      interval is decided afresh on every call.'
   issues:
     - issue.estate.ghost_contact_scope
     - issue.estate.furnishing_usage_boundaries
@@ -326,7 +334,9 @@
     - id: reset
       source:
         - *a1
-      source_text: Each call decides afresh whether a new interval is due.
+      source_text:
+        Between every quest, the party must roll 1d10. This is done the night before the planned
+        departure.
       effects:
         - type: set
           target: ghost_check_due
@@ -363,8 +373,8 @@
         - *a1
         - *a2
       source_text:
-        The roll is printed under Staying at the House. Whether it applies when the party did
-        not spend that night at the estate is not stated; the caller supplies the reading.
+        Between every quest, the party must roll 1d10. This is done the night before the planned
+        departure.
       when:
         type: all
         conditions:
@@ -413,9 +423,7 @@
     - id: owed_reading_unsupplied
       source:
         - *a3
-      source_text:
-        'Whether an owed #8 replaces the ordinary contact roll or comes in addition to it is not
-        stated; the caller supplies the reading.'
+      source_text: 'There will automatically be a Ghostly Event before the next quest, and that will be #8.'
       when:
         type: all
         conditions:
@@ -456,8 +464,8 @@
       source:
         - *a1
       source_text:
-        Between every quest, once, the night before the planned departure, under the supplied
-        reading of whether that night must be spent at the estate.
+        Between every quest, the party must roll 1d10. This is done the night before the planned
+        departure.
       when:
         type: all
         conditions:
@@ -522,9 +530,7 @@
     - id: forced_event
       source:
         - *a3
-      source_text:
-        "After a failed Grieving Mother there is automatically a Ghostly Event before the next
-        quest, and it is #8. Under the replaces_rolls reading it is the interval's event."
+      source_text: 'There will automatically be a Ghostly Event before the next quest, and that will be #8.'
       when:
         type: all
         conditions:
@@ -578,9 +584,7 @@
     - id: owed_event_in_addition
       source:
         - *a3
-      source_text:
-        'Under the in_addition reading the owed #8 applies once and the ordinary contact roll is
-        also made; there is no time to change plans.'
+      source_text: 'There will automatically be a Ghostly Event before the next quest, and that will be #8.'
       when:
         type: all
         conditions:
@@ -614,7 +618,7 @@
         - id: owed_event_8
           source:
             - *a7
-          source_text: 'Restless Night: all heroes start the next quest with -2 Energy (minimum 0).'
+          source_text: All heroes start the next quest with -2 Energy (minimum 0).
           rule_refs:
             - character.settlement.estate.departure
             - character.settlement.ghost_event.8
@@ -622,7 +626,9 @@
     - id: contact
       source:
         - *a1
-      source_text: On a result of 7–10 the ghosts make contact; roll on the Ghostly Events Table.
+      source_text:
+        On a result of 7-10, the ghosts have seen fit to make contact. Roll on the Ghostly
+        Events Table.
       when:
         type: all
         conditions:
@@ -657,7 +663,8 @@
     - id: grieving_mother_done
       source:
         - *a5
-      source_text: 'If the Grieving Mother quest has already succeeded, treat a 6 as if you rolled #2.'
+      source_text: 'If you already have succeeded in this quest, ignore this and treat it as if you
+        rolled #2.'
       when:
         type: all
         conditions:
@@ -699,8 +706,8 @@
       source:
         - *a5
       source_text:
-        If there are no wizards in the party, ignore the Protector and head out without any
-        ghostly events.
+        If there are no wizards in the party, ignore this and head out on your quest without
+        any ghostly events.
       when:
         type: all
         conditions:
@@ -735,7 +742,9 @@
     - id: select_event
       source:
         - *a5
-      source_text: Apply the selected Ghostly Event once; there is no time to change plans afterwards.
+      source_text:
+        There is no time to change plans after this, and you must head straight to the World
+        Map.
       when: *a6
       rule_refs:
         - character.settlement.estate.departure
@@ -748,7 +757,9 @@
     - id: event_1
       source:
         - *a5
-      source_text: 'The Family Heirlooms: two rolls on the Wonderful Treasure Chart; each hero loses 1 Energy.'
+      source_text:
+        The heroes may roll twice on the Wonderful Treasure Chart. However, the lack of sleep
+        will deprive each hero of 1 Point of Energy.
       when:
         type: all
         conditions:
@@ -767,7 +778,7 @@
     - id: event_2
       source:
         - *a5
-      source_text: 'Guardian Spirits: +1 Luck for all heroes during the coming quest.'
+      source_text: +1 Luck for all heroes during the coming quest.
       when:
         type: all
         conditions:
@@ -786,8 +797,9 @@
     - id: event_3
       source:
         - *a5
-      source_text: 'The Hidden Treasure: a Side Quest Card leads to an extra door to R10 with no
-        encounters inside.'
+      source_text: Add a Side Quest Card to the first half of the pile when setting up the Dungeon
+        Cards. ... On this card, you add 1 extra door leading to the R10 tile. ... there are no
+        encounters inside.
       when:
         type: all
         conditions:
@@ -806,7 +818,7 @@
     - id: event_4
       source:
         - *a5
-      source_text: 'Spiritual Guides: all heroes get +5 CS/+5 RS during the quest.'
+      source_text: All Heroes get +5 CS/+5 RS during the quest.
       when:
         type: all
         conditions:
@@ -825,7 +837,7 @@
     - id: event_5
       source:
         - *a5
-      source_text: 'Protector: any wizard only miscasts on 97–00 during the coming quest.'
+      source_text: Any wizard in the party will only miscast on 97-00 during the coming quest.
       when:
         type: all
         conditions:
@@ -844,7 +856,8 @@
     - id: event_6
       source:
         - *a5
-      source_text: 'The Grieving Mother: start the Grieving Mother side quest.'
+      source_text: See the Grieving Mother Side Quest. ... If you have tried and failed, you may try
+        again.
       when:
         type: all
         conditions:
@@ -870,7 +883,7 @@
     - id: event_7
       source:
         - *a7
-      source_text: 'Angered Ghost: any rations from the crops, hen house and pigsty are lost.'
+      source_text: Any rations from the crops, hen house, and pigsty are lost.
       when:
         type: all
         conditions:
@@ -967,7 +980,8 @@
     - id: event_8
       source:
         - *a7
-      source_text: 'Restless Night: all heroes start the next quest with -2 Energy (minimum 0).'
+      source_text: All heroes start the next quest with -2 Energy (minimum 0). This can be regained
+        as usual after the quest has started through the usual means.
       when:
         type: all
         conditions:
@@ -986,9 +1000,10 @@
     - id: event_9
       source:
         - *a7
-      source_text:
-        'Lost Item: one randomised item of one randomised hero stays at the estate until after
-        the next dungeon.'
+      source_text: First randomise which hero is affected. Then randomise between all weapons, all
+        pieces of armour and all rations (All rations are considered a single item for this
+        purpose). This item is left back at the estate and cannot be used until you have left the
+        next dungeon.
       when:
         type: all
         conditions:
@@ -1007,9 +1022,8 @@
     - id: event_10
       source:
         - *a7
-      source_text:
-        'The Curse: every hero suffers an individual curse from the Curse Table until back in
-        the city.'
+      source_text: Every hero suffers an individual curse from the Curse Table in the Rulebook that
+        cannot be lifted until they are back in the city again.
       when:
         type: all
         conditions:

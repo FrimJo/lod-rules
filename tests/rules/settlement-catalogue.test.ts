@@ -64,22 +64,24 @@ describe('settlement catalogue source cells and relationships', () => {
     });
   });
   it('retains trap timing, targeting and armour distinctions', () => {
-    expect(run('guild.dark.caltrops').state).toMatchObject({
-      range_squares: 2,
+    // "with no armour" is ambiguous (issue.guild.caltrops_no_armour); range and adjacency are typed.
+    expect(
+      run('guild.dark.caltrops', { distance_squares: 2, enemy_adjacent_to_thrower: false }).state,
+    ).toMatchObject({
       action_points: 1,
-      requires_no_adjacent_enemy: true,
-      requires_unarmoured_enemy: true,
       damage_die: 4,
       ends_enemy_turn: true,
     });
-    expect(run('guild.dark.tripwire').state).toMatchObject({
-      quick_slot_setup_turns: 1,
+    expect(
+      run('guild.dark.tripwire', { ongoing_battle: false, in_quick_slot: true }).state,
+    ).toMatchObject({
+      setup_turns: 1,
       span_squares: 4,
       diagonal_allowed: false,
       damage_die: 8,
       armour_and_natural_armour_apply: true,
     });
-    expect(run('guild.dark.bear_trap').state).toMatchObject({
+    expect(run('guild.dark.bear_trap', { ongoing_battle: false }).state).toMatchObject({
       action_points: 1,
       wounds_die: 12,
       armour_applies: false,
@@ -99,9 +101,9 @@ describe('settlement catalogue source cells and relationships', () => {
     ).toBeUndefined();
   });
   it('preserves weapon treatment and staff recharge restrictions', () => {
-    expect(run('guild.fighters.slayer').state).toMatchObject({
-      requires_edged_weapon: true,
-      requires_full_durability: true,
+    expect(
+      run('guild.fighters.slayer', { edged_weapon: true, at_full_durability: true }).state,
+    ).toMatchObject({
       damage_modifier: 1,
       cumulative: true,
       duration: 'until the weapon breaks',
@@ -110,9 +112,11 @@ describe('settlement catalogue source cells and relationships', () => {
       durability: 8,
       default_charges: 3,
       recharge_purchase_price_fraction: 0.5,
-      casting_automatically_succeeds: true,
-      normal_casting_action_points: 2,
     });
+    // Changelog 2.21 entry 174: only the spell contained within the staff.
+    expect(
+      run('guild.wizards.staff_casting', { spell_contained_in_staff: true }).state,
+    ).toMatchObject({ casting_automatically_succeeds: true, normal_casting_action_points: 2 });
     expect(run('equipment.arcane_staff', { selected: true }).state.dissipation_minimum).toBe(9);
     expect(run('equipment.staff_of_the_heart', { selected: true }).state.dissipation_minimum).toBe(
       10,

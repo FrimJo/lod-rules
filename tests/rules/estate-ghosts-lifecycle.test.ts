@@ -207,6 +207,7 @@ describe('Furnishing the Manor — rendered PDF161', () => {
     chosen_god: '',
     hero_id: 'hero-1',
     hero_is_alchemist: false,
+    hero_is_wizard: false,
     hero_use_interval_id: '',
     hero_training_facility: '',
     hero_training_interval_id: '',
@@ -278,6 +279,24 @@ describe('Furnishing the Manor — rendered PDF161', () => {
     const unsupplied = furnish({ ...lab, furnishing: 'Garden' });
     expect(unsupplied.unresolved).toEqual(['issue.estate.furnishing_usage_boundaries']);
     expect(unsupplied.state.use_allowed).toBe(false);
+  });
+  it('the Wizard’s Study serves a wizard; the Kennel has no actor or use limit', () => {
+    const study: State = {
+      ...manor,
+      phase: 'use',
+      furnishing_owned: true,
+      furnishing: 'Wizard’s Study',
+      hero_is_wizard: true,
+    };
+    const wizard = furnish(study);
+    expect(wizard.state.use_allowed).toBe(true);
+    expect(wizard.trace).toContain('character.settlement.estate.wizards_study');
+    const other = furnish(study, { hero_is_wizard: false });
+    expect(other.state.use_allowed).toBe(false);
+    expect(other.trace).not.toContain('character.settlement.estate.wizards_study');
+    const kennel = furnish(study, { furnishing: 'Kennel', hero_is_wizard: false });
+    expect(kennel.state.use_allowed).toBe(true);
+    expect(kennel.trace).toContain('character.settlement.estate.kennel');
   });
   it.each(['Smithy', 'Shrine', 'Crops, Hen House, and Pigsty'])(
     'how often the %s may be used is not stated',

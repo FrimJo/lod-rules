@@ -10,23 +10,23 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Whenever the party enters a settlement, roll 1d12 against its event
-    threshold. If triggered, roll on the Events Table and follow its
-    instructions.
+  source_text: Whenever the party enters a settlement, they must roll for a random Event. Roll 1d12
+    and consult the table to see if you have triggered an Event. If that is the case, roll on the
+    Events Table and follow the instructions.
   type: modifier
   scope: settlement
   fields:
     arrival_die:
       type: number
       role: output
-      description: arrival die
+      description: Sides of the die rolled on every entry (1d12).
     check_every_entry:
       type: boolean
       role: output
-      description: check every entry
+      description: The party rolls whenever it enters a settlement.
   effects:
     - type: set
       target: arrival_die
@@ -53,32 +53,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 132
       printed_page: 130
-      heading: Taking on Quests; Rejecting a Quest
+      heading: Taking on Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Rejecting a Quest
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Start an available campaign or roll for random quests. Use the
-    settlement Quest Site die and map colour. Only The Outpost offers Ancient
-    Lands quests. Rejecting 2 quests in a village or 3 in Silver City requires
-    moving to another settlement for a new quest.
+  source_text: Whenever the party is in a settlement, they may either start an available campaign or
+    roll to see if there are random quests available. ... The only settlement to offer quests in
+    the Ancient Lands is The Outpost. ... The party may reject 2 quests in a village and 3 quests in
+    Silver City before they must move to another settlement to find a new quest.
+  issues:
+    - issue.settlement.quest_offer_scope
   type: modifier
   scope: settlement
   fields:
     village_rejection_limit:
       type: number
       role: output
-      description: village rejection limit
+      description: Quests the party may reject in a village before it must move on.
     silver_city_rejection_limit:
       type: number
       role: output
-      description: silver city rejection limit
+      description: Quests the party may reject in Silver City before it must move on.
     ancient_lands_quest_source:
       type: string
       role: output
-      description: ancient lands quest source
+      description: The only settlement that offers quests in the Ancient Lands.
   effects:
     - type: set
       target: village_rejection_limit
@@ -97,55 +108,132 @@
         value: The Outpost
   dependencies:
     - key: related_0
-      label: table.settlement.quest_sites
-      object_id: table.settlement.quest_sites
-- id: character.settlement.quest_availability
-  name: Available quests; Leaving on a Quest
+      label: table.settlement.quest_availability
+      object_id: table.settlement.quest_availability
+- id: character.settlement.quest_site_selector
+  name: Quest Site die and map colour
   section_id: section.settlements.taking_on_quests
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
-      pdf_page: 133
-      printed_page: 131
-      heading: Available quests; Leaving on a Quest
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Roll 1d6 for available quests, then if a quest is available roll
-    1d8: on 1–2 a side quest is available with any other quest. Luck cannot
-    modify either roll. Generate choices from Quest Book tables. If none
-    interest the party, move to another settlement. Depart early in the morning
-    with no settlement activities that day.'
+  source_text: The Quest Site is determined by rolling a dice and cross-referencing this to the
+    numbers written on the map.
+  unresolved_references:
+    - 'The map distances (for example "a mere two-day trek from the village" in the Taking on Quests
+      example) are read from the printed map on PDF 140 and are not modelled.'
+  issues:
+    - issue.settlement.quest_offer_scope
+  type: lookup
+  scope: settlement
+  fields:
+    settlement:
+      type: string
+      role: input
+      description: Settlement name as printed in the Settlement column.
+    quest_site_roll:
+      type: number
+      role: input
+      description: Result of the settlement's Quest dice, read as a number on the map.
+      integer: true
+      minimum: 1
+      maximum: 40
+    quest_site_die:
+      type: string
+      role: output
+      description: The settlement's printed Quest dice.
+    quest_site_colour:
+      type: string
+      role: output
+      description: The printed map colour whose numbers are read.
+    quest_site_number:
+      type: number
+      role: output
+      description: The map number in that colour that marks the Quest Site.
+  effects:
+    - type: lookup
+      table_id: table.settlement.quest_sites
+      key_column: settlement
+      key:
+        type: field
+        name: settlement
+      value_column: quest_die
+      target: quest_site_die
+      on_missing_issue: issue.settlement.quest_offer_scope
+    - type: lookup
+      table_id: table.settlement.quest_sites
+      key_column: settlement
+      key:
+        type: field
+        name: settlement
+      value_column: colour
+      target: quest_site_colour
+      on_missing_issue: issue.settlement.quest_offer_scope
+    - type: set
+      target: quest_site_number
+      value:
+        type: field
+        name: quest_site_roll
+  uses_tables:
+    - table.settlement.quest_sites
+- id: character.settlement.quest_availability
+  name: Available quests
+  section_id: section.settlements.taking_on_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Available quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Roll 1d6 on the table to see what quests are available. If there is a quest
+    available, then roll 1d8. On a result of 1-2 on the d8, a side quest is available as well and
+    may be taken together with any of the other quests. See page 271. Luck may not be used for any
+    of these two rolls. Use the Quest Book tables to generate which quests to choose from. If none
+    of the quests are interesting to the party, they must move to another settlement to find new
+    ones.
+  see_also:
+    - section.quest_book_i.side_quests
   type: modifier
   scope: settlement
   fields:
     availability_die:
       type: number
       role: output
-      description: availability die
+      description: Sides of the availability die (1d6).
     side_quest_die:
       type: number
       role: output
-      description: side quest die
+      description: Sides of the side-quest die (1d8).
     side_quest_success_max:
       type: number
       role: output
-      description: side quest success max
+      description: Highest d8 result that offers a side quest.
     side_quest_requires_available_quest:
       type: boolean
       role: output
-      description: side quest requires available quest
+      description: The d8 is rolled only if there is a quest available.
     luck_allowed:
       type: boolean
       role: output
-      description: luck allowed
-    no_activities_on_departure_day:
+      description: Luck may not be used for either roll.
+    no_interesting_quest_must_move:
       type: boolean
       role: output
-      description: no activities on departure day
+      description: If none of the quests interest the party, it must move to another settlement.
   effects:
     - type: set
       target: availability_die
@@ -173,7 +261,7 @@
         type: literal
         value: false
     - type: set
-      target: no_activities_on_departure_day
+      target: no_interesting_quest_must_move
       value:
         type: literal
         value: true
@@ -181,6 +269,50 @@
     - key: related_0
       label: table.settlement.quest_availability
       object_id: table.settlement.quest_availability
+- id: character.settlement.leaving_on_a_quest
+  name: Leaving on a Quest
+  section_id: section.settlements.leaving_on_a_quest
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Taking on deadly quests requires careful planning and preparation. Therefore,
+    leaving on a quest is always done early in the morning. No other settlement activities are
+    allowed on that day.
+  type: constraint
+  scope: settlement
+  fields:
+    departure_time:
+      type: string
+      role: output
+      description: When the party leaves on a quest.
+    settlement_activities_on_departure_day:
+      type: boolean
+      role: output
+      description: Whether other settlement activities are allowed on the departure day.
+  effects:
+    - type: set
+      target: departure_time
+      value:
+        type: literal
+        value: early in the morning
+    - type: set
+      target: settlement_activities_on_departure_day
+      value:
+        type: literal
+        value: false
+  dependencies:
+    - key: departure
+      label: Quest departure checkpoint
+      object_id: procedure.quest_departure
 - id: character.settlement.activities
   name: Activities in a Settlement
   section_id: section.settlements.activities_in_a_settlement
@@ -193,36 +325,47 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Each hero has one Activity Point per day. Performing an activity
-    requires staying at the inn that night. Lodging price is for the entire
-    party regardless of size. Services must exist in the settlement. A hero may
-    buy or sell pooled party gear.
+  source_text: In a settlement you can perform different activities. Each hero may perform
+    activities worth one Activity Point per day, but performing an activity also means that you
+    must stay for the night at the inn. Note that the price for staying at the inn is for the
+    entire party, regardless of its size. Not all activities are available at all settlements, and
+    to know what is available, check the ‘Settlement Descriptions’ on page 134 onwards. It is
+    perfectly fine to pool the party’s excess gear to the hero that goes to a certain shop or
+    similar. In the same way, a hero may purchase gear for another hero.
+  see_also:
+    - section.settlements.the_settlements_of_the_southern_part_of_the_kingdom
+  term_refs:
+    - term.activity_point
   type: modifier
   scope: settlement
   fields:
     activity_points_per_hero_day:
       type: number
       role: output
-      description: activity points per hero day
+      description: Activity Points each hero may spend per day.
     lodging_charge_unit:
       type: string
       role: output
-      description: lodging charge unit
+      description: The inn price covers the entire party, regardless of its size.
     activity_requires_overnight:
       type: boolean
       role: output
-      description: activity requires overnight
+      description: Performing an activity means staying the night at the inn.
     requires_available_service:
       type: boolean
       role: output
-      description: requires available service
+      description: Not all activities are available at all settlements.
     party_gear_may_be_pooled:
       type: boolean
       role: output
-      description: party gear may be pooled
+      description: The party's excess gear may be pooled to the hero who visits a shop.
+    hero_may_purchase_for_another:
+      type: boolean
+      role: output
+      description: A hero may purchase gear for another hero.
   effects:
     - type: set
       target: activity_points_per_hero_day
@@ -249,6 +392,11 @@
       value:
         type: literal
         value: true
+    - type: set
+      target: hero_may_purchase_for_another
+      value:
+        type: literal
+        value: true
   dependencies:
     - key: related_0
       label: table.settlement.activities
@@ -265,34 +413,48 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Zero-cost activities are free, with the listed overnight
-    restrictions. More than one Activity Point takes more than a day; nothing
-    else may be done during those days. Other heroes must also stay while a
-    member undertakes a lengthy activity. Create Scroll costs 1 per scroll, max
-    2; Enchant Objects costs 1, max once.
+  source_text: The heroes may choose from the activities listed in the table below, as long as the
+    settlement offers that specific service. Some activities cost 0 Action Points which means they
+    can be done for free. Those which cost more than 1 Activity Point take longer than a day to
+    perform. During those days nothing else can be done. If one member of the party decides to do
+    something that takes a long time, and the other party members are done, they must also stay at
+    the inn.
+  issues:
+    - issue.settlement.action_points_wording
+  term_refs:
+    - term.activity_point
   type: modifier
   scope: settlement
   fields:
+    zero_cost_activities_free:
+      type: boolean
+      role: output
+      description: Activities costing 0 can be done for free.
     multi_day_excludes_other_activities:
       type: boolean
       role: output
-      description: multi day excludes other activities
+      description: During the days of an activity costing more than 1, nothing else can be done.
     party_waits_for_occupied_heroes:
       type: boolean
       role: output
-      description: party waits for occupied heroes
+      description: Party members who are done must also stay at the inn.
     scroll_maximum:
       type: number
       role: output
-      description: scroll maximum
+      description: Create a Scroll, printed "1 per Scroll. Max 2."
     enchant_maximum:
       type: number
       role: output
-      description: enchant maximum
+      description: Enchant Objects, printed "1. Max once."
   effects:
+    - type: set
+      target: zero_cost_activities_free
+      value:
+        type: literal
+        value: true
     - type: set
       target: multi_day_excludes_other_activities
       value:
@@ -317,6 +479,202 @@
     - key: related_0
       label: table.settlement.activities
       object_id: table.settlement.activities
+- id: character.settlement.long_activity_stay
+  name: Activities taking longer than a day
+  section_id: section.settlements.activities_in_a_settlement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Leaving on a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Uncaptioned table (What, Where, Activity Point cost)
+        row: Learn a Spell; Treat Mental Conditions
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Those which cost more than 1 Activity Point take longer than a day to perform. During
+    those days nothing else can be done. If one member of the party decides to do something that
+    takes a long time, and the other party members are done, they must also stay at the inn. ...
+    Therefore, leaving on a quest is always done early in the morning. No other settlement
+    activities are allowed on that day.
+  unresolved_references:
+    - 'Structural reading: one Activity Point is spent per day, so an activity costing N Activity
+      Points occupies its hero from the start day through day start + N - 1. The party stays at the
+      inn through that night, and the first day it may leave is the next morning.'
+  term_refs:
+    - term.activity_point
+  type: calculation
+  scope: settlement
+  fields:
+    activity:
+      type: string
+      role: input
+      description: learn_a_spell (Learn a Spell, cost 3) or treat_mental_conditions (Treat Mental
+        Conditions, cost 5), the two Available Actions rows that cost more than 1.
+    start_day:
+      type: number
+      role: input
+      description: Settlement day on which the hero starts the activity.
+      integer: true
+      minimum: 1
+    activity_point_cost:
+      type: number
+      role: output
+      description: Printed Activity Point cost of the activity.
+    occupied_until_day:
+      type: number
+      role: output
+      description: Last day on which the hero can do nothing else.
+    party_stays_at_inn_until_night:
+      type: number
+      role: output
+      description: Last night the whole party must stay at the inn.
+    earliest_departure_day:
+      type: number
+      role: output
+      description: First morning on which the party may leave on a quest.
+  effects:
+    - type: choice
+      selection: activity
+      options:
+        - id: learn_a_spell
+          effects:
+            - type: set
+              target: activity_point_cost
+              value:
+                type: literal
+                value: 3
+        - id: treat_mental_conditions
+          effects:
+            - type: set
+              target: activity_point_cost
+              value:
+                type: literal
+                value: 5
+    - type: set
+      target: occupied_until_day
+      value:
+        type: arithmetic
+        operator: subtract
+        values:
+          - type: sum
+            values:
+              - type: field
+                name: start_day
+              - type: field
+                name: activity_point_cost
+          - type: literal
+            value: 1
+    - type: set
+      target: party_stays_at_inn_until_night
+      value:
+        type: field
+        name: occupied_until_day
+    - type: set
+      target: earliest_departure_day
+      value:
+        type: sum
+        values:
+          - type: field
+            name: occupied_until_day
+          - type: literal
+            value: 1
+  uses_tables:
+    - table.settlement.activities
+- id: character.settlement.listed_services
+  name: The Settlements of the Southern Part of the Kingdom
+  section_id: section.settlements.the_settlements_of_the_southern_part_of_the_kingdom
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 136
+      printed_page: 134
+      heading: The Settlements of the Southern Part of the Kingdom
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    These are the settlements you can visit. All services available in each settlement are listed
+    here. Unless noted otherwise, prices and availability are unchanged. The following pages give a
+    detailed description of the services offered.
+  issues:
+    - issue.settlement.whiteport_gambling_scope
+  type: constraint
+  scope: settlement
+  fields:
+    visitable_settlements:
+      type: string
+      role: output
+      description: the settlements listed under this heading
+    services_limited_to_listed:
+      type: boolean
+      role: output
+      description: a settlement offers only the services listed for it
+    unlisted_price_percent_modifier:
+      type: number
+      role: output
+      description: price change where the listing notes none
+    unlisted_availability_modifier:
+      type: number
+      role: output
+      description: availability change where the listing notes none
+  effects:
+    - type: set
+      target: visitable_settlements
+      value:
+        type: literal
+        value: Caelkirk; Freyfell; Coalfell; Irondale; Whiteport; Rochdale; Windfair; Silver City;
+          The Outpost; Durburim; Birnheim
+    - type: set
+      target: services_limited_to_listed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: unlisted_price_percent_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: unlisted_availability_modifier
+      value:
+        type: literal
+        value: 0
+  dependencies:
+    - key: related_0
+      label: table.settlement.profiles
+      object_id: table.settlement.profiles
+    - key: related_1
+      label: table.settlement.activities
+      object_id: table.settlement.activities
+  uses_tables:
+    - table.settlement.activities
 - id: character.settlement.profile.caelkirk
   name: Caelkirk
   section_id: section.settlements.caelkirk
@@ -329,13 +687,17 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Fishing and small-scale forestry. Blacksmith equipment availability
-    -2 and price +10%; General Store fishing gear 50 c, availability 6; General
-    Store equipment availability -2, price +10%; Inn 35 c per party per night;
-    Kennel (Companions’ Compendium).
+  source_text: |-
+    Blacksmith:
+    - Equipment availability -2, price +10%
+    General Store:
+    - Fishing gear 50 c, availability 6
+    - Equipment availability -2, price +10%
+    Inn: 35c per party, per night.
+    Kennel: See Companions compendium.
   type: modifier
   scope: settlement
   fields:
@@ -434,6 +796,9 @@
     - key: related_0
       label: table.settlement.profiles
       object_id: table.settlement.profiles
+    - key: related_1
+      label: character.settlement.blacksmith
+      object_id: character.settlement.blacksmith
 - id: character.settlement.profile.freyfell
   name: Freyfell
   section_id: section.settlements.freyfell
@@ -446,12 +811,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Largest southern port; Arena; Blacksmith; General Store equipment
-    availability +1 and price -10%; Inn 25 c per party per night; Kennel;
-    Freyfell bloodhound availability 5; Sick Ward.
+  source_text: |-
+    Arena
+    Blacksmith
+    General Store:
+    - Equipment availability +1, price -10%
+    Inn: 25 c per party, per night.
+    Kennel: See Companions compendium.
+    - Freyfell bloodhound availability 5.
+    Sick Ward
   type: modifier
   scope: settlement
   fields:
@@ -553,12 +924,16 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Small village relying on hunting and farming; Blacksmith weapons
-    and armour availability +1, price -10%; General Store equipment availability
-    -2, price +20%; Inn 35 c per party per night; Temple of Ohlnir.
+  source_text: |-
+    Blacksmith:
+    - Weapons and armour availability +1, Price -10%
+    General Store:
+    - Equipment availability -2, price +20%
+    Inn: 35c per party, per night.
+    Temples: Ohlnir.
   type: modifier
   scope: settlement
   fields:
@@ -651,11 +1026,15 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Farms and main regional wood supplier; Blacksmith; General Store;
-    Inn 15 c per party per night; Temples of Rhidnir, Iphy and Metheia.
+  source_text: |-
+    Blacksmith
+    General Store
+    Inn: 15c per party, per night.
+    Temples:
+    - Rhidnir, Iphy, and Metheia.
   type: modifier
   scope: settlement
   fields:
@@ -748,14 +1127,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Whiteport is one of two southern ports, smaller than Freyfell, with
-    substantial traveller/goods traffic and fishing income. Alberta’s
-    Magnificent Animals; General Store fishing gear 50 c (availability 6),
-    equipment availability +1 and price -10%; Inn 15 c per party per night and
-    gambling opportunities; Temples of Rhidnir, Iphy, Ohlnir and Metheia.
+  source_text: |-
+    Alberta’s Magnificent Animals
+    General Store:
+    - Fishing gear 50 c, availability 6
+    - Equipment availability +1, price -10%
+    Inn: 15c per party, per night. There are also gambling opportunities.
+    Temples: Rhidnir, Iphy, Ohlnir, and Metheia.
+  issues:
+    - issue.settlement.whiteport_gambling_scope
   type: modifier
   scope: settlement
   fields:
@@ -803,6 +1186,10 @@
       type: number
       role: output
       description: fishing gear availability
+    gambling_opportunities:
+      type: boolean
+      role: output
+      description: gambling opportunities at the Inn
   effects:
     - type: set
       target: services
@@ -860,6 +1247,11 @@
       value:
         type: literal
         value: 6
+    - type: set
+      target: gambling_opportunities
+      value:
+        type: literal
+        value: true
   dependencies:
     - key: related_0
       label: table.settlement.profiles
@@ -876,12 +1268,15 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Rochdale is a small farming village and unofficial alchemy centre.
-    General Store; Herbalist; Inn 20 c per party per night; Sick Ward; The Magic
-    Brewery.
+  source_text: |-
+    General Store
+    Herbalist
+    Inn: 20c per party, per night.
+    Sick Ward
+    The Magic Brewery
   type: modifier
   scope: settlement
   fields:
@@ -983,14 +1378,17 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Windfair lies by the Silver Mines and Durburim. Since the mines
-    closed, residents rely on fishing and trade with Dwarfs. Blacksmith; General
-    Store fishing gear 50 c (availability 6), equipment availability -1 and
-    price +10%; Inn 35 c per party per night; Scryer; Temples of Ohlnir and
-    Charus.
+  source_text: |-
+    Blacksmith
+    General Store:
+    - Fishing gear 50 c, availability 6
+    - Equipment availability -1, price +10%
+    Inn: 35c per party, per night.
+    Scryer
+    Temples: Ohlnir and Charus.
   type: modifier
   scope: settlement
   fields:
@@ -1101,14 +1499,21 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Silver City is the capital of the South, third-largest city in the
-    kingdom, bustling with activities, travellers and opportunities. It offers
-    Arena, Asylum, Banks, Blacksmith, Fortune Teller, General Store, Guilds,
-    Horse Racing Track, Inn (25 c per party per night), Inner Sanctum and all
-    Temples. The fictional history on PDF 138 is setting text.
+  source_text: |-
+    Arena
+    Asylum
+    Banks
+    Blacksmith
+    Fortune Teller
+    General Store
+    Guilds
+    Horse Racing Track
+    Inn: 25 c per party, per night.
+    Inner Sanctum
+    Temples: All.
   type: modifier
   scope: settlement
   fields:
@@ -1202,13 +1607,19 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: General Store equipment availability -2 and price +20%; Inn 25 c
-    per party per night; Blacksmith weapon and armour prices +20%; Ancient Lands
-    quest site requires toll of 100 c per hero first and League membership. All
-    expeditions into the Ancient Lands must start from The Outpost by law.
+  source_text: |-
+    All expeditions into these lands must start from the outpost by law.
+    ...
+    Blacksmith:
+    - Weapon and armour price +20%
+    General Store:
+    - Equipment availability -2, price +20%
+    Inn: 25 c per party, per night.
+    Special:
+    - Toll. If you are to head out to a Quest Site in the Ancient Lands (yellow 1-12), you will have to pay a toll to the King of 100 c per hero first. You must be a member of the league to be allowed to pass.
   type: modifier
   scope: settlement
   fields:
@@ -1256,6 +1667,14 @@
       type: boolean
       role: output
       description: ancient lands expeditions must start here
+    ancient_lands_quest_sites:
+      type: string
+      role: output
+      description: Ancient Lands quest sites the toll applies to
+    toll_recipient:
+      type: string
+      role: output
+      description: who the toll is paid to
   effects:
     - type: set
       target: services
@@ -1312,10 +1731,29 @@
       value:
         type: literal
         value: true
+    - type: set
+      target: ancient_lands_quest_sites
+      value:
+        type: literal
+        value: 'yellow 1-12'
+    - type: set
+      target: toll_recipient
+      value:
+        type: literal
+        value: 'the King'
   dependencies:
     - key: related_0
       label: table.settlement.profiles
       object_id: table.settlement.profiles
+    - key: related_1
+      label: procedure.ancient_lands_expedition
+      object_id: procedure.ancient_lands_expedition
+    - key: related_2
+      label: core.quest.ancient_lands.outpost_membership
+      object_id: core.quest.ancient_lands.outpost_membership
+    - key: related_3
+      label: character.equipment.transport.camel.purchase
+      object_id: character.equipment.transport.camel.purchase
 - id: character.settlement.profile.durburim
   name: Durburim
   section_id: section.settlements.durburim
@@ -1328,13 +1766,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Dwarven city; Blacksmith weapon availability +1 and price +20%;
-    weapons bought here are Dwarven-made and gain +2 Durability cumulative;
-    armour availability ±0 and price +10%; General Store equipment availability
-    -1, price +20%; Inn 65 c per party per night; all Temples.
+  source_text: |-
+    Blacksmith:
+    - Weapons availability +1, Price +20%
+    - Armour availability ±0, Price +10%
+    - Weapons purchased in Durburim are Dwarven-made and gain an additional +2 Durability. This is cumulative with any other modifiers.
+    General store:
+    - Equipment availability -1, price +20%
+    Inn: 65 c per party, per night.
+    Temples: All
   type: modifier
   scope: settlement
   fields:
@@ -1445,13 +1888,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Blacksmith weapon availability -1 and price +20%; armour
-    availability +1 and price +20%; armour bought here is Dwarven-made and gains
-    +2 Durability cumulative; General Store equipment availability -2 and price
-    +20%; Inn 65 c per party per night; all Temples.
+  source_text: |-
+    Blacksmith:
+    - Weapons availability -1, Price +20%
+    - Armour availability +1, Price +20%
+    - Armours purchased in Birnheim are Dwarven-made and gain an additional +2 durability. This is cumulative with any other modifiers.
+    General store:
+    - Equipment availability -2, price +20%
+    Inn: 65 c per party, per night.
+    Temples: All
   type: modifier
   scope: settlement
   fields:
@@ -1551,23 +1999,30 @@
       label: table.settlement.profiles
       object_id: table.settlement.profiles
 - id: character.settlement.arena_entry
-  name: Participating; Calculating the Chance of Victory
+  name: Arena Fighting entry and chance of victory
   section_id: section.settlements.arena_fighting
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 141
       printed_page: 139
-      heading: Participating; Calculating the Chance of Victory
+      heading: 'Participating'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 141
+      printed_page: 139
+      heading: 'Calculating the Chance of Victory'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Any hero may spend a full day in the arena. Pay 50–200 c once for
-    all three levels. Win Group to progress to Semi-final, then win to progress
-    to Final. Roll CS once per level with HP, STR and stage modifiers.
+  source_text: 'Any hero can choose to participate in the arena fights and doing so will take a complete day. The minimum fee for joining is 50 c, but you can pay up to 200 c if you want to gamble more money. You will then first fight in the group fights. If you win, you may go on to fight in a semi-final. If you win that, you will fight in the final. You pay once to attend all three levels. ... Roll once on your CS for each level. The following modifiers are applied based on the participant’s stats: ... There is also a modifier depending on the level of the fight:'
   type: modifier
   scope: settlement
   fields:
@@ -1621,25 +2076,39 @@
     - key: related_0
       label: table.settlement.arena_modifiers
       object_id: table.settlement.arena_modifiers
+    - key: related_1
+      label: table.settlement.arena_strength_modifiers
+      object_id: table.settlement.arena_strength_modifiers
+    - key: related_2
+      label: table.settlement.arena_level_modifiers
+      object_id: table.settlement.arena_level_modifiers
+  issues:
+    - issue.settlement.arena_hit_points_basis
 - id: character.settlement.arena_results
-  name: Betting, Odds, and Winning; Losing
+  name: Arena Fighting winnings and losses
   section_id: section.settlements.arena_fighting
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 142
       printed_page: 140
-      heading: Betting, Odds, and Winning; Losing
+      heading: 'Betting, Odds, and Winning'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 142
+      printed_page: 140
+      heading: 'Losing'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: After each win multiply original entry fee by the stage odds (RDD).
-    The hero, not the party, gains 50/100/150 XP for Group/Semi/Final. A Final
-    win also rolls for an extra award. A loss costs 2/4/6 HP respectively and 2
-    Sanity.
+  source_text: 'After each level, if the hero won, multiply the amount you paid to enter the fight with the following modifiers (RDD): ... If you win the final, there is also a chance that you receive an extra award: ... You (not the party) will also gain 50, 100, and 150 XP for each level you win. ... If you lose the fight, you will lose 2 HP (group), 4 HP (semi), or 6 HP (final). You will also lose 2 Points of Sanity.'
   type: modifier
   scope: settlement
   fields:
@@ -1732,6 +2201,8 @@
     - key: related_1
       label: table.settlement.arena_awards
       object_id: table.settlement.arena_awards
+  issues:
+    - issue.settlement.arena_winnings_accumulation
 - id: character.settlement.banking
   name: Banking
   section_id: section.settlements.banking
@@ -1740,16 +2211,41 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 143
       printed_page: 141
-      heading: Banking
+      heading: 'Banking'
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: 'Depositing Money'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: 'Determining the Profit…or Loss'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: 'Robbed!'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: A hero may keep money in several banks. Each visit to Silver City
-    and the bank first rolls 1d20 and adjusts an existing balance, before
-    deciding whether to deposit or withdraw. Robbed loses all deposits.
+  source_text: 'If your hero already has money in the bank, the first thing to do is to determine how the balance has developed. ... The hero must choose which bank to deposit his or her money in, based on risk and chance of profit. It is perfectly fine to have money in several banks. ... Each time you visit Silver City (and the bank), roll on the table below (1d20) and adjust the account balance. Then decide whether you want to deposit more money or withdraw money. ... The bank has been robbed and all your deposits are gone! Tough luck.'
   type: modifier
   scope: settlement
   fields:
@@ -1794,3 +2290,6 @@
     - key: related_0
       label: table.settlement.bank_returns
       object_id: table.settlement.bank_returns
+  issues:
+    - issue.settlement.bank_return_rounding
+    - issue.settlement.bank_roll_per_account

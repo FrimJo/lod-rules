@@ -81,6 +81,12 @@ describe('issue resolutions', () => {
       'issue.combat.change_facing_timing',
       'issue.combat.charge_move_wording',
       'issue.psychology.hungry_morale_penalty',
+      'issue.psychology.hungry_morale_duration_and_travel_penalty',
+      'issue.guild.wizards_identify_visitors',
+      'issue.guild.staff_casting_scope',
+      'issue.guild.human_body_parts',
+      'issue.guild.barbed_ammunition_encumbrance',
+      'issue.guild.rangers_health_column',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

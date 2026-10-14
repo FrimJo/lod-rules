@@ -6,7 +6,25 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 132
       printed_page: 130
-      heading: Settlement Events; Taking on Quests
+      heading: Settlement Events
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Rejecting a Quest
       extraction:
         method: text
         confidence: high
@@ -15,27 +33,36 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 133
       printed_page: 131
-      heading: Available quests; Leaving on a Quest
+      heading: Available quests
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Whenever the party enters a settlement, roll 1d12 and consult its event threshold. When
-    in a settlement, the party may start an available campaign or roll for random quests. Quest
-    availability uses 1d6, followed by 1d8 for a side quest (1-2); Luck cannot modify either roll.
-    If no quest interests the party, they must move to another settlement. The quest site is
-    determined by rolling the settlement's listed quest die and cross-referencing the corresponding
-    map colour. A party may reject two quests in a village and three in Silver City before it must
-    move to another settlement.
+  source_text: Whenever the party enters a settlement, they must roll for a random Event. Roll 1d12
+    and consult the table to see if you have triggered an Event. If that is the case, roll on the
+    Events Table and follow the instructions. ... Whenever the party is in a settlement, they may
+    either start an available campaign or roll to see if there are random quests available. The
+    Quest Site is determined by rolling a dice and cross-referencing this to the numbers written on
+    the map. ... The party may reject 2 quests in a village and 3 quests in Silver City before they
+    must move to another settlement to find a new quest. ... Roll 1d6 on the table to see what
+    quests are available. If there is a quest available, then roll 1d8. On a result of 1-2 on the
+    d8, a side quest is available as well and may be taken together with any of the other quests.
+    See page 271. Luck may not be used for any of these two rolls. Use the Quest Book tables to
+    generate which quests to choose from. If none of the quests are interesting to the party, they
+    must move to another settlement to find new ones.
+  issues:
+    - issue.settlement.quest_offer_scope
+    - issue.settlement.quest_availability_repeat
   fields:
     phase:
       type: string
       role: input
-      description: arrival, quests, accept or reject. Repeat calls preserve visit counters; random
-        availability is established once per visit.
+      description: arrival, quests, accept or reject. Repeat calls preserve visit counters. Random
+        availability is established once per visit, the reading applied pending
+        issue.settlement.quest_availability_repeat; a second quests call in the same visit does not
+        reroll and returns that issue.
     settlement:
       type: string
       role: input
@@ -129,7 +156,11 @@
     must_depart:
       type: boolean
       role: state
-      description: must depart
+      description:
+        Set by a no-bed event, by reaching the rejection limit, or when every offered quest has been
+        rejected ("If none of the quests are interesting to the party, they must move to another
+        settlement"). A roll that offers no quest does not set it; that case returns
+        issue.settlement.quest_availability_repeat.
     business_allowed:
       type: boolean
       role: state
@@ -159,11 +190,13 @@
       label: Quest Book selector for available quests
       section_id: section.quest_book_i
     - key: quest_site_selector
-      label: Settlement quest-site dice and map colours
-      object_id: table.settlement.quest_sites
+      label: Settlement Quest dice and map colour
+      object_id: character.settlement.quest_site_selector
   steps:
     - id: arrival_event_check
-      source_text: Each genuine settlement entry requires an event check.
+      source_text:
+        The party may reject 2 quests in a village and 3 quests in Silver City before they must
+        move to another settlement to find a new quest.
       effects:
         - type: set
           target: new_arrival
@@ -176,7 +209,9 @@
             type: literal
             value: 2
     - id: silver_city_limit
-      source_text: Three quests may be rejected in Silver City; two in a village.
+      source_text:
+        The party may reject 2 quests in a village and 3 quests in Silver City before they must
+        move to another settlement to find a new quest.
       when:
         type: compare
         operator: eq
@@ -193,7 +228,7 @@
             type: literal
             value: 3
     - id: initialise_visit
-      source_text: New visit counters belong to this settlement return, not to every procedure invocation.
+      source_text: Whenever the party enters a settlement, they must roll for a random Event.
       when:
         type: all
         conditions:
@@ -260,7 +295,9 @@
             type: field
             name: visit_id
     - id: resolve_arrival_event
-      source_text: If the settlement threshold is reached, roll on the event table and supply its consequences.
+      source_text:
+        Roll 1d12 and consult the table to see if you have triggered an Event. If that is the
+        case, roll on the Events Table and follow the instructions.
       when:
         type: all
         conditions:
@@ -289,7 +326,20 @@
         - type: invoke
           dependency: settlement_event
     - id: event_departure
-      source_text: A supplied event requiring departure forbids ordinary settlement business.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 135
+          printed_page: 133
+          heading: Settlement Events
+          locator:
+            row: 7
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: On a result of 9-12 on 1d12, there are no beds, and the party must continue their
+        travel without doing any business (you may claim any quest reward before leaving).
       when:
         type: all
         conditions:
@@ -329,7 +379,7 @@
             type: literal
             value: false
     - id: forbid_luck
-      source_text: Luck cannot modify quest availability or side-quest rolls.
+      source_text: Luck may not be used for any of these two rolls.
       when:
         type: compare
         operator: eq
@@ -350,8 +400,66 @@
             right:
               type: literal
               value: 0
+    - id: repeat_quest_roll_unresolved
+      source_text:
+        Whenever the party is in a settlement, they may either start an available campaign or
+        roll to see if there are random quests available.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: quests
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: arrival_visit
+            right:
+              type: field
+              name: visit_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quests_checked_visit
+            right:
+              type: field
+              name: visit_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: must_depart
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_accepted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: available_quests
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.quest_availability_repeat
     - id: check_available_quests
-      source_text: Use the appropriate Settlement/Silver City column.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when: &a1
         type: all
         conditions:
@@ -418,7 +526,7 @@
         - type: invoke
           dependency: settlement_catalogue
     - id: village_two
-      source_text: A village result of 1 gives two quests.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when:
         type: all
         conditions:
@@ -454,7 +562,7 @@
             type: literal
             value: 2
     - id: village_one
-      source_text: A village result of 2–4 gives one quest.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when:
         type: all
         conditions:
@@ -498,7 +606,7 @@
             type: literal
             value: 1
     - id: city_three
-      source_text: Silver City result 1 gives three quests.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when:
         type: all
         conditions:
@@ -534,7 +642,7 @@
             type: literal
             value: 3
     - id: city_two
-      source_text: Silver City result 2–4 gives two quests.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when:
         type: all
         conditions:
@@ -578,7 +686,7 @@
             type: literal
             value: 2
     - id: city_one
-      source_text: Silver City result 5 gives one quest.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when:
         type: all
         conditions:
@@ -614,7 +722,9 @@
             type: literal
             value: 1
     - id: campaign
-      source_text: The party may instead start an available campaign.
+      source_text:
+        Whenever the party is in a settlement, they may either start an available campaign or
+        roll to see if there are random quests available.
       when:
         type: all
         conditions:
@@ -642,7 +752,9 @@
             type: literal
             value: 1
     - id: side_quest
-      source_text: If a random quest is available, a d8 result of 1–2 also offers a side quest.
+      source_text:
+        If there is a quest available, then roll 1d8. On a result of 1-2 on the d8, a side
+        quest is available as well and may be taken together with any of the other quests.
       when:
         type: all
         conditions:
@@ -678,7 +790,7 @@
             type: literal
             value: true
     - id: generate_quests
-      source_text: Use supplied Quest Book selectors to generate the available quest choices.
+      source_text: Use the Quest Book tables to generate which quests to choose from.
       when:
         type: all
         conditions:
@@ -695,7 +807,7 @@
         - type: invoke
           dependency: quest_catalogue
     - id: record_quest_check
-      source_text: Do not reroll the same visit’s offer by invoking the procedure again.
+      source_text: Roll 1d6 on the table to see what quests are available.
       when: *a1
       effects:
         - type: set
@@ -704,7 +816,8 @@
             type: field
             name: visit_id
     - id: accept_quest
-      source_text: Accept one of the available quests and determine its site from the source die/map colour.
+      source_text: The Quest Site is determined by rolling a dice and cross-referencing this to the
+        numbers written on the map.
       when:
         type: all
         conditions:
@@ -754,8 +867,71 @@
           dependency: quest_site_selector
         - type: invoke
           dependency: map_site
+    - id: rejection_limit_unresolved
+      source_text:
+        The party may reject 2 quests in a village and 3 quests in Silver City before they must
+        move to another settlement to find a new quest.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: reject
+          - *a3
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: durburim
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: birnheim
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: outpost
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: freyfell
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: whiteport
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.quest_offer_scope
     - id: reject_quest
-      source_text: Reject one offered quest; count rejections and remove that offered choice.
+      source_text:
+        The party may reject 2 quests in a village and 3 quests in Silver City before they must
+        move to another settlement to find a new quest.
       when:
         type: all
         conditions:
@@ -787,8 +963,70 @@
                 name: available_quests
               - type: literal
                 value: -1
+    - id: no_quest_available_unresolved
+      source_text:
+        Roll 1d6 on the table to see what quests are available. ... If none of the quests are
+        interesting to the party, they must move to another settlement to find new ones.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: phase
+            right:
+              type: literal
+              value: quests
+          - *a2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quests_checked_visit
+            right:
+              type: field
+              name: visit_id
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: quest_accepted
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: must_depart
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: available_quests
+            right:
+              type: literal
+              value: 0
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: rejected_quests
+            right:
+              type: literal
+              value: 0
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.quest_availability_repeat
     - id: enforce_rejection_limit
-      source_text: Move to another settlement when the limit is reached or no offered quests remain.
+      source_text:
+        The party may reject 2 quests in a village and 3 quests in Silver City before they must
+        move to another settlement to find a new quest. ... If none of the quests are interesting to
+        the party, they must move to another settlement to find new ones.
       when:
         type: all
         conditions:
@@ -811,22 +1049,74 @@
               name: visit_id
           - type: any
             conditions:
-              - type: compare
-                operator: gte
-                left:
-                  type: field
-                  name: rejected_quests
-                right:
-                  type: field
-                  name: rejection_limit
-              - type: compare
-                operator: eq
-                left:
-                  type: field
-                  name: available_quests
-                right:
-                  type: literal
-                  value: 0
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: rejected_quests
+                    right:
+                      type: field
+                      name: rejection_limit
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: durburim
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: birnheim
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: outpost
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: freyfell
+                  - type: compare
+                    operator: ne
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: whiteport
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: available_quests
+                    right:
+                      type: literal
+                      value: 0
+                  - type: compare
+                    operator: gt
+                    left:
+                      type: field
+                      name: rejected_quests
+                    right:
+                      type: literal
+                      value: 0
       effects:
         - type: set
           target: must_depart
@@ -836,8 +1126,14 @@
   entry_step: arrival_event_check
   exit_step: enforce_rejection_limit
   unresolved_references:
-    - Quest Book quest generation outcomes are supplied; remaining quest catalogues belong to Phase
-      5 Batch 7. Map geometry is supplied.
+    - 'Structural reading, not printed text: the event threshold, the rolls and the Quest Book
+      results are supplied. Visit counters belong to one genuine arrival, so a repeated call in the
+      same visit neither rerolls the event nor reopens the offer; a second quests call and a roll
+      offering no quest return issue.settlement.quest_availability_repeat. Rejecting every offered
+      quest forces departure under the printed "If none of the quests are interesting to the party,
+      they must move to another settlement". The 2-quest limit applies to every settlement except
+      Silver City and the five named in issue.settlement.quest_offer_scope (Durburim, Birnheim, The
+      Outpost, Freyfell, Whiteport). Map geometry is supplied.'
 - id: procedure.settlement_activities_and_overnight
   name: Settlement activity days and overnight stay
   section_id: section.settlements.activities_in_a_settlement
@@ -880,13 +1176,20 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Each hero may perform activities worth 1 Activity Point per day; an activity also
-    requires staying overnight at the inn. Activities costing more than 1 Activity Point take longer
-    than a day, and nothing else may be done during those days. If one party member undertakes a
-    long activity, the other party members must also stay at the inn when done. The inn price is for
-    the entire party, regardless of size. Some activities cost 0 Activity Points but still require
-    an inn stay where stated. Leaving on a quest is always early in the morning, and no other
-    settlement activities are allowed that day.
+  source_text: Each hero may perform activities worth one Activity Point per day, but performing an
+    activity also means that you must stay for the night at the inn. Note that the price for staying
+    at the inn is for the entire party, regardless of its size. Not all activities are available at
+    all settlements ... Therefore, leaving on a quest is always done early in the morning. No other
+    settlement activities are allowed on that day. ... The heroes may choose from the activities
+    listed in the table below, as long as the settlement offers that specific service. Some
+    activities cost 0 Action Points which means they can be done for free. Those which cost more
+    than 1 Activity Point take longer than a day to perform. During those days nothing else can be
+    done. If one member of the party decides to do something that takes a long time, and the other
+    party members are done, they must also stay at the inn. ... For some coins, the members of the
+    party may regain their health, luck and energy, by sleeping in the relative comfort of the beds
+    at one of the city inns, or in their own home. ... Once the heroes have the key, they are free
+    to stay at the house in between quests. Now they do not have to pay the daily cost of at the
+    inns.
   fields:
     phase:
       type: string
@@ -1148,7 +1451,9 @@
       object_id: character.settlement.estate.lodging
   steps:
     - id: new_visit
-      source_text: A genuine new visit restores eligibility for once-per-visit Luck and catalogue limits.
+      source_text:
+        Once luck has been restored, any use of luck after this will not be restored until the
+        next visit to a settlement.
       when:
         type: all
         conditions:
@@ -1180,24 +1485,12 @@
             type: literal
             value: false
         - type: set
-          target: scroll_activities
-          value:
-            type: literal
-            value: 0
-        - type: set
-          target: enchant_activities
-          value:
-            type: literal
-            value: 0
-        - type: set
           target: activity_reserved
           value:
             type: literal
             value: false
     - id: new_party_visit
-      source_text:
-        Initialise shared lodging obligations once per genuine return; hero initialisation must
-        not reset another hero’s shared charges.
+      source_text: Note that the price for staying at the inn is for the entire party, regardless of its size.
       when:
         type: all
         conditions:
@@ -1261,7 +1554,7 @@
             type: literal
             value: false
     - id: start_day
-      source_text: Each hero has one Activity Point per day; repeated calls do not replenish it.
+      source_text: Each hero may perform activities worth one Activity Point per day
       when:
         type: all
         conditions:
@@ -1298,7 +1591,9 @@
             type: literal
             value: false
     - id: occupied_day
-      source_text: During a multi-day activity nothing else can be done.
+      source_text:
+        Those which cost more than 1 Activity Point take longer than a day to perform. During
+        those days nothing else can be done.
       when:
         type: all
         conditions:
@@ -1326,8 +1621,10 @@
             value: 0
     - id: confirm_service
       source_text:
-        Activities require a offered service, eligibility, the hero’s daily budget, and no
-        departure or multi-day conflict.
+        The heroes may choose from the activities listed in the table below, as long as the
+        settlement offers that specific service. ... Each hero may perform activities worth one
+        Activity Point per day, but performing an activity also means that you must stay for the
+        night at the inn. ... No other settlement activities are allowed on that day.
       when:
         type: compare
         operator: eq
@@ -1438,14 +1735,24 @@
                         right:
                           type: literal
                           value: create_scroll
-                      - type: compare
-                        operator: lt
-                        left:
-                          type: field
-                          name: scroll_activities
-                        right:
-                          type: literal
-                          value: 2
+                      - type: all
+                        conditions:
+                          - type: compare
+                            operator: lt
+                            left:
+                              type: field
+                              name: scroll_activities
+                            right:
+                              type: literal
+                              value: 2
+                          - type: compare
+                            operator: eq
+                            left:
+                              type: field
+                              name: enchant_activities
+                            right:
+                              type: literal
+                              value: 0
                   - type: any
                     conditions:
                       - type: compare
@@ -1456,14 +1763,24 @@
                         right:
                           type: literal
                           value: enchant
-                      - type: compare
-                        operator: lt
-                        left:
-                          type: field
-                          name: enchant_activities
-                        right:
-                          type: literal
-                          value: 1
+                      - type: all
+                        conditions:
+                          - type: compare
+                            operator: lt
+                            left:
+                              type: field
+                              name: enchant_activities
+                            right:
+                              type: literal
+                              value: 1
+                          - type: compare
+                            operator: eq
+                            left:
+                              type: field
+                              name: scroll_activities
+                            right:
+                              type: literal
+                              value: 0
         - type: require
           condition: &a5
             type: any
@@ -1513,7 +1830,9 @@
               type: field
               name: day
     - id: reserve_activity_days
-      source_text: Reserve the activity and record the overnight obligation for the whole party.
+      source_text:
+        If one member of the party decides to do something that takes a long time, and the
+        other party members are done, they must also stay at the inn.
       when:
         type: all
         conditions:
@@ -1592,7 +1911,29 @@
         - type: invoke
           dependency: activity_catalogue
     - id: scroll_limit
-      source_text: 'Create a Scroll: max two per visit.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            row: Create a Scroll
+          extraction:
+            method: table
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 71
+          printed_page: 69
+          heading: Enchantments Take Time
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text: Create a Scroll ... 1 per Scroll. Max 2. ... Only one object or two attempts
+        (successful or not) to create scrolls may be done between quests.
       when:
         type: all
         conditions:
@@ -1631,7 +1972,30 @@
               - type: literal
                 value: 1
     - id: enchant_limit
-      source_text: 'Enchant Objects: max once per visit.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            row: Enchant Objects
+          extraction:
+            method: table
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 71
+          printed_page: 69
+          heading: Enchantments Take Time
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      source_text:
+        Enchant Objects ... 1. Max once. ... Only one object or two attempts (successful or
+        not) to create scrolls may be done between quests.
       when:
         type: all
         conditions:
@@ -1671,8 +2035,8 @@
                 value: 1
     - id: multi_day_exclusivity
       source_text:
-        A cost above one occupies the hero for that many consecutive days, excluding all other
-        activities.
+        Those which cost more than 1 Activity Point take longer than a day to perform. During
+        those days nothing else can be done.
       when:
         type: all
         conditions:
@@ -1713,7 +2077,7 @@
               - type: literal
                 value: -1
     - id: paid_inn
-      source_text: Pay the inn price once for the party per night, not once for each hero.
+      source_text: Note that the price for staying at the inn is for the entire party, regardless of its size.
       when:
         type: all
         conditions:
@@ -1823,9 +2187,20 @@
         - type: invoke
           dependency: lodging
     - id: estate_lodging
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 160
+          printed_page: 158
+          heading: Staying at the House
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       source_text:
-        Owners may stay at their estate without the daily inn charge; normal between-quest rest
-        applies.
+        Once the heroes have the key, they are free to stay at the house in between quests. Now
+        they do not have to pay the daily cost of at the inns. All the normal rules for resting
+        between quests apply.
       when:
         type: all
         conditions:
@@ -1874,7 +2249,20 @@
         - type: invoke
           dependency: estate
     - id: stable_lodging
-      source_text: If the inn cannot be afforded, sleep in its stable and leave in the morning.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead. You will then need to leave the settlement in the
+        morning, either on a quest or to travel to another settlement.
       when:
         type: all
         conditions:
@@ -1934,7 +2322,20 @@
             type: literal
             value: true
     - id: recovery_boundary
-      source_text: HP recovery above recorded maximum is unresolved.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        Mana, Luck and energy are automatically restored, and each hero regains 2d6 HP per night.
+        ... If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead.
       when:
         type: all
         conditions:
@@ -1981,7 +2382,19 @@
         - type: unresolved
           issue_id: issue.phase4.recovery_bounds
     - id: stable_half_boundary
-      source_text: Half of each stat is ambiguous; require explicit supplied amounts.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead.
       when:
         type: all
         conditions:
@@ -2017,10 +2430,20 @@
         - type: unresolved
           issue_id: issue.phase4.recovery_bounds
     - id: paid_hp
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       source_text:
-        Paid lodging or owned-home rest gives each hero 2d6 HP for the night. HP above the recorded
-        maximum stays the open recovery_bounds boundary, so that roll is not applied; it does not
-        block the Mana, Energy and Luck restoration below.
+        For some coins, the members of the party may regain their health, luck and energy, by
+        sleeping in the relative comfort of the beds at one of the city inns, or in their own home.
+        Mana, Luck and energy are automatically restored, and each hero regains 2d6 HP per night.
       when:
         type: all
         conditions:
@@ -2078,9 +2501,20 @@
               - type: field
                 name: hp_roll
     - id: restore_luck
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       source_text:
-        Paid lodging restores Luck automatically. Once Luck is restored, later spending is not
-        restored until a new settlement visit.
+        Mana, Luck and energy are automatically restored, and each hero regains 2d6 HP per night.
+        Once luck has been restored, any use of luck after this will not be restored until the next
+        visit to a settlement.
       when:
         type: all
         conditions:
@@ -2105,9 +2539,17 @@
             type: literal
             value: true
     - id: paid_recovery
-      source_text:
-        Paid lodging or owned-home rest automatically restores Mana and Energy once for this hero
-        and night, whatever the HP roll does.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: Mana, Luck and energy are automatically restored, and each hero regains 2d6 HP per night.
       when: *a8
       effects:
         - type: set
@@ -2126,7 +2568,19 @@
             type: field
             name: day
     - id: stable_readiness
-      source_text: Resolve all supplied half-stat and HP bounds before applying any recovery.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead.
       when:
         type: compare
         operator: eq
@@ -2143,7 +2597,19 @@
             type: literal
             value: false
     - id: allow_stable_recovery
-      source_text: The caller supplied a bounded interpretation of the half-stat amounts.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead.
       when:
         type: all
         conditions:
@@ -2200,7 +2666,20 @@
             type: literal
             value: true
     - id: stable_luck
-      source_text: Use the explicitly supplied half-stat recovery once for Luck during this visit.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        Once luck has been restored, any use of luck after this will not be restored until the next
+        visit to a settlement. If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead.
       when:
         type: all
         conditions:
@@ -2244,7 +2723,20 @@
             type: literal
             value: true
     - id: stable_recovery
-      source_text: Use supplied half-stat amounts and the 1d6 HP result; retain the mandatory morning departure.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Rest and Recuperation
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        If you cannot afford this, only half (RDD) of each stat is regained and 1d6 HP as you sleep in
+        the inn's stable instead. You will then need to leave the settlement in the
+        morning, either on a quest or to travel to another settlement.
       when:
         type: all
         conditions:
@@ -2298,7 +2790,11 @@
             type: field
             name: day
     - id: departure_lock
-      source_text: Leave early with no activities that day. All multi-day work must have finished.
+      source_text:
+        Therefore, leaving on a quest is always done early in the morning. No other settlement
+        activities are allowed on that day. ... If one member of the party decides to do something
+        that takes a long time, and the other party members are done, they must also stay at the
+        inn.
       when:
         type: compare
         operator: eq
@@ -2385,7 +2881,7 @@
                       type: literal
                       value: true
     - id: depart
-      source_text: Departure follows all occupied days and has no settlement activity on that day.
+      source_text: Therefore, leaving on a quest is always done early in the morning.
       when:
         type: all
         conditions:
@@ -2444,7 +2940,9 @@
             type: literal
             value: true
     - id: record_quest_departure
-      source_text: No settlement activities may be performed on the day of quest departure.
+      source_text:
+        No other settlement activities are allowed on that day. ... Only one object or two
+        attempts (successful or not) to create scrolls may be done between quests.
       when:
         type: all
         conditions:
@@ -2478,8 +2976,34 @@
           value:
             type: field
             name: day
+        - type: set
+          target: scroll_activities
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: enchant_activities
+          value:
+            type: literal
+            value: 0
   entry_step: new_visit
   exit_step: record_quest_departure
+  unresolved_references:
+    - 'Structural reading, not printed text: each call handles one hero for one phase. A hero spends
+      at most one Activity Point per day, so an activity costing N occupies days start to start + N
+      - 1 and the party stays at the inn through that night. Departure needs a day after the last
+      activity and the last occupied day. Create a Scroll and Enchant Objects counters run between
+      quests: they reset when the hero leaves on a quest, not on arrival, and one object excludes
+      scroll attempts and the reverse.'
+    - 'Recovery modelling, not printed text: a 2d6 (inn or own home) or 1d6 (stable) HP roll that
+      would take a hero above the recorded maximum is not applied and returns
+      issue.phase4.recovery_bounds; it does not block the Mana, Energy and Luck restoration. The
+      printed "only half (RDD) of each stat" settles rounding (round down) but not whether half
+      means half of the maximum, of the missing amount or of the current value, so the stable steps
+      apply only caller-supplied half-stat amounts (stable_outcome_supplied) that stay within each
+      maximum, and otherwise return issue.phase4.recovery_bounds; the stable recovery applies at
+      most once per hero and night and keeps the mandatory morning departure. Staying at the house
+      skips only the inn charge; recovery there follows the inn branch.'
   issues:
     - issue.phase4.recovery_bounds
     - issue.phase4.settlement_recovery
@@ -2522,16 +3046,22 @@
       extraction: *a13
   status: extracted
   confidence: high
-  source_text: Shopping is performed at a service offering the item. Roll 1d6 for availability; one
-    item may be bought per successful roll. After a failed availability roll, neither that hero nor
-    any other hero may buy that specific item until returning to the settlement later. Selling uses
-    the Sell Table or Treasure Card value and local price variations do not apply, except
-    event-triggered changes. Items may be bought for another hero and party excess gear may be
-    pooled. Repair price is the equipment appendix Sell Table Repair column; repairs are at a
-    General Store while buying/selling gear, or a Blacksmith for weapons and armour. Potions can be
-    identified at the General Store or Alchemists' Guild; Magic Items by a Scryer or Wizards' Guild.
-    Collect a promised completed-quest reward only in the quest’s starting settlement; the feast
-    no-bed event allows this before leaving.
+  source_text: 'Equipment can be bought and sold at the various shops in the market. ... Once there,
+    locate what you want to buy and roll for its availability (1d6). You may buy one piece for each
+    successful roll, but as soon as you fail a roll, you or any other hero may not buy that specific
+    piece of equipment until you return to the settlement at a later time. Selling equipment is
+    always done using the Sell Table in the Equipment Appendix, or by using the price noted on
+    Treasure Cards. The selling price is not affected by local price variations, except if they are
+    triggered by an event. ... The monks in a Sick Ward or at a Temple of Metheia are able to treat
+    most illnesses, but it will cost you 100 c. It will take one day. ... Identifying Magic Items
+    can be done by a Scryer or at the Wizards’ Guild in Silver City. The price for this is 150 c.
+    Identifying potions can be done at the General Store or the Alchemist Guild for 25 c. ...
+    Repairing equipment is done by paying the amount of money listed in the ‘Repair Column’ in the
+    Sell Table (See Appendix III: Equipment, page 184). This can be done while shopping or selling
+    at the General Store for gear, and at the Blacksmith for weapons and armour. ... At a cost of
+    1000 c, they will try to cure one disorder. ... If the party is back after a finished quest the
+    party will first receive their reward, if any was promised. This can only be done in the
+    settlement where you accepted the quest.'
   fields:
     operation:
       type: string
@@ -2603,9 +3133,9 @@
       type: boolean
       role: input
       description:
-        Supplied treatment outcome. Mental treatment uses treatment_roll instead. For disease or
-        poison only true is source-defined; false surfaces issue.settlement.illness_treatment_limits
-        without charging or curing.
+        Supplied treatment outcome. Mental treatment uses treatment_roll instead. For disease
+        or poison only true is source-defined; false surfaces
+        issue.settlement.illness_treatment_limits without charging or curing.
     purchase_price:
       type: number
       role: output
@@ -2811,7 +3341,9 @@
       label: Explicitly supplied treatment or identification outcome
   steps:
     - id: initialise_transaction
-      source_text: Service, eligibility, activity, item availability and funds are separate checks.
+      source_text:
+        Equipment can be bought and sold at the various shops in the market. Depending on what
+        you need, you must visit different shops.
       effects:
         - type: set
           target: purchase_attempted
@@ -2839,7 +3371,9 @@
             type: literal
             value: false
     - id: release_return_lock
-      source_text: A failed item lock ends only on a later return to this settlement.
+      source_text:
+        as soon as you fail a roll, you or any other hero may not buy that specific piece of
+        equipment until you return to the settlement at a later time.
       when:
         type: all
         conditions:
@@ -2866,7 +3400,9 @@
             type: literal
             value: false
     - id: check_service_guard
-      source_text: Only offered, eligible services with authorized activity and no quest departure may be used.
+      source_text:
+        Depending on what you need, you must visit different shops. Once there, locate what you
+        want to buy and roll for its availability (1d6).
       effects:
         - type: require
           condition: &a17
@@ -2942,7 +3478,7 @@
           type: literal
           value: collect_reward
     - id: local_purchase_price
-      source_text: Apply a local equipment price percentage when no event changes the price.
+      source_text: Unless noted otherwise, prices and availability are unchanged.
       when:
         type: all
         conditions:
@@ -3011,7 +3547,10 @@
             type: literal
             value: true
     - id: event_purchase_price
-      source_text: Apply the event percentage and explicit coin adjustment when no local modifier overlaps.
+      source_text:
+        Sale! There seems to be a settlement-wide sale going on. All stores sell their items at
+        a 20% discount. ... As a result, prices have also gone up, resulting in a +10% price
+        modifier on all items.
       when:
         type: all
         conditions:
@@ -3055,7 +3594,7 @@
             type: literal
             value: true
     - id: combined_price_boundary
-      source_text: The source does not state an order for simultaneous local and event price changes.
+      source_text: Unless noted otherwise, prices and availability are unchanged.
       when:
         type: all
         conditions:
@@ -3084,7 +3623,7 @@
         - type: unresolved
           issue_id: issue.settlement.price_modifier_combination
     - id: supplied_combined_quote
-      source_text: Use an explicitly supplied combined quote without choosing a canonical stacking order.
+      source_text: Unless noted otherwise, prices and availability are unchanged.
       when:
         type: all
         conditions:
@@ -3110,8 +3649,7 @@
             type: literal
             value: true
     - id: check_purchase_funds
-      source_text: A purchase needs an unlocked item, supplied price and sufficient money before
-        attempting availability.
+      source_text: Once there, locate what you want to buy and roll for its availability (1d6).
       when:
         type: compare
         operator: eq
@@ -3179,7 +3717,7 @@
                       type: field
                       name: purchase_price
     - id: purchase_availability
-      source_text: An actual availability attempt occurs only after service, item-lock and funds guards pass.
+      source_text: Once there, locate what you want to buy and roll for its availability (1d6).
       when:
         type: all
         conditions:
@@ -3222,7 +3760,9 @@
         - type: invoke
           dependency: availability
     - id: failed_roll_lock
-      source_text: Only an actual failed availability attempt locks this item for all heroes.
+      source_text:
+        as soon as you fail a roll, you or any other hero may not buy that specific piece of
+        equipment until you return to the settlement at a later time.
       when:
         type: all
         conditions:
@@ -3287,7 +3827,7 @@
             type: field
             name: visit_id
     - id: purchase_one
-      source_text: 'Each successful availability roll buys one piece: charge once and grant one.'
+      source_text: 'You may buy one piece for each successful roll'
       when:
         type: all
         conditions:
@@ -3319,7 +3859,10 @@
             type: literal
             value: true
     - id: sell
-      source_text: Sell one owned item using Sell Table/Treasure Card value and only event-based price changes.
+      source_text:
+        Selling equipment is always done using the Sell Table in the Equipment Appendix, or by
+        using the price noted on Treasure Cards. The selling price is not affected by local price
+        variations, except if they are triggered by an event.
       when:
         type: all
         conditions:
@@ -3393,7 +3936,8 @@
         - type: invoke
           dependency: equipment_catalogue
     - id: repair_price
-      source_text: Repair cost comes from the printed Repair Column.
+      source_text: 'Repairing equipment is done by paying the amount of money listed in the ‘Repair
+        Column’ in the Sell Table (See Appendix III: Equipment, page 184).'
       when:
         type: compare
         operator: eq
@@ -3410,7 +3954,9 @@
             type: field
             name: repair_price
     - id: magic_identification_price
-      source_text: Magic Item identification costs 150 c.
+      source_text:
+        Identifying Magic Items can be done by a Scryer or at the Wizards’ Guild in Silver
+        City. The price for this is 150 c.
       when:
         type: compare
         operator: eq
@@ -3427,7 +3973,7 @@
             type: literal
             value: 150
     - id: potion_identification_price
-      source_text: Potion identification costs 25 c.
+      source_text: Identifying potions can be done at the General Store or the Alchemist Guild for 25 c.
       when:
         type: compare
         operator: eq
@@ -3444,7 +3990,9 @@
             type: literal
             value: 25
     - id: illness_treatment_price
-      source_text: Disease or poison treatment costs 100 c and one day.
+      source_text:
+        The monks in a Sick Ward or at a Temple of Metheia are able to treat most illnesses,
+        but it will cost you 100 c. It will take one day.
       when:
         type: any
         conditions:
@@ -3472,8 +4020,9 @@
             value: 100
     - id: mental_treatment_price
       source_text:
-        One attempt to treat a mental condition costs 1000 c, takes five days and is limited
-        between quests.
+        At a cost of 1000 c, they will try to cure one disorder. However, each hero can only
+        attempt to cure one of their disorders in between each quest, ... The treatment takes 5
+        days.
       when:
         type: compare
         operator: eq
@@ -3490,7 +4039,9 @@
             type: literal
             value: 1000
     - id: repair_eligibility
-      source_text: Repair requires an owned item, supplied repair price and the appropriate gear/weapon shop.
+      source_text:
+        This can be done while shopping or selling at the General Store for gear, and at the
+        Blacksmith for weapons and armour.
       when:
         type: all
         conditions:
@@ -3557,7 +4108,10 @@
             type: literal
             value: true
     - id: identify_eligibility
-      source_text: Identification requires an owned unidentified item and an appropriate provider.
+      source_text:
+        Identifying Magic Items can be done by a Scryer or at the Wizards’ Guild in Silver
+        City. ... Identifying potions can be done at the General Store or the Alchemist Guild for 25
+        c.
       when:
         type: all
         conditions:
@@ -3624,7 +4178,7 @@
             type: literal
             value: true
     - id: illness_eligibility
-      source_text: Treatment requires the corresponding condition and appropriate service.
+      source_text: This is where the sick and poisoned come to seek treatment.
       when:
         type: all
         conditions:
@@ -3714,10 +4268,8 @@
             value: true
     - id: illness_treatment_limit
       source_text:
-        The monks treat most illnesses for 100 c and one day. The book defines no failure roll,
-        does not name the illnesses they cannot treat and does not say whether the fee is due
-        then. A supplied unsuccessful outcome is not charged, does not consume the day and does
-        not cure; it surfaces the open boundary instead.
+        The monks in a Sick Ward or at a Temple of Metheia are able to treat most illnesses,
+        but it will cost you 100 c. It will take one day.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3770,9 +4322,7 @@
         - type: unresolved
           issue_id: issue.settlement.illness_treatment_limits
     - id: mental_eligibility
-      source_text:
-        Only one disorder treatment attempt between quests; require an existing disorder and
-        completed five-day service.
+      source_text: However, each hero can only attempt to cure one of their disorders in between each quest
       when:
         type: all
         conditions:
@@ -3839,7 +4389,9 @@
             type: literal
             value: true
     - id: charge_service
-      source_text: Charge an eligible service once, separately from purchases and sales.
+      source_text:
+        it will cost you 100 c. ... The price for this is 150 c. ... for 25 c. ... At a cost of
+        1000 c
       when:
         type: compare
         operator: eq
@@ -3866,7 +4418,9 @@
             type: literal
             value: true
     - id: repair_result
-      source_text: Apply the supplied catalogue repair result once.
+      source_text:
+        Repairing equipment is done by paying the amount of money listed in the ‘Repair Column’
+        in the Sell Table
       when:
         type: all
         conditions:
@@ -3893,7 +4447,10 @@
             type: field
             name: maximum_durability
     - id: identification_result
-      source_text: Paid identification identifies the selected item.
+      source_text:
+        Identifying Magic Items can be done by a Scryer or at the Wizards’ Guild in Silver
+        City. ... Identifying potions can be done at the General Store or the Alchemist Guild for 25
+        c.
       when:
         type: all
         conditions:
@@ -3930,7 +4487,7 @@
             type: literal
             value: true
     - id: cure_disease_result
-      source_text: The supplied successful treatment removes disease.
+      source_text: The monks in a Sick Ward or at a Temple of Metheia are able to treat most illnesses
       when:
         type: all
         conditions:
@@ -3983,16 +4540,15 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 144
           printed_page: 142
-          heading: Cure Disease/Poison
+          heading: Cure Disease and Poison
           extraction:
             method: text
             confidence: high
             visually_verified: true
     - id: cure_poison_result
-      source_text: The supplied successful poison treatment removes the current poison condition and
-        cancels its remaining checks. Carry both poison-state checkpoints forward; do not leave a
-        stale already_poisoned state able to resume damage. Existing treatment resource/visit guards
-        remain the accounting owner.
+      source_text:
+        This is where the sick and poisoned come to seek treatment. ... Disease and poison need
+        tending to at the Sick Wards.
       when:
         type: all
         conditions:
@@ -4066,7 +4622,7 @@
             confidence: high
             visually_verified: true
     - id: mental_attempt
-      source_text: An attempted treatment consumes the between-quest opportunity even when it fails.
+      source_text: However, each hero can only attempt to cure one of their disorders in between each quest
       when:
         type: all
         conditions:
@@ -4093,7 +4649,7 @@
             type: literal
             value: true
     - id: mental_success
-      source_text: A result of 1–5 on d6 cures one disorder.
+      source_text: the attempt only succeeds on a roll of 1-5 on 1d6.
       when:
         type: all
         conditions:
@@ -4132,9 +4688,7 @@
               - type: literal
                 value: -1
     - id: record_treatment_day
-      source_text:
-        A one-day treatment or completed multi-day treatment cannot be charged again for the
-        same hero on the same day.
+      source_text: It will take one day. ... The treatment takes 5 days.
       when:
         type: all
         conditions:
@@ -4180,8 +4734,9 @@
             name: day
     - id: collect_reward
       source_text:
-        A finished quest’s promised reward is collected only where accepted. The feast no-bed
-        event expressly allows collecting it before leaving.
+        If the party is back after a finished quest the party will first receive their reward,
+        if any was promised. This can only be done in the settlement where you accepted the quest.
+        ... (you may claim any quest reward before leaving
       when:
         type: all
         conditions:

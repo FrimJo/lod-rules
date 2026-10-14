@@ -165,6 +165,17 @@ describe('bounty and crusade rewards — PDF 151, 159', () => {
     expect(collected.state).toMatchObject({ coins: 1175, reward: 175, paid: true });
     expect(run('sanctum_crusade', collected.state).state.coins).toBe(1175);
   });
+  it('the early-payment issue is raised only for a Warrior Priest in the Inner Sanctum', () => {
+    const assigned = run('sanctum_crusade', crusade).state;
+    const early = { ...assigned, phase: 'collect' };
+    expect(run('sanctum_crusade', early).unresolved).toContain('issue.guild.crusade_early_payment');
+    expect(run('sanctum_crusade', { ...early, guild: 'fighters' }).unresolved).not.toContain(
+      'issue.guild.crusade_early_payment',
+    );
+    expect(run('sanctum_crusade', { ...early, profession: 'warrior' }).unresolved).not.toContain(
+      'issue.guild.crusade_early_payment',
+    );
+  });
   it('does not pay from unresolved target/quest counts', () => {
     expect(
       run('sanctum_crusade', {
@@ -258,6 +269,7 @@ describe('Sanctum prayer — PDF 146–147, 158', () => {
     ohlnir_choice: 'cs',
     boon: '',
     expires_at: '',
+    sanctum_fee_reading: 'temple_fee_and_day',
   };
   it('charges one completed prayer and grants the source boon, without executing the handoff twice', () => {
     const r = run('sanctum_prayer', prayer);
@@ -290,6 +302,36 @@ describe('Sanctum prayer — PDF 146–147, 158', () => {
     const trickster = run('sanctum_prayer', { ...prayer, prayer_roll: 6, god: 'rhidnir', luck: 3 });
     expect(trickster.unresolved).toContain('issue.settlement.trickster_deduction');
     expect(trickster.state).toMatchObject({ coins: 950, luck: 3, prayed_since_quest: true });
+  });
+  it('makes no prayer and returns the fee issue when no fee reading is supplied', () => {
+    const r = run('sanctum_prayer', { ...prayer, sanctum_fee_reading: '' });
+    expect(r.unresolved).toContain('issue.guild.sanctum_prayer_fee');
+    expect(r.state).toMatchObject({
+      coins: 1000,
+      prayed_since_quest: false,
+      prayer_attempted: false,
+      boon_granted: false,
+    });
+  });
+  it('under the no-fee reading grants the boon without charging or needing the day', () => {
+    const r = run('sanctum_prayer', {
+      ...prayer,
+      sanctum_fee_reading: 'no_fee_or_day',
+      coins: 0,
+      completed_activity_days: 0,
+    });
+    expect(r.unresolved).not.toContain('issue.guild.sanctum_prayer_fee');
+    expect(r.state).toMatchObject({ coins: 0, prayed_since_quest: true, boon_granted: true });
+  });
+  it('the same-god retry issue is raised only for a Warrior Priest in the Inner Sanctum', () => {
+    const prayed = { ...prayer, prayed_since_quest: true, chosen_god: 'charus' };
+    expect(run('sanctum_prayer', prayed).unresolved).toContain('issue.guild.same_god_prayer_retry');
+    expect(run('sanctum_prayer', { ...prayed, guild: 'fighters' }).unresolved).not.toContain(
+      'issue.guild.same_god_prayer_retry',
+    );
+    expect(run('sanctum_prayer', { ...prayed, profession: 'warrior' }).unresolved).not.toContain(
+      'issue.guild.same_god_prayer_retry',
+    );
   });
   it('cannot pray before completing the full day', () => {
     expect(run('sanctum_prayer', { ...prayer, completed_activity_days: 0 }).state.coins).toBe(1000);

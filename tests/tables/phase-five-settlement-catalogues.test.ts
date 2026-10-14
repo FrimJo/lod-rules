@@ -10,17 +10,19 @@ const matrix = (id: string) => {
 };
 
 describe('settlement and estate source catalogue regressions', () => {
-  it('retains every named settlement selector and quest-site die/threshold endpoint', () => {
+  it('retains every named settlement Quest dice and map colour', () => {
+    // PDF 132 prints three columns (Settlement, Quest dice, Colour); event thresholds are the
+    // separate Settlement Events table.
     expect(matrix('table.settlement.quest_sites')).toEqual([
-      ['Caelkirk', '1d4', '10-12', 'Red'],
-      ['Coalfell', '1d6', '11-12', 'Green'],
-      ['Freyfell', '1d6', '10-12', 'Pink'],
-      ['Irondale', '1d6', '11-12', 'Turqois'],
-      ['Rochdale', '1d6', '11-12', 'Purple'],
-      ['Silver City', '2d20', '8-12', 'White'],
-      ['The Outpost', '1d12', '9-12', 'Yellow'],
-      ['Windfair', '1d6', '11-12', 'Blue'],
-      ['Whiteport', '1d6', '9-12', 'Black'],
+      ['Caelkirk', '1d4', 'Red'],
+      ['Coalfell', '1d6', 'Green'],
+      ['Freyfell', '1d6', 'Pink'],
+      ['Irondale', '1d6', 'Turqois'],
+      ['Rochdale', '1d6', 'Purple'],
+      ['Silver City', '2d20', 'White'],
+      ['The Outpost', '1d12', 'Yellow'],
+      ['Windfair', '1d6', 'Blue'],
+      ['Whiteport', '1d6', 'Black'],
     ]);
   });
   it('preserves the activity catalogue including zero and multi-day costs', () => {
@@ -49,9 +51,9 @@ describe('settlement and estate source catalogue regressions', () => {
     expect(rows[3]?.[1]).toContain('Trinket Salesman');
     expect(rows[4]?.[1]).toContain('Sale');
     expect(matrix('table.settlement.trinket_results')).toEqual([
-      ['1-5', 'The trinket is magical.'],
-      ['5-11', 'The trinket is useless and cannot be sold.'],
-      ['12', 'The trinket is cursed.'],
+      ['1-5', 'On a result of 1-5, it is magic.'],
+      ['5-11', 'A result of 5-11 means the trinket is useless and cannot even be sold.'],
+      ['12', 'A result of 12 means you have bought a cursed item.'],
     ]);
   });
   it('retains all eleven event thresholds including the two without quest dice', () => {
@@ -173,9 +175,10 @@ describe('visually checked settlement pages 132–135', () => {
       ],
       [
         'N1',
+        // Enlarged crop of PDF 133: only the Thief cell prints a comma after "luck".
         'Inn (regains 2d6 HP and all Mana, luck, and energy).',
-        'Inn (regains 2d6 HP and all Mana, luck, and energy).',
-        'Inn (regains 2d6 HP and all Mana, luck, and energy).',
+        'Inn (regains 2d6 HP and all Mana, luck and energy).',
+        'Inn (regains 2d6 HP and all Mana, luck and energy).',
         'Inn (regains 2d6 HP and all Mana, luck and energy).',
       ],
       [
@@ -206,6 +209,7 @@ describe('visually checked settlement pages 132–135', () => {
     expect(rows[6]?.[1]).toContain('can then only be raised back to the standard level');
     expect(rows[6]?.[1]).toContain('9-12 on 1d12');
     expect(rows[6]?.[1]).toContain('you may claim any quest reward before leaving');
+    expect(rows[9]?.[1]).toContain('has managed to get too close');
     expect(rows[10]?.[1]).toContain('one hero that is attacked by 1d4 bandits');
     expect(rows[10]?.[1]).toContain('The heroes do not die');
     expect(rows[11]?.[1]).toContain('once and apply the curse to all heroes');
@@ -214,16 +218,21 @@ describe('visually checked settlement pages 132–135', () => {
 
 describe('rendered arena and bank matrices (PDF 141–143)', () => {
   it('retains every arena modifier and odds cell', () => {
+    // PDF 141 prints three separate tables: Hero Hit Points, Hero STR and Level.
     expect(matrix('table.settlement.arena_modifiers')).toEqual([
-      ['Hit Points', '<10', '-5'],
-      ['Hit Points', '10-15', '0'],
-      ['Hit Points', '>15', '+5'],
-      ['STR', '<40', '-5'],
-      ['STR', '40-50', '0'],
-      ['STR', '>50', '+5'],
-      ['Level', 'Group', '-10'],
-      ['Level', 'Semi', '-15'],
-      ['Level', 'Final', '-20'],
+      ['<10', '-5'],
+      ['10-15', '0'],
+      ['>15', '+5'],
+    ]);
+    expect(matrix('table.settlement.arena_strength_modifiers')).toEqual([
+      ['<40', '-5'],
+      ['40-50', '0'],
+      ['>50', '+5'],
+    ]);
+    expect(matrix('table.settlement.arena_level_modifiers')).toEqual([
+      ['Group', '-10'],
+      ['Semi', '-15'],
+      ['Final', '-20'],
     ]);
     expect(matrix('table.settlement.arena_odds')).toEqual([
       ['10', '1,1', '1,3', '1,5'],
@@ -275,8 +284,8 @@ describe('rendered gambling and racing matrices (PDF 145–146)', () => {
   it('retains racing thresholds, level multipliers, and both award selectors', () => {
     expect(matrix('table.settlement.horse_racing')).toEqual([
       ['<= DEX/2 (RDD)', 'Win!'],
-      ['<= DEX-10', '2nd place!'],
-      ['> DEX-10', 'You lose…'],
+      ['<=DEX-10', '2nd place!'],
+      ['>DEX-10', 'You lose…'],
       ['>=95', 'Catastrophe strikes!'],
     ]);
     expect(matrix('table.settlement.racing_winnings')).toEqual([
@@ -566,6 +575,17 @@ describe('rendered guild tables (PDF 152–154)', () => {
 });
 
 describe('rendered Ranger and Sanctum tables (PDF 156–159)', () => {
+  it('types the Bounty Hunt and trophy sale tables as rolled tables', () => {
+    const bounty = byId('table.guild.fighters_bounty');
+    expect(bounty.type).toBe('random_table');
+    expect(bounty.roll_domain).toEqual({ min: 1, max: 100 });
+    expect(bounty.rows.at(-1)?.cells.roll).toMatchObject({ printed: '00', min: 100, max: 100 });
+    const sale = byId('table.guild.taxidermy_sale');
+    expect(sale.type).toBe('random_table');
+    expect(sale.roll_domain).toEqual({ min: 1, max: 20 });
+    expect(sale.rows[0]?.cells.village).toMatchObject({ type: 'number', value: -500 });
+    expect(sale.rows.at(-1)?.cells.silver_city).toMatchObject({ type: 'number', value: 300 });
+  });
   it('retains all trophy sale modifier cells', () => {
     expect(matrix('table.guild.taxidermy_sale')).toEqual([
       ['1', '-500', '-300'],
@@ -684,9 +704,11 @@ describe('rendered estate restrictions (PDF 160–163)', () => {
       ['Garden', '200 c'],
       ['Kennel', '75 c'],
     ]);
-    expect(byId('table.estate.furnishings').footnotes).toEqual([
-      'Only one thing may be bought in between every quest, and it cannot be used until after leaving the next dungeon.',
-    ]);
+    // The one-purchase limit is prose under Furnishing the Manor, not a printed footnote.
+    expect(byId('table.estate.furnishings').footnotes).toEqual([]);
+    expect(byId('table.estate.furnishings').source_text).toContain(
+      'it cannot be used until after the leaving the next dungeon',
+    );
     const rows = matrix('table.estate.furnishings');
     expect(rows[5]?.[2]).toContain('either at archery range OR at the training grounds');
     expect(rows[6]?.[2]).toContain('1d8+the number of spent days');

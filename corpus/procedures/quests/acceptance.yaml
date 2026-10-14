@@ -6,7 +6,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 132
       printed_page: 130
-      heading: Taking on Quests; Rejecting a Quest
+      heading: Taking on Quests
       extraction:
         method: text
         confidence: high
@@ -15,21 +15,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 133
       printed_page: 131
-      heading: Available quests; Leaving on a Quest
+      heading: Available quests
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: The party may start an available campaign or choose offered random quests in a
-    settlement. Side quests available on d8 1–2 may be taken with another quest; only The Outpost
-    offers Ancient Lands quests. Existing arrival/selector procedures own offer rolls, Luck
-    prohibition, rejection limits and source site dice/map colour. This checkpoint records an actual
-    source-eligible accepted choice once per party/distinct quest instance, with separate main/side
-    records and immutable origin/site. Departure, progression, abandonment, completion and rewards
-    remain separately owned; fresh records do not reset a previous instance reward or hero
-    recovery/attempt state.
+  source_text: Whenever the party is in a settlement, they may either start an available campaign or
+    roll to see if there are random quests available. The Quest Site is determined by rolling a
+    dice and cross-referencing this to the numbers written on the map. ... The only settlement to
+    offer quests in the Ancient Lands is The Outpost. ... If there is a quest available, then roll
+    1d8. On a result of 1-2 on the d8, a side quest is available as well and may be taken together
+    with any of the other quests. ... Use the Quest Book tables to generate which quests to choose
+    from.
+  unresolved_references:
+    - 'Structural reading, not printed text: offer rolls, the Luck prohibition and the rejection
+      limits belong to procedure.settlement_arrival. This checkpoint records one accepted choice per
+      party and distinct quest occurrence, with separate main and side records and an immutable
+      originating settlement and site. Request steps hand off to the supplied quest choice or site
+      roll once; the handoff is not acceptance. Departure, progression, abandonment, completion and
+      rewards belong to their own procedures, and a fresh record does not reset an earlier
+      occurrence.'
   issues:
     - issue.quest.acceptance_scope
   fields:
@@ -241,15 +248,13 @@
       label: Actual early-morning departure and no settlement activities that day
       object_id: procedure.settlement_activities_and_overnight
     - key: site_selector
-      label: Source settlement dice/map colour for quests requiring that selector; not an invented
-        fixed-site reroll
-      object_id: table.settlement.quest_sites
+      label: Settlement Quest dice and map colour for quests whose Quest Site is randomised from the
+        map
+      object_id: character.settlement.quest_site_selector
   steps:
     - id: request_choice
       source: *a1
-      source_text:
-        Request actual chosen identity/eligibility once; handoff is not acceptance or a fresh
-        repeatable occurrence.
+      source_text: Use the Quest Book tables to generate which quests to choose from.
       when:
         type: all
         conditions:
@@ -372,7 +377,9 @@
           dependency: choice
     - id: invalid_choice
       source: *a1
-      source_text: Empty supplied identities or an unsupported slot have no accepted instance disposition.
+      source_text:
+        Whenever the party is in a settlement, they may either start an available campaign
+        or roll to see if there are random quests available.
       when:
         type: all
         conditions:
@@ -434,9 +441,8 @@
           issue_id: issue.quest.acceptance_scope
     - id: request_site
       source: *a1
-      source_text:
-        An actual accepted source-eligible choice requiring a site requests the source die/map
-        or fixed location once; this is not a completed site result.
+      source_text: The Quest Site is determined by rolling a dice and cross-referencing this to the
+        numbers written on the map.
       when:
         type: all
         conditions:
@@ -583,9 +589,10 @@
     - id: record
       source: *a1
       source_text:
-        Persist actual accepted quest, instance, originating settlement, main/side slot and
-        supplied site once. Initialize only this new instance statuses; replay cannot reseed rewards
-        or overwrite another instance.
+        Whenever the party is in a settlement, they may either start an available campaign
+        or roll to see if there are random quests available. ... The only settlement to offer quests
+        in the Ancient Lands is The Outpost. ... On a result of 1-2 on the d8, a side quest is
+        available as well and may be taken together with any of the other quests.
       when:
         type: all
         conditions:
@@ -710,9 +717,8 @@
       substeps:
         - id: supplied_site
           source: *a1
-          source_text:
-            Persist an actual supplied site only when present. Empty instance site otherwise
-            records no acceptance-site prescription; never invent a location.
+          source_text: The Quest Site is determined by rolling a dice and cross-referencing this to
+            the numbers written on the map.
           when:
             type: all
             conditions:

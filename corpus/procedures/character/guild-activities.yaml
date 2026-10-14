@@ -8,32 +8,32 @@
       printed_page: 143
       heading: Guilds
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 148
       printed_page: 146
-      heading: dark
+      heading: The Dark Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 151
       printed_page: 149
-      heading: fighters
+      heading: Fighters’ Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 153
       printed_page: 151
-      heading: wizards
+      heading: Wizards’ Guild
       extraction:
         method: text
         confidence: high
@@ -42,34 +42,52 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 154
       printed_page: 152
-      heading: alchemists
+      heading: Alchemists’ Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: rangers
+      heading: Rangers’ Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 158
       printed_page: 156
-      heading: inner_sanctum
+      heading: The Inner Sanctum
       extraction:
         method: text
         confidence: high
         visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 173
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: All guilds are in Silver City. Their services are restricted to the appropriate
-    professions. The Wizards’ Guild separately admits visitors recharging magic items. The source
-    gives no membership fee, enrolment sequence or membership rank.
+  source_text: There are several Guilds available, and these are all in Silver City. They are
+    described at the end of this chapter. The Guilds are very protective of their skills and
+    services, and they will only allow heroes of the appropriate professions to enter. ... Apart
+    from visitors recharging magic items, only Wizards are allowed here.
+  unresolved_references:
+    - The book prints no guild membership fee, enrolment sequence or membership rank; access_granted
+      is therefore per operation, not persistent membership.
+  issues:
+    - issue.guild.wizards_identify_visitors
+    - issue.guild.alchemists_access
   fields:
     settlement:
       type: string
@@ -86,7 +104,7 @@
     operation:
       type: string
       role: input
-      description: Requested guild service.
+      description: Requested guild service (recharge and identify are the Wizards’ Guild visitor operations).
     business_allowed:
       type: boolean
       role: input
@@ -120,7 +138,18 @@
       label: Existing guild catalogue.
   steps:
     - id: initialize
-      source_text: Guilds only allow heroes of appropriate professions to enter.
+      source_text: The Guilds are very protective of their skills and services, and they will only
+        allow heroes of the appropriate professions to enter.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Guilds
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       effects:
         - type: set
           target: access_granted
@@ -128,13 +157,13 @@
             type: literal
             value: false
     - id: enter_dark
-      source_text: Appropriate professions may enter their guild.
+      source_text: 'Located in the shadier parts of the city, this Guild is for Thieves and Rogues.'
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 148
           printed_page: 146
-          heading: Guild access
+          heading: The Dark Guild
           extraction:
             method: text
             confidence: high
@@ -203,13 +232,13 @@
         - type: invoke
           dependency: dark
     - id: enter_fighters
-      source_text: Appropriate professions may enter their guild.
+      source_text: 'This is the guild for Warriors and Barbarians.'
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 151
           printed_page: 149
-          heading: Guild access
+          heading: Fighters’ Guild
           extraction:
             method: text
             confidence: high
@@ -278,13 +307,13 @@
         - type: invoke
           dependency: fighters
     - id: enter_wizards
-      source_text: Appropriate professions may enter their guild.
+      source_text: 'As the name implies, this is the guild for Wizards.'
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 153
           printed_page: 151
-          heading: Guild access
+          heading: Wizards’ Guild
           extraction:
             method: text
             confidence: high
@@ -345,17 +374,17 @@
         - type: invoke
           dependency: wizards
     - id: enter_alchemists
-      source_text: Appropriate professions may enter their guild.
+      source_text: 'The Guilds are very protective of their skills and services, and they will only allow heroes of the appropriate professions to enter.'
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
-          pdf_page: 154
-          printed_page: 152
-          heading: Guild access
+          pdf_page: 145
+          printed_page: 143
+          heading: Guilds
           extraction:
-            method: text
+            method: image
             confidence: high
-            visually_verified: false
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -412,13 +441,13 @@
         - type: invoke
           dependency: alchemists
     - id: enter_rangers
-      source_text: Appropriate professions may enter their guild.
+      source_text: 'This is where the Rangers get together, sharing stories and exchanging experience.'
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 156
           printed_page: 154
-          heading: Guild access
+          heading: Rangers’ Guild
           extraction:
             method: text
             confidence: high
@@ -479,7 +508,8 @@
         - type: invoke
           dependency: rangers
     - id: enter_inner_sanctum
-      source_text: Appropriate professions may enter their guild.
+      source_text: Only a Warrior Priest may enter the Inner Sanctum and consult with the High
+        Priests.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -554,7 +584,18 @@
           printed_page: 151
           heading: Wizards’ Guild
           extraction:
-            method: text
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 25
+          printed_page: null
+          heading: '2.21'
+          locator:
+            row: 173
+          extraction:
+            method: image
             confidence: high
             visually_verified: true
       when:
@@ -594,14 +635,24 @@
             right:
               type: literal
               value: wizards
-          - type: compare
-            operator: eq
-            left:
-              type: field
-              name: operation
-            right:
-              type: literal
-              value: recharge
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: recharge
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: operation
+                right:
+                  type: literal
+                  value: identify
       effects:
         - type: set
           target: access_granted
@@ -620,17 +671,47 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: Special talents; Skinning; Butcher; Taxidermist
+      heading: Special talents
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Skinning (250 c)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Butcher (200 c)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Taxidermist (350 c)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    A ranger may learn the following talents at any time by paying the tutor fee. Once one
-    has been learnt, the ranger must level up once before learning another. Skinning costs 250 c,
-    Butcher 200 c, and Taxidermist 350 c.
+  source_text: 'A ranger may learn the following talents at any time by paying the tutor fee. Once one of the talents have been learnt, the ranger must level up once before learning another of these talents. ... Skinning (250 c) ... Butcher (200 c) ... Taxidermist (350 c)'
+  unresolved_references:
+    - The book does not say where the tutor fee is paid or whether "at any time" needs a settlement
+      visit. Requiring Silver City, Rangers’ Guild access and an authorized, completed settlement
+      activity is a reading the page does not print (issue.guild.ranger_talent_any_time).
+  issues:
+    - issue.guild.ranger_talent_any_time
   fields:
     settlement:
       type: string
@@ -725,8 +806,7 @@
       label: Existing special-talent effect.
   steps:
     - id: quote
-      source_text: A ranger may learn these talents at any time for the tutor fee, but must level up
-        before another.
+      source_text: 'A ranger may learn the following talents at any time by paying the tutor fee.'
       effects:
         - type: set
           target: tuition_cost
@@ -739,7 +819,7 @@
             type: literal
             value: false
     - id: quote_skinning
-      source_text: Printed special-talent tutor fee.
+      source_text: 'Skinning (250 c)'
       when:
         type: compare
         operator: eq
@@ -756,7 +836,7 @@
             type: literal
             value: 250
     - id: quote_butcher
-      source_text: Printed special-talent tutor fee.
+      source_text: 'Butcher (200 c)'
       when:
         type: compare
         operator: eq
@@ -773,7 +853,7 @@
             type: literal
             value: 200
     - id: quote_taxidermist
-      source_text: Printed special-talent tutor fee.
+      source_text: 'Taxidermist (350 c)'
       when:
         type: compare
         operator: eq
@@ -790,7 +870,7 @@
             type: literal
             value: 350
     - id: check_tuition
-      source_text: Level up once between special talent purchases; afford the selected fee.
+      source_text: 'Once one of the talents have been learnt, the ranger must level up once before learning another of these talents.'
       effects:
         - type: require
           condition:
@@ -897,7 +977,7 @@
                   type: field
                   name: tuition_cost
     - id: learn_skinning
-      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      source_text: 'A ranger may learn the following talents at any time by paying the tutor fee.'
       when:
         type: all
         conditions:
@@ -1043,7 +1123,7 @@
             type: literal
             value: true
     - id: learn_butcher
-      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      source_text: 'A ranger may learn the following talents at any time by paying the tutor fee.'
       when:
         type: all
         conditions:
@@ -1189,7 +1269,7 @@
             type: literal
             value: true
     - id: learn_taxidermist
-      source_text: Pay the tutor and acquire the chosen talent once; the next purchase requires another level.
+      source_text: 'A ranger may learn the following talents at any time by paying the tutor fee.'
       when:
         type: all
         conditions:
@@ -1346,15 +1426,12 @@
       printed_page: 149
       heading: Bounty Hunt
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Roll on the Bounty Hunt table five times and note which enemies to hunt until the next
-    city visit. Find and kill them on the next quest and return for 250 gold per creature kind. Only
-    one reward may be claimed for each kind of enemy.
+  source_text: 'There is always a list of wanted enemies at the Fighters’ Guild. If you find and kill any of these on your next quest, you can return to receive a reward. Roll on the table 5 times and note down which enemies to hunt until the next time you visit the city. Each creature killed will earn you 250 gold. You can only claim one reward for each kind of enemy.'
   fields:
     settlement:
       type: string
@@ -1447,7 +1524,7 @@
       label: Five supplied d100 selections; no absent Bestiary statistics invented.
   steps:
     - id: initialize
-      source_text: Keep one claim per enemy kind even when the offered list has duplicate kinds.
+      source_text: 'You can only claim one reward for each kind of enemy.'
       effects:
         - type: set
           target: claimed
@@ -1455,7 +1532,7 @@
             type: literal
             value: false
     - id: assign
-      source_text: Roll five times and note the offered hunt list until the next city visit.
+      source_text: 'Roll on the table 5 times and note down which enemies to hunt until the next time you visit the city.'
       when:
         type: all
         conditions:
@@ -1572,9 +1649,7 @@
             type: literal
             value: true
     - id: claim
-      source_text:
-        Return after the next quest and receive one 250-gold reward for each offered enemy kind
-        killed.
+      source_text: 'If you find and kill any of these on your next quest, you can return to receive a reward. ... Each creature killed will earn you 250 gold. You can only claim one reward for each kind of enemy.'
       when:
         type: all
         conditions:
@@ -1745,13 +1820,15 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Roll 1d6 for the crusade target. For every matching enemy killed the priest receives 25
-    c; who landed the killing blow does not matter. Trophies are automatic. The crusade lasts until
-    leaving the next dungeon and pays on the next Sanctum visit.
+  source_text: Roll on the table below to decide what a crusade has been declared against. ... For
+    every enemy the Warrior Priest kills and brings a trophy from, the priest will receive 25 c.
+    Now, there is no real way for the High Priests to determine who actually killed the enemy, so it
+    does not matter who in the party landed the killing blow. The crusade only lasts until the
+    heroes leave the next dungeon. The trophies are considered to be collected automatically and
+    the money is paid the next time the Warrior Priest visits the Sanctum.
   fields:
     settlement:
       type: string
@@ -1857,7 +1934,7 @@
       label: Printed target categories.
   steps:
     - id: initialize
-      source_text: Roll to determine the declared crusade.
+      source_text: Roll on the table below to decide what a crusade has been declared against.
       effects:
         - type: set
           target: reward
@@ -1865,7 +1942,9 @@
             type: literal
             value: 0
     - id: assign_1
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -1975,7 +2054,9 @@
             type: literal
             value: true
     - id: assign_2
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -2085,7 +2166,9 @@
             type: literal
             value: true
     - id: assign_3
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -2195,7 +2278,9 @@
             type: literal
             value: true
     - id: assign_4
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -2305,7 +2390,9 @@
             type: literal
             value: true
     - id: assign_5
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -2415,7 +2502,9 @@
             type: literal
             value: true
     - id: assign_6
-      source_text: Roll on the Crusades table; the crusade lasts until leaving the next dungeon.
+      source_text:
+        Roll on the table below to decide what a crusade has been declared against. ... The
+        crusade only lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -2525,12 +2614,37 @@
             type: literal
             value: true
     - id: early_return_uncertain
-      source_text:
-        The source specifies next-visit payment but does not explain payment on a return before
-        leaving the next dungeon.
+      source_text: The crusade only lasts until the heroes leave the next dungeon. ... the money is
+        paid the next time the Warrior Priest visits the Sanctum.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 159
+          printed_page: 157
+          heading: Crusades
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
           - type: all
             conditions:
               - type: all
@@ -2628,8 +2742,10 @@
           issue_id: issue.guild.crusade_early_payment
     - id: collect
       source_text:
-        Trophies are automatic, regardless of who landed the killing blow; pay on the next
-        Sanctum visit.
+        For every enemy the Warrior Priest kills and brings a trophy from, the priest will
+        receive 25 c. ... it does not matter who in the party landed the killing blow. ... The
+        trophies are considered to be collected automatically and the money is paid the next time
+        the Warrior Priest visits the Sanctum.
       when:
         type: all
         conditions:
@@ -2775,9 +2891,10 @@
   exit_step: collect
   issues:
     - issue.guild.crusade_early_payment
+    - issue.guild.crusade_target_scope
 - id: procedure.guild_item_service
   name: Guild recharging and item blessings
-  section_id: section.settlements.guilds
+  section_id: section.wizards_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -2799,9 +2916,23 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Repaired broken magic items recharge for 250 c; a staff recharge costs half its
-    purchase price. The Warrior Priest may have each armour piece blessed for 25 c (+1 durability)
-    or a weapon for 75 c (+2 DMG against Undead or Demons), lasting until leaving the next dungeon.
+  source_text: A broken Magic Item that has been repaired can be recharged for 250 coins. ...
+    Staffs have three charges unless noted otherwise. This means that the spell bound in the staff
+    can be cast three times before it needs to be recharged. Recharging a staff costs half of the
+    purchase price of the staff. ... The Warrior Priests may seek to have their armour or weapon
+    blessed by one of the High Priests. ... Each piece of armour must be individually blessed to
+    give the proper protection. As this is tedious work, the High Priests have decided to take a fee
+    of 25 c per piece to make this feasible. Blessed Armour will benefit from +1 durability, and it
+    will last until the heroes leave the next dungeon. ... Any Undead or Demon struck by such a
+    weapon suffers a further 2 points of DMG. Blessing a weapon costs 75 c and lasts until the
+    heroes leave the next dungeon.
+  unresolved_references:
+    - The book prints the service fees but not how payment, Activity Points or lodging are
+      accounted. The procedure charges the fee once per authorized operation and item, requires the
+      fee to be affordable, and leaves activity time and lodging to settlement accounting.
+    - Staves whose catalogue rows print a different recharge outcome (for example the Arcane Staff
+      and Staff of the Heart) keep that outcome; the charge reset applies the printed three-charge
+      default.
   fields:
     settlement:
       type: string
@@ -2943,7 +3074,28 @@
       label: Temporary conditional weapon bonus.
   steps:
     - id: initialize
-      source_text: Select the correct guild item service and its fee.
+      source_text: Apart from visitors recharging magic items, only Wizards are allowed here. ...
+        The Warrior Priests may seek to have their armour or weapon blessed by one of the High
+        Priests.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Wizards’ Guild
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Blessing Your Armour and Weapons
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       effects:
         - type: set
           target: cost
@@ -3027,9 +3179,7 @@
             type: literal
             value: true
     - id: quote_staff_recharge
-      source_text:
-        Recharging a staff costs half its purchase price; normal capacity is three unless noted
-        otherwise.
+      source_text: Recharging a staff costs half of the purchase price of the staff.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3092,7 +3242,9 @@
             type: literal
             value: true
     - id: quote_bless_armour
-      source_text: Each piece is blessed individually at the printed fee until leaving the next dungeon.
+      source_text:
+        Each piece of armour must be individually blessed to give the proper protection. ...
+        the High Priests have decided to take a fee of 25 c per piece to make this feasible.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3158,7 +3310,7 @@
             type: literal
             value: true
     - id: quote_bless_weapon
-      source_text: Each piece is blessed individually at the printed fee until leaving the next dungeon.
+      source_text: Blessing a weapon costs 75 c and lasts until the heroes leave the next dungeon.
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -3224,8 +3376,29 @@
             type: literal
             value: true
     - id: check_service
-      source_text: Require a held eligible item, correct access, completed authorized activity and
-        sufficient funds.
+      source_text: A broken Magic Item that has been repaired can be recharged for 250 coins. ...
+        Recharging a staff costs half of the purchase price of the staff. ... the High Priests have
+        decided to take a fee of 25 c per piece to make this feasible. ... Blessing a weapon costs
+        75 c and lasts until the heroes leave the next dungeon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charging Magic Items; Charges and Recharges
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Blessing Your Armour and Weapons
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       effects:
         - type: require
           condition:
@@ -3316,8 +3489,29 @@
                   type: field
                   name: cost
     - id: perform_service
-      source_text: Pay exactly once for this item service. Activity Points and lodging were already
-        accounted for.
+      source_text: A broken Magic Item that has been repaired can be recharged for 250 coins. ...
+        Recharging a staff costs half of the purchase price of the staff. ... the High Priests have
+        decided to take a fee of 25 c per piece to make this feasible. ... Blessing a weapon costs
+        75 c and lasts until the heroes leave the next dungeon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charging Magic Items; Charges and Recharges
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Blessing Your Armour and Weapons
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -3430,7 +3624,17 @@
             type: literal
             value: true
     - id: recharge
-      source_text: Restore the item’s magic; staff-specific consequences remain catalogue-bound.
+      source_text: A broken Magic Item that has been repaired can be recharged for 250 coins.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charging Magic Items
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -3464,9 +3668,18 @@
         - type: invoke
           dependency: charging
     - id: staff_charges
-      source_text:
-        Restore the staff’s printed capacity, unless its special catalogue specifies another
-        recharge outcome.
+      source_text: Staffs have three charges unless noted otherwise. This means that the spell
+        bound in the staff can be cast three times before it needs to be recharged.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Charges and Recharges
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -3495,7 +3708,8 @@
         - type: invoke
           dependency: staff_rules
     - id: bless_armour
-      source_text: Blessed armour gains +1 durability until leaving the next dungeon.
+      source_text: Blessed Armour will benefit from +1 durability, and it will last until the heroes
+        leave the next dungeon.
       when:
         type: all
         conditions:
@@ -3542,7 +3756,8 @@
         - type: invoke
           dependency: armour_blessing
     - id: bless_weapon
-      source_text: Undead or Demons struck suffer a further 2 DMG until leaving the next dungeon.
+      source_text: Any Undead or Demon struck by such a weapon suffers a further 2 points of DMG.
+        Blessing a weapon ... lasts until the heroes leave the next dungeon.
       when:
         type: all
         conditions:
@@ -3598,7 +3813,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 158
       printed_page: 156
-      heading: Praying in the Inner Sanctum
+      heading: Praying in the Inner Sanctum.
       extraction:
         method: text
         confidence: high
@@ -3609,18 +3824,18 @@
       printed_page: 144
       heading: Pray at the Local Temples; Temple of Charus; Temple of Iphy
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 147
       printed_page: 145
       heading: Temple of Metheia; Temple of Ohlnir; Temple of Rhidnir; Temple of Ramos
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: vonbraus.changelog_2_2x
       file: source/vonbraus-changelog-2.2x.pdf
       pdf_page: 13
@@ -3634,9 +3849,17 @@
         row: 82
   status: extracted
   confidence: high
-  source_text: A Warrior Priest prays to one god in the Inner Sanctum. The ordinary temple prayer
-    costs 50 c, takes one day, and lasts until leaving the next dungeon. The Sanctum grants the same
-    boon on 1–5; the Trickster on 6 has an unspecified Luck deduction.
+  source_text: Just like the dedicated temples, the Inner Sanctum has areas dedicated to each God.
+    The Warrior Priest can choose to pray at one of these, and receive the same blessing as granted
+    to the other heroes in the temples. The difference is that the gods are more likely to listen,
+    and a result of 1-5 will grant this boon. While praying to the Trickster God, a result of 6 will
+    still give the deduction of luck as described in the ‘Temple’ section.
+  unresolved_references:
+    - The Inner Sanctum prints no fee or duration for praying. Whether the temple fee of 50 c and
+      the one day from Pray at the Local Temples also apply is issue.guild.sanctum_prayer_fee; the
+      caller supplies the reading in sanctum_fee_reading, and without it no prayer is made.
+    - Each hero may choose only one temple before each quest. Whether a hero who has prayed may pray
+      again to the same god before the next quest is not stated (issue.guild.same_god_prayer_retry).
   fields:
     settlement:
       type: string
@@ -3680,6 +3903,13 @@
       description: Hero or designated payer coins; lodging and activity costs stay in settlement accounting.
       integer: true
       minimum: 0
+    sanctum_fee_reading:
+      type: string
+      role: input
+      description: 'Caller-supplied reading of issue.guild.sanctum_prayer_fee: temple_fee_and_day
+        (the temple fee of 50 c and one day, one Activity Point, apply in the Inner Sanctum) or
+        no_fee_or_day (the Inner Sanctum prints neither, so neither applies). Any other value,
+        including empty, is not supplied and no prayer is made.'
     god:
       type: string
       role: input
@@ -3761,7 +3991,28 @@
       label: Existing source-backed temple boon; invocation records application handoff.
   steps:
     - id: initialize
-      source_text: Choose one god before each quest; the Sanctum improves the success threshold.
+      source_text:
+        The Warrior Priest can choose to pray at one of these ... Therefore, each hero may
+        choose only one temple before each quest.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Praying in the Inner Sanctum.
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       effects:
         - type: set
           target: prayer_attempted
@@ -3853,30 +4104,6 @@
                 right:
                   type: literal
                   value: false
-              - type: compare
-                operator: eq
-                left:
-                  type: field
-                  name: reserved_activity_points
-                right:
-                  type: literal
-                  value: 1
-              - type: compare
-                operator: gte
-                left:
-                  type: field
-                  name: completed_activity_days
-                right:
-                  type: literal
-                  value: 1
-              - type: compare
-                operator: gte
-                left:
-                  type: field
-                  name: coins
-                right:
-                  type: literal
-                  value: 50
               - type: any
                 conditions:
                   - type: compare
@@ -3955,8 +4182,218 @@
                         right:
                           type: literal
                           value: rs
+    - id: fee_reading_unsupplied
+      source_text: Warrior Priests will not use the temples but instead go to the Inner Sanctum. ...
+        Praying at the temple costs 50 c. ... This takes one day. ... The Warrior Priest can choose
+        to pray at one of these, and receive the same blessing as granted to the other heroes in the
+        temples.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Praying in the Inner Sanctum.
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayed_since_quest
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: charus
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: iphy
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: metheia
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: rhidnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ramos
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: cs
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: rs
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: sanctum_fee_reading
+            right:
+              type: literal
+              value: temple_fee_and_day
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: sanctum_fee_reading
+            right:
+              type: literal
+              value: no_fee_or_day
+      effects:
+        - type: unresolved
+          issue_id: issue.guild.sanctum_prayer_fee
     - id: pray
-      source_text: A prayer costs 50 c and takes one day, including a failed attempt.
+      source_text: Praying at the temple costs 50 c. ... This takes one day.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
@@ -4138,6 +4575,14 @@
                     right:
                       type: literal
                       value: rs
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanctum_fee_reading
+            right:
+              type: literal
+              value: temple_fee_and_day
       effects:
         - type: invoke
           dependency: accounting
@@ -4162,8 +4607,206 @@
           value:
             type: literal
             value: true
+    - id: pray_no_fee
+      source_text: The Warrior Priest can choose to pray at one of these, and receive the same
+        blessing as granted to the other heroes in the temples.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Praying in the Inner Sanctum.
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: silver_city
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: business_allowed
+                    right:
+                      type: literal
+                      value: true
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: leaving_on_quest
+                    right:
+                      type: literal
+                      value: false
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: access_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: activity_authorized
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: duration_completed
+                right:
+                  type: literal
+                  value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayed_since_quest
+            right:
+              type: literal
+              value: false
+          - type: any
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: charus
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: iphy
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: metheia
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: rhidnir
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ramos
+          - type: any
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: god
+                right:
+                  type: literal
+                  value: ohlnir
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: cs
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: ohlnir_choice
+                    right:
+                      type: literal
+                      value: rs
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: sanctum_fee_reading
+            right:
+              type: literal
+              value: no_fee_or_day
+      effects:
+        - type: invoke
+          dependency: accounting
+        - type: set
+          target: prayed_since_quest
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: chosen_god
+          value:
+            type: field
+            name: god
+        - type: set
+          target: prayer_attempted
+          value:
+            type: literal
+            value: true
     - id: boon_charus
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4210,7 +4853,9 @@
             type: literal
             value: true
     - id: boon_iphy
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4257,7 +4902,9 @@
             type: literal
             value: true
     - id: boon_metheia
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4304,7 +4951,9 @@
             type: literal
             value: true
     - id: boon_ohlnir
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4351,7 +5000,9 @@
             type: literal
             value: true
     - id: boon_rhidnir
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4398,7 +5049,9 @@
             type: literal
             value: true
     - id: boon_ramos
-      source_text: Receive the same boon as at the dedicated temple, on 1–5.
+      source_text:
+        The Warrior Priest can choose to pray at one of these, and receive the same blessing
+        as granted to the other heroes in the temples. ... a result of 1-5 will grant this boon.
       when:
         type: all
         conditions:
@@ -4445,10 +5098,36 @@
             type: literal
             value: true
     - id: same_god_retry_uncertain
-      source_text: Choosing only one temple or god does not explicitly settle repeat attempts at the same god.
+      source_text: Therefore, each hero may choose only one temple before each quest.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guild
+            right:
+              type: literal
+              value: inner_sanctum
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: profession
+            right:
+              type: literal
+              value: warrior_priest
           - type: all
             conditions:
               - type: all
@@ -4529,7 +5208,9 @@
         - type: unresolved
           issue_id: issue.guild.same_god_prayer_retry
     - id: trickster_six
-      source_text: On 6 the Sanctum text says Luck is deducted, but the Temple section gives no amount.
+      source_text:
+        While praying to the Trickster God, a result of 6 will still give the deduction of
+        luck as described in the ‘Temple’ section.
       when:
         type: all
         conditions:
@@ -4563,6 +5244,7 @@
   entry_step: initialize
   exit_step: trickster_six
   issues:
+    - issue.guild.sanctum_prayer_fee
     - issue.settlement.trickster_deduction
     - issue.settlement.ohlnir_temple_name
     - issue.guild.same_god_prayer_retry
@@ -4576,21 +5258,19 @@
       printed_page: 154
       heading: Taxidermist (350 c)
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    A Ranger may take one 15-ENC trophy per quest from a Large creature after a successful
-    Foraging roll. In a settlement, roll 1d20 and add the printed adjustment to the creature XP.
-    Zero or negative means no buyer; only one attempt per settlement. Searching for a buyer costs
-    one Activity Point.
+  source_text: 'Once back in a settlement, roll on the following table to see how much it can be sold for. Roll on the table and add the value to the XP of the creature. If the value is 0 or negative, there is no buyer in that settlement. Only one attempt may be done per settlement. Selling the trophy counts as 1 Activity Point as the Ranger must search for a buyer in the settlement.'
+  issues:
+    - issue.guild.trophy_sale_settlement_column
   fields:
     settlement_type:
       type: string
       role: input
-      description: village or silver_city.
+      description: village or silver_city, the two printed table columns; any other settlement returns the unresolved column issue.
     profession:
       type: string
       role: input
@@ -4680,9 +5360,12 @@
     - key: trophy_capture
       object_id: character.settlement.guild.rangers.taxidermist
       label: Large-creature Foraging, one trophy per quest and 15 ENC; supplied trophy capture outcome.
+    - key: sale_rule
+      object_id: character.settlement.guild.rangers.trophy_sale
+      label: One attempt per settlement, 1 Activity Point, no buyer at 0 or below.
   steps:
     - id: initialize
-      source_text: Selling the trophy requires one Activity Point to search for a buyer.
+      source_text: 'Selling the trophy counts as 1 Activity Point as the Ranger must search for a buyer in the settlement.'
       effects:
         - type: set
           target: sale_modifier
@@ -4704,8 +5387,32 @@
           value:
             type: literal
             value: false
+    - id: settlement_column_undefined
+      source_text: 'Once back in a settlement, roll on the following table to see how much it can be sold for.'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: village
+          - type: compare
+            operator: ne
+            left:
+              type: field
+              name: settlement_type
+            right:
+              type: literal
+              value: silver_city
+      effects:
+        - type: unresolved
+          issue_id: issue.guild.trophy_sale_settlement_column
     - id: quote_village_1
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4740,7 +5447,7 @@
             type: literal
             value: -500
     - id: quote_silver_city_1
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4775,7 +5482,7 @@
             type: literal
             value: -300
     - id: quote_village_2
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4810,7 +5517,7 @@
             type: literal
             value: -400
     - id: quote_silver_city_2
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4845,7 +5552,7 @@
             type: literal
             value: -200
     - id: quote_village_4
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4880,7 +5587,7 @@
             type: literal
             value: -300
     - id: quote_silver_city_4
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4915,7 +5622,7 @@
             type: literal
             value: -100
     - id: quote_village_6
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4950,7 +5657,7 @@
             type: literal
             value: -150
     - id: quote_silver_city_6
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -4985,7 +5692,7 @@
             type: literal
             value: -50
     - id: quote_village_9
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5020,7 +5727,7 @@
             type: literal
             value: 0
     - id: quote_silver_city_9
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5055,7 +5762,7 @@
             type: literal
             value: 0
     - id: quote_village_15
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5090,7 +5797,7 @@
             type: literal
             value: 50
     - id: quote_silver_city_15
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5125,7 +5832,7 @@
             type: literal
             value: 100
     - id: quote_village_18
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5160,7 +5867,7 @@
             type: literal
             value: 100
     - id: quote_silver_city_18
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5195,7 +5902,7 @@
             type: literal
             value: 200
     - id: quote_village_20
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5230,7 +5937,7 @@
             type: literal
             value: 200
     - id: quote_silver_city_20
-      source_text: Add the printed modifier to the creature XP.
+      source_text: 'Roll on the table and add the value to the XP of the creature.'
       when:
         type: all
         conditions:
@@ -5265,7 +5972,7 @@
             type: literal
             value: 300
     - id: attempt_sale
-      source_text: Only one sale attempt per settlement. Zero or negative total means no buyer.
+      source_text: 'Once back in a settlement, roll on the following table to see how much it can be sold for. ... Only one attempt may be done per settlement.'
       when:
         type: all
         conditions:
@@ -5384,7 +6091,7 @@
             type: literal
             value: true
     - id: sell
-      source_text: A positive sale value is paid and the trophy is no longer held.
+      source_text: 'If the value is 0 or negative, there is no buyer in that settlement.'
       when:
         type: all
         conditions:
@@ -5433,27 +6140,27 @@
       printed_page: 143
       heading: Guilds
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 148
       printed_page: 146
       heading: Buying Special Equipment
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 152
       printed_page: 150
       heading: Buying Special Equipment
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 153
@@ -5469,18 +6176,18 @@
       printed_page: 152
       heading: Purchasing Ingredients, Parts, and Potions
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 157
       printed_page: 155
       heading: Buying Special Equipment
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 158
@@ -5501,12 +6208,24 @@
         visually_verified: false
   status: extracted
   confidence: high
-  source_text: Guild purchases reuse the structured special-equipment and component catalogues.
-    Resolve the printed price, availability and restrictions, then use the ordinary settlement
-    purchasing procedure. Alchemists’ components cost 15 c; a successful part-availability roll
-    permits a kind of part from the selected enemy, with the printed illegal-body-part boundary
-    retained. Weak potions are always in stock, Standard have availability 5 and Supreme 4. Guild
-    access is checked separately.
+  source_text: >-
+    The Guilds are very protective of their skills and services, and they will only
+    allow heroes of the appropriate professions to enter. ... There is certain equipment for sale at
+    the Dark Guild that can be of use during a quest: ... Some specialised equipment is only sold at
+    the Fighters’ Guild. ... However, magical staffs are comparably common, ... At the Alchemists’
+    Guild, you can purchase both parts and ingredients, when they are available. To purchase a part,
+    check the availability in the table below. If you succeed with the Availability Roll, you may
+    choose any kind of part from that enemy. A part or ingredient costs 15 c. There are some parts
+    that are not sold, as dealing with human body parts is illegal. Potions can be bought here. ...
+    All Standard Potions have an availability of 5, whereas Weak Potions are always in stock.
+    Supreme versions have an availability of 4. ... Some equipment is only sold in the Rangers’
+    Guild. ... Here you can buy special things that are usually only available to the Warrior
+    Priests.
+  unresolved_references:
+    - The guild pages print what each guild sells, its price and its availability but no separate
+      purchase sequence. This procedure only authorizes the purchase (access, completed activity and
+      a resolved catalogue offering) and hands the quote to ordinary settlement purchasing, which
+      makes the Availability Roll, charges the price and changes inventory exactly once.
   fields:
     settlement:
       type: string
@@ -5595,7 +6314,18 @@
       label: Resolve this guild’s linked structured offering, effects and tables.
   steps:
     - id: initialize
-      source_text: Resolve guild access, completed shopping activity, and a real catalogue offering.
+      source_text: The Guilds are very protective of their skills and services, and they will only
+        allow heroes of the appropriate professions to enter.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Guilds
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       effects:
         - type: set
           target: service_eligible
@@ -5717,8 +6447,68 @@
                       type: literal
                       value: inner_sanctum
     - id: authorize
-      source_text: Pass eligibility and the resolved quote to ordinary settlement purchasing; do not
-        charge twice.
+      source_text: >-
+        There is certain equipment for sale at the Dark Guild that can be of use during
+        a quest: ... Some specialised equipment is only sold at the Fighters’ Guild. ... However,
+        magical staffs are comparably common, ... At the Alchemists’ Guild, you can purchase both
+        parts and ingredients, when they are available. ... Potions can be bought here. ... Some
+        equipment is only sold in the Rangers’ Guild. ... Here you can buy special things that are
+        usually only available to the Warrior Priests.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 148
+          printed_page: 146
+          heading: Buying Special Equipment
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 152
+          printed_page: 150
+          heading: Buying Special Equipment
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 153
+          printed_page: 151
+          heading: Buying Wizard’s Staffs
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 154
+          printed_page: 152
+          heading: Purchasing Ingredients, Parts, and Potions
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 157
+          printed_page: 155
+          heading: Buying Special Equipment
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 158
+          printed_page: 156
+          heading: Buying Special Equipment
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
       when:
         type: all
         conditions:

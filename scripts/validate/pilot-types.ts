@@ -270,6 +270,10 @@ export interface StateMachineTransition {
   to: string;
   source_text: string;
   source?: PilotSource[];
+  /** Typed guard over the machine's fields; every printed qualifier of the transition. */
+  when?: Condition;
+  /** Open issues the transition returns when taken. */
+  issues?: string[];
 }
 export interface StateMachineState {
   id: string;
@@ -279,6 +283,7 @@ export interface StateMachineState {
   transitions?: StateMachineTransition[];
 }
 export interface StateMachine extends Metadata {
+  fields?: Fields;
   initial: string;
   states: StateMachineState[];
 }

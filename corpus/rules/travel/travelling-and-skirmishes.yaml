@@ -1,0 +1,404 @@
+- id: core.travel.ancient_land_desert_hexes
+  name: Ancient Land hexes are Desert Hexes
+  section_id: section.travelling_and_skirmishes
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Travelling and Skirmishes
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: All hexes below the white dotted line are in the Ancient Land, and are Desert Hexes.
+  type: definition
+  scope: global
+  fields:
+    below_white_dotted_line:
+      type: boolean
+      role: input
+      description: The hex lies below the white dotted line on the World Map.
+    in_ancient_land:
+      type: boolean
+      role: output
+      description: The hex is in the Ancient Land.
+    desert_hex:
+      type: boolean
+      role: output
+      description: The hex is a Desert Hex.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: below_white_dotted_line
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: in_ancient_land
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: desert_hex
+      value:
+        type: literal
+        value: true
+  see_also:
+    - section.travelling_and_skirmishes.moving_on_the_map
+    - section.travelling_and_skirmishes.events
+- id: core.travel.return_after_quest
+  name: Travel back after the quest to claim the award
+  section_id: section.travelling_and_skirmishes
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Travelling and Skirmishes
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Most of the quests on which you embark will take place outside of the relative
+    safety of the settlements. The Quest Books provides all necessary directions. After the
+    quest, you must travel back to the settlement to claim your award.
+  type: constraint
+  scope: global
+  fields:
+    claiming_award:
+      type: boolean
+      role: input
+      description: The party is claiming the award of a finished quest.
+    back_in_settlement:
+      type: boolean
+      role: input
+      description: The party has travelled back to the settlement.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: claiming_award
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: back_in_settlement
+        right:
+          type: literal
+          value: true
+  see_also:
+    - section.embarking_on_your_first_quest
+    - section.settlements.collect_your_reward
+- id: core.travel.free_movement
+  name: Moving on the map without a quest
+  section_id: section.travelling_and_skirmishes
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Travelling and Skirmishes
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You may also freely choose to move on the map, without a quest. This may be done
+    to get to a better position, or to shop for special things.
+  type: choice
+  scope: global
+  fields:
+    may_move_on_map:
+      type: boolean
+      role: output
+      description: The party may move on the World Map.
+  effects:
+    - type: set
+      target: may_move_on_map
+      value:
+        type: literal
+        value: true
+  see_also:
+    - section.travelling_and_skirmishes.moving_on_the_map
+- id: core.travel.map.road_hex
+  name: Road Hex and off-road hexes
+  section_id: section.travelling_and_skirmishes.reading_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Reading the Map
+      locator:
+        region: Map key, first entry (Road Hex symbol)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: There are some things on the map that carry special importance. ... Road Hex. All
+    hexes without roads are considered off-road.
+  type: definition
+  scope: global
+  fields:
+    hex_has_road:
+      type: boolean
+      role: input
+      description: The hex shows a road.
+    off_road:
+      type: boolean
+      role: output
+      description: The hex is considered off-road.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: hex_has_road
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: off_road
+      value:
+        type: literal
+        value: true
+  see_also:
+    - section.travelling_and_skirmishes.moving_on_the_map
+    - section.travelling_and_skirmishes.events
+- id: core.travel.map.quest_site_colours
+  name: Quest Site number colours
+  section_id: section.travelling_and_skirmishes.reading_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Reading the Map
+      locator:
+        region: Map key, second entry (Quest Site symbol)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Quest Site. White colour numbers refer to Silver City when randomising quest
+    locations. Other colours refer to towns nearby.
+  type: definition
+  scope: global
+  fields:
+    number_colour:
+      type: string
+      role: input
+      description: Colour of a number printed at a Quest Site, for example white.
+    refers_to:
+      type: string
+      role: output
+      description: Settlement the number belongs to when randomising quest locations.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: number_colour
+    right:
+      type: literal
+      value: white
+  effects:
+    - type: set
+      target: refers_to
+      value:
+        type: literal
+        value: Silver City
+  uses_tables:
+    - table.settlement.quest_sites
+- id: core.travel.map.town_quest_sites
+  name: Randomising a quest location from a town
+  section_id: section.travelling_and_skirmishes.reading_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Reading the Map
+      locator:
+        region: Map key, third entry (Town symbol)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Town. When randomising a quest location from a town, only Quest Sites with
+    corresponding colours are to be used.
+  type: constraint
+  scope: global
+  fields:
+    randomising_from_town:
+      type: boolean
+      role: input
+      description: A quest location is being randomised from a town.
+    quest_site_colour:
+      type: string
+      role: input
+      description: Colour of the Quest Site number considered.
+    town_colour:
+      type: string
+      role: input
+      description: Colour of the town the location is randomised from.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: randomising_from_town
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: quest_site_colour
+        right:
+          type: field
+          name: town_colour
+  uses_tables:
+    - table.settlement.quest_sites
+- id: core.travel.visit_settlements
+  name: Visiting settlements while travelling
+  section_id: section.travelling_and_skirmishes.visiting_settlements
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Visiting Settlements
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The party may visit settlements as they pass by them. There are subtle
+    differences between each settlement, so they may all be worth a visit.
+  type: choice
+  scope: global
+  fields:
+    passing_settlement:
+      type: boolean
+      role: input
+      description: The party's route passes by a settlement.
+    may_visit_settlement:
+      type: boolean
+      role: output
+      description: The party may visit that settlement.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: passing_settlement
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: may_visit_settlement
+      value:
+        type: literal
+        value: true
+  see_also:
+    - section.settlements
+- id: core.travel.staying_at_inns
+  name: Staying at an inn when movement ends in a settlement
+  section_id: section.travelling_and_skirmishes.visiting_settlements
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      section: Visiting Settlements
+      heading: Staying at Inns
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the party decides to end their movement in a settlement or the City Hex, they
+    have to pay to stay at the inn overnight. Go to the chapter on ‘Settlements’ for more
+    information. If they only plan to stay for the night, you only have to pay the inn fee.
+  type: constraint
+  scope: global
+  fields:
+    movement_ends_in_settlement:
+      type: boolean
+      role: input
+      description: The party ends its movement in a settlement or the City Hex.
+    inn_fee_paid:
+      type: boolean
+      role: input
+      description: The party pays to stay at the inn overnight.
+    only_staying_the_night:
+      type: boolean
+      role: input
+      description: The party only plans to stay for the night.
+    pay_only_inn_fee:
+      type: boolean
+      role: output
+      description: The inn fee is the only cost of the stay.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: movement_ends_in_settlement
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: inn_fee_paid
+        right:
+          type: literal
+          value: true
+    - type: set
+      target: pay_only_inn_fee
+      value:
+        type: field
+        name: only_staying_the_night
+  dependencies:
+    - key: settlements
+      label: Settlements chapter
+      section_id: section.settlements
+  see_also:
+    - section.settlements
+    - section.settlements.activities_in_a_settlement

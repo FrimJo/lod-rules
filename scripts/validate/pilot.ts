@@ -488,6 +488,7 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
             ![
               ...(cell.min === cell.max ? [String(cell.min)] : [`${cell.min}-${cell.max}`]),
               ...(cell.min === 10 && cell.max === 10 ? ['0'] : []),
+              ...(cell.min === 100 && cell.max === 100 ? ['00'] : []),
               ...(cell.min < cell.max && cell.max <= 100
                 ? [
                     String(cell.min).padStart(2, '0') +
@@ -606,6 +607,15 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
         if (!stateIds.has(transition.to))
           errors.push(`${machine.id}/${state.id}: unknown transition target ${transition.to}`);
         provenance(`${machine.id}/${state.id}/${transition.event}`, transition.source ?? []);
+        for (const id of transition.issues ?? [])
+          openIssue(`${machine.id}/${state.id}/${transition.event}`, id);
+        if (transition.when)
+          mechanics(
+            `${machine.id}/${state.id}/${transition.event}`,
+            machine.fields ?? {},
+            [],
+            transition.when,
+          );
       }
       for (const enter of state.enter ?? []) {
         if (enter.section_id) link(machine.id, enter.section_id, ['sections']);

@@ -14,13 +14,16 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: When staying at the manor, the heroes may furnish rooms or build new areas. Only one
-    thing may be bought in between every quest, and it cannot be used until after leaving the next
-    dungeon. Training Grounds and Archery Range may each be used once between each visit to a
-    dungeon, and each hero trains at one or the other. The Alchemist Lab allows one recipe and the
-    Garden one gathering between visits; whether that limit is per facility or per alchemist is not
-    stated, so the caller supplies the reading. The Wizard’s Study and Kennel have no stated use
-    limit. The text does not say how often the Smithy, Shrine or Crops can be used.
+  source_text: When staying at the manor, the heroes may decide to furnish rooms, or build new areas
+    for use. Only one thing may be bought in between every quest, and it cannot be used until after
+    the leaving the next dungeon.
+  unresolved_references:
+    - Training Grounds and Archery Range may each be used once between each visit to a dungeon, and
+      each hero trains at one or the other; a hero who trained at the other facility is refused in
+      the same interval, and whether the choice is permanent is not stated. The Alchemist Lab allows one recipe and the Garden one
+      gathering; whether that limit is per facility or per alchemist is not stated, so the caller
+      supplies the reading. The Wizard’s Study (for a wizard) and the Kennel state no use limit. The
+      text does not say how often the Smithy, Shrine or Crops can be used.
   issues:
     - issue.estate.furnishing_usage_boundaries
   fields:
@@ -85,6 +88,10 @@
       type: boolean
       role: input
       description: That hero is an alchemist.
+    hero_is_wizard:
+      type: boolean
+      role: input
+      description: That hero is a wizard; the Wizard’s Study serves "A wizard".
     lab_garden_limit_scope:
       type: string
       role: input
@@ -203,12 +210,12 @@
     - id: reset
       source:
         - *a1
-      source_text: Each call decides afresh.
+      source_text: When staying at the manor, the heroes may decide to furnish rooms, or build new areas for use.
       substeps:
         - id: owned
           source:
             - *a1
-          source_text: Only the estate owners furnish and use it.
+          source_text: When staying at the manor, the heroes may decide to furnish rooms, or build new areas for use.
           when:
             type: compare
             operator: eq
@@ -243,7 +250,7 @@
     - id: price_1
       source:
         - *a1
-      source_text: 'Training Grounds: 500 c.'
+      source_text: Training Grounds 500 c
       when:
         type: compare
         operator: eq
@@ -262,7 +269,7 @@
     - id: price_2
       source:
         - *a1
-      source_text: 'Wizard’s Study: 500 c.'
+      source_text: Wizard’s Study 500 c
       when:
         type: compare
         operator: eq
@@ -281,7 +288,7 @@
     - id: price_3
       source:
         - *a1
-      source_text: 'Alchemist Lab: 500 c.'
+      source_text: Alchemist Lab 500 c
       when:
         type: compare
         operator: eq
@@ -300,7 +307,7 @@
     - id: price_4
       source:
         - *a1
-      source_text: 'Shrine: 350 c.'
+      source_text: Shrine 350 c
       when:
         type: compare
         operator: eq
@@ -319,7 +326,7 @@
     - id: price_5
       source:
         - *a1
-      source_text: 'Smithy: 350 c.'
+      source_text: Smithy 350 c
       when:
         type: compare
         operator: eq
@@ -338,7 +345,7 @@
     - id: price_6
       source:
         - *a1
-      source_text: 'Archery Range: 500 c.'
+      source_text: Archery Range 500 c
       when:
         type: compare
         operator: eq
@@ -357,7 +364,7 @@
     - id: price_7
       source:
         - *a1
-      source_text: 'Crops, Hen House, and Pigsty: 200 c.'
+      source_text: Crops, Hen House, and Pigsty 200 c
       when:
         type: compare
         operator: eq
@@ -376,7 +383,7 @@
     - id: price_8
       source:
         - *a1
-      source_text: 'Garden: 200 c.'
+      source_text: Garden 200 c
       when:
         type: compare
         operator: eq
@@ -395,7 +402,7 @@
     - id: price_9
       source:
         - *a1
-      source_text: 'Kennel: 75 c.'
+      source_text: Kennel 75 c
       when:
         type: compare
         operator: eq
@@ -414,9 +421,9 @@
     - id: purchase
       source:
         - *a1
-      source_text:
-        Only one thing may be bought in between every quest; it cannot be used until after
-        leaving the next dungeon.
+      source_text: When staying at the manor, the heroes may decide to furnish rooms, or build new
+        areas for use. Only one thing may be bought in between every quest, and it cannot be used
+        until after the leaving the next dungeon.
       when:
         type: all
         conditions:
@@ -482,7 +489,7 @@
         - id: shrine_god
           source:
             - *a1
-          source_text: Only one shrine can be built, dedicated to a god of the hero’s choice.
+          source_text: Due to the ongoing rivalry between the gods, only one shrine can be built, dedicated to a god of the hero’s choice.
           when:
             type: compare
             operator: eq
@@ -527,7 +534,7 @@
     - id: first_dungeon_exit
       source:
         - *a1
-      source_text: After leaving the next dungeon the new furnishing may be used.
+      source_text: it cannot be used until after the leaving the next dungeon.
       when:
         type: all
         conditions:
@@ -573,8 +580,8 @@
       source:
         - *a1
       source_text:
-        'Training Grounds (CS or Dodge +1d2) or Archery Range (RS +1d2): once between each
-        visit to a dungeon, and each hero trains at one or the other.'
+        May be done once between each visit to a dungeon. ... You can only train either at
+        archery range OR at the training grounds with each hero.
       when:
         type: all
         conditions:
@@ -669,7 +676,9 @@
         - id: training_grounds_rule
           source:
             - *a1
-          source_text: Training Grounds effect.
+          source_text:
+            Any hero who spends time at the training grounds may choose to increase either
+            CS or Dodge by +1d2. May be done once between each visit to a dungeon.
           when:
             type: compare
             operator: eq
@@ -685,7 +694,9 @@
         - id: archery_range_rule
           source:
             - *a1
-          source_text: Archery Range effect.
+          source_text:
+            Heroes staying at the manor may increase their RS by +1d2 between each visit to
+            a dungeon.
           when:
             type: compare
             operator: eq
@@ -722,9 +733,8 @@
     - id: train_other_facility
       source:
         - *a1
-      source_text:
-        'A hero who trained at the other facility: refused in the same interval; whether the
-        choice is permanent is not stated.'
+      source_text: You can only train either at archery range OR at the training grounds with each
+        hero.
       when:
         type: all
         conditions:
@@ -778,9 +788,9 @@
       source:
         - *a1
       source_text:
-        'Alchemist Lab: one recipe between each visit to a dungeon. Garden: one gathering of
-        1d6+2 ingredients between each quest. Alchemists only. The limit is counted per
-        facility or per alchemist as the caller supplies.'
+        An alchemist making a recipe in this lab may choose what kind of potion the recipe
+        will yield. Only one recipe may be made between each visit to a dungeon. ... An Alchemist
+        may gather 1d6+2 random ingredients from the garden once between each quest.
       when:
         type: all
         conditions:
@@ -856,7 +866,8 @@
         - id: lab_rule
           source:
             - *a1
-          source_text: Alchemist Lab effect.
+          source_text: An alchemist making a recipe in this lab may choose what kind of potion the
+            recipe will yield. Only one recipe may be made between each visit to a dungeon.
           when:
             type: compare
             operator: eq
@@ -872,7 +883,8 @@
         - id: garden_rule
           source:
             - *a1
-          source_text: Garden effect.
+          source_text: An Alchemist may gather 1d6+2 random ingredients from the garden once between
+            each quest.
           when:
             type: compare
             operator: eq
@@ -904,9 +916,8 @@
     - id: alchemy_limit_unsupplied
       source:
         - *a1
-      source_text:
-        Whether the one recipe and one gathering are counted per facility or per alchemist is
-        not stated; the caller supplies the reading.
+      source_text: Only one recipe may be made between each visit to a dungeon. ... An Alchemist may
+        gather 1d6+2 random ingredients from the garden once between each quest.
       when:
         type: all
         conditions:
@@ -937,21 +948,33 @@
     - id: unlimited
       source:
         - *a1
-      source_text: The Wizard’s Study and Kennel state no use limit.
+      source_text: A wizard may store any number of Familiars here for free. Furthermore, any
+        Enchantment or Magic Scribble cast here is done with a +20 modifier. ... With a kennel, you
+        can leave any dogs you own between quests, if you decide not to bring them.
       when:
         type: all
         conditions:
           - *a2
           - type: any
             conditions:
-              - type: compare
-                operator: eq
-                left:
-                  type: field
-                  name: furnishing
-                right:
-                  type: literal
-                  value: Wizard’s Study
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: furnishing
+                    right:
+                      type: literal
+                      value: Wizard’s Study
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: hero_is_wizard
+                    right:
+                      type: literal
+                      value: true
               - type: compare
                 operator: eq
                 left:
@@ -964,7 +987,8 @@
         - id: study_rule
           source:
             - *a1
-          source_text: Wizard’s Study effect.
+          source_text: A wizard may store any number of Familiars here for free. Furthermore, any
+            Enchantment or Magic Scribble cast here is done with a +20 modifier.
           when:
             type: compare
             operator: eq
@@ -980,7 +1004,9 @@
         - id: kennel_rule
           source:
             - *a1
-          source_text: Kennel effect (Companion’s Expansion).
+          source_text:
+            With a kennel, you can leave any dogs you own between quests, if you decide not
+            to bring them. This requires the Companion’s Expansion.
           when:
             type: compare
             operator: eq
@@ -1002,7 +1028,10 @@
     - id: frequency_open
       source:
         - *a1
-      source_text: How often the Smithy, Shrine and Crops may be used is not stated.
+      source_text: Any hero may pray at the shrine in between quests and get the standard boon, but
+        for free and with a success on 1-4 on 1d6. ... All heroes may automatically repair 1d3
+        Durability Points on all weapons and armour. ... As long as one of the heroes spends at least
+        a full day tending to these, the party will receive a number of rations for free.
       when:
         type: all
         conditions:

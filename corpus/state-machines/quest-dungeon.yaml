@@ -12,7 +12,8 @@
         method: text
         confidence: high
         visually_verified: true
-    - document: rulebook.second_printing.eng
+    - &taking
+      document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 132
       printed_page: 130
@@ -21,7 +22,28 @@
         method: text
         confidence: high
         visually_verified: true
-    - document: rulebook.second_printing.eng
+    - &rejecting
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Rejecting a Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &available
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Available quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &leaving
+      document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 133
       printed_page: 131
@@ -39,41 +61,335 @@
     you were tasked to do, you may leave the dungeon. There is no need to trace your way back to the
     entrance.
   unresolved_references:
-    - 'Structural reading, not printed text: this is the lifecycle of one accepted dungeon quest occurrence. Initial acceptance and departure are existing owned procedures. Abandonment retains the layout; returning resumes the same task after repopulation and fresh checks. Actual task achievement permits leaving without retracing. This machine does not execute rewards, infer source-specific task completion or reset for a repeated quest; a legitimately repeated quest has a separate instance. Wilderness and personal quest applicability is not inferred.'
-    - 'The wording of the offered and accepted transitions (Taking on Quests, PDF 132; Leaving on a Quest, PDF 133) is a curator paraphrase, not verified against those pages.'
+    - 'Structural reading, not printed text: this is the lifecycle of one dungeon quest occurrence
+      from the settlement offer to leaving the dungeon. The offered, rejected, accepted and departed
+      states follow Taking on Quests, Rejecting a Quest, Available quests and Leaving on a Quest
+      (PDF 132–133); acceptance and departure are recorded by procedure.quest_acceptance and
+      procedure.quest_departure. Abandonment retains the layout; returning resumes the same task
+      after repopulation and fresh checks. Actual task achievement permits leaving without
+      retracing. This machine does not execute rewards, infer source-specific task completion or
+      reset for a repeated quest; a legitimately repeated quest has a separate instance. Wilderness
+      and personal quest applicability is not inferred.'
   issues:
     - issue.quest.shared_lifecycle_boundaries
+    - issue.settlement.quest_offer_scope
+    - issue.quest.side_quest_availability
+  fields:
+    party_in_settlement:
+      type: boolean
+      role: input
+      description: The party is in a settlement.
+    quest_source:
+      type: string
+      role: input
+      description: campaign (an available campaign), random (a random quest offered by the Available
+        quests roll) or side (a side quest offered on a d8 result of 1-2).
+    campaign_available:
+      type: boolean
+      role: input
+      description: The campaign is available to start.
+    random_quest_available:
+      type: boolean
+      role: input
+      description: The Available quests roll offered this quest in this settlement.
+    side_quest_available:
+      type: boolean
+      role: input
+      description:
+        A d8 result of 1-2 made a side quest available. Side Quests (PDF 273) also lets the heroes
+        accept a Side Quest "at any time during their stay in the city"; a stay-time side quest
+        without the d8 result is covered by issue.quest.side_quest_availability, and this guard
+        applies only the d8 reading.
+    quest_in_ancient_lands:
+      type: boolean
+      role: input
+      description: The quest is in the Ancient Lands.
+    settlement:
+      type: string
+      role: input
+      description: Settlement entity key (silver_city, outpost, irondale, ...).
+    settlement_is_village:
+      type: boolean
+      role: input
+      description: The settlement is a village; issue.settlement.quest_offer_scope covers
+        settlements the book does not call a village (Durburim, Birnheim, The Outpost, Freyfell,
+        Whiteport), where a rejection takes the transition that returns that issue.
+    must_move_on:
+      type: boolean
+      role: input
+      description: The party must move to another settlement (rejection limit reached, or none of
+        the quests interest it).
+    rejected_quests:
+      type: number
+      role: input
+      description: Quests the party has already rejected in this settlement.
+      integer: true
+      minimum: 0
+    departure_early_morning:
+      type: boolean
+      role: input
+      description: The party leaves early in the morning.
+    other_settlement_activities_that_day:
+      type: number
+      role: input
+      description: Other settlement activities performed on the departure day.
+      integer: true
+      minimum: 0
   initial: offered
   states:
     - id: offered
       transitions:
-        - event: actual_party_acceptance
+        - event: party_accepts_offer
           to: accepted
-          source_text: Actual party accepts this source offer.
+          source_text: Whenever the party is in a settlement, they may either start an available
+            campaign or roll to see if there are random quests available. ... The only settlement to
+            offer quests in the Ancient Lands is The Outpost. ... If there is a quest available,
+            then roll 1d8. On a result of 1-2 on the d8, a side quest is available as well and may
+            be taken together with any of the other quests.
           source:
-            - document: rulebook.second_printing.eng
-              file: source/Rulebook-2nd-printing-ENGa.pdf
-              pdf_page: 132
-              printed_page: 130
-              heading: Taking on Quests
-              extraction:
-                method: text
-                confidence: high
-                visually_verified: true
+            - *taking
+            - *available
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_in_settlement
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: must_move_on
+                right:
+                  type: literal
+                  value: false
+              - type: any
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: quest_source
+                        right:
+                          type: literal
+                          value: campaign
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: campaign_available
+                        right:
+                          type: literal
+                          value: true
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: quest_source
+                        right:
+                          type: literal
+                          value: random
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: random_quest_available
+                        right:
+                          type: literal
+                          value: true
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: quest_source
+                        right:
+                          type: literal
+                          value: side
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: side_quest_available
+                        right:
+                          type: literal
+                          value: true
+              - type: any
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: quest_in_ancient_lands
+                    right:
+                      type: literal
+                      value: false
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: settlement
+                    right:
+                      type: literal
+                      value: outpost
+        - event: party_rejects_offer
+          to: rejected
+          source_text: The party may reject 2 quests in a village and 3 quests in Silver City before
+            they must move to another settlement to find a new quest.
+          source:
+            - *rejecting
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_in_settlement
+                right:
+                  type: literal
+                  value: true
+              - type: any
+                conditions:
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: rejected_quests
+                        right:
+                          type: literal
+                          value: 3
+                  - type: all
+                    conditions:
+                      - type: compare
+                        operator: ne
+                        left:
+                          type: field
+                          name: settlement
+                        right:
+                          type: literal
+                          value: silver_city
+                      - type: compare
+                        operator: eq
+                        left:
+                          type: field
+                          name: settlement_is_village
+                        right:
+                          type: literal
+                          value: true
+                      - type: compare
+                        operator: lt
+                        left:
+                          type: field
+                          name: rejected_quests
+                        right:
+                          type: literal
+                          value: 2
+        - event: party_rejects_offer
+          to: rejected
+          source_text: The party may reject 2 quests in a village and 3 quests in Silver City before
+            they must move to another settlement to find a new quest.
+          source:
+            - *rejecting
+          issues:
+            - issue.settlement.quest_offer_scope
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: party_in_settlement
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: settlement
+                right:
+                  type: literal
+                  value: silver_city
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: settlement_is_village
+                right:
+                  type: literal
+                  value: false
+    - id: rejected
+      terminal: true
     - id: accepted
       enter:
         - label: Actual immutable party/occurrence acceptance
           object_id: procedure.quest_acceptance
       transitions:
-        - event: actual_departure_and_dungeon_entry
+        - event: party_leaves_on_quest
+          to: departed
+          source_text: Taking on deadly quests requires careful planning and preparation. Therefore,
+            leaving on a quest is always done early in the morning. No other settlement activities
+            are allowed on that day.
+          source:
+            - *leaving
+          when:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: departure_early_morning
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: other_settlement_activities_that_day
+                right:
+                  type: literal
+                  value: 0
+    - id: departed
+      enter:
+        - label: Actual party departure for this accepted occurrence
+          object_id: procedure.quest_departure
+      transitions:
+        - event: actual_dungeon_entry
           to: active
-          source_text: Actual early-morning quest departure followed by actual dungeon entry.
+          source_text: >-
+            Place the starting tile as the first tile. This tile has one side with grass and one side
+            with flagstones. On the stone side of the tile, you will find a door leading into the
+            dungeon.
           source:
             - document: rulebook.second_printing.eng
               file: source/Rulebook-2nd-printing-ENGa.pdf
-              pdf_page: 133
-              printed_page: 131
-              heading: Leaving on a Quest
+              pdf_page: 88
+              printed_page: 86
+              heading: Initial Setup
               extraction:
                 method: text
                 confidence: high

@@ -1,0 +1,4678 @@
+- id: procedure.arena_fighting
+  name: Arena Fighting
+  section_id: section.settlements.arena_fighting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 141
+      printed_page: 139
+      heading: Participating
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 141
+      printed_page: 139
+      heading: Calculating the Chance of Victory
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 142
+      printed_page: 140
+      heading: Betting, Odds, and Winning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 142
+      printed_page: 140
+      heading: Losing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Arena Fighting
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Any hero can choose to participate in the arena fights and doing so will take a
+    complete day. The minimum fee for joining is 50 c, but you can pay up to 200 c if you want to
+    gamble more money. You will then first fight in the group fights. If you win, you may go on to
+    fight in a semi-final. If you win that, you will fight in the final. You pay once to attend all
+    three levels. ... Roll once on your CS for each level. The following modifiers are applied based
+    on the participant’s stats: ... After each level, if the hero won, multiply the amount you paid
+    to enter the fight with the following modifiers (RDD): ... If you win the final, there is also a
+    chance that you receive an extra award: ... You (not the party) will also gain 50, 100, and 150
+    XP for each level you win. ... If you lose the fight, you will lose 2 HP (group), 4 HP (semi),
+    or 6 HP (final). You will also lose 2 Points of Sanity.'
+  issues:
+    - issue.settlement.arena_hit_points_basis
+    - issue.settlement.arena_winnings_accumulation
+  fields:
+    coins:
+      type: number
+      role: state
+      description: Coins of the participating hero.
+      integer: true
+      minimum: 0
+    entry_fee:
+      type: number
+      role: input
+      description: Fee paid once for all three levels (50 c to 200 c).
+      integer: true
+      minimum: 50
+      maximum: 200
+    combat_skill:
+      type: number
+      role: input
+      description: The hero’s CS before arena modifiers.
+      integer: true
+      minimum: 0
+    hit_points:
+      type: number
+      role: input
+      description:
+        Hit Points compared against the Hero Hit Points table; whether current or maximum HP is
+        meant is issue.settlement.arena_hit_points_basis.
+      integer: true
+      minimum: 0
+    strength:
+      type: number
+      role: input
+      description: The hero’s STR.
+      integer: true
+      minimum: 0
+    hero_level:
+      type: number
+      role: input
+      description: Hero level, the row of the winnings table.
+      integer: true
+      minimum: 1
+      maximum: 10
+    group_roll:
+      type: number
+      role: input
+      description: CS roll for the group fight.
+      integer: true
+      minimum: 1
+      maximum: 100
+    semi_roll:
+      type: number
+      role: input
+      description: CS roll for the semi-final, when it is fought.
+      integer: true
+      minimum: 1
+      maximum: 100
+    final_roll:
+      type: number
+      role: input
+      description: CS roll for the final, when it is fought.
+      integer: true
+      minimum: 1
+      maximum: 100
+    continue_to_semi:
+      type: boolean
+      role: input
+      description: After winning the group fight, whether the hero goes on to the semi-final ("you may go on").
+    award_roll:
+      type: number
+      role: input
+      description: 1d10 on the extra award table after winning the final.
+      integer: true
+      minimum: 1
+      maximum: 10
+    entered:
+      type: boolean
+      role: state
+      description: Whether the fee was paid and the hero fights.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    hp_modifier:
+      type: number
+      role: output
+      description: Hero Hit Points modifier.
+    str_modifier:
+      type: number
+      role: output
+      description: Hero STR modifier.
+    group_modifier:
+      type: number
+      role: output
+      description: Level modifier for the group fight.
+    semi_modifier:
+      type: number
+      role: output
+      description: Level modifier for the semi-final.
+    final_modifier:
+      type: number
+      role: output
+      description: Level modifier for the final.
+    group_target:
+      type: number
+      role: output
+      description: Modified CS for the group fight roll.
+    semi_target:
+      type: number
+      role: output
+      description: Modified CS for the semi-final roll.
+    final_target:
+      type: number
+      role: output
+      description: Modified CS for the final roll.
+    group_won:
+      type: boolean
+      role: output
+      description: Group fight won.
+    semi_won:
+      type: boolean
+      role: output
+      description: Semi-final won.
+    final_won:
+      type: boolean
+      role: output
+      description: Final won.
+    group_multiplier_tenths:
+      type: number
+      role: output
+      description: Winnings modifier for the group level, in tenths (printed 1,1 is 11).
+    semi_multiplier_tenths:
+      type: number
+      role: output
+      description: Winnings modifier for the semi-final level, in tenths (printed 1,1 is 11).
+    final_multiplier_tenths:
+      type: number
+      role: output
+      description: Winnings modifier for the final level, in tenths (printed 1,1 is 11).
+    group_payout:
+      type: number
+      role: output
+      description:
+        Fee multiplied by the group modifier (RDD). Paying this for a won group level and keeping
+        it whatever happens later is the reading applied pending
+        issue.settlement.arena_winnings_accumulation.
+    semi_payout:
+      type: number
+      role: output
+      description:
+        Fee multiplied by the semi-final modifier (RDD), paid in addition to the group payout; the
+        reading applied pending issue.settlement.arena_winnings_accumulation.
+    final_payout:
+      type: number
+      role: output
+      description:
+        Fee multiplied by the final modifier (RDD), paid in addition to the group and semi-final
+        payouts; the reading applied pending issue.settlement.arena_winnings_accumulation.
+    winnings:
+      type: number
+      role: output
+      description:
+        Sum of the payouts of every won level, kept after a later loss. The book does not say
+        whether won levels accumulate, only the last is paid, or the amount compounds, nor whether
+        earlier winnings are kept after a loss; summing and keeping them is the reading applied
+        pending issue.settlement.arena_winnings_accumulation.
+    xp_gained:
+      type: number
+      role: output
+      description: XP gained by the hero (not the party).
+    hp_lost:
+      type: number
+      role: output
+      description: HP lost on losing a fight.
+    sanity_lost:
+      type: number
+      role: output
+      description: Sanity lost on losing a fight.
+    extra_award:
+      type: string
+      role: output
+      description: Extra award after winning the final, or none.
+  dependencies:
+    - key: hit_points_table
+      label: Hero Hit Points modifiers
+      object_id: table.settlement.arena_modifiers
+    - key: strength_table
+      label: Hero STR modifiers
+      object_id: table.settlement.arena_strength_modifiers
+    - key: level_table
+      label: Level modifiers
+      object_id: table.settlement.arena_level_modifiers
+    - key: odds_table
+      label: Winnings modifiers
+      object_id: table.settlement.arena_odds
+    - key: award_table
+      label: Extra award
+      object_id: table.settlement.arena_awards
+    - key: entry_rule
+      label: Arena entry
+      object_id: character.settlement.arena_entry
+    - key: results_rule
+      label: Arena results
+      object_id: character.settlement.arena_results
+  steps:
+    - id: initialise
+      source_text: Any hero can choose to participate in the arena fights and doing so will take a complete day.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Participating
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Arena Fighting
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: entered
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: group_won
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: semi_won
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: final_won
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: winnings
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: xp_gained
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: extra_award
+          value:
+            type: literal
+            value: none
+    - id: pay_entry
+      source_text:
+        The minimum fee for joining is 50 c, but you can pay up to 200 c if you want to gamble
+        more money. ... You pay once to attend all three levels.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Participating
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: field
+              name: entry_fee
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: entry_fee
+          duration: immediate
+        - type: set
+          target: entered
+          value:
+            type: literal
+            value: true
+    - id: hit_points_low
+      source_text: 'Hero Hit Points <10: -5'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero Hit Points
+            row: <10
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - &a1
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: entered
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 10
+      effects:
+        - type: set
+          target: hp_modifier
+          value:
+            type: literal
+            value: -5
+    - id: hit_points_middle
+      source_text: 'Hero Hit Points 10-15: 0'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero Hit Points
+            row: 10-15
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 10
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 15
+      effects:
+        - type: set
+          target: hp_modifier
+          value:
+            type: literal
+            value: 0
+    - id: hit_points_high
+      source_text: 'Hero Hit Points >15: +5'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero Hit Points
+            row: '>15'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: hit_points
+            right:
+              type: literal
+              value: 15
+      effects:
+        - type: set
+          target: hp_modifier
+          value:
+            type: literal
+            value: 5
+    - id: strength_low
+      source_text: 'Hero STR <40: -5'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero STR
+            row: <40
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: strength
+            right:
+              type: literal
+              value: 40
+      effects:
+        - type: set
+          target: str_modifier
+          value:
+            type: literal
+            value: -5
+    - id: strength_middle
+      source_text: 'Hero STR 40-50: 0'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero STR
+            row: 40-50
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: strength
+            right:
+              type: literal
+              value: 40
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: strength
+            right:
+              type: literal
+              value: 50
+      effects:
+        - type: set
+          target: str_modifier
+          value:
+            type: literal
+            value: 0
+    - id: strength_high
+      source_text: 'Hero STR >50: +5'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          locator:
+            table: Hero STR
+            row: '>50'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: strength
+            right:
+              type: literal
+              value: 50
+      effects:
+        - type: set
+          target: str_modifier
+          value:
+            type: literal
+            value: 5
+    - id: group_fight
+      source_text: You will then first fight in the group fights. ... Roll once on your CS for each level.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Participating
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when: *a1
+      effects:
+        - type: lookup
+          table_id: table.settlement.arena_level_modifiers
+          key_column: level
+          key:
+            type: literal
+            value: Group
+          value_column: modifier
+          target: group_modifier
+          on_missing_issue: issue.phase4.lookup_domain
+        - type: set
+          target: group_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: combat_skill
+              - type: field
+                name: hp_modifier
+              - type: field
+                name: str_modifier
+              - type: field
+                name: group_modifier
+    - id: group_win
+      source_text:
+        'After each level, if the hero won, multiply the amount you paid to enter the fight
+        with the following modifiers (RDD): ... You (not the party) will also gain 50, 100, and 150
+        XP for each level you win.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Betting, Odds, and Winning
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: group_roll
+            right:
+              type: field
+              name: group_target
+      effects:
+        - type: set
+          target: group_won
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: group_multiplier_tenths
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 21
+              - type: field
+                name: hero_level
+        - type: set
+          target: group_payout
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: entry_fee
+                      - type: field
+                        name: group_multiplier_tenths
+                  - type: literal
+                    value: 10
+        - type: add
+          target: winnings
+          value:
+            type: field
+            name: group_payout
+          duration: immediate
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: group_payout
+          duration: immediate
+        - type: add
+          target: xp_gained
+          value:
+            type: literal
+            value: 50
+          duration: immediate
+    - id: group_loss
+      source_text:
+        If you lose the fight, you will lose 2 HP (group), 4 HP (semi), or 6 HP (final). You
+        will also lose 2 Points of Sanity.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Losing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a1
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: group_roll
+            right:
+              type: field
+              name: group_target
+      effects:
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 2
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 2
+    - id: semi_fight
+      source_text: If you win, you may go on to fight in a semi-final.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Participating
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when: &a2
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: group_won
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: continue_to_semi
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: lookup
+          table_id: table.settlement.arena_level_modifiers
+          key_column: level
+          key:
+            type: literal
+            value: Semi
+          value_column: modifier
+          target: semi_modifier
+          on_missing_issue: issue.phase4.lookup_domain
+        - type: set
+          target: semi_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: combat_skill
+              - type: field
+                name: hp_modifier
+              - type: field
+                name: str_modifier
+              - type: field
+                name: semi_modifier
+    - id: semi_win
+      source_text:
+        'After each level, if the hero won, multiply the amount you paid to enter the fight
+        with the following modifiers (RDD): ... You (not the party) will also gain 50, 100, and 150
+        XP for each level you win.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Betting, Odds, and Winning
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: semi_roll
+            right:
+              type: field
+              name: semi_target
+      effects:
+        - type: set
+          target: semi_won
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: semi_multiplier_tenths
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 23
+              - type: field
+                name: hero_level
+        - type: set
+          target: semi_payout
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: entry_fee
+                      - type: field
+                        name: semi_multiplier_tenths
+                  - type: literal
+                    value: 10
+        - type: add
+          target: winnings
+          value:
+            type: field
+            name: semi_payout
+          duration: immediate
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: semi_payout
+          duration: immediate
+        - type: add
+          target: xp_gained
+          value:
+            type: literal
+            value: 100
+          duration: immediate
+    - id: semi_loss
+      source_text:
+        If you lose the fight, you will lose 2 HP (group), 4 HP (semi), or 6 HP (final). You
+        will also lose 2 Points of Sanity.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Losing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a2
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: semi_roll
+            right:
+              type: field
+              name: semi_target
+      effects:
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 4
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 2
+    - id: final_fight
+      source_text: If you win that, you will fight in the final.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Participating
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 141
+          printed_page: 139
+          heading: Calculating the Chance of Victory
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when: &a3
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: semi_won
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: lookup
+          table_id: table.settlement.arena_level_modifiers
+          key_column: level
+          key:
+            type: literal
+            value: Final
+          value_column: modifier
+          target: final_modifier
+          on_missing_issue: issue.phase4.lookup_domain
+        - type: set
+          target: final_target
+          value:
+            type: sum
+            values:
+              - type: field
+                name: combat_skill
+              - type: field
+                name: hp_modifier
+              - type: field
+                name: str_modifier
+              - type: field
+                name: final_modifier
+    - id: final_win
+      source_text:
+        'After each level, if the hero won, multiply the amount you paid to enter the fight
+        with the following modifiers (RDD): ... If you win the final, there is also a chance that
+        you receive an extra award: ... You (not the party) will also gain 50, 100, and 150 XP for
+        each level you win.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Betting, Odds, and Winning
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: final_roll
+            right:
+              type: field
+              name: final_target
+      effects:
+        - type: set
+          target: final_won
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: final_multiplier_tenths
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 25
+              - type: field
+                name: hero_level
+        - type: set
+          target: final_payout
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: entry_fee
+                      - type: field
+                        name: final_multiplier_tenths
+                  - type: literal
+                    value: 10
+        - type: add
+          target: winnings
+          value:
+            type: field
+            name: final_payout
+          duration: immediate
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: final_payout
+          duration: immediate
+        - type: add
+          target: xp_gained
+          value:
+            type: literal
+            value: 150
+          duration: immediate
+        - type: lookup
+          table_id: table.settlement.arena_awards
+          key_column: roll
+          key:
+            type: field
+            name: award_roll
+          value_column: award
+          target: extra_award
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: final_loss
+      source_text:
+        If you lose the fight, you will lose 2 HP (group), 4 HP (semi), or 6 HP (final). You
+        will also lose 2 Points of Sanity.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 142
+          printed_page: 140
+          heading: Losing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a3
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: final_roll
+            right:
+              type: field
+              name: final_target
+      effects:
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 6
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 2
+  entry_step: initialise
+  exit_step: final_loss
+- id: procedure.horse_racing
+  name: Horse Racing
+  section_id: section.settlements.horse_racing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Horse Racing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Win and Second Place
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Catastrophe Strikes!
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Horse Racing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Anyone owning a horse may join the race if they pay a fee of 50 c. If you feel lucky,
+    or that the odds for winning are in your favour, you can bet up to 300 c including the 50 c
+    entry fee. Winners and second runner ups will win some money for their performance. ... If you
+    decide to compete, you will need to make a DEX Test. ... Check the table below and multiply the
+    amount bet including the entry fee (RDD). ... There is also a chance to win an extra prize. ...
+    Remove the horse from your Character Sheet and subtract 1d6 HP and 1 Point of Sanity.
+  issues:
+    - issue.settlement.horse_racing_catastrophe
+  fields:
+    owns_horse:
+      type: boolean
+      role: input
+      description: Whether the hero owns a horse.
+    coins:
+      type: number
+      role: state
+      description: Coins of the racing hero.
+      integer: true
+      minimum: 0
+    bet:
+      type: number
+      role: input
+      description: Amount bet including the 50 c entry fee (50 c to 300 c).
+      integer: true
+      minimum: 50
+      maximum: 300
+    dexterity:
+      type: number
+      role: input
+      description: The hero’s DEX.
+      integer: true
+      minimum: 0
+    dex_roll:
+      type: number
+      role: input
+      description: The DEX Test roll.
+      integer: true
+      minimum: 1
+      maximum: 100
+    hero_level:
+      type: number
+      role: input
+      description: Hero level, the row of the winnings table.
+      integer: true
+      minimum: 1
+      maximum: 10
+    award_roll:
+      type: number
+      role: input
+      description: 1d10 on the extra award table, rolled in the column for the placement.
+      integer: true
+      minimum: 1
+      maximum: 10
+    hp_loss_roll:
+      type: number
+      role: input
+      description: 1d6 HP lost when catastrophe strikes.
+      integer: true
+      minimum: 1
+      maximum: 6
+    entered:
+      type: boolean
+      role: state
+      description: Whether the hero raced.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    placement:
+      type: string
+      role: output
+      description: win, second, lose or catastrophe.
+    multiplier_tenths:
+      type: number
+      role: output
+      description: Multiplier for the placement and hero level, in tenths (printed 2,5 is 25).
+    winnings:
+      type: number
+      role: output
+      description: Amount bet including the entry fee multiplied by the multiplier (RDD).
+    extra_award:
+      type: string
+      role: output
+      description: Extra award, or none.
+    horse_lost:
+      type: boolean
+      role: output
+      description: The horse is removed from the Character Sheet.
+    hp_lost:
+      type: number
+      role: output
+      description: HP lost.
+    sanity_lost:
+      type: number
+      role: output
+      description: Sanity lost.
+  dependencies:
+    - key: placement_table
+      label: DEX roll result and placement
+      object_id: table.settlement.horse_racing
+    - key: winnings_table
+      label: Horse racing multipliers
+      object_id: table.settlement.racing_winnings
+    - key: award_table
+      label: Horse racing extra award
+      object_id: table.settlement.racing_awards
+    - key: racing_rule
+      label: Horse Racing
+      object_id: character.settlement.horse_racing
+    - key: awards_rule
+      label: Win and Second Place; Catastrophe Strikes!
+      object_id: character.settlement.horse_racing_awards
+  steps:
+    - id: initialise
+      source_text: Anyone owning a horse may join the race if they pay a fee of 50 c.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Horse Racing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: entered
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: none
+        - type: set
+          target: winnings
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: extra_award
+          value:
+            type: literal
+            value: none
+        - type: set
+          target: horse_lost
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: hp_lost
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 0
+    - id: enter_race
+      source_text:
+        Anyone owning a horse may join the race if they pay a fee of 50 c. If you feel lucky,
+        or that the odds for winning are in your favour, you can bet up to 300 c including the 50 c
+        entry fee.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: owns_horse
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: bet
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: bet
+          duration: immediate
+        - type: set
+          target: entered
+          value:
+            type: literal
+            value: true
+    - id: win
+      source_text:
+        '<= DEX/2 (RDD): Win! ... You manage to cross the finish line first! Your hero wins
+        money based on how much they bet, but also based on the odds. Check the table below and
+        multiply the amount bet including the entry fee (RDD).'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          locator:
+            table: DEX roll result
+            row: <= DEX/2 (RDD)
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Win and Second Place
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - &a4
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: entered
+            right:
+              type: literal
+              value: true
+          - &a5
+            type: compare
+            operator: lt
+            left:
+              type: field
+              name: dex_roll
+            right:
+              type: literal
+              value: 95
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: dex_roll
+            right: &a6
+              type: arithmetic
+              operator: floor
+              values:
+                - type: arithmetic
+                  operator: divide
+                  values:
+                    - type: field
+                      name: dexterity
+                    - type: literal
+                      value: 2
+      effects:
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: win
+        - type: set
+          target: multiplier_tenths
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 31
+              - type: field
+                name: hero_level
+        - type: set
+          target: winnings
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: bet
+                      - type: field
+                        name: multiplier_tenths
+                  - type: literal
+                    value: 10
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: winnings
+          duration: immediate
+        - type: lookup
+          table_id: table.settlement.racing_awards
+          key_column: first_place_roll
+          key:
+            type: field
+            name: award_roll
+          value_column: award
+          target: extra_award
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: second_place
+      source_text:
+        '<=DEX-10: 2nd place! ... Check the table below and multiply the amount bet including
+        the entry fee (RDD). ... There is also a chance to win an extra prize.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          locator:
+            table: DEX roll result
+            row: <=DEX-10
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Win and Second Place
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a4
+          - *a5
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: dex_roll
+            right: *a6
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: dex_roll
+            right: &a7
+              type: arithmetic
+              operator: subtract
+              values:
+                - type: field
+                  name: dexterity
+                - type: literal
+                  value: 10
+      effects:
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: second
+        - type: set
+          target: multiplier_tenths
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: literal
+                value: 26
+              - type: field
+                name: hero_level
+        - type: set
+          target: winnings
+          value:
+            type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: bet
+                      - type: field
+                        name: multiplier_tenths
+                  - type: literal
+                    value: 10
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: winnings
+          duration: immediate
+        - type: lookup
+          table_id: table.settlement.racing_awards
+          key_column: second_place_roll
+          key:
+            type: field
+            name: award_roll
+          value_column: award
+          target: extra_award
+          on_missing_issue: issue.phase4.lookup_domain
+    - id: lose
+      source_text: '>DEX-10: You lose…'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          locator:
+            table: DEX roll result
+            row: '>DEX-10'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a4
+          - *a5
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: dex_roll
+            right: *a6
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: dex_roll
+            right: *a7
+      effects:
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: lose
+    - id: catastrophe
+      source_text:
+        '>=95: Catastrophe strikes! ... The horse however did not fare that well and you are
+        now without a mount. ... Remove the horse from your Character Sheet and subtract 1d6 HP and
+        1 Point of Sanity.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Horse Racing
+          locator:
+            table: DEX roll result
+            row: '>=95'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Catastrophe Strikes!
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a4
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: dex_roll
+            right:
+              type: literal
+              value: 95
+      effects:
+        - type: set
+          target: placement
+          value:
+            type: literal
+            value: catastrophe
+        - type: set
+          target: horse_lost
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: hp_lost
+          value:
+            type: field
+            name: hp_loss_roll
+        - type: set
+          target: sanity_lost
+          value:
+            type: literal
+            value: 1
+  entry_step: initialise
+  exit_step: catastrophe
+- id: procedure.settlement_gambling
+  name: Gambling
+  section_id: section.settlements.gambling
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Gambling
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Fortune Teller
+      locator:
+        table: Fortune Teller
+        row: '2'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Gamble
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Nevertheless, your heroes are free to try their luck once during each stay in a
+    settlement. The hero is allowed to bet between 50 and 500 coins before rolling on the table
+    below. You may subtract -1 for each Point of Luck the hero has for the moment, without actually
+    spending them. However, a natural result of 10 cannot be modified.
+  issues:
+    - issue.settlement.gambling_outcome_amounts
+    - issue.settlement.whiteport_gambling_scope
+  fields:
+    staying_at_inn:
+      type: boolean
+      role: input
+      description:
+        'Whether the party stays at the inn (Gamble: Inn, 0 Activity Points but requires stay
+        at inn).'
+    gambled_this_stay:
+      type: boolean
+      role: state
+      description: Whether this hero has already gambled during this stay in the settlement.
+    coins:
+      type: number
+      role: state
+      description: Coins of the gambling hero.
+      integer: true
+      minimum: 0
+    bet:
+      type: number
+      role: input
+      description: Bet, between 50 and 500 coins.
+      integer: true
+      minimum: 50
+      maximum: 500
+    current_luck:
+      type: number
+      role: input
+      description: Points of Luck the hero has for the moment; they are not spent.
+      integer: true
+      minimum: 0
+    fortune_gambling_bonus:
+      type: boolean
+      role: input
+      description: Whether the Fortune Teller result 2 (-2 at a gambling dice roll during this stay)
+        applies to this roll.
+    roll:
+      type: number
+      role: input
+      description: Natural 1d10 roll.
+      integer: true
+      minimum: 1
+      maximum: 10
+    placed:
+      type: boolean
+      role: state
+      description: Whether the bet was placed.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    modified_roll:
+      type: number
+      role: output
+      description: Roll after subtracting Luck and any Fortune Teller modifier; a natural 10 is not modified.
+    outcome:
+      type: string
+      role: output
+      description: grand_slam, win, lose or accused, or none.
+    payout:
+      type: number
+      role: output
+      description: Coins the hero goes home with from the table result.
+  dependencies:
+    - key: gambling_table
+      label: Gambling table
+      object_id: table.settlement.gambling
+    - key: gambling_rule
+      label: Gambling
+      object_id: character.settlement.gambling
+    - key: fortune_table
+      label: Fortune Teller table
+      object_id: table.settlement.fortune_teller
+  steps:
+    - id: initialise
+      source_text: 'Gamble: Inn, 0 (but requires stay at inn).'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Gamble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: placed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: none
+        - type: set
+          target: payout
+          value:
+            type: literal
+            value: 0
+    - id: place_bet
+      source_text: Nevertheless, your heroes are free to try their luck once during each stay in a
+        settlement. The hero is allowed to bet between 50 and 500 coins before rolling on the table
+        below.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Gamble
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: staying_at_inn
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: gambled_this_stay
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: field
+                  name: bet
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: multiply
+            values:
+              - type: literal
+                value: -1
+              - type: field
+                name: bet
+          duration: immediate
+        - type: set
+          target: gambled_this_stay
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: placed
+          value:
+            type: literal
+            value: true
+    - id: modify_roll
+      source_text: You may subtract -1 for each Point of Luck the hero has for the moment, without
+        actually spending them. However, a natural result of 10 cannot be modified.
+      when:
+        type: all
+        conditions:
+          - &a8
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: placed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 10
+      effects:
+        - type: set
+          target: modified_roll
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: roll
+              - type: field
+                name: current_luck
+    - id: fortune_modifier
+      source_text: The hero gets -2 at a gambling dice roll during this stay in the city.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Fortune Teller
+          locator:
+            table: Fortune Teller
+            row: '2'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: fortune_gambling_bonus
+            right:
+              type: literal
+              value: true
+      effects:
+        - type: add
+          target: modified_roll
+          value:
+            type: literal
+            value: -2
+          duration: immediate
+    - id: natural_ten
+      source_text: However, a natural result of 10 cannot be modified.
+      when:
+        type: all
+        conditions:
+          - *a8
+          - &a9
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 10
+      effects:
+        - type: set
+          target: modified_roll
+          value:
+            type: literal
+            value: 10
+    - id: grand_slam
+      source_text: '<=1: Grand slam! You win 2 times your bet.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: <=1
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: modified_roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: grand_slam
+        - type: unresolved
+          issue_id: issue.settlement.gambling_outcome_amounts
+    - id: win
+      source_text: '2-3: Win! You go home with 1,5 times the bet (RDU)'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: 2-3
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: modified_roll
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: modified_roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: win
+        - type: set
+          target: payout
+          value:
+            type: arithmetic
+            operator: ceil
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: field
+                        name: bet
+                      - type: literal
+                        value: 3
+                  - type: literal
+                    value: 2
+        - type: add
+          target: coins
+          value:
+            type: field
+            name: payout
+          duration: immediate
+    - id: lose
+      source_text: '4-9: You lose all your bets.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: 4-9
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: modified_roll
+            right:
+              type: literal
+              value: 4
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: modified_roll
+            right:
+              type: literal
+              value: 9
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: lose
+    - id: accused
+      source_text:
+        '10: The others around the table are certain you have cheated, and you end up getting a
+        good beating and being robbed of an additional 100 c.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: '10'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - *a9
+      effects:
+        - type: set
+          target: outcome
+          value:
+            type: literal
+            value: accused
+    - id: robbed_shortfall
+      source_text: being robbed of an additional 100 c.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: '10'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - *a9
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: coins
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: unresolved
+          issue_id: issue.settlement.gambling_outcome_amounts
+    - id: robbed
+      source_text: being robbed of an additional 100 c.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Gambling
+          locator:
+            table: Gambling
+            row: '10'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a8
+          - *a9
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -100
+          duration: immediate
+  entry_step: initialise
+  exit_step: robbed
+- id: procedure.fortune_teller
+  name: Fortune Teller
+  section_id: section.settlements.fortune_teller
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Fortune Teller
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Read your Fortune
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    The hero may choose to visit a Fortune Teller during their stay in the city. ... A hero
+    who decides to have their future read must pay 50 c.
+  see_also:
+    - section.appendix_v_treasures.table_9
+  fields:
+    coins:
+      type: number
+      role: state
+      description: Coins of the hero.
+      integer: true
+      minimum: 0
+    roll:
+      type: number
+      role: input
+      description: 1d6 on the Fortune Teller table.
+      integer: true
+      minimum: 1
+      maximum: 6
+    paid:
+      type: boolean
+      role: state
+      description: Whether the 50 c was paid.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    attack_as_miss_next_quest:
+      type: boolean
+      role: output
+      description: The hero may treat one successful attack by an enemy during the next quest as a miss.
+    gambling_roll_modifier:
+      type: number
+      role: output
+      description: Modifier to a gambling dice roll during this stay in the city.
+    cursed_next_quest:
+      type: boolean
+      role: output
+      description: The hero will suffer a curse during the next quest (roll on the Curses Table).
+  dependencies:
+    - key: fortune_table
+      label: Fortune Teller table
+      object_id: table.settlement.fortune_teller
+    - key: fortune_rule
+      label: Fortune Teller
+      object_id: character.settlement.fortune
+    - key: curses_table
+      label: Curses Table
+      object_id: table.treasure.curses
+  steps:
+    - id: initialise
+      source_text: 'Read your Fortune: Fortune Teller, 1.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Read your Fortune
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: paid
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: attack_as_miss_next_quest
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: gambling_roll_modifier
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: cursed_next_quest
+          value:
+            type: literal
+            value: false
+    - id: pay
+      source_text: A hero who decides to have their future read must pay 50 c.
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: gte
+            left:
+              type: field
+              name: coins
+            right:
+              type: literal
+              value: 50
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -50
+          duration: immediate
+        - type: set
+          target: paid
+          value:
+            type: literal
+            value: true
+    - id: result_one
+      source_text: The hero may treat one successful attack by an enemy during the next quest as a miss.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Fortune Teller
+          locator:
+            table: Fortune Teller
+            row: '1'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - &a10
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: paid
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 1
+      effects:
+        - type: set
+          target: attack_as_miss_next_quest
+          value:
+            type: literal
+            value: true
+    - id: result_two
+      source_text: The hero gets -2 at a gambling dice roll during this stay in the city.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Fortune Teller
+          locator:
+            table: Fortune Teller
+            row: '2'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 2
+      effects:
+        - type: set
+          target: gambling_roll_modifier
+          value:
+            type: literal
+            value: -2
+    - id: result_three_to_five
+      source_text: The old lady talks about lots of things, but nothing that is of any importance.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Fortune Teller
+          locator:
+            table: Fortune Teller
+            row: 3-5
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a10
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 3
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 5
+      effects: []
+    - id: result_six
+      source_text: The hero will suffer a curse during the next quest (roll on Curses Table to see what curse).
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 145
+          printed_page: 143
+          heading: Fortune Teller
+          locator:
+            table: Fortune Teller
+            row: '6'
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a10
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 6
+      effects:
+        - type: set
+          target: cursed_next_quest
+          value:
+            type: literal
+            value: true
+        - type: invoke
+          dependency: curses_table
+  entry_step: initialise
+  exit_step: result_six
+- id: procedure.temple_prayer
+  name: Pray at the Local Temples
+  section_id: section.settlements.pray_at_the_local_temples
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Pray at the Local Temples
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Temple of Charus
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Temple of Iphy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Iphy
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Metheia
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Ohlnir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Rhidnir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Ramos
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 13
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 82
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Pray
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Warrior Priests will not use the temples but instead go to the Inner Sanctum. ...
+    Therefore, each hero may choose only one temple before each quest. Praying at the temple costs
+    50 c. Roll 1d6 and on a result 1-3 the god listens and grants you a boon. This takes one day.
+    The effect will last until you leave the next dungeon.
+  issues:
+    - issue.settlement.ohlnir_temple_name
+    - issue.settlement.trickster_deduction
+  fields:
+    profession:
+      type: string
+      role: input
+      description: The hero’s profession id.
+    temple:
+      type: string
+      role: input
+      description: charus, iphy, metheia, ohlnir, rhidnir or ramos.
+    temple_chosen_before_quest:
+      type: boolean
+      role: state
+      description: Whether the hero has already chosen a temple before this quest.
+    coins:
+      type: number
+      role: state
+      description: Coins of the praying hero.
+      integer: true
+      minimum: 0
+    roll:
+      type: number
+      role: input
+      description: 1d6; the god listens on 1-3.
+      integer: true
+      minimum: 1
+      maximum: 6
+    ohlnir_skill:
+      type: string
+      role: input
+      description: CS or RS, the player’s choice for the Temple of Ohlnir boon.
+    prayed:
+      type: boolean
+      role: state
+      description: Whether the hero prayed.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    boon_granted:
+      type: boolean
+      role: output
+      description: Whether the god listened.
+    effect_lasts:
+      type: string
+      role: output
+      description: How long the boon lasts.
+    energy_bonus:
+      type: number
+      role: output
+      description: Extra Energy Point that cannot be regained through resting.
+    resolve_bonus:
+      type: number
+      role: output
+      description: Resolve bonus.
+    hp_bonus:
+      type: number
+      role: output
+      description: HP bonus.
+    cs_bonus:
+      type: number
+      role: output
+      description: CS bonus.
+    rs_bonus:
+      type: number
+      role: output
+      description: RS bonus.
+    luck_bonus:
+      type: number
+      role: output
+      description: Luck bonus.
+    str_bonus:
+      type: number
+      role: output
+      description: STR bonus.
+  dependencies:
+    - key: temples_rule
+      label: Pray at the Local Temples
+      object_id: character.settlement.temples
+    - key: charus
+      label: Temple of Charus
+      object_id: character.settlement.temple.charus
+    - key: iphy
+      label: Temple of Iphy
+      object_id: character.settlement.temple.iphy
+    - key: metheia
+      label: Temple of Metheia
+      object_id: character.settlement.temple.metheia
+    - key: ohlnir
+      label: Temple of Ohlnir
+      object_id: character.settlement.temple.ohlnir
+    - key: rhidnir
+      label: Temple of Rhidnir
+      object_id: character.settlement.temple.rhidnir
+    - key: ramos
+      label: Temple of Ramos
+      object_id: character.settlement.temple.ramos
+  steps:
+    - id: initialise
+      source_text: 'Pray: Temple, 1.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Pray
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: prayed
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: effect_lasts
+          value:
+            type: literal
+            value: until you leave the next dungeon
+        - type: set
+          target: energy_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: resolve_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: hp_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: cs_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: rs_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: luck_bonus
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: str_bonus
+          value:
+            type: literal
+            value: 0
+    - id: pray
+      source_text: Warrior Priests will not use the temples but instead go to the Inner Sanctum. ...
+        Therefore, each hero may choose only one temple before each quest. Praying at the temple
+        costs 50 c. ... This takes one day.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: ne
+                left:
+                  type: field
+                  name: profession
+                right:
+                  type: literal
+                  value: warrior_priest
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: temple_chosen_before_quest
+                right:
+                  type: literal
+                  value: false
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: coins
+                right:
+                  type: literal
+                  value: 50
+        - type: add
+          target: coins
+          value:
+            type: literal
+            value: -50
+          duration: immediate
+        - type: set
+          target: temple_chosen_before_quest
+          value:
+            type: literal
+            value: true
+        - type: set
+          target: prayed
+          value:
+            type: literal
+            value: true
+    - id: god_listens
+      source_text: Roll 1d6 and on a result 1-3 the god listens and grants you a boon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Pray at the Local Temples
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: prayed
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 3
+      effects:
+        - type: set
+          target: boon_granted
+          value:
+            type: literal
+            value: true
+    - id: charus
+      source_text:
+        If Charus listens, he will grant your hero 1 extra Energy Point that cannot be regained
+        through resting.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 146
+          printed_page: 144
+          heading: Temple of Charus
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boon_granted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: temple
+            right:
+              type: literal
+              value: charus
+      effects:
+        - type: set
+          target: energy_bonus
+          value:
+            type: literal
+            value: 1
+    - id: iphy
+      source_text: If Iphy listens, she grants your hero +5 Resolve.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Iphy
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boon_granted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: temple
+            right:
+              type: literal
+              value: iphy
+      effects:
+        - type: set
+          target: resolve_bonus
+          value:
+            type: literal
+            value: 5
+    - id: metheia
+      source_text:
+        If she answers your hero’s prayers, they get +1 HP until the next time the hero leaves
+        a dungeon.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Metheia
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boon_granted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: temple
+            right:
+              type: literal
+              value: metheia
+      effects:
+        - type: set
+          target: hp_bonus
+          value:
+            type: literal
+            value: 1
+    - id: ohlnir_cs
+      source_text: If Ohlnir hears their prayer, they will get +5 CS/RS (either 1CS or RS – player’s choice).
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Ohlnir
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 13
+          printed_page: null
+          heading: '2.21'
+          locator:
+            row: 82
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: boon_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: temple
+                right:
+                  type: literal
+                  value: ohlnir
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ohlnir_skill
+            right:
+              type: literal
+              value: CS
+      effects:
+        - type: set
+          target: cs_bonus
+          value:
+            type: literal
+            value: 5
+    - id: ohlnir_rs
+      source_text: If Ohlnir hears their prayer, they will get +5 CS/RS (either 1CS or RS – player’s choice).
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Ohlnir
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+        - document: vonbraus.changelog_2_2x
+          file: source/vonbraus-changelog-2.2x.pdf
+          pdf_page: 13
+          printed_page: null
+          heading: '2.21'
+          locator:
+            row: 82
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: boon_granted
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: temple
+                right:
+                  type: literal
+                  value: ohlnir
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: ohlnir_skill
+            right:
+              type: literal
+              value: RS
+      effects:
+        - type: set
+          target: rs_bonus
+          value:
+            type: literal
+            value: 5
+    - id: rhidnir
+      source_text: If he listens and is feeling generous, he will grant your hero +1 Luck.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Rhidnir
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boon_granted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: temple
+            right:
+              type: literal
+              value: rhidnir
+      effects:
+        - type: set
+          target: luck_bonus
+          value:
+            type: literal
+            value: 1
+    - id: ramos
+      source_text: If he decides to listen to the prayer, the hero will be granted +5 STR.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 147
+          printed_page: 145
+          heading: Temple of Ramos
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: boon_granted
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: temple
+            right:
+              type: literal
+              value: ramos
+      effects:
+        - type: set
+          target: str_bonus
+          value:
+            type: literal
+            value: 5
+  entry_step: initialise
+  exit_step: ramos
+- id: procedure.settlement_banking
+  name: Banking
+  section_id: section.settlements.banking
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Banking
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Depositing Money
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Determining the Profit…or Loss
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Robbed!
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Available Actions
+        row: Banking
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If your hero already has money in the bank, the first thing to do is to determine how
+    the balance has developed. ... The hero must choose which bank to deposit his or her money in,
+    based on risk and chance of profit. It is perfectly fine to have money in several banks. ...
+    Each time you visit Silver City (and the bank), roll on the table below (1d20) and adjust the
+    account balance. Then decide whether you want to deposit more money or withdraw money. ... The
+    bank has been robbed and all your deposits are gone! Tough luck.
+  issues:
+    - issue.settlement.bank_return_rounding
+    - issue.settlement.bank_roll_per_account
+  fields:
+    in_silver_city:
+      type: boolean
+      role: input
+      description: Whether the hero visits Silver City (and the bank).
+    bank:
+      type: string
+      role: input
+      description:
+        chamberlings_reserve, smartfall_bank or the_vault; run once per bank holding the hero’s
+        money. A separate 1d20 per account is the reading applied pending
+        issue.settlement.bank_roll_per_account; the book does not say whether one roll is read in
+        the column of every bank the hero uses.
+    balance:
+      type: number
+      role: state
+      description: Account balance at this bank, unrounded (issue.settlement.bank_return_rounding).
+      minimum: 0
+    roll:
+      type: number
+      role: input
+      description:
+        1d20 on the profit or loss table for this bank. Rolling once per account is the reading
+        applied pending issue.settlement.bank_roll_per_account.
+      integer: true
+      minimum: 1
+      maximum: 20
+    deposit:
+      type: number
+      role: input
+      description: Coins deposited after the balance is adjusted.
+      integer: true
+      minimum: 0
+    withdrawal:
+      type: number
+      role: input
+      description: Coins withdrawn after the balance is adjusted.
+      integer: true
+      minimum: 0
+    coins:
+      type: number
+      role: state
+      description: Coins the hero carries.
+      integer: true
+      minimum: 0
+    visited:
+      type: boolean
+      role: state
+      description: Whether the hero is at the bank in Silver City.
+    activity_points:
+      type: number
+      role: output
+      description: Activity Points the activity costs (Available Actions).
+      integer: true
+      minimum: 0
+    result:
+      type: string
+      role: output
+      description: Printed result applied to the balance, or none.
+  dependencies:
+    - key: returns_table
+      label: Profit or loss table
+      object_id: table.settlement.bank_returns
+    - key: banking_rule
+      label: Banking
+      object_id: character.settlement.banking
+  steps:
+    - id: initialise
+      source_text: 'Banking: Banks, 1.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 134
+          printed_page: 132
+          heading: Available Actions
+          locator:
+            table: Available Actions
+            row: Banking
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: set
+          target: visited
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: activity_points
+          value:
+            type: literal
+            value: 1
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: none
+    - id: visit_bank
+      source_text:
+        Each time you visit Silver City (and the bank), roll on the table below (1d20) and
+        adjust the account balance.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      effects:
+        - type: require
+          condition:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_silver_city
+            right:
+              type: literal
+              value: true
+        - type: set
+          target: visited
+          value:
+            type: literal
+            value: true
+    - id: result_profit_30
+      source_text: 'The Vault 1-2: 30% profit'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 30% profit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - &a11
+            type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: visited
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: gt
+                left:
+                  type: field
+                  name: balance
+                right:
+                  type: literal
+                  value: 0
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bank
+                right:
+                  type: literal
+                  value: the_vault
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: roll
+                right:
+                  type: literal
+                  value: 1
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: roll
+                right:
+                  type: literal
+                  value: 2
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 30% profit
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: 30
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_profit_20
+      source_text: 'Chamberlings Reserve 1-4, The Vault 3-4: 20% profit'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 20% profit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 1
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 4
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 3
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 4
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 20% profit
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: 20
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_profit_15
+      source_text: 'Chamberlings Reserve 5-7, Smartfall Bank 1-2, The Vault 5: 15% profit'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 15% profit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 5
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 7
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 1
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 2
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 5
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 5
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 15% profit
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: 15
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_profit_10
+      source_text: 'Chamberlings Reserve 8-10, Smartfall Bank 3-4, The Vault 6: 10% profit'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 10% profit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 8
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 10
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 3
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 4
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 6
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 6
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 10% profit
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: 10
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_profit_5
+      source_text: 'Chamberlings Reserve 11, Smartfall Bank 5-9, The Vault 7: 5% profit'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 5% profit
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 11
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 11
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 5
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 9
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 7
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 7
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 5% profit
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: 5
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_no_change
+      source_text: 'Chamberlings Reserve 12, Smartfall Bank 10-14, The Vault 8-10: No change'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: No change
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 12
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 12
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 10
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 14
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 8
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 10
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: No change
+    - id: result_loss_5
+      source_text: 'Chamberlings Reserve 13-14, Smartfall Bank 15-16, The Vault 11-14: 5 % loss'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 5 % loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 13
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 14
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 15
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 16
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 11
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 14
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 5 % loss
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: -5
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_loss_10
+      source_text: 'Chamberlings Reserve 15-17, Smartfall Bank 17, The Vault 15-16: 10% loss'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 10% loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 15
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 17
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 17
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 17
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 15
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 16
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 10% loss
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: -10
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_loss_20
+      source_text: 'Chamberlings Reserve 18-19, The Vault 17: 20% loss'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 20% loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 18
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 19
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 17
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 17
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 20% loss
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: -20
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_loss_30
+      source_text: 'The Vault 18: 30% loss'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          locator:
+            table: Determining the Profit…or Loss
+            row: 30% loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: bank
+                right:
+                  type: literal
+                  value: the_vault
+              - type: compare
+                operator: gte
+                left:
+                  type: field
+                  name: roll
+                right:
+                  type: literal
+                  value: 18
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: roll
+                right:
+                  type: literal
+                  value: 18
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: 30% loss
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: divide
+            values:
+              - type: arithmetic
+                operator: multiply
+                values:
+                  - type: field
+                    name: balance
+                  - type: literal
+                    value: -30
+              - type: literal
+                value: 100
+          duration: immediate
+    - id: result_robbed
+      source_text: 'Chamberlings Reserve 20, Smartfall Bank 18-20, The Vault 19-20: Robbed!'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Robbed!
+          locator:
+            table: Determining the Profit…or Loss
+            row: Robbed!
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: all
+        conditions:
+          - *a11
+          - type: any
+            conditions:
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: chamberlings_reserve
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 20
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 20
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: smartfall_bank
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 18
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 20
+              - type: all
+                conditions:
+                  - type: compare
+                    operator: eq
+                    left:
+                      type: field
+                      name: bank
+                    right:
+                      type: literal
+                      value: the_vault
+                  - type: compare
+                    operator: gte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 19
+                  - type: compare
+                    operator: lte
+                    left:
+                      type: field
+                      name: roll
+                    right:
+                      type: literal
+                      value: 20
+      effects:
+        - type: set
+          target: result
+          value:
+            type: literal
+            value: Robbed!
+        - type: set
+          target: balance
+          value:
+            type: literal
+            value: 0
+    - id: deposit_or_withdraw
+      source_text: Then decide whether you want to deposit more money or withdraw money.
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 143
+          printed_page: 141
+          heading: Determining the Profit…or Loss
+          extraction:
+            method: text
+            confidence: high
+            visually_verified: true
+      when:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: visited
+        right:
+          type: literal
+          value: true
+      effects:
+        - type: require
+          condition:
+            type: all
+            conditions:
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: deposit
+                right:
+                  type: field
+                  name: coins
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: withdrawal
+                right:
+                  type: field
+                  name: balance
+        - type: add
+          target: balance
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: deposit
+              - type: field
+                name: withdrawal
+          duration: immediate
+        - type: add
+          target: coins
+          value:
+            type: arithmetic
+            operator: subtract
+            values:
+              - type: field
+                name: withdrawal
+              - type: field
+                name: deposit
+          duration: immediate
+  entry_step: initialise
+  exit_step: deposit_or_withdraw

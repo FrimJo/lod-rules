@@ -1,0 +1,1299 @@
+- id: test.procedure.arena_fighting.wins_all_three
+  name: derived case, a level 1 hero wins group, semi-final and final
+  section_id: section.settlements.arena_fighting
+  source: &a1
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 141
+      printed_page: 139
+      heading: Participating
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a3
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 142
+      printed_page: 140
+      heading: Betting, Odds, and Winning
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.arena_fighting: level 1 hero, CS 45, 12 HP, STR 45, fee 100
+    c, rolls 30, 25 and 20 against 35, 30 and 25, award roll 1. Winnings of 660 sum the payout
+    of every won level (200 + 220 + 240), the reading applied pending
+    issue.settlement.arena_winnings_accumulation.'
+  kind: derived_case
+  procedure_id: procedure.arena_fighting
+  inputs:
+    coins: 300
+    entry_fee: 100
+    combat_skill: 45
+    hit_points: 12
+    strength: 45
+    hero_level: 1
+    group_roll: 30
+    semi_roll: 25
+    final_roll: 20
+    continue_to_semi: true
+    award_roll: 1
+  expected:
+    state:
+      coins: 860
+      entered: true
+      activity_points: 1
+      group_won: true
+      semi_won: true
+      final_won: true
+      winnings: 660
+      xp_gained: 300
+      hp_lost: 0
+      sanity_lost: 0
+      extra_award: 1 Wonderful Treasure
+      hp_modifier: 0
+      str_modifier: 0
+      group_modifier: -10
+      group_target: 35
+      group_multiplier_tenths: 20
+      group_payout: 200
+      semi_modifier: -15
+      semi_target: 30
+      semi_multiplier_tenths: 22
+      semi_payout: 220
+      final_modifier: -20
+      final_target: 25
+      final_multiplier_tenths: 24
+      final_payout: 240
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.arena_fighting
+    unresolved: []
+    steps:
+      - initialise
+      - pay_entry
+      - hit_points_middle
+      - strength_middle
+      - group_fight
+      - group_win
+      - semi_fight
+      - semi_win
+      - final_fight
+      - final_win
+- id: test.procedure.arena_fighting.declines_semi_final
+  name: derived case, the hero wins the group fight and does not go on
+  section_id: section.settlements.arena_fighting
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.arena_fighting: level 10 hero, CS 60, 20 HP, STR 55, fee 70
+    c, group roll 40 against 60; the hero may go on to the semi-final and declines.'
+  kind: derived_case
+  procedure_id: procedure.arena_fighting
+  inputs:
+    coins: 70
+    entry_fee: 70
+    combat_skill: 60
+    hit_points: 20
+    strength: 55
+    hero_level: 10
+    group_roll: 40
+    continue_to_semi: false
+  expected:
+    state:
+      coins: 77
+      entered: true
+      activity_points: 1
+      group_won: true
+      semi_won: false
+      final_won: false
+      winnings: 77
+      xp_gained: 50
+      hp_lost: 0
+      sanity_lost: 0
+      extra_award: none
+      hp_modifier: 5
+      str_modifier: 5
+      group_modifier: -10
+      group_target: 60
+      group_multiplier_tenths: 11
+      group_payout: 77
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.arena_fighting
+    unresolved: []
+    steps:
+      - initialise
+      - pay_entry
+      - hit_points_high
+      - strength_high
+      - group_fight
+      - group_win
+- id: test.procedure.arena_fighting.loses_group
+  name: derived case, a weak hero loses the group fight
+  section_id: section.settlements.arena_fighting
+  source:
+    - *a2
+    - *a3
+    - &a4
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 142
+      printed_page: 140
+      heading: Losing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.arena_fighting: CS 40, 8 HP, STR 35, fee 50 c, group roll
+    25 against 20.'
+  kind: derived_case
+  procedure_id: procedure.arena_fighting
+  inputs:
+    coins: 60
+    entry_fee: 50
+    combat_skill: 40
+    hit_points: 8
+    strength: 35
+    hero_level: 3
+    group_roll: 25
+  expected:
+    state:
+      coins: 10
+      entered: true
+      activity_points: 1
+      group_won: false
+      semi_won: false
+      final_won: false
+      winnings: 0
+      xp_gained: 0
+      hp_lost: 2
+      sanity_lost: 2
+      extra_award: none
+      hp_modifier: -5
+      str_modifier: -5
+      group_modifier: -10
+      group_target: 20
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.arena_fighting
+    unresolved: []
+    steps:
+      - initialise
+      - pay_entry
+      - hit_points_low
+      - strength_low
+      - group_fight
+      - group_loss
+- id: test.procedure.arena_fighting.loses_final
+  name: derived case, the hero wins two levels and loses the final
+  section_id: section.settlements.arena_fighting
+  source:
+    - *a2
+    - *a3
+    - *a4
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.arena_fighting: level 5 hero, CS 50, 16 HP, STR 52, fee 200
+    c, rolls 10, 30 and 41 against 50, 45 and 40. Winnings of 680 sum the group and semi-final
+    payouts (320 + 360) and are kept after losing the final, the reading applied pending
+    issue.settlement.arena_winnings_accumulation.'
+  kind: derived_case
+  procedure_id: procedure.arena_fighting
+  inputs:
+    coins: 200
+    entry_fee: 200
+    combat_skill: 50
+    hit_points: 16
+    strength: 52
+    hero_level: 5
+    group_roll: 10
+    semi_roll: 30
+    final_roll: 41
+    continue_to_semi: true
+  expected:
+    state:
+      coins: 680
+      entered: true
+      activity_points: 1
+      group_won: true
+      semi_won: true
+      final_won: false
+      winnings: 680
+      xp_gained: 150
+      hp_lost: 6
+      sanity_lost: 2
+      extra_award: none
+      hp_modifier: 5
+      str_modifier: 5
+      group_modifier: -10
+      group_target: 50
+      group_multiplier_tenths: 16
+      group_payout: 320
+      semi_modifier: -15
+      semi_target: 45
+      semi_multiplier_tenths: 18
+      semi_payout: 360
+      final_modifier: -20
+      final_target: 40
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.arena_fighting
+    unresolved: []
+    steps:
+      - initialise
+      - pay_entry
+      - hit_points_high
+      - strength_high
+      - group_fight
+      - group_win
+      - semi_fight
+      - semi_win
+      - final_fight
+      - final_loss
+- id: test.procedure.arena_fighting.cannot_pay
+  name: derived case, the hero cannot pay the chosen fee
+  section_id: section.settlements.arena_fighting
+  source: *a1
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.arena_fighting: a fee of 150 c with 100 c carried.'
+  kind: derived_case
+  procedure_id: procedure.arena_fighting
+  inputs:
+    coins: 100
+    entry_fee: 150
+    combat_skill: 45
+    hit_points: 12
+    strength: 45
+    hero_level: 1
+    group_roll: 1
+  expected:
+    state:
+      entered: false
+      activity_points: 1
+      group_won: false
+      semi_won: false
+      final_won: false
+      winnings: 0
+      xp_gained: 0
+      hp_lost: 0
+      sanity_lost: 0
+      extra_award: none
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.arena_fighting
+    unresolved: []
+    steps:
+      - initialise
+      - pay_entry
+- id: test.procedure.horse_racing.win
+  name: derived case, a level 2 hero wins the race
+  section_id: section.settlements.horse_racing
+  source:
+    - &a5
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Horse Racing
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a6
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Win and Second Place
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.horse_racing: DEX 45, bet 100 c including the fee, DEX roll
+    22 (DEX/2 RDD is 22), level 2, award roll 2.'
+  kind: derived_case
+  procedure_id: procedure.horse_racing
+  inputs:
+    owns_horse: true
+    coins: 150
+    bet: 100
+    dexterity: 45
+    dex_roll: 22
+    hero_level: 2
+    award_roll: 2
+  expected:
+    state:
+      coins: 340
+      entered: true
+      activity_points: 1
+      placement: win
+      winnings: 290
+      extra_award: 1 Wonderful Treasure
+      horse_lost: false
+      hp_lost: 0
+      sanity_lost: 0
+      multiplier_tenths: 29
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.horse_racing
+    unresolved: []
+    steps:
+      - initialise
+      - enter_race
+      - win
+- id: test.procedure.horse_racing.second_place
+  name: derived case, the hero takes second place
+  section_id: section.settlements.horse_racing
+  source:
+    - *a5
+    - *a6
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.horse_racing: DEX 45, bet 50 c, DEX roll 35 (above 22, at
+    most 35), level 7, award roll 1.'
+  kind: derived_case
+  procedure_id: procedure.horse_racing
+  inputs:
+    owns_horse: true
+    coins: 50
+    bet: 50
+    dexterity: 45
+    dex_roll: 35
+    hero_level: 7
+    award_roll: 1
+  expected:
+    state:
+      coins: 95
+      entered: true
+      activity_points: 1
+      placement: second
+      winnings: 95
+      extra_award: 1 Wonderful Treasure
+      horse_lost: false
+      hp_lost: 0
+      sanity_lost: 0
+      multiplier_tenths: 19
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.horse_racing
+    unresolved: []
+    steps:
+      - initialise
+      - enter_race
+      - second_place
+- id: test.procedure.horse_racing.lose
+  name: derived case, the hero loses the race and the bet
+  section_id: section.settlements.horse_racing
+  source: &a7
+    - *a5
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.horse_racing: DEX 45, bet 300 c, DEX roll 36.'
+  kind: derived_case
+  procedure_id: procedure.horse_racing
+  inputs:
+    owns_horse: true
+    coins: 300
+    bet: 300
+    dexterity: 45
+    dex_roll: 36
+    hero_level: 4
+  expected:
+    state:
+      coins: 0
+      entered: true
+      activity_points: 1
+      placement: lose
+      winnings: 0
+      extra_award: none
+      horse_lost: false
+      hp_lost: 0
+      sanity_lost: 0
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.horse_racing
+    unresolved: []
+    steps:
+      - initialise
+      - enter_race
+      - lose
+- id: test.procedure.horse_racing.catastrophe
+  name: derived case, catastrophe strikes
+  section_id: section.settlements.horse_racing
+  source:
+    - *a5
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Catastrophe Strikes!
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.horse_racing: DEX roll 97, 1d6 HP roll 4.'
+  kind: derived_case
+  procedure_id: procedure.horse_racing
+  inputs:
+    owns_horse: true
+    coins: 100
+    bet: 50
+    dexterity: 45
+    dex_roll: 97
+    hero_level: 4
+    hp_loss_roll: 4
+  expected:
+    state:
+      coins: 50
+      entered: true
+      activity_points: 1
+      placement: catastrophe
+      winnings: 0
+      extra_award: none
+      horse_lost: true
+      hp_lost: 4
+      sanity_lost: 1
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.horse_racing
+    unresolved: []
+    steps:
+      - initialise
+      - enter_race
+      - catastrophe
+- id: test.procedure.horse_racing.no_horse
+  name: derived case, a hero without a horse cannot join
+  section_id: section.settlements.horse_racing
+  source: *a7
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.horse_racing: Anyone owning a horse may join the race; this
+    hero owns none.'
+  kind: derived_case
+  procedure_id: procedure.horse_racing
+  inputs:
+    owns_horse: false
+    coins: 100
+    bet: 50
+    dexterity: 45
+    dex_roll: 10
+    hero_level: 1
+  expected:
+    state:
+      entered: false
+      activity_points: 1
+      placement: none
+      winnings: 0
+      extra_award: none
+      horse_lost: false
+      hp_lost: 0
+      sanity_lost: 0
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.horse_racing
+    unresolved: []
+    steps:
+      - initialise
+      - enter_race
+- id: test.procedure.settlement_gambling.win_with_luck
+  name: derived case, Luck lowers a 5 to a win
+  section_id: section.settlements.gambling
+  source: &a9
+    - &a8
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Gambling
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: bet 75 coins, natural 5, 2 Points of
+    Luck, modified 3: 1,5 times the bet (RDU) is 113.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: false
+    coins: 100
+    bet: 75
+    current_luck: 2
+    fortune_gambling_bonus: false
+    roll: 5
+  expected:
+    state:
+      gambled_this_stay: true
+      coins: 138
+      placed: true
+      activity_points: 0
+      outcome: win
+      payout: 113
+      modified_roll: 3
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_gambling
+    unresolved: []
+    steps:
+      - initialise
+      - place_bet
+      - modify_roll
+      - win
+- id: test.procedure.settlement_gambling.grand_slam_unresolved
+  name: derived case, Luck and the Fortune Teller bonus reach a grand slam
+  section_id: section.settlements.gambling
+  source:
+    - *a8
+    - &a10
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 145
+      printed_page: 143
+      heading: Fortune Teller
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: bet 100, natural 4, 1 Point of Luck
+    and the Fortune Teller -2: modified 1, Grand slam; the payout basis is unresolved.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: false
+    coins: 200
+    bet: 100
+    current_luck: 1
+    fortune_gambling_bonus: true
+    roll: 4
+  expected:
+    state:
+      gambled_this_stay: true
+      coins: 100
+      placed: true
+      activity_points: 0
+      outcome: grand_slam
+      payout: 0
+      modified_roll: 1
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_gambling
+    unresolved:
+      - issue.settlement.gambling_outcome_amounts
+    steps:
+      - initialise
+      - place_bet
+      - modify_roll
+      - fortune_modifier
+      - grand_slam
+- id: test.procedure.settlement_gambling.lose
+  name: derived case, the hero loses the bet
+  section_id: section.settlements.gambling
+  source: *a9
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: bet 500, natural 9, no Luck.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: false
+    coins: 600
+    bet: 500
+    current_luck: 0
+    fortune_gambling_bonus: false
+    roll: 9
+  expected:
+    state:
+      gambled_this_stay: true
+      coins: 100
+      placed: true
+      activity_points: 0
+      outcome: lose
+      payout: 0
+      modified_roll: 9
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_gambling
+    unresolved: []
+    steps:
+      - initialise
+      - place_bet
+      - modify_roll
+      - lose
+- id: test.procedure.settlement_gambling.natural_ten
+  name: derived case, a natural 10 is not modified and costs 100 c more
+  section_id: section.settlements.gambling
+  source: *a9
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: bet 50, natural 10 with 3 Points of
+    Luck; the result stays 10.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: false
+    coins: 200
+    bet: 50
+    current_luck: 3
+    fortune_gambling_bonus: false
+    roll: 10
+  expected:
+    state:
+      gambled_this_stay: true
+      coins: 50
+      placed: true
+      activity_points: 0
+      outcome: accused
+      payout: 0
+      modified_roll: 10
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_gambling
+    unresolved: []
+    steps:
+      - initialise
+      - place_bet
+      - natural_ten
+      - accused
+      - robbed
+- id: test.procedure.settlement_gambling.natural_ten_shortfall
+  name: derived case, the hero cannot cover the additional 100 c
+  section_id: section.settlements.gambling
+  source: *a9
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: bet 50 with 80 c carried, natural 10.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: false
+    coins: 80
+    bet: 50
+    current_luck: 0
+    fortune_gambling_bonus: false
+    roll: 10
+  expected:
+    state:
+      gambled_this_stay: true
+      coins: 30
+      placed: true
+      activity_points: 0
+      outcome: accused
+      payout: 0
+      modified_roll: 10
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_gambling
+    unresolved:
+      - issue.settlement.gambling_outcome_amounts
+    steps:
+      - initialise
+      - place_bet
+      - natural_ten
+      - accused
+      - robbed_shortfall
+- id: test.procedure.settlement_gambling.second_attempt
+  name: derived case, a second attempt in the same stay is refused
+  section_id: section.settlements.gambling
+  source: *a9
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_gambling: the hero already gambled during this stay.'
+  kind: derived_case
+  procedure_id: procedure.settlement_gambling
+  inputs:
+    staying_at_inn: true
+    gambled_this_stay: true
+    coins: 200
+    bet: 50
+    current_luck: 0
+    fortune_gambling_bonus: false
+    roll: 2
+  expected:
+    state:
+      placed: false
+      activity_points: 0
+      outcome: none
+      payout: 0
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.settlement_gambling
+    unresolved: []
+    steps:
+      - initialise
+      - place_bet
+- id: test.procedure.fortune_teller.attack_as_miss
+  name: derived case, result 1
+  section_id: section.settlements.fortune_teller
+  source: &a11
+    - *a10
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.fortune_teller: pay 50 c, roll 1.'
+  kind: derived_case
+  procedure_id: procedure.fortune_teller
+  inputs:
+    coins: 60
+    roll: 1
+  expected:
+    state:
+      coins: 10
+      paid: true
+      activity_points: 1
+      attack_as_miss_next_quest: true
+      gambling_roll_modifier: 0
+      cursed_next_quest: false
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.fortune_teller
+    unresolved: []
+    steps:
+      - initialise
+      - pay
+      - result_one
+- id: test.procedure.fortune_teller.gambling_bonus
+  name: derived case, result 2
+  section_id: section.settlements.fortune_teller
+  source: *a11
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.fortune_teller: pay 50 c, roll 2.'
+  kind: derived_case
+  procedure_id: procedure.fortune_teller
+  inputs:
+    coins: 50
+    roll: 2
+  expected:
+    state:
+      coins: 0
+      paid: true
+      activity_points: 1
+      attack_as_miss_next_quest: false
+      gambling_roll_modifier: -2
+      cursed_next_quest: false
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.fortune_teller
+    unresolved: []
+    steps:
+      - initialise
+      - pay
+      - result_two
+- id: test.procedure.fortune_teller.nothing_important
+  name: derived case, results 3-5
+  section_id: section.settlements.fortune_teller
+  source: *a11
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.fortune_teller: pay 50 c, roll 4.'
+  kind: derived_case
+  procedure_id: procedure.fortune_teller
+  inputs:
+    coins: 100
+    roll: 4
+  expected:
+    state:
+      coins: 50
+      paid: true
+      activity_points: 1
+      attack_as_miss_next_quest: false
+      gambling_roll_modifier: 0
+      cursed_next_quest: false
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.fortune_teller
+    unresolved: []
+    steps:
+      - initialise
+      - pay
+      - result_three_to_five
+- id: test.procedure.fortune_teller.cursed
+  name: derived case, result 6
+  section_id: section.settlements.fortune_teller
+  source: *a11
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.fortune_teller: pay 50 c, roll 6.'
+  kind: derived_case
+  procedure_id: procedure.fortune_teller
+  inputs:
+    coins: 100
+    roll: 6
+  expected:
+    state:
+      coins: 50
+      paid: true
+      activity_points: 1
+      attack_as_miss_next_quest: false
+      gambling_roll_modifier: 0
+      cursed_next_quest: true
+    events:
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: table.treasure.curses
+    trace:
+      - procedure.fortune_teller
+    unresolved: []
+    steps:
+      - initialise
+      - pay
+      - result_six
+- id: test.procedure.temple_prayer.ohlnir_rs
+  name: derived case, Ohlnir listens and the player chooses RS
+  section_id: section.settlements.pray_at_the_local_temples
+  source:
+    - &a12
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 146
+      printed_page: 144
+      heading: Pray at the Local Temples
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 147
+      printed_page: 145
+      heading: Temple of Ohlnir
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.temple_prayer: a ranger prays at the Temple of Ohlnir,
+    rolls 2 and chooses RS.'
+  kind: derived_case
+  procedure_id: procedure.temple_prayer
+  inputs:
+    profession: ranger
+    temple: ohlnir
+    temple_chosen_before_quest: false
+    coins: 80
+    roll: 2
+    ohlnir_skill: RS
+  expected:
+    state:
+      temple_chosen_before_quest: true
+      coins: 30
+      prayed: true
+      activity_points: 1
+      boon_granted: true
+      effect_lasts: until you leave the next dungeon
+      energy_bonus: 0
+      resolve_bonus: 0
+      hp_bonus: 0
+      cs_bonus: 0
+      rs_bonus: 5
+      luck_bonus: 0
+      str_bonus: 0
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.temple_prayer
+    unresolved: []
+    steps:
+      - initialise
+      - pray
+      - god_listens
+      - ohlnir_rs
+- id: test.procedure.temple_prayer.not_heard
+  name: derived case, the god does not listen
+  section_id: section.settlements.pray_at_the_local_temples
+  source: &a13
+    - *a12
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.temple_prayer: a wizard prays at the Temple of Ramos and
+    rolls 4; the 50 c is still paid.'
+  kind: derived_case
+  procedure_id: procedure.temple_prayer
+  inputs:
+    profession: wizard
+    temple: ramos
+    temple_chosen_before_quest: false
+    coins: 50
+    roll: 4
+  expected:
+    state:
+      temple_chosen_before_quest: true
+      coins: 0
+      prayed: true
+      activity_points: 1
+      boon_granted: false
+      effect_lasts: until you leave the next dungeon
+      energy_bonus: 0
+      resolve_bonus: 0
+      hp_bonus: 0
+      cs_bonus: 0
+      rs_bonus: 0
+      luck_bonus: 0
+      str_bonus: 0
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.temple_prayer
+    unresolved: []
+    steps:
+      - initialise
+      - pray
+- id: test.procedure.temple_prayer.warrior_priest
+  name: derived case, a Warrior Priest does not use the temples
+  section_id: section.settlements.pray_at_the_local_temples
+  source: *a13
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.temple_prayer: Warrior Priests will not use the temples.'
+  kind: derived_case
+  procedure_id: procedure.temple_prayer
+  inputs:
+    profession: warrior_priest
+    temple: charus
+    temple_chosen_before_quest: false
+    coins: 100
+    roll: 1
+  expected:
+    state:
+      prayed: false
+      activity_points: 1
+      boon_granted: false
+      effect_lasts: until you leave the next dungeon
+      energy_bonus: 0
+      resolve_bonus: 0
+      hp_bonus: 0
+      cs_bonus: 0
+      rs_bonus: 0
+      luck_bonus: 0
+      str_bonus: 0
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.temple_prayer
+    unresolved: []
+    steps:
+      - initialise
+      - pray
+- id: test.procedure.temple_prayer.second_temple
+  name: derived case, a second temple before the same quest is refused
+  section_id: section.settlements.pray_at_the_local_temples
+  source: *a13
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.temple_prayer: each hero may choose only one temple before
+    each quest.'
+  kind: derived_case
+  procedure_id: procedure.temple_prayer
+  inputs:
+    profession: rogue
+    temple: iphy
+    temple_chosen_before_quest: true
+    coins: 100
+    roll: 1
+  expected:
+    state:
+      prayed: false
+      activity_points: 1
+      boon_granted: false
+      effect_lasts: until you leave the next dungeon
+      energy_bonus: 0
+      resolve_bonus: 0
+      hp_bonus: 0
+      cs_bonus: 0
+      rs_bonus: 0
+      luck_bonus: 0
+      str_bonus: 0
+    events:
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.temple_prayer
+    unresolved: []
+    steps:
+      - initialise
+      - pray
+- id: test.procedure.settlement_banking.vault_profit
+  name: derived case, The Vault rolls 30% profit and the hero deposits more
+  section_id: section.settlements.banking
+  source: &a15
+    - &a14
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Determining the Profit…or Loss
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_banking: 200 c in The Vault, roll 2 (30%
+    profit), then deposit 100 c.'
+  kind: derived_case
+  procedure_id: procedure.settlement_banking
+  inputs:
+    in_silver_city: true
+    bank: the_vault
+    balance: 200
+    roll: 2
+    deposit: 100
+    withdrawal: 0
+    coins: 150
+  expected:
+    state:
+      balance: 360
+      coins: 50
+      visited: true
+      activity_points: 1
+      result: 30% profit
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_banking
+    unresolved: []
+    steps:
+      - initialise
+      - visit_bank
+      - result_profit_30
+      - deposit_or_withdraw
+- id: test.procedure.settlement_banking.chamberlings_robbed
+  name: derived case, Chamberlings Reserve is robbed
+  section_id: section.settlements.banking
+  source:
+    - *a14
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Robbed!
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.settlement_banking: 500 c in Chamberlings Reserve, roll 20
+    (Robbed!).'
+  kind: derived_case
+  procedure_id: procedure.settlement_banking
+  inputs:
+    in_silver_city: true
+    bank: chamberlings_reserve
+    balance: 500
+    roll: 20
+    deposit: 0
+    withdrawal: 0
+    coins: 10
+  expected:
+    state:
+      balance: 0
+      visited: true
+      activity_points: 1
+      result: Robbed!
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_banking
+    unresolved: []
+    steps:
+      - initialise
+      - visit_bank
+      - result_robbed
+      - deposit_or_withdraw
+- id: test.procedure.settlement_banking.smartfall_loss_withdraw
+  name: derived case, Smartfall Bank loses 10% and the hero withdraws everything
+  section_id: section.settlements.banking
+  source: *a15
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_banking: 300 c in Smartfall Bank, roll 17 (10%
+    loss), withdraw 270 c.'
+  kind: derived_case
+  procedure_id: procedure.settlement_banking
+  inputs:
+    in_silver_city: true
+    bank: smartfall_bank
+    balance: 300
+    roll: 17
+    deposit: 0
+    withdrawal: 270
+    coins: 0
+  expected:
+    state:
+      balance: 0
+      coins: 270
+      visited: true
+      activity_points: 1
+      result: 10% loss
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_banking
+    unresolved: []
+    steps:
+      - initialise
+      - visit_bank
+      - result_loss_10
+      - deposit_or_withdraw
+- id: test.procedure.settlement_banking.first_deposit
+  name: derived case, a first deposit needs no profit roll
+  section_id: section.settlements.banking
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 143
+      printed_page: 141
+      heading: Banking
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - *a14
+  status: extracted
+  confidence: high
+  source_text: 'Derived case for procedure.settlement_banking: no money in Smartfall Bank yet; deposit 120 c.'
+  kind: derived_case
+  procedure_id: procedure.settlement_banking
+  inputs:
+    in_silver_city: true
+    bank: smartfall_bank
+    balance: 0
+    roll: 1
+    deposit: 120
+    withdrawal: 0
+    coins: 200
+  expected:
+    state:
+      balance: 120
+      coins: 80
+      visited: true
+      activity_points: 1
+      result: none
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.settlement_banking
+    unresolved: []
+    steps:
+      - initialise
+      - visit_bank
+      - deposit_or_withdraw
+- id: test.procedure.settlement_banking.overdraw_refused
+  name: derived case, withdrawing more than the adjusted balance is refused
+  section_id: section.settlements.banking
+  source: *a15
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for procedure.settlement_banking: 100 c in Chamberlings Reserve, roll 12
+    (No change), withdraw 150 c.'
+  kind: derived_case
+  procedure_id: procedure.settlement_banking
+  inputs:
+    in_silver_city: true
+    bank: chamberlings_reserve
+    balance: 100
+    roll: 12
+    deposit: 0
+    withdrawal: 150
+    coins: 0
+  expected:
+    state:
+      visited: true
+      activity_points: 1
+      result: No change
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.settlement_banking
+    unresolved: []
+    steps:
+      - initialise
+      - visit_bank
+      - result_no_change
+      - deposit_or_withdraw

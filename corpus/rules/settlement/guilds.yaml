@@ -1,49 +1,80 @@
 - id: character.settlement.guild.dark.training
-  name: Guild access and Skill Training
+  name: The Dark Guild Skill training
   section_id: section.the_dark_guild.skill_training
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 148
       printed_page: 146
-      heading: Guild access and Skill Training
+      heading: The Dark Guild
       extraction:
-        method: text
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Skill training
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Access: Thief or Rogue. Training: CS, RS, Pick Locks, Perception. Increase one skill
-    by +3 for 300 c. Only one training session per skill between two dungeons.'
+  source_text: Located in the shadier parts of the city, this Guild is for Thieves and Rogues. ... You can practice CS, RS, Pick Locks, and Perception here. Increasing your skill by +3 will cost 300 c. Only one training session per skill may be undertaken between two dungeons.
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who trains (stable profession id suffix).
     eligible_professions:
       type: string
       role: output
-      description: eligible professions
+      description: Professions the guild is for.
     trainable_skills:
       type: string
       role: output
-      description: trainable skills
+      description: Skills that can be practised here.
     skill_increase:
       type: number
       role: output
-      description: skill increase
+      description: Skill increase per training session.
     cost:
       type: number
       role: output
-      description: cost
+      description: Coins per training session.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
-      description: sessions per skill between dungeons
+      description: Training sessions allowed per skill between two dungeons.
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: thief
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: rogue
   effects:
     - type: set
       target: eligible_professions
       value:
         type: literal
-        value: Thief or Rogue
+        value: Thieves and Rogues
     - type: set
       target: trainable_skills
       value:
@@ -64,54 +95,87 @@
       value:
         type: literal
         value: 1
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: procedure.guild_skill_training
+      object_id: procedure.guild_skill_training
 - id: character.settlement.guild.fighters.training
-  name: Guild access and Skill Training
+  name: Fighters’ Guild Skill Training
   section_id: section.fighters_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 151
       printed_page: 149
-      heading: Guild access and Skill Training
+      heading: Fighters’ Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 151
+      printed_page: 149
+      heading: Skill Training
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Access: Warrior or Barbarian. Training: CS, Heal, Dodge. Increase one skill by +3 for
-    300 c. Only one training session per skill between two dungeons.'
+  source_text: This is the guild for Warriors and Barbarians. ... You can practice CS, Heal and Dodge here. Increasing one skill by +3 costs 300 c. Only one training session per skill can be undertaken between two dungeons.
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who trains (stable profession id suffix).
     eligible_professions:
       type: string
       role: output
-      description: eligible professions
+      description: Professions the guild is for.
     trainable_skills:
       type: string
       role: output
-      description: trainable skills
+      description: Skills that can be practised here.
     skill_increase:
       type: number
       role: output
-      description: skill increase
+      description: Skill increase per training session.
     cost:
       type: number
       role: output
-      description: cost
+      description: Coins per training session.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
-      description: sessions per skill between dungeons
+      description: Training sessions allowed per skill between two dungeons.
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: warrior
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: barbarian
   effects:
     - type: set
       target: eligible_professions
       value:
         type: literal
-        value: Warrior or Barbarian
+        value: Warriors and Barbarians
     - type: set
       target: trainable_skills
       value:
@@ -132,54 +196,88 @@
       value:
         type: literal
         value: 1
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: procedure.guild_skill_training
+      object_id: procedure.guild_skill_training
 - id: character.settlement.guild.wizards.training
-  name: Guild access and Skill Training
+  name: Wizards’ Guild Skill Training
   section_id: section.wizards_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 153
       printed_page: 151
-      heading: Guild access and Skill Training
+      heading: Wizards’ Guild
       extraction:
-        method: text
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Skill Training
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 173
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Access: Wizard; visitors recharging magic items are an exception. Training: Arcane
-    Arts, Perception, Heal. Increase one skill by +3 for 300 c. Only one training session per skill
-    between two dungeons.'
+  source_text: As the name implies, this is the guild for Wizards. Apart from visitors recharging magic items, only Wizards are allowed here. ... You can practice your Arcane Arts, Perception, and Heal here. Increasing your skill by +3 costs 300 c. Only one training session per skill can be undertaken between two dungeons.
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who trains (stable profession id suffix). Visitors admitted only to recharge or identify magic items do not train.
     eligible_professions:
       type: string
       role: output
-      description: eligible professions
+      description: Professions the guild is for.
     trainable_skills:
       type: string
       role: output
-      description: trainable skills
+      description: Skills that can be practised here.
     skill_increase:
       type: number
       role: output
-      description: skill increase
+      description: Skill increase per training session.
     cost:
       type: number
       role: output
-      description: cost
+      description: Coins per training session.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
-      description: sessions per skill between dungeons
+      description: Training sessions allowed per skill between two dungeons.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: profession
+    right:
+      type: literal
+      value: wizard
   effects:
     - type: set
       target: eligible_professions
       value:
         type: literal
-        value: Wizard; visitors recharging magic items are an exception
+        value: Wizards
     - type: set
       target: trainable_skills
       value:
@@ -200,55 +298,51 @@
       value:
         type: literal
         value: 1
-  dependencies: []
+  issues:
+    - issue.guild.wizards_identify_visitors
+  dependencies:
+    - key: related_0
+      label: procedure.guild_skill_training
+      object_id: procedure.guild_skill_training
+    - key: related_1
+      label: procedure.guild_access
+      object_id: procedure.guild_access
 - id: character.settlement.guild.alchemists.training
-  name: Guild access and Skill Training
+  name: Alchemists’ Guild Skill Training
   section_id: section.alchemists_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 154
       printed_page: 152
-      heading: Guild access and Skill Training
+      heading: Skill Training
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Access: appropriate profession under the general guild access rule. Training: Alchemy,
-    Heal, Perception. Increase one skill by +3 for 300 c. Only one training session per skill
-    between two dungeons.'
+  source_text: You can practice Alchemy, Heal, and Perception. Increasing your skill by +3 costs 300 c. Only one training session per skill can be done between two dungeons.
   type: modifier
   scope: settlement
   fields:
-    eligible_professions:
-      type: string
-      role: output
-      description: eligible professions
     trainable_skills:
       type: string
       role: output
-      description: trainable skills
+      description: Skills that can be practised here.
     skill_increase:
       type: number
       role: output
-      description: skill increase
+      description: Skill increase per training session.
     cost:
       type: number
       role: output
-      description: cost
+      description: Coins per training session.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
-      description: sessions per skill between dungeons
+      description: Training sessions allowed per skill between two dungeons.
   effects:
-    - type: set
-      target: eligible_professions
-      value:
-        type: literal
-        value: appropriate profession under the general guild access rule
     - type: set
       target: trainable_skills
       value:
@@ -269,54 +363,79 @@
       value:
         type: literal
         value: 1
-  dependencies: []
+  issues:
+    - issue.guild.alchemists_access
+  dependencies:
+    - key: related_0
+      label: procedure.guild_skill_training
+      object_id: procedure.guild_skill_training
 - id: character.settlement.guild.rangers.training
-  name: Guild access and Skill Training
+  name: Rangers’ Guild Skill Training
   section_id: section.rangers_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: Guild access and Skill Training
+      heading: Rangers’ Guild
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Skill Training
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Access: Ranger. Training: CS, RS, Dodge, Heal, Foraging. Increase one skill by +3 for
-    300 c. Only one training session per skill between two dungeons.'
+  source_text: This is where the Rangers get together, sharing stories and exchanging experience. ... You can practice CS, RS, Dodge, Heal, and Foraging. Increasing your skill by +3 costs 300 c. Only one training session per skill can be undertaken between two dungeons.
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who trains (stable profession id suffix).
     eligible_professions:
       type: string
       role: output
-      description: eligible professions
+      description: Professions the guild is for.
     trainable_skills:
       type: string
       role: output
-      description: trainable skills
+      description: Skills that can be practised here.
     skill_increase:
       type: number
       role: output
-      description: skill increase
+      description: Skill increase per training session.
     cost:
       type: number
       role: output
-      description: cost
+      description: Coins per training session.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
-      description: sessions per skill between dungeons
+      description: Training sessions allowed per skill between two dungeons.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: profession
+    right:
+      type: literal
+      value: ranger
   effects:
     - type: set
       target: eligible_professions
       value:
         type: literal
-        value: Ranger
+        value: Rangers
     - type: set
       target: trainable_skills
       value:
@@ -337,32 +456,66 @@
       value:
         type: literal
         value: 1
-  dependencies: []
-- id: character.settlement.guild.inner_sanctum.training
-  name: Guild access and Skill Training
+  dependencies:
+    - key: related_0
+      label: procedure.guild_skill_training
+      object_id: procedure.guild_skill_training
+- id: character.settlement.guild.inner_sanctum.access
+  name: Inner Sanctum access
   section_id: section.the_inner_sanctum
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 158
       printed_page: 156
-      heading: Guild access and Skill Training
+      heading: The Inner Sanctum
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Access: Warrior Priest. Training: CS, Dodge, Battle Prayers. Increase one skill by +3
-    for 300 c. Only one training session per skill between two dungeons.'
-  type: modifier
+  source_text: Only a Warrior Priest may enter the Inner Sanctum and consult with the High Priests.
+    Here, priests can practice in their ways, learn new prayers, and find the religious relics that
+    they need to perform their work.
+  type: constraint
   scope: settlement
   fields:
     eligible_professions:
       type: string
       role: output
-      description: eligible professions
+      description: The only profession that may enter the Inner Sanctum.
+  effects:
+    - type: set
+      target: eligible_professions
+      value:
+        type: literal
+        value: Warrior Priest
+  dependencies:
+    - key: guild
+      label: guild.inner_sanctum
+      object_id: guild.inner_sanctum
+- id: character.settlement.guild.inner_sanctum.training
+  name: Practicing Skills
+  section_id: section.the_inner_sanctum.practicing_skills
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Practicing Skills
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: You can practice CS, Dodge, and Battle Prayers here. Increasing your skill by +3
+    costs 300 c and takes 1 day. Only one training session per skill can be taken between two
+    dungeons.
+  type: modifier
+  scope: settlement
+  fields:
     trainable_skills:
       type: string
       role: output
@@ -375,16 +528,15 @@
       type: number
       role: output
       description: cost
+    duration_days:
+      type: number
+      role: output
+      description: Days one training session takes.
     sessions_per_skill_between_dungeons:
       type: number
       role: output
       description: sessions per skill between dungeons
   effects:
-    - type: set
-      target: eligible_professions
-      value:
-        type: literal
-        value: Warrior Priest
     - type: set
       target: trainable_skills
       value:
@@ -401,13 +553,21 @@
         type: literal
         value: 300
     - type: set
+      target: duration_days
+      value:
+        type: literal
+        value: 1
+    - type: set
       target: sessions_per_skill_between_dungeons
       value:
         type: literal
         value: 1
-  dependencies: []
+  dependencies:
+    - key: access
+      label: character.settlement.guild.inner_sanctum.access
+      object_id: character.settlement.guild.inner_sanctum.access
 - id: character.settlement.guild.dark.nightstalker
-  name: Nightstalker Armour
+  name: Nightstalker Armour and High Quality
   section_id: section.the_dark_guild.buying_special_equipment
   source:
     - document: rulebook.second_printing.eng
@@ -416,39 +576,36 @@
       printed_page: 146
       heading: Nightstalker Armour
       extraction:
-        method: text
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: High Quality
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Nightstalker counts as leather armour (Tier 2) for restrictions and special rules. High
-    Quality gives Durability 8 instead of 6. Wearing a piece with Dark as the Night gives enemies -5
-    to strike or shoot; this does not stack for two or three pieces. Covering all four hit zones
-    with Nightstalker gives -10.
+  source_text: It’s considered a leather armour (Tier 2) with regards to restrictions and any other special rules. ... This armour is really a masterpiece. It is of such superior quality that the armour has a Durability of 8 instead of 6.
   type: modifier
-  scope: settlement
+  scope: global
   fields:
     armour_tier:
       type: number
       role: output
-      description: armour tier
+      description: Armour tier Nightstalker armour counts as for restrictions and other special rules.
+    armour_type:
+      type: string
+      role: output
+      description: Armour type Nightstalker armour counts as.
     durability:
       type: number
       role: output
-      description: durability
-    enemy_strike_or_shoot_modifier:
-      type: number
-      role: output
-      description: enemy strike or shoot modifier
-    full_head_arms_torso_legs_modifier:
-      type: number
-      role: output
-      description: full head arms torso legs modifier
-    partial_bonus_stacks:
-      type: boolean
-      role: output
-      description: partial bonus stacks
+      description: Durability of a Nightstalker part with the High Quality Special Rule (8 instead of 6).
   effects:
     - type: set
       target: armour_tier
@@ -456,26 +613,124 @@
         type: literal
         value: 2
     - type: set
+      target: armour_type
+      value:
+        type: literal
+        value: leather
+    - type: set
       target: durability
       value:
         type: literal
         value: 8
+  dependencies: []
+- id: character.settlement.guild.dark.dark_as_the_night
+  name: Dark as the Night
+  section_id: section.the_dark_guild.buying_special_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Dark as the Night
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: By wearing a part of armour that has this Special Rule, the hero becomes more difficult to hit. Any enemy trying to strike or shoot at the hero suffers a -5 modifier. This is not cumulative if the hero has two or three parts,
+  type: modifier
+  scope: battle
+  fields:
+    dark_as_the_night_parts_worn:
+      type: number
+      role: input
+      description: Worn armour parts that have the Dark as the Night Special Rule.
+      integer: true
+      minimum: 0
+    nightstalker_on_all_hit_zones:
+      type: boolean
+      role: input
+      description: The hero wears Nightstalker armour on all hit zones (Head, Arms, Torso, Legs).
+    enemy_strike_or_shoot_modifier:
+      type: number
+      role: output
+      description: Modifier to any enemy trying to strike or shoot at the hero; not cumulative for two or three parts.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: dark_as_the_night_parts_worn
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: nightstalker_on_all_hit_zones
+        right:
+          type: literal
+          value: false
+  effects:
     - type: set
       target: enemy_strike_or_shoot_modifier
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.dark.dark_as_the_night_all_zones
+      object_id: character.settlement.guild.dark.dark_as_the_night_all_zones
+- id: character.settlement.guild.dark.dark_as_the_night_all_zones
+  name: Dark as the Night on all hit zones
+  section_id: section.the_dark_guild.buying_special_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Dark as the Night
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: but if the hero wears Nightstalker armour on all hit zones (Head, Arms, Torso, Legs), this becomes a -10 modifier.
+  type: modifier
+  scope: battle
+  fields:
+    nightstalker_on_all_hit_zones:
+      type: boolean
+      role: input
+      description: The hero wears Nightstalker armour on all hit zones (Head, Arms, Torso, Legs).
+    enemy_strike_or_shoot_modifier:
+      type: number
+      role: output
+      description: Modifier to any enemy trying to strike or shoot at the hero.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: nightstalker_on_all_hit_zones
+    right:
+      type: literal
+      value: true
+  effects:
     - type: set
-      target: full_head_arms_torso_legs_modifier
+      target: enemy_strike_or_shoot_modifier
       value:
         type: literal
         value: -10
-    - type: set
-      target: partial_bonus_stacks
-      value:
-        type: literal
-        value: false
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.dark.dark_as_the_night
+      object_id: character.settlement.guild.dark.dark_as_the_night
 - id: character.settlement.guild.dark.traps
   name: Traps
   section_id: section.the_dark_guild.buying_special_equipment
@@ -486,48 +741,59 @@
       printed_page: 147
       heading: Traps
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Rogues and Thieves may place traps, marked with tokens. Enemies take the most direct
-    route and randomise equal paths. Record wounds on Wandering Monster tokens; each revealed
-    individual has those wounds unless the trap says otherwise. Placed traps cannot be picked up and
-    are removed when triggered. Heroes avoid setting off known traps.
+  source_text: These traps can be used by a Rogue or Thief and placed in the dungeon to cause trouble for their enemies. Use the trap tokens to indicate where you have placed the traps. When moving enemies, they will always take the most direct route towards their targets, and if there are dual options for the path, randomise the path. If they enter a trapped square, take note of any wounds caused to a Wandering Monster token and when the monsters are revealed, each individual enemy will have suffered the wounds written down (unless noted otherwise below). Two of the traps below are primarily meant for Wandering Monsters, but there are ways to set them so they can hurt encounters as well (place them before opening a door and let the enemy approach). Once placed, traps may not be picked up, and once a monster triggers the trap, it is removed. Heroes can walk through squares with traps since they know they are there and can avoid setting them off.
   type: modifier
-  scope: settlement
+  scope: dungeon
   fields:
-    eligible_professions:
+    profession:
       type: string
-      role: output
-      description: eligible professions
+      role: input
+      description: Profession of the hero using the trap (stable profession id suffix).
     placed_traps_recoverable:
       type: boolean
       role: output
-      description: placed traps recoverable
+      description: Placed traps may be picked up again.
     remove_on_trigger:
       type: boolean
       role: output
-      description: remove on trigger
+      description: A trap is removed once a monster triggers it.
     heroes_trigger_traps:
       type: boolean
       role: output
-      description: heroes trigger traps
+      description: Heroes set off traps when walking through their squares.
     wandering_damage_default:
       type: string
       role: output
-      description: wandering damage default
+      description: How wounds noted on a Wandering Monster token apply once the monsters are revealed.
     equal_path_choice:
       type: string
       role: output
-      description: equal path choice
+      description: How a moving enemy chooses between dual options for the most direct path.
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: rogue
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: profession
+        right:
+          type: literal
+          value: thief
   effects:
-    - type: set
-      target: eligible_professions
-      value:
-        type: literal
-        value: Rogue or Thief
     - type: set
       target: placed_traps_recoverable
       value:
@@ -547,7 +813,7 @@
       target: wandering_damage_default
       value:
         type: literal
-        value: each individual when revealed
+        value: each individual enemy has suffered the noted wounds when revealed, unless noted otherwise
     - type: set
       target: equal_path_choice
       value:
@@ -564,61 +830,62 @@
       printed_page: 147
       heading: Caltrops
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Throw into a square up to 2 squares away for 1 AP, only with no adjacent enemy. Any
-    enemy with no armour walking over the square suffers 1d4 Damage and immediately stops its turn.
+  source_text: These small metal pyramids can be thrown on the floor and the unsuspecting enemy will walk on them. They cause immense pain and will disrupt the movement for anyone walking over them. (Almost like Legos). The Caltrops can be thrown in a square up to 2 squares away from the hero. Throwing them takes 1 AP and this can be done as long as there is no enemy adjacent to the thrower. Any enemy walking over the square with no armour will suffer 1d4 Points of Damage and will stop their turn immediately.
   type: modifier
-  scope: settlement
+  scope: dungeon
   fields:
+    distance_squares:
+      type: number
+      role: input
+      description: Distance in squares from the hero to the target square.
+      integer: true
+      minimum: 1
+    enemy_adjacent_to_thrower:
+      type: boolean
+      role: input
+      description: An enemy is adjacent to the thrower.
     action_points:
       type: number
       role: output
-      description: action points
-    range_squares:
-      type: number
-      role: output
-      description: range squares
-    requires_no_adjacent_enemy:
-      type: boolean
-      role: output
-      description: requires no adjacent enemy
-    requires_unarmoured_enemy:
-      type: boolean
-      role: output
-      description: requires unarmoured enemy
+      description: AP cost of throwing the Caltrops.
     damage_die:
       type: number
       role: output
-      description: damage die
+      description: Sides of the damage die (1d4 Points of Damage) for an enemy walking over the square.
     ends_enemy_turn:
       type: boolean
       role: output
-      description: ends enemy turn
+      description: An enemy walking over the square stops its turn immediately.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: lte
+        left:
+          type: field
+          name: distance_squares
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: enemy_adjacent_to_thrower
+        right:
+          type: literal
+          value: false
   effects:
     - type: set
       target: action_points
       value:
         type: literal
         value: 1
-    - type: set
-      target: range_squares
-      value:
-        type: literal
-        value: 2
-    - type: set
-      target: requires_no_adjacent_enemy
-      value:
-        type: literal
-        value: true
-    - type: set
-      target: requires_unarmoured_enemy
-      value:
-        type: literal
-        value: true
     - type: set
       target: damage_die
       value:
@@ -629,7 +896,12 @@
       value:
         type: literal
         value: true
-  dependencies: []
+  issues:
+    - issue.guild.caltrops_no_armour
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.dark.traps
+      object_id: character.settlement.guild.dark.traps
 - id: character.settlement.guild.dark.tripwire
   name: Tripwire with Darts
   section_id: section.the_dark_guild.buying_special_equipment
@@ -640,58 +912,74 @@
       printed_page: 147
       heading: Tripwire with Darts
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 150
       printed_page: 148
       heading: Tripwire with Darts
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Only place outside an ongoing battle. Setup takes one full turn if in a Quick Slot.
-    Span 4 squares in a straight, non-diagonal line. Any enemy entering triggers 1d8 damage; account
-    for Armour and NA when revealed.
+  source_text: This trap is primarily meant to stop Wandering Monsters. The tripwire can be set up only if there is no ongoing battle. It takes one full turn to set up if it is placed in a Quick Slot, and can span 4 squares in a straight line (not diagonal). Use tokens to indicate which squares are covered by the tripwire, and any enemy entering one of those squares will trigger the trap. The darts cause 1d8 damage. Account for Armour and NA once the enemy is revealed.
   type: modifier
-  scope: settlement
+  scope: dungeon
   fields:
-    requires_no_battle:
+    ongoing_battle:
       type: boolean
-      role: output
-      description: requires no battle
-    quick_slot_setup_turns:
+      role: input
+      description: A battle is ongoing.
+    in_quick_slot:
+      type: boolean
+      role: input
+      description: The tripwire is placed in a Quick Slot.
+    setup_turns:
       type: number
       role: output
-      description: quick slot setup turns
+      description: Full turns needed to set up the tripwire from a Quick Slot.
     span_squares:
       type: number
       role: output
-      description: span squares
+      description: Squares the tripwire can span in a straight line.
     diagonal_allowed:
       type: boolean
       role: output
-      description: diagonal allowed
+      description: The line may be diagonal.
     damage_die:
       type: number
       role: output
-      description: damage die
+      description: Sides of the dart damage die (1d8).
     armour_and_natural_armour_apply:
       type: boolean
       role: output
-      description: armour and natural armour apply
+      description: Armour and NA are accounted for once the enemy is revealed.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: ongoing_battle
+        right:
+          type: literal
+          value: false
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: in_quick_slot
+        right:
+          type: literal
+          value: true
   effects:
     - type: set
-      target: requires_no_battle
-      value:
-        type: literal
-        value: true
-    - type: set
-      target: quick_slot_setup_turns
+      target: setup_turns
       value:
         type: literal
         value: 1
@@ -715,9 +1003,12 @@
       value:
         type: literal
         value: true
-  dependencies: []
-  unresolved_references:
-    - Setup duration when not in a Quick Slot is not stated.
+  issues:
+    - issue.guild.tripwire_setup_outside_quick_slot
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.dark.traps
+      object_id: character.settlement.guild.dark.traps
 - id: character.settlement.guild.dark.bear_trap
   name: Bear Trap
   section_id: section.the_dark_guild.buying_special_equipment
@@ -728,51 +1019,53 @@
       printed_page: 148
       heading: Bear Trap
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Covers one square; cannot be placed during battle. Costs 1 AP to set and causes 1d12
-    wounds with no armour. Only one randomly selected enemy in a Wandering Monster group is
-    affected.
+  source_text: This trap is primarily meant to stop Wandering Monsters. The Bear Trap only covers one square. It cannot be placed while there is an ongoing battle. It takes 1 AP to set the trap. It causes 1d12 wounds with no armour, but will only affect one enemy within a Wandering Monster group. Randomise which one.
   type: modifier
-  scope: settlement
+  scope: dungeon
   fields:
-    requires_no_battle:
+    ongoing_battle:
       type: boolean
-      role: output
-      description: requires no battle
+      role: input
+      description: A battle is ongoing.
     action_points:
       type: number
       role: output
-      description: action points
+      description: AP cost of setting the trap.
     span_squares:
       type: number
       role: output
-      description: span squares
+      description: Squares the Bear Trap covers.
     wounds_die:
       type: number
       role: output
-      description: wounds die
+      description: Sides of the wounds die (1d12).
     armour_applies:
       type: boolean
       role: output
-      description: armour applies
+      description: Armour reduces the wounds (the text says "with no armour").
     affected_group_members:
       type: number
       role: output
-      description: affected group members
+      description: Enemies affected within a Wandering Monster group.
     target_selection:
       type: string
       role: output
-      description: target selection
+      description: How the affected enemy is chosen.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: ongoing_battle
+    right:
+      type: literal
+      value: false
   effects:
-    - type: set
-      target: requires_no_battle
-      value:
-        type: literal
-        value: true
     - type: set
       target: action_points
       value:
@@ -803,7 +1096,10 @@
       value:
         type: literal
         value: random
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.dark.traps
+      object_id: character.settlement.guild.dark.traps
 - id: character.settlement.guild.fighters.bounty
   name: Bounty Hunt
   section_id: section.fighters_guild
@@ -814,34 +1110,31 @@
       printed_page: 149
       heading: Bounty Hunt
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Roll five times on the bounty table. Find and kill those enemies on the next quest and
-    return for a reward. Hunt until next visiting the city. Each creature earns 250 gold, but only
-    one reward per kind of enemy may be claimed.
+  source_text: There is always a list of wanted enemies at the Fighters’ Guild. If you find and kill any of these on your next quest, you can return to receive a reward. Roll on the table 5 times and note down which enemies to hunt until the next time you visit the city. Each creature killed will earn you 250 gold. You can only claim one reward for each kind of enemy.
   type: modifier
   scope: settlement
   fields:
     target_rolls:
       type: number
       role: output
-      description: target rolls
+      description: Rolls on the Bounty Hunt table.
     reward_per_kind:
       type: number
       role: output
-      description: reward per kind
+      description: Gold earned for a killed wanted creature.
     rewards_per_kind:
       type: number
       role: output
-      description: rewards per kind
+      description: Rewards that can be claimed for each kind of enemy.
     duration:
       type: string
       role: output
-      description: duration
+      description: How long the noted enemies are hunted.
   effects:
     - type: set
       target: target_rolls
@@ -862,9 +1155,12 @@
       target: duration
       value:
         type: literal
-        value: next quest until next city visit
+        value: until the next time you visit the city; kills on your next quest
   dependencies:
     - key: related_0
+      label: procedure.fighters_bounty
+      object_id: procedure.fighters_bounty
+    - key: related_1
       label: table.guild.fighters_bounty
       object_id: table.guild.fighters_bounty
 - id: character.settlement.guild.fighters.addons
@@ -877,51 +1173,93 @@
       printed_page: 150
       heading: Gauntlets, Gorget, Shoulder Pads, and Poleyns
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Add to padded, leather or mail armour with an existing DEF value in that area.
-    Permanently add +1 Defence and +1 ENC. Cannot be separated; destroyed with the armour. Only one
-    of each add-on may be worn at a time.
+  source_text: These can be added to padded, leather, or mail armours that already have a DEF value in the indicated area. They will increase the Defence Value of that armour and the Encumbrance permanently with +1 and cannot be separated from that armour once combined. If the armour is destroyed, any add-ons are destroyed as well. Only one of each addons can be worn at the same time. That is, only one set of gauntlets etc at a time.
   type: modifier
   scope: settlement
   fields:
-    eligible_armour:
+    armour_type:
       type: string
-      role: output
-      description: eligible armour
+      role: input
+      description: Type of the armour the add-on is added to (padded, leather or mail).
+    armour_has_def_in_area:
+      type: boolean
+      role: input
+      description: The armour already has a DEF value in the indicated area.
+    same_addon_already_worn:
+      type: boolean
+      role: input
+      description: One of the same add-on is already worn.
     defence_modifier:
       type: number
       role: output
-      description: defence modifier
+      description: Permanent increase to the armour's Defence Value.
     encumbrance_modifier:
       type: number
       role: output
-      description: encumbrance modifier
-    permanent:
-      type: boolean
-      role: output
-      description: permanent
+      description: Permanent increase to the armour's Encumbrance.
     separable:
       type: boolean
       role: output
-      description: separable
+      description: The add-on can be separated from the armour once combined.
     destroyed_with_armour:
       type: boolean
       role: output
-      description: destroyed with armour
+      description: The add-on is destroyed when the armour is destroyed.
     maximum_worn_per_kind:
       type: number
       role: output
-      description: maximum worn per kind
+      description: Add-ons of each kind that can be worn at the same time.
+  when:
+    type: all
+    conditions:
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: armour_type
+            right:
+              type: literal
+              value: padded
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: armour_type
+            right:
+              type: literal
+              value: leather
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: armour_type
+            right:
+              type: literal
+              value: mail
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: armour_has_def_in_area
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: same_addon_already_worn
+        right:
+          type: literal
+          value: false
   effects:
-    - type: set
-      target: eligible_armour
-      value:
-        type: literal
-        value: padded, leather or mail with existing DEF in indicated area
     - type: set
       target: defence_modifier
       value:
@@ -932,11 +1270,6 @@
       value:
         type: literal
         value: 1
-    - type: set
-      target: permanent
-      value:
-        type: literal
-        value: true
     - type: set
       target: separable
       value:
@@ -963,43 +1296,63 @@
       printed_page: 150
       heading: Pain Killer
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: For 1 AP, remove any wound status marker and immediately regain lost AP, allowing
-    movement or attack that turn. Does not remedy the wound. Lasts the battle; afterward wound
-    status applies again if still applicable.
+  source_text: This is a fine powder, made from a mix of herbs. The recipe is a heavily guarded secret, and is only known by the top tier of the Fighters’ Guild. By snorting this power, a wounded fighter will receive considerable pain relief. However, the powder does not remedy the actual wound. A hero snorting this powder may remove any wound status marker and regain his or her lost AP. It will last for the entire battle, and after the battle the wound status will once again take affect if still applicable. Using it requires 1 AP and immediately gives you back the lost AP, meaning you can move or attack in the same turn.
   type: modifier
-  scope: settlement
+  scope: battle
   fields:
+    has_wound_status_marker:
+      type: boolean
+      role: input
+      description: The hero has a wound status marker.
     action_points:
       type: number
       role: output
-      description: action points
+      description: AP needed to use the powder.
+    removes_wound_status_marker:
+      type: boolean
+      role: output
+      description: Any wound status marker may be removed.
     restores_lost_action_points_immediately:
       type: boolean
       role: output
-      description: restores lost action points immediately
+      description: The lost AP is given back immediately, so the hero can move or attack in the same turn.
     heals_wound:
       type: boolean
       role: output
-      description: heals wound
+      description: The powder remedies the actual wound.
     duration:
       type: string
       role: output
-      description: duration
+      description: How long the relief lasts.
     reapply_wound_status_after_battle_if_applicable:
       type: boolean
       role: output
-      description: reapply wound status after battle if applicable
+      description: After the battle the wound status takes effect again if still applicable.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: has_wound_status_marker
+    right:
+      type: literal
+      value: true
   effects:
     - type: set
       target: action_points
       value:
         type: literal
         value: 1
+    - type: set
+      target: removes_wound_status_marker
+      value:
+        type: literal
+        value: true
     - type: set
       target: restores_lost_action_points_immediately
       value:
@@ -1031,27 +1384,27 @@
       printed_page: 150
       heading: Shield Padding
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Any shield regardless of size gains +1 Durability: total 7, or 9 for a magic shield.'
+  source_text: This padding increases the structural integrity of any shield (regardless of size) giving it a total Durability of 7. A magic shield would thus have a Durability of 9.
   type: modifier
   scope: settlement
   fields:
     durability_modifier:
       type: number
       role: output
-      description: durability modifier
+      description: Durability increase (the table prints +1).
     ordinary_total_durability:
       type: number
       role: output
-      description: ordinary total durability
+      description: Total Durability of any padded shield, regardless of size.
     magic_total_durability:
       type: number
       role: output
-      description: magic total durability
+      description: Total Durability of a padded magic shield.
   effects:
     - type: set
       target: durability_modifier
@@ -1068,7 +1421,10 @@
       value:
         type: literal
         value: 9
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: character.settlement.equipment.shield_padding
+      object_id: character.settlement.equipment.shield_padding
 - id: character.settlement.guild.fighters.slayer
   name: Slayer Weapons
   section_id: section.fighters_guild.buying_special_equipment
@@ -1079,47 +1435,55 @@
       printed_page: 150
       heading: Slayer Weapons
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Any edged weapon at full durability may be treated. Gain +1 DMG, cumulative with any
-    other modifiers, until the weapon breaks.
+  source_text: The Weapon Smith at the Guild has a special way of heat-treating weapons, giving them a razor-sharp edge which is able to cut through even the thickest armour. The weapon gets +1 DMG that is cumulative with any other modifiers. The hero may have any edged weapon treated as long as it is at full durability. Once treated, the effect will last until the weapon breaks.
   type: modifier
   scope: settlement
   fields:
-    requires_edged_weapon:
+    edged_weapon:
       type: boolean
-      role: output
-      description: requires edged weapon
-    requires_full_durability:
+      role: input
+      description: The weapon to be treated is an edged weapon.
+    at_full_durability:
       type: boolean
-      role: output
-      description: requires full durability
+      role: input
+      description: The weapon is at full durability.
     damage_modifier:
       type: number
       role: output
-      description: damage modifier
+      description: DMG bonus of the treated weapon.
     cumulative:
       type: boolean
       role: output
-      description: cumulative
+      description: The bonus is cumulative with any other modifiers.
     duration:
       type: string
       role: output
-      description: duration
+      description: How long the treatment lasts.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: edged_weapon
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_full_durability
+        right:
+          type: literal
+          value: true
   effects:
-    - type: set
-      target: requires_edged_weapon
-      value:
-        type: literal
-        value: true
-    - type: set
-      target: requires_full_durability
-      value:
-        type: literal
-        value: true
     - type: set
       target: damage_modifier
       value:
@@ -1146,36 +1510,48 @@
       printed_page: 151
       heading: Learning New Spells
       extraction:
-        method: text
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Each hero may learn one spell between quests for 200 c + 100 c per level above 1. A
-    found Grimoire makes that spell free. Takes 3 days.
+  source_text: During their time off, wizards may learn a new spell. Each hero may learn one spell in between each quest. The price for learning a spell is 200 c + 100 c for each spell level above 1. If the wizard found a Grimoire, learning that spell is free. It takes 3 days to learn a new spell.
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who learns (stable profession id suffix).
     spells_between_quests:
       type: number
       role: output
-      description: spells between quests
+      description: Spells each hero may learn in between each quest.
     base_cost:
       type: number
       role: output
-      description: base cost
+      description: Price in coins for a level 1 spell.
     per_level_above_one_cost:
       type: number
       role: output
-      description: per level above one cost
+      description: Added coins for each spell level above 1.
     grimoire_cost:
       type: number
       role: output
-      description: grimoire cost
+      description: Price of learning a spell from a Grimoire the wizard found.
     duration_days:
       type: number
       role: output
-      description: duration days
+      description: Days it takes to learn a new spell.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: profession
+    right:
+      type: literal
+      value: wizard
   effects:
     - type: set
       target: spells_between_quests
@@ -1213,7 +1589,7 @@
       printed_page: 151
       heading: Charging Magic Items
       extraction:
-        method: text
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
@@ -1222,20 +1598,24 @@
   type: modifier
   scope: settlement
   fields:
-    requires_repaired_item:
+    broken_magic_item_repaired:
       type: boolean
-      role: output
-      description: requires repaired item
+      role: input
+      description: The item is a broken Magic Item that has been repaired.
     recharge_cost:
       type: number
       role: output
-      description: recharge cost
+      description: Coins to recharge the item.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: broken_magic_item_repaired
+    right:
+      type: literal
+      value: true
   effects:
-    - type: set
-      target: requires_repaired_item
-      value:
-        type: literal
-        value: true
     - type: set
       target: recharge_cost
       value:
@@ -1243,48 +1623,55 @@
         value: 250
   dependencies: []
 - id: character.settlement.guild.wizards.staves
-  name: Buying Wizard’s Staffs; Charges and Recharges; Casting a Spell with a Staff
+  name: Buying Wizard’s Staffs, Charges and Recharges
   section_id: section.wizards_guild
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 153
       printed_page: 151
-      heading: Buying Wizard’s Staffs; Charges and Recharges; Casting a Spell with a Staff
+      heading: Buying Wizard’s Staffs
       extraction:
-        method: text
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Charges and Recharges
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Wizard staffs use normal staff combat stats but DUR 8. Unless noted otherwise they have
-    three spell charges. Recharging costs half the purchase price. Casting a staff spell
-    automatically succeeds and normally requires 2 AP.
+  source_text: Magical items are rare, therefore, they are difficult to purchase. However, magical staffs are comparably common, and they have magical abilities which strengthen wizards, while also doubling as close-combat weapons (same stats as a normal staff, but DUR 8). ... Staffs have three charges unless noted otherwise. This means that the spell bound in the staff can be cast three times before it needs to be recharged. Recharging a staff costs half of the purchase price of the staff.
   type: modifier
-  scope: settlement
+  scope: global
   fields:
+    close_combat_stats:
+      type: string
+      role: output
+      description: Close-combat statistics of a magical staff.
     durability:
       type: number
       role: output
-      description: durability
+      description: DUR of a magical staff.
     default_charges:
       type: number
       role: output
-      description: default charges
+      description: Charges of a staff unless noted otherwise; the bound spell can be cast that many times before recharging.
     recharge_purchase_price_fraction:
       type: number
       role: output
-      description: recharge purchase price fraction
-    casting_automatically_succeeds:
-      type: boolean
-      role: output
-      description: casting automatically succeeds
-    normal_casting_action_points:
-      type: number
-      role: output
-      description: normal casting action points
+      description: Fraction of the staff's purchase price that recharging costs.
   effects:
+    - type: set
+      target: close_combat_stats
+      value:
+        type: literal
+        value: same stats as a normal staff
     - type: set
       target: durability
       value:
@@ -1300,6 +1687,65 @@
       value:
         type: literal
         value: 0.5
+  dependencies:
+    - key: related_0
+      label: character.settlement.guild.wizards.staff_casting
+      object_id: character.settlement.guild.wizards.staff_casting
+    - key: related_1
+      label: table.guild.wizard_staves
+      object_id: table.guild.wizard_staves
+- id: character.settlement.guild.wizards.staff_casting
+  name: Casting a Spell with a Staff
+  section_id: section.wizards_guild
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 153
+      printed_page: 151
+      heading: Casting a Spell with a Staff
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 174
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Casting a spell with a staff will automatically succeed and normally requires 2AP.
+  type: modifier
+  scope: battle
+  fields:
+    spell_contained_in_staff:
+      type: boolean
+      role: input
+      description: The spell cast is the spell contained within the staff (changelog 2.21 entry 174), not another spell cast while holding it.
+    casting_automatically_succeeds:
+      type: boolean
+      role: output
+      description: The casting automatically succeeds.
+    normal_casting_action_points:
+      type: number
+      role: output
+      description: AP the casting normally requires.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: spell_contained_in_staff
+    right:
+      type: literal
+      value: true
+  effects:
     - type: set
       target: casting_automatically_succeeds
       value:
@@ -1310,10 +1756,12 @@
       value:
         type: literal
         value: 2
+  issues:
+    - issue.guild.staff_casting_scope
   dependencies:
-    - key: ordinary_staff
-      label: Normal staff combat statistics
-      object_id: equipment.weapon.staff
+    - key: related_0
+      label: character.settlement.guild.wizards.staves
+      object_id: character.settlement.guild.wizards.staves
 - id: character.settlement.guild.alchemists.purchases
   name: Purchasing Ingredients, Parts, and Potions
   section_id: section.alchemists_guild
@@ -1324,43 +1772,46 @@
       printed_page: 152
       heading: Purchasing Ingredients, Parts, and Potions
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 177
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    A successful availability roll permits choosing any kind of part from that enemy. Parts
-    and ingredients cost 15 c. Some human body parts are not sold because their trade is illegal.
-    Weak potions are always in stock; standard availability is 5 and supreme 4. Potion prices are on
-    page 195.
+  source_text: At the Alchemists’ Guild, you can purchase both parts and ingredients, when they are available. To purchase a part, check the availability in the table below. If you succeed with the Availability Roll, you may choose any kind of part from that enemy. A part or ingredient costs 15 c. There are some parts that are not sold, as dealing with human body parts is illegal. Potions can be bought here. Normally, with a lot more to choose from than the General Store. The supply is much better as well. All Standard Potions have an availability of 5, whereas Weak Potions are always in stock. Supreme versions have an availability of 4. Prices are listed in the Potions Table on page 195.
   type: modifier
   scope: settlement
   fields:
     component_cost:
       type: number
       role: output
-      description: component cost
-    choose_enemy_part_on_success:
+      description: Coins for a part or ingredient.
+    listed_parts_withheld:
       type: boolean
       role: output
-      description: choose enemy part on success
-    human_body_parts_trade_illegal:
-      type: boolean
-      role: output
-      description: human body parts trade illegal
+      description: Some parts in the table are withheld from sale. False under changelog 2.21 entry 177, which removes the human-body-parts sentence because every part is sold.
     weak_always_available:
       type: boolean
       role: output
-      description: weak always available
+      description: Weak Potions are always in stock.
     standard_availability:
       type: number
       role: output
-      description: standard availability
+      description: Availability of Standard Potions.
     supreme_availability:
       type: number
       role: output
-      description: supreme availability
+      description: Availability of Supreme Potions.
   effects:
     - type: set
       target: component_cost
@@ -1368,15 +1819,10 @@
         type: literal
         value: 15
     - type: set
-      target: choose_enemy_part_on_success
+      target: listed_parts_withheld
       value:
         type: literal
-        value: true
-    - type: set
-      target: human_body_parts_trade_illegal
-      value:
-        type: literal
-        value: true
+        value: false
     - type: set
       target: weak_always_available
       value:
@@ -1392,6 +1838,11 @@
       value:
         type: literal
         value: 4
+  issues:
+    - issue.guild.human_body_parts
+    - issue.guild.alchemist_part_from_enemy
+  see_also:
+    - section.appendix_v_treasures.tables_of_potions
   dependencies:
     - key: related_0
       label: table.guild.alchemist_availability
@@ -1406,28 +1857,44 @@
       printed_page: 154
       heading: Special talents
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Pay the tutor fee to learn a special Ranger talent. After learning one, the Ranger must
-    level up once before learning another of these talents.
+  source_text: A ranger may learn the following talents at any time by paying the tutor fee. Once one of the talents have been learnt, the ranger must level up once before learning another of these talents.
+  issues:
+    - issue.guild.ranger_talent_any_time
   type: modifier
   scope: settlement
   fields:
+    profession:
+      type: string
+      role: input
+      description: Profession of the hero who learns (stable profession id suffix).
     level_ups_between_special_talents:
       type: number
       role: output
-      description: level ups between special talents
+      description: Level-ups needed after learning one of these talents before learning another.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: profession
+    right:
+      type: literal
+      value: ranger
   effects:
     - type: set
       target: level_ups_between_special_talents
       value:
         type: literal
         value: 1
-  dependencies: []
+  dependencies:
+    - key: related_0
+      label: procedure.ranger_special_talent
+      object_id: procedure.ranger_special_talent
 - id: character.settlement.guild.rangers.skinning
   name: Skinning
   section_id: section.rangers_guild
@@ -1436,47 +1903,88 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: Skinning
+      heading: Skinning (250 c)
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Learning costs 250 c. After catching an animal, with a skinning knife, make another
-    Foraging roll. Success yields a fur of 2 ENC sold at the General Store for 40 c without the Sell
-    Table.
+  source_text: If you manage to catch an animal, and have a skinning knife, you may make another Foraging Skill roll. A success on that roll will give you a fur to sell. Each fur weighs 2 ENC. A fur can be sold at the General Store for 40 c (no need to use the sell table).
   type: modifier
-  scope: settlement
+  scope: global
   fields:
+    talent_known:
+      type: boolean
+      role: input
+      description: The ranger has learnt Skinning.
+    animal_caught:
+      type: boolean
+      role: input
+      description: The hero managed to catch an animal.
+    has_skinning_knife:
+      type: boolean
+      role: input
+      description: The hero has a skinning knife.
+    skinning_roll_succeeded:
+      type: boolean
+      role: input
+      description: The additional Foraging Skill roll succeeded.
     tuition:
       type: number
       role: output
-      description: tuition
-    requires_caught_animal:
-      type: boolean
+      description: Tutor fee printed with the heading.
+    furs_gained:
+      type: number
       role: output
-      description: requires caught animal
-    requires_skinning_knife:
-      type: boolean
-      role: output
-      description: requires skinning knife
-    check:
-      type: string
-      role: output
-      description: check
+      description: Furs gained.
     fur_encumbrance:
       type: number
       role: output
-      description: fur encumbrance
+      description: ENC of each fur.
     fur_sale_price:
       type: number
       role: output
-      description: fur sale price
+      description: Coins for a fur at the General Store.
     uses_sell_table:
       type: boolean
       role: output
-      description: uses sell table
+      description: Selling a fur uses the sell table.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent_known
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: animal_caught
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_skinning_knife
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: skinning_roll_succeeded
+        right:
+          type: literal
+          value: true
   effects:
     - type: set
       target: tuition
@@ -1484,20 +1992,10 @@
         type: literal
         value: 250
     - type: set
-      target: requires_caught_animal
+      target: furs_gained
       value:
         type: literal
-        value: true
-    - type: set
-      target: requires_skinning_knife
-      value:
-        type: literal
-        value: true
-    - type: set
-      target: check
-      value:
-        type: literal
-        value: another Foraging roll
+        value: 1
     - type: set
       target: fur_encumbrance
       value:
@@ -1513,8 +2011,10 @@
       value:
         type: literal
         value: false
-  dependencies: []
-  entity_id: talent.skinning
+  dependencies:
+    - key: related_0
+      label: character.settlement.equipment.skinning_knife
+      object_id: character.settlement.equipment.skinning_knife
 - id: character.settlement.guild.rangers.butcher
   name: Butcher
   section_id: section.rangers_guild
@@ -1523,38 +2023,69 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: Butcher
+      heading: Butcher (200 c)
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Learning costs 200 c. A Foraging roll less than half (RDD) the skill grants 2 rations
-    instead of one.
+  source_text: The ranger can masterfully take care of every piece of meat on an animal. If the Foraging roll is less than half (RDD) of the Foraging skill value, the Ranger gains 2 rations instead of one.
   type: modifier
-  scope: settlement
+  scope: global
   fields:
+    talent_known:
+      type: boolean
+      role: input
+      description: The ranger has learnt Butcher.
+    foraging_roll:
+      type: number
+      role: input
+      description: The Foraging roll.
+      integer: true
+      minimum: 1
+      maximum: 100
+    foraging_skill:
+      type: number
+      role: input
+      description: The ranger's Foraging skill value.
+      integer: true
+      minimum: 0
     tuition:
       type: number
       role: output
-      description: tuition
-    threshold_fraction:
-      type: number
-      role: output
-      description: threshold fraction
-    threshold_rounding:
-      type: string
-      role: output
-      description: threshold rounding
-    threshold_comparison:
-      type: string
-      role: output
-      description: threshold comparison
+      description: Tutor fee printed with the heading.
     rations:
       type: number
       role: output
-      description: rations
+      description: Rations gained instead of one.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent_known
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: lt
+        left:
+          type: field
+          name: foraging_roll
+        right:
+          type: arithmetic
+          operator: floor
+          values:
+            - type: arithmetic
+              operator: divide
+              values:
+                - type: field
+                  name: foraging_skill
+                - type: literal
+                  value: 2
   effects:
     - type: set
       target: tuition
@@ -1562,27 +2093,11 @@
         type: literal
         value: 200
     - type: set
-      target: threshold_fraction
-      value:
-        type: literal
-        value: 0.5
-    - type: set
-      target: threshold_rounding
-      value:
-        type: literal
-        value: RDD
-    - type: set
-      target: threshold_comparison
-      value:
-        type: literal
-        value: strictly less than
-    - type: set
       target: rations
       value:
         type: literal
         value: 2
   dependencies: []
-  entity_id: talent.butcher
 - id: character.settlement.guild.rangers.taxidermist
   name: Taxidermist
   section_id: section.rangers_guild
@@ -1591,52 +2106,80 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 156
       printed_page: 154
-      heading: Taxidermist
+      heading: Taxidermist (350 c)
       extraction:
-        method: text
+        method: image
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Learning costs 350 c. After the party kills a Large creature, a successful Foraging
-    roll yields one 15 ENC trophy. Only one trophy per quest. To sell, add the table result to
-    creature XP; 0 or negative means no buyer. One sale attempt per settlement, costing 1 Activity
-    Point.
+  source_text: Whenever the party kills a ‘Large’ creature, the ranger may make a Foraging roll. If successful, the Ranger has managed to secure a trophy that can be taken back to a settlement and be sold. The Trophy weighs 15 ENC and only one trophy can be taken during each quest as prepping it for sale takes quite some time.
   type: modifier
-  scope: settlement
+  scope: quest
   fields:
+    talent_known:
+      type: boolean
+      role: input
+      description: The ranger has learnt Taxidermist.
+    party_killed_large_creature:
+      type: boolean
+      role: input
+      description: The party killed a ‘Large’ creature.
+    foraging_roll_succeeded:
+      type: boolean
+      role: input
+      description: The ranger's Foraging roll succeeded.
+    trophy_taken_this_quest:
+      type: boolean
+      role: input
+      description: A trophy has already been taken during this quest.
     tuition:
       type: number
       role: output
-      description: tuition
-    requires_large_creature_killed:
-      type: boolean
+      description: Tutor fee printed with the heading.
+    trophies_gained:
+      type: number
       role: output
-      description: requires large creature killed
-    check:
-      type: string
-      role: output
-      description: check
+      description: Trophies secured.
     trophy_encumbrance:
       type: number
       role: output
-      description: trophy encumbrance
-    trophies_per_quest:
-      type: number
-      role: output
-      description: trophies per quest
-    sale_attempts_per_settlement:
-      type: number
-      role: output
-      description: sale attempts per settlement
-    sale_activity_points:
-      type: number
-      role: output
-      description: sale activity points
-    sale_price:
-      type: string
-      role: output
-      description: sale price
+      description: ENC of the Trophy.
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: talent_known
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: party_killed_large_creature
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: foraging_roll_succeeded
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: trophy_taken_this_quest
+        right:
+          type: literal
+          value: false
   effects:
     - type: set
       target: tuition
@@ -1644,25 +2187,67 @@
         type: literal
         value: 350
     - type: set
-      target: requires_large_creature_killed
+      target: trophies_gained
       value:
         type: literal
-        value: true
-    - type: set
-      target: check
-      value:
-        type: literal
-        value: Foraging
+        value: 1
     - type: set
       target: trophy_encumbrance
       value:
         type: literal
         value: 15
-    - type: set
-      target: trophies_per_quest
-      value:
-        type: literal
-        value: 1
+  dependencies:
+    - key: related_0
+      label: procedure.ranger_trophy_sale
+      object_id: procedure.ranger_trophy_sale
+    - key: related_1
+      label: table.guild.taxidermy_sale
+      object_id: table.guild.taxidermy_sale
+- id: character.settlement.guild.rangers.trophy_sale
+  name: Selling a Taxidermist trophy
+  section_id: section.rangers_guild
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 156
+      printed_page: 154
+      heading: Taxidermist (350 c)
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Once back in a settlement, roll on the following table to see how much it can be sold for. Roll on the table and add the value to the XP of the creature. If the value is 0 or negative, there is no buyer in that settlement. Only one attempt may be done per settlement. Selling the trophy counts as 1 Activity Point as the Ranger must search for a buyer in the settlement.
+  type: modifier
+  scope: settlement
+  fields:
+    sale_attempted_in_settlement:
+      type: boolean
+      role: input
+      description: A sale attempt has already been made in this settlement.
+    sale_attempts_per_settlement:
+      type: number
+      role: output
+      description: Sale attempts allowed per settlement.
+    sale_activity_points:
+      type: number
+      role: output
+      description: Activity Points that selling the trophy counts as.
+    no_buyer_at_or_below:
+      type: number
+      role: output
+      description: A sale value at or below this means there is no buyer in that settlement.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: sale_attempted_in_settlement
+    right:
+      type: literal
+      value: false
+  effects:
     - type: set
       target: sale_attempts_per_settlement
       value:
@@ -1674,15 +2259,19 @@
         type: literal
         value: 1
     - type: set
-      target: sale_price
+      target: no_buyer_at_or_below
       value:
         type: literal
-        value: creature XP + table value; must be positive
+        value: 0
+  issues:
+    - issue.guild.trophy_sale_settlement_column
   dependencies:
     - key: related_0
+      label: procedure.ranger_trophy_sale
+      object_id: procedure.ranger_trophy_sale
+    - key: related_1
       label: table.guild.taxidermy_sale
       object_id: table.guild.taxidermy_sale
-  entity_id: talent.taxidermist
 - id: character.settlement.guild.inner_sanctum.praying
   name: Praying in the Inner Sanctum
   section_id: section.the_inner_sanctum.praying_in_the_inner_sanctum
@@ -1691,16 +2280,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 158
       printed_page: 156
-      heading: Praying in the Inner Sanctum
+      heading: Praying in the Inner Sanctum.
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Warrior Priests choose one god and receive the same boon as temples, but succeed on
-    1–5. The text says the Trickster God still deducts Luck on a 6 as described in the Temple
-    section; that section does not specify the deduction.
+  source_text: Just like the dedicated temples, the Inner Sanctum has areas dedicated to each God.
+    The Warrior Priest can choose to pray at one of these, and receive the same blessing as granted
+    to the other heroes in the temples. The difference is that the gods are more likely to listen,
+    and a result of 1-5 will grant this boon. While praying to the Trickster God, a result of 6 will
+    still give the deduction of luck as described in the ‘Temple’ section.
   type: modifier
   scope: settlement
   fields:
@@ -1736,6 +2327,11 @@
     - key: related_0
       label: character.settlement.temples
       object_id: character.settlement.temples
+    - key: access
+      label: character.settlement.guild.inner_sanctum.access
+      object_id: character.settlement.guild.inner_sanctum.access
+  see_also:
+    - section.settlements.pray_at_the_local_temples
   issues:
     - issue.settlement.trickster_deduction
 - id: character.settlement.guild.inner_sanctum.learning
@@ -1750,12 +2346,12 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    One prayer may be learned between dungeon visits. Costs 200 c + 100 c per level above 1
-    and takes 1 day.
+  source_text: Priests may learn a prayer from one of the High Priests. Each hero may learn one
+    prayer in between each visit to a dungeon. The price for learning a prayer is 200 c +100 c per
+    prayer level above 1. It takes 1 day.
   type: modifier
   scope: settlement
   fields:
@@ -1796,7 +2392,12 @@
       value:
         type: literal
         value: 1
-  dependencies: []
+  dependencies:
+    - key: access
+      label: character.settlement.guild.inner_sanctum.access
+      object_id: character.settlement.guild.inner_sanctum.access
+  issues:
+    - issue.prayers.learning_location
 - id: character.settlement.guild.inner_sanctum.blessed_armour
   name: Blessed Armours
   section_id: section.the_inner_sanctum.blessing_your_armour_and_weapons
@@ -1809,14 +2410,22 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Warrior Priests pay 25 c per piece to have each piece individually blessed. Gain +1
-    Durability until leaving the next dungeon.
+  source_text:
+    The Warrior Priests may seek to have their armour or weapon blessed by one of the High
+    Priests. ... Each piece of armour must be individually blessed to give the proper protection. As
+    this is tedious work, the High Priests have decided to take a fee of 25 c per piece to make this
+    feasible. Blessed Armour will benefit from +1 durability, and it will last until the heroes leave
+    the next dungeon.
   type: modifier
   scope: settlement
   fields:
+    eligible_profession:
+      type: string
+      role: output
+      description: Who may have armour blessed.
     cost_per_piece:
       type: number
       role: output
@@ -1830,6 +2439,11 @@
       role: output
       description: duration
   effects:
+    - type: set
+      target: eligible_profession
+      value:
+        type: literal
+        value: Warrior Priest
     - type: set
       target: cost_per_piece
       value:
@@ -1858,15 +2472,21 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
   source_text:
-    Blessing a weapon costs 75 c. Undead or Demons struck suffer 2 further DMG. Lasts until
-    leaving the next dungeon.
+    The Warrior Priests may seek to have their armour or weapon blessed by one of the High
+    Priests. ... A Blessed Weapon will work wonders against Undead beings and creatures of the void.
+    Any Undead or Demon struck by such a weapon suffers a further 2 points of DMG. Blessing a weapon
+    costs 75 c and lasts until the heroes leave the next dungeon.
   type: modifier
   scope: settlement
   fields:
+    eligible_profession:
+      type: string
+      role: output
+      description: Who may have a weapon blessed.
     cost:
       type: number
       role: output
@@ -1884,6 +2504,11 @@
       role: output
       description: duration
   effects:
+    - type: set
+      target: eligible_profession
+      value:
+        type: literal
+        value: Warrior Priest
     - type: set
       target: cost
       value:
@@ -1917,12 +2542,18 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Roll to determine the crusade target. Any party member may land the killing blow.
-    Trophies are collected automatically. Each matching enemy killed earns 25 c, paid when the
-    Warrior Priest next visits the Sanctum. The crusade lasts until leaving the next dungeon.
+  source_text:
+    The High Priests constantly proclaim crusades against the evils of the world. Based on
+    reports from around the kingdom, the priests decide where their forces need to focus. Roll on
+    the table below to decide what a crusade has been declared against. ... For every enemy the
+    Warrior Priest kills and brings a trophy from, the priest will receive 25 c. Now, there is no
+    real way for the High Priests to determine who actually killed the enemy, so it does not matter
+    who in the party landed the killing blow. The crusade only lasts until the heroes leave the
+    next dungeon. The trophies are considered to be collected automatically and the money is paid
+    the next time the Warrior Priest visits the Sanctum.
   type: modifier
   scope: settlement
   fields:
@@ -1976,3 +2607,54 @@
     - key: related_0
       label: table.guild.crusade
       object_id: table.guild.crusade
+  issues:
+    - issue.guild.crusade_target_scope
+- id: character.settlement.guild.inner_sanctum.special_equipment
+  name: Buying Special Equipment
+  section_id: section.the_inner_sanctum.buying_special_equipment
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Buying Special Equipment
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Here you can buy special things that are usually only available to the Warrior
+    Priests.
+  type: modifier
+  scope: settlement
+  fields:
+    catalogue_table:
+      type: string
+      role: output
+      description: The structured catalogue sold in the Inner Sanctum.
+    intended_buyers:
+      type: string
+      role: output
+      description: Who the catalogue is usually only available to.
+  effects:
+    - type: set
+      target: catalogue_table
+      value:
+        type: literal
+        value: table.guild.sanctum_equipment
+    - type: set
+      target: intended_buyers
+      value:
+        type: literal
+        value: Warrior Priests
+  dependencies:
+    - key: access
+      label: character.settlement.guild.inner_sanctum.access
+      object_id: character.settlement.guild.inner_sanctum.access
+    - key: catalogue
+      label: table.guild.sanctum_equipment
+      object_id: table.guild.sanctum_equipment
+    - key: purchase
+      label: procedure.guild_purchase_authorization
+      object_id: procedure.guild_purchase_authorization

@@ -1,0 +1,539 @@
+- id: test.travel.map_caption.green_first_hex
+  name: 'Map caption: the green route on foot, first hex off-road (1,5p)'
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      locator:
+        region: Hex map figure and its caption, right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Blue arrows would cost 5 points of movement and would require a horse. The green arrows
+    would cost 2,5 points and could be done on foot.'
+  kind: source_example
+  procedure_id: procedure.travel_daily_movement
+  inputs:
+    day: 0
+    movement_day: -1
+    event_day: 0
+    route_legal: true
+    movement_points: 0
+    hex_index: 0
+    terrain: 'off_road'
+    transport_mode: 'walking'
+  expected:
+    state:
+      movement_day: 0
+      movement_points: 1.5
+      hex_index: 1
+      entered_hex: true
+      terrain_cost: 1.5
+    events:
+      - type: invoke
+        dependency: Determine party transport eligibility
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: World Map route and terrain lookup
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_daily_movement
+    unresolved: []
+    steps:
+      - determine_allowance
+      - walking_allowance
+      - offroad_cost
+      - check_entry
+      - enter_hex
+- id: test.travel.map_caption.green_second_hex
+  name: 'Map caption: the green route on foot reaches the road at 2,5 points'
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      locator:
+        region: Hex map figure and its caption, right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Blue arrows would cost 5 points of movement and would require a horse. The green arrows
+    would cost 2,5 points and could be done on foot.'
+  kind: source_example
+  procedure_id: procedure.travel_daily_movement
+  inputs:
+    day: 0
+    movement_day: 0
+    event_day: 0
+    route_legal: true
+    movement_points: 1.5
+    hex_index: 1
+    terrain: 'road'
+    transport_mode: 'walking'
+  expected:
+    state:
+      movement_points: 0.5
+      hex_index: 2
+      entered_hex: true
+      terrain_cost: 1
+    events:
+      - type: invoke
+        dependency: Determine party transport eligibility
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: World Map route and terrain lookup
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_daily_movement
+    unresolved: []
+    steps:
+      - determine_allowance
+      - road_cost
+      - check_entry
+      - enter_hex
+- id: test.travel.map_caption.blue_on_foot
+  name: 'Map caption: on foot the blue route stops after the two road hexes (2p)'
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      locator:
+        region: Hex map figure and its caption, right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Blue arrows would cost 5 points of movement and would require a horse. The green arrows
+    would cost 2,5 points and could be done on foot.'
+  kind: source_example
+  procedure_id: procedure.travel_daily_movement
+  inputs:
+    day: 0
+    movement_day: 0
+    event_day: 0
+    route_legal: true
+    movement_points: 1
+    hex_index: 2
+    terrain: 'off_road'
+    transport_mode: 'walking'
+  expected:
+    state:
+      entered_hex: false
+      terrain_cost: 1.5
+    events:
+      - type: invoke
+        dependency: Determine party transport eligibility
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: World Map route and terrain lookup
+      - type: require
+        satisfied: false
+    trace:
+      - procedure.travel_daily_movement
+    unresolved: []
+    steps:
+      - determine_allowance
+      - offroad_cost
+      - check_entry
+- id: test.travel.map_caption.blue_on_horse
+  name: 'Map caption: riding, the blue route ends at 5 points'
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      locator:
+        region: Hex map figure and its caption, right column
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Blue arrows would cost 5 points of movement and would require a horse. The green arrows
+    would cost 2,5 points and could be done on foot.'
+  kind: source_example
+  procedure_id: procedure.travel_daily_movement
+  inputs:
+    day: 0
+    movement_day: 0
+    event_day: 0
+    route_legal: true
+    movement_points: 2.5
+    hex_index: 3
+    terrain: 'off_road'
+    transport_mode: 'all_riding_horses_or_camels'
+  expected:
+    state:
+      movement_points: 1
+      hex_index: 4
+      entered_hex: true
+      terrain_cost: 1.5
+    events:
+      - type: invoke
+        dependency: Determine party transport eligibility
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: World Map route and terrain lookup
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_daily_movement
+    unresolved: []
+    steps:
+      - determine_allowance
+      - offroad_cost
+      - check_entry
+      - enter_hex
+- id: test.travel.desert_camels.heroes_on_camels_walking_member
+  name: 'Desert Hex: heroes all have camels but the party walks, 3 Movement Points and 1,5 per hex'
+  section_id: section.travelling_and_skirmishes.moving_on_the_map
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 124
+      pdf_page: 126
+      heading: Moving on the Map
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Derived case for "A Desert Hex costs 2 Movement Points, unless all heroes have camels. Then it
+    is 1,5 points per hex." read separately from "A walking party, or a party with a wagon or mule
+    has 3 Movement Points. A party where all members are riding horses or camels has 6 Movement
+    Points.": every hero has a camel but another party member walks; inputs are test values.'
+  kind: derived_case
+  procedure_id: procedure.travel_daily_movement
+  inputs:
+    day: 0
+    movement_day: -1
+    event_day: 0
+    route_legal: true
+    movement_points: 0
+    hex_index: 0
+    terrain: 'desert'
+    transport_mode: 'walking'
+    all_heroes_have_camels: true
+  expected:
+    state:
+      movement_day: 0
+      movement_points: 1.5
+      hex_index: 1
+      entered_hex: true
+      terrain_cost: 1.5
+    events:
+      - type: invoke
+        dependency: Determine party transport eligibility
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: invoke
+        dependency: World Map route and terrain lookup
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_daily_movement
+    unresolved: []
+    steps:
+      - determine_allowance
+      - walking_allowance
+      - desert_cost
+      - camel_desert_cost
+      - check_entry
+      - enter_hex
+- id: test.travel.hunger_morale.heroes_mercenary_and_dog
+  name: 'Hunger: 3 heroes, 1 mercenary and a dog lower Party Morale by 4'
+  section_id: section.travelling_and_skirmishes.rations_and_resting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 166
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Derived case for the hunger penalty as changed by changelog 2.21 entry 166 ("Party Morale is also
+    lowered by 1 per character (Mercenaries included, not dogs)"); inputs are test values.
+  kind: derived_case
+  procedure_id: procedure.travel_food_and_rest
+  inputs:
+    phase: 'food'
+    food_choice: 'rations'
+    terrain: 'road'
+    has_trees: false
+    forage_day: -1
+    party_fed: false
+    day: 0
+    food_day: -1
+    rations_available: 0
+    hunger_morale_active: false
+    hunger_morale_loss: 0
+    party_morale: 8
+    party_member_count: 5
+    dog_count: 1
+  expected:
+    state:
+      food_day: 0
+      food_required: 1
+      hunger_morale_active: true
+      hunger_morale_loss: 4
+      party_morale: 4
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_food_and_rest
+    unresolved: []
+    steps:
+      - determine_food_requirement
+      - no_rations
+      - hunger_morale
+- id: test.travel.hunger_morale.two_heroes
+  name: 'Hunger: a party of 2 heroes loses 2 Party Morale'
+  section_id: section.travelling_and_skirmishes.rations_and_resting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 166
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Derived case for the hunger penalty as changed by changelog 2.21 entry 166 ("Party Morale is also
+    lowered by 1 per character (Mercenaries included, not dogs)"); inputs are test values.
+  kind: derived_case
+  procedure_id: procedure.travel_food_and_rest
+  inputs:
+    phase: 'food'
+    food_choice: 'rations'
+    terrain: 'road'
+    has_trees: false
+    forage_day: -1
+    party_fed: false
+    day: 0
+    food_day: -1
+    rations_available: 0
+    hunger_morale_active: false
+    hunger_morale_loss: 0
+    party_morale: 8
+    party_member_count: 2
+    dog_count: 0
+  expected:
+    state:
+      food_day: 0
+      food_required: 1
+      hunger_morale_active: true
+      hunger_morale_loss: 2
+      party_morale: 6
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - procedure.travel_food_and_rest
+    unresolved: []
+    steps:
+      - determine_food_requirement
+      - no_rations
+      - hunger_morale
+- id: test.travel.hunger_morale.second_hungry_day
+  name: 'Hunger: a second day without food lowers Party Morale no further'
+  section_id: section.travelling_and_skirmishes.rations_and_resting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 166
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Derived case for the hunger penalty as changed by changelog 2.21 entry 166 ("Party Morale is also
+    lowered by 1 per character (Mercenaries included, not dogs)"); inputs are test values.
+  kind: derived_case
+  procedure_id: procedure.travel_food_and_rest
+  inputs:
+    phase: 'food'
+    food_choice: 'rations'
+    terrain: 'road'
+    has_trees: false
+    forage_day: -1
+    party_fed: false
+    day: 1
+    food_day: 0
+    rations_available: 0
+    hunger_morale_active: true
+    hunger_morale_loss: 4
+    party_morale: 4
+    party_member_count: 5
+    dog_count: 1
+  expected:
+    state:
+      food_day: 1
+      food_required: 1
+    events: []
+    trace:
+      - procedure.travel_food_and_rest
+    unresolved: []
+    steps:
+      - determine_food_requirement
+      - no_rations
+- id: test.travel.hunger_morale.eat_again
+  name: 'Hunger: eating again restores the Party Morale the hunger removed'
+  section_id: section.travelling_and_skirmishes.rations_and_resting
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 125
+      pdf_page: 127
+      heading: Rations and Resting
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 25
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 166
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    Derived case for the hunger penalty as changed by changelog 2.21 entry 166 ("Party Morale is also
+    lowered by 1 per character (Mercenaries included, not dogs)"); inputs are test values.
+  kind: derived_case
+  procedure_id: procedure.travel_food_and_rest
+  inputs:
+    phase: 'food'
+    food_choice: 'rations'
+    terrain: 'road'
+    has_trees: false
+    forage_day: -1
+    party_fed: false
+    day: 2
+    food_day: 1
+    rations_available: 1
+    hunger_morale_active: true
+    hunger_morale_loss: 4
+    party_morale: 4
+    party_member_count: 5
+    dog_count: 1
+  expected:
+    state:
+      food_day: 2
+      food_required: 1
+      rations_available: 0
+      party_fed: true
+      hunger_morale_active: false
+      hunger_morale_loss: 0
+      party_morale: 8
+    events: []
+    trace:
+      - procedure.travel_food_and_rest
+    unresolved: []
+    steps:
+      - determine_food_requirement
+      - consume_rations
+      - restore_morale

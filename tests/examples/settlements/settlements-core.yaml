@@ -1,0 +1,187 @@
+- id: test.settlement.taking_on_quests.irondale_example
+  name: 'printed Taking on Quests example: Irondale rolls 1d6, result 1, read in turquoise'
+  section_id: section.settlements.taking_on_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
+      locator:
+        paragraph: Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Example: The party is in Irondale and has decided to take on the quest: ‘Rescuing the
+    Prisoners’. This campaign requires that the Quest Site should be randomised from the map.
+    Looking at the previous table we can tell that we should roll 1d6 and cross-reference with the
+    map. The result is 1, and since Irondale is turquoise, we read those numbers on the map, noting
+    with pleasure that the Quest Site is a mere two-day trek from the village.'
+  kind: source_example
+  rule_ids:
+    - character.settlement.quest_site_selector
+  inputs:
+    settlement: Irondale
+    quest_site_roll: 1
+  expected:
+    state:
+      quest_site_die: 1d6
+      quest_site_colour: Turqois
+      quest_site_number: 1
+    events: []
+    trace:
+      - character.settlement.quest_site_selector
+    unresolved: []
+    steps: []
+- id: test.settlement.taking_on_quests.durburim_has_no_quest_dice
+  name: Durburim has no row in the Taking on Quests table
+  section_id: section.settlements.taking_on_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
+      locator:
+        table: Uncaptioned table at the top of the right-hand column (Settlement, Quest dice, Colour)
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Quest Site is determined by rolling a dice and cross-referencing this to the
+    numbers written on the map.
+  kind: derived_case
+  rule_ids:
+    - character.settlement.quest_site_selector
+  inputs:
+    settlement: Durburim
+    quest_site_roll: 1
+  expected:
+    state: {}
+    events: []
+    trace:
+      - character.settlement.quest_site_selector
+    unresolved:
+      - issue.settlement.quest_offer_scope
+    steps: []
+- id: test.settlement.taking_on_quests.silver_city_two_d20
+  name: Silver City reads 2d20 in white
+  section_id: section.settlements.taking_on_quests
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 132
+      printed_page: 130
+      heading: Taking on Quests
+      locator:
+        table: Uncaptioned table at the top of the right-hand column (Settlement, Quest dice, Colour)
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The Quest Site is determined by rolling a dice and cross-referencing this to the
+    numbers written on the map. ... The largest city in the area, Silver City, attracts visitors
+    from all over the Kingdom. Therefore, the Quest Sites are far more dispersed.
+  kind: derived_case
+  rule_ids:
+    - character.settlement.quest_site_selector
+  inputs:
+    settlement: Silver City
+    quest_site_roll: 27
+  expected:
+    state:
+      quest_site_die: 2d20
+      quest_site_colour: White
+      quest_site_number: 27
+    events: []
+    trace:
+      - character.settlement.quest_site_selector
+    unresolved: []
+    steps: []
+- id: test.settlement.activities.wizard_learns_spell_example
+  name: 'printed Activities in a Settlement example: the Wizard learns a spell D1–D3, the party leaves D4'
+  section_id: section.settlements.activities_in_a_settlement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 133
+      printed_page: 131
+      heading: Activities in a Settlement
+      locator:
+        paragraph: Example
+        table: Uncaptioned table (Day/Night, Thief, Warrior, Priest, Wizard)
+        column: Wizard
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Example: This party has just arrived at the settlement (Silver City in this case)
+    after a challenging quest. They are weary and in need of rest and replenishment. The table below
+    will show you how the heroes decide to spend their time. ... D1 ... Collects Quest reward.
+    Visits Wizards’ Guild to learn a new spell. ... D2 ... Goes to Wizards’ Guild to continue
+    learning the spell. ... D3 ... Goes to Wizards’ Guild to continue learning the spell. ... N3
+    ... Inn. ... D4 Leaves on a Quest'
+  kind: source_example
+  rule_ids:
+    - character.settlement.long_activity_stay
+  inputs:
+    activity: learn_a_spell
+    start_day: 1
+  expected:
+    state:
+      activity_point_cost: 3
+      occupied_until_day: 3
+      party_stays_at_inn_until_night: 3
+      earliest_departure_day: 4
+    events: []
+    trace:
+      - character.settlement.long_activity_stay
+    unresolved: []
+    steps: []
+- id: test.settlement.activities.treat_mental_conditions_five_days
+  name: Treat Mental Conditions started on day 2 occupies days 2–6
+  section_id: section.settlements.activities_in_a_settlement
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      locator:
+        table: Uncaptioned table (What, Where, Activity Point cost)
+        row: Treat Mental Conditions
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Those which cost more than 1 Activity Point take longer than a day to perform. During
+    those days nothing else can be done.
+  kind: derived_case
+  rule_ids:
+    - character.settlement.long_activity_stay
+  inputs:
+    activity: treat_mental_conditions
+    start_day: 2
+  expected:
+    state:
+      activity_point_cost: 5
+      occupied_until_day: 6
+      party_stays_at_inn_until_night: 6
+      earliest_departure_day: 7
+    events: []
+    trace:
+      - character.settlement.long_activity_stay
+    unresolved: []
+    steps: []

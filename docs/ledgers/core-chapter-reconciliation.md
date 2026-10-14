@@ -2474,3 +2474,693 @@ and `procedure.travel_food_and_rest` now list the reviewer's new unresolved issu
 not say how it combines with Rations and Resting's -4 on PDF 127). The optional pointer edit to
 `issue.psychology.hungry_morale_penalty` was not made, to keep `review.psychology_tables.4` fresh;
 `issue.rest.without_ration` still cites entry 124's -4 and is left for the next review of its unit.
+
+## Tier 6 — Settlement catalogue — 14 October 2026
+
+Pages inspected (rendered, enlarged quadrant crops): PDF 136–139 (printed 134–137) and PDF 140
+(full-page Silver City map, no folio; page map label 138). Also PDF 134 (Available Actions, Gamble
+row) and PDF 145 (Gambling) for the Whiteport issue, and changelog PDF 13 (entries 79–82).
+
+Per-section disposition (all 14 now `extracted`; none `reviewed`):
+
+- `the_settlements_of_the_southern_part_of_the_kingdom`: rules extracted (new
+  `character.settlement.listed_services`, the intro paragraph: closed service list, prices and
+  availability unchanged unless noted); tables extracted (`table.settlement.profiles`, which this
+  heading owns; the book prints no ruled table, so no `.table` node is needed); glossary, examples,
+  procedures, entities not_applicable.
+- Caelkirk, Freyfell, Coalfell, Irondale, Whiteport, Rochdale, Windfair, Silver City, The Outpost,
+  Durburim, Birnheim: rules extracted (`character.settlement.profile.*`), entities extracted
+  (`settlement.*`); tables not_applicable (each list is a row of `table.settlement.profiles`);
+  glossary and examples not_applicable; procedures not_applicable except The Outpost (extracted:
+  `procedure.ancient_lands_expedition` cites the heading and runs membership and toll).
+- `the_silver_city`, `the_ancient_lands`: boxed italic setting sidebars, all components
+  not_applicable (Brotherhood of Ohlnir sidebar precedent).
+- PDF 140 map: stays owned by `section.settlements` in pages.yaml (like full-page art on PDF 69,
+  214, 215); note now names it. It prints place labels only, no mechanics. `settlement.silver_city`
+  cites it as an image source.
+
+Changed objects:
+
+- `table.settlement.profiles`: the services cells were paraphrased summaries mixed with setting
+  prose. They are now the verbatim Available Services lists, one line per printed line or bullet.
+  The column label is now "Available Services". The table cites the intro heading and all 11
+  settlement headings, and source_text quotes the intro.
+- `character.settlement.profile.*` (11): source_text is now the verbatim services list (The
+  Outpost also quotes "All expeditions into these lands must start from the outpost by law."), and
+  `visually_verified` is true. Whiteport gains `gambling_opportunities` and the issue. The Outpost
+  gains `ancient_lands_quest_sites` ('yellow 1-12') and `toll_recipient` ('the King'), plus
+  dependencies on `procedure.ancient_lands_expedition`,
+  `core.quest.ancient_lands.outpost_membership` and
+  `character.equipment.transport.camel.purchase`. Caelkirk depends on
+  `character.settlement.blacksmith`, which justifies reading its Blacksmith "Equipment" as weapons
+  and armour. Numeric effects were checked against the crops and needed no change.
+- `settlement.*` (11): source_text is now the verbatim description paragraph. Each entity also
+  links `character.settlement.listed_services`. Whiteport lists the new issue.
+- New: `character.settlement.listed_services`.
+- `tests/fixtures/settlements/catalogue-cells.yaml`: the profiles block was rewritten to the
+  verbatim cells. This is a PDF-checked correction of the earlier paraphrase.
+- New test: `tests/rules/settlement-southern-catalogue.test.ts` covers the closed list, each rule
+  quoting its row, the Whiteport issue, the Outpost toll qualifiers and Caelkirk's weapons and
+  armour reading.
+
+Examples: none printed on PDF 136–140.
+
+Issues: new `issue.settlement.whiteport_gambling_scope` (unresolved). Whiteport's "There are also
+gambling opportunities" conflicts with the closed service list on one side, and with Gamble at any
+Inn and Gambling "once during each stay in a settlement" on the other.
+
+Rulings:
+
+- #80 (Whiteport gambling) is "Fixed" with no stated rule. It is recorded, not applied: it is
+  evidence on the new issue, with a row in review/designer-published-rulings.md.
+- #81 is the Asylum (PDF 146), Rejected "This is as intended". It is not in this unit.
+- #82 (Temple of Ohlnir) is already applied on `issue.settlement.ohlnir_temple_name`. Its scope is
+  the temple description, and the settlement lists here are unaffected.
+- #76/#167 (Ancient Lands rations) are not printed in these sections. They are left to the Travel
+  unit, and no row here needed `issue.travel.partial_rations`.
+- No FAQ entry or other changelog entry names these settlements.
+
+Frozen objects: none touched. Only `test.core.quest.start_settlement.windfair` is frozen in this
+area.
+
+Concurrency note: another agent's rewrite of `corpus/rules/settlement/arrival-profiles.yaml`
+dropped `character.settlement.listed_services` once. It was re-inserted, and the profile edits
+survived.
+
+Gates: `npm run validate` reports no errors for this unit. The 64 remaining errors are other
+units' in-progress work: unknown `issue.settlement.*` ids (arena, banking, quest-offer, grimoire)
+and the arena odds, bank returns and racing winnings tables. `npm test`:
+settlement-southern-catalogue (5/5) and the profiles cells in settlement-catalogue pass. The other
+failures are in guild, travel, settlement-selector and schema suites that those units are editing.
+`npm run lint` only fails on another agent's untracked `scripts/_tmp_g6*.ts`.
+
+## Tier 6 — Inner Sanctum and Buying an Estate — 14 October 2026
+
+Units: `section.the_inner_sanctum` and its descendants; `section.buying_an_estate` and its children
+except `section.buying_an_estate.side_quest_the_grieving_mother` (not touched). Nothing set
+`reviewed`.
+
+Pages inspected (rendered): PDF 158–163 and 166 (printed 156–161 and 164); PDF 146–147 (printed
+144–145) for the temple prayer rules the Inner Sanctum points to; PDF 165 (printed 163) for the
+Grieving Mother "Aftermath – If You Fail" sentence the ghost procedure quotes; changelog 2.2x page 14
+(entries 83–88).
+
+Per-section disposition (all now `extracted`):
+
+- `section.the_inner_sanctum`: rules `character.settlement.guild.inner_sanctum.access` (new);
+  procedures `procedure.guild_access`; entities `guild.inner_sanctum`; glossary, tables and
+  examples `not_applicable`.
+- `.blessing_your_armour_and_weapons`: rules `blessed_armour`, `blessed_weapon`; procedures
+  `procedure.guild_item_service` (blessing steps); others `not_applicable`.
+- `.praying_in_the_inner_sanctum`: rules `praying`; procedures `procedure.sanctum_prayer`.
+- `.practicing_skills`: rules `inner_sanctum.training` (moved here from the root); procedures
+  `procedure.guild_skill_training`.
+- `.learning_a_new_prayer`: rules `learning`; procedures `procedure.learn_prayer` (frozen, cited
+  only).
+- `.buying_special_equipment`: rules `character.settlement.guild.inner_sanctum.special_equipment`
+  (new); procedures `procedure.guild_purchase_authorization`; tables and entities `not_applicable`
+  (owned by the `.table` node).
+- `.buying_special_equipment.table`: unchanged dispositions; note rewritten.
+- `.crusades`: tables now `not_applicable` (the `.table` node owns `table.guild.crusade`); rules
+  and procedures extracted; entities `not_applicable`.
+- `.crusades.table`: entities dispositioned `not_applicable`.
+- `section.buying_an_estate`: rules and procedures now `not_applicable` (the opening paragraph
+  states no rule; the ghost rule it used to carry moved to Staying at the House); entities
+  `estate.bergmeister`.
+- `.buying_the_house`, `.staying_at_the_house`, `.furnishing_the_manor`, `.ghostly_events_table`:
+  existing rules, tables, procedures and entities confirmed against the page; entities
+  dispositioned on every row.
+- `.the_dark_gods`: glossary `term.dark_gods` (new, `mechanically_significant: false`); every other
+  component `not_applicable` (setting sidebar, no game effect).
+
+Section tree: `staying_at_the_house` now spans PDF 160–161 (the run-in The Ghosts of Past
+Generations continues on 161); `ghostly_events_table` spans PDF 162–163 (entries 7–10 continue).
+
+Changed objects:
+
+- `source_text` replaced with verbatim quotations (they were paraphrases):
+  `character.settlement.guild.inner_sanctum.praying`, `.learning`, `.blessed_armour`,
+  `.blessed_weapon`, `.crusades`; `character.settlement.estate.purchase`, `.lodging`,
+  `.ghost_contact`, `.furnishing`, `.departure`; `estate.bergmeister`; `guild.inner_sanctum`;
+  `table.guild.crusade`, `table.guild.sanctum_equipment`, `table.estate.furnishings`,
+  `table.estate.ghost_events`; procedure-level text of `procedure.sanctum_crusade`,
+  `procedure.sanctum_prayer`, `procedure.estate_ownership`, `procedure.estate_furnishing` and
+  `procedure.estate_ghostly_events` (extractor reasoning moved to `unresolved_references`), and most
+  of their step texts; the four Inner Sanctum blessing steps of `procedure.guild_item_service`.
+- `character.settlement.guild.inner_sanctum.training`: moved to Practicing Skills, now records
+  "takes 1 day" (`duration_days`); the access restriction moved to the new access rule.
+- Blessing rules record the Warrior Priest actor (`eligible_profession`).
+- Shrine: the re-capitalised "Only one shrine can be built" restored to "Due to the ongoing rivalry
+  between the gods, only one shrine can be built" in the rule, entity, table cell, procedure substep
+  and the catalogue-cells fixture.
+- `table.estate.furnishings` and `table.estate.ghost_events`: invented footnotes removed (the text
+  is prose, not a printed footnote); the ghost table now cites PDF 162 and 163 instead of 161–162.
+- `table.guild.crusade`: column label "Crusade against…" (ellipsis printed); cites changelog
+  entries 84 and 85.
+- `character.settlement.ghost_event.1`–`.10`: names and headings are the printed entry titles
+  (were "ghost_event N" / the table heading); entries 8–10 cite PDF 163 only (entry 8 cited 162
+  too); entry 1 records "the Wonderful Treasure Chart" as unresolved; entry 6 `see_also` the
+  Grieving Mother section; entry 10 also uses `table.treasure.curses`.
+- `character.settlement.estate.ghost_contact`: `section_id` moved from the chapter root to
+  `section.buying_an_estate.staying_at_the_house` (its printed parent), cites PDF 160 and 161, and
+  returns `issue.estate.ghost_contact_scope`.
+- `procedure.estate_furnishing`: the Wizard’s Study branch now requires `hero_is_wizard` ("A wizard
+  may store…"); the Kennel stays unconditional.
+- `procedure.estate_ownership`: the combined heading "Buying the House; Staying at the House" split
+  into the two printed headings.
+- Shared procedures, PDF 158 citation only: `procedure.guild_access` heading "inner_sanctum" →
+  "The Inner Sanctum"; `procedure.guild_skill_training` heading "Skill Training" → "Practicing
+  Skills".
+- All estate furnishing entities and the estate tables marked visually verified.
+
+New objects: `character.settlement.guild.inner_sanctum.access`,
+`character.settlement.guild.inner_sanctum.special_equipment`, `term.dark_gods` and its alias row,
+`issue.guild.crusade_target_scope`, `issue.guild.sanctum_prayer_fee`.
+
+Examples: PDF 158–163 and 166 print no example; no fixture added.
+
+Issues:
+
+- `issue.guild.crusade_target_scope` (new): the 25 c reward sentence does not restate that only
+  enemies of the declared category count, and Beasts/Reptiles membership is not defined here.
+- `issue.guild.sanctum_prayer_fee` (new): the Inner Sanctum prints no fee or time for praying;
+  `procedure.sanctum_prayer` applies the temple's 50 c and one day and returns the issue.
+- `issue.settlement.trickster_deduction`: its Temple of Rhidnir source cited PDF 158 (wrong page);
+  now PDF 147 / printed 145, plus Praying in the Inner Sanctum. on PDF 158; `related` adds
+  `procedure.sanctum_prayer`, which returns it.
+
+Rulings: #84/#85 (Crusades header "1d4" → "1d6", "Fixed"): our PDF already prints 1d6; recorded as
+already printed in `review/designer-published-rulings.md`, cited on `table.guild.crusade`. #77
+(prayer learning 1 Activity Point vs the example's days, "Fixed" without a rule): already recorded
+on `issue.settlement.prayer_schedule_duration`; the Inner Sanctum's "It takes 1 day" agrees with the
+activity table; nothing applied. No FAQ entry or changelog page-28 entry concerns these pages.
+
+Frozen objects: none edited. `procedure.learn_prayer` (frozen) cites Learning a New Prayer and is
+named in coverage only. Out-of-scope note: `core.quest.grieving_mother.failure` paraphrases
+"There will automatically be a Ghostly Event before the next quest, and that will be #8." (PDF 165);
+the Grieving Mother unit owns it.
+
+Tests: `tests/tables/phase-five-settlement-catalogues.test.ts` now expects no furnishing footnote
+and checks the verbatim one-purchase sentence; `tests/fixtures/settlements/catalogue-cells.yaml`
+carries the full Shrine sentence; `tests/rules/estate-ghosts-lifecycle.test.ts` adds a Wizard’s
+Study actor test (wizard allowed, non-wizard refused, Kennel unconditional).
+
+## Tier 6 — Guilds — 14 October 2026
+
+Pages inspected: rendered PDF 148–157 (printed 146–155), plus PDF 144–146 for the Charge Magic
+Items, Guilds and Identifying Items and Potions cross-references. Enlarged 4× renders checked the
+Fighters’ equipment table (PDF 152), the Alchemists’ parts and ingredients tables (PDF 154) and the
+Rangers’ equipment table (PDF 157); every cell, price, availability and requirement matches. Changelog
+pages 25–26 rendered for entries 173–179. No page in the range prints an "Example:".
+
+Per-section disposition (all `extracted`; `reviewed` not set):
+
+- `section.the_dark_guild`: rules, procedures (`procedure.guild_access` step `enter_dark`) and
+  entity `guild.dark` extracted; tables owned by the two table nodes.
+- `section.the_dark_guild.skill_training`: rule and `procedure.guild_skill_training`.
+- `section.the_dark_guild.buying_special_equipment`: span extended to PDF 148–150 (the Traps text
+  ends on PDF 150); seven rules; purchases via `procedure.guild_purchase_authorization`.
+- `section.the_dark_guild.buying_special_equipment.table`, `section.the_dark_guild.table`
+  (reparented under Buying Special Equipment, where it is printed), `section.fighters_guild.table`,
+  `section.fighters_guild.buying_special_equipment.table`, `section.wizards_guild.table`,
+  `section.alchemists_guild.table`, `section.rangers_guild.table`,
+  `section.rangers_guild.equipment_table`: table cells re-verified; table notes rewritten.
+- `section.the_dark_guild.buying_special_equipment.table_2`: compatibility redirect, stays `mapped`.
+- `section.fighters_guild`, `section.fighters_guild.buying_special_equipment`,
+  `section.wizards_guild`, `section.alchemists_guild`, `section.rangers_guild`: rules, procedures
+  and guild entities extracted; glossary and examples `not_applicable` (no term defined, no example
+  printed).
+- `section.alchemists_guild.life_in_the_kingdom`: all components `not_applicable`; PDF 155 prints
+  only the setting-fiction sidebar.
+
+Changed objects:
+
+- `corpus/rules/settlement/guilds.yaml`: the 23 guild rules on these pages had paraphrased
+  `source_text` and the invented heading "Guild access and Skill Training". All now quote the page
+  verbatim under printed headings, with every citing page, and model printed qualifiers in `when`:
+  profession for training, traps and talents; Caltrops range and no adjacent enemy; no ongoing
+  battle and Quick Slot for the Tripwire and Bear Trap; padded, leather or mail armour with a DEF
+  value and one of each add-on; edged weapon at full durability; a wound status marker; a repaired
+  broken Magic Item; Skinning, Butcher (roll below half the skill, RDD) and Taxidermist conditions.
+- New rules: `character.settlement.guild.dark.dark_as_the_night`, `.dark_as_the_night_all_zones`
+  (split from the Nightstalker rule so -5 and -10 are separate branches),
+  `character.settlement.guild.wizards.staff_casting`,
+  `character.settlement.guild.rangers.trophy_sale`.
+- `corpus/rules/settlement/guild-equipment.yaml`: barbed arrows and bolts get encumbrance 0 and the
+  Compass durability 1, under the rulings below.
+- `corpus/tables/guilds/catalogue.yaml`: column labels now printed (`1d00`, `Def`, `Enc`, `DUR`,
+  `Avail`); the bounty table's extractor footnote and the Dark Guild tools table's extractor note in
+  `unresolved_references` removed; `source_text` quotes each table's introducing sentence or header.
+- `corpus/entities/guilds/catalogue.yaml` (five guild entities) and `ranger-talents.yaml` (three
+  talents): verbatim `source_text`, printed headings.
+- Procedures owned here (`procedure.fighters_bounty`, `procedure.ranger_special_talent`,
+  `procedure.ranger_trophy_sale`): verbatim procedure and step text; separate printed headings for
+  the tutor fees; `ranger_trophy_sale` gains step `settlement_column_undefined`.
+- `procedure.guild_access` (section `section.settlements.guilds`, Settlements unit): minimal edits
+  only. Headings "dark", "fighters", … and step headings "Guild access" replaced by printed
+  headings; the per-guild entry steps quote this unit's pages (Alchemists cite the general Guilds
+  rule on PDF 145, since their page names no profession); the visitor step applies ruling 173. Its
+  procedure-level `source_text` and `initialize`/Inner Sanctum steps are still paraphrased and
+  belong to the Settlements and Inner Sanctum units.
+
+Issues (new, `review/ambiguities.yaml`): `issue.guild.wizards_identify_visitors` (resolved, #173),
+`issue.guild.staff_casting_scope` (resolved, #174), `issue.guild.human_body_parts` (resolved,
+#177), `issue.guild.barbed_ammunition_encumbrance` (resolved, #178),
+`issue.guild.rangers_health_column` (resolved, #179), `issue.guild.wizards_grimoire_sale`
+(unresolved, #176 recorded not applied, with the FAQ answer as evidence),
+`issue.guild.caltrops_no_armour`, `issue.guild.tripwire_setup_outside_quick_slot`,
+`issue.guild.alchemists_access`, `issue.guild.alchemist_part_from_enemy`,
+`issue.guild.trophy_sale_settlement_column`.
+
+Rulings (changelog 2.21; each "Page N" matches our printed folio): #173 applied (identifying
+visitors admitted to the Wizards’ Guild; resolves a real conflict with printed 144); #174 applied
+(automatic success only for the spell contained in the staff); #175 already printed (Pain Killer
+Enc "-", DUR "1"); #176 recorded, not applied (no Grimoire or spell sale text on printed 151; #171 is
+the Settlement activities unit's and is not duplicated); #177 applied (no part withheld; Human blood
+is listed); #178 applied (barbed ammunition 0 ENC, printed cells kept); #179 applied ("Health"
+column is DUR, printed label kept). Rows added to `review/designer-published-rulings.md`. The
+page-28 2.22 entries concern bows only.
+
+Frozen objects: none edited. The `part.*` and `ingredient.*` entities (frozen) reference rows of
+`table.guild.alchemist_availability`, so its two printed tables stay merged in one table (parts rows
+1–30, ingredients 31–50); the coverage note says so.
+
+Tests: new `tests/rules/guilds-reconciliation.test.ts` (derived branch fixtures for every new
+condition and for rulings 173, 174, 177, 178, 179). `tests/rules/character-guilds.test.ts` and the
+guild assertions in `tests/tables/phase-five-settlement-catalogues.test.ts` pass unchanged.
+`tests/rules/settlement-catalogue.test.ts` changed for two PDF-checked corrections: Caltrops no
+longer asserts `requires_unarmoured_enemy` (now `issue.guild.caltrops_no_armour`) and supplies the
+typed inputs for Caltrops, Tripwire, Bear Trap and Slayer; staff casting moved to
+`character.settlement.guild.wizards.staff_casting` under ruling 174. `tests/schema/review.test.ts`
+lists the five newly resolved issues.
+
+Gates: `npm run validate`, `npm test` and `npm run lint` pass.
+
+## Tier 6 — Travel (part node, Travelling and Skirmishes) — 14 October 2026
+
+Pages inspected (rendered): PDF 125–131 (printed: divider without folio, then 124–129), and
+changelog 2.2x PDF 12 (entry 76) and PDF 25 (entries 166–170). The FAQ snapshot and the changelog's
+page-28 section were searched by topic; nothing applies to these pages.
+
+Per-section disposition:
+
+- `section.travel_and_settlements` (part divider, PDF 125): extracted, all components
+  not_applicable, following the `section.dungeoneering_and_combat` precedent.
+- `section.travelling_and_skirmishes` (root): extracted; rules `core.travel.return_after_quest`,
+  `core.travel.free_movement`, `core.travel.ancient_land_desert_hexes`; other components
+  not_applicable.
+- `.reading_the_map`: extracted; rules `core.travel.map.road_hex`,
+  `core.travel.map.quest_site_colours`, `core.travel.map.town_quest_sites`.
+- `.rations_and_resting`: extracted; procedure-owned (`procedure.travel_food_and_rest`); span
+  corrected to PDF 126–127 (the text continues at the top of PDF 127).
+- `.moving_on_the_map`: extracted; procedure-owned (`procedure.travel_daily_movement`); examples
+  extracted.
+- `.skirmishes`: extracted; procedure-owned (`procedure.travel_skirmish_setup`); span corrected to
+  PDF 127–130 (Desert and Setup on PDF 128, the table under Setup to PDF 130).
+- `.events`: extracted; procedure-owned (`procedure.travel_event_check`).
+- `.visiting_settlements`: extracted; rules `core.travel.visit_settlements` and
+  `core.travel.staying_at_inns` (run-in heading Staying at Inns), handing off to
+  `section.settlements`.
+- `.kredelia_the_goddess_of_travellers`: extracted with zero records, all not_applicable: the
+  sidebar names an offering and a possible boon but gives no cost, roll, timing or effect, and the
+  book mentions Kredelia nowhere else.
+- `.table`: extracted; now spans PDF 128–130 and owns all 22 rows of `table.travel.obstacles`.
+- `.table_2`: compatibility redirect to `.table` (same span, mapped, all not_applicable). Ids kept.
+
+New objects: `corpus/rules/travel/travelling-and-skirmishes.yaml` (the eight `core.travel.*`
+rules above); `tests/examples/travel/travelling-and-skirmishes.yaml`.
+
+Changed objects:
+
+- All four procedures in `corpus/procedures/travel/journey.yaml`: paraphrased top-level and step
+  `source_text` replaced by verbatim quotations; added citations (map caption, chapter
+  introduction, Events for the movement allowance, run-in headings for skirmishes).
+- `procedure.travel_food_and_rest`: ruling 166 applied (below); fields `party_member_count`,
+  `dog_count`, `hunger_morale_loss`; dependency on `character.morale.event.hungry`; issues add
+  `issue.character_basics.foraging_travel`, which already named the procedure.
+- `procedure.travel_skirmish_setup`: new steps `road_tiles`, `wilderness_tiles`,
+  `called_for_tiles`, `desert_tiles` (the four kinds of outdoor tiles by trigger, input
+  `skirmish_trigger`, output `outdoor_tiles`); an unprinted trigger is rejected; the 3d terrain
+  step returns `issue.travel.skirmish_3d_terrain_charging`.
+- `table.travel.obstacles`: cells checked against enlarged renders (unchanged); citations now use
+  the printed run-in heading Setup with a locator; the extractor footnote about the artwork-only
+  Example column was removed (the book prints no footnote) and the column is named in each
+  locator; `see_also` to the redirect removed.
+
+Examples: the PDF 126 map caption ("Blue arrows would cost 5 points of movement and would require a
+horse. The green arrows would cost 2,5 points and could be done on foot.") is
+`test.travel.map_caption.green_first_hex`, `.green_second_hex`, `.blue_on_foot` and
+`.blue_on_horse`, with a chained route test in `tests/rules/travel-accounting.test.ts`. No other
+example is printed on PDF 125–131; the obstacle table's Example column is artwork.
+
+Rulings:
+
+- #166 applied. The printed sentence "Party Morale is also lowered by 4" is on PDF 127, printed 125,
+  as the entry says. `source_text` keeps it; step `hunger_morale` lowers Party Morale by
+  `party_member_count - dog_count` once, stores the loss and restores it when the party eats again;
+  later hungry days lower it no further. Derived fixtures
+  `test.travel.hunger_morale.heroes_mercenary_and_dog` (5 members with a dog: -4), `.two_heroes`
+  (-2), `.second_hungry_day` (no further drop) and `.eat_again` (restored).
+- `issue.psychology.hungry_morale_duration_and_travel_penalty` resolved from #166 with #148:
+  duration until the party eats again; no per-day cumulation (148's "cumulative" refers to party
+  members); the table row and the Rations and Resting sentence are one penalty, applied once.
+- #76 / #167 (Ancient Lands, 2 rations for the party): already applied; #76 added as a citation.
+  `issue.travel.partial_rations` summary rewritten (its "two rations per hero" was stale); the
+  1-ration case stays open. Register row updated to #76, #167, partial.
+- #168, #169, #170: added text that this PDF does not print (169 also points to The False Prophet,
+  not present). Recorded, not applied, as new unresolved issues
+  `issue.travel.skirmish_3d_terrain_charging`, `issue.travel.natural_swimmer_pier_and_water` and
+  `issue.travel.huge_statue_size`, with "recorded, not applied" rows in the register.
+
+Frozen objects: only `issue.psychology.hungry_morale_duration_and_travel_penalty` was edited (as
+allowed). Needing a change, not edited: `character.morale.event.hungry` (its `hungry_characters`
+description says "heroes and other party members such as mercenaries" and does not exclude dogs, as
+#166 does); `issue.rest.without_ration` (its summary still says "Party Morale -4, confirmed by
+changelog 2.21 entry 124", superseded by #148 and #166).
+
+Tests: `tests/rules/travel-accounting.test.ts` (party size fields; new tests for the per-character
+penalty, dog exclusion, stored-loss restore, outdoor tiles by trigger, an unprinted trigger, the
+caption routes; the skirmish tests supply `skirmish_trigger` and expect the 3d issue);
+`tests/tables/travel-obstacles.test.ts` (no footnote; locator names the Example column);
+`tests/reports/chapters.test.ts` (Kredelia no longer unfinished, so the no-records assertion moved
+to `section.appendix_i_perks.metheia_the_god_of_life`, PDF 169 / printed 167; redirects 37);
+`tests/schema/review.test.ts` (resolved list adds the hungry duration issue).
+
+Gates: `npm run validate` passes. `npm test`: all travel, table, report and pilot fixture tests
+pass; the remaining failure is `tests/schema/review.test.ts`'s resolved-issue list, which lacks
+five `issue.guild.*` issues resolved by the Guilds unit. `npm run lint`: Prettier and ESLint clean;
+`tsc` reports two TS2352 errors in `tests/rules/guilds-reconciliation.test.ts` (Guilds unit).
+`docs/coverage-report.md` was not regenerated here.
+
+## Tier 6 — Settlement activities — 14 October 2026
+
+Pages inspected (rendered): PDF 141–147 (printed 139–145), PDF 134 (Available Actions, for the
+Activity Point cost of each activity), PDF 135–136 (Sale, Shortage, Settlement Feast and the
+settlement intro, quoted by the buy/sell procedure) and PDF 57 (printed 55, mental conditions
+table, quoted by the Asylum procedures). Changelog PDF 13 (#81, #82), 14 (#83) and 25 (#171,
+#172), and the FAQ snapshot ("Can I sell scrolls or Grimoires?"). No page in the unit prints an
+"Example:".
+
+Per-section disposition (31 rows now `extracted`, none `reviewed`; `arena_fighting.table_4` and
+`.table_5` stay compatibility redirects, now with a note):
+
+- `arena_fighting` (span extended to PDF 141–142): rules, procedures extracted; tables
+  not_applicable (five child nodes); the bracket diagram adds no rule. `arena_fighting.table`,
+  `.table_2`, `.table_3`, `table_3`, `table_4`: tables extracted.
+- `banking`: rules, procedures extracted; `banking.table` owns `table.settlement.bank_returns`.
+- `buying_and_selling`: rules (six), procedures extracted; Companion's Expansion recorded as
+  `external_references: companions_compendium`; see_also the Sell and Repair Table node.
+- `charge_magic_items`, `create_magic_scrolls`, `enchant_items`, `level_up`: rules extracted;
+  procedures not_applicable (location statements or pointers). The ‘Enchanting’ and ‘Enchant
+  Items’ chapter pointers are bound to `section.enchantments` (printed title Enchantments).
+- `collect_your_reward`, `cure_disease_and_poison`, `identifying_items_and_potions`,
+  `repair_equipment`: rules extracted; procedures extracted via the steps of
+  `procedure.settlement_buy_sell_and_service` (and `procedure.disease_cure`).
+- `fortune_teller`, `gambling`, `horse_racing`, `pray_at_the_local_temples` (span extended to PDF
+  147; horse racing to PDF 146): rules and new procedures extracted; horse racing also owns
+  `table.settlement.horse_racing`. `fortune_teller.table`, `gambling.table`,
+  `learn_a_spell_or_prayer.table` (racing multipliers) and `level_up.table` (racing awards):
+  tables extracted. The odd node ids stay; their titles and Horse Racing parent were already right.
+- `guilds`, `learn_a_spell_or_prayer`, `skills_training`, `tending_to_those_memories`,
+  `treat_mental_conditions`, `rest_and_recuperation`: rules and existing procedures extracted.
+- Every row: glossary not_applicable (no headword defined; no term cites these sections),
+  examples not_applicable (none printed; derived cases named in the notes), entities
+  not_applicable (shops, banks, temples and the arena have no catalogue record).
+
+Changed objects:
+
+- Tables: `table.settlement.arena_modifiers` held all three PDF 141 tables in one; it is now only
+  Hero Hit Points, and new `table.settlement.arena_strength_modifiers` (Hero STR, `.table_2`) and
+  `table.settlement.arena_level_modifiers` (Level, `.table_3`) hold the other two with numeric
+  modifier cells. Column labels now match the page (Hero lvl / Group / Semi / Final; Result;
+  Extra Award; 1st place 1d10 / 2nd place 1d10; "Multiplier for 2nd place."). Extra-award selectors
+  are typed ranges. Horse racing placement cells now read `<=DEX-10` and `>DEX-10` as printed.
+  Paraphrased table source_text replaced by the printed lead-in sentence; the racing awards text no
+  longer says to roll both selectors.
+- Rules: every `character.settlement.*` rule in the unit (31 in services.yaml, arena entry/results
+  and banking in arrival-profiles.yaml) now quotes the page verbatim with the printed run-in
+  headings and both pages where a passage spans two (Temple of Iphy). `character.settlement.cure`
+  cites the Sick Wards sentence on PDF 147; `character.settlement.identification` no longer folds
+  the activity table's Magic Brewery into the PDF 146 value. `character.settlement.memories` adds
+  `inn_recoveries_per_stay` 1 citing changelog #83. Issues and see_also added where the page
+  points elsewhere. `character.recovery.inn_hp` and `character.sanity.treatment_success` quotes
+  now mark their mid-sentence start with "..."; PDF 144–147 sources of the recovery, reward and
+  repair rules are `visually_verified`.
+- Procedures: `procedure.settlement_buy_sell_and_service`, `procedure.mental_condition_treatment`
+  and `procedure.mental_condition_cleanup` replace their paraphrased procedure and step
+  source_text with verbatim quotes (PDF 135, 136, 144, 146, 147 and the PDF 57 table rows). No
+  executable effect changed.
+- New procedures (`corpus/procedures/settlement/activities.yaml`): `procedure.arena_fighting`,
+  `procedure.horse_racing`, `procedure.settlement_gambling`, `procedure.fortune_teller`,
+  `procedure.temple_prayer`, `procedure.settlement_banking`. Each carries the Available Actions
+  Activity Point cost and models the printed qualifiers: fee once for three levels, optional
+  semi-final, mandatory final, XP to the hero, RDD payouts; owning a horse, bet including the fee,
+  placement in the printed order with catastrophe at 95 or more; once per stay, at the inn, Luck
+  and the Fortune Teller -2 never modifying a natural 10, RDU win; Warrior Priests excluded, one
+  temple before each quest, 1-3 on 1d6, Ohlnir's CS or RS choice; Silver City visit, roll per
+  account only when a balance exists, adjust before deposit or withdrawal.
+  The winnings tables print comma decimals, which cannot be numeric cells, so the two procedures
+  compute the multipliers in tenths (21/23/25 − level for the arena, 31/26 − level for racing).
+  `tests/tables/settlement-activity-multipliers.test.ts` checks every printed cell against them
+  and every bank roll against `table.settlement.bank_returns`.
+- Sections: spans of `arena_fighting`, `horse_racing` and `pray_at_the_local_temples` extended;
+  see_also added for `buying_and_selling`, `create_magic_scrolls`, `enchant_items`,
+  `fortune_teller`, `guilds`, `level_up`, `repair_equipment`.
+- `tests/tables/phase-five-settlement-catalogues.test.ts`: the arena expectation now checks the
+  three separate tables, and the racing placement cells match the page. Both are PDF-checked
+  corrections.
+
+Examples: none printed on PDF 141–147. New derived cases (29) in
+`tests/examples/settlements/activities.yaml`, one per branch of each new procedure; expected
+values were computed by hand before comparison with the runner.
+
+Issues (new, unresolved): `issue.settlement.arena_hit_points_basis` (current or maximum HP),
+`issue.settlement.bank_return_rounding`, `issue.settlement.gambling_outcome_amounts` (Grand slam
+stake basis; robbery the hero cannot cover; the beating), `issue.settlement.horse_racing_catastrophe`
+("a few days to fully recover"), `issue.settlement.grimoire_sale_value` (#171 and the FAQ),
+`issue.settlement.arcane_arts_identification` (#172).
+
+Rulings: #171 and #172 add text this printing does not print: recorded, not applied, with rows
+in review/designer-published-rulings.md. #83 (partial on `issue.sanity.recovery_scope`) is now
+applied to `character.settlement.memories`; the rulings row says so. #81 (Rejected, "This is as
+intended") confirms the printed 1-5 Asylum roll: cited on `character.settlement.asylum` and listed
+under "Checked and already printed". #82 stays applied (Ohlnir rule, prayer procedure). #77: PDF
+146 agrees with Available Actions (spell 3 days, prayer 1 day); `issue.settlement.prayer_schedule_duration`
+belongs to Activities in a Settlement and was not changed. #80 is the catalogue unit's.
+
+Frozen objects: none edited. Frozen issues are only listed under new objects. Not changed but
+worth a follow-up: `procedure.sanity_recovery` (frozen) does not cite changelog #83.
+
+Left to the Guilds unit: `procedure.guild_access`, `procedure.guild_item_service`,
+`procedure.guild_purchase_authorization` and `procedure.guild_skill_training` have section_id in
+this unit but quote guild chapter pages in paraphrase; `procedure.guild_item_service` cites only
+PDF 153 and 158 and probably belongs to a guild section.
+
+Size: the digest for this unit is 167 objects. A later review could split at the page boundary
+PDF 141–143 (Arena Fighting, Banking) and PDF 144–147.
+
+Gates (final run): `npm run validate` passes; `npm test` passes (4280 tests, 2 skipped);
+`npm run lint` passes. `docs/coverage-report.md` was not regenerated here.
+
+## Tier 6 review corrections (B) — Settlement services, Guilds, Inner Sanctum and Buying an Estate — 14 October 2026
+
+Records: `review.settlements_services.1`, `review.guilds.1`, `review.inner_sanctum_and_estate.1`.
+Pages re-checked on the rendered PNGs: PDF 134, 145–148, 151–154, 156–159, 161, 165; changelog
+2.21 page 14 (entry 83).
+
+### review.settlements_services.1
+
+- `procedure.guild_access` (applied): procedure source_text is now the verbatim PDF 145 Guilds
+  paragraph plus the PDF 153 visitor sentence; the "no membership fee, enrolment or rank" note moved
+  to `unresolved_references`. Step `initialize` quotes the PDF 145 sentence with its own source;
+  `enter_inner_sanctum` quotes "Only a Warrior Priest may enter the Inner Sanctum and consult with
+  the High Priests." PDF 145 sources marked visually verified.
+- `procedure.guild_item_service` (applied, split pushed back): section_id moved from
+  `section.settlements.guilds` to `section.wizards_guild`. Procedure and step source_text (initialize,
+  quote_staff_recharge, check_service, perform_service, recharge, staff_charges) now quote PDF 153 and
+  PDF 158 verbatim; implementation notes moved to `unresolved_references`. Not split into two
+  procedures: the id is cited by acceptance evidence and the guild tests, and one procedure keeps
+  the single fee/once-per-item flow; the Wizards’ Guild and blessing coverage notes name it.
+- `procedure.guild_purchase_authorization` (applied; section_id kept): source_text is now the
+  verbatim PDF 145 access sentence joined with the six guild "Buying" lead-in sentences and the
+  Alchemists’ part/ingredient/potion sentences (PDF 148, 152–154, 157–158); step texts quote the
+  access sentence and the guild buying sentences; the handoff note moved to `unresolved_references`.
+  Kept under `section.settlements.guilds` because it is the shared access guard for all six guild
+  catalogues; no single guild chapter owns it. Changelog #177 handling is unchanged (applied on
+  `character.settlement.guild.alchemists.purchases`; this procedure withholds nothing).
+- `procedure.guild_skill_training` (applied): source_text quotes PDF 147 "This can be done in the
+  Guilds." and each guild's Skill Training paragraph verbatim; each eligibility step quotes its
+  guild's practice sentence (Fighters, Wizards and Rangers also their profession sentence); the near-80
+  step and check/train steps quote the +3/300 c/once-per-skill sentences, the Available Actions
+  "Skill Training | Guilds | 1" row (row locator) and the PDF 60 maximum. Notes moved to
+  `unresolved_references`. PDF 148's heading corrected to the printed "Skill training".
+- Coverage `section.settlements.guilds` (applied): notes now name `procedure.guild_access` and
+  `procedure.guild_purchase_authorization`, and say the services procedure sits under the
+  Wizards’ Guild. `section.wizards_guild` notes say the procedure also holds the blessing steps.
+- `character.sanity.inn_recovery` once-per-stay guard (pushed back, partial): the rule now cites
+  changelog 2.21 page 14 row 83 and `issue.sanity.recovery_scope`, and `unresolved_references`
+  states the limit is not enforced here. The guard was not added: the validator requires every field
+  of a referenced rule to be declared on the invoking procedure, and `procedure.sanity_recovery`
+  (frozen) has no per-stay field, so a new `inn_sanity_recovered_this_stay` input would fail
+  validation and throw in the procedure's tests. The rulings row #83 and the Tending to those
+  Memories coverage note now say so. Needs a later unfreeze of `procedure.sanity_recovery`.
+
+### review.guilds.1
+
+- `table.guild.alchemist_availability` split (pushed back; fallback applied): not split. All 48
+  frozen `part.*` and `ingredient.*` entities in corpus/entities/alchemy/catalogue.yaml list
+  `table.guild.alchemist_availability` with row ids (parts row_1–row_30, ingredients row_31–row_50),
+  and the validator requires those links to be reciprocal, so moving either group to a new table
+  breaks frozen references. Instead each of the 50 rows now has a row source whose locator names its
+  printed table ("Parts table (Type | Avail)" with first/second column pair, or "Ingredients table
+  (Ingredient | Availability)"), and `unresolved_references` say that the combined column labels are
+  not printed and that the footnote belongs to the parts table (three ¹ parts only). The footnote
+  text stays verbatim. Coverage note for `section.alchemists_guild.table` updated. No `table_2` node.
+- `table.guild.fighters_bounty` (applied): `random_table`, `roll_domain` 1–100, roll cells typed
+  `range` (1-2 → 1..2, …, 00 → 100..100, printed strings kept; label "1d00" kept). The range
+  validator in scripts/validate/pilot.ts now accepts printed "00" for 100..100.
+- `table.guild.taxidermy_sale` (applied): `random_table`, `roll_domain` 1–20, range roll cells, Village
+  and Silver City as number cells (`meaning: modifier`, printed strings kept).
+- `procedure.ranger_special_talent` and `character.settlement.guild.rangers.talents` (applied): both
+  list `issue.guild.ranger_talent_any_time`; the procedure's `unresolved_references` say the Silver
+  City / guild / settlement-activity gating is an unprinted reading.
+
+### review.inner_sanctum_and_estate.1
+
+- `procedure.sanctum_prayer` verbatim steps (applied): `initialize` quotes PDF 158 "The Warrior
+  Priest can choose to pray at one of these" and PDF 146 "each hero may choose only one temple
+  before each quest"; `pray` quotes "Praying at the temple costs 50 c. ... This takes one day."
+  (PDF 146); `same_god_retry_uncertain` quotes the PDF 146 sentence. Explanations moved to
+  `unresolved_references`. Procedure PDF 146/147 sources marked visually verified.
+- Sanctum prayer fee (applied, option a): new input `sanctum_fee_reading` (`temple_fee_and_day` or
+  `no_fee_or_day`). New step `fee_reading_unsupplied` returns `issue.guild.sanctum_prayer_fee` and
+  makes no prayer when no reading is given; `pray` runs only under the temple reading (50 c, one
+  completed Activity Point day); new step `pray_no_fee` grants the attempt without fee or day. The
+  fee, Activity Point and day requirements moved out of the `initialize` require into `pray`. Issue
+  summary updated.
+- `same_god_retry_uncertain` (applied): requires guild `inner_sanctum` and profession
+  `warrior_priest`.
+- `procedure.sanctum_crusade` `early_return_uncertain` (applied): quotes "The crusade only lasts until
+  the heroes leave the next dungeon. ... the money is paid the next time the Warrior Priest visits
+  the Sanctum." and requires guild `inner_sanctum` and profession `warrior_priest`.
+- `procedure.estate_furnishing` (applied): `reset` and substep `owned` quote the PDF 161 "When
+  staying at the manor ..." sentence; `price_1`–`price_9` use the printed heading lines ("Training
+  Grounds 500 c", …); `train_other_facility`, `alchemy`, `alchemy_limit_unsupplied` and
+  `frequency_open` quote the Archery Range, Alchemist Lab/Garden, and Shrine/Smithy/Crops sentences.
+  The permanence question joined the procedure's `unresolved_references`.
+- `procedure.estate_ghostly_events` (applied): `reset`, `scope_unsupplied` and `due` quote "Between
+  every quest, the party must roll 1d10. This is done the night before the planned departure." (PDF
+  161); `forced_event`, `owed_event_in_addition` and `owed_reading_unsupplied` quote "There will
+  automatically be a Ghostly Event before the next quest, and that will be #8." (PDF 165, Aftermath –
+  If You Fail; no side-quest object edited). Reading explanations moved to `unresolved_references`.
+- `issue.guild.same_god_prayer_retry` (applied): PDF 158 heading now "Praying in the Inner
+  Sanctum."; PDF 146 source marked visually verified.
+
+New issues: none. Rulings: #83 row updated (still partial; enforcement blocked by the frozen
+procedure). Frozen objects needing change: `procedure.sanity_recovery` (per-stay Sanity field and
+changelog #83 citation); the 48 `part.*`/`ingredient.*` entities if the alchemist table is ever split.
+
+Tests: tests/rules/character-guilds.test.ts (prayer fixture supplies `sanctum_fee_reading`; new
+cases for an unsupplied reading, the no-fee reading, the same-god guard and the crusade early-payment
+guard); tests/tables/phase-five-settlement-catalogues.test.ts (random-table typing of the Bounty Hunt
+and trophy sale tables).
+
+## Tier 6 review corrections (A) — Travel, Settlements core, Arena and Banking, carry-overs — 14 October 2026
+
+Pages checked on the render before editing: PDF 126 (Moving on the Map), 132–133 (Taking on
+Quests, Rejecting a Quest, Available quests, Activities example), 136–137 (Freyfell, Whiteport and
+the village descriptions), 142 (Betting, Odds, and Winning), 143 (Banking), 147 (Rest and
+Recuperation), 160 (Staying at the House), 273 (Side Quests), 58 (Party Morale table); changelog
+2.21 pages 23 (row 148) and 25 (row 166).
+
+### review.travelling_and_skirmishes.1
+
+- Issue link (applied): `procedure.travel_daily_movement` now lists
+  `issue.travel.movement_points_per_day`; the free-text reading left `unresolved_references` and is
+  named as the issue's reading in the `movement_day` and `movement_points` field descriptions
+  (renewal per day, no carry-over, entry only with enough points) and in the coverage note.
+- Camels (applied): new supplied boolean input `all_heroes_have_camels`; `camel_desert_cost` now
+  requires Desert Hex and `all_heroes_have_camels`, independent of `transport_mode`, which only sets
+  the 3/6 allowance. The `all_camels` transport value is dropped (an unknown value is now refused).
+  New derived fixture `test.travel.desert_camels.heroes_on_camels_walking_member` (walking party,
+  heroes on camels, Desert Hex 1,5, 1,5 left).
+
+### review.settlements_core.1
+
+- `procedure.settlement_arrival` (applied, with one qualification): lists
+  `issue.settlement.quest_availability_repeat`; new step `repeat_quest_roll_unresolved` returns it
+  on a second quests call in the same visit while offers remain (the roll is still not repeated);
+  new step `no_quest_available_unresolved` returns it when the roll offers no quest, and
+  `enforce_rejection_limit` no longer sets `must_depart` for that case. Pushed back on removing
+  departure after every offered quest has been rejected: the page prints "If none of the quests are
+  interesting to the party, they must move to another settlement to find new ones", so that branch
+  (available 0 after at least one rejection) still forces departure.
+- `issue.settlement.quest_offer_scope` (applied): names Freyfell ("This is the largest port in the
+  southern part of the kingdom", PDF 136) and Whiteport ("Whiteport is one of two ports in the
+  southern part of the Kingdom", PDF 137), notes that the other five settlements are each called a
+  village, and cites both pages; `freyfell` and `whiteport` join the unresolved rejection-limit
+  branch and the limit exclusions of the procedure.
+- `state_machine.quest_dungeon` (applied; allowed carry-over): second `party_rejects_offer`
+  transition for a settlement that is neither Silver City nor a village, with no limit and
+  `issues: [issue.settlement.quest_offer_scope]`. Schema: state-machine transitions gained an
+  optional `issues` list (types in `scripts/validate/pilot-types.ts`, open-issue link check in
+  `scripts/validate/pilot.ts`).
+- Wizard fixture (applied): `test.settlement.activities.wizard_learns_spell_example` quotes the
+  Wizard column only ("D3 ... Goes to Wizards’ Guild to continue learning the spell. ... N3 ...
+  Inn."). Coverage note of `section.settlements.activities_in_a_settlement` no longer claims the
+  Thief is tested.
+- `procedure.settlement_activities_and_overnight` (applied): the eleven steps `estate_lodging`,
+  `stable_lodging`, `recovery_boundary`, `stable_half_boundary`, `paid_hp`, `restore_luck`,
+  `paid_recovery`, `stable_readiness`, `allow_stable_recovery`, `stable_luck` and `stable_recovery`
+  now quote PDF 147 (Rest and Recuperation, including "only half (RDD)") or PDF 160 (Staying at the
+  House) verbatim and cite that page; the modelling commentary moved to procedure-level
+  `unresolved_references`. "(RDD)" settles the rounding of the half but not its base (maximum,
+  missing or current amount), so the supplied-amount gate stays.
+- `issue.settlement.prayer_schedule_duration` (pushed back: frozen, review.prayers.2): not edited;
+  heading and changelog #77 correction reported as a follow-up.
+
+### review.settlements_arena_banking.1
+
+- Arena (applied): `issue.settlement.arena_winnings_accumulation` added to
+  `procedure.arena_fighting`, `character.settlement.arena_results` and `table.settlement.arena_odds`;
+  `winnings`, `group_payout`, `semi_payout` and `final_payout` descriptions name the sum-and-keep
+  reading as applied pending the issue; `test.procedure.arena_fighting.wins_all_three` and
+  `.loses_final` name the reading in their source_text; coverage note updated.
+- Banking (applied): `issue.settlement.bank_roll_per_account` added to `procedure.settlement_banking`,
+  `character.settlement.banking` and `table.settlement.bank_returns`; `bank` and `roll` descriptions
+  and the `section.settlements.banking` coverage note name the per-account roll as the reading
+  applied pending the issue.
+
+### review.into_the_dungeons_setup.3
+
+- Applied: `state_machine.quest_dungeon` lists `issue.quest.side_quest_availability` and the
+  `side_quest_available` description says the guard applies only the d8 reading and quotes Side
+  Quests (PDF 273). The issue is not frozen, so `state_machine.quest_dungeon` joined its `related`.
+
+### review.psychology_party_morale.6
+
+- `character.morale.event.hungry` (applied; allowed carry-over): `hungry_characters` counts heroes
+  and mercenaries, not dogs (changelog 2.21 entries 148 and 166); new source changelog PDF 25,
+  heading 2.21, row 166; source_text and the -1 per character effect unchanged. New fixture
+  `test.character.morale.event.hungry.dog_not_counted`. Rulings row for
+  `issue.psychology.hungry_morale_duration_and_travel_penalty` mentions the rule.
+- Double penalty (real, fixed): step `hunger_morale` of `procedure.travel_food_and_rest` both
+  subtracted the loss and invoked `character.morale.event.hungry`; an invoke is a handoff, so a
+  consumer executing it would apply the penalty twice. The invoke was removed; the dependency stays
+  as a labelled reference. Hunger fixtures and tests/rules/travel-accounting.test.ts no longer
+  expect the invoke event.
+
+New issues: none. Rulings: #166 applied to `character.morale.event.hungry` (row updated).
+Frozen objects needing change: `issue.settlement.prayer_schedule_duration` (PDF 134 heading
+"Available Actions"; cite changelog #77, PDF 12, which is marked Fixed without a stated rule);
+`issue.phase4.recovery_bounds` (say that "only half (RDD)" settles rounding, not the base, cite
+the PDF 147 page as visually verified, and add `procedure.settlement_activities_and_overnight` to
+`related`); `issue.psychology.hungry_morale_duration_and_travel_penalty` (its resolution says the
+travel procedure invokes the hungry rule; it now references it without invoking).
+
+Tests: tests/rules/travel-accounting.test.ts (camel cost keyed to heroes; `all_camels` refused; no
+hungry invoke), tests/rules/settlements-core.test.ts (Freyfell and Whiteport return the offer-scope
+issue; no-quest roll and repeat roll return the availability issue; rejecting every offered quest
+forces departure; the state machine's open-limit rejection transition and side-quest issue).
+
+Gates: `npm run validate` passes (524 files); `npm test` passes (4298 tests, 2 skipped); `npm run lint` passes after corrector A finished formatting corpus/procedures/travel/journey.yaml.
