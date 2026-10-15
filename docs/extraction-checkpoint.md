@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 8 October 2026
+## Current position — 15 October 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -37,32 +37,48 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   Attack, Enemy Attack). `section.into_the_dungeons.table_3` is now a redirect. Changelog 2.21
   entries 67, 155 and 160 are applied; 159 (Initiative token stacking), 162, 164 and 165 are
   recorded, not applied.
+- Step 2 tier 6 is reconciled and independently reviewed (15 October): the Travel and
+  Settlements part node (`review.travel_and_settlements.1`), Travelling and Skirmishes
+  (`review.travelling_and_skirmishes.2`), Settlements as four units (`review.settlements_core.3`,
+  `review.settlements_catalogue.1`, `review.settlements_arena_banking.2`,
+  `review.settlements_services.2`), the five guild chapters (`review.guilds.3`) and The Inner
+  Sanctum with Buying an Estate (`review.inner_sanctum_and_estate.4`); 98 sections. The Grieving
+  Mother side quest stays `extracted` for Step 3. Changelog 2.21 entry 166 (Rations and Resting:
+  −1 per character, mercenaries included, not dogs) is applied and resolves
+  `issue.psychology.hungry_morale_duration_and_travel_penalty`; 173, 174, 177–179 are applied;
+  80, 168–171, 172 and 176 are recorded, not applied. `state_machine.quest_dungeon` now quotes
+  PDF 132–133 with typed offer, reject and departure guards (`review.into_the_dungeons_setup.7`).
+  `section.travelling_and_skirmishes.table_2` is now a redirect.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
-- Coverage: see the generated [coverage report](coverage-report.md); 309 sections reviewed.
+- Coverage: see the generated [coverage report](coverage-report.md); 407 sections reviewed.
   Phases 7–12 are unfinished.
 
 ## Next unit
 
-Step 2, tier 6: Travelling and Skirmishes, Settlements, guilds, Inner Sanctum, Buying an Estate
-(PDF 125–166). Reconcile with `npm run report:chapters`, then one fresh `corpus-reviewer` per
-review unit of at most about 12 pages or 150 objects; failed findings go to a separate
-corrector, then fresh re-reviewers; promote only sections whose latest review passed and is
-fresh. Open carry-overs:
+Step 2, tier 7: Appendices I–V (Perks, Talents, Equipment, Spells, Treasures), Adding a Third
+Dimension, and front and back matter (PDF 1–11, 167–220, 280–286). Appendix III Equipment has the
+most unfinished work (13 of 23 sections, 8 with no records). The 6 open Phase 0–6 exit rows
+assigned to tier 7 close here. Reconcile with `npm run report:chapters`, then one fresh
+`corpus-reviewer` per review unit of at most about 12 pages or 150 objects; failed findings go to
+a separate corrector, then fresh re-reviewers; promote only sections whose latest review passed
+and is fresh. Open carry-overs:
 
 - `issue.0004` still lacks `related` links to the Acute Stress rule and procedure (frozen by
   `review.introduction.2`).
 - `issue.phase4.magic_breakage` lists only `character.durability.broken` in `related` (frozen
   by `review.equipment.2`).
-- Going hungry: changelog 2.21 entry 148 (-1 per hungry character) is applied to
-  `character.morale.event.hungry` by user decision, superseding entry 124's flat -4.
-  `issue.psychology.hungry_morale_duration_and_travel_penalty` (open) asks how it combines with
-  Rations and Resting's -4 (PDF 127), which `procedure.travel_food_and_rest` still applies;
-  settle it with the Travelling extraction. `issue.rest.without_ration` still cites entry 124's
-  -4 (frozen by `review.into_the_dungeons_actions.3`). The GM table in `clients/web` still uses
-  a flat -2.
-- `state_machine.quest_dungeon` offered/accepted transitions (PDF 132–133) still paraphrase;
-  check them in tier 6.
+- `issue.rest.without_ration` still cites entry 124's −4 (frozen by
+  `review.into_the_dungeons_actions.3`); entries 148 and 166 supersede it.
+- `issue.phase4.recovery_bounds` should say that "only half (RDD)" (PDF 147) settles rounding,
+  not the base, and relate `procedure.settlement_activities_and_overnight`.
+- `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
+  limit on `character.sanity.inn_recovery` is recorded but not enforced.
+- `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
+  46 frozen `part.*` / `ingredient.*` entities cite its rows; split it when those are next
+  reviewed.
+- The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
+  hungry character (not dogs), once, until the party eats.
 
 ## Evidence ledgers
 

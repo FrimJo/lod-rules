@@ -3164,3 +3164,58 @@ issue; no-quest roll and repeat roll return the availability issue; rejecting ev
 forces departure; the state machine's open-limit rejection transition and side-quest issue).
 
 Gates: `npm run validate` passes (524 files); `npm test` passes (4298 tests, 2 skipped); `npm run lint` passes after corrector A finished formatting corpus/procedures/travel/journey.yaml.
+
+## Tier 6 review closure and promotion — 15 October 2026
+
+Re-reviews after the two correction passes. Corrector A stopped at its final check (an API limit)
+with every edit in place; its gates were re-run and pass. Leftover findings from the re-reviews
+were small and fully specified and were applied by the coordinator:
+
+- `issue.quest.side_quest_availability`: the summary now says `procedure.side_quest_selection`
+  accepts `offer_basis` `arrival_d8` or `stay_choice` and that the book states no order for
+  "work your way through them one by one" (the corpus takes the printed table order).
+- `procedure.side_quest_selection` (Quest Book I, reached through that issue): procedure-level
+  `source_text` and the steps `stay_choice_unresolved`, `roll_side_quest`, `next_in_order` and
+  `attach_and_hand_off` quote PDF 273 and PDF 133 verbatim; `check_owner`, `bind` and `owner` no
+  longer cite PDF 273 and are marked as corpus bookkeeping. Pushed back on narrowing
+  `stay_choice_unresolved` to `stay_choice` only: a failed arrival d8 does not settle whether the
+  party may still accept a side quest "at any time during their stay in the city" (PDF 273),
+  which is the open issue; the re-reviewer accepted this.
+- `issue.settlement.quest_availability_repeat`: summary matches the corrected procedure (one roll
+  per visit, the issue on a no-quest roll or a second call, departure only after every offered
+  quest is rejected).
+- `issue.settlement.prayer_schedule_duration` (frozen by `review.prayers.2`, changed by user
+  decision): PDF 134 heading is now "Available Actions"; changelog 2.21 row 77 (PDF 12, "Fixed"
+  without a stated rule) is cited as evidence. The 29 Prayers sections were set back to
+  `extracted` and re-promoted after `review.prayers.3` passed.
+- `procedure.guild_item_service`: sources PDF 145 (Guilds) and PDF 133 (Activities in a
+  Settlement; Leaving on a Quest), and a note that PDF 153 and 158 print no Activity Point cost or
+  duration for recharging or blessing.
+- Coverage notes: `section.settlements.taking_on_quests` cites the "two-day trek" to the PDF 132
+  example; `section.the_inner_sanctum.praying_in_the_inner_sanctum` describes the three
+  `sanctum_fee_reading` branches of `procedure.sanctum_prayer`.
+
+Records (latest, all fresh): `review.travelling_and_skirmishes.2`, `review.settlements_core.3`,
+`review.settlements_catalogue.1`, `review.settlements_arena_banking.2`,
+`review.settlements_services.2`, `review.guilds.3`, `review.inner_sanctum_and_estate.4`; carry-overs
+`review.into_the_dungeons_setup.7`, `review.psychology_party_morale.7`, `review.prayers.3`; part node
+`review.travel_and_settlements.1`. Re-reviews from 15 October ran on Claude Haiku 5.5.
+
+Promoted: every non-redirect tier 6 section except the Grieving Mother side quest (Step 3), plus
+`section.psychology.party_morale`, the 16 Into the Dungeons setup sections and the 29 Prayers
+sections. The seven tier 6 compatibility redirects stay `mapped`.
+
+Pushed back, blocked by frozen objects (follow-ups for a later review of their units):
+
+- `table.guild.alchemist_availability` keeps the Alchemists' Guild's two printed tables merged:
+  46 frozen `part.*` / `ingredient.*` entities cite its rows. Each row records its printed table
+  and the notes say the combined headers are not printed.
+- `character.sanity.inn_recovery` cites changelog 2.21 #83 but cannot enforce once-per-stay: the
+  frozen `procedure.sanity_recovery` has no per-stay field.
+- `issue.rest.without_ration` still cites entry 124's −4 (frozen by
+  `review.into_the_dungeons_actions.3`); entries 148 and 166 supersede it.
+- `issue.phase4.recovery_bounds` should say "only half (RDD)" settles rounding, not the base.
+
+Consumer drift: the `/gm` island in `clients/web` still applies a flat −2 for going hungry; the
+corpus now applies −1 per hungry character (mercenaries included, dogs not), once, until the
+party eats (changelog 2.21 entries 148 and 166).

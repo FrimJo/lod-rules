@@ -7,13 +7,13 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 679 / 679 | 100% |
-| extracted | 504 / 679 | 74% |
-| reviewed | 309 / 679 | 46% |
+| mapped | 678 / 678 | 100% |
+| extracted | 580 / 678 | 86% |
+| reviewed | 408 / 678 | 60% |
 
-Total sections tracked: 679
+Total sections tracked: 678
 
-36 compatibility redirects are excluded from all extraction counts above and below.
+37 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
@@ -21,6 +21,7 @@ Total sections tracked: 679
 | --- | --- |
 | section.magic.casting_spells.table_3 | section.magic.casting_spells.table_2 |
 | section.into_the_dungeons.table_3 | section.into_the_dungeons.table_2 |
+| section.travelling_and_skirmishes.table_2 | section.travelling_and_skirmishes.table |
 | section.settlements.settlement_events.table_2 | section.settlements.settlement_events.table |
 | section.settlements.settlement_events.table_3 | section.settlements.settlement_events.table |
 | section.settlements.settlement_events.table_4 | section.settlements.settlement_events.table |
@@ -65,7 +66,7 @@ Total sections tracked: 679
 | section | 15 |
 | subsection | 388 |
 | appendix | 5 |
-| table | 182 |
+| table | 181 |
 | example | 3 |
 | optional_rule | 3 |
 | scenario_rule | 37 |
@@ -78,12 +79,12 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 66 | 185 | 428 |
-| rules | 425 | 48 | 206 |
-| tables | 215 | 119 | 345 |
-| examples | 26 | 186 | 467 |
-| procedures | 113 | 160 | 406 |
-| entities | 232 | 128 | 319 |
+| glossary | 68 | 115 | 495 |
+| rules | 431 | 29 | 218 |
+| tables | 202 | 64 | 412 |
+| examples | 29 | 116 | 533 |
+| procedures | 127 | 121 | 430 |
+| entities | 232 | 54 | 392 |
 
 ## Remaining tables
 
@@ -131,6 +132,7 @@ None. Every node in the structural map has been mapped.
 | section.settlements.settlement_events | companions_compendium |
 | section.settlements.caelkirk | companions_compendium |
 | section.settlements.freyfell | companions_compendium |
+| section.settlements.buying_and_selling | companions_compendium |
 | section.buying_an_estate.furnishing_the_manor | companions_compendium |
 | section.quest_book_i.lair_of_the_spider_queen.level_1_the_entrance | bestiary |
 | section.psychology.table | bestiary |

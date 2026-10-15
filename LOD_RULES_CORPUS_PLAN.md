@@ -8,7 +8,7 @@
 >
 > **Explicitly out of scope:** the player-facing helper application, UI, chat experience, and runtime product integration.
 
-## Current status — 8 October 2026
+## Current status — 15 October 2026
 
 The phase specifications and unchecked exit criteria below are the original plan, not a live
 completion checklist. This status summary is based on the canonical corpus, coverage report,
@@ -19,16 +19,16 @@ sections are independently reviewed.
 | Phase | Status | Evidence and remaining work |
 | --- | --- | --- |
 | 0 — Repository bootstrap | Complete | Source manifest, conventions, schemas, validation, tests and lint tooling are present. |
-| 1 — Structural map | Complete | All 286 pages mapped; 679 canonical sections and 36 compatibility redirects. Structural corrections found during review (page spans, run-in parents) are applied in `sections.yaml`. |
-| 2 — Glossary and ontology | Complete within scoped extraction | 114 terms; scope and distinctions recorded in [ontology](docs/ontology.md). Terms are added as chapters are reconciled. |
+| 1 — Structural map | Complete | All 286 pages mapped; 678 canonical sections and 37 compatibility redirects. Structural corrections found during review (page spans, run-in parents) are applied in `sections.yaml`. |
+| 2 — Glossary and ontology | Complete within scoped extraction | 116 terms; scope and distinctions recorded in [ontology](docs/ontology.md). Terms are added as chapters are reconciled. |
 | 3 — Schema pilot | Complete | Representative extraction and executable fixtures; see the historical [pilot audit](docs/ledgers/phase-3-pilot.md). |
 | 4 — Core mechanics | Extracted and tested | All 21 priority areas covered; the chapters holding most of them (Game Basics, Character Basics, Equipment, Psychology, Magic, Alchemy, Prayers, Into the Dungeons, Combat) are now independently reviewed. See the [Phase 4 audit](docs/ledgers/phase-4-core-mechanics.md). |
-| 5 — Entities and tables | Complete at catalogue scope | Batches 1–7 extracted; all quest, personal-quest and estate catalogue records exist. [Package A](docs/ledgers/package-a-completion-inventory.md) and [quest/scenario evidence](docs/ledgers/quest-scenario-inventory.md) record the boundaries. Independent review of catalogue chapters is Step 2 tiers 5–7 and Step 3 (Alchemy and Prayers are done). |
+| 5 — Entities and tables | Complete at catalogue scope | Batches 1–7 extracted; all quest, personal-quest and estate catalogue records exist. [Package A](docs/ledgers/package-a-completion-inventory.md) and [quest/scenario evidence](docs/ledgers/quest-scenario-inventory.md) record the boundaries. Independent review of catalogue chapters is Step 2 tiers 5–7 and Step 3 (Alchemy, Prayers, settlements, guilds and the estate are done). |
 | 6 — Procedures and state machines | Complete at documented scope | Batches 1–7. Packages B/C (travel and settlement accounting), D (character and guild procedures) and F (lifecycle models) are accepted: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 at `catalogue_scope`. Per-quest ordered lifecycles are optional deferred work. See the [Phase 6 ledger](docs/ledgers/phase-6-procedures-and-state-machines.md) and [lifecycle ledger](docs/ledgers/lifecycle-procedures.md). |
 | 7 — Dependency graph and precedence | Groundwork only | References and explicit overrides exist; comprehensive graph generation and analysis are pending (Step 4). |
 | 8 — Examples as executable tests | In progress, chapter by chapter | Runs inside the Step 2 core-chapter loop: every printed example in a reconciled chapter is classified and executable ones are fixtures. Chapters not yet reconciled still hold unclassified examples. |
-| 9 — Independent review | In progress, chapter by chapter | Schema-validated review records under `review/independent/` with content digests and staleness checks. Twenty-four fresh passing records back 309 reviewed sections. Issues: 221 records, 196 unresolved and 25 resolved (most by published designer rulings). |
-| 10 — Full-book coverage pass | In progress | 504 of 679 sections extracted (74%), 309 independently reviewed (46%). Step 2 tiers 1–5 are closed (Introduction through Combat). Tiers 6–7 cover 115 unfinished non-quest sections, 43 with no citing record; see `npm run report:chapters`. |
+| 9 — Independent review | In progress, chapter by chapter | Schema-validated review records under `review/independent/` with content digests and staleness checks. Thirty-two fresh passing records back 408 reviewed sections. Issues: 261 records, 230 unresolved and 31 resolved (most by published designer rulings). |
+| 10 — Full-book coverage pass | In progress | 580 of 678 sections extracted (86%), 408 independently reviewed (60%). Step 2 tiers 1–6 are closed (Introduction through Buying an Estate). Tier 7 and the estate side quest cover 38 unfinished non-quest sections, 29 with no citing record; see `npm run report:chapters`. |
 | 11 — Build generated artifacts | Not implemented | `npm run build:corpus` remains a stub; JSON bundles, SQLite and compiled graph outputs are pending (Step 5). |
 | 12 — Semantic retrieval corpus | Partial groundwork | Lexical canonical-record retrieval, shared agent tools (CLI and MCP server), the `ask` pipeline and labelled question-analysis evaluation exist; comprehensive Phase 12 remains unfinished. See [retrieval evidence](docs/retrieval.md). |
 
@@ -37,8 +37,8 @@ set, caching, cascade and shadow comparisons. Calibration and production-provide
 remain pending. This is derived judgment metadata, not Phase 12 retrieval or independent corpus
 review. See [semantic decisions](docs/semantic-decisions.md).
 
-Current inventory (8 October): 1,798 rules, 669 entities, 221 tables, 113 procedures,
-two state machines, 114 glossary terms and 669 executable YAML fixtures. Counts describe stored
+Current inventory (15 October): 1,816 rules, 669 entities, 223 tables, 119 procedures,
+two state machines, 116 glossary terms and 714 executable YAML fixtures. Counts describe stored
 objects, not completeness of their source headings. The generated
 [coverage report](docs/coverage-report.md) is the section and component progress reference.
 Historical phase audits retain their milestone counts.
@@ -48,10 +48,12 @@ is `accepted` with 95 entries and no pending rows. The Phase 0–6 exit checklis
 (`tests/fixtures/acceptance/phases-0-6.json`) has 79 of 85 rows verified; the 6 open rows are
 assigned to Step 2 tier 7, Phase 7 and Phase 10 in the completion plan.
 
-Independent review so far (records dated 7–8 October): Introduction, Game Basics, Character
+Independent review so far (records dated 7–15 October): Introduction, Game Basics, Character
 Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest, Party Management,
 Equipment, Psychology, Academic Skills, Magic, Magic Items, Enchantments, Alchemy, Prayers, the
-Dungeoneering and Combat part node, Into the Dungeons, Treasure and Combat.
+Dungeoneering and Combat part node, Into the Dungeons, Treasure, Combat, the Travel and
+Settlements part node, Travelling and Skirmishes, Settlements, the five guilds, The Inner Sanctum
+and Buying an Estate (without its side quest).
 Tiers 1–3 failed their first review on provenance findings (shortened quotations, invented
 headings or footnotes, missing citations, coverage notes that did not stand alone). In tier 4
 the extractors fixed provenance up front; two units passed first time and the other four failed
@@ -61,7 +63,12 @@ passed with corrections on re-review (Magic needed two correction rounds). In ti
 units) the part node and Treasure passed first time; the other six failed on typed-condition gaps
 (missing actor, weapon and state qualifiers; the 91–00 automatic failure absent from attack rolls)
 and remaining paraphrase in older procedures, and passed with corrections after one to three
-correction rounds.
+correction rounds. In tier 6 (eight units) the settlement catalogue passed first time; the
+others failed on unrecorded readings of silent rules (arena winnings, bank rolls, movement
+points), paraphrase left in older settlement, guild and estate procedures, and two merged
+conditions, and passed with corrections after one to three rounds. Changelog 2.21 entry 166
+settled the going-hungry carry-over; the Into the Dungeons setup, Party Morale and Prayers units
+were re-reviewed because tier 6 corrections touched objects they back.
 
 ### Next steps
 
@@ -72,8 +79,7 @@ next unit are in [the extraction checkpoint](docs/extraction-checkpoint.md).
 1. **Done 7 October.** Close Package F at reduced scope.
 2. Core-chapter loop (Phases 8–10 together, with Phase 9 review records): reconcile coverage
    components against the PDF, extract genuine omissions, convert worked examples and
-   independently review each chapter. Tiers 1–5 are done. Next: tier 6
-   (Travelling and Skirmishes, Settlements, guilds, Inner Sanctum, Buying an Estate) and tier 7
+   independently review each chapter. Tiers 1–6 are done. Next: tier 7
    (Appendices I–V, Adding a Third Dimension, front and back matter).
 3. Apply the same loop to Quest Book I, backgrounds and the estate side quest.
 4. Dependency graph and precedence (Phase 7).
