@@ -2274,7 +2274,12 @@
   summary: The Silver City example schedules learning a prayer on both D1 and D2,
     whereas Available Actions lists Learn a Prayer with an Activity Point cost
     of 1. Preserve both; the example does not silently override the activity
-    catalogue.
+    catalogue. Changelog 2.21 entry 77 reports the same conflict ("the table on
+    page 120 says it takes 1 Activity Point (1 day) to \"Learn a Prayer,\" but the
+    example on page 119. shows the Priest going to the Temple 3 times to learn a
+    Prayer (3 days)") and is marked "Fixed" without a stated rule, so it settles
+    nothing; this printing shows the Priest learning on D1 and D2, not three
+    visits.
   related:
     - table.settlement.activity_schedule_example
     - table.settlement.activities
@@ -2293,9 +2298,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 134
       printed_page: 132
-      heading: Activities in a Settlement
+      heading: Available Actions
       extraction:
         method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 12
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 77
+      extraction:
+        method: image
         confidence: high
         visually_verified: true
   status: unresolved
@@ -5041,8 +5057,11 @@
     It does not say whether that needs the d8 result, whether "the city" means
     Silver City only, or whether a side quest started but not finished counts as
     worked through when they are taken one by one. procedure.side_quest_selection
-    selects only on an arrival d8 result. A stay-time choice without it surfaces
-    this issue.
+    accepts offer_basis arrival_d8 or stay_choice; a stay_choice returns this
+    issue, because whether it needs the d8 result is what this issue records.
+    Side Quests also says "you work your way through them one by one" without
+    stating an order; procedure.side_quest_selection takes them in the printed
+    order of the Side Quests table.
   related:
     - procedure.side_quest_selection
     - procedure.settlement_arrival
@@ -5055,6 +5074,40 @@
       pdf_page: 133
       printed_page: 131
       heading: Available quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 273
+      printed_page: 271
+      heading: Side Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.quest.side_quest_event_offer
+  type: ambiguity
+  summary: >-
+    Settlement Events (PDF 135, printed 133) has event 8: "Side Quest. The party is approached by a
+    citizen, urgently requesting their help. Roll on the Side Quest Table and decide if you wish to
+    add this to your current quest." That is a third way a side quest is offered, beside the
+    arrival d8 and the stay-time choice in Side Quests (PDF 273, printed 271). The book does not say
+    whether a side quest added this way is taken together with the current quest at no Day Count
+    cost, as the Side Quests paragraph says, or whether the Side Quests rules apply to it at all.
+    procedure.side_quest_selection has no offer_basis for this route, so issue.quest.side_quest_availability
+    does not cover it.
+  related:
+    - procedure.side_quest_selection
+    - issue.quest.side_quest_availability
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 135
+      printed_page: 133
+      heading: Settlement Events
       extraction:
         method: text
         confidence: high
@@ -8947,8 +9000,9 @@
     on. Rejecting a Quest allows 2 rejections in a village and 3 in Silver City, which equal the
     largest number of quests one roll can offer there (2 and 3), so the limit only differs from
     "reject all offered quests" if offers can accumulate over more than one roll.
-    procedure.settlement_arrival rolls once per visit and sets must_depart when no quest is
-    available, a reading the book does not state.
+    procedure.settlement_arrival rolls once per visit, returns this issue for a roll offering no
+    quest or a second quests call in the same visit, and sets must_depart only once every offered
+    quest has been rejected.
   related:
     - procedure.settlement_arrival
     - character.settlement.quest_availability
@@ -9111,6 +9165,82 @@
       pdf_page: 159
       printed_page: 157
       heading: Crusades
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.estate.printed_typos
+  type: possible_typo
+  summary: Two printed sentences in Buying an Estate look like misprints, and the corpus
+    quotes them verbatim without correcting them. PDF 160 (printed 158), Staying at the
+    House, reads "Now they do not have to pay the daily cost of at the inns." PDF 161
+    (printed 159), Furnishing the Manor, reads "Only one thing may be bought in between every
+    quest, and it cannot be used until after the leaving the next dungeon." The intended
+    meanings ("the daily cost of the inns" and "until after leaving the next dungeon") are
+    clear from context, so no rule is changed. The book does not correct either sentence.
+  related:
+    - character.settlement.estate.lodging
+    - character.settlement.estate.furnishing
+    - procedure.estate_ownership
+    - procedure.estate_furnishing
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 160
+      printed_page: 158
+      heading: Staying at the House
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 161
+      printed_page: 159
+      heading: Furnishing the Manor
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: unresolved
+- id: issue.guild.training_day_gate
+  type: rulebook_undefined
+  summary: >-
+    Only the Inner Sanctum's Practicing Skills paragraph (PDF 158, printed 156) says that guild
+    skill training "takes 1 day". The Available Actions row Skill Training prints 1 Activity Point at
+    the Guilds (PDF 134, printed 132), and its introduction says only activities costing more than 1
+    Activity Point take longer than a day. The Dark, Fighters, Wizards, Alchemists and Rangers
+    paragraphs (PDF 148, 151, 153, 154, 156) give the price and the one-session limit but no
+    duration. procedure.guild_skill_training nevertheless requires completed_activity_days of at
+    least 1 for every guild. The book does not say whether a training session at those guilds
+    consumes a day.
+  related:
+    - procedure.guild_skill_training
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 158
+      printed_page: 156
+      heading: Practicing Skills
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 134
+      printed_page: 132
+      heading: Available Actions
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 148
+      printed_page: 146
+      heading: Skill training
       extraction:
         method: image
         confidence: high
