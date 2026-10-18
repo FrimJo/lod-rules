@@ -147,7 +147,7 @@ export type Cell =
   | {
       type: 'marker';
       printed: '-' | 'N/A';
-      meaning: 'no_increase' | 'unavailable' | 'not_specified';
+      meaning: 'no_increase' | 'unavailable' | 'not_specified' | 'not_applicable';
     };
 export interface Table extends Metadata {
   type: string;
