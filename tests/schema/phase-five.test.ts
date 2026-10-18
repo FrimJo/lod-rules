@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { readPilot } from '../../scripts/validate/pilot-files.ts';
 import { checkPilotIntegrity } from '../../scripts/validate/pilot.ts';
-import { printedDiceMatches } from '../../scripts/validate/dice.ts';
+import { readFileSync } from 'node:fs';
+import { printedDiceMatches, textCellDiceErrors } from '../../scripts/validate/dice.ts';
+import type { TextCellDiceExemption } from '../../scripts/validate/dice.ts';
 import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';
 import type { Pilot } from '../../scripts/validate/pilot-types.ts';
 import { phaseFourContext } from '../support/phase-four-context.ts';
@@ -158,5 +160,76 @@ describe('equipment catalogue links', () => {
       const itemRows = table.rows.filter((row) => !/^Tier \d+:$/.test(row.source_row));
       expect(itemRows.every((row) => row.entity_refs?.length === 1)).toBe(true);
     }
+  });
+});
+
+describe('text-cell dice guard', () => {
+  const raw: unknown = JSON.parse(
+    readFileSync(new URL('../fixtures/text-cell-dice-exemptions.json', import.meta.url), 'utf8'),
+  );
+  const isExemption = (e: unknown): e is TextCellDiceExemption =>
+    typeof e === 'object' &&
+    e !== null &&
+    ['table_id', 'row_id', 'reason'].every(
+      (k) => typeof (e as Record<string, unknown>)[k] === 'string',
+    );
+  if (!Array.isArray(raw) || !raw.every(isExemption)) throw new Error('bad exemption fixture');
+  const exemptions: TextCellDiceExemption[] = raw;
+  type Row = Pilot['tables'][number]['rows'][number];
+  const withRow = (row: Row) => {
+    const copy = structuredClone(corpus.tables);
+    copy.find((t) => t.id === 'table.settlement.events')!.rows.push(row);
+    return copy;
+  };
+  const untyped = (printed = 'The party loses 1d2 rations.'): Row => ({
+    id: 'synthetic',
+    source_row: 'synthetic',
+    cells: { event: { type: 'text', printed } },
+  });
+
+  it('finds every text-cell die typed, linked through rule_refs or exempted', () => {
+    expect(textCellDiceErrors(corpus.tables, exemptions)).toEqual([]);
+  });
+  it('gives every exemption one source-based reason', () => {
+    const keys = exemptions.map((e) => `${e.table_id}/${e.row_id}`);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const e of exemptions) expect(e.reason).toMatch(/PDF \d+/);
+  });
+  it('names the table and row of an untyped text-cell die', () => {
+    expect(textCellDiceErrors(withRow(untyped()), exemptions)).toEqual([
+      'table.settlement.events/synthetic: die printed in a text cell without a dice cell, rule_refs or exemption',
+    ]);
+  });
+  it('accepts a row with a typed dice cell', () => {
+    const row = untyped();
+    row.cells.event_dice = {
+      type: 'dice',
+      printed: '1d2',
+      dice: { count: 1, sides: 2 },
+      meaning: 'loss',
+    };
+    expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([]);
+  });
+  it('accepts a row linked through rule_refs', () => {
+    const row = { ...untyped(), rule_refs: ['character.settlement.event.4'] };
+    expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([]);
+  });
+  it('accepts an exempted row', () => {
+    const extra = { table_id: 'table.settlement.events', row_id: 'synthetic', reason: 'x' };
+    expect(textCellDiceErrors(withRow(untyped()), [...exemptions, extra])).toEqual([]);
+  });
+  it('rejects stale exemptions', () => {
+    const gone = { table_id: 'table.settlement.events', row_id: 'absent', reason: 'x' };
+    const noDie = { table_id: 'table.settlement.events', row_id: 'row_1', reason: 'x' };
+    expect(textCellDiceErrors(corpus.tables, [...exemptions, gone, noDie])).toEqual([
+      'table.settlement.events/absent: stale exemption, row not found',
+      'table.settlement.events/row_1: stale exemption, row prints no die in a text cell',
+    ]);
+  });
+  it.each(['1D10 DMG', 'heal 1d3', '+1d2 days', 'D3'])('detects %s as a die', (printed) => {
+    expect(textCellDiceErrors(withRow(untyped(printed)), exemptions)).toHaveLength(1);
+  });
+  it.each(['road 2d', 'Card D5', 'id10x', '1d7'])('ignores %s', (printed) => {
+    expect(textCellDiceErrors(withRow(untyped(printed)), exemptions)).toEqual([]);
   });
 });
