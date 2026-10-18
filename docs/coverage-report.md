@@ -9,7 +9,7 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | --- | --- | --- |
 | mapped | 677 / 677 | 100% |
 | extracted | 677 / 677 | 100% |
-| reviewed | 677 / 677 | 100% |
+| reviewed | 662 / 677 | 98% |
 
 Total sections tracked: 677
 
