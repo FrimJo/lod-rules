@@ -30,7 +30,7 @@ interface CoverageRow {
   notes?: string;
 }
 
-const ids = readFileSync('generated/review/step3/ids-qb1_spider_lava_bandits_fountain.txt', 'utf8')
+const ids = readFileSync('tests/fixtures/step3/ids-qb1_spider_lava_bandits_fountain.txt', 'utf8')
   .split('\n')
   .filter(Boolean);
 const sections = new Set(ids);
