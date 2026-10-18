@@ -106,8 +106,8 @@ complete at the documented scope in the [Phase 6 ledger](ledgers/phase-6-procedu
 
 **Outcome:** Package F is `accepted` (41 implemented, 10 covered by another model, 1
 nonprocedural, 43 `catalogue_scope`). The estate's source-silent readings are caller-supplied
-inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 79 of 85
-rows verified; the 6 still pending are assigned below and close with the steps that own them.
+inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 83 of 85
+rows verified; the 2 still pending close with Step 4 below.
 
 ### Step 2 — Core-chapter loop: reconcile, extract, review
 
@@ -173,10 +173,13 @@ Run after Steps 2–3 so the graph covers the reconciled corpus. Omissions it ex
 through the Step 2 loop. This step also closes the Phase 6 exit row "procedure steps reference
 rules rather than duplicate them", which needs a duplication check.
 
-The remaining open Phase 0–6 exit rows close in Phase 10 (Steps 2–3): a page-by-page table
-inventory (including turning the duplicate PDF 186 table node into a redirect), typed dice for
-the 63 table rows that print dice only in text, and an audit that printed restrictions are
-rules.
+The Phase 0–6 exit rows that Phase 10 owned are verified (18 October 2026): the book-wide table
+inventory (the duplicate PDF 186 node is a redirect), typed dice for every table row that prints
+a die in a text cell (guarded corpus-wide by `textCellDiceErrors`), the embedded-restriction audit
+(0 unconverted) and Phase 5 Batch 7. Two rows stay pending for this step: the duplication check
+above (`phase_6.criterion_2`) and the "embarking on a quest" candidate, whose start-settlement
+randomisation (`core.quest.start_settlement`, PDF 59) is extracted and reviewed but not yet bound
+as the source of the first quest acceptance's settlement.
 
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 

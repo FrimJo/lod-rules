@@ -14,8 +14,9 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
 - Phase 6 Batches 1–7 are complete at documented scope. Package F is `accepted`: 41
   implemented, 10 covered by another model, 1 nonprocedural, 43 `catalogue_scope`.
-- Phase 0–6 exit checklist: 79 of 85 rows verified; the 6 open rows are assigned to Step 2
-  tier 7, Phase 7 and Phase 10 in the plan.
+- Phase 0–6 exit checklist: 83 of 85 rows verified; the checklist stays `open`. The 2 pending
+  rows (`phase_6.criterion_2` and the "embarking on a quest" candidate) belong to Step 4
+  (Phase 7).
 - Step 2 tiers 1–2 are reconciled and independently reviewed: Introduction, Game Basics,
   Character Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest and
   the Party Management part node (90 sections; `review.*.2` records, all passed with
@@ -67,6 +68,18 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   2.21 entries 103/194, 111, 142, 143 and 195 are applied; 104, 105, 107–110 and 112 are recorded,
   not applied. Every non-redirect section of the book is now `reviewed` (677); the 38 compatibility
   redirects stay `mapped`.
+- The Phase 10-owned exit rows are closed (issue #3, 18 October): `phase_1.criterion_3` (one node
+  per printed table, book-wide), `phase_5.criterion_3` (typed dice), `phase_5.criterion_5`
+  (embedded restrictions, 0 unconverted) and Phase 5 Batch 7 (every listed core table reviewed or
+  a redirect). `textCellDiceErrors` in `tests/schema/phase-five.test.ts` now fails any table row
+  that prints a die in a text cell without a dice cell, row `rule_refs` or a reasoned exemption
+  (`tests/fixtures/text-cell-dice-exemptions.json`, 5 rows). The typed dice and restriction
+  conversions were re-reviewed fresh and passing: `review.settlements_core.4`, `review.magic.4`,
+  `review.inner_sanctum_and_estate.5`, `review.alchemy_preparations.2`, `review.guilds.4`,
+  `review.into_the_dungeons_actions.6`, `review.into_the_dungeons_setup.11`,
+  `review.travelling_and_skirmishes.4` and `review.appendix_iii_weapons_armour.3`.
+  `governingRecord` now orders same-date records by numeric suffix, so `review.x.10` governs over
+  `review.x.9`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -74,22 +87,15 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Close the Phase 0–6 exit rows that Phase 10 owns, then start Step 4 (Phase 7). Phase 10's
-coverage exit holds (every section reviewed or a redirect), but these rows in
-`tests/fixtures/acceptance/phases-0-6.json` are still `pending`:
+Step 4 (Phase 7): the dependency graph and precedence in
+[corpus-completion-plan.md](corpus-completion-plan.md). Two Phase 0–6 exit rows in
+`tests/fixtures/acceptance/phases-0-6.json` close with it:
 
-- `phase_1.criterion_3` (every printed table has exactly one node): confirm from the review records
-  and `sections.yaml`, and turn `section.appendix_iii_equipment.general_equipment.table` into a
-  redirect if it still duplicates the PDF 186 Sell and Repair table.
-- `phase_5.criterion_3` (typed dice): a corpus-wide scan of table text cells still finds about 35
-  rows printing a die with neither a dice/composite cell nor a row `rule_refs` (mostly
-  `table.settlement.quest_sites`, `table.settlement.events`, `table.magic.miscast`,
-  `table.estate.furnishings`, `table.magic.demons`); some may be typed through rules linked
-  elsewhere. Most sit in frozen records, so fixes need a re-review of the record that freezes them.
-- `phase_5.criterion_5` (embedded restrictions as rules): Steps 2–3 audited each unit; record the
-  corpus-wide evidence.
-- `phase_6.criterion_2` (procedure/rule duplication) and the Phase 5 Batch 7 and "embarking on a
-  quest" rows close with Step 4 as the plan assigns.
+- `phase_6.criterion_2` (procedure steps reference atomic rules rather than duplicate them): the
+  duplicate/summary detection.
+- The "embarking on a quest" candidate: `table.settlement.start_settlement` and
+  `core.quest.start_settlement` are extracted and reviewed; bind them as the source of the first
+  `procedure.quest_acceptance`'s settlement.
 
 Open carry-overs:
 
@@ -97,8 +103,6 @@ Open carry-overs:
   `review.introduction.2`).
 - `issue.phase4.magic_breakage` lists only `character.durability.broken` in `related` (frozen
   by `review.equipment.2`).
-- `issue.rest.without_ration` still cites entry 124's −4 (frozen by
-  `review.into_the_dungeons_actions.3`); entries 148 and 166 supersede it.
 - `issue.phase4.recovery_bounds` should say that "only half (RDD)" (PDF 147) settles rounding,
   not the base, and relate `procedure.settlement_activities_and_overnight`.
 - `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
