@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { parse } from 'yaml';
 import { readPilot } from '../../scripts/validate/pilot-files.ts';
 const table = readPilot().tables.find((t) => t.id === 'table.travel.obstacles')!;
 // Textual cells transcribed from rendered PDF 128–130. Example art remains supplied geometry.
@@ -104,5 +106,25 @@ describe('outdoor obstacle matrix', () => {
     expect(table.source.map(locatorTable).every((t) => String(t).includes('Example column'))).toBe(
       true,
     );
+  });
+  it('links each printed Special restriction to a rule or records it as unresolved', () => {
+    const refs = (id: string) => table.rows.find((row) => row.id === id)?.rule_refs ?? [];
+    // Huge boulder prints the same "more than 50%" threshold as the rule of 50% (PDF 94).
+    expect(refs('row_11')).toEqual(['core.obstacle.half_square']);
+    expect(refs('row_15')).toEqual(['core.travel.obstacle.pyramid_stairs']);
+    // Boulder and Large log print "50% or more", which the rule of 50% does not: logged, not linked.
+    expect(refs('row_2')).toEqual([]);
+    expect(refs('row_12')).toEqual([]);
+    const issue = 'issue.travel.obstacle_fifty_percent_threshold';
+    expect(table.issues).toContain(issue);
+    const issues = parse(readFileSync('review/ambiguities.yaml', 'utf8')) as {
+      id: string;
+      status: string;
+      related: string[];
+    }[];
+    expect(issues.find((i) => i.id === issue)).toMatchObject({
+      status: 'unresolved',
+      related: ['table.travel.obstacles'],
+    });
   });
 });

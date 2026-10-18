@@ -402,3 +402,56 @@
   see_also:
     - section.settlements
     - section.settlements.activities_in_a_settlement
+- id: core.travel.obstacle.pyramid_stairs
+  name: A Pyramid can only be climbed along the stairs
+  section_id: section.travelling_and_skirmishes.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 130
+      printed_page: 128
+      section: Skirmishes
+      heading: Setup
+      locator:
+        table: Uncaptioned obstacle table that the Setup text calls the Obstacles Table; its Example column prints artwork only
+        row: Pyramid
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Can only be climbed along the stairs.
+  type: constraint
+  scope: global
+  fields:
+    climbing_pyramid:
+      type: boolean
+      role: input
+      description: A model climbs a Pyramid square during a skirmish.
+    along_stairs:
+      type: boolean
+      role: input
+      description: The climb follows the stairs printed on the Pyramid art.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: climbing_pyramid
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: along_stairs
+        right:
+          type: literal
+          value: true
+  uses_tables:
+    - table.travel.obstacles

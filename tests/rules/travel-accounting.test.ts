@@ -448,3 +448,25 @@ describe('travel resource accounting from PDF 126–128', () => {
     expect(damage.state.hit_points).toBe(8);
   });
 });
+
+describe('Outdoor Obstacles Special restrictions, PDF 129–130', () => {
+  const rule = (id: string, inputs: State) =>
+    runCase({ rule_ids: [id], inputs } as TestCase, corpus);
+  it('lets a Pyramid be climbed only along the stairs', () => {
+    const pyramid = 'core.travel.obstacle.pyramid_stairs';
+    expect(rule(pyramid, { climbing_pyramid: true, along_stairs: true }).events).toEqual([
+      { type: 'require', satisfied: true },
+    ]);
+    expect(rule(pyramid, { climbing_pyramid: true, along_stairs: false }).events).toEqual([
+      { type: 'require', satisfied: false },
+    ]);
+    expect(rule(pyramid, { climbing_pyramid: false, along_stairs: false }).events).toEqual([]);
+  });
+  it('blocks a Huge boulder square only when more than 50% is covered', () => {
+    const at = (occupied_fraction: number) =>
+      rule('core.obstacle.half_square', { uses_half_square_rule: true, occupied_fraction }).state
+        .movement_affected;
+    expect(at(0.51)).toBe(true);
+    expect(at(0.5)).toBeUndefined();
+  });
+});

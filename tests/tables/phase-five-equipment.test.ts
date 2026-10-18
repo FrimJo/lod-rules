@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parse, stringify } from 'yaml';
 import { readPilot } from '../../scripts/validate/pilot-files.ts';
@@ -260,6 +261,25 @@ describe('Phase 5 independently transcribed Armour table, PDF 180', () => {
     expect(table.rows.find((r) => r.source_row === 'Padded Coat')!.cells.special!.type).toBe(
       'blank',
     );
+  });
+
+  it('records the Cloak "Torso (only back)" restriction as undefined, not as a rule', () => {
+    const cloak = table.rows.find((r) => r.id === 'cloak')!;
+    expect(cloak.cells.covers!.printed).toBe('Torso (only back)');
+    expect(cloak.rule_refs).toEqual(['character.equipment.armour.stackable']);
+    const issue = 'issue.equipment.cloak_only_back';
+    expect(table.issues).toContain(issue);
+    const issues = parse(readFileSync('review/ambiguities.yaml', 'utf8')) as {
+      id: string;
+      type: string;
+      status: string;
+      related: string[];
+    }[];
+    expect(issues.find((i) => i.id === issue)).toMatchObject({
+      type: 'rulebook_undefined',
+      status: 'unresolved',
+      related: ['table.equipment.armour', 'equipment.armour.cloak'],
+    });
   });
 
   it('carries only the printed Stackable and Clunky definitions', () => {
