@@ -268,18 +268,23 @@ export function describeStaleness(staleness: Staleness): string {
  * both suffixes are numeric (so `.10` follows `.9`), otherwise by plain string order.
  */
 function compareRecordIds(a: string, b: string): number {
-  const split = (id: string) => [
-    id.slice(0, id.lastIndexOf('.')),
-    id.slice(id.lastIndexOf('.') + 1),
-  ];
-  const [prefixA, suffixA] = split(a);
-  const [prefixB, suffixB] = split(b);
-  if (prefixA === prefixB && /^\d+$/.test(suffixA!) && /^\d+$/.test(suffixB!))
-    return Number(suffixA) - Number(suffixB);
+  const numericSuffix = (id: string): { prefix: string; n: number } | undefined => {
+    const match = /^(.*)\.(\d+)$/.exec(id);
+    return match?.[1] !== undefined && match[2] !== undefined
+      ? { prefix: match[1], n: Number(match[2]) }
+      : undefined;
+  };
+  const left = numericSuffix(a);
+  const right = numericSuffix(b);
+  if (left && right && left.prefix === right.prefix) return left.n - right.n;
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-/** Latest record (by date, then id) whose scope includes the section. */
+/**
+ * Latest record whose scope includes the section: newest date first; on equal dates the higher
+ * id wins, ordering ids that share a prefix by numeric suffix (`.10` after `.9`), else by
+ * string order.
+ */
 export function governingRecord(
   records: ReviewRecord[],
   sectionId: string,
