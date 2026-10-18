@@ -481,8 +481,8 @@
       type: literal
       value: true
   entity_id: equipment.transport.horse
-  unresolved_references:
-    - Travel speed and terrain procedures remain in the travel batch.
+  see_also:
+    - section.travelling_and_skirmishes.moving_on_the_map
 - id: character.equipment.transport.camel.travel
   name: transport camel travel
   section_id: section.appendix_iii_equipment.general_equipment.animals_and_transportation.table
@@ -540,8 +540,8 @@
       type: literal
       value: true
   entity_id: equipment.transport.camel
-  unresolved_references:
-    - Travel speed and terrain procedures remain in the travel batch.
+  see_also:
+    - section.travelling_and_skirmishes.moving_on_the_map
 - id: character.equipment.transport.camel.purchase
   name: transport camel purchase
   section_id: section.appendix_iii_equipment.general_equipment.animals_and_transportation.table
@@ -920,8 +920,8 @@
       role: state
       description: party days or rests sustained
   entity_id: equipment.consumable.ration
-- id: character.equipment.consumable.tobacco.purchase
-  name: consumable tobacco purchase
+- id: character.equipment.consumable.ration.use
+  name: consumable ration used while resting
   section_id: section.appendix_iii_equipment.general_equipment.consumables.table
   source:
     - document: rulebook.second_printing.eng
@@ -930,18 +930,109 @@
       printed_page: 180
       heading: Consumables
       extraction:
-        method: text
+        method: image
         confidence: high
         visually_verified: true
       locator:
         table: Consumables
-        row: Tobacco
+        row: Ration
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 183
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Tobacco: A hero may only purchase one kit between quests; it lasts the coming quest.
-    Equipped tobacco gives +10 RES. After the quest make a RES test without the bonus; failure
-    causes addiction. An addicted hero without tobacco suffers -10 RES. Two complete quests without
-    tobacco remove addiction.'
+  source_text: Ration | 1/1 | 1 | Rations are used during overland travel and during short rests. 1
+    Ration can sustain the entire party for one day or one rest. | 5 c | 5
+  scope: global
+  type: constraint
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: resting
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: overland_travel
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: quick_slot_needed
+      value:
+        type: literal
+        value: false
+  fields:
+    using_ration:
+      type: boolean
+      role: input
+      description: a hero or the party uses a Ration
+    resting:
+      type: boolean
+      role: input
+      description: the party is taking a rest
+    overland_travel:
+      type: boolean
+      role: input
+      description: >-
+        the party is on overland travel (the printed use; whether changelog 2.21 entry 183
+        withdraws it is issue.equipment.ration_overland_travel_use)
+    quick_slot_needed:
+      type: boolean
+      role: state
+      description: >-
+        Whether a Ration needs a Quick Slot. The ENC cell prints 1/1; changelog 2.21 entry 183
+        changes it to 1: "Can only be used while resting. No need for Quick Slot."
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: using_ration
+    right:
+      type: literal
+      value: true
+  dependencies:
+    - key: quick_slot_stack
+      label: character.equipment.quick_slot_stack
+      object_id: character.equipment.quick_slot_stack
+  entity_id: equipment.consumable.ration
+  issues:
+    - issue.equipment.ration_quick_slot
+    - issue.equipment.ration_overland_travel_use
+- id: character.equipment.consumable.tobacco.purchase
+  name: consumable tobacco purchase
+  section_id: section.appendix_iii_equipment.general_equipment.consumables
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 182
+      printed_page: 180
+      heading: Tobacco
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'A hero may only purchase one kit of tobacco between quests and that purchase is enough for the coming quest.'
   scope: global
   type: modifier
   effects:
@@ -977,26 +1068,20 @@
   entity_id: equipment.consumable.tobacco
 - id: character.equipment.consumable.tobacco.bonus
   name: consumable tobacco bonus
-  section_id: section.appendix_iii_equipment.general_equipment.consumables.table
+  section_id: section.appendix_iii_equipment.general_equipment.consumables
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 182
       printed_page: 180
-      heading: Consumables
+      heading: Tobacco
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Consumables
-        row: Tobacco
   status: extracted
   confidence: high
-  source_text: 'Tobacco: A hero may only purchase one kit between quests; it lasts the coming quest.
-    Equipped tobacco gives +10 RES. After the quest make a RES test without the bonus; failure
-    causes addiction. An addicted hero without tobacco suffers -10 RES. Two complete quests without
-    tobacco remove addiction.'
+  source_text: 'Whenever equipped with tobacco, a hero will get +10 RES.'
   scope: global
   type: modifier
   effects:
@@ -1026,26 +1111,20 @@
   entity_id: equipment.consumable.tobacco
 - id: character.equipment.consumable.tobacco.addiction_test
   name: consumable tobacco addiction test
-  section_id: section.appendix_iii_equipment.general_equipment.consumables.table
+  section_id: section.appendix_iii_equipment.general_equipment.consumables
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 182
       printed_page: 180
-      heading: Consumables
+      heading: Tobacco
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Consumables
-        row: Tobacco
   status: extracted
   confidence: high
-  source_text: 'Tobacco: A hero may only purchase one kit between quests; it lasts the coming quest.
-    Equipped tobacco gives +10 RES. After the quest make a RES test without the bonus; failure
-    causes addiction. An addicted hero without tobacco suffers -10 RES. Two complete quests without
-    tobacco remove addiction.'
+  source_text: 'After the quest, the hero must make a RES test (without the Tobacco Bonus). If it fails, the hero has become addicted.'
   scope: global
   type: modifier
   effects:
@@ -1110,26 +1189,20 @@
   entity_id: equipment.consumable.tobacco
 - id: character.equipment.consumable.tobacco.withdrawal
   name: consumable tobacco withdrawal
-  section_id: section.appendix_iii_equipment.general_equipment.consumables.table
+  section_id: section.appendix_iii_equipment.general_equipment.consumables
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 182
       printed_page: 180
-      heading: Consumables
+      heading: Tobacco
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Consumables
-        row: Tobacco
   status: extracted
   confidence: high
-  source_text: 'Tobacco: A hero may only purchase one kit between quests; it lasts the coming quest.
-    Equipped tobacco gives +10 RES. After the quest make a RES test without the bonus; failure
-    causes addiction. An addicted hero without tobacco suffers -10 RES. Two complete quests without
-    tobacco remove addiction.'
+  source_text: 'If addicted, the hero must bring a kit of tobacco on every quest or suffer a -10 modifier to RES instead.'
   scope: global
   type: modifier
   effects:
@@ -1143,10 +1216,10 @@
       type: boolean
       role: input
       description: addicted
-    tobacco_equipped:
+    brought_tobacco_kit_on_quest:
       type: boolean
       role: input
-      description: tobacco equipped
+      description: the hero brought a kit of tobacco on this quest
     tobacco_res_modifier:
       type: number
       role: state
@@ -1166,33 +1239,27 @@
         operator: eq
         left:
           type: field
-          name: tobacco_equipped
+          name: brought_tobacco_kit_on_quest
         right:
           type: literal
           value: false
   entity_id: equipment.consumable.tobacco
 - id: character.equipment.consumable.tobacco.recover
   name: consumable tobacco recover
-  section_id: section.appendix_iii_equipment.general_equipment.consumables.table
+  section_id: section.appendix_iii_equipment.general_equipment.consumables
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 182
       printed_page: 180
-      heading: Consumables
+      heading: Tobacco
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Consumables
-        row: Tobacco
   status: extracted
   confidence: high
-  source_text: 'Tobacco: A hero may only purchase one kit between quests; it lasts the coming quest.
-    Equipped tobacco gives +10 RES. After the quest make a RES test without the bonus; failure
-    causes addiction. An addicted hero without tobacco suffers -10 RES. Two complete quests without
-    tobacco remove addiction.'
+  source_text: 'It will take two complete quests without tobacco to get rid of the addiction.'
   scope: global
   type: modifier
   effects:
@@ -1308,19 +1375,33 @@
   scope: global
   type: modifier
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_warrior_priest
+        right:
+          type: literal
+          value: true
     - type: set
       target: warrior_priest_can_use
       value:
         type: literal
         value: true
   fields:
+    is_warrior_priest:
+      type: boolean
+      role: input
+      description: whether the hero using the relic is a Warrior Priest
     warrior_priest_can_use:
       type: boolean
       role: state
       description: warrior priest can use
   entity_id: equipment.jewellery.religious_relic_necklace
-  unresolved_references:
-    - Religious Relic variants in the Treasures chapter remain a catalogue dependency.
+  see_also:
+    - section.appendix_v_treasures.table_of_relics
 - id: character.equipment.jewellery.religious_relic_ring.use
   name: jewellery religious relic ring use
   section_id: section.appendix_iii_equipment.general_equipment.jewellery.table
@@ -1343,19 +1424,33 @@
   scope: global
   type: modifier
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_warrior_priest
+        right:
+          type: literal
+          value: true
     - type: set
       target: warrior_priest_can_use
       value:
         type: literal
         value: true
   fields:
+    is_warrior_priest:
+      type: boolean
+      role: input
+      description: whether the hero using the relic is a Warrior Priest
     warrior_priest_can_use:
       type: boolean
       role: state
       description: warrior priest can use
   entity_id: equipment.jewellery.religious_relic_ring
-  unresolved_references:
-    - Religious Relic variants in the Treasures chapter remain a catalogue dependency.
+  see_also:
+    - section.appendix_v_treasures.table_of_relics
 - id: character.equipment.light_source.lamp_oil.refill
   name: light source lamp oil refill
   section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
@@ -1370,7 +1465,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Light Sources
+        table: Light sources
         row: Lamp Oil
   status: extracted
   confidence: high
@@ -1391,28 +1486,20 @@
   entity_id: equipment.light_source.lamp_oil
 - id: character.equipment.light_source.lantern_filled_with_oil.light
   name: light source lantern filled with oil light
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'A lantern lights up the dungeon and strengthens the resolve of all heroes, even those with Night Vision. As long as the lantern is lit, the party gains +5 when making Fear or Terror Tests, and the hero carrying the lantern gets +10 Perception.'
   scope: global
   type: modifier
   effects:
@@ -1461,28 +1548,20 @@
   duration: while_condition
 - id: character.equipment.light_source.lantern_filled_with_oil.hands
   name: light source lantern filled with oil hands
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'To use the lantern, it must be held in one hand, which means you cannot equip a shield, bow, crossbow, or two-handed weapon (class 5).'
   scope: global
   type: modifier
   effects:
@@ -1513,28 +1592,20 @@
   entity_id: equipment.light_source.lantern_filled_with_oil
 - id: character.equipment.light_source.lantern_filled_with_oil.oil_use
   name: light source lantern filled with oil oil use
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'If you roll below the Threat Level on the Threat Roll, the lamp is out of half its oil.'
   scope: global
   type: modifier
   effects:
@@ -1583,28 +1654,20 @@
   entity_id: equipment.light_source.lantern_filled_with_oil
 - id: character.equipment.light_source.lantern_filled_with_oil.extinguished
   name: light source lantern filled with oil extinguished
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'If you roll below the Threat Level on the Threat Roll, the lamp is out of half its oil. The second time this happens, the flame goes out. Until you refill the lantern, the above-mentioned bonus is no longer active.'
   scope: global
   type: modifier
   effects:
@@ -1652,28 +1715,20 @@
   entity_id: equipment.light_source.lantern_filled_with_oil
 - id: character.equipment.light_source.lantern_filled_with_oil.refill
   name: light source lantern filled with oil refill
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Refilling the lamp takes 1 action from a Quick Slot.'
   scope: global
   type: modifier
   effects:
@@ -1721,28 +1776,20 @@
   entity_id: equipment.light_source.lantern_filled_with_oil
 - id: character.equipment.light_source.lantern_filled_with_oil.troll_failure
   name: light source lantern filled with oil troll failure
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Trolls must pass a RES test to attack a hero carrying a lantern. If they fail, they automatically use that action to Bellow instead of attacking.'
   scope: global
   type: modifier
   effects:
@@ -1752,10 +1799,6 @@
         type: literal
         value: bellow
   fields:
-    lit:
-      type: boolean
-      role: input
-      description: lit
     troll_previously_passed_res:
       type: boolean
       role: input
@@ -1775,14 +1818,6 @@
         operator: eq
         left:
           type: field
-          name: lit
-        right:
-          type: literal
-          value: true
-      - type: compare
-        operator: eq
-        left:
-          type: field
           name: troll_previously_passed_res
         right:
           type: literal
@@ -1796,32 +1831,26 @@
           type: literal
           value: false
   entity_id: equipment.light_source.lantern_filled_with_oil
+  issues:
+    - issue.equipment.lantern_troll_unlit
   unresolved_references:
     - Bellow and monster characteristics require the unavailable Bestiary.
 - id: character.equipment.light_source.lantern_filled_with_oil.troll_success
   name: light source lantern filled with oil troll success
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Once the RES test succeeds, there is no need to test for future attacks.'
   scope: global
   type: modifier
   effects:
@@ -1831,10 +1860,6 @@
         type: literal
         value: true
   fields:
-    lit:
-      type: boolean
-      role: input
-      description: lit
     troll_res_succeeded:
       type: boolean
       role: input
@@ -1844,49 +1869,33 @@
       role: state
       description: troll previously passed res
   when:
-    type: all
-    conditions:
-      - type: compare
-        operator: eq
-        left:
-          type: field
-          name: lit
-        right:
-          type: literal
-          value: true
-      - type: compare
-        operator: eq
-        left:
-          type: field
-          name: troll_res_succeeded
-        right:
-          type: literal
-          value: true
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: troll_res_succeeded
+    right:
+      type: literal
+      value: true
   entity_id: equipment.light_source.lantern_filled_with_oil
+  issues:
+    - issue.equipment.lantern_troll_unlit
 - id: character.equipment.light_source.lantern_filled_with_oil.bats
   name: light source lantern filled with oil bats
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Lantern
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Lantern (filled with oil)
   status: extracted
   confidence: high
-  source_text:
-    A lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier
-    +10 Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Bat swarms only do half damage (RDU) when attacking a hero carrying a lit lantern.'
   scope: global
   type: modifier
   effects:
@@ -1938,28 +1947,29 @@
   entity_id: equipment.light_source.lantern_filled_with_oil
 - id: character.equipment.light_source.headlamp.light
   name: light source headlamp light
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... A lantern lights up the dungeon and strengthens the resolve of all heroes, even those with Night Vision. As long as the lantern is lit, the party gains +5 when making Fear or Terror Tests, and the hero carrying the lantern gets +10 Perception.'
   scope: global
   type: modifier
   effects:
@@ -2008,28 +2018,20 @@
   duration: while_condition
 - id: character.equipment.light_source.headlamp.hands
   name: light source headlamp hands
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands.'
   scope: global
   type: modifier
   effects:
@@ -2046,28 +2048,29 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.headlamp.oil_use
   name: light source headlamp oil use
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... If you roll below the Threat Level on the Threat Roll, the lamp is out of half its oil.'
   scope: global
   type: modifier
   effects:
@@ -2116,28 +2119,29 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.headlamp.extinguished
   name: light source headlamp extinguished
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... If you roll below the Threat Level on the Threat Roll, the lamp is out of half its oil. The second time this happens, the flame goes out. Until you refill the lantern, the above-mentioned bonus is no longer active.'
   scope: global
   type: modifier
   effects:
@@ -2185,28 +2189,29 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.headlamp.refill
   name: light source headlamp refill
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... Refilling the lamp takes 1 action from a Quick Slot.'
   scope: global
   type: modifier
   effects:
@@ -2254,28 +2259,29 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.headlamp.troll_failure
   name: light source headlamp troll failure
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... Trolls must pass a RES test to attack a hero carrying a lantern. If they fail, they automatically use that action to Bellow instead of attacking.'
   scope: global
   type: modifier
   effects:
@@ -2285,10 +2291,6 @@
         type: literal
         value: bellow
   fields:
-    lit:
-      type: boolean
-      role: input
-      description: lit
     troll_previously_passed_res:
       type: boolean
       role: input
@@ -2308,14 +2310,6 @@
         operator: eq
         left:
           type: field
-          name: lit
-        right:
-          type: literal
-          value: true
-      - type: compare
-        operator: eq
-        left:
-          type: field
           name: troll_previously_passed_res
         right:
           type: literal
@@ -2329,32 +2323,35 @@
           type: literal
           value: false
   entity_id: equipment.light_source.headlamp
+  issues:
+    - issue.equipment.lantern_troll_unlit
   unresolved_references:
     - Bellow and monster characteristics require the unavailable Bestiary.
 - id: character.equipment.light_source.headlamp.troll_success
   name: light source headlamp troll success
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... Once the RES test succeeds, there is no need to test for future attacks.'
   scope: global
   type: modifier
   effects:
@@ -2364,10 +2361,6 @@
         type: literal
         value: true
   fields:
-    lit:
-      type: boolean
-      role: input
-      description: lit
     troll_res_succeeded:
       type: boolean
       role: input
@@ -2377,49 +2370,42 @@
       role: state
       description: troll previously passed res
   when:
-    type: all
-    conditions:
-      - type: compare
-        operator: eq
-        left:
-          type: field
-          name: lit
-        right:
-          type: literal
-          value: true
-      - type: compare
-        operator: eq
-        left:
-          type: field
-          name: troll_res_succeeded
-        right:
-          type: literal
-          value: true
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: troll_res_succeeded
+    right:
+      type: literal
+      value: true
   entity_id: equipment.light_source.headlamp
+  issues:
+    - issue.equipment.lantern_troll_unlit
 - id: character.equipment.light_source.headlamp.bats
   name: light source headlamp bats
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Lantern
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: Headlamp follows lantern rules but leaves both hands free; a head hit destroys it. A
-    lit lantern gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +10
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Trolls must pass RES to attack; failure uses the action to Bellow; once successful no further
-    test. Bat swarms inflict half damage (RDU). Each Threat Roll below Threat consumes half its oil;
-    the second extinguishes it. Refilling from a Quick Slot takes 1 action.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. ... Bat swarms only do half damage (RDU) when attacking a hero carrying a lit lantern.'
   scope: global
   type: modifier
   effects:
@@ -2471,28 +2457,20 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.torch.light
   name: light source torch light
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'A torch lights up the dungeon and strengthens the resolve of all heroes, even those with Night Vision. As long as the torch is lit, the party gains +5 when making Fear or Terror Tests and the hero carrying the torch gets +5 Perception.'
   scope: global
   type: modifier
   effects:
@@ -2541,28 +2519,20 @@
   duration: while_condition
 - id: character.equipment.light_source.torch.hands
   name: light source torch hands
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'To use the torch, it must be held in one hand, which means you cannot equip a shield, bow, crossbow, or two-handed weapon (class 5).'
   scope: global
   type: modifier
   effects:
@@ -2593,25 +2563,20 @@
   entity_id: equipment.light_source.torch
 - id: character.equipment.light_source.headlamp.destroyed
   name: light source headlamp destroyed
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Headlamp
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Headlamp
   status: extracted
   confidence: high
-  source_text:
-    A headlamp follows lantern rules but leaves both hands free. If the hero is hit in the
-    head, the lamp is destroyed.
+  source_text: 'Follows the same rules as a lantern but allows the hero to use both hands. If the hero is hit in the head, the lamp is destroyed.'
   scope: global
   type: modifier
   effects:
@@ -2668,28 +2633,20 @@
   entity_id: equipment.light_source.headlamp
 - id: character.equipment.light_source.torch.attack
   name: light source torch attack
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'While equipped, a torch can be swung at an enemy using CS +15.'
   scope: global
   type: modifier
   effects:
@@ -2720,28 +2677,20 @@
   entity_id: equipment.light_source.torch
 - id: character.equipment.light_source.torch.shove
   name: light source torch shove
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'A successful attack forces the enemy back 1 square just like the shoving rules, except the hero may not follow the enemy and occupy the enemy’s square.'
   scope: global
   type: modifier
   effects:
@@ -2780,28 +2729,85 @@
   entity_id: equipment.light_source.torch
 - id: character.equipment.light_source.torch.spent
   name: light source torch spent
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'If you roll below the Threat Level on the Threat Roll, the Torch is spent, and the above-mentioned bonus is no longer active.'
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: lit
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: party_fear_terror_modifier
+      value:
+        type: literal
+        value: 0
+    - type: set
+      target: carrier_perception_modifier
+      value:
+        type: literal
+        value: 0
+  fields:
+    threat_roll:
+      type: number
+      role: input
+      description: threat roll
+    threat_level:
+      type: number
+      role: input
+      description: threat level
+    lit:
+      type: boolean
+      role: state
+      description: lit
+    party_fear_terror_modifier:
+      type: number
+      role: output
+      description: Bonus from this light source ends when it goes out.
+    carrier_perception_modifier:
+      type: number
+      role: output
+      description: Bonus from this light source ends when it goes out.
+  when:
+    type: compare
+    operator: lt
+    left:
+      type: field
+      name: threat_roll
+    right:
+      type: field
+      name: threat_level
+  entity_id: equipment.light_source.torch
+- id: character.equipment.light_source.torch.swing_out
+  name: light source torch goes out when swung
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Torch
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'While equipped, a torch can be swung at an enemy using CS +15. ... In the case of an unmodified result of >=90, the torch goes out and must be discarded.'
   scope: global
   type: modifier
   effects:
@@ -2826,18 +2832,14 @@
         type: literal
         value: 0
   fields:
+    swinging_torch:
+      type: boolean
+      role: input
+      description: the attack is made by swinging the torch
     unmodified_attack_roll:
       type: number
       role: input
-      description: unmodified attack roll
-    threat_roll:
-      type: number
-      role: input
-      description: threat roll
-    threat_level:
-      type: number
-      role: input
-      description: threat level
+      description: unmodified result of the torch attack roll
     lit:
       type: boolean
       role: state
@@ -2855,8 +2857,16 @@
       role: output
       description: Bonus from this light source ends when it goes out.
   when:
-    type: any
+    type: all
     conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: swinging_torch
+        right:
+          type: literal
+          value: true
       - type: compare
         operator: gte
         left:
@@ -2865,39 +2875,27 @@
         right:
           type: literal
           value: 90
-      - type: compare
-        operator: lt
-        left:
-          type: field
-          name: threat_roll
-        right:
-          type: field
-          name: threat_level
+  dependencies:
+    - key: attack
+      label: character.equipment.light_source.torch.attack
+      object_id: character.equipment.light_source.torch.attack
   entity_id: equipment.light_source.torch
 - id: character.equipment.light_source.torch.light_new
   name: light source torch light new
-  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 183
       printed_page: 181
-      heading: Light sources
+      heading: Torch
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Light Sources
-        row: Torch
   status: extracted
   confidence: high
-  source_text:
-    A lit torch gives all heroes, including Night Vision, +5 Fear/Terror and the carrier +5
-    Perception. It occupies one hand and excludes shields, bows, crossbows and class 5 weapons.
-    Swing with CS +15; a hit shoves the enemy 1 square without following. An unmodified result >=90
-    extinguishes and discards it. A Threat Roll below Threat spends it. Lighting a new torch from a
-    Quick Slot takes 1 action, never adjacent to an enemy.
+  source_text: 'Lighting a new torch takes 1 action from a Quick Slot but it cannot be done adjacent to an enemy.'
   scope: global
   type: modifier
   effects:
@@ -2948,6 +2946,59 @@
       type: literal
       value: true
   entity_id: equipment.light_source.torch
+- id: character.equipment.light_source.torch.quick_slot_stack
+  name: light source torch quick slot stack
+  section_id: section.appendix_iii_equipment.general_equipment.light_sources.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 183
+      printed_page: 181
+      heading: Light sources
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        table: Light sources
+        row: Torch
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 184
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Torch | 1 | 1 | The light projected by a torch helps strengthen the resolve of your
+    party. See separate note on torch. | 15 c | 5
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: quick_slot_stack_size
+      value:
+        type: literal
+        value: 1
+  fields:
+    quick_slot_stack_size:
+      type: number
+      role: state
+      description: >-
+        Torches storable in one quick slot. The ENC cell prints 1 with no /X; changelog 2.21 entry
+        184 adds 1/1 at Torch.
+  dependencies:
+    - key: quick_slot_stack
+      label: character.equipment.quick_slot_stack
+      object_id: character.equipment.quick_slot_stack
+  entity_id: equipment.light_source.torch
+  issues:
+    - issue.equipment.torch_quick_slot_stack
 - id: character.equipment.general.backpack_medium.capacity
   name: general backpack medium capacity
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -2962,7 +3013,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Backpack - Medium
   status: extracted
   confidence: high
@@ -3008,8 +3059,19 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Backpack - Large
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 185
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text:
@@ -3028,7 +3090,7 @@
       target: dex_modifier
       value:
         type: literal
-        value: -10
+        value: -15
       duration: while_condition
   fields:
     carrying_capacity:
@@ -3038,8 +3100,12 @@
     dex_modifier:
       type: number
       role: state
-      description: dex modifier
+      description: >-
+        DEX modifier. The row prints -10; changelog 2.21 entry 185 changes it to -15 to match the
+        Treasure Card.
   entity_id: equipment.general.backpack_large
+  issues:
+    - issue.equipment.large_backpack_dex
 - id: character.equipment.general.bandage_old_rags.healing
   name: general bandage old rags healing
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -3054,7 +3120,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Bandage (old rags)
   status: extracted
   confidence: high
@@ -3122,8 +3188,19 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Bandage (linen)
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 15
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 89
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Necessary when using the Heal Skill. Heals 1d8 Hit Points.
@@ -3145,6 +3222,11 @@
       value:
         type: field
         name: healing_roll
+    - type: set
+      target: bundle_uses
+      value:
+        type: literal
+        value: 3
   fields:
     heal_skill_used:
       type: boolean
@@ -3164,7 +3246,15 @@
       dice:
         count: 1
         sides: 8
+    bundle_uses:
+      type: number
+      role: state
+      description: >-
+        Uses per bundle. The row prints no number of uses; changelog 2.21 entry 89 adds 3 bandages
+        to all types.
   entity_id: equipment.general.bandage_linen
+  issues:
+    - issue.equipment.bandage_uses
 - id: character.equipment.general.bandage_herbal_wrap.healing
   name: general bandage herbal wrap healing
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -3179,8 +3269,19 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Bandage (Herbal wrap)
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 15
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 89
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: Necessary when using the Heal Skill. Gives Heal skill +15 and heals 1d10 Hit Points.
@@ -3202,6 +3303,11 @@
       value:
         type: field
         name: healing_roll
+    - type: set
+      target: bundle_uses
+      value:
+        type: literal
+        value: 3
   fields:
     heal_skill_used:
       type: boolean
@@ -3221,7 +3327,15 @@
       dice:
         count: 1
         sides: 10
+    bundle_uses:
+      type: number
+      role: state
+      description: >-
+        Uses per bundle. The row prints no number of uses; changelog 2.21 entry 89 adds 3 bandages
+        to all types.
   entity_id: equipment.general.bandage_herbal_wrap
+  issues:
+    - issue.equipment.bandage_uses
 - id: character.equipment.general.bandage_herbal_wrap.modifier
   name: general bandage herbal wrap modifier
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -3236,7 +3350,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Bandage (Herbal wrap)
   status: extracted
   confidence: high
@@ -3270,7 +3384,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Bed Roll
   status: extracted
   confidence: high
@@ -3323,7 +3437,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Combat Harness
   status: extracted
   confidence: high
@@ -3360,7 +3474,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Combat Harness
   status: extracted
   confidence: high
@@ -3409,7 +3523,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Extended Battle Belt
   status: extracted
   confidence: high
@@ -3446,7 +3560,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Extended Battle Belt
   status: extracted
   confidence: high
@@ -3495,7 +3609,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Holy Water
   status: extracted
   confidence: high
@@ -3512,6 +3626,10 @@
         type: field
         name: damage_roll
   fields:
+    thrown:
+      type: boolean
+      role: input
+      description: the holy water is thrown
     target_is_undead:
       type: boolean
       role: input
@@ -3541,6 +3659,14 @@
         operator: eq
         left:
           type: field
+          name: thrown
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
           name: target_is_undead
         right:
           type: literal
@@ -3554,8 +3680,8 @@
           type: literal
           value: true
   entity_id: equipment.general.holy_water
-  unresolved_references:
-    - Throwing a potion procedure remains a supplied attack handoff.
+  see_also:
+    - section.combat.throwing_potions
 - id: character.equipment.general.holy_water.dip
   name: general holy water dip
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -3570,7 +3696,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Holy Water
   status: extracted
   confidence: high
@@ -3606,7 +3732,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Holy Water
   status: extracted
   confidence: high
@@ -3629,6 +3755,10 @@
         type: literal
         value: true
   fields:
+    dipped_projectile:
+      type: boolean
+      role: input
+      description: the attack uses a projectile dipped in the holy water
     target_is_undead:
       type: boolean
       role: input
@@ -3642,14 +3772,24 @@
       role: state
       description: non mundane
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: target_is_undead
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: dipped_projectile
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: target_is_undead
+        right:
+          type: literal
+          value: true
   entity_id: equipment.general.holy_water
 - id: character.equipment.general.iron_wedges.bar
   name: general iron wedges bar
@@ -3665,7 +3805,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Iron Wedges
   status: extracted
   confidence: high
@@ -3716,6 +3856,8 @@
   entity_id: equipment.general.iron_wedges
   issues:
     - issue.phase6.iron_wedges_movement
+  see_also:
+    - section.into_the_dungeons.rest
 - id: character.equipment.general.parchment.scroll
   name: general parchment scroll
   section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
@@ -3730,7 +3872,7 @@
         confidence: high
         visually_verified: true
       locator:
-        table: Miscellaneous Equipment
+        table: Miscellaneous
         row: Parchment
   status: extracted
   confidence: high
@@ -3749,32 +3891,40 @@
           type: literal
           value: true
   fields:
+    making_magic_scroll:
+      type: boolean
+      role: input
+      description: the hero is making a magic scroll
     has_parchment:
       type: boolean
       role: input
       description: has parchment
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: making_magic_scroll
+    right:
+      type: literal
+      value: true
   entity_id: equipment.general.parchment
 - id: character.equipment.general.partial_map.use
   name: general partial map use
-  section_id: section.appendix_iii_equipment.general_equipment.miscellaneous.table
+  section_id: section.appendix_iii_equipment.general_equipment.miscellaneous
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 184
       printed_page: 182
-      heading: Miscellaneous
+      heading: Partial Map
       extraction:
         method: text
         confidence: high
         visually_verified: true
-      locator:
-        table: Miscellaneous Equipment
-        row: Partial Map
   status: extracted
   confidence: high
-  source_text: A found Partial Map is only usable in that dungeon; a bought map in a dungeon of
-    choice. Look at any 2 Exploration Cards, return them to exactly the same positions, and discard
-    the map.
+  source_text: 'If found in a dungeon, it can only be used in that dungeon. If bought, it may be used in a dungeon of choice. Once used, it is discarded. ... You may look at any 2 cards in the pile of Exploration Cards, and then return them to the exact same position.'
   scope: global
   type: modifier
   effects:
@@ -4019,8 +4169,54 @@
       role: state
       description: lighter and stronger than ordinary pickaxe
   entity_id: equipment.tool.dwarven_pickaxe
-  unresolved_references:
-    - No quantified digging advantage is stated; use the printed ENC and DUR table cells.
+- id: character.equipment.tool.dwarven_pickaxe.rubble
+  name: tool dwarven pickaxe removes rubble
+  section_id: section.appendix_iii_equipment.general_equipment.tools.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 185
+      printed_page: 183
+      heading: Tools
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+      locator:
+        table: Tools
+        row: Dwarven Pickaxe
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 26
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 186
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A finely crafted pickaxe. Lighter, yet stronger than ordinary pickaxes.
+  scope: global
+  type: modifier
+  effects:
+    - type: set
+      target: can_remove_rubble
+      value:
+        type: literal
+        value: true
+  fields:
+    can_remove_rubble:
+      type: boolean
+      role: state
+      description: >-
+        Whether the item can remove rubble. The row does not print it; changelog 2.21 entry 186 adds
+        "Can be used to remove rubble." to the Dwarven Pickaxe.
+  entity_id: equipment.tool.dwarven_pickaxe
+  issues:
+    - issue.equipment.dwarven_pickaxe_rubble
 - id: character.equipment.tool.fishing_gear.foraging
   name: tool fishing gear foraging
   section_id: section.appendix_iii_equipment.general_equipment.tools.table
@@ -4037,6 +4233,28 @@
       locator:
         table: Tools
         row: Fishing Gear
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 18
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 114
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 21
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 128
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text: A good fishing rod always makes life better. With this, a hero’s Foraging Skill increases by +5.
@@ -4047,14 +4265,36 @@
       target: foraging_modifier
       value:
         type: literal
-        value: 5
+        value: 10
       duration: check
   fields:
+    wild_game_traps_modifier_applied:
+      type: boolean
+      role: input
+      description: the Wild game traps +10 already applies to this Foraging roll
     foraging_modifier:
       type: number
       role: state
-      description: foraging modifier
+      description: >-
+        Foraging modifier. The table prints +5; changelog 2.21 entry 114 changes it to +10 to match
+        the card, and entry 128 makes it not cumulative with Wild game traps.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: wild_game_traps_modifier_applied
+    right:
+      type: literal
+      value: false
+  dependencies:
+    - key: wild_game_traps
+      label: character.settlement.equipment.wild_game_traps
+      object_id: character.settlement.equipment.wild_game_traps
   entity_id: equipment.tool.fishing_gear
+  issues:
+    - issue.equipment.fishing_gear_trap_stacking
+    - issue.equipment.fishing_gear_forage_value
 - id: character.equipment.tool.lockpicks_5.pick
   name: tool lockpicks 5 pick
   section_id: section.appendix_iii_equipment.general_equipment.tools.table
@@ -4202,6 +4442,8 @@
       role: state
       description: can remove rubble
   entity_id: equipment.tool.pickaxe
+  issues:
+    - issue.equipment.pickaxe_durability
 - id: character.equipment.tool.rope_old.break
   name: tool rope old break
   section_id: section.appendix_iii_equipment.general_equipment.tools.table
@@ -4308,8 +4550,8 @@
       role: state
       description: can help escape pit
   entity_id: equipment.tool.rope
-  unresolved_references:
-    - Pit geometry and any escape test remain supplied; no numerical bonus is printed here.
+  see_also:
+    - section.into_the_dungeons.obstacles.climbing_pits
 - id: character.equipment.tool.trap_disarming_kit.disarm
   name: tool trap disarming kit disarm
   section_id: section.appendix_iii_equipment.general_equipment.tools.table

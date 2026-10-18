@@ -1,0 +1,149 @@
+- id: character.perk.appendix_use
+  name: Perk cost and one Perk per Action
+  section_id: section.appendix_i_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 168
+      printed_page: 166
+      heading: 'Appendix I: Perks'
+      locator:
+        paragraph: 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Using these Perks always costs 1 Point of Energy, but no AP unless noted otherwise.
+    Perks can only be used one at a time (one Perk per Action).
+  type: modifier
+  scope: global
+  fields:
+    perks_used_this_action:
+      type: number
+      role: input
+      description: Perks already used in this Action
+      integer: true
+      minimum: 0
+    energy:
+      type: number
+      role: state
+      description: Energy of the hero using the Perk
+    action_point_cost:
+      type: number
+      role: output
+      description: AP cost of using the Perk when its entry notes no other cost
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: gte
+        left:
+          type: field
+          name: energy
+        right:
+          type: literal
+          value: 1
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: perks_used_this_action
+        right:
+          type: literal
+          value: 0
+    - type: add
+      target: energy
+      value:
+        type: literal
+        value: -1
+      duration: immediate
+    - type: set
+      target: action_point_cost
+      value:
+        type: literal
+        value: 0
+  dependencies:
+    - key: energy_for_perks
+      label: Perks can be used at the cost of energy
+      section_id: section.character_basics.the_character.perks
+      object_id: character.energy.perk
+    - key: perk_progression
+      label: Perk categories by level
+      section_id: section.levelling_up.talents_and_perks.table_perks
+      object_id: table.character.perk_progression
+  term_refs:
+    - term.perk
+- id: character.talent.appendix_definition
+  name: Talents are always active
+  section_id: section.appendix_ii_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 172
+      printed_page: 170
+      heading: 'Appendix II: Talents'
+      locator:
+        paragraph: 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Talents are specific skills that your heroes possess. They are always active, and do
+    not need a successful die roll to confer benefit. You may choose a Talent from the category
+    listed on the Level Up Table.
+  type: definition
+  scope: global
+  fields: {}
+  effects: []
+  dependencies:
+    - key: passive
+      label: Talents are Passive Boosts
+      section_id: section.character_basics.the_character.talents
+      object_id: character.talent.passive
+    - key: talent_progression
+      label: Level Up Table talent categories
+      section_id: section.levelling_up.talents_and_perks.table_talents
+      object_id: table.character.talent_progression
+    - key: level_up_choice
+      label: Choose a Talent from the category shown on level up
+      section_id: section.levelling_up.talents_and_perks
+      object_id: character.advancement.talent_and_perk_choice
+  term_refs:
+    - term.talent
+  issues:
+    - issue.talent.die_roll_benefit
+- id: character.talent.common.eligibility
+  name: 'Common Talents: any profession'
+  section_id: section.appendix_ii_talents.common_talents
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 175
+      printed_page: 173
+      heading: Common Talents
+      locator:
+        paragraph: 1
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These are everyday Talents that anyone can obtain regardless of profession.
+  type: definition
+  scope: global
+  fields: {}
+  effects: []
+  dependencies:
+    - key: pious_exception
+      label: Pious cannot be chosen by a Warrior Priest
+      section_id: section.appendix_ii_talents.common_talents
+      object_id: character.talent.pious.eligibility
+  term_refs:
+    - term.talent
