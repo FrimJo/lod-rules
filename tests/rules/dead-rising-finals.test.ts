@@ -171,7 +171,7 @@ describe('The Master — rendered PDF 235–236', () => {
     expect(
       corpus.rules.find((x) => x.id === 'core.quest.master.master')?.unresolved_references,
     ).toContain(
-      'Three Closecombat Spells and four Ranged Spells: the source does not name them or state a selection method.',
+      '3 Close combat Spells and 4 Ranged Spells: the source does not name them or state a selection method.',
     );
   });
   it.each([true, false])('requires Master fallen before aftermath findings: %s', (fallen) => {
@@ -237,7 +237,7 @@ describe('The Master — rendered PDF 235–236', () => {
         value: values[i],
         meaning: 'value',
       });
-    expect(table.footnotes).toContain('XP: 200, T4 Treasure Table.');
+    expect(table.footnotes).toContain('XP: 200, T4 Treasure Table');
     for (const suffix of ['sacrifice', 'master']) {
       const threat = corpus.tables.find((x) => x.id === `table.quest.${suffix}.threat`)!;
       expect(['start', 'min', 'max'].map((c) => threat.rows[0]?.cells[c]?.printed)).toEqual([

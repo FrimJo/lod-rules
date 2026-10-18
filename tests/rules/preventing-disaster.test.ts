@@ -123,8 +123,9 @@ describe('Preventing a Disaster — PDF247–248', () => {
         river_flooding: flooding,
         hero_remains_in_chamber: remains,
         turns_since_flooding: turn,
+        fire_damage_roll: 4,
       }).state;
-      expect(state.hit_point_loss_dice === '1d6').toBe(damaged);
+      expect(state.hit_points_lost === 4).toBe(damaged);
       if (damaged)
         expect(state).toMatchObject({
           damage_type: 'Fire Damage',

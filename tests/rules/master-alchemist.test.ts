@@ -51,6 +51,7 @@ describe('The Master Alchemist — rendered PDF246', () => {
       selected_vial_result: result,
       dex: 50,
       dex_roll: roll,
+      fire_damage_roll: 3,
     }).state;
     const key =
       result === 'filled'
@@ -60,7 +61,7 @@ describe('The Master Alchemist — rendered PDF246', () => {
           : 'vial_dropped';
     expect(state[key] === true).toBe(allowed);
     if (result === 'burned' && allowed) {
-      expect(state.fire_damage_dice).toBe('1d4');
+      expect(state.fire_damage).toBe(3);
       expect(state).not.toHaveProperty('vial_filled');
       expect(state).not.toHaveProperty('retry_allowed');
     }
@@ -89,7 +90,7 @@ describe('The Master Alchemist — rendered PDF246', () => {
         dex_roll: result === 'dropped' ? 71 : 50,
       }).state;
       expect(state).not.toHaveProperty('vial_filled');
-      expect(state).not.toHaveProperty('fire_damage_dice');
+      expect(state).not.toHaveProperty('fire_damage');
       expect(state).not.toHaveProperty('vial_dropped');
     },
   );

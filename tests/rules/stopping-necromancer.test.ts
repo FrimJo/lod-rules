@@ -100,10 +100,15 @@ describe('Stopping the Necromancer — PDF261', () => {
         dex_test_succeeded: true,
       }).trace,
     ).toEqual([]);
-    expect(run('zombie_protection', { ragnalf_dead: false })).toMatchObject({
+    expect(
+      run('zombie_protection', { ragnalf_dead: false, zombie_next_to_ragnalf: true }),
+    ).toMatchObject({
       zombies_advance_toward_heroes: false,
       zombie_formation: 'circle to protect Ragnalf',
     });
+    expect(
+      result('zombie_protection', { ragnalf_dead: false, zombie_next_to_ragnalf: false }).trace,
+    ).toEqual([]);
   });
   it.each([true, false])('kills all zombies only on Ragnalf death=%s', (dead) => {
     expect(run('ragnalf_death', { ragnalf_dead: dead }).all_zombies_dead === true).toBe(dead);

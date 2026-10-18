@@ -13,8 +13,6 @@ describe('Spring Cleaning source — PDF 224–226', () => {
   it('preserves the quest location, objective and tile exclusions', () => {
     expect(run('setup').state).toMatchObject({
       location: 'any town',
-      campaign_start: 'wherever the heroes are',
-      second_quest_start: 'Silver City',
       corridors: 4,
       excluded_corridor: 'C16',
       rooms: 4,
@@ -42,8 +40,14 @@ describe('Spring Cleaning source — PDF 224–226', () => {
       });
   });
   it('excepts only the ration requirement, leaving rest lifecycle accounting separate', () => {
-    const result = run('rest_exception');
-    expect(result.state).toEqual({ rest_ration_cost: 0, rest_other_requirements_unchanged: true });
+    const result = run('rest_exception', { current_quest: 'quest.dead_rising.spring_cleaning' });
+    expect(result.state).toMatchObject({
+      rest_ration_cost: 0,
+      rest_other_requirements_unchanged: true,
+    });
+    expect(
+      run('rest_exception', { current_quest: 'quest.dead_rising.the_dead_rising' }).trace,
+    ).toEqual([]);
     expect(result.events).toEqual([]);
     expect(
       corpus.rules.find((x) => x.id === 'core.quest.spring_cleaning.rest_exception')?.dependencies,

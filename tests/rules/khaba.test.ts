@@ -61,8 +61,25 @@ describe('Crypt of Khaba — PDF271–272', () => {
         normal_encounter_roll_used: false,
         queen_khaba_present: true,
         wights_present: 4,
+        party_has_met_queen_khaba: true,
       });
   });
+  it.each([true, false])(
+    'an Ace of Spades meeting suppresses the objective Queen, variant %s',
+    (access) => {
+      const p = access ? 'ancient' : 'standard';
+      const met = run('ace_encounter', { drawn_card: 'Ace of Spades' });
+      const objective = runCase(
+        {
+          rule_ids: ['core.quest.khaba.ace_encounter', `core.quest.khaba.${p}_queen`],
+          inputs: { drawn_card: 'Ace of Spades', ancient_tiles_available: access } as State,
+        } as TestCase,
+        corpus,
+      );
+      expect(met.party_has_met_queen_khaba).toBe(true);
+      expect(objective.trace).toEqual(['core.quest.khaba.ace_encounter']);
+    },
+  );
   it('retains exact profiles without a guessed creature class or shield type', () => {
     expect(run('queen_profile')).toEqual({
       queen_weapon: 'dagger',

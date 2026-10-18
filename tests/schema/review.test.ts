@@ -65,6 +65,7 @@ describe('issue resolutions', () => {
       'issue.phase4.short_rest_morale',
       'issue.phase5.ranger_species_bows',
       'issue.phase5.heirloom_sword',
+      'issue.phase5.minotaur_reward_missing',
       'issue.phase6.failed_threat_roll_increase',
       'issue.phase6.door_open_threat_source',
       'issue.phase6.trap_headings_unmapped',
@@ -74,6 +75,7 @@ describe('issue resolutions', () => {
       'issue.treasure.horn_ready_slot',
       'issue.settlement.ohlnir_temple_name',
       'issue.quest.spider_queen_cobweb_mapping',
+      'issue.quest.belua_terror',
       'issue.sanity.miscast_loss',
       'issue.movement.pit_down_test',
       'issue.traps.disarm_lockpick',
@@ -98,6 +100,9 @@ describe('issue resolutions', () => {
       'issue.equipment.torch_quick_slot_stack',
       'issue.equipment.large_backpack_dex',
       'issue.equipment.dwarven_pickaxe_rubble',
+      'issue.quest.manhunt_bandit_xp_loot',
+      'issue.backgrounds.lost_brother_monster_card',
+      'issue.quest.highwaymen_objective_room_name',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

@@ -47,11 +47,11 @@ describe('The Mapmaker — PDF276', () => {
       'Energy',
     ]);
     expect(table?.rows[0]?.cells).toEqual({
-      cs: { type: 'text', printed: '-' },
-      rs: { type: 'text', printed: '-' },
+      cs: { type: 'marker', printed: '-', meaning: 'not_specified' },
+      rs: { type: 'marker', printed: '-', meaning: 'not_specified' },
       dex: { type: 'number', printed: '25', value: 25, meaning: 'value' },
       res: { type: 'number', printed: '35', value: 35, meaning: 'value' },
-      dmg_na: { type: 'text', printed: '-' },
+      dmg_na: { type: 'marker', printed: '-', meaning: 'not_specified' },
       to_hit: { type: 'number', printed: '-5', value: -5, meaning: 'value' },
       luck: { type: 'number', printed: '0', value: 0, meaning: 'value' },
       m: { type: 'number', printed: '4', value: 4, meaning: 'value' },

@@ -38,7 +38,7 @@ describe('Spring Cleaning printed tables — rendered PDF 224–225', () => {
       '1 Giant spider',
     ]);
     expect(encounter.footnotes).toEqual([
-      'Johann can only appear once. If you end up with 31-45 again then place 1d4 Giant Rats and 1 Bat swarm.',
+      'Johann can only appear once. If you end up with 31-45 again then place 1d4 Giant Rats and 1 Batswarm.',
     ]);
     expect(encounter.roll_domain).toEqual({ min: 1, max: 100 });
   });
@@ -66,7 +66,7 @@ describe('Spring Cleaning printed tables — rendered PDF 224–225', () => {
       m: { type: 'number', printed: '4', value: 4, meaning: 'value' },
       hp: { type: 'number', printed: '15', value: 15, meaning: 'value' },
     });
-    expect(stats.footnotes).toContain('XP: 115.');
+    expect(stats.footnotes).toContain('XP: 115');
     expect(stats.source[0]).toMatchObject({ pdf_page: 225, printed_page: 223 });
   });
 });

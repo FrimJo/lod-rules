@@ -17,6 +17,9 @@ describe('The Dead Rising second quest — rendered PDF 227–228', () => {
       room_pool: 'R2B–R8B only, randomised',
       encounters: 'Undead',
       objective_room: 'The Great Crypt',
+      room_pool_first: 'R2B',
+      room_pool_last: 'R8B',
+      room_pool_exclusive: true,
     });
   });
   it.each([
@@ -76,7 +79,9 @@ describe('The Dead Rising second quest — rendered PDF 227–228', () => {
   it('preserves the per-hero advertised reward and unquantified aftermath promise', () => {
     expect(run('reward').state.reward_per_hero).toBe(150);
     const quest = corpus.entities.find((x) => x.id === 'quest.dead_rising.the_dead_rising')!;
-    expect(quest.source_text).toContain('no numerical favour or additional reward is defined');
+    expect(quest.unresolved_references?.[0]).toContain(
+      'defines no numerical favour or additional reward',
+    );
     expect(quest.rules).toHaveLength(5);
     for (const id of quest.rules)
       expect(corpus.rules.find((x) => x.id === id)).toMatchObject({
@@ -120,7 +125,7 @@ describe('The Dead Rising second quest — rendered PDF 227–228', () => {
       m: { type: 'number', printed: '4', value: 4, meaning: 'value' },
       hp: { type: 'number', printed: '12', value: 12, meaning: 'value' },
     });
-    expect(stats.footnotes).toContain('XP: 140, T2 Treasure Table.');
+    expect(stats.footnotes).toContain('XP: 140, T2 Treasure Table');
     expect(stats.source[0]).toMatchObject({ pdf_page: 228, printed_page: 226 });
   });
 });

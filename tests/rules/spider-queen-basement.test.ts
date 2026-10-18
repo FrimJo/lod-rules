@@ -39,11 +39,9 @@ describe('Spider Queen Basement — PDF239–240', () => {
   ])('places only on increasing to a threshold: %s -> %s', (previous, current, triggered) => {
     const state = run('threshold', { previous_threat: previous, current_threat: current }).state;
     expect(state.wandering_monster_triggered === true).toBe(triggered);
-    if (triggered)
-      expect(state).toMatchObject({
-        threat_reduction_on_placement: 0,
-        scenario_result_ignored: true,
-      });
+    if (triggered) expect(state).toMatchObject({ threat_reduction_on_placement: 0 });
+    // PDF 239 prints no "regardless of the Scenario die result" clause for this level.
+    expect(state).not.toHaveProperty('scenario_result_ignored');
   });
   it.each([true, false])(
     'adds Kraghul and applicable ordinary encounters only on the secondary card: %s',

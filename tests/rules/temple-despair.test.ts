@@ -135,7 +135,7 @@ describe('Temple of Despair — PDF268–269', () => {
     expect(result.state).toMatchObject({
       curses_to_randomise_for_this_hero: 1,
       temple_curse_active: true,
-      temple_curse_duration: 'until this hero leaves their next dungeon',
+      temple_curse_duration: 'until the heroes leave their next dungeon',
     });
     expect(result.events).toEqual([{ type: 'invoke', dependency: 'table.treasure.curses' }]);
     expect(execute(['curse'], { temple_aftermath_reached: false }).events).toEqual([]);

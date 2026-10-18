@@ -23,10 +23,10 @@ describe('Manhunt — PDF278', () => {
     ]);
     expect(table?.rows[0]?.cells).toEqual({
       cs: { type: 'number', printed: '60', value: 60, meaning: 'value' },
-      rs: { type: 'text', printed: '-' },
+      rs: { type: 'marker', printed: '-', meaning: 'not_specified' },
       dex: { type: 'number', printed: '45', value: 45, meaning: 'value' },
       res: { type: 'number', printed: '35', value: 35, meaning: 'value' },
-      dmg_na: { type: 'text', printed: '-' },
+      dmg_na: { type: 'marker', printed: '-', meaning: 'not_specified' },
       to_hit: { type: 'number', printed: '-10', value: -10, meaning: 'value' },
       luck: { type: 'number', printed: '0', value: 0, meaning: 'value' },
       m: { type: 'number', printed: '4', value: 4, meaning: 'value' },

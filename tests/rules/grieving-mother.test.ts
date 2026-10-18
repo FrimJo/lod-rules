@@ -25,9 +25,12 @@ describe('The Grieving Mother — rendered PDF 164–165', () => {
       });
       expect(result.state).toMatchObject({
         initial_text_readable: triggered,
-        door_slam_text_readable: allowed,
         read_one_section_at_a_time: true,
       });
+      expect(result.state.door_slam_text_readable === true).toBe(allowed);
+      expect(
+        single('reading', { quest_triggered: triggered, first_turn_finished: finished }).state,
+      ).not.toHaveProperty('door_slam_text_readable');
     },
   );
   it('preserves next-main-quest location, extra card and inherited encounters', () => {

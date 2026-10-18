@@ -21,7 +21,7 @@ describe('Spider Queen Tomb — PDF241–242', () => {
   it.each([true, false])(
     'selects mutually exclusive encounters from supplied parity without assuming die size: %s',
     (odd) => {
-      const inputs: State = { encounter_die_odd: odd };
+      const inputs: State = { encounter_die_odd: odd, giant_spider_roll: 2 };
       const result = runCase(
         {
           rule_ids: [
@@ -34,7 +34,7 @@ describe('Spider Queen Tomb — PDF241–242', () => {
       );
       expect(result.state.encounter_kind === 'Giant Spiders').toBe(odd);
       expect(result.state.encounter_list === 'Undead Encounter List').toBe(!odd);
-      if (odd) expect(result.state.encounter_count_dice).toBe('1d3');
+      if (odd) expect(result.state.giant_spiders).toBe(2);
     },
   );
   it.each([
@@ -70,7 +70,7 @@ describe('Spider Queen Tomb — PDF241–242', () => {
     });
     expect(run('belua').state).toEqual({
       enemy_kind: 'Gigantic Spider',
-      terror: 5,
+      terror: 10,
       poison: true,
       large: true,
       wall_climbing: false,
@@ -103,10 +103,9 @@ describe('Spider Queen Tomb — PDF241–242', () => {
   it.each([true, false])(
     'requires Belua and every child slain for party sarcophagus findings: %s',
     (slain) => {
-      const state = run('aftermath', { belua_and_children_slain: slain }).state;
+      const state = run('aftermath', { belua_and_children_slain: slain, coin_roll: 237 }).state;
       expect(state.sceptre_found === true).toBe(slain);
-      if (slain)
-        expect(state).toMatchObject({ coin_roll_expression: '4d100', wonderful_treasures: 3 });
+      if (slain) expect(state).toMatchObject({ coins_found: 237, wonderful_treasures: 3 });
       expect(state).not.toHaveProperty('coins');
     },
   );

@@ -54,7 +54,11 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     ).toBe(leaving ? 1500 : 0);
   });
   it.each([1, 2, 10])('Heirloom placement only on a one: %i', (roll) => {
-    const result = run('the_heirloom.quest_setup', { quest_start_roll: roll });
+    const result = run('the_heirloom.quest_setup', {
+      at_quest_start: true,
+      quest_start_roll: roll,
+      sword_recovered: false,
+    });
     if (roll === 1)
       expect(result.state).toMatchObject({
         secondary_card_location: 'first_half_of_exploration_pile',
@@ -123,9 +127,17 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     ).toMatchObject({ type: 'quest_actor', quest_id: 'quest.background.the_lost_brother' });
   });
   it.each([59, 60, 61])('Lost Brother discovery boundary at %i', (total) => {
-    const result = run('the_lost_brother.discovery', { roll: total - 5, dungeons_entered: 5 }, [
-      'the_lost_brother.surviving_brother',
-    ]);
+    const result = run(
+      'the_lost_brother.discovery',
+      {
+        brother_on_next_tile: true,
+        entered_brother_room: true,
+        roll: total - 5,
+        dungeons_entered: 5,
+        burial_choice: 'leave',
+      },
+      ['the_lost_brother.remains_found', 'the_lost_brother.surviving_brother'],
+    );
     expect(result.state.brother_alive).toBe(total < 60);
     expect(result.state.result).toBe(total);
   });
@@ -285,8 +297,11 @@ describe('Phase 5 personal traits and quest boundaries', () => {
   });
   it.each([9, 10])('Sworn Enemy adds one leader on ten: %i', (roll) => {
     expect(
-      run('sworn_enemy.bandit_encounter', { battle_with_bandits: true, roll }).state
-        .additional_bandit_leaders,
+      run('sworn_enemy.bandit_encounter', {
+        battle_with_bandits: true,
+        roll,
+        sworn_enemy_killed: false,
+      }).state.additional_bandit_leaders,
     ).toBe(roll === 10 ? 1 : undefined);
   });
   it('Family Keep requires every tile and every enemy', () => {
@@ -329,7 +344,11 @@ describe('Phase 5 personal traits and quest boundaries', () => {
     ).toBe(final ? 1000 : 0);
   });
   it.each([1, 2])('Minotaur recognition occurs only on one: %i', (roll) => {
-    const result = run('revenge_minotaur.recognition', { fighting_minotaur: true, roll });
+    const result = run('revenge_minotaur.recognition', {
+      fighting_minotaur: true,
+      roll,
+      reward_already_received: false,
+    });
     expect(result.state.recognize_scar).toBe(roll === 1 ? true : undefined);
   });
   it('quest enemies remain separately bound with no invented statistics', () => {
@@ -343,14 +362,15 @@ describe('Phase 5 personal traits and quest boundaries', () => {
         tables: [],
       });
   });
-  it('Minotaur reward stays unresolved without speculative XP', () => {
+  it('Minotaur reward follows changelog 2.21 entry 143 (1500 XP)', () => {
     const result = run('revenge_minotaur.reward', {
       recognize_scar: true,
       beast_defeated: true,
+      reward_already_received: false,
       xp: 0,
     });
-    expect(result.unresolved).toEqual(['issue.phase5.minotaur_reward_missing']);
-    expect(result.state.xp).toBe(0);
+    expect(result.unresolved).toEqual([]);
+    expect(result.state.xp).toBe(1500);
   });
   it.each([false, true])('A new home requires the named estate: %s', (acquired) => {
     expect(

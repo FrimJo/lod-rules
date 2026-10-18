@@ -22,6 +22,7 @@ const base: State = {
   threat: 9,
   objective_room_entered: true,
   hero_in_objective_room: true,
+  zombie_next_to_ragnalf: true,
   hit_result_supplied: true,
   actual_hit_event: 1,
   to_hit_roll: 89,
@@ -82,6 +83,15 @@ describe('Stopping the Necromancer actual occurrence/hero checkpoints — PDF261
       ragnalf_position: 'moved',
     });
     expect(state.zombie_hp).toBeUndefined();
+  });
+  it('only zombies standing next to Ragnalf form the protective circle', () => {
+    const entry = run({
+      ...run({ ...base, zombie_next_to_ragnalf: false }).state,
+      phase: 'objective_room',
+    });
+    expect(entry.state.zombies).toBe(6);
+    expect(entry.state.zombie_formation).not.toBe('circle to protect Ragnalf');
+    expect(entry.trace).not.toContain('core.quest.stopping_necromancer.zombie_protection');
   });
   it('source-owned modifier reports replay without accumulating or touching unrelated modifiers', () => {
     const first = run({ ...room(), phase: 'modifiers', other_cs_modifier: 7, total_cs: 80 });

@@ -14,7 +14,8 @@ describe('Highwaymen — rendered PDF 229–230', () => {
       corridors: 6,
       rooms: 6,
       encounters: 'Bandits and Brigands',
-      objective_room: 'The Dwarven hall',
+      objective_room: 'The Throne room',
+      objective_room_printed: 'The Dwarven hall',
     });
   });
   it.each([
@@ -85,14 +86,16 @@ describe('Highwaymen — rendered PDF 229–230', () => {
       '2 kegs of Dwarven Ale (~400 c)',
       '1 bag of spice (~500 c)',
       '373 c',
-      '3 bodies - 150 c (Delivery 13/6)',
+      '3 bodies -150 c (Delivery 13/6)',
       '16/6',
       '3 sacks of potatoes (~50 c)',
     ]);
     expect(
       ledger.rows.filter((x) => x.row_kind === 'structural').map((x) => x.cells.entry?.printed),
     ).toEqual(['12/6', '16/6']);
-    expect(ledger.source_text).toContain('not treated as item prices or present reward contents');
+    expect(ledger.unresolved_references?.[0]).toContain(
+      'not item prices or present reward contents',
+    );
     expect(ledger.source[0]).toMatchObject({ pdf_page: 230, printed_page: 228 });
   });
   it('keeps all seven local rules bound to Highwaymen', () => {

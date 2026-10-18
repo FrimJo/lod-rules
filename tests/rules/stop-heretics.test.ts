@@ -79,13 +79,15 @@ describe('Stop the Heretics — PDF244–245', () => {
       ).toBe(defeated);
     },
   );
+  // PDF 245 Aftermath ties the reward only to killing the Spellcaster before he opens the
+  // portal; defeating every Objective Room creature gates only the alternative exit.
   it.each([
     [true, true, 250],
     [true, false, 125],
-    [false, true, undefined],
-    [false, false, undefined],
+    [false, true, 250],
+    [false, false, 125],
   ])(
-    'gates full or half reward: defeated%s / portal prevented%s',
+    'gates full or half reward on the portal alone: defeated%s / portal prevented%s',
     (defeated, prevented, reward) => {
       const inputs: State = {
         all_objective_creatures_defeated: defeated,
@@ -102,7 +104,7 @@ describe('Stop the Heretics — PDF244–245', () => {
         corpus,
       ).state;
       expect(state.reward_per_hero).toBe(reward);
-      if (defeated) expect(state.portal_open).toBe(!prevented);
+      expect(state.portal_open).toBe(!prevented);
       expect(state).not.toHaveProperty('coins');
     },
   );
