@@ -563,6 +563,14 @@ describe('rendered guild tables (PDF 152–154)', () => {
     expect(rows[0]?.[1]).toContain('When leaving a dungeon, roll 1d10. On a result of 9-10');
     expect(rows[8]?.[1]).toContain('Between each quest, roll 1d10. On a result of 10');
     expect(rows[5]?.[1]).toContain('It will not go out due to any other reason.');
+    const staves = byId('table.guild.wizard_staves');
+    for (const id of ['row_1', 'row_9'])
+      expect(staves.rows.find((row) => row.id === id)!.cells.dissipation_roll).toEqual({
+        type: 'dice',
+        printed: '1d10',
+        dice: { count: 1, sides: 10 },
+        meaning: 'roll',
+      });
     for (const [index, capacity] of [
       [2, 30],
       [3, 20],
