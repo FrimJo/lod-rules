@@ -112,6 +112,31 @@ describe('casting foundations (PDF 64–67)', () => {
 });
 
 describe('specific spell exceptions and miscast outcomes', () => {
+  it('miscast rows that print a die link a rule typing it (PDF 65)', () => {
+    const table = pilot.tables.find((t) => t.id === 'table.magic.miscast')!;
+    const refs = (row: string) => table.rows.find((r) => r.id === row)!.rule_refs;
+    const dice = (id: string, field: string) =>
+      pilot.rules.find((r) => r.id === `core.magic.miscast.${id}`)!.fields![field]!.dice;
+    expect(refs('row_4')).toEqual(['core.magic.miscast.outcome_4']);
+    expect(refs('row_7')).toEqual(['core.magic.miscast.outcome_7']);
+    expect(refs('row_8')).toEqual(['core.magic.miscast.outcome_8']);
+    expect(refs('row_10')).toEqual(['core.magic.miscast.outcome_10']);
+    expect(dice('outcome_4', 'sanity_roll')).toEqual({ count: 1, sides: 3 });
+    expect(dice('outcome_7', 'hp_roll')).toEqual({ count: 1, sides: 6 });
+    expect(dice('outcome_8', 'friendly_sanity_roll')).toEqual({ count: 1, sides: 8 });
+    expect(dice('outcome_8', 'wizard_sanity_roll')).toEqual({ count: 1, sides: 3 });
+    expect(dice('outcome_10', 'damage_roll')).toEqual({ count: 1, sides: 10 });
+    expect(
+      run(['miscast.outcome_8'], {
+        miscast_result: 8,
+        friendly_sanity_roll: 8,
+        wizard_sanity_roll: 3,
+      }).state,
+    ).toMatchObject({ friendly_sanity_lost: 8, wizard_sanity_lost: 3 });
+    expect(() => run(['miscast.outcome_4'], { miscast_result: 4, sanity_roll: 4 })).toThrow(
+      'Input out of range sanity_roll',
+    );
+  });
   const spell = (name: string, inputs: State) =>
     runCase({ rule_ids: [`core.spell.${name}`], inputs } as TestCase, pilot);
   it('miscast Mana overrides preserve full/triple/half costs', () => {

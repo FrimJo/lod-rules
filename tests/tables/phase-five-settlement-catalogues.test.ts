@@ -25,6 +25,56 @@ describe('settlement and estate source catalogue regressions', () => {
       ['Whiteport', '1d6', 'Black'],
     ]);
   });
+  it('types every settlement Quest dice cell as the die rolled for the Quest Site', () => {
+    // PDF 132: "The Quest Site is determined by rolling a dice"; each Quest dice cell is that die.
+    const table = byId('table.settlement.quest_sites');
+    expect(table.columns.find((column) => column.id === 'quest_die')?.cell_types).toEqual(['dice']);
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.quest_die;
+        return cell?.type === 'dice' ? [cell.printed, cell.dice, cell.meaning] : cell?.type;
+      }),
+    ).toEqual([
+      ['1d4', { count: 1, sides: 4 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['2d20', { count: 2, sides: 20 }, 'roll'],
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+    ]);
+  });
+  it('types the die printed inside each Settlement Event cell beside the verbatim event', () => {
+    // PDF 135 (printed 133): events 4 and 7 roll 1d12, event 10 steals 1d100 c, event 11 sends
+    // 1d4 bandits; the other events print no die.
+    const table = byId('table.settlement.events');
+    expect(table.columns.find((column) => column.id === 'event_dice')).toEqual({
+      id: 'event_dice',
+      label: 'Printed dice within Event cell',
+      cell_types: ['dice', 'blank'],
+    });
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.event_dice;
+        return cell?.type === 'dice' ? [cell.printed, cell.dice, cell.meaning] : cell?.type;
+      }),
+    ).toEqual([
+      'blank',
+      'blank',
+      'blank',
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      'blank',
+      'blank',
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      'blank',
+      'blank',
+      ['1d100', { count: 1, sides: 100 }, 'value'],
+      ['1d4', { count: 1, sides: 4 }, 'value'],
+      'blank',
+    ]);
+  });
   it('preserves the activity catalogue including zero and multi-day costs', () => {
     expect(matrix('table.settlement.activities')).toHaveLength(29);
     expect(matrix('table.settlement.activities').filter((row) => row[2]?.startsWith('0'))).toEqual([
@@ -563,6 +613,14 @@ describe('rendered guild tables (PDF 152–154)', () => {
     expect(rows[0]?.[1]).toContain('When leaving a dungeon, roll 1d10. On a result of 9-10');
     expect(rows[8]?.[1]).toContain('Between each quest, roll 1d10. On a result of 10');
     expect(rows[5]?.[1]).toContain('It will not go out due to any other reason.');
+    const staves = byId('table.guild.wizard_staves');
+    for (const id of ['row_1', 'row_9'])
+      expect(staves.rows.find((row) => row.id === id)!.cells.dissipation_roll).toEqual({
+        type: 'dice',
+        printed: '1d10',
+        dice: { count: 1, sides: 10 },
+        meaning: 'roll',
+      });
     for (const [index, capacity] of [
       [2, 30],
       [3, 20],
@@ -713,6 +771,34 @@ describe('rendered estate restrictions (PDF 160–163)', () => {
     expect(rows[5]?.[2]).toContain('either at archery range OR at the training grounds');
     expect(rows[6]?.[2]).toContain('1d8+the number of spent days');
     expect(rows[7]?.[2]).toContain('once between each quest');
+  });
+  it('types each die printed in a furnishing effect without changing the effect text', () => {
+    // PDF 161: the dice stay verbatim in Effect; a sibling column types each one.
+    const table = byId('table.estate.furnishings');
+    expect(table.columns.map((column) => column.id)).toEqual([
+      'furnishing',
+      'cost',
+      'effect',
+      'effect_dice',
+    ]);
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.effect_dice;
+        return cell?.type === 'dice'
+          ? [row.id, cell.printed, cell.dice, cell.meaning]
+          : [row.id, cell?.type];
+      }),
+    ).toEqual([
+      ['row_1', '+1d2', { count: 1, sides: 2 }, 'increase'],
+      ['row_2', 'blank'],
+      ['row_3', 'blank'],
+      ['row_4', '1d6', { count: 1, sides: 6 }, 'roll'],
+      ['row_5', '1d3', { count: 1, sides: 3 }, 'value'],
+      ['row_6', '+1d2', { count: 1, sides: 2 }, 'increase'],
+      ['row_7', '1d8', { count: 1, sides: 8 }, 'value'],
+      ['row_8', '1d6+2', { count: 1, sides: 6, modifier: 2 }, 'value'],
+      ['row_9', 'blank'],
+    ]);
   });
   it('retains all ten ghost effect cells including the rations selection unit', () => {
     expect(matrix('table.estate.ghost_events').map((row) => row[2])).toEqual([
