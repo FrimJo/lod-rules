@@ -1,3 +1,453 @@
+- id: character.treasure.potions.identify
+  name: 'Tables of Potions: identification of found and mixed potions'
+  section_id: section.appendix_v_treasures.tables_of_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Tables of Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These tables are used to randomise what kind of potion you have found or created.
+    Remember that potions must be identified if found before drinking. That is not necessary if the
+    potion is a result of your own mixing.
+  scope: global
+  type: constraint
+  fields:
+    potion_origin:
+      type: string
+      role: input
+      description: 'how the potion was obtained: found or own_mixing'
+    identified:
+      type: boolean
+      role: input
+      description: the potion has been identified
+    identification_required:
+      type: boolean
+      role: output
+      description: the potion must be identified before drinking
+    may_drink:
+      type: boolean
+      role: output
+      description: the potion may be drunk
+  effects:
+    - type: choice
+      selection: potion_origin
+      options:
+        - id: found
+          effects:
+            - type: set
+              target: identification_required
+              value:
+                type: literal
+                value: true
+            - type: require
+              condition:
+                type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: identified
+                right:
+                  type: literal
+                  value: true
+            - type: set
+              target: may_drink
+              value:
+                type: literal
+                value: true
+        - id: own_mixing
+          effects:
+            - type: set
+              target: identification_required
+              value:
+                type: literal
+                value: false
+            - type: set
+              target: may_drink
+              value:
+                type: literal
+                value: true
+  uses_tables:
+    - table.alchemy.weak_supreme
+    - table.alchemy.standard
+  see_also:
+    - section.alchemy.identifying_potions
+    - section.alchemy.mixing_potions
+  dependencies:
+    - key: identify_potion
+      label: Identifying Potions
+      object_id: character.alchemy.identify
+    - key: identify_before_use
+      label: Identifying Items and Potions
+      object_id: core.identify.before_use
+    - key: mixed_without_recipe
+      label: Mixing Potions (random result)
+      object_id: character.alchemy.mix.success.random
+- id: character.treasure.potions.standard.columns_1_2
+  name: 'Standard Potions: 1d3 result 1 or 2'
+  section_id: section.appendix_v_treasures.tables_of_potions.standard
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Standard Potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: In order to randomise Standard Potions, you must roll 1d3 first to determine what
+    column to roll next. If you roll 1 you will use 1d10 to randomise from the top 10 potions, and
+    if you roll 2, you will randomise from the lower potions (bold numbers) on the d10 column.
+  scope: global
+  type: random_resolution
+  fields: &a1
+    column_roll: &a2
+      type: number
+      role: input
+      description: Standard Potions 1d3 roll that determines the column to roll next
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    potion_roll: &a3
+      type: number
+      role: input
+      description: Standard Potions 1d10 roll in the selected column
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    standard_potions_row:
+      type: number
+      role: output
+      description: row of the Standard Potions table, counted from the top (1-30)
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: column_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: column_roll
+        right:
+          type: literal
+          value: 2
+  effects:
+    - type: set
+      target: standard_potions_row
+      value:
+        type: sum
+        values:
+          - type: field
+            name: potion_roll
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: arithmetic
+                operator: subtract
+                values:
+                  - type: field
+                    name: column_roll
+                  - type: literal
+                    value: 1
+              - type: literal
+                value: 10
+  uses_tables:
+    - table.alchemy.standard
+  issues:
+    - issue.alchemy.standard_selector
+- id: character.treasure.potions.standard.column_3
+  name: 'Standard Potions: column headed 3'
+  section_id: section.appendix_v_treasures.tables_of_potions.standard
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Standard Potions
+      locator:
+        table: Standard Potions
+        column: 3 1d10
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 1,2 1d10 3 1d10 Cost Potion
+  scope: global
+  type: random_resolution
+  fields: *a1
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: column_roll
+    right:
+      type: literal
+      value: 3
+  effects:
+    - type: set
+      target: standard_potions_row
+      value:
+        type: sum
+        values:
+          - type: field
+            name: potion_roll
+          - type: literal
+            value: 20
+  uses_tables:
+    - table.alchemy.standard
+  issues:
+    - issue.alchemy.standard_selector
+- id: character.treasure.potions.standard.roll_again
+  name: 'Standard Potions: Roll again'
+  section_id: section.appendix_v_treasures.tables_of_potions.standard
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Standard Potions
+      locator:
+        table: Standard Potions
+        row: 3 / 10
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 10 - Roll again
+  scope: global
+  type: random_resolution
+  fields:
+    column_roll: *a2
+    potion_roll: *a3
+    roll_again:
+      type: boolean
+      role: output
+      description: the result is Roll again
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: column_roll
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: potion_roll
+        right:
+          type: literal
+          value: 10
+  effects:
+    - type: set
+      target: roll_again
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.alchemy.standard
+  issues:
+    - issue.alchemy.standard_selector
+- id: character.treasure.potions.weak_supreme
+  name: 'Weak or Supreme potions: roll and cost reading'
+  section_id: section.appendix_v_treasures.tables_of_potions.table_weak_or_supreme_potions
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 197
+      printed_page: 195
+      heading: Weak or Supreme potions
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The cost should be read as Weak/Supreme. 1d12 Cost Potion
+  scope: global
+  type: random_resolution
+  fields:
+    potion_roll:
+      type: number
+      role: input
+      description: Weak or Supreme potions 1d12 roll
+      integer: true
+      minimum: 1
+      maximum: 12
+      dice:
+        count: 1
+        sides: 12
+    quality:
+      type: string
+      role: input
+      description: 'quality of the potion: weak or supreme'
+    weak_supreme_row:
+      type: number
+      role: output
+      description: row of the Weak or Supreme potions table
+    cost_part:
+      type: string
+      role: output
+      description: which value of the printed Cost cell applies
+  effects:
+    - type: set
+      target: weak_supreme_row
+      value:
+        type: field
+        name: potion_roll
+    - type: choice
+      selection: quality
+      options:
+        - id: weak
+          effects:
+            - type: set
+              target: cost_part
+              value:
+                type: literal
+                value: value before the slash
+        - id: supreme
+          effects:
+            - type: set
+              target: cost_part
+              value:
+                type: literal
+                value: value after the slash
+  uses_tables:
+    - table.alchemy.weak_supreme
+  issues:
+    - issue.treasure.potion_table_divergences
+- id: character.treasure.ingredients_and_parts.randomise
+  name: 'Ingredients and Parts: randomise a found part or ingredient'
+  section_id: section.appendix_v_treasures.ingredients_and_parts
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 198
+      printed_page: 196
+      heading: Ingredients and Parts
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    When you have found a random part or ingredient, you can use these tables to randomize
+    what you have found.
+  scope: global
+  type: random_resolution
+  fields:
+    found_kind:
+      type: string
+      role: input
+      description: 'what was found: ingredient or part'
+    ingredient_roll:
+      type: number
+      role: input
+      description: Table of Ingredients 1d20 roll
+      integer: true
+      minimum: 1
+      maximum: 20
+      dice:
+        count: 1
+        sides: 20
+    group_roll:
+      type: number
+      role: input
+      description: Table of Parts 1d3 roll
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    part_roll:
+      type: number
+      role: input
+      description: Table of Parts 1d10 roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    ingredients_row:
+      type: number
+      role: output
+      description: row of the Table of Ingredients
+    parts_row:
+      type: number
+      role: output
+      description: row of the Table of Parts, counted from the top (1-30)
+  effects:
+    - type: choice
+      selection: found_kind
+      options:
+        - id: ingredient
+          effects:
+            - type: set
+              target: ingredients_row
+              value:
+                type: field
+                name: ingredient_roll
+        - id: part
+          effects:
+            - type: set
+              target: parts_row
+              value:
+                type: sum
+                values:
+                  - type: field
+                    name: part_roll
+                  - type: arithmetic
+                    operator: multiply
+                    values:
+                      - type: arithmetic
+                        operator: subtract
+                        values:
+                          - type: field
+                            name: group_roll
+                          - type: literal
+                            value: 1
+                      - type: literal
+                        value: 10
+  uses_tables:
+    - table.alchemy.ingredients
+    - table.alchemy.parts
+  issues:
+    - issue.alchemy.parts_footnote
+    - issue.treasure.parts_catalogue_divergence
 - id: character.treasure.powerstone.1
   name: Table of Powerstones 1
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -6,49 +456,63 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 1
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 1 | +2 Damage. This stone can be used to improve any weapon.
+  source_text: 1 +2 Damage. This stone can be used to improve any weapon.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    powerstone_roll: &a4
+      type: number
       role: input
-      description: selected
+      description: Table of Powerstones 1d20 result
+      integer: true
+      minimum: 1
+      maximum: 20
+      dice:
+        count: 1
+        sides: 20
+    item_kind: &a5
+      type: string
+      role: input
+      description: 'kind of object the stone is used on: weapon, armour, shield, ring or amulet'
     damage_modifier:
       type: number
       role: output
       description: damage modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 1
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: damage_modifier
       value:
         type: literal
         value: 2
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: any weapon
 - id: character.treasure.powerstone.2
   name: Table of Powerstones 2
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -57,49 +521,51 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 2
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 2 | +3 Damage. This stone can be used to improve any weapon.
+  source_text: 2 +3 Damage. This stone can be used to improve any weapon.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     damage_modifier:
       type: number
       role: output
       description: damage modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 2
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: damage_modifier
       value:
         type: literal
         value: 3
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: any weapon
 - id: character.treasure.powerstone.3
   name: Table of Powerstones 3
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -108,58 +574,119 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 3
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    3 | Poisonous. This stone gives a weapon a permanent poisonous ability. If a monster is
+  source_text: 3 Poisonous. This stone gives a weapon a permanent poisonous ability. If a monster is
     wounded by this weapon, it loses 1HP every turn until end of battle.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     poisonous:
       type: boolean
       role: output
-      description: poisonous
-    monster_hp_loss_each_turn:
-      type: number
-      role: output
-      description: monster hp loss each turn
-    duration:
-      type: string
-      role: output
-      description: duration
-    trigger:
-      type: string
-      role: output
-      description: trigger
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: the weapon has a permanent poisonous ability
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 3
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: poisonous
       value:
         type: literal
         value: true
+- id: character.treasure.powerstone.3.wounded
+  name: Table of Powerstones 3, wounded monster
+  section_id: section.appendix_v_treasures.table_of_powerstones
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 199
+      printed_page: 197
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '3'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 3 Poisonous. This stone gives a weapon a permanent poisonous ability. If a monster is
+    wounded by this weapon, it loses 1HP every turn until end of battle.
+  scope: global
+  type: modifier
+  fields:
+    powerstone_roll: *a4
+    item_kind: *a5
+    monster_wounded_by_weapon:
+      type: boolean
+      role: input
+      description: the monster has been wounded by this weapon
+    monster_hp_loss_each_turn:
+      type: number
+      role: output
+      description: HP the wounded monster loses every turn
+    duration:
+      type: string
+      role: output
+      description: how long the HP loss lasts
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 3
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: monster_wounded_by_weapon
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: monster_hp_loss_each_turn
       value:
@@ -170,16 +697,6 @@
       value:
         type: literal
         value: until end of battle
-    - type: set
-      target: trigger
-      value:
-        type: literal
-        value: monster wounded
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: weapon
 - id: character.treasure.powerstone.4
   name: Table of Powerstones 4
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -188,50 +705,56 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 4
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 4 | Fire Damage. This stone makes this weapon cause Fire Damage. See ‘Fire Damage’
+  source_text: 4 Fire Damage. This stone makes this weapon cause Fire Damage. See ‘Fire Damage’
     section in the ‘Combat’ chapter for more information.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     damage_type:
       type: string
       role: output
-      description: damage type
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: damage type the weapon causes
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 4
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: damage_type
       value:
         type: literal
         value: fire
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: weapon
+  see_also:
+    - section.combat.different_kinds_of_damage.fire_damage
+  term_refs:
+    - term.fire_damage
 - id: character.treasure.powerstone.5
   name: Table of Powerstones 5
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -240,49 +763,51 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 5
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 5 | +10 To Hit. This stone makes the weapon perfectly balanced, increasing chances to hit.
+  source_text: 5 +10 To Hit. This stone makes the weapon perfectly balanced, increasing chances to hit.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     to_hit_modifier:
       type: number
       role: output
       description: to hit modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 5
   effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: item_kind
+        right:
+          type: literal
+          value: weapon
     - type: set
       target: to_hit_modifier
       value:
         type: literal
         value: 10
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: weapon
 - id: character.treasure.powerstone.6
   name: Table of Powerstones 6
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -291,49 +816,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 6
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 6 | + 5 Strength bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
+  source_text: 6 + 5 Strength bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    borne_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero is the bearer of the ring or amulet
     strength_modifier:
       type: number
       role: output
-      description: strength modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: strength modifier for the bearer
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: borne_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: strength_modifier
       value:
         type: literal
         value: 5
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.7
   name: Table of Powerstones 7
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -342,50 +895,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 7
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '7'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 7 | +5 Constitution bonus. This stone can be used on rings or amulets, enhancing the
-    bearer's stat.
+  source_text: 7 +5 Constitution bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    borne_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero is the bearer of the ring or amulet
     constitution_modifier:
       type: number
       role: output
-      description: constitution modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: constitution modifier for the bearer
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 7
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: borne_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: constitution_modifier
       value:
         type: literal
         value: 5
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.8
   name: Table of Powerstones 8
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -394,49 +974,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 8
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '8'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 8 | +5 Wisdom bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
+  source_text: 8 +5 Wisdom bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    borne_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero is the bearer of the ring or amulet
     wisdom_modifier:
       type: number
       role: output
-      description: wisdom modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: wisdom modifier for the bearer
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 8
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: borne_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: wisdom_modifier
       value:
         type: literal
         value: 5
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.9
   name: Table of Powerstones 9
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -445,49 +1053,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 9
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '9'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 9 | +5 Resolve bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
+  source_text: 9 +5 Resolve bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    borne_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero is the bearer of the ring or amulet
     resolve_modifier:
       type: number
       role: output
-      description: resolve modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: resolve modifier for the bearer
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 9
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: borne_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: resolve_modifier
       value:
         type: literal
         value: 5
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.10
   name: Table of Powerstones 10
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -496,49 +1132,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 10
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '10'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 10 | +5 Dexterity bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
+  source_text: 10 +5 Dexterity bonus. This stone can be used on rings or amulets, enhancing the bearer's stat.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    borne_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero is the bearer of the ring or amulet
     dexterity_modifier:
       type: number
       role: output
-      description: dexterity modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: dexterity modifier for the bearer
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 10
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: borne_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: dexterity_modifier
       value:
         type: literal
         value: 5
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.11
   name: Table of Powerstones 11
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -547,49 +1211,103 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 11
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '11'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 11 | Fast Reload. Reduces reload time by 1 Action. If the hero has Fast Reload, they
-    may fire twice in the first action (But only once in the second).
+  source_text:
+    11 Fast Reload. Reduces reload time by 1 Action. If the hero has Fast Reload, they may
+    fire twice in the first action (But only once in the second).
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
     reload_action_reduction:
       type: number
       role: output
-      description: reload action reduction
-    with_fast_reload_first_action_shots:
-      type: number
-      role: output
-      description: with fast reload first action shots
-    with_fast_reload_second_action_shots:
-      type: number
-      role: output
-      description: with fast reload second action shots
+      description: reload time reduction in Actions
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 11
   effects:
     - type: set
       target: reload_action_reduction
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.reload
+  issues:
+    - issue.treasure.powerstone_fast_reload_object
+- id: character.treasure.powerstone.11.fast_reload
+  name: Table of Powerstones 11 with the Fast Reload talent
+  section_id: section.appendix_v_treasures.table_of_powerstones
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 199
+      printed_page: 197
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '11'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    11 Fast Reload. Reduces reload time by 1 Action. If the hero has Fast Reload, they may
+    fire twice in the first action (But only once in the second).
+  scope: global
+  type: modifier
+  fields:
+    powerstone_roll: *a4
+    has_fast_reload:
+      type: boolean
+      role: input
+      description: the hero has the Fast Reload talent
+    with_fast_reload_first_action_shots:
+      type: number
+      role: output
+      description: shots in the first action
+    with_fast_reload_second_action_shots:
+      type: number
+      role: output
+      description: shots in the second action
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 11
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: has_fast_reload
+        right:
+          type: literal
+          value: true
+  effects:
     - type: set
       target: with_fast_reload_first_action_shots
       value:
@@ -600,6 +1318,12 @@
       value:
         type: literal
         value: 1
+  dependencies:
+    - key: fast_reload
+      label: Fast Reload
+      object_id: talent.fast_reload
+  issues:
+    - issue.treasure.powerstone_fast_reload_object
 - id: character.treasure.powerstone.12
   name: Table of Powerstones 12
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -608,49 +1332,61 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 12
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '12'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 12 | +2 DEF. This can be used to enhance a piece of armour or a shield.
+  source_text: 12 +2 DEF. This can be used to enhance a piece of armour or a shield.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     defence_modifier:
       type: number
       role: output
-      description: defence modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: DEF modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 12
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: armour
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: shield
     - type: set
       target: defence_modifier
       value:
         type: literal
         value: 2
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: armour or shield
 - id: character.treasure.powerstone.13
   name: Table of Powerstones 13
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -659,44 +1395,62 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 13
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '13'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 13 | +1 Energy Point per quest. This is applied to a ring or amulet. The hero starts
-    with 1 more Point of Energy than normally allowed.
+  source_text:
+    13 +1 Energy Point per quest. This is applied to a ring or amulet. The hero starts with
+    1 more Point of Energy than normally allowed.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     energy_modifier:
       type: number
       role: output
-      description: energy modifier
+      description: additional Points of Energy the hero starts with
     duration:
       type: string
       role: output
-      description: duration
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: how often the extra Energy Point applies
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 13
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: energy_modifier
       value:
@@ -707,11 +1461,10 @@
       value:
         type: literal
         value: per quest
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  term_refs:
+    - term.energy
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.14
   name: Table of Powerstones 14
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -720,51 +1473,80 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 14
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '14'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    14 | +1 Luck Point. This is applied to a ring or amulet. The hero that wears this has 1
+  source_text: 14 +1 Luck Point. This is applied to a ring or amulet. The hero that wears this has 1
     more Point of Luck than usual.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    worn_by_hero:
       type: boolean
       role: input
-      description: selected
+      description: the hero wears the ring or amulet
     luck_modifier:
       type: number
       role: output
-      description: luck modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: additional Points of Luck
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 14
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: worn_by_hero
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: luck_modifier
       value:
         type: literal
         value: 1
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  term_refs:
+    - term.luck
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.15
   name: Table of Powerstones 15
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -773,51 +1555,78 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 15
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '15'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    15 | +10 chance to detect traps. This is applied to a ring or amulet. When prompted to
+  source_text: 15 +10 chance to detect traps. This is applied to a ring or amulet. When prompted to
     check if the hero has detected a trap, this bonus helps.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    checking_trap_detection:
       type: boolean
       role: input
-      description: selected
+      description: the hero is prompted to check whether they detected a trap
     detect_traps_modifier:
       type: number
       role: output
-      description: detect traps modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: modifier to detect traps
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 15
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: checking_trap_detection
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: detect_traps_modifier
       value:
         type: literal
         value: 10
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.16
   name: Table of Powerstones 16
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -826,58 +1635,81 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 16
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '16'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 16 | +1 Initiative token on the first turn of combat. This is applied to a ring or amulet.
+  source_text: 16 +1 Initiative token on the first turn of combat. This is applied to a ring or amulet.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    powerstone_roll: *a4
+    item_kind: *a5
+    combat_turn:
+      type: number
       role: input
-      description: selected
+      description: turn of the combat, counting from 1
+      integer: true
+      minimum: 1
     initiative_tokens:
       type: number
       role: output
-      description: initiative tokens
-    duration:
-      type: string
-      role: output
-      description: duration
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: additional Initiative tokens
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 16
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: combat_turn
+        right:
+          type: literal
+          value: 1
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: initiative_tokens
       value:
         type: literal
         value: 1
-    - type: set
-      target: duration
-      value:
-        type: literal
-        value: first turn of combat
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  term_refs:
+    - term.initiative_token
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.17
   name: Table of Powerstones 17
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -886,49 +1718,77 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 17
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '17'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 17 | Hero may re-roll a failed Fear or Terror Test. This is applied to a ring or amulet.
+  source_text: 17 Hero may re-roll a failed Fear or Terror Test. This is applied to a ring or amulet.
   scope: global
   type: modifier
   fields:
-    selected:
+    powerstone_roll: *a4
+    item_kind: *a5
+    failed_fear_or_terror_test:
       type: boolean
       role: input
-      description: selected
+      description: the hero failed a Fear or Terror Test
     reroll_failed_fear_terror:
       type: boolean
       role: output
-      description: reroll failed fear terror
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: the hero may re-roll the failed test
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 17
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: failed_fear_or_terror_test
+        right:
+          type: literal
+          value: true
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: reroll_failed_fear_terror
       value:
         type: literal
         value: true
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.18
   name: Table of Powerstones 18
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -937,50 +1797,67 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 18
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '18'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 18 | +2 Hit Points. This stone raises the number of starting wounds before a quest.
-    This is applied to a ring or amulet.
+  source_text:
+    18 +2 Hit Points. This stone raises the number of starting wounds before a quest. This
+    is applied to a ring or amulet.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     starting_hit_points_modifier:
       type: number
       role: output
-      description: starting hit points modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: additional starting wounds before a quest
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 18
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: starting_hit_points_modifier
       value:
         type: literal
         value: 2
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
+  term_refs:
+    - term.hit_points
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.19
   name: Table of Powerstones 19
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -989,59 +1866,82 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 19
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '19'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 19 | +2 Party Morale. If one hero carries an object with this power, the Party Morale
+  source_text: 19 +2 Party Morale. If one hero carries an object with this power, the Party Morale
     starts 2 points higher. This is applied to a ring or amulet.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    powerstone_roll: *a4
+    item_kind: *a5
+    heroes_carrying_power:
+      type: number
       role: input
-      description: selected
+      description: number of heroes carrying an object with this power
+      integer: true
+      minimum: 0
     starting_party_morale_modifier:
       type: number
       role: output
-      description: starting party morale modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
-    condition_text:
-      type: string
-      role: output
-      description: condition text
+      description: points the Party Morale starts higher
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: powerstone_roll
+        right:
+          type: literal
+          value: 19
+      - type: compare
+        operator: gte
+        left:
+          type: field
+          name: heroes_carrying_power
+        right:
+          type: literal
+          value: 1
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: starting_party_morale_modifier
       value:
         type: literal
         value: 2
-    - type: set
-      target: applicable_to
-      value:
-        type: literal
-        value: ring or amulet
-    - type: set
-      target: condition_text
-      value:
-        type: literal
-        value: if one hero carries an object with this power
+  term_refs:
+    - term.party_morale
+  issues:
+    - issue.treasure.powerstone_amulet_slot
 - id: character.treasure.powerstone.20
   name: Table of Powerstones 20
   section_id: section.appendix_v_treasures.table_of_powerstones
@@ -1050,7 +1950,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 199
       printed_page: 197
-      heading: Table of Powerstones 20
+      heading: Table of Powerstones
+      locator:
+        table: Table of Powerstones
+        row: '20'
       extraction:
         method: text
         confidence: high
@@ -1058,43 +1961,279 @@
   status: extracted
   confidence: high
   source_text:
-    20 | +2 Sanity Points. This is applied to a ring or amulet. The hero has 2 more Points
-    of Sanity than they would normally have.
+    20 +2 Sanity Points. This is applied to a ring or amulet. The hero has 2 more Points of
+    Sanity than they would normally have.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
-      role: input
-      description: selected
+    powerstone_roll: *a4
+    item_kind: *a5
     sanity_modifier:
       type: number
       role: output
-      description: sanity modifier
-    applicable_to:
-      type: string
-      role: output
-      description: applicable to
+      description: additional Points of Sanity
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: powerstone_roll
     right:
       type: literal
-      value: true
+      value: 20
   effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: ring
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: item_kind
+            right:
+              type: literal
+              value: amulet
     - type: set
       target: sanity_modifier
       value:
         type: literal
         value: 2
+  term_refs:
+    - term.sanity
+  issues:
+    - issue.treasure.powerstone_amulet_slot
+- id: character.treasure.magic_powers.roll
+  name: 'Tables of Magic Powers for Items: roll for the magic effect'
+  section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items
+  source: &a6
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 200
+      printed_page: 198
+      heading: Tables of Magic Powers for Items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: When you find a Magic Item, roll on the table below to see what effect the magic has
+    upon the item.
+  scope: global
+  type: random_resolution
+  fields:
+    magic_item_found:
+      type: boolean
+      role: input
+      description: a Magic Item has been found
+    item_kind:
+      type: string
+      role: input
+      description: 'kind of Magic Item: weapon, armour_or_shield or item'
+    power_roll:
+      type: number
+      role: input
+      description: Magic Weapons, Magic Armours and Shields or Magic Item 1d10 roll
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    magic_power_table:
+      type: string
+      role: output
+      description: table rolled on
+    magic_power_row:
+      type: number
+      role: output
+      description: row of that table
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: magic_item_found
+    right:
+      type: literal
+      value: true
+  effects:
     - type: set
-      target: applicable_to
+      target: magic_power_row
+      value:
+        type: field
+        name: power_roll
+    - type: choice
+      selection: item_kind
+      options:
+        - id: weapon
+          effects:
+            - type: set
+              target: magic_power_table
+              value:
+                type: literal
+                value: table.treasure.magic_weapons
+        - id: armour_or_shield
+          effects:
+            - type: set
+              target: magic_power_table
+              value:
+                type: literal
+                value: table.treasure.magic_armours_shields
+        - id: item
+          effects:
+            - type: set
+              target: magic_power_table
+              value:
+                type: literal
+                value: table.treasure.magic_items
+  uses_tables:
+    - table.treasure.magic_weapons
+    - table.treasure.magic_armours_shields
+    - table.treasure.magic_items
+  term_refs:
+    - term.magic_item
+- id: character.treasure.magic_powers.identify
+  name: 'Tables of Magic Powers for Items: identify before use'
+  section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items
+  source: *a6
+  status: extracted
+  confidence: high
+  source_text:
+    Please note that you have to identify its magical abilities using the Arcane Arts skill
+    or pay for the service in town before you can use it.
+  scope: global
+  type: constraint
+  fields:
+    identified_by:
+      type: string
+      role: input
+      description: 'how the magical abilities were identified: arcane_arts, town_service or none'
+    can_use:
+      type: boolean
+      role: output
+      description: the hero can use the Magic Item
+  effects:
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: identified_by
+            right:
+              type: literal
+              value: arcane_arts
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: identified_by
+            right:
+              type: literal
+              value: town_service
+    - type: set
+      target: can_use
       value:
         type: literal
-        value: ring or amulet
+        value: true
+  see_also:
+    - section.magic_items.identifying
+    - section.settlements.identifying_items_and_potions
+  dependencies:
+    - key: arcane_arts
+      label: Identifying (Magic Items)
+      object_id: character.magic_item.identify
+    - key: town_service
+      label: Identifying Items and Potions (settlement service)
+      object_id: character.settlement.identification
+    - key: before_use
+      label: Identifying Items and Potions
+      object_id: core.identify.before_use
+  term_refs:
+    - term.magic_item
+- id: character.treasure.magic_powers.roll_timing
+  name: 'Tables of Magic Powers for Items: when to roll (diehard option)'
+  section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items
+  source: *a6
+  status: extracted
+  confidence: high
+  source_text:
+    For simplicity, it may be easier to roll on this table once you have found it and then
+    remember not to use it until identified. However, the diehard player would just note down ‘Magic
+    Weapon’, and then roll on the table once it has been identified. This may affect decisions if
+    you are carrying too much equipment and have to sacrifice something.
+  scope: global
+  type: choice
+  fields:
+    roll_timing:
+      type: string
+      role: input
+      description: 'play style chosen: on_find (for simplicity) or diehard'
+    identified:
+      type: boolean
+      role: input
+      description: the Magic Item has been identified
+    roll_power_now:
+      type: boolean
+      role: output
+      description: roll on the table now
+    noted_as:
+      type: string
+      role: output
+      description: what is noted down for the item before its power is rolled
+    can_use:
+      type: boolean
+      role: output
+      description: the item may be used
+  effects:
+    - type: choice
+      selection: roll_timing
+      options:
+        - id: on_find
+          effects:
+            - type: set
+              target: roll_power_now
+              value:
+                type: literal
+                value: true
+            - type: set
+              target: can_use
+              value:
+                type: field
+                name: identified
+        - id: diehard
+          effects:
+            - type: set
+              target: noted_as
+              value:
+                type: literal
+                value: Magic Weapon
+            - type: set
+              target: roll_power_now
+              value:
+                type: field
+                name: identified
+            - type: set
+              target: can_use
+              value:
+                type: field
+                name: identified
+  uses_tables:
+    - table.treasure.magic_weapons
+    - table.treasure.magic_armours_shields
+    - table.treasure.magic_items
 - id: character.treasure.magic_weapons.1
   name: Magic Weapons 1
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -1103,40 +2242,53 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 1
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 1 | This weapon has a slight glow to it, as if radiating heat. | Weapon DMG counts as Fire.
+  source_text: 1 This weapon has a slight glow to it, as if radiating heat. Weapon DMG counts as Fire.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     damage_type:
       type: string
       role: output
-      description: damage type
+      description: damage type of the weapon DMG
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 1
   effects:
     - type: set
       target: damage_type
       value:
         type: literal
         value: fire
+  see_also:
+    - section.combat.different_kinds_of_damage.fire_damage
+  term_refs:
+    - term.fire_damage
 - id: character.treasure.magic_weapons.2
   name: Magic Weapons 2
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -1145,21 +2297,30 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 2
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 2 | When wielding this weapon, it is as if your hero can feel its thirst for blood. | +2 Damage.
+  source_text: 2 When wielding this weapon, it is as if your hero can feel its thirst for blood. +2 Damage.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     damage_modifier:
       type: number
       role: output
@@ -1169,10 +2330,10 @@
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 2
   effects:
     - type: set
       target: damage_modifier
@@ -1187,23 +2348,31 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 3
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    3 | A slight humming sound can be heard when you wield this weapon, as if it is powered
-    up and ready to kill. | +1 Damage
+  source_text: 3 A slight humming sound can be heard when you wield this weapon, as if it is powered
+    up and ready to kill. +1 Damage
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     damage_modifier:
       type: number
       role: output
@@ -1213,10 +2382,10 @@
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 3
   effects:
     - type: set
       target: damage_modifier
@@ -1231,35 +2400,44 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 4
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 4 | This weapon feels as if it is one with your body, making every move as simple and
-    perfect as they can be. | +10 CS/RS.
+  source_text: 4 This weapon feels as if it is one with your body, making every move as simple and
+    perfect as they can be. +10 CS/RS.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     cs_rs_modifier:
       type: number
       role: output
-      description: cs rs modifier
+      description: CS/RS modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 4
   effects:
     - type: set
       target: cs_rs_modifier
@@ -1274,35 +2452,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 5
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 5 | The magic infused into this weapon causes every strike or shot to be all but
-    perfect. | +5 CS/RS.
+  source_text: 5 The magic infused into this weapon causes every strike or shot to be all but perfect. +5 CS/RS.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     cs_rs_modifier:
       type: number
       role: output
-      description: cs rs modifier
+      description: CS/RS modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 5
   effects:
     - type: set
       target: cs_rs_modifier
@@ -1317,44 +2503,52 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 6
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    6 | The low weight of this weapon goes beyond your heroes' understanding. A weapon half
-    the size would not even weigh this little. | -5 Enc and -1 Class (Min 1).
+  source_text: 6 The low weight of this weapon goes beyond your heroes' understanding. A weapon half
+    the size would not even weigh this little. -5 Enc and -1 Class (Min 1).
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     enc_modifier:
       type: number
       role: output
-      description: enc modifier
+      description: Enc modifier
     class_modifier:
       type: number
       role: output
-      description: class modifier
+      description: Class modifier
     minimum_class:
       type: number
       role: output
-      description: minimum class
+      description: minimum Class after the modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 6
   effects:
     - type: set
       target: enc_modifier
@@ -1371,6 +2565,9 @@
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.encumbrance
+    - term.weapon_class
 - id: character.treasure.magic_weapons.7
   name: Magic Weapons 7
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -1379,40 +2576,48 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 7
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '7'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    7 | It is as if the magic in this weapon is unusually strong, binding it together in a
-    way that your hero has never experienced before. | Item has +2 max Durability (total 10).
+  source_text: 7 It is as if the magic in this weapon is unusually strong, binding it together in a
+    way that your hero has never experienced before. Item has +2 max Durability (total 10).
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     max_durability_modifier:
       type: number
       role: output
-      description: max durability modifier
+      description: max Durability modifier
     max_durability_total:
       type: number
       role: output
-      description: max durability total
+      description: total max Durability
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 7
   effects:
     - type: set
       target: max_durability_modifier
@@ -1424,6 +2629,8 @@
       value:
         type: literal
         value: 10
+  term_refs:
+    - term.durability
 - id: character.treasure.magic_weapons.8
   name: Magic Weapons 8
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -1432,36 +2639,44 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 8
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '8'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    8 | One look at this weapon reassures your hero that nothing can stand between them and
-    victory. | +10 on Fear and Terror Tests.
+  source_text: 8 One look at this weapon reassures your hero that nothing can stand between them and
+    victory. +10 on Fear and Terror Tests.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     fear_terror_modifier:
       type: number
       role: output
-      description: fear terror modifier
+      description: modifier on Fear and Terror Tests
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 8
   effects:
     - type: set
       target: fear_terror_modifier
@@ -1476,50 +2691,73 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 9
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '9'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 9 | Imbued with powerful spells, this weapon is designed to protect its owner. | +5
+  source_text: 9 Imbued with powerful spells, this weapon is designed to protect its owner. +5
     parrying for CC weapons. +5 Dodge for Ranged Weapons.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    weapon_kind:
+      type: string
+      role: input
+      description: 'kind of weapon: close_combat or ranged'
     close_combat_parry_modifier:
       type: number
       role: output
-      description: close combat parry modifier
+      description: parrying modifier for a CC weapon
     ranged_dodge_modifier:
       type: number
       role: output
-      description: ranged dodge modifier
+      description: Dodge modifier for a Ranged Weapon
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 9
   effects:
-    - type: set
-      target: close_combat_parry_modifier
-      value:
-        type: literal
-        value: 5
-    - type: set
-      target: ranged_dodge_modifier
-      value:
-        type: literal
-        value: 5
+    - type: choice
+      selection: weapon_kind
+      options:
+        - id: close_combat
+          effects:
+            - type: set
+              target: close_combat_parry_modifier
+              value:
+                type: literal
+                value: 5
+        - id: ranged
+          effects:
+            - type: set
+              target: ranged_dodge_modifier
+              value:
+                type: literal
+                value: 5
+  term_refs:
+    - term.parry
+    - term.dodge
 - id: character.treasure.magic_weapons.10
   name: Magic Weapons 10
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -1528,41 +2766,57 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 200
       printed_page: 198
-      heading: Magic Weapons 10
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '10'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    10 | Cursed! This weapon may lend its strength, but it comes at a price. Roll again to
+  source_text: 10 Cursed! This weapon may lend its strength, but it comes at a price. Roll again to
     see what positive effect it has, but know that while wielding this weapon, your hero also
-    suffers the effects of the curse. | Cursed. See Curses Table.
+    suffers the effects of the curse. Cursed. See Curses Table.
   scope: global
   type: modifier
   fields:
-    selected:
+    power_roll:
+      type: number
+      role: input
+      description: Magic Weapons 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    wielding:
       type: boolean
       role: input
-      description: selected
+      description: your hero is wielding this item
     cursed:
       type: boolean
       role: output
-      description: cursed
+      description: the item is cursed
     reroll_positive_effect:
       type: boolean
       role: output
-      description: reroll positive effect
+      description: roll again on this table for the positive effect
+    curse_effects_apply:
+      type: boolean
+      role: output
+      description: your hero suffers the effects of the curse
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 10
   effects:
     - type: set
       target: cursed
@@ -1575,11 +2829,23 @@
         type: literal
         value: true
     - type: invoke
+      dependency: positive_effect
+    - type: invoke
       dependency: curse
+    - type: set
+      target: curse_effects_apply
+      value:
+        type: field
+        name: wielding
   dependencies:
+    - key: positive_effect
+      label: Roll again to see what positive effect it has
+      object_id: table.treasure.magic_weapons
     - key: curse
       label: Curses Table
       object_id: table.treasure.curses
+  issues:
+    - issue.treasure.cursed_roll_again
 - id: character.treasure.magic_armours_shields.1
   name: Magic Armours and Shields 1
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields
@@ -1588,34 +2854,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 1
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 1 | This piece of armour simply radiates strength. | +2 Defence.
+  source_text: 1 This piece of armour simply radiates strength. +2 Defence.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     defence_modifier:
       type: number
       role: output
-      description: defence modifier
+      description: Defence modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 1
   effects:
     - type: set
       target: defence_modifier
@@ -1630,34 +2905,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 2
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 2 | It is as if this piece of armour can deflect any blow. | +1 Defence.
+  source_text: 2 It is as if this piece of armour can deflect any blow. +1 Defence.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     defence_modifier:
       type: number
       role: output
-      description: defence modifier
+      description: Defence modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 2
   effects:
     - type: set
       target: defence_modifier
@@ -1672,38 +2956,47 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 3
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 3 | This armour seems lighter than even Mithril. | -50% Encumbrance (RDU).
+  source_text: 3 This armour seems lighter than even Mithril. -50% Encumbrance (RDU).
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     enc_multiplier:
       type: number
       role: output
-      description: enc multiplier
+      description: Encumbrance multiplier
     rounding:
       type: string
       role: output
-      description: rounding
+      description: rounding direction (RDU)
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 3
   effects:
     - type: set
       target: enc_multiplier
@@ -1715,6 +3008,8 @@
       value:
         type: literal
         value: up
+  term_refs:
+    - term.encumbrance
 - id: character.treasure.magic_armours_shields.4
   name: Magic Armours and Shields 4
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields
@@ -1723,39 +3018,49 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 4
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 4 | Enchanted by a Master Enchanter, it will take tremendous effort to break this
-    armour. | +1 item max Durability (Total 9).
+  source_text:
+    4 Enchanted by a Master Enchanter, it will take tremendous effort to break this armour.
+    +1 item max Durability (Total 9).
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     max_durability_modifier:
       type: number
       role: output
-      description: max durability modifier
+      description: item max Durability modifier
     max_durability_total:
       type: number
       role: output
-      description: max durability total
+      description: total max Durability
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 4
   effects:
     - type: set
       target: max_durability_modifier
@@ -1767,6 +3072,8 @@
       value:
         type: literal
         value: 9
+  term_refs:
+    - term.durability
 - id: character.treasure.magic_armours_shields.5
   name: Magic Armours and Shields 5
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields
@@ -1775,40 +3082,49 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 5
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 5 | From time to time, it almost looks as if this armour is on fire even though it is
-    cool to the touch. Maybe this is the reason that it is not susceptible to fire. | Ignores effect
+  source_text: 5 From time to time, it almost looks as if this armour is on fire even though it is
+    cool to the touch. Maybe this is the reason that it is not susceptible to fire. Ignores effect
     of Fire DMG no matter where the strike lands.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     ignore_fire_effects:
       type: boolean
       role: output
-      description: ignore fire effects
+      description: ignores effect of Fire DMG
     all_hit_locations:
       type: boolean
       role: output
-      description: all hit locations
+      description: no matter where the strike lands
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 5
   effects:
     - type: set
       target: ignore_fire_effects
@@ -1820,6 +3136,10 @@
       value:
         type: literal
         value: true
+  see_also:
+    - section.combat.different_kinds_of_damage.fire_damage
+  term_refs:
+    - term.fire_damage
 - id: character.treasure.magic_armours_shields.6
   name: Magic Armours and Shields 6
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields
@@ -1828,36 +3148,59 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 6
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 6 | When forging this armour, powerful enchantments were imbued into it to thwart
-    anyone trying to poison its wearer. | Improved resistance to poison (+10 Constitution on those
-    rolls).
+  source_text:
+    6 When forging this armour, powerful enchantments were imbued into it to thwart anyone
+    trying to poison its wearer. Improved resistance to poison (+10 Constitution on those rolls).
   scope: global
   type: modifier
   fields:
-    selected:
+    power_roll:
+      type: number
+      role: input
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    poison_resistance_roll:
       type: boolean
       role: input
-      description: selected
+      description: the roll is a Constitution roll to resist poison
     poison_constitution_modifier:
       type: number
       role: output
-      description: poison constitution modifier
+      description: Constitution modifier on those rolls
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: selected
-    right:
-      type: literal
-      value: true
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: power_roll
+        right:
+          type: literal
+          value: 6
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: poison_resistance_roll
+        right:
+          type: literal
+          value: true
   effects:
     - type: set
       target: poison_constitution_modifier
@@ -1872,35 +3215,44 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 7
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '7'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 7 | The enchantment in this armour reaches out to its owner and strengthens their
-    resilience. | +5 Constitution.
+  source_text: 7 The enchantment in this armour reaches out to its owner and strengthens their
+    resilience. +5 Constitution.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     constitution_modifier:
       type: number
       role: output
-      description: constitution modifier
+      description: Constitution modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 7
   effects:
     - type: set
       target: constitution_modifier
@@ -1915,35 +3267,44 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 8
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '8'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 8 | As If the armour lends its strength, the owner of this piece of armour becomes as
-    strong as an ox. | +5 Strength.
+  source_text: 8 As If the armour lends its strength, the owner of this piece of armour becomes as
+    strong as an ox. +5 Strength.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     strength_modifier:
       type: number
       role: output
-      description: strength modifier
+      description: Strength modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 8
   effects:
     - type: set
       target: strength_modifier
@@ -1958,41 +3319,53 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 9
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '9'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 9 | Imbued with powerful spells, the armour gives a tingling sensation to its owner
-    when danger is afoot, giving them a split second extra to dodge the threat. | +5 Dodge.
+  source_text:
+    9 Imbued with powerful spells, the armour gives a tingling sensation to its owner when
+    danger is afoot, giving them a split second extra to dodge the threat. +5 Dodge.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     dodge_modifier:
       type: number
       role: output
-      description: dodge modifier
+      description: Dodge modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 9
   effects:
     - type: set
       target: dodge_modifier
       value:
         type: literal
         value: 5
+  term_refs:
+    - term.dodge
 - id: character.treasure.magic_armours_shields.10
   name: Magic Armours and Shields 10
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields
@@ -2001,41 +3374,57 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Armours and Shields 10
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '10'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    10 | Cursed! This armour may lend its strength, but it comes at a price. Roll again to
+  source_text: 10 Cursed! This armour may lend its strength, but it comes at a price. Roll again to
     see what positive effect it has but know that while wearing this armour, your hero also suffers
-    the effects of the curse. | Cursed. See Curses Table.
+    the effects of the curse. Cursed. See Curses Table.
   scope: global
   type: modifier
   fields:
-    selected:
+    power_roll:
+      type: number
+      role: input
+      description: Magic Armours and Shields 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    wearing:
       type: boolean
       role: input
-      description: selected
+      description: your hero is wearing this item
     cursed:
       type: boolean
       role: output
-      description: cursed
+      description: the item is cursed
     reroll_positive_effect:
       type: boolean
       role: output
-      description: reroll positive effect
+      description: roll again on this table for the positive effect
+    curse_effects_apply:
+      type: boolean
+      role: output
+      description: your hero suffers the effects of the curse
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 10
   effects:
     - type: set
       target: cursed
@@ -2048,11 +3437,23 @@
         type: literal
         value: true
     - type: invoke
+      dependency: positive_effect
+    - type: invoke
       dependency: curse
+    - type: set
+      target: curse_effects_apply
+      value:
+        type: field
+        name: wearing
   dependencies:
+    - key: positive_effect
+      label: Roll again to see what positive effect it has
+      object_id: table.treasure.magic_armours_shields
     - key: curse
       label: Curses Table
       object_id: table.treasure.curses
+  issues:
+    - issue.treasure.cursed_roll_again
 - id: character.treasure.magic_items.1
   name: Magic Item 1
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2061,42 +3462,52 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 1
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    1 | This item has been imbued by some of the life essence of the enchanter and lends it
-    to the one wearing this item. | +1 HP.
+  source_text: 1 This item has been imbued by some of the life essence of the enchanter and lends it
+    to the one wearing this item. +1 HP.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     hit_points_modifier:
       type: number
       role: output
-      description: hit points modifier
+      description: HP modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 1
   effects:
     - type: set
       target: hit_points_modifier
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.hit_points
 - id: character.treasure.magic_items.2
   name: Magic Item 2
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2105,36 +3516,44 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 2
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    2 | A Spell of Resilience has been cast upon this item, giving the wearer the power to
-    resist damage and illness alike. | +5 Constitution.
+  source_text: 2 A Spell of Resilience has been cast upon this item, giving the wearer the power to
+    resist damage and illness alike. +5 Constitution.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     constitution_modifier:
       type: number
       role: output
-      description: constitution modifier
+      description: Constitution modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 2
   effects:
     - type: set
       target: constitution_modifier
@@ -2149,34 +3568,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 3
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 3 | Using this item grants the hero the strength of several men. | +5 Strength.
+  source_text: 3 Using this item grants the hero the strength of several men. +5 Strength.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     strength_modifier:
       type: number
       role: output
-      description: strength modifier
+      description: Strength modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 3
   effects:
     - type: set
       target: strength_modifier
@@ -2191,35 +3619,45 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 4
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 4 | Bolstering the mind against the horrors, this item lends a bit of spine to its
-    user. | +5 Resolve.
+  source_text:
+    4 Bolstering the mind against the horrors, this item lends a bit of spine to its user.
+    +5 Resolve.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     resolve_modifier:
       type: number
       role: output
-      description: resolve modifier
+      description: Resolve modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 4
   effects:
     - type: set
       target: resolve_modifier
@@ -2234,34 +3672,43 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 5
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 5 | This makes the user as nimble as a cat…almost. | +5 Dexterity.
+  source_text: 5 This makes the user as nimble as a cat…almost. +5 Dexterity.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     dexterity_modifier:
       type: number
       role: output
-      description: dexterity modifier
+      description: Dexterity modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 5
   effects:
     - type: set
       target: dexterity_modifier
@@ -2276,41 +3723,52 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 6
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 6 | This is an extraordinary item for sure. Used as a vessel for energy, it gives the
-    user the endurance to perform that which a normal man could not. | +1 Point of Energy.
+  source_text: 6 This is an extraordinary item for sure. Used as a vessel for energy, it gives the
+    user the endurance to perform that which a normal man could not. +1 Point of Energy.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     energy_modifier:
       type: number
       role: output
-      description: energy modifier
+      description: Points of Energy modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 6
   effects:
     - type: set
       target: energy_modifier
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.energy
 - id: character.treasure.magic_items.7
   name: Magic Item 7
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2319,7 +3777,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 7
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '7'
       extraction:
         method: text
         confidence: high
@@ -2327,34 +3788,42 @@
   status: extracted
   confidence: high
   source_text:
-    7 | Clearly enchanted by a follower of Rhidnir, this item bestows a little bit of luck
-    to its user. Hopefully without a price. | +1 Luck.
+    7 Clearly enchanted by a follower of Rhidnir, this item bestows a little bit of luck to
+    its user. Hopefully without a price. +1 Luck.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     luck_modifier:
       type: number
       role: output
-      description: luck modifier
+      description: Luck modifier
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 7
   effects:
     - type: set
       target: luck_modifier
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.luck
 - id: character.treasure.magic_items.8
   name: Magic Item 8
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2363,41 +3832,53 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 8
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '8'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 8 | Through this enchantment, the wizards who created this lends some of their skills
-    to its user. | +5 on a random skill.
+  source_text:
+    8 Through this enchantment, the wizards who created this lends some of their skills to
+    its user. +5 on a random skill.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     random_skill_modifier:
       type: number
       role: output
-      description: random skill modifier
+      description: modifier on a random skill
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 8
   effects:
     - type: set
       target: random_skill_modifier
       value:
         type: literal
         value: 5
+  issues:
+    - issue.treasure.legendary_followup
 - id: character.treasure.magic_items.9
   name: Magic Item 9
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2406,42 +3887,52 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 9
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '9'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    9 | A simple attempt to copy the Rings of Awareness, this item still has its benefits.
-    | Add one Hero Initiative token.
+  source_text: 9 A simple attempt to copy the Rings of Awareness, this item still has its benefits.
+    Add one Hero Initiative token.
   scope: global
   type: modifier
   fields:
-    selected:
-      type: boolean
+    power_roll:
+      type: number
       role: input
-      description: selected
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
     hero_initiative_tokens:
       type: number
       role: output
-      description: hero initiative tokens
+      description: Hero Initiative tokens added
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 9
   effects:
     - type: set
       target: hero_initiative_tokens
       value:
         type: literal
         value: 1
+  term_refs:
+    - term.initiative_token
 - id: character.treasure.magic_items.10
   name: Magic Item 10
   section_id: section.appendix_v_treasures.table_magic_item
@@ -2450,40 +3941,58 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 201
       printed_page: 199
-      heading: Magic Item 10
+      heading: Magic Item
+      locator:
+        table: Magic Item
+        row: '10'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 10 | Cursed! This item may lend its strength, but it comes at a price. Roll again to
-    see what positive effect it has but know that while wielding this item, your hero also suffers
-    the effects of the curse. | Cursed. See Curses Table.
+  source_text:
+    10 Cursed! This item may lend its strength, but it comes at a price. Roll again to see
+    what positive effect it has but know that while wielding this item, your hero also suffers the
+    effects of the curse. Cursed. See Curses Table.
   scope: global
   type: modifier
   fields:
-    selected:
+    power_roll:
+      type: number
+      role: input
+      description: Magic Item 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    wielding:
       type: boolean
       role: input
-      description: selected
+      description: your hero is wielding this item
     cursed:
       type: boolean
       role: output
-      description: cursed
+      description: the item is cursed
     reroll_positive_effect:
       type: boolean
       role: output
-      description: reroll positive effect
+      description: roll again on this table for the positive effect
+    curse_effects_apply:
+      type: boolean
+      role: output
+      description: your hero suffers the effects of the curse
   when:
     type: compare
     operator: eq
     left:
       type: field
-      name: selected
+      name: power_roll
     right:
       type: literal
-      value: true
+      value: 10
   effects:
     - type: set
       target: cursed
@@ -2496,11 +4005,23 @@
         type: literal
         value: true
     - type: invoke
+      dependency: positive_effect
+    - type: invoke
       dependency: curse
+    - type: set
+      target: curse_effects_apply
+      value:
+        type: field
+        name: wielding
   dependencies:
+    - key: positive_effect
+      label: Roll again to see what positive effect it has
+      object_id: table.treasure.magic_items
     - key: curse
       label: Curses Table
       object_id: table.treasure.curses
+  issues:
+    - issue.treasure.cursed_roll_again
 - id: character.treasure.curses.1
   name: Curses 1
   section_id: section.appendix_v_treasures.table_9
@@ -2509,29 +4030,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 1
+      heading: Curses
+      locator:
+        table: Curses
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 1 | -2 Hit Points
+  source_text: 1 -2 Hit Points
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     hit_points_modifier:
       type: number
       role: output
       description: hit points modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2539,10 +4069,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 1
       - type: compare
         operator: eq
         left:
@@ -2557,6 +4087,10 @@
       value:
         type: literal
         value: -2
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.2
   name: Curses 2
   section_id: section.appendix_v_treasures.table_9
@@ -2565,29 +4099,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 2
+      heading: Curses
+      locator:
+        table: Curses
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 2 | -5 Wisdom
+  source_text: 2 -5 Wisdom
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     wisdom_modifier:
       type: number
       role: output
       description: wisdom modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2595,10 +4138,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 2
       - type: compare
         operator: eq
         left:
@@ -2613,6 +4156,10 @@
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.3
   name: Curses 3
   section_id: section.appendix_v_treasures.table_9
@@ -2621,29 +4168,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 3
+      heading: Curses
+      locator:
+        table: Curses
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 3 | -5 Constitution
+  source_text: 3 -5 Constitution
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     constitution_modifier:
       type: number
       role: output
       description: constitution modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2651,10 +4207,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 3
       - type: compare
         operator: eq
         left:
@@ -2669,6 +4225,10 @@
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.4
   name: Curses 4
   section_id: section.appendix_v_treasures.table_9
@@ -2677,29 +4237,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 4
+      heading: Curses
+      locator:
+        table: Curses
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 4 | -5 Strength
+  source_text: 4 -5 Strength
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     strength_modifier:
       type: number
       role: output
       description: strength modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2707,10 +4276,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 4
       - type: compare
         operator: eq
         left:
@@ -2725,6 +4294,10 @@
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.5
   name: Curses 5
   section_id: section.appendix_v_treasures.table_9
@@ -2733,29 +4306,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 5
+      heading: Curses
+      locator:
+        table: Curses
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 5 | -5 Dexterity
+  source_text: 5 -5 Dexterity
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     dexterity_modifier:
       type: number
       role: output
       description: dexterity modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2763,10 +4345,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 5
       - type: compare
         operator: eq
         left:
@@ -2781,6 +4363,10 @@
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.6
   name: Curses 6
   section_id: section.appendix_v_treasures.table_9
@@ -2789,29 +4375,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 6
+      heading: Curses
+      locator:
+        table: Curses
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 6 | -3 Hit Points
+  source_text: 6 -3 Hit Points
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     hit_points_modifier:
       type: number
       role: output
       description: hit points modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2819,10 +4414,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 6
       - type: compare
         operator: eq
         left:
@@ -2837,6 +4432,10 @@
       value:
         type: literal
         value: -3
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.7
   name: Curses 7
   section_id: section.appendix_v_treasures.table_9
@@ -2845,29 +4444,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 7
+      heading: Curses
+      locator:
+        table: Curses
+        row: '7'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 7 | -10 Resolve
+  source_text: 7 -10 Resolve
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     resolve_modifier:
       type: number
       role: output
       description: resolve modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2875,10 +4483,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 7
       - type: compare
         operator: eq
         left:
@@ -2893,6 +4501,10 @@
       value:
         type: literal
         value: -10
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.8
   name: Curses 8
   section_id: section.appendix_v_treasures.table_9
@@ -2901,29 +4513,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 8
+      heading: Curses
+      locator:
+        table: Curses
+        row: '8'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 8 | -5 on a Random Skill
+  source_text: 8 -5 on a Random Skill
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     random_skill_modifier:
       type: number
       role: output
       description: random skill modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2931,10 +4552,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 8
       - type: compare
         operator: eq
         left:
@@ -2949,6 +4570,12 @@
       value:
         type: literal
         value: -5
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
+  issues:
+    - issue.treasure.legendary_followup
 - id: character.treasure.curses.9
   name: Curses 9
   section_id: section.appendix_v_treasures.table_9
@@ -2957,29 +4584,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 9
+      heading: Curses
+      locator:
+        table: Curses
+        row: '9'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 9 | -1 Luck
+  source_text: 9 -1 Luck
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     luck_modifier:
       type: number
       role: output
       description: luck modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -2987,10 +4623,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 9
       - type: compare
         operator: eq
         left:
@@ -3005,6 +4641,10 @@
       value:
         type: literal
         value: -1
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
 - id: character.treasure.curses.10
   name: Curses 10
   section_id: section.appendix_v_treasures.table_9
@@ -3013,29 +4653,38 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 202
       printed_page: 200
-      heading: Curses 10
+      heading: Curses
+      locator:
+        table: Curses
+        row: '10'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 10 | -1 Energy
+  source_text: 10 -1 Energy
   scope: global
   type: modifier
   fields:
-    selected:
+    curse_roll:
+      type: number
+      role: input
+      description: Curses 1d10 result
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    same_benefit:
       type: boolean
       role: input
-      description: selected
+      description: the result regards the same magical benefit the item has
     energy_modifier:
       type: number
       role: output
       description: energy modifier
-    same_benefit:
-      type: boolean
-      role: input
-      description: Curse regards the same magical benefit; reroll instead.
   when:
     type: all
     conditions:
@@ -3043,10 +4692,10 @@
         operator: eq
         left:
           type: field
-          name: selected
+          name: curse_roll
         right:
           type: literal
-          value: true
+          value: 10
       - type: compare
         operator: eq
         left:
@@ -3061,3 +4710,112 @@
       value:
         type: literal
         value: -1
+  dependencies:
+    - key: reroll
+      label: 'Curses: reroll on the same magical benefit'
+      object_id: character.treasure.curse_reroll
+- id: character.treasure.legendary_selector
+  name: 'Legendary Items: two-stage selector and found-once restriction'
+  section_id: section.appendix_v_treasures.table_10
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 202
+      printed_page: 200
+      heading: Legendary Items
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Should you be so lucky as to find a Legendary Item, roll on the table below. Remember
+    that each object may only be found once, unless noted otherwise. ... 1-2 1d10 3-4 1d10 5-6 1d10
+    Legendary Item
+  scope: global
+  type: random_resolution
+  fields:
+    column_roll:
+      type: number
+      role: input
+      description: result that selects the column headed 1-2, 3-4 or 5-6 (the page names no die for it)
+      integer: true
+      minimum: 1
+      maximum: 6
+    item_roll:
+      type: number
+      role: input
+      description: Legendary Items 1d10 roll in the selected column
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    already_found:
+      type: boolean
+      role: input
+      description: the object rolled has already been found
+    noted_otherwise:
+      type: boolean
+      role: input
+      description: the object is noted as one that may be found more than once
+    legendary_row:
+      type: number
+      role: output
+      description: row of the Legendary Items table, counted from the top (1-30)
+  effects:
+    - type: set
+      target: legendary_row
+      value:
+        type: sum
+        values:
+          - type: field
+            name: item_roll
+          - type: arithmetic
+            operator: multiply
+            values:
+              - type: arithmetic
+                operator: subtract
+                values:
+                  - type: arithmetic
+                    operator: ceil
+                    values:
+                      - type: arithmetic
+                        operator: divide
+                        values:
+                          - type: field
+                            name: column_roll
+                          - type: literal
+                            value: 2
+                  - type: literal
+                    value: 1
+              - type: literal
+                value: 10
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: already_found
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: noted_otherwise
+            right:
+              type: literal
+              value: true
+  uses_tables:
+    - table.treasure.legendary
+  term_refs:
+    - term.legendary_item
+  issues:
+    - issue.gameplay_example.legendary_roll
+    - issue.treasure.legendary_names

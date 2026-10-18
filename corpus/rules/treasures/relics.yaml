@@ -1,3 +1,96 @@
+- id: character.treasure.relic.restrictions
+  name: 'Table of Relics: Warrior Priests only, two at a time, counts as magic items'
+  section_id: section.appendix_v_treasures.table_of_relics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. These counts as
+    magic items and therefore counts towards the maximum number of magic items that can be worn.
+  scope: global
+  type: constraint
+  fields:
+    is_warrior_priest:
+      type: boolean
+      role: input
+      description: the bearer is a Warrior Priest
+    relics_in_use:
+      type: number
+      role: input
+      description: relics the Warrior Priest uses at the same time, including this one
+      integer: true
+      minimum: 1
+    has_reliquary_talent:
+      type: boolean
+      role: input
+      description: the Warrior Priest has the Reliquary talent
+    counts_as_magic_item:
+      type: boolean
+      role: output
+      description: the relic counts as a magic item towards the maximum number of magic items that can be worn
+  effects:
+    - type: require
+      condition:
+        type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_warrior_priest
+        right:
+          type: literal
+          value: true
+    - type: require
+      condition:
+        type: any
+        conditions:
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: relics_in_use
+            right:
+              type: literal
+              value: 2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: has_reliquary_talent
+            right:
+              type: literal
+              value: true
+    - type: set
+      target: counts_as_magic_item
+      value:
+        type: literal
+        value: true
+  dependencies:
+    - key: relics
+      label: Table of Relics
+      object_id: table.treasure.relics
+    - key: reliquary
+      label: 'Reliquary talent: relic limit'
+      object_id: character.talent.reliquary.relic_limit
+    - key: magic_item_limit
+      label: Carrying Magic Items
+      object_id: character.magic_item.jewellery_limits
+    - key: prayer_relics
+      label: Relics
+      object_id: character.prayer.relics
+  term_refs:
+    - term.relic
+    - term.magic_item
+  issues:
+    - issue.treasure.relic_limit_reliquary
 - id: character.treasure.relic.charus
   name: Relic of Charus
   section_id: section.appendix_v_treasures.table_of_relics
@@ -6,25 +99,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Charus
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '1'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants +1 Energy Point.
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 1 Relic of
+    Charus Grants +1 Energy Point.
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     energy_modifier:
       type: number
       role: output
@@ -54,6 +162,10 @@
       value:
         type: literal
         value: 1
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
 - id: character.treasure.relic.metheia
   name: Relic of Metheia
   section_id: section.appendix_v_treasures.table_of_relics
@@ -62,25 +174,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Metheia
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '2'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Adds +1d3 to any form of healing done by the Priest
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 2 Relic of
+    Metheia Adds +1d3 to any form of healing done by the Priest
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     healing_dice:
       type: string
       role: output
@@ -110,6 +237,110 @@
       value:
         type: literal
         value: 1d3
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
+- id: character.treasure.relic.metheia.healing_bonus
+  name: 'Relic of Metheia: healing bonus roll'
+  section_id: section.appendix_v_treasures.table_of_relics
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '2'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 2 Relic of
+    Metheia Adds +1d3 to any form of healing done by the Priest
+  scope: global
+  type: modifier
+  fields:
+    is_warrior_priest:
+      type: boolean
+      role: input
+      description: the bearer is a Warrior Priest
+    relic_slot_valid:
+      type: boolean
+      role: input
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
+    healing_done_by_priest:
+      type: boolean
+      role: input
+      description: the healing (of any form) is done by the Priest bearing the relic
+    healing_bonus_roll:
+      type: number
+      role: input
+      description: bonus to the healing (1d3)
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    healing_modifier:
+      type: number
+      role: output
+      description: amount added to the healing
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: is_warrior_priest
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: relic_slot_valid
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: healing_done_by_priest
+        right:
+          type: literal
+          value: true
+  effects:
+    - type: set
+      target: healing_modifier
+      value:
+        type: field
+        name: healing_bonus_roll
+  dependencies:
+    - key: relic
+      label: Relic of Metheia
+      object_id: character.treasure.relic.metheia
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
 - id: character.treasure.relic.iphy
   name: Relic of Iphy
   section_id: section.appendix_v_treasures.table_of_relics
@@ -118,25 +349,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Iphy
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '3'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants +5 Resolve
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 3 Relic of
+    Iphy Grants +5 Resolve
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     resolve_modifier:
       type: number
       role: output
@@ -166,6 +412,10 @@
       value:
         type: literal
         value: 5
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
 - id: character.treasure.relic.rhidnir
   name: Relic of Rhidnir
   section_id: section.appendix_v_treasures.table_of_relics
@@ -174,25 +424,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Rhidnir
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '4'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants +1 Luck during each quest
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 4 Relic of
+    Rhidnir Grants +1 Luck during each quest
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     luck_modifier:
       type: number
       role: output
@@ -231,6 +496,10 @@
       value:
         type: literal
         value: each quest
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
 - id: character.treasure.relic.ohlnir
   name: Relic of Ohlnir
   section_id: section.appendix_v_treasures.table_of_relics
@@ -239,25 +508,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Ohlnir
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '5'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants +5 CS
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 5 Relic of
+    Ohlnir Grants +5 CS
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     cs_modifier:
       type: number
       role: output
@@ -287,6 +571,10 @@
       value:
         type: literal
         value: 5
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
 - id: character.treasure.relic.ramos
   name: Relic of Ramos
   section_id: section.appendix_v_treasures.table_of_relics
@@ -295,25 +583,40 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 196
       printed_page: 194
-      heading: Relic of Ramos
+      heading: Table of Relics
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 196
+      printed_page: 194
+      heading: Table of Relics
+      locator:
+        table: Table of Relics
+        row: '6'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Grants +5 STR
+  source_text: These are religious artifacts that can only be used by Warrior Priests. Only two of
+    these can be used at a time unless the Warrior Priest have the Reliquary talent. ... 6 Relic of
+    Ramos Grants +5 STR
   scope: global
   type: modifier
   fields:
     is_warrior_priest:
       type: boolean
       role: input
-      description: is warrior priest
+      description: the bearer is a Warrior Priest
     relic_slot_valid:
       type: boolean
       role: input
-      description: relic slot valid
+      description: this relic is one of the relics the Warrior Priest may use at a time
+        (character.treasure.relic.restrictions)
     strength_modifier:
       type: number
       role: output
@@ -343,3 +646,7 @@
       value:
         type: literal
         value: 5
+  dependencies:
+    - key: restrictions
+      label: Table of Relics restrictions
+      object_id: character.treasure.relic.restrictions
