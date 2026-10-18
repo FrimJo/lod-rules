@@ -764,6 +764,34 @@ describe('rendered estate restrictions (PDF 160–163)', () => {
     expect(rows[6]?.[2]).toContain('1d8+the number of spent days');
     expect(rows[7]?.[2]).toContain('once between each quest');
   });
+  it('types each die printed in a furnishing effect without changing the effect text', () => {
+    // PDF 161: the dice stay verbatim in Effect; a sibling column types each one.
+    const table = byId('table.estate.furnishings');
+    expect(table.columns.map((column) => column.id)).toEqual([
+      'furnishing',
+      'cost',
+      'effect',
+      'effect_dice',
+    ]);
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.effect_dice;
+        return cell?.type === 'dice'
+          ? [row.id, cell.printed, cell.dice, cell.meaning]
+          : [row.id, cell?.type];
+      }),
+    ).toEqual([
+      ['row_1', '+1d2', { count: 1, sides: 2 }, 'increase'],
+      ['row_2', 'blank'],
+      ['row_3', 'blank'],
+      ['row_4', '1d6', { count: 1, sides: 6 }, 'roll'],
+      ['row_5', '1d3', { count: 1, sides: 3 }, 'value'],
+      ['row_6', '+1d2', { count: 1, sides: 2 }, 'increase'],
+      ['row_7', '1d8', { count: 1, sides: 8 }, 'value'],
+      ['row_8', '1d6+2', { count: 1, sides: 6, modifier: 2 }, 'value'],
+      ['row_9', 'blank'],
+    ]);
+  });
   it('retains all ten ghost effect cells including the rations selection unit', () => {
     expect(matrix('table.estate.ghost_events').map((row) => row[2])).toEqual([
       'The heroes may roll twice on the Wonderful Treasure Chart. However, the lack of sleep will deprive each hero of 1 Point of Energy.',
