@@ -263,6 +263,22 @@ export function describeStaleness(staleness: Staleness): string {
   return parts.length ? parts.join('; ') : 'digest mismatch';
 }
 
+/**
+ * Order two record ids: by the numeric suffix after the last `.` when both share the prefix and
+ * both suffixes are numeric (so `.10` follows `.9`), otherwise by plain string order.
+ */
+function compareRecordIds(a: string, b: string): number {
+  const split = (id: string) => [
+    id.slice(0, id.lastIndexOf('.')),
+    id.slice(id.lastIndexOf('.') + 1),
+  ];
+  const [prefixA, suffixA] = split(a);
+  const [prefixB, suffixB] = split(b);
+  if (prefixA === prefixB && /^\d+$/.test(suffixA!) && /^\d+$/.test(suffixB!))
+    return Number(suffixA) - Number(suffixB);
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /** Latest record (by date, then id) whose scope includes the section. */
 export function governingRecord(
   records: ReviewRecord[],
@@ -271,7 +287,7 @@ export function governingRecord(
   return records
     .filter((record) => record.scope.section_ids.includes(sectionId))
     .sort((a, b) =>
-      a.date !== b.date ? (a.date < b.date ? 1 : -1) : a.id < b.id ? 1 : a.id > b.id ? -1 : 0,
+      a.date !== b.date ? (a.date < b.date ? 1 : -1) : compareRecordIds(b.id, a.id),
     )[0];
 }
 

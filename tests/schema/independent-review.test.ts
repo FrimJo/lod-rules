@@ -5,6 +5,7 @@ import {
   checkIndependentReviews,
   computeDigest,
   DIGEST_ALGORITHM,
+  governingRecord,
   type ReviewRecord,
   type ReviewSnapshot,
 } from '../../scripts/validate/independent-review.ts';
@@ -293,6 +294,27 @@ describe('reviewed status requires evidence', () => {
     expect(checkIndependentReviews(snap, [passed, failed])).toContain(
       'coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.2" failed',
     );
+  });
+
+  it('orders same-date records by numeric suffix, so .10 governs over .9', () => {
+    const snap = snapshot();
+    const older = record(snap, { id: 'review.alpha.9' });
+    const latest = record(snap, { id: 'review.alpha.10', outcome: 'failed' });
+    markReviewed(snap);
+    expect(governingRecord([older, latest], 'section.alpha')?.id).toBe('review.alpha.10');
+    expect(governingRecord([latest, older], 'section.alpha')?.id).toBe('review.alpha.10');
+    expect(checkIndependentReviews(snap, [older, latest])).toContain(
+      'coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.10" failed',
+    );
+  });
+
+  it('falls back to string order when same-date ids differ in prefix or suffix', () => {
+    const snap = snapshot();
+    const a = record(snap, { id: 'review.alpha.10' });
+    const b = record(snap, { id: 'review.beta.9' });
+    const c = record(snap, { id: 'review.alpha.x' });
+    expect(governingRecord([a, b], 'section.alpha')?.id).toBe('review.beta.9');
+    expect(governingRecord([a, c], 'section.alpha')?.id).toBe('review.alpha.x');
   });
 
   it('rejects a stale digest, naming the section and the changed object', () => {
