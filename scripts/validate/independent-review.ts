@@ -263,7 +263,28 @@ export function describeStaleness(staleness: Staleness): string {
   return parts.length ? parts.join('; ') : 'digest mismatch';
 }
 
-/** Latest record (by date, then id) whose scope includes the section. */
+/**
+ * Order two record ids: by the numeric suffix after the last `.` when both share the prefix and
+ * both suffixes are numeric (so `.10` follows `.9`), otherwise by plain string order.
+ */
+function compareRecordIds(a: string, b: string): number {
+  const numericSuffix = (id: string): { prefix: string; n: number } | undefined => {
+    const match = /^(.*)\.(\d+)$/.exec(id);
+    return match?.[1] !== undefined && match[2] !== undefined
+      ? { prefix: match[1], n: Number(match[2]) }
+      : undefined;
+  };
+  const left = numericSuffix(a);
+  const right = numericSuffix(b);
+  if (left && right && left.prefix === right.prefix) return left.n - right.n;
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * Latest record whose scope includes the section: newest date first; on equal dates the higher
+ * id wins, ordering ids that share a prefix by numeric suffix (`.10` after `.9`), else by
+ * string order.
+ */
 export function governingRecord(
   records: ReviewRecord[],
   sectionId: string,
@@ -271,7 +292,7 @@ export function governingRecord(
   return records
     .filter((record) => record.scope.section_ids.includes(sectionId))
     .sort((a, b) =>
-      a.date !== b.date ? (a.date < b.date ? 1 : -1) : a.id < b.id ? 1 : a.id > b.id ? -1 : 0,
+      a.date !== b.date ? (a.date < b.date ? 1 : -1) : compareRecordIds(b.id, a.id),
     )[0];
 }
 

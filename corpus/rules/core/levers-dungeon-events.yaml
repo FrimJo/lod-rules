@@ -534,3 +534,261 @@
         right:
           type: literal
           value: false
+- id: core.lever.red.floor_gives_way.test_passed
+  name: Red Levers 19 — DEX Test passed
+  section_id: section.into_the_dungeons.table_red_levers
+  source: &red19
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 102
+      pdf_page: 104
+      heading: Red Levers
+      locator:
+        table: Red Levers (1d20 / Event)
+        row: '19'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    They must make a DEX Test or fall into a pit trap. If the test is successful, place a pit
+    token on that square and move the hero to an adjacent square. ... Lower PM by 1
+  type: resource_change
+  scope: dungeon
+  fields:
+    dex_test_passed:
+      type: boolean
+      role: input
+      description: The randomised hero (not the one pulling the lever) passed the DEX Test.
+    fell_into_pit:
+      type: boolean
+      role: output
+      description: The hero falls into the pit trap.
+    pit_token_placed:
+      type: boolean
+      role: output
+      description: A pit token is placed on the hero's square and the hero moves to an adjacent square.
+    party_morale_change:
+      type: number
+      role: output
+      description: Change to Party Morale (PM).
+      integer: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dex_test_passed
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: fell_into_pit
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: pit_token_placed
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: party_morale_change
+      value:
+        type: literal
+        value: -1
+  uses_tables:
+    - table.dungeon.red_levers
+- id: core.lever.red.floor_gives_way.test_failed
+  name: Red Levers 19 — DEX Test failed
+  section_id: section.into_the_dungeons.table_red_levers
+  source: *red19
+  status: extracted
+  confidence: high
+  source_text:
+    They must make a DEX Test or fall into a pit trap. ... If it fails, the hero takes 1d10 Points
+    of Damage without armour but with NA. ... Lower PM by 1, and if the hero falls into the pit,
+    lower his Sanity by 2.
+  type: resource_change
+  scope: dungeon
+  fields:
+    dex_test_passed:
+      type: boolean
+      role: input
+      description: The randomised hero (not the one pulling the lever) passed the DEX Test.
+    damage_roll:
+      type: number
+      role: input
+      description: The printed 1d10 Points of Damage.
+      integer: true
+      minimum: 1
+      maximum: 10
+      dice:
+        count: 1
+        sides: 10
+    fell_into_pit:
+      type: boolean
+      role: output
+      description: The hero falls into the pit trap.
+    damage:
+      type: number
+      role: output
+      description: Points of Damage taken, before Natural Armour.
+      integer: true
+    armour_applies:
+      type: boolean
+      role: output
+      description: Armour reduces the damage ("without armour").
+    natural_armour_applies:
+      type: boolean
+      role: output
+      description: Natural Armour reduces the damage ("but with NA").
+    party_morale_change:
+      type: number
+      role: output
+      description: Change to Party Morale (PM).
+      integer: true
+    sanity_change:
+      type: number
+      role: output
+      description: Change to the fallen hero's Sanity.
+      integer: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: dex_test_passed
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: fell_into_pit
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: damage
+      value:
+        type: field
+        name: damage_roll
+    - type: set
+      target: armour_applies
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: natural_armour_applies
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: party_morale_change
+      value:
+        type: literal
+        value: -1
+    - type: set
+      target: sanity_change
+      value:
+        type: literal
+        value: -2
+  uses_tables:
+    - table.dungeon.red_levers
+- id: core.lever.red.floor_gives_way.climb_out_with_rope
+  name: Red Levers 19 — getting up with a rope
+  section_id: section.into_the_dungeons.table_red_levers
+  source: *red19
+  status: extracted
+  confidence: high
+  source_text: To get up, the hero must use a rope or succeed with a DEX Test. Both alternatives take 1 AP.
+  issues:
+    - issue.lever.floor_gives_way_pit_exit
+  type: calculation
+  scope: dungeon
+  fields:
+    rope_used:
+      type: boolean
+      role: input
+      description: The fallen hero uses a rope to get up.
+    ap_cost:
+      type: number
+      role: output
+      description: AP spent getting up.
+      integer: true
+    dex_test_required:
+      type: boolean
+      role: output
+      description: A DEX Test must be passed to get up.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rope_used
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: ap_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: false
+  uses_tables:
+    - table.dungeon.red_levers
+- id: core.lever.red.floor_gives_way.climb_out_without_rope
+  name: Red Levers 19 — getting up with a DEX Test
+  section_id: section.into_the_dungeons.table_red_levers
+  source: *red19
+  status: extracted
+  confidence: high
+  source_text: To get up, the hero must use a rope or succeed with a DEX Test. Both alternatives take 1 AP.
+  issues:
+    - issue.lever.floor_gives_way_pit_exit
+  type: calculation
+  scope: dungeon
+  fields:
+    rope_used:
+      type: boolean
+      role: input
+      description: The fallen hero uses a rope to get up.
+    ap_cost:
+      type: number
+      role: output
+      description: AP spent getting up.
+      integer: true
+    dex_test_required:
+      type: boolean
+      role: output
+      description: A DEX Test must be passed to get up.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: rope_used
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: ap_cost
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: true
+  uses_tables:
+    - table.dungeon.red_levers
