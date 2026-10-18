@@ -736,42 +736,51 @@ the canonical object and the linked rules and given a manual disposition (39 hit
   that motivates the Baptising fetch objective, which itself is `core.quest.baptising.water_return`.
 - _unconverted_: a mechanical restriction with no rule, link or issue.
 
-**Counts.** 324 hits in 187 objects: 139 table cells and 185 entity fields.
+**Counts.** 324 hits in 187 objects: 139 table cells and 185 entity fields. The scan first left
+8 table-cell hits unconverted; the resolution below closes all 8 (5 converted, 3 logged).
 
 | Class          | Table cells | Entity fields | Total |
 | -------------- | ----------: | ------------: | ----: |
-| Converted      |         119 |           169 |   288 |
+| Converted      |         124 |           169 |   293 |
 | Already a rule |           9 |             3 |    12 |
-| Logged         |           2 |             0 |     2 |
+| Logged         |           5 |             0 |     5 |
 | Non-mechanical |           1 |            13 |    14 |
-| Unconverted    |           8 |             0 |     8 |
+| Unconverted    |           0 |             0 |     0 |
 
 The classification is textual. Whether each linked rule's typed effects match the printed
 restriction is the per-unit review's evidence, not this scan's.
 
 **Review records.** The governing record of every object with a hit is fresh and passing (29
-records): `review.alchemy_preparations.1`, `review.appendix_i_perks.2`,
+records, as of the resolution below): `review.alchemy_preparations.2`, `review.appendix_i_perks.2`,
 `review.appendix_ii_talents.2`, `review.appendix_iii_general_equipment_a.5`,
-`review.appendix_iii_general_equipment_b.3`, `review.appendix_iii_weapons_armour.2`,
+`review.appendix_iii_general_equipment_b.3`, `review.appendix_iii_weapons_armour.3`,
 `review.appendix_iv_spells.2`, `review.appendix_v_findings.1`, `review.appendix_v_legendary_a.3`,
 `review.appendix_v_legendary_b.2`, `review.appendix_v_tables.4`, `review.backgrounds.2`,
 `review.bandits_hideout_and_fountain_room.2`, `review.creating_your_character.2`,
-`review.guilds.3`, `review.inner_sanctum_and_estate.4`, `review.into_the_dungeons_actions.3`,
-`review.into_the_dungeons_movement.2`, `review.into_the_dungeons_setup.8`, `review.magic.3`,
+`review.guilds.4`, `review.inner_sanctum_and_estate.5`, `review.into_the_dungeons_actions.6`,
+`review.into_the_dungeons_movement.2`, `review.into_the_dungeons_setup.11`, `review.magic.4`,
 `review.prayers.3`, `review.psychology_tables.4`, `review.quests_into_the_ancient_lands.3`,
-`review.settlements_catalogue.1`, `review.settlements_core.3`, `review.side_quests.2`,
+`review.settlements_catalogue.1`, `review.settlements_core.4`, `review.side_quests.2`,
 `review.spider_queen_and_lava_river.3`, `review.the_dead_rising.2` and
-`review.travelling_and_skirmishes.2`.
+`review.travelling_and_skirmishes.4`. Five superseded the records the first scan cited
+(`alchemy_preparations.1`, `guilds.3`, `inner_sanctum_and_estate.4`, `magic.3`,
+`settlements_core.3`) after the typed-dice re-reviews; four more after the resolution.
 
-**Unconverted (8 hits, 4 objects).** These stay open, and `phase_5.criterion_5` stays `pending`
-until each one is converted through the corrector path or logged under `review/`:
+**Resolution of the 8 unconverted hits (issue #3, unit 5).** Each went through a separate corrector
+and a fresh `corpus-reviewer` re-review of its freezing record. Printed text stays verbatim.
 
-| Object / row                                                   | Printed restriction                                                                                                                                                                                                                                                                                   | Freezing record                        |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `table.dungeon.red_levers` `floor_gives_way`                   | "They must make a DEX Test or fall into a pit trap." … "To get up, the hero must use a rope or succeed with a DEX Test. Both alternatives take 1 AP." The general pit rules print DEX Test and 2 AP, or rope and 1 Action.                                                                            | `review.into_the_dungeons_actions.3`   |
-| `table.dungeon.threat_in_battle` `disarmed`                    | "The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so." Retries cost one AP each. ("cannot fight" is logged.)                                                                                                                                                           | `review.into_the_dungeons_setup.8`     |
-| `table.equipment.armour` `cloak` (`covers`)                    | "Torso (only back)": no hit zone or rule defines "back".                                                                                                                                                                                                                                              | `review.appendix_iii_weapons_armour.2` |
-| `table.travel.obstacles` `row_2`, `row_11`, `row_12`, `row_15` | Boulder and Large log: "50% or more of the square must be covered to count"; Huge boulder: "If more than 50% … it cannot be entered"; Pyramid: "Can only be climbed along the stairs." No row `rule_refs`; the dungeon Obstacles rows link `core.obstacle.half_square` and `core.movement.furniture`. | `review.travelling_and_skirmishes.2`   |
+| Object / row                                     | Printed restriction                                                                                                                                                                                                        | Disposition                                                                                                                                                                                                                                                | Re-review                              |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `table.dungeon.red_levers` `floor_gives_way` (2) | "They must make a DEX Test or fall into a pit trap." … "To get up, the hero must use a rope or succeed with a DEX Test. Both alternatives take 1 AP." The general pit rules print DEX Test and 2 AP, or rope and 1 Action. | Converted: row `rule_refs` → `core.lever.red.floor_gives_way.test_passed`, `.test_failed`, `.climb_out_with_rope`, `.climb_out_without_rope` (row-scoped 1 AP). The relation to the general pit rules is logged as `issue.lever.floor_gives_way_pit_exit`. | `review.into_the_dungeons_actions.6`   |
+| `table.dungeon.threat_in_battle` `disarmed` (1)  | "The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so." Retries cost one AP each.                                                                                                            | Converted: row `rule_refs` → `core.threat.in_battle.disarmed.retrieve_weapon`, `.retry`. Retry ambiguity logged as `issue.threat.disarmed_retry` ("cannot fight" stays `issue.threat.changelog_disarmed_cannot_fight`).                                    | `review.into_the_dungeons_setup.11`    |
+| `table.equipment.armour` `cloak` `covers` (1)    | "Torso (only back)": no hit zone or rule defines "back".                                                                                                                                                                   | Logged: `issue.equipment.cloak_only_back`.                                                                                                                                                                                                                 | `review.appendix_iii_weapons_armour.3` |
+| `table.travel.obstacles` `row_11` (1)            | Huge boulder: "If more than 50% … it cannot be entered".                                                                                                                                                                   | Converted: row `rule_refs` → `core.obstacle.half_square`.                                                                                                                                                                                                  | `review.travelling_and_skirmishes.4`   |
+| `table.travel.obstacles` `row_15` (1)            | Pyramid: "Can only be climbed along the stairs."                                                                                                                                                                           | Converted: new rule `core.travel.obstacle.pyramid_stairs`, linked from the row's `rule_refs`.                                                                                                                                                              | `review.travelling_and_skirmishes.4`   |
+| `table.travel.obstacles` `row_2`, `row_12` (2)   | Boulder and Large log: "50% or more of the square must be covered to count".                                                                                                                                               | Logged: `issue.travel.obstacle_fifty_percent_threshold` ("50% or more" against the general "more than 50%"); not linked to `core.obstacle.half_square`.                                                                                                    | `review.travelling_and_skirmishes.4`   |
+
+Every id above resolves in `corpus/rules/` or `review/ambiguities.yaml`, and each re-review record
+is fresh and passing under `npm run review -- check`. No hit remains unconverted, so
+`phase_5.criterion_5` is verified.
 
 ## Typed-dice guard (`phase_5.criterion_3`) — 18 October 2026
 
@@ -792,3 +801,6 @@ the day labels D2, D3 and D4, not dice. Its `row_2` quotes the Inn's 2d6 HP from
 **Review records.** The typed rows were re-reviewed fresh and passing: `review.settlements_core.4`,
 `review.magic.4`, `review.inner_sanctum_and_estate.5`, `review.alchemy_preparations.2`,
 `review.guilds.4`, `review.into_the_dungeons_actions.4` and `review.into_the_dungeons_setup.9`.
+The restriction conversions above later superseded the last two with
+`review.into_the_dungeons_actions.6` and `review.into_the_dungeons_setup.11`, both fresh and
+passing; the typed rows are unchanged.
