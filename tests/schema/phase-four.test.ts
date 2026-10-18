@@ -99,6 +99,16 @@ describe('Phase 4 schema and integrity boundaries', () => {
       'lookup output type mismatch',
     ],
     [
+      'dice lookup into a number result',
+      (d) => {
+        // A dice cell yields its printed notation, so only a string target may receive it.
+        d.rules.find(
+          (r) => r.id === 'character.settlement.quest_site_selector',
+        )!.fields.quest_site_die!.type = 'number';
+      },
+      'lookup output type mismatch',
+    ],
+    [
       'resolved fallback issue',
       (d) => {
         (

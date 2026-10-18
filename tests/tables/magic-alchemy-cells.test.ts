@@ -21,27 +21,45 @@ describe('complete source table cells', () => {
   it('complete miscast and Demon matrices (PDF 65)', () => {
     expect(matrix('table.magic.miscast')).toEqual(lines('miscasts'));
     expect(matrix('table.magic.demons')).toEqual([
-      '1|1d3 Lesser Plague Demons|-',
-      '2|1d3 Plauge Demons|Randomize weapon by drawing a weapon card. Armour 0.',
-      '3|1d3 Blood Demons|Randomize weapon by drawing a weapon card. Armour 1.',
-      '4|1 Bloated Demon|2 Support spells, 2 Ranged spells and 2 Close combat spells.',
+      '1|1d3 Lesser Plague Demons|1d3|-',
+      '2|1d3 Plauge Demons|1d3|Randomize weapon by drawing a weapon card. Armour 0.',
+      '3|1d3 Blood Demons|1d3|Randomize weapon by drawing a weapon card. Armour 1.',
+      '4|1 Bloated Demon|1|2 Support spells, 2 Ranged spells and 2 Close combat spells.',
+    ]);
+    const demons = pilot.tables.find((t) => t.id === 'table.magic.demons')!;
+    const d3 = { type: 'dice', printed: '1d3', dice: { count: 1, sides: 3 }, meaning: 'value' };
+    expect(demons.rows.map((r) => r.cells.quantity)).toEqual([
+      d3,
+      d3,
+      d3,
+      { type: 'number', printed: '1', value: 1, meaning: 'value' },
     ]);
   });
   it('all preparation strength cells (PDF 79–81)', () => {
     expect(matrix('table.alchemy.strengths')).toEqual([
-      'Acidic Bomb|1d6|1d10|1d12',
-      'Firebomb|1d6|1d10|1d12',
-      'Potion of Constitution|+10|+15|+20',
-      'Potion of Courage|+10|+15|+20',
-      'Potion of Cure Disease|75%|100%|100%; heal 1d3 HP',
-      'Potion of Cure Poison|75%|100%|100%; heal 1d3 HP',
-      'Potion of Dexterity|+5|+10|+15',
-      'Potion of Energy|+1|+2|+3',
-      'Potion of Health|1d4|1d6|1d10',
-      'Potion of Mana|1d20|2d20|3d20',
-      'Potion of Strength|+10|+15|+20',
-      'Potion of Wisdom|+10|+15|+20',
+      'Acidic Bomb|1d6|1d10|1d12|',
+      'Firebomb|1d6|1d10|1d12|',
+      'Potion of Constitution|+10|+15|+20|',
+      'Potion of Courage|+10|+15|+20|',
+      'Potion of Cure Disease|75%|100%|100%; heal 1d3 HP|1d3',
+      'Potion of Cure Poison|75%|100%|100%; heal 1d3 HP|1d3',
+      'Potion of Dexterity|+5|+10|+15|',
+      'Potion of Energy|+1|+2|+3|',
+      'Potion of Health|1d4|1d6|1d10|',
+      'Potion of Mana|1d20|2d20|3d20|',
+      'Potion of Strength|+10|+15|+20|',
+      'Potion of Wisdom|+10|+15|+20|',
     ]);
+  });
+  it('types the Supreme healing die in its own column (PDF 80)', () => {
+    const table = pilot.tables.find((t) => t.id === 'table.alchemy.strengths')!;
+    for (const id of ['row_5', 'row_6'])
+      expect(table.rows.find((r) => r.id === id)!.cells.supreme_healing).toEqual({
+        type: 'dice',
+        printed: '1d3',
+        dice: { count: 1, sides: 3 },
+        meaning: 'value',
+      });
   });
   it.each([1, 2, 3, 4, 5, 6])('Level %i spell table including every effect and blank', (level) => {
     expect(matrix(`table.spells.level_${level}`).map(normal)).toEqual(
