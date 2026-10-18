@@ -21,10 +21,18 @@ describe('complete source table cells', () => {
   it('complete miscast and Demon matrices (PDF 65)', () => {
     expect(matrix('table.magic.miscast')).toEqual(lines('miscasts'));
     expect(matrix('table.magic.demons')).toEqual([
-      '1|1d3 Lesser Plague Demons|-',
-      '2|1d3 Plauge Demons|Randomize weapon by drawing a weapon card. Armour 0.',
-      '3|1d3 Blood Demons|Randomize weapon by drawing a weapon card. Armour 1.',
-      '4|1 Bloated Demon|2 Support spells, 2 Ranged spells and 2 Close combat spells.',
+      '1|1d3 Lesser Plague Demons|1d3|-',
+      '2|1d3 Plauge Demons|1d3|Randomize weapon by drawing a weapon card. Armour 0.',
+      '3|1d3 Blood Demons|1d3|Randomize weapon by drawing a weapon card. Armour 1.',
+      '4|1 Bloated Demon|1|2 Support spells, 2 Ranged spells and 2 Close combat spells.',
+    ]);
+    const demons = pilot.tables.find((t) => t.id === 'table.magic.demons')!;
+    const d3 = { type: 'dice', printed: '1d3', dice: { count: 1, sides: 3 }, meaning: 'value' };
+    expect(demons.rows.map((r) => r.cells.quantity)).toEqual([
+      d3,
+      d3,
+      d3,
+      { type: 'number', printed: '1', value: 1, meaning: 'value' },
     ]);
   });
   it('all preparation strength cells (PDF 79–81)', () => {
