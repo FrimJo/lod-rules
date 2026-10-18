@@ -8,8 +8,8 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 | Milestone | Sections | Share |
 | --- | --- | --- |
 | mapped | 677 / 677 | 100% |
-| extracted | 616 / 677 | 91% |
-| reviewed | 545 / 677 | 81% |
+| extracted | 677 / 677 | 100% |
+| reviewed | 677 / 677 | 100% |
 
 Total sections tracked: 677
 
@@ -80,12 +80,12 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 69 | 39 | 569 |
-| rules | 435 | 2 | 240 |
-| tables | 194 | 2 | 481 |
-| examples | 29 | 40 | 608 |
-| procedures | 128 | 45 | 504 |
-| entities | 223 | 7 | 447 |
+| glossary | 69 | 0 | 608 |
+| rules | 435 | 0 | 242 |
+| tables | 194 | 0 | 483 |
+| examples | 30 | 0 | 647 |
+| procedures | 133 | 0 | 544 |
+| entities | 223 | 4 | 450 |
 
 ## Remaining tables
 
@@ -93,11 +93,7 @@ None.
 
 ## Remaining examples
 
-1 of this kind still need their contents extracted.
-
-| Node | Title | Printed pages |
-| --- | --- | --- |
-| section.backgrounds.character_creation_example | Character Creation Example | 47 |
+None.
 
 ## Sections citing external sources
 
@@ -118,6 +114,11 @@ None.
 | section.quest_book_i.introduction | quest_book_ii |
 | section.quest_book_i.lair_of_the_spider_queen | bestiary |
 | section.introduction.game_components | bestiary, charts_compendium, quest_book_ii |
+| section.backgrounds.4_the_heirloom | bestiary |
+| section.backgrounds.6_the_lost_brother | bestiary |
+| section.backgrounds.7_revenge | bestiary |
+| section.backgrounds.13_sworn_enemy | bestiary |
+| section.backgrounds.16_revenge | bestiary |
 | section.magic.dispelling_magic | bestiary |
 | section.into_the_dungeons.encounters | bestiary |
 | section.combat.hero_attacking | bestiary |
