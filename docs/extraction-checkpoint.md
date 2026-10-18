@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 15 October 2026
+## Current position — 17 October 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -49,20 +49,29 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   80, 168–171, 172 and 176 are recorded, not applied. `state_machine.quest_dungeon` now quotes
   PDF 132–133 with typed offer, reject and departure guards (`review.into_the_dungeons_setup.7`).
   `section.travelling_and_skirmishes.table_2` is now a redirect.
+- Step 2 tier 7 is reconciled and independently reviewed (17 October): front matter, the
+  Appendices part node and Appendices I–V, Adding a Third Dimension and back matter, as twelve
+  review units; 137 sections promoted, 21 continuation table nodes stay `mapped`. Changelog 2.2x
+  entries 113, 114, 180–193, 89 and 128 are applied. `issue.phase6.iron_wedges_movement` and
+  `issue.treasure.legendary_followup` were changed by user decision and the records they froze
+  re-reviewed (`review.combat_enemies.3`, `review.into_the_dungeons_setup.8`,
+  `review.appendix_v_legendary_b.2`). Step 2 is complete: every non-quest section except
+  Backgrounds is `reviewed` or a `mapped` redirect.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
-- Coverage: see the generated [coverage report](coverage-report.md); 407 sections reviewed.
+- Coverage: see the generated [coverage report](coverage-report.md); 545 sections reviewed.
   Phases 7–12 are unfinished.
 
 ## Next unit
 
-Step 2, tier 7: Appendices I–V (Perks, Talents, Equipment, Spells, Treasures), Adding a Third
-Dimension, and front and back matter (PDF 1–11, 167–220, 280–286). Appendix III Equipment has the
-most unfinished work (13 of 23 sections, 8 with no records). The 6 open Phase 0–6 exit rows
-assigned to tier 7 close here. Reconcile with `npm run report:chapters`, then one fresh
-`corpus-reviewer` per review unit of at most about 12 pages or 150 objects; failed findings go to
-a separate corrector, then fresh re-reviewers; promote only sections whose latest review passed
-and is fresh. Open carry-overs:
+Step 3: Quest Book I (66 sections still `extracted`), Backgrounds (5) and the Grieving Mother
+side quest, at catalogue scope. Apply the Step 2 loop: reconcile with `npm run report:chapters`,
+one fresh `corpus-reviewer` per unit of at most about 12 pages or 150 objects, a separate
+corrector, fresh re-reviewers, and promote only sections whose latest review passed and is fresh.
+Quest rules stay scenario-scoped. The 6 open Phase 0–6 exit rows (table inventory, typed dice in
+text cells, embedded restrictions as rules, procedure/rule duplication, Phase 5 Batch 7, the
+"embarking on a quest" candidate) are still `pending`; they close in Phase 10 and Step 4 as the
+plan assigns. Open carry-overs:
 
 - `issue.0004` still lacks `related` links to the Acute Stress rule and procedure (frozen by
   `review.introduction.2`).
@@ -77,6 +86,13 @@ and is fresh. Open carry-overs:
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
   46 frozen `part.*` / `ingredient.*` entities cite its rows; split it when those are next
   reviewed.
+- `issue.spell.activation_details` needs heading "Summon Demon" and a PDF 190 source (frozen by
+  an earlier tier's record).
+- `procedure.hate` cites PDF 178 as heading "Hate", column "Effect"; the page prints "Mental
+  Talents", columns Talent and Description (Psychology unit).
+- `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should
+  relate `combat.action.pick_up_weapon` and `procedure.enemy_attack` (frozen by
+  `review.combat_actions.4` and `review.combat_damage.2`).
 - The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
   hungry character (not dogs), once, until the party eats.
 

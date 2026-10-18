@@ -7,13 +7,13 @@ corpus/source-map/sections.yaml. Do not edit by hand. -->
 
 | Milestone | Sections | Share |
 | --- | --- | --- |
-| mapped | 678 / 678 | 100% |
-| extracted | 580 / 678 | 86% |
-| reviewed | 408 / 678 | 60% |
+| mapped | 677 / 677 | 100% |
+| extracted | 616 / 677 | 91% |
+| reviewed | 545 / 677 | 81% |
 
-Total sections tracked: 678
+Total sections tracked: 677
 
-37 compatibility redirects are excluded from all extraction counts above and below.
+38 compatibility redirects are excluded from all extraction counts above and below.
 
 ## Compatibility redirects
 
@@ -40,6 +40,7 @@ Total sections tracked: 678
 | section.appendix_ii_talents.table_3 | section.appendix_ii_talents.table |
 | section.appendix_ii_talents.sneaky_talents.table_2 | section.appendix_ii_talents.sneaky_talents.table |
 | section.appendix_iii_equipment.armour_and_shields.table_3 | section.appendix_iii_equipment.armour_and_shields.table |
+| section.appendix_iii_equipment.general_equipment.table | section.appendix_iii_equipment.general_equipment.sell_and_repair_table |
 | section.appendix_iv_spells.table | section.appendix_iv_spells.level_1 |
 | section.appendix_iv_spells.table_2 | section.appendix_iv_spells.level_1 |
 | section.appendix_iv_spells.table_3 | section.appendix_iv_spells.level_1 |
@@ -64,9 +65,9 @@ Total sections tracked: 678
 | part | 8 |
 | chapter | 38 |
 | section | 15 |
-| subsection | 388 |
+| subsection | 390 |
 | appendix | 5 |
-| table | 181 |
+| table | 178 |
 | example | 3 |
 | optional_rule | 3 |
 | scenario_rule | 37 |
@@ -79,23 +80,16 @@ None. Every node in the structural map has been mapped.
 
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
-| glossary | 68 | 115 | 495 |
-| rules | 431 | 29 | 218 |
-| tables | 202 | 64 | 412 |
-| examples | 29 | 116 | 533 |
-| procedures | 127 | 121 | 430 |
-| entities | 232 | 54 | 392 |
+| glossary | 69 | 39 | 569 |
+| rules | 435 | 2 | 240 |
+| tables | 194 | 2 | 481 |
+| examples | 29 | 40 | 608 |
+| procedures | 128 | 45 | 504 |
+| entities | 223 | 7 | 447 |
 
 ## Remaining tables
 
-4 of this kind still need their contents extracted.
-
-| Node | Title | Printed pages |
-| --- | --- | --- |
-| section.front_matter.index_of_art.table | Index of Art table | 9 |
-| section.appendix_v_treasures.table_of_relics | Table of Relics | 194 |
-| section.appendix_v_treasures.table_of_powerstones | Table of Powerstones | 197 |
-| section.appendix_iii_equipment.general_equipment.table | General Equipment table | 184 |
+None.
 
 ## Remaining examples
 
@@ -110,7 +104,7 @@ None. Every node in the structural map has been mapped.
 | Section | External sources |
 | --- | --- |
 | section.introduction | bestiary, charts_compendium, quest_book_ii |
-| section.front_matter.index_of_art | bestiary, charts_compendium, quest_book_ii |
+| section.front_matter.index_of_art | bestiary, charts_compendium, quest_book_ii, dark_pyramid |
 | section.back_matter.index | bestiary |
 | section.character_basics | companions_compendium |
 | section.psychology | bestiary |

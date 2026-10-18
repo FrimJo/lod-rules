@@ -3219,3 +3219,54 @@ Pushed back, blocked by frozen objects (follow-ups for a later review of their u
 Consumer drift: the `/gm` island in `clients/web` still applies a flat −2 for going hungry; the
 corpus now applies −1 per hungry character (mercenaries included, dogs not), once, until the
 party eats (changelog 2.21 entries 148 and 166).
+
+## Tier 7 review closure and promotion — 17 October 2026
+
+Scope: front matter (PDF 1–11), the Appendices part node and Appendices I–V (PDF 167–215), Adding a
+Third Dimension (PDF 216–220) and back matter (PDF 280–286), reviewed as twelve units by fresh
+`corpus-reviewer` agents (Claude Opus 5.5; Sonnet 5.5 for Third Dimension and back matter). Every
+failed finding went to a separate corrector or, for one-line fixes, to the coordinator, followed by
+a fresh re-reviewer.
+
+Records (latest, all fresh): `review.front_matter.2`, `review.appendix_i_perks.2`,
+`review.appendix_ii_talents.2`, `review.appendix_iii_weapons_armour.2`,
+`review.appendix_iii_general_equipment_a.5`, `review.appendix_iii_general_equipment_b.3`,
+`review.appendix_iv_spells.2`, `review.appendix_v_findings.1`, `review.appendix_v_tables.4`,
+`review.appendix_v_legendary_a.3`, `review.appendix_v_legendary_b.2`,
+`review.third_dimension_and_back_matter.2`; carry-over re-reviews `review.combat_enemies.3` and
+`review.into_the_dungeons_setup.8`.
+
+Changelog 2.2x rulings applied (printed `source_text` kept verbatim): 113, 114, 180–187 (187:
+Healing 1d8+2), 188 (Ice Tomb CV/Mana), 189–193 (193: Oakenshield to Copperbane), plus 89 and 128
+on Appendix III light sources and tools. Entry 183 (Ration: resting only, no Quick Slot) is applied
+to the resting and Quick Slot effects; whether it withdraws the printed overland-travel use stays
+open in `issue.equipment.ration_overland_travel_use`. Entries 119 and 122 (Iron Wedges) are "Fixed"
+without a stated rule and settle nothing.
+
+Schema: `not_applicable` is a table marker meaning for the "-" durability cells, which PDF 52
+defines ("durability is not applicable to that kind of gear"); ENC "-" keeps `no_increase`.
+
+Frozen objects changed by user decision, with the records they froze re-reviewed:
+
+- `issue.phase6.iron_wedges_movement`: related Iron Wedges entity and rule; PDF 184 heading
+  "Miscellaneous", table "Miscellaneous", row "Iron Wedges" (`review.combat_enemies.3`,
+  `review.into_the_dungeons_setup.8`).
+- `issue.treasure.legendary_followup`: related Magic Item 8 and Curses 8 rules and tables
+  (`review.appendix_v_legendary_b.2`).
+
+New issues from the reviews include `issue.treasure.summoners_staff_conjuring_spell` (the staff
+names a "Conjuring Spell"; the only school is Conjuration, compared as `conjuration`),
+`issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability`.
+
+Promoted: 137 tier 7 sections. The 21 continuation table nodes in Appendices I, II and IV stay
+`mapped`.
+
+Pushed back, blocked by frozen objects (follow-ups for a later review of their units):
+
+- `issue.spell.activation_details` cites the row name "Summon Greater Demon" as its heading and
+  lacks a PDF 190 (Summon Demon) source.
+- `procedure.hate` cites PDF 178 with heading "Hate" and column "Effect"; the page prints "Mental
+  Talents" with columns Talent and Description.
+- `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should also
+  relate `combat.action.pick_up_weapon` and `procedure.enemy_attack`; linking them makes
+  `review.combat_actions.4` and `review.combat_damage.2` stale.
