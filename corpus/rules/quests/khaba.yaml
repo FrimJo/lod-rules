@@ -6,7 +6,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — setup
+      heading: Crypt of Khaba
+      locator:
+        paragraph: 'Quest Location:, Number of tiles:, Reward:, Encounters:'
       extraction:
         method: text
         confidence: high
@@ -14,8 +16,8 @@
   status: extracted
   confidence: high
   source_text:
-    'Quest Location: Ancient Lands, random. Number of tiles: 6 corridors, 6 rooms. Reward:
-    500 c per hero. Encounters: Ancient Lands.'
+    'Quest Location: Ancient Lands, random. ... Number of tiles: 6 corridors, 6 rooms. ...
+    Reward: 500 c per hero. Encounters: Ancient Lands.'
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -77,15 +79,15 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — Standard room pool
+      heading: 'Number of tiles:'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: If not using Ancient Lands tiles, randomise rooms using R1B, R2B, R4B-R8B, R1, R4-R6,
-    R9-R11, R14, R16, R17. All corridors can be part of the mix.
+  source_text: If not using the Ancient Lands tiles, randomise the rooms using the tiles R1B, R2B,
+    R4B-R8B, R1, R4-R6, R9-R11, R14, R16, R17. All corridors can be part of the mix.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -130,7 +132,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — Furniture Chart rerolls
+      heading: 'Special Rules:'
       extraction:
         method: text
         confidence: high
@@ -138,8 +140,8 @@
   status: extracted
   confidence: high
   source_text:
-    You may re-roll 4 rolls on the furniture chart during the quest. A re-roll may never be
-    re-rolled.
+    Due to the abundance of treasure, you may re-roll 4 rolls on the furniture chart during
+    the quest. A re-roll may never be re-rolled.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -210,14 +212,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — playing cards
+      heading: 'Special Rules:'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Mix a deck of 12 playing cards. All are red except the Ace of Spades.
+  source_text: Mix a deck of 12 playing cards. Make sure they are all red, except the Ace of Spades.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -269,7 +271,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — new tile
+      heading: 'Special Rules:'
       extraction:
         method: text
         confidence: high
@@ -277,7 +279,7 @@
   status: extracted
   confidence: high
   source_text: Every time you enter a new tile, flip a card. If the Ace of Spades shows up, consult
-    the corresponding paragraph.
+    the corresponding paragraph below.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -314,15 +316,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — Ace of Spades
+      heading: Ace of Spades
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Ignore the normal roll for encounters. Instead encounter the undead Queen Khaba and
-    her retinue: her eternal bodyguard, 4 Wights, are also in the room.'
+  source_text: 'Ignore the normal roll for encounters. Instead, you have come face to face with the
+    undead Queen Khaba and her retinue. ... Apart from the Queen, her eternal bodyguard, 4 Wights,
+    are also in the room.'
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -344,6 +347,12 @@
       role: output
       description: wights present
       integer: true
+    party_has_met_queen_khaba:
+      type: boolean
+      role: output
+      description: >-
+        The party has come face to face with Queen Khaba; the objective Setup places her only if
+        the party has not yet met her.
   effects:
     - type: set
       target: normal_encounter_roll_used
@@ -360,6 +369,11 @@
       value:
         type: literal
         value: 4
+    - type: set
+      target: party_has_met_queen_khaba
+      value:
+        type: literal
+        value: true
   when:
     type: compare
     operator: eq
@@ -377,7 +391,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Queen Khaba — equipment and spells
+      heading: Ace of Spades
       extraction:
         method: text
         confidence: high
@@ -467,7 +481,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Khaba’s Wights — equipment
+      heading: Ace of Spades
       extraction:
         method: text
         confidence: high
@@ -524,15 +538,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — ancient objective
+      heading: Objective tile (Ancient land tiles)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 271
+      printed_page: 269
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Ancient land tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Use The Large Tomb tile. Enter along the long edge. Roll twice on the Encounter Table
-    and place enemies randomly in the room.
+  source_text:
+    'In one of the two sarcophagi, the sceptre may be awaiting your liberation. ... Place:
+    The Large Tomb tile. The party enters along the long edge. Roll twice on the Encounter Table and
+    place the enemies randomly in the room.'
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -606,7 +633,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — ancient Queen fallback
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Ancient land tiles)
       extraction:
         method: text
         confidence: high
@@ -680,14 +709,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — ancient Queen sarcophagus
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Ancient land tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Queen Khaba’s sarcophagus cannot spawn another mummy (ignore the result), but can
+  source_text: Queen Khabas’ sarcophagus cannot spawn another mummy (just ignore the result) but can
     contain treasure.
   type: scenario_rule
   scope: quest
@@ -763,7 +794,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 271
       printed_page: 269
-      heading: Crypt of Khaba — other sarcophagus
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Ancient land tiles)
       extraction:
         method: text
         confidence: high
@@ -826,15 +859,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Crypt of Khaba — standard objective
+      heading: Objective tile (Standard tiles)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 272
+      printed_page: 270
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Standard tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Use The Lone Tomb room. Enter along the short edge. Roll twice on the Encounter Table
-    and place enemies randomly in the room.
+  source_text:
+    In the sarcophagus on top of the dais, the sceptre may be awaiting your liberation. ...
+    Use The Lone Tomb room. The party enters along the short edge. Roll twice on the Encounter Table
+    and place the enemies randomly in the room.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -908,14 +954,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Crypt of Khaba — standard Queen fallback
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Standard tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: If the party has not yet met Queen Khaba, she is present in the room next to the sarcophagus.
+  source_text: If the party has not yet met Queen Khaba, she is present in the room next to the
+    sarcophagus. ... See Ace of Spades for details on Queen Khaba.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -980,14 +1029,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Crypt of Khaba — standard Queen sarcophagus
+      heading: Setup
+      locator:
+        paragraph: Objective tile (Standard tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Queen Khaba’s sarcophagus cannot spawn another mummy (ignore the result), but can
+  source_text: Queen Khaba’s sarcophagus cannot spawn another mummy (just ignore the result) but can
     contain treasure.
   type: scenario_rule
   scope: quest
@@ -1063,15 +1114,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Crypt of Khaba — aftermath
+      heading: Aftermath (Both set of tiles)
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: With all undead vanquished the party rummages through the chamber for valuables. The
-    sceptre can be found in the Queen’s final resting place.
+  source_text:
+    With all undead vanquished the party starts rummaging through the chamber in search of
+    valuables. As expected, the sceptre can be found in the final resting place of the queen.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -1120,17 +1172,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Sceptre of the Queen — properties
+      heading: Sceptre of the Queen
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    This is a legendary item (cannot be sold). Although metal, it is surprisingly light and
-    appears covered in gold. It is considered a magic staff and contains the Fireball spell. It can
-    only be cast once during each dungeon or skirmish, but never needs to be recharged.
+  source_text: This is a legendary item (cannot be sold). ... Although made of metal, it is
+    surprisingly light and appears to be covered in gold. The Sceptre is considered a magic staff
+    and contains the Fireball spell. It can only be cast once during each dungeon or skirmish, but
+    never nee ds to be recharged.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba
@@ -1207,15 +1259,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 272
       printed_page: 270
-      heading: Sceptre of the Queen — Fireball limit
+      heading: Sceptre of the Queen
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: The Sceptre contains Fireball. It can only be cast once during each dungeon or
-    skirmish; it never needs to be recharged.
+  source_text:
+    The Sceptre is considered a magic staff and contains the Fireball spell. It can only be
+    cast once during each dungeon or skirmish, but never nee ds to be recharged.
   type: scenario_rule
   scope: quest
   quest_id: quest.ancient_lands.khaba

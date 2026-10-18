@@ -6,15 +6,41 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 229
       printed_page: 227
-      heading: Highwaymen — setup
+      heading: 'Quest 3: Highwaymen'
+      locator:
+        paragraph: Quest Location; Number of tiles; Encounters; Objective room
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 17
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 103
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 27
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 194
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Deal with the bandits in exchange for coins. Quest Location: White 34. Six corridors
-    and six rooms. Encounters: Bandits and Brigands. Objective room: The Dwarven hall.'
+  source_text:
+    'The party will deal with the bandits, in exchange for coins. ... Quest Location: White
+    34. ... Number of tiles: 6 corridors, 6 rooms. ... Encounters: Bandits and Brigands. ...
+    Objective room: The Dwarven hall.'
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen
@@ -44,7 +70,13 @@
     objective_room:
       type: string
       role: output
-      description: objective room
+      description:
+        Objective Room tile to use. Changelog 2.21 entries 103 and 194 name it The Throne room;
+        the printed "The Dwarven hall" names no objective tile.
+    objective_room_printed:
+      type: string
+      role: output
+      description: Objective room name as printed on PDF 229.
   effects:
     - type: set
       target: objective
@@ -75,7 +107,14 @@
       target: objective_room
       value:
         type: literal
+        value: The Throne room
+    - type: set
+      target: objective_room_printed
+      value:
+        type: literal
         value: The Dwarven hall
+  issues:
+    - issue.quest.highwaymen_objective_room_name
 - id: core.quest.highwaymen.threshold
   name: Quest Threat 10
   section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
@@ -97,11 +136,11 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: When Threat reaches 10, a Wandering Monster appears regardless of the Scenario die
-    result. The introduction defines this as an increase to the threshold.
+  source_text: 'Special Rules: When the Threat Level reaches 10, a Wandering Monster appears
+    regardless of the Scenario die result.'
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen
@@ -182,6 +221,9 @@
     - key: threshold_convention
       label: Quest Book I directional Threat convention
       object_id: core.quest_book.threat_threshold_monster
+  unresolved_references:
+    - Upward-only triggering and no Threat reduction on placement follow the Quest Book I Triggering
+      Wandering Monsters rule (PDF 222), applied through core.quest_book.threat_threshold_monster.
 - id: core.quest.highwaymen.objective_setup
   name: Highwaymen — Dwarven hall setup
   section_id: section.quest_book_i.the_dead_rising.quest_3_highwaymen
@@ -190,16 +232,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 229
       printed_page: 227
-      heading: Highwaymen — Dwarven hall setup
+      heading: Setup
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Place Graup the Ogre by the throne. Roll twice on the Bandits and Brigands Table and
-    place the resulting enemies randomly around the Ogre, as close as possible. Heroes enter along
-    the short side. Bandits move first.
+  source_text:
+    Place Graup, the Ogre, by the throne. Roll twice on the Bandits and Brigands Table and
+    randomly place them around the Ogre, as close as possible. The heroes enter along the short side
+    of the room. Bandits move first.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen
@@ -271,14 +314,14 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 229
       printed_page: 227
-      heading: Graup — equipment
+      heading: Setup
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Graup is an ordinary Ogre, armed with a longsword and Armour 1.
+  source_text: Graup is an ordinary Ogre and is armed with a longsword and has Armour 1.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen
@@ -323,7 +366,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 229
       printed_page: 227
-      heading: Highwaymen — advertised reward
+      heading: Reward
       extraction:
         method: text
         confidence: high
@@ -354,16 +397,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 229
       printed_page: 227
-      heading: Highwaymen — aftermath findings
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    After the last bandit falls the party notices two chests filled with bandit plunder and
-    a thick ledger detailing raids, including wagon crews as plunder.
+  source_text: Taking a look around the room the party notices two chests filled with loot from the
+    bandits’ plunder. There is also a thick ledger, detailing the plunder taken at every raid.
+    Curiously, the last raids have listed the wagons’ crew as plunder as well.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen
@@ -409,16 +452,18 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 230
       printed_page: 228
-      heading: Highwaymen — travel to Rochdale
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Gather rations for two days from the bandit stash. Head north through the forest to
-    Rochdale. The party travels to Rochdale without event using those rations. Midday on the second
-    day, smoke rises over the forest ahead.
+  source_text: Taking what they can, the heroes start their journey back to the city. They manage to
+    gather rations for two days from the bandits' stash and head north. They decide to trek through
+    the forest to the north to reach Rochdale within two days. ... About mid-day on the second day,
+    the party suddenly notices a smoke plume rising over the forest in front of them. ... The party
+    travels to Rochdale without event using the rations found at the bandit’s hideout.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.highwaymen

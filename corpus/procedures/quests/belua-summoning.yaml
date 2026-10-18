@@ -1,0 +1,96 @@
+- id: procedure.belua_summoning
+  name: Belua summons one of her children
+  section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Special Rules
+      locator:
+        paragraph: Belua, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: Belua has a Special Ability. Whenever you roll 5-6 on her behaviour, she tries to summon one of her children. Make a CS test for her, and if she succeeds, place a Giant Spider randomly in the room. That spider may not act on the turn it arrives (it spends its time descending from the roof in a string of cobwebs).
+  fields:
+    behaviour_roll:
+      type: number
+      role: input
+      description: Supplied behaviour result.
+      integer: true
+      minimum: 1
+      maximum: 6
+    summoning_attempt:
+      type: boolean
+      role: output
+      description: Attempt a summon.
+    cs_test_required:
+      type: boolean
+      role: output
+      description: Requires her CS test.
+    cs_test_value:
+      type: number
+      role: output
+      description: Printed CS 55.
+      integer: true
+      minimum: 0
+    belua_cs_test_succeeded:
+      type: boolean
+      role: input
+      description: Supplied outcome of Belua’s CS test.
+    summoned_giant_spiders:
+      type: number
+      role: output
+      description: One child.
+      integer: true
+      minimum: 0
+    summoned_spider_position:
+      type: string
+      role: output
+      description: Randomly in the room.
+    summoned_spider_may_act_on_arrival_turn:
+      type: boolean
+      role: output
+      description: Cannot act this turn.
+  dependencies: []
+  steps:
+    - id: behaviour_roll
+      source:
+        - *a1
+      source_text: Whenever you roll 5-6 on her behaviour, she tries to summon one of her children. Make a CS test for her,
+      effects: []
+      rule_refs:
+        - core.quest.spider_queen_tomb.summon_attempt
+    - id: place_spider
+      source:
+        - *a1
+      source_text: and if she succeeds, place a Giant Spider randomly in the room. That spider may not act on the turn it arrives (it spends its time descending from the roof in a string of cobwebs).
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: gte
+            left:
+              type: field
+              name: behaviour_roll
+            right:
+              type: literal
+              value: 5
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: behaviour_roll
+            right:
+              type: literal
+              value: 6
+      effects: []
+      rule_refs:
+        - core.quest.spider_queen_tomb.summon_success
+  entry_step: behaviour_roll
+  exit_step: place_spider

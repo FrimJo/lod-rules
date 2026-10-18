@@ -6,7 +6,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 43
       printed_page: 41
-      heading: 'The Heirloom: quest setup'
+      section: Backgrounds
+      heading: 4. The Heirloom
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -25,6 +28,10 @@
   scope: quest
   entity_id: background.the_heirloom
   fields:
+    at_quest_start:
+      type: boolean
+      role: input
+      description: The roll is made at the start of a quest.
     quest_start_roll:
       type: number
       role: input
@@ -35,6 +42,10 @@
       dice:
         count: 1
         sides: 10
+    sword_recovered:
+      type: boolean
+      role: input
+      description: The Great Aunt’s sword has already been recovered; the quest is to find the one sword.
     secondary_card_location:
       type: string
       role: output
@@ -82,14 +93,32 @@
         type: literal
         value: false
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: quest_start_roll
-    right:
-      type: literal
-      value: 1
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_quest_start
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quest_start_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: sword_recovered
+        right:
+          type: literal
+          value: false
   dependencies:
     - key: encounters
       label: Encounter table
@@ -106,7 +135,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 43
       printed_page: 41
-      heading: 'The Heirloom: sword properties'
+      section: Backgrounds
+      heading: 4. The Heirloom
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high

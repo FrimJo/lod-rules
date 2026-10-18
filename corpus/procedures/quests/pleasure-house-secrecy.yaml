@@ -1,0 +1,145 @@
+- id: procedure.pleasure_house_secrecy
+  name: The Pleasure House — keeping the daughter’s secret
+  section_id: section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 252
+      printed_page: 250
+      heading: Aftermath
+      locator:
+        paragraph: 'Quest 2: The Pleasure House, Aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 252
+      printed_page: 250
+      heading: Aftermath
+      locator:
+        table: Uncaptioned aftermath table (1d6 | Result)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Once the guards and Isabelle are defeated, the heroes tend to any wounded members of the staff and visitors. While in the midst of this, the adventurers recognise one of the visitors as a daughter of the High Priest of Metheia. She urges the heroes not to tell her father and promises to pay them 400 c should they keep their promise. If they choose to do so, roll on the following table:'
+  see_also:
+    - section.quest_book_i.the_bandits_hideout.quest_2_the_pleasure_house.table_2
+  issues:
+    - issue.quest.pleasure_house_aftermath_scope
+  fields:
+    guards_and_isabelle_defeated:
+      type: boolean
+      role: input
+      description: Guards and Isabelle defeated.
+    tend_wounded_staff_and_visitors:
+      type: boolean
+      role: output
+      description: Tend wounded.
+    visitor_identity:
+      type: string
+      role: output
+      description: Daughter’s identity.
+    secrecy_offer_party_coins:
+      type: number
+      role: output
+      description: 400 c offer to the party.
+      integer: true
+      minimum: 0
+    keep_secrecy_promise:
+      type: boolean
+      role: input
+      description: Heroes choose to keep the secrecy promise.
+    aftermath_table_required:
+      type: boolean
+      role: output
+      description: Roll the table.
+    aftermath_roll:
+      type: number
+      role: input
+      description: The 1d6 roll on the aftermath table.
+      integer: true
+      minimum: 1
+      maximum: 6
+      dice:
+        count: 1
+        sides: 6
+    party_coins_from_daughter:
+      type: number
+      role: output
+      description: party coins from daughter
+      integer: true
+    max_hp_modifier:
+      type: number
+      role: output
+      description: max hp modifier
+      integer: true
+    max_hp_duration:
+      type: string
+      role: output
+      description: max hp duration
+    max_hp_wording:
+      type: string
+      role: output
+      description: max hp wording
+    high_priest_refuses_payment:
+      type: boolean
+      role: output
+      description: high priest refuses payment
+    priests_collectively_refuse_rewards:
+      type: boolean
+      role: output
+      description: priests collectively refuse rewards
+  dependencies: []
+  steps:
+    - id: daughter_recognised
+      source:
+        - *a1
+      source_text: Once the guards and Isabelle are defeated, the heroes tend to any wounded members of the staff and visitors. While in the midst of this, the adventurers recognise one of the visitors as a daughter of the High Priest of Metheia. She urges the heroes not to tell her father and promises to pay them 400 c should they keep their promise.
+      effects: []
+      rule_refs:
+        - core.quest.pleasure_house.aftermath_offer
+    - id: keep_promise
+      source:
+        - *a1
+      source_text: 'If they choose to do so, roll on the following table:'
+      effects: []
+      rule_refs:
+        - core.quest.pleasure_house.secrecy_choice
+    - id: aftermath_table
+      source:
+        - *a2
+      source_text: 1d6 | Result
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: guards_and_isabelle_defeated
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: keep_secrecy_promise
+            right:
+              type: literal
+              value: true
+      effects: []
+      rule_refs:
+        - core.quest.pleasure_house.blessing
+        - core.quest.pleasure_house.payment
+        - core.quest.pleasure_house.priest_refusal
+        - core.quest.pleasure_house.curse
+  entry_step: daughter_recognised
+  exit_step: aftermath_table

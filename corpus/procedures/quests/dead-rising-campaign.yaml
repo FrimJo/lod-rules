@@ -17,11 +17,12 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 226
       printed_page: 224
-      heading: 'Quest 1: Spring Cleaning — aftermath'
+      heading: 'Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      section: 'Quest 1: Spring Cleaning'
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 227
@@ -31,16 +32,19 @@
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: Quest Location
     - &a5
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 230
       printed_page: 228
-      heading: 'Quest 3: Highwaymen — aftermath'
+      heading: 'Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      section: 'Quest 3: Highwaymen'
     - &a3
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
@@ -51,45 +55,73 @@
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: Victory Condition; Aftermath
     - &a6
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 233
       printed_page: 231
-      heading: 'Quest 5: The Apprentice — aftermath'
+      heading: 'Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      section: 'Quest 5: The Apprentice'
     - &a7
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 234
       printed_page: 232
-      heading: 'Quest 6A: Sacrifice — aftermath'
+      heading: 'Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      section: 'Quest 6A: Sacrifice'
     - &a8
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 236
       printed_page: 234
-      heading: 'Quest 6B: The Master — aftermath'
+      heading: 'Aftermath'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+      section: 'Quest 6B: The Master'
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 229
+      printed_page: 227
+      heading: 'Quest 3: Highwaymen'
+      locator:
+        paragraph: Quest Location
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 236
+      printed_page: 234
+      section: The Dead Rising
+      heading: Campaign aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'The campaign starts wherever the heroes are, but the second quest must be started in
-    Silver City. Its quests run in order: Spring Cleaning, The Dead Rising, Highwaymen, The Burning
-    Village (won or fled, the campaign continues), The Apprentice, then the party chooses: the
-    Apostle (6A, then travel to White 39 for 6B) or the Master (6B directly), with no time to return
-    to Silver City. After 6B the party travels to Silver City for the campaign aftermath. Each quest
-    runs as its own accepted quest; this procedure owns only the campaign order, the Silver City
-    start check, the 6A/6B choice and the once-only aftermath.'
+  source_text:
+    'This campaign starts wherever the heroes are, but the second quest must be started in
+    Silver City. ... Head to Silver City to continue the campaign. ... Quest Location: Silver City.
+    ... Quest Location: White 34. ... The party travels to Rochdale without event using the rations
+    found at the bandit’s hideout. ... Continue your travel to the city. ... Continue your travel to
+    Silver city. ... Either way, there is no time to head back to the Silver City. They must press
+    on. If they choose to go for the Apostle, play quest 6A. If they choose to go for the Master,
+    Play 6B. ... Travel to white 39. ... Travel to Silver City. ... During the dinner, the Jarl
+    presents each of them with a small box containing 1000 c.'
   issues:
     - issue.quest.campaign_progression_boundaries
   fields:
@@ -209,15 +241,22 @@
     - key: rochdale
       label: Travel to Rochdale without event using the bandit rations
       object_id: core.quest.highwaymen.aftermath_travel
+    - key: campaign_start
+      label: This campaign starts wherever the heroes are; the second quest must be started in Silver City
+      object_id: core.quest.dead_rising_campaign.start
   steps:
     - id: check_owner
       source: &a2
         - *a1
-      source_text: Bind a fresh campaign progression to its instance; another instance cannot advance it.
+      source_text:
+        This campaign starts wherever the heroes are, but the second quest must be started in
+        Silver City.
       substeps:
         - id: bind_campaign
           source: *a2
-          source_text: A fresh progression takes the campaign instance of its first call.
+          source_text:
+            This campaign starts wherever the heroes are, but the second quest must be started in
+            Silver City.
           when:
             type: compare
             operator: eq
@@ -235,7 +274,9 @@
                 name: campaign_id
         - id: owner
           source: *a2
-          source_text: Only the bound campaign instance continues.
+          source_text:
+            This campaign starts wherever the heroes are, but the second quest must be started in
+            Silver City.
           when:
             type: compare
             operator: eq
@@ -265,7 +306,9 @@
     - id: start_campaign
       source:
         - *a1
-      source_text: 'This campaign starts wherever the heroes are, with Quest 1: Spring Cleaning.'
+      source_text:
+        'This campaign starts wherever the heroes are, but the second quest must be started in
+        Silver City.'
       when:
         type: all
         conditions:
@@ -328,8 +371,8 @@
       source:
         - *a1
       source_text:
-        The second quest must be started in Silver City; the other quests start where their own
-        text places them.
+        This campaign starts wherever the heroes are, but the second quest must be started in
+        Silver City.
       when:
         type: all
         conditions:
@@ -445,8 +488,11 @@
       source:
         - *a1
         - *a3
-      source_text: Only the actual completion of the required next quest advances the campaign. The
-        Burning Village continues the campaign whether the heroes won or fled.
+      source_text:
+        If at any time, there are no living enemies on the table, the heroes win. If at any
+        time the heroes feel like running away, they can do so by simply leaving the map, in which
+        case the quest is over. ... Continue your travel to the city. ... Continue your travel to
+        Silver city.
       when:
         type: all
         conditions:
@@ -520,9 +566,8 @@
       source:
         - *a1
       source_text:
-        The campaign text gives the order of its quests and where to go next, but not what
-        happens to the campaign when one of them is failed or abandoned. Such an outcome changes
-        nothing here.
+        This campaign starts wherever the heroes are, but the second quest must be started in
+        Silver City.
       when:
         type: all
         conditions:
@@ -632,14 +677,16 @@
       source:
         - document: rulebook.second_printing.eng
           file: source/Rulebook-2nd-printing-ENGa.pdf
-          pdf_page: 228
-          printed_page: 226
-          heading: 'Quest 2: The Dead Rising — aftermath'
+          pdf_page: 229
+          printed_page: 227
+          heading: 'Quest 3: Highwaymen'
+          locator:
+            paragraph: Quest Location
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: 'Quest 3: Highwaymen follows The Dead Rising.'
+      source_text: 'Quest Location: White 34.'
       when:
         type: all
         conditions:
@@ -688,7 +735,7 @@
     - id: after_highwaymen
       source:
         - *a5
-      source_text: The party travels to Rochdale without event, using the rations found at the bandit hideout.
+      source_text: The party travels to Rochdale without event using the rations found at the bandit’s hideout.
       when:
         type: all
         conditions:
@@ -739,7 +786,7 @@
     - id: after_burning_village
       source:
         - *a3
-      source_text: 'Won or fled, continue the travel to Silver City for Quest 5: The Apprentice.'
+      source_text: 'Continue your travel to the city. ... Continue your travel to Silver city.'
       when:
         type: all
         conditions:
@@ -788,9 +835,7 @@
     - id: after_apprentice
       source:
         - *a6
-      source_text:
-        There is no time to head back to Silver City; the party must choose the Apostle or the
-        Master.
+      source_text: Either way, there is no time to head back to the Silver City. They must press on.
       when:
         type: all
         conditions:
@@ -839,7 +884,18 @@
     - id: choose_apostle
       source:
         - *a6
-      source_text: If they choose to go for the Apostle, play quest 6A.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 234
+          printed_page: 232
+          heading: 'Quest 6A: Sacrifice'
+          locator:
+            paragraph: Quest Location
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: 'If they choose to go for the Apostle, play quest 6A. ... Quest Location: White 36.'
       when:
         type: all
         conditions:
@@ -899,7 +955,18 @@
     - id: choose_master
       source:
         - *a6
-      source_text: If they choose to go for the Master, play quest 6B.
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 235
+          printed_page: 233
+          heading: 'Quest 6B: The Master'
+          locator:
+            paragraph: Quest Location
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: 'If they choose to go for the Master, Play 6B. ... Quest Location: White 39.'
       when:
         type: all
         conditions:
@@ -959,7 +1026,9 @@
     - id: after_sacrifice
       source:
         - *a7
-      source_text: 'After 6A the heroes head straight towards the Master: travel to White 39 for 6B.'
+      source_text:
+        'With no time to lose, they send the civilians on their way while heading straight
+        towards the Master themselves. Travel to white 39.'
       when:
         type: all
         conditions:
@@ -1008,7 +1077,8 @@
     - id: after_master
       source:
         - *a8
-      source_text: After 6B, travel to Silver City for the campaign aftermath.
+      source_text: Taking what they want from the crypt, the party heads back to the city. Travel to
+        Silver City.
       when:
         type: all
         conditions:
@@ -1065,14 +1135,17 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 236
           printed_page: 234
+          section: The Dead Rising
           heading: Campaign aftermath
           extraction:
             method: text
             confidence: high
             visually_verified: true
       source_text:
-        In Silver City the Jarl presents each hero with 1000 c and the party is enlisted into
-        the League of Dungeoneers. This happens once.
+        The Jarl greets the heroes in the city, commending their actions and invites them to
+        dine with him. ... During the dinner, the Jarl presents each of them with a small box
+        containing 1000 c. He also informs them that their exploits have been noticed and that High
+        King Logan III has requested him to enlist them into the League of Dungeoneers.
       when:
         type: all
         conditions:
@@ -1136,3 +1209,18 @@
             value: complete
   entry_step: check_owner
   exit_step: campaign_aftermath
+  unresolved_references:
+    - Each campaign quest runs as its own accepted quest and dungeon lifecycle
+      (procedure.quest_acceptance); this procedure holds only the campaign order, the Silver City
+      start of the second quest, the 6A/6B choice and the once-only Campaign aftermath.
+    - 'Quest 2: The Dead Rising prints no onward destination in its aftermath; the next destination
+      recorded is the printed Quest Location of Quest 3: Highwaymen, White 34.'
+    - 'The Burning Village continues the campaign whether the heroes won or fled: both aftermath
+      branches print onward travel (to the city / to Silver city).'
+    - league_member records the enlistment that High King Logan III has requested the Jarl to make
+      in the Campaign aftermath.
+    - The campaign text does not say what happens to the campaign when one of its quests is failed
+      or abandoned (issue.quest.campaign_progression_boundaries); such an outcome does not advance
+      the campaign here.
+    - Campaign and step ownership checks bind one campaign instance; they encode no printed sentence
+      beyond the campaign start rule.

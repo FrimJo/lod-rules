@@ -44,15 +44,21 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Started by Ghostly Event 6, the side quest takes place in the same dungeon as the next
-    quest, with one Side Quest Card added to the pile. The drawn card is put aside and the next card
-    leads through a hidden door to the side Objective Room (R17) with two giant spiders. After the
-    first combat turn the door slams shut. Once the spiders are beaten, one action places the
-    remains in a backpack (ENC 8). If the main quest finishes before the card is drawn, the heroes
-    may keep searching or end the quest, and the side quest fails. Failure makes the next Ghostly
-    Event #8. Remains brought back are buried at the estate and a magical Longsword (+2 DMG) is
-    found the next morning.'
+  source_text: 'Location: In the same dungeon as the next quest. Special Rules: Add one Side Quest
+    Card to the pile. When you draw this card, put it aside and pull the next card. This card will
+    now lead you to the side Objective Room. There is a hidden door in one of the walls. ... If the
+    quest is finished before this card is drawn, the heroes may continue to try to find it or end
+    the quest, in which case this side quest will fail. ... Place the R17 tile. ... Emerging from
+    the opposite corners are two giant spiders slowly walking towards the heroes. Read the next
+    paragraph only after the first turn of combat! Without warning, the hidden door suddenly slams
+    shut with a loud bang. ... Once the spiders have been beaten, the heroes can spend one action to
+    place the skeletal remains in one of the backpacks (ENC 8). Any Wandering Monster from this
+    point and forward will originate from the opening from where the light comes. Each Wandering
+    Monster will be 1d2 Giant spiders. ... There will automatically be a Ghostly Event before the
+    next quest, and that will be #8. ... Once back at the estate, the party holds a short ceremony
+    and buries the remains in the old family cemetery. The old lady is never seen again, but the
+    next morning an exquisite sword is found on the dining table. The Longsword is considered
+    magical and has +2 DMG.'
   issues:
     - issue.quest.grieving_mother_outcome_boundaries
     - issue.quest.grieving_mother_wandering_activation
@@ -337,6 +343,10 @@
       type: string
       role: output
       description: Dining table.
+    reward:
+      type: string
+      role: output
+      description: Printed Reward line of the setup rule.
   dependencies:
     - key: dungeon
       label: The next quest’s dungeon and its card pile
@@ -348,12 +358,16 @@
     - id: check_owner
       source:
         - *a1
-      source_text: Bind a fresh occurrence; another occurrence cannot change it.
+      source_text:
+        'Corpus bookkeeping; no printed wording: bind a fresh occurrence; another occurrence
+        cannot change it.'
       substeps:
         - id: bind
           source:
             - *a1
-          source_text: A fresh occurrence takes the id of its first call.
+          source_text:
+            'Corpus bookkeeping; no printed wording: a fresh occurrence takes the id of its first
+            call.'
           when:
             type: compare
             operator: eq
@@ -372,7 +386,7 @@
         - id: owner
           source:
             - *a1
-          source_text: Only the bound occurrence continues.
+          source_text: 'Corpus bookkeeping; no printed wording: only the bound occurrence continues.'
           when:
             type: compare
             operator: eq
@@ -402,7 +416,9 @@
     - id: setup
       source:
         - *a1
-      source_text: 'Location: the same dungeon as the next quest. Add one Side Quest Card to the pile.'
+      source_text:
+        'Location: In the same dungeon as the next quest. Special Rules: Add one Side Quest
+        Card to the pile.'
       when:
         type: all
         conditions:
@@ -485,8 +501,11 @@
         - *a1
         - *a2
       source_text:
-        Put the drawn card aside; the next card leads through a hidden door (a regular door,
-        rolled for lock and trap) to the side Objective Room, R17, with two giant spiders.
+        When you draw this card, put it aside and pull the next card. This card will now lead
+        you to the side Objective Room. There is a hidden door in one of the walls. ... Roll if
+        locked or trapped as usual, but apart from that, treat it as a regular door. ... Place the
+        R17 tile. ... Emerging from the opposite corners are two giant spiders slowly walking
+        towards the heroes.
       when:
         type: all
         conditions:
@@ -532,7 +551,7 @@
       substeps:
         - id: card_drawn_rules
           source: *a4
-          source_text: Apply the printed rules for this checkpoint.
+          source_text: 'Corpus bookkeeping; no printed wording: apply the rules this step references.'
           rule_refs:
             - core.quest.grieving_mother.side_quest_card
             - core.quest.grieving_mother.hidden_door
@@ -541,7 +560,9 @@
     - id: door_slams
       source: &a6
         - *a2
-      source_text: After the first turn of combat the hidden door slams shut, locked as a 10 on the Door Table.
+      source_text: Read the next paragraph only after the first turn of combat! Without warning, the
+        hidden door suddenly slams shut with a loud bang. ... The door is now locked as though you
+        had rolled 10 on the Door Table
       when:
         type: all
         conditions:
@@ -584,14 +605,14 @@
       substeps:
         - id: door_slams_rules
           source: *a6
-          source_text: Apply the printed rules for this checkpoint.
+          source_text: 'Corpus bookkeeping; no printed wording: apply the rules this step references.'
           rule_refs:
             - core.quest.grieving_mother.door_slam
           effects: []
     - id: spiders_beaten
       source:
         - *a2
-      source_text: The side room spiders are beaten.
+      source_text: Once the spiders have been beaten
       when:
         type: all
         conditions:
@@ -621,8 +642,8 @@
     - id: pick_up_remains
       source: &a7
         - *a2
-      source_text: Once the spiders are beaten, a hero spends one action to place the remains in a
-        backpack (ENC 8), once.
+      source_text: Once the spiders have been beaten, the heroes can spend one action to place the
+        skeletal remains in one of the backpacks (ENC 8).
       when:
         type: all
         conditions:
@@ -683,14 +704,16 @@
       substeps:
         - id: pick_up_remains_rules
           source: *a7
-          source_text: Apply the printed rules for this checkpoint.
+          source_text: 'Corpus bookkeeping; no printed wording: apply the rules this step references.'
           rule_refs:
             - core.quest.grieving_mother.remains_pickup
           effects: []
     - id: wandering_open
       source:
         - *a2
-      source_text: When the light-opening spider Wandering Monsters start is not settled by the text.
+      source_text:
+        Any Wandering Monster from this point and forward will originate from the opening from
+        where the light comes.
       when:
         type: all
         conditions:
@@ -725,7 +748,9 @@
     - id: wandering_spiders
       source:
         - *a2
-      source_text: From then on each Wandering Monster is 1d2 Giant spiders from the light opening.
+      source_text:
+        Any Wandering Monster from this point and forward will originate from the opening from
+        where the light comes. Each Wandering Monster will be 1d2 Giant spiders.
       when:
         type: all
         conditions:
@@ -762,8 +787,9 @@
         - *a1
         - *a8
       source_text:
-        'If the quest is finished before the card is drawn and the heroes end it, the side
-        quest fails, and the next Ghostly Event is #8.'
+        'If the quest is finished before this card is drawn, the heroes may continue to try to
+        find it or end the quest, in which case this side quest will fail. ... There will
+        automatically be a Ghostly Event before the next quest, and that will be #8.'
       when:
         type: all
         conditions:
@@ -803,14 +829,16 @@
       substeps:
         - id: end_before_card_rules
           source: *a9
-          source_text: Apply the printed rules for this checkpoint.
+          source_text: 'Corpus bookkeeping; no printed wording: apply the rules this step references.'
           rule_refs:
             - core.quest.grieving_mother.failure
           effects: []
     - id: end_with_remains
       source:
         - *a2
-      source_text: Leaving the dungeon with the remains takes them home to the estate.
+      source_text:
+        'Corpus bookkeeping; no printed wording: leaving the dungeon with the remains carries
+        them back to the estate, where the aftermath applies.'
       when:
         type: all
         conditions:
@@ -840,7 +868,9 @@
     - id: end_without_remains
       source:
         - *a2
-      source_text: Leaving after reaching the side room without the remains is not described.
+      source_text:
+        'Corpus bookkeeping; no printed wording: the book does not say what happens if the
+        heroes leave after reaching the side room without the remains.'
       when:
         type: all
         conditions:
@@ -876,8 +906,9 @@
       source:
         - *a10
       source_text:
-        Back at the estate the remains are buried; the next morning a magical Longsword (+2
-        DMG) is on the dining table. Once.
+        Once back at the estate, the party holds a short ceremony and buries the remains in the
+        old family cemetery. The old lady is never seen again, but the next morning an exquisite
+        sword is found on the dining table. The Longsword is considered magical and has +2 DMG.
       when:
         type: all
         conditions:
@@ -939,7 +970,9 @@
         - id: success_rule
           source:
             - *a10
-          source_text: The old lady is never seen again; the reward is the magical Longsword.
+          source_text:
+            The old lady is never seen again, but the next morning an exquisite sword is found on
+            the dining table. The Longsword is considered magical and has +2 DMG.
           rule_refs:
             - core.quest.grieving_mother.success
           effects: []

@@ -7,7 +7,7 @@
       pdf_page: 261
       printed_page: 259
       section: The Great Crypt
-      heading: "Quest 2: Stopping the Necromancer"
+      heading: 'Quest 2: Stopping the Necromancer'
       extraction:
         method: text
         confidence: high
@@ -16,8 +16,8 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 261
       printed_page: 259
-      section: "Quest 2: Stopping the Necromancer"
-      heading: "Quest Location:"
+      section: 'Quest 2: Stopping the Necromancer'
+      heading: 'Quest Location:'
       extraction:
         method: text
         confidence: high
@@ -64,7 +64,8 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: "Quest Location: No travel necessary. Special rules: - Number of tiles: 7 corridors, 7
+  source_text:
+    'Quest Location: No travel necessary. Special rules: - Number of tiles: 7 corridors, 7
     rooms. Reward: 300 c per hero. Encounters: Undead. ... Place the Necromancer at the far end of
     the room. Place 6 Zombies armed with longswords close to him. Heroes enter along a short side.
     ... Ragnalf knows Raise Dead, 3 Ranged Spells and 2 Close-combat spells. Armed with a poisonous
@@ -75,10 +76,11 @@
     required to succeed. The zombies standing next to Ragnalf will not move toward the heroes, but
     instead form a circle to protect him. If Ragnalf dies, all zombies die as well. ... When the
     Necromancer dies, all zombies topple over and all movement on the floor stops. ... Not staying a
-    minute longer than necessary, the heroes head back to town to collect their reward."
+    minute longer than necessary, the heroes head back to town to collect their reward.'
   issues:
     - issue.quest.necromancer_lifecycle_scope
     - issue.quest.ragnalf_unspecified_spells_poison
+    - issue.quest.necromancer_cs_rs_reduction
   fields:
     objective:
       type: string
@@ -158,7 +160,7 @@
     xp:
       type: number
       role: state
-      description: Printed Ragnalf XP200 report, not earned hero XP; actual accounting remains a battle handoff.
+      description: Printed Ragnalf XP 200 report, not earned hero XP; actual accounting remains a battle handoff.
       integer: true
     treasure_table:
       type: string
@@ -171,13 +173,15 @@
     cs_modifier:
       type: number
       role: state
-      description: Owned atomic-rule working report for this hero/quest contribution; not the total CS or
+      description:
+        Owned atomic-rule working report for this hero/quest contribution; not the total CS or
         any unrelated modifier.
       integer: true
     rs_modifier:
       type: number
       role: state
-      description: Owned atomic-rule working report for this hero/quest contribution; not the total RS or
+      description:
+        Owned atomic-rule working report for this hero/quest contribution; not the total RS or
         any unrelated modifier.
       integer: true
     to_hit_roll:
@@ -202,7 +206,8 @@
     next_action_spent_getting_up:
       type: boolean
       role: state
-      description: Owned working report restored from the accepted pending getting-up action before atomic
+      description:
+        Owned working report restored from the accepted pending getting-up action before atomic
         rule execution; not a fresh action input.
     dex_test_succeeded:
       type: boolean
@@ -216,6 +221,10 @@
       type: boolean
       role: input
       description: ragnalf dead
+    zombie_next_to_ragnalf:
+      type: boolean
+      role: input
+      description: This zombie stands next to Ragnalf.
     zombies_advance_toward_heroes:
       type: boolean
       role: state
@@ -256,7 +265,8 @@
     necro_hero_owner_matches:
       type: boolean
       role: input
-      description: Actual hero/action/payment state belongs to this quest occurrence and this hero. Each
+      description:
+        Actual hero/action/payment state belongs to this quest occurrence and this hero. Each
         hero has independent state.
     necro_setup_processed:
       type: boolean
@@ -329,35 +339,40 @@
     actual_hit_event:
       type: number
       role: input
-      description: Chronological actual hero event identifier; delayed DEX result must match persisted
+      description:
+        Chronological actual hero event identifier; delayed DEX result must match persisted
         pending attempt.
       integer: true
       minimum: 0
     last_hit_event:
       type: number
       role: state
-      description: Chronological actual hero event identifier; delayed DEX result must match persisted
+      description:
+        Chronological actual hero event identifier; delayed DEX result must match persisted
         pending attempt.
       integer: true
       minimum: 0
     actual_getting_up_attempt:
       type: number
       role: input
-      description: Chronological actual hero event identifier; delayed DEX result must match persisted
+      description:
+        Chronological actual hero event identifier; delayed DEX result must match persisted
         pending attempt.
       integer: true
       minimum: 0
     last_getting_up_attempt:
       type: number
       role: state
-      description: Chronological actual hero event identifier; delayed DEX result must match persisted
+      description:
+        Chronological actual hero event identifier; delayed DEX result must match persisted
         pending attempt.
       integer: true
       minimum: 0
     pending_getting_up_attempt:
       type: number
       role: state
-      description: Chronological actual hero event identifier; delayed DEX result must match persisted
+      description:
+        Chronological actual hero event identifier; delayed DEX result must match persisted
         pending attempt.
       integer: true
       minimum: 0
@@ -420,18 +435,21 @@
       label: Actual initial d6
       object_id: table.quest.stopping_necromancer.threat
     - key: external
-      label: Actual Zombie statistics, Raise Dead, three ranged and two close-combat spell selections,
+      label:
+        Actual Zombie statistics, Raise Dead, three ranged and two close-combat spell selections,
         poisonous dagger outcome; absent or unspecified values are supplied
     - key: dex
       label: Actual pending hero getting-up DEX Test result; request is not success
     - key: battle
-      label: Actual owned battle result, XP200 accounting and T4 treasure resolution; request does not
+      label:
+        Actual owned battle result, XP 200 accounting and T4 treasure resolution; request does not
         collect or pay
   steps:
     - id: setup
       source: *a1
-      source_text: "Quest Location: No travel necessary. Special rules: - Number of tiles: 7 corridors, 7
-        rooms. Reward: 300 c per hero. Encounters: Undead."
+      source_text:
+        'Quest Location: No travel necessary. Special rules: - Number of tiles: 7 corridors, 7
+        rooms. Reward: 300 c per hero. Encounters: Undead.'
       when:
         type: all
         conditions:
@@ -480,7 +498,7 @@
             value: true
     - id: request_threat
       source: *a1
-      source_text: Start Threat Level 1d6; Min Threat Level Same as start lvl; Max Threat Level 20
+      source_text: Start Threat Level | Min Threat Level | Max Threat Level ... 1d6 | Same as start lvl | 20
       when:
         type: all
         conditions:
@@ -528,7 +546,7 @@
             value: true
     - id: initial_threat
       source: *a1
-      source_text: Start Threat Level 1d6; Min Threat Level Same as start lvl; Max Threat Level 20
+      source_text: Start Threat Level | Min Threat Level | Max Threat Level ... 1d6 | Same as start lvl | 20
       when:
         type: all
         conditions:
@@ -589,7 +607,8 @@
             value: true
     - id: objective_setup
       source: *a1
-      source_text: Place the Necromancer at the far end of the room. Place 6 Zombies armed with longswords
+      source_text:
+        Place the Necromancer at the far end of the room. Place 6 Zombies armed with longswords
         close to him. Heroes enter along a short side.
       when:
         type: all
@@ -681,7 +700,8 @@
             value: true
     - id: protect_ragnalf
       source: *a1
-      source_text: The zombies standing next to Ragnalf will not move toward the heroes, but instead form
+      source_text:
+        The zombies standing next to Ragnalf will not move toward the heroes, but instead form
         a circle to protect him.
       when:
         type: all
@@ -703,12 +723,21 @@
             right:
               type: literal
               value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: zombie_next_to_ragnalf
+            right:
+              type: literal
+              value: true
       rule_refs:
         - core.quest.stopping_necromancer.zombie_protection
       effects: []
     - id: hero_modifiers
       source: *a1
-      source_text: Moving across the corpses and fighting at the same time is very difficult. All CS and
+      source_text:
+        Moving across the corpses and fighting at the same time is very difficult. All CS and
         RS are reduced by 10% for the heroes.
       when:
         type: all
@@ -764,7 +793,8 @@
             value: -10
     - id: hero_departed
       source: *a1
-      source_text: Moving across the corpses and fighting at the same time is very difficult. All CS and
+      source_text:
+        Moving across the corpses and fighting at the same time is very difficult. All CS and
         RS are reduced by 10% for the heroes.
       when:
         type: all
@@ -800,7 +830,8 @@
             value: 0
     - id: hit
       source: *a1
-      source_text: Any ‘To Hit’ roll of 90 or more means that hero loses his balance and falls. The hero
+      source_text:
+        Any ‘To Hit’ roll of 90 or more means that hero loses his balance and falls. The hero
         must spend the next action getting up.
       when:
         type: all
@@ -959,7 +990,8 @@
             value: false
     - id: request_dex
       source: *a1
-      source_text: However, the corpses on the ground do their best to pull them down again, and a DEX
+      source_text:
+        However, the corpses on the ground do their best to pull them down again, and a DEX
         Test is required to succeed.
       when:
         type: all
@@ -1027,7 +1059,8 @@
             value: true
     - id: getting_up_result
       source: *a1
-      source_text: However, the corpses on the ground do their best to pull them down again, and a DEX
+      source_text:
+        However, the corpses on the ground do their best to pull them down again, and a DEX
         Test is required to succeed.
       when:
         type: all
@@ -1069,7 +1102,8 @@
       substeps:
         - id: apply_getting_up_result
           source: *a1
-          source_text: However, the corpses on the ground do their best to pull them down again, and a DEX
+          source_text:
+            However, the corpses on the ground do their best to pull them down again, and a DEX
             Test is required to succeed.
           rule_refs:
             - core.quest.stopping_necromancer.getting_up_success
@@ -1081,7 +1115,8 @@
                 value: false
     - id: death
       source: *a1
-      source_text: If Ragnalf dies, all zombies die as well. ... When the Necromancer dies, all zombies
+      source_text:
+        If Ragnalf dies, all zombies die as well. ... When the Necromancer dies, all zombies
         topple over and all movement on the floor stops.
       when:
         type: all
@@ -1161,8 +1196,9 @@
             value: true
     - id: reward
       source: *a1
-      source_text: "Reward: 300 c per hero. ... Not staying a minute longer than necessary, the heroes
-        head back to town to collect their reward."
+      source_text:
+        'Reward: 300 c per hero. ... Not staying a minute longer than necessary, the heroes
+        head back to town to collect their reward.'
       when:
         type: all
         conditions:

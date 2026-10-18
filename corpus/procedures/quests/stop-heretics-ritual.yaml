@@ -1,0 +1,89 @@
+- id: procedure.stop_heretics_ritual
+  name: Stop the Heretics — the Ritual of Summoning
+  section_id: section.quest_book_i.the_lava_river.quest_1_stop_the_heretics
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Special Rules
+      locator:
+        paragraph: The Objective Room, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 244
+      printed_page: 242
+      heading: Special Rules
+      locator:
+        table: Uncaptioned demon table (1d6 | Demon) under The Objective Room, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The heroes have 10 turns to kill the caster, or the Demons will be summoned. If the ritual succeeds, the Spellcaster will collapse from the exertion, and be out of the battle. Roll on the table to see what emerges and place these on random squares along the river as they climb out of the lava.
+  see_also:
+    - section.quest_book_i.the_lava_river.quest_1_stop_the_heretics.table_3
+  issues:
+    - issue.quest.heretics_deadline_phase
+  fields:
+    turn_limit:
+      type: number
+      role: output
+      description: turn limit
+      integer: true
+    deadline_goal:
+      type: string
+      role: output
+      description: deadline goal
+    successful_ritual_caster_out_of_battle:
+      type: boolean
+      role: output
+      description: successful ritual caster out of battle
+    ritual_succeeded:
+      type: boolean
+      role: input
+      description: Supplied source ritual outcome.
+    caster_collapses:
+      type: boolean
+      role: output
+      description: Exhaustion collapse.
+    caster_out_of_battle:
+      type: boolean
+      role: output
+      description: Caster is out of battle.
+    demon_table_roll_required:
+      type: boolean
+      role: output
+      description: Roll the Demon table.
+    demon_placement:
+      type: string
+      role: output
+      description: Random river squares.
+  dependencies:
+    - key: demons
+      label: The 1d6 Demon table
+      object_id: table.quest.stop_heretics.demons
+  steps:
+    - id: ten_turns
+      source:
+        - *a1
+      source_text: The heroes have 10 turns to kill the caster, or the Demons will be summoned.
+      effects: []
+      rule_refs:
+        - core.quest.stop_heretics.deadline
+    - id: ritual_succeeds
+      source:
+        - *a1
+      source_text: If the ritual succeeds, the Spellcaster will collapse from the exertion, and be out of the battle. Roll on the table to see what emerges and place these on random squares along the river as they climb out of the lava.
+      effects: []
+      rule_refs:
+        - core.quest.stop_heretics.ritual_completed
+  entry_step: ten_turns
+  exit_step: ritual_succeeds

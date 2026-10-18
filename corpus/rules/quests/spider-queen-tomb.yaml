@@ -1,21 +1,21 @@
 - id: core.quest.spider_queen_tomb.setup
-  name: The Tomb — setup
+  name: 'Level 3: The Tomb of the Spider Queen — starting tile, tiles, encounters and objective'
   section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
   source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: The Tomb — setup
+      heading: 'Level 3: The Tomb of the Spider Queen'
+      locator:
+        paragraph: Starting Tile; Number of Tiles; Encounters; Objective Room
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Starting Tile C8. Cobweb Opening at the far end, heroes placed as you see fit. Seven
-    rooms except R1, R9 and R17; seven corridors except C16. Encounters follow Special Rules.
-    Objective Room: The Great Crypt.'
+  source_text: 'Starting Tile: C8. Place a Cobweb Opening at the far end and place the heroes as you see fit. Number of Tiles: 7 rooms except R1, R9 and R17. Corridors: 7 (except C16). ... Encounters: See Special Rules. Objective Room: The Great Crypt.'
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -103,14 +103,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: The Tomb — odd encounter roll
+      heading: Special Rules
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, first bullet'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Whenever an encounter occurs, roll a die. An odd number results in 1d3 Giant Spiders.
+  source_text: Whenever you have an encounter, roll a die. An odd number results in 1d3 Giant Spiders.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -123,10 +125,23 @@
       type: string
       role: output
       description: Giant Spiders.
-    encounter_count_dice:
-      type: string
+    giant_spider_roll:
+      type: number
+      role: input
+      description: The 1d3 roll for the number of Giant Spiders.
+      integer: true
+      minimum: 1
+      maximum: 3
+      dice:
+        count: 1
+        sides: 3
+    giant_spiders:
+      type: number
       role: output
-      description: Printed 1d3 count expression.
+      description: Number of Giant Spiders encountered.
+      integer: true
+      minimum: 1
+      maximum: 3
   effects:
     - type: set
       target: encounter_kind
@@ -134,10 +149,10 @@
         type: literal
         value: Giant Spiders
     - type: set
-      target: encounter_count_dice
+      target: giant_spiders
       value:
-        type: literal
-        value: 1d3
+        type: field
+        name: giant_spider_roll
   when:
     type: compare
     operator: eq
@@ -148,8 +163,9 @@
       type: literal
       value: true
   unresolved_references:
-    - The parity die size is not specified in this quest. Giant Spider standard statistics require
-      the unavailable Bestiary.
+    - The parity die size is not specified in this quest. Giant Spider standard statistics require the unavailable Bestiary.
+  issues:
+    - issue.quest.spider_queen_parity_die
 - id: core.quest.spider_queen_tomb.encounter_even
   name: The Tomb — even encounter roll
   section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
@@ -158,14 +174,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: The Tomb — even encounter roll
+      heading: Special Rules
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, first bullet'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: An even number results in an encounter from the Undead Encounter List.
+  source_text: Whenever you have an encounter, roll a die. ... An even number results in an encounter from the Undead Encounter List.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -195,6 +213,8 @@
       value: false
   unresolved_references:
     - Undead Encounter List entries are unavailable; no list roll or enemy statistics are invented.
+  issues:
+    - issue.quest.spider_queen_parity_die
 - id: core.quest.spider_queen_tomb.doors
   name: The Tomb — cobweb covered openings
   section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
@@ -203,7 +223,9 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: The Tomb — cobweb covered openings
+      heading: Special Rules
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, second bullet'
       extraction:
         method: text
         confidence: high
@@ -227,10 +249,10 @@
         value: true
   dependencies:
     - key: cobweb_placement
-      label: Cobweb Covered Openings, page101
+      label: Cobweb Covered Openings, page 101
       object_id: core.cobweb_opening.placement
     - key: cobweb_clearing
-      label: 2AP clearing and Threat cost
+      label: 2 AP clearing and Threat cost
       object_id: core.cobweb_opening.clearing
     - key: cobweb_alert
       label: Spider alert on clearing
@@ -246,6 +268,8 @@
       pdf_page: 241
       printed_page: 239
       heading: Special Rules
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, third bullet'
       extraction:
         method: text
         confidence: high
@@ -261,8 +285,7 @@
         visually_verified: false
   status: extracted
   confidence: high
-  source_text: When Threat reaches 12, a Wandering Monster appears regardless of the Scenario die
-    result. The introduction defines this as an increase to the threshold.
+  source_text: A Threat Level of 12 triggers a Wandering Monster.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -288,15 +311,11 @@
     wandering_monster_triggered:
       type: boolean
       role: output
-      description: Place special quest monster.
-    scenario_result_ignored:
-      type: boolean
-      role: output
-      description: Ignore Scenario result for this trigger.
+      description: A Wandering Monster appears.
     threat_reduction_on_placement:
       type: number
       role: output
-      description: No reduction for special placement.
+      description: The Threat Level is not decreased when the Wandering Monster is placed.
       integer: true
       minimum: 0
   effects:
@@ -307,11 +326,6 @@
         value: 12
     - type: set
       target: wandering_monster_triggered
-      value:
-        type: literal
-        value: true
-    - type: set
-      target: scenario_result_ignored
       value:
         type: literal
         value: true
@@ -351,17 +365,27 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: The Tomb — Objective Room setup
+      heading: The Objective Room
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, The Objective Room'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 241
+      printed_page: 239
+      heading: Setup
+      locator:
+        paragraph: The Objective Room, Setup
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    Gigantic Spider Belua is next to the sarcophagus; heroes enter on the short side. There
-    is no way to get to the sarcophagus without killing the beast. The sarcophagus rests at the far
-    end of the room.
+  source_text: creating a spotlight effect on the sarcophagus resting at the far end of the room. ... There is no way of getting to the sarcophagus without killing that beast. ... The Gigantic Spider, Belua, should be placed next to the sarcophagus. The heroes enter on the short side of the room.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -415,15 +439,27 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: Belua — special rules and experience
+      heading: Belua
+      locator:
+        table: Uncaptioned statistics grid (CS RS DMG NA DEX / To hit RES M HP)
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 27
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 195
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Belua causes Terror 5, Poison and Large (not wall-climbing). XP 1100, Part. All nine
-    statistics, including DMG 1d10+3, are printed in the grid.
+  source_text: Causes Terror 5, Poison, Large (not wall-climbing) ... XP 1100, Part
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -435,7 +471,7 @@
     terror:
       type: number
       role: output
-      description: terror
+      description: Terror level. The page prints Terror 5; changelog 2.21 entry 195 changes Belua to Terror 10.
       integer: true
     poison:
       type: boolean
@@ -468,7 +504,7 @@
       target: terror
       value:
         type: literal
-        value: 5
+        value: 10
     - type: set
       target: poison
       value:
@@ -502,6 +538,8 @@
     - key: parts
       label: Parts catalogue
       object_id: table.alchemy.parts
+  issues:
+    - issue.quest.belua_terror
 - id: core.quest.spider_queen_tomb.summon_attempt
   name: Belua — behaviour 5–6 summoning attempt
   section_id: section.quest_book_i.lair_of_the_spider_queen.level_3_the_tomb_of_the_spider_queen
@@ -510,14 +548,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: Belua — behaviour 5–6 summoning attempt
+      heading: Special Rules
+      locator:
+        paragraph: Belua, Special Rules
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: On behaviour 5–6 Belua tries to summon a child. Make a CS test for her.
+  source_text: Belua has a Special Ability. Whenever you roll 5-6 on her behaviour, she tries to summon one of her children. Make a CS test for her,
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -586,16 +626,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 241
       printed_page: 239
-      heading: Belua — successful summoning
+      heading: Special Rules
+      locator:
+        paragraph: Belua, Special Rules
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    On behaviour 5–6, if Belua succeeds at her CS test, place one Giant Spider randomly in
-    the room. It may not act on the turn it arrives.
+  source_text: Whenever you roll 5-6 on her behaviour, she tries to summon one of her children. Make a CS test for her, and if she succeeds, place a Giant Spider randomly in the room. That spider may not act on the turn it arrives (it spends its time descending from the roof in a string of cobwebs).
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -678,16 +718,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 242
       printed_page: 240
-      heading: The Tomb — sarcophagus findings
+      heading: Aftermath
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: With Belua and her children slain the heroes examine the sarcophagus and take Queen
-    Araneae’s long black sceptre with a golden spider-shaped head. The sarcophagus also holds 4d100
-    c and three Wonderful Treasures.
+  source_text: With Belua and her children slain, the heroes can carefully examine the sarcophagus. ... At the bottom lies the dried husk of Queen Araneae, clutching a long black sceptre with a golden head shaped like pouncing spider. ... There is 4d100 c and 3 Wonderful Treasures in the sarcophagus.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -700,16 +740,29 @@
       type: boolean
       role: output
       description: Take the sceptre.
-    coin_roll_expression:
-      type: string
-      role: output
-      description: Party coins, printed 4d100.
     wonderful_treasures:
       type: number
       role: output
       description: Three party Wonderful Treasures.
       integer: true
       minimum: 0
+    coin_roll:
+      type: number
+      role: input
+      description: The 4d100 roll for the coins in the sarcophagus.
+      integer: true
+      minimum: 4
+      maximum: 400
+      dice:
+        count: 4
+        sides: 100
+    coins_found:
+      type: number
+      role: output
+      description: Coins found in the sarcophagus.
+      integer: true
+      minimum: 4
+      maximum: 400
   effects:
     - type: set
       target: sceptre_found
@@ -717,10 +770,10 @@
         type: literal
         value: true
     - type: set
-      target: coin_roll_expression
+      target: coins_found
       value:
-        type: literal
-        value: 4d100
+        type: field
+        name: coin_roll
     - type: set
       target: wonderful_treasures
       value:
@@ -747,16 +800,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 242
       printed_page: 240
-      heading: The Tomb — return journey boundary
+      heading: Aftermath
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, Aftermath'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Once done, heroes may leave without walking the whole dungeon because the trek to the
-    surface is eventless. Overland Travel must be done. Once back in Whiteport they receive their
-    reward.
+  source_text: Once done, the heroes may leave the dungeon and head back. There is no need to walk all the way through the dungeon as their trek back to the surface is eventless. The Overland Travel must of course be done. Once back in Whiteport, the heroes receive their reward.
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb
@@ -824,6 +877,8 @@
       pdf_page: 242
       printed_page: 240
       heading: Aftermath
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, Aftermath'
       extraction:
         method: text
         confidence: high
@@ -832,15 +887,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 237
       printed_page: 235
-      heading: Reward
+      heading: Lair of the Spider Queen
+      locator:
+        paragraph: Reward
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Once back in Whiteport, the heroes receive their reward. The campaign opening states
-    1200 c per hero.
+  source_text: 'Once back in Whiteport, the heroes receive their reward. ... Reward: 1200 c per hero.'
   type: scenario_rule
   scope: quest
   quest_id: quest.spider_queen.tomb

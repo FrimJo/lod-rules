@@ -6,7 +6,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: quest setup'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -20,6 +23,10 @@
   scope: quest
   entity_id: background.the_lost_brother
   fields:
+    at_quest_start:
+      type: boolean
+      role: input
+      description: The roll is made at the start of a quest.
     quest_start_roll:
       type: number
       role: input
@@ -30,6 +37,10 @@
       dice:
         count: 1
         sides: 10
+    brother_found:
+      type: boolean
+      role: input
+      description: The brother has already been found, dead or alive; the quest is to find the one brother.
     secondary_card_location:
       type: string
       role: output
@@ -50,14 +61,32 @@
         type: literal
         value: true
   when:
-    type: compare
-    operator: eq
-    left:
-      type: field
-      name: quest_start_roll
-    right:
-      type: literal
-      value: 1
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: at_quest_start
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: quest_start_roll
+        right:
+          type: literal
+          value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: brother_found
+        right:
+          type: literal
+          value: false
   quest_id: quest.background.the_lost_brother
   dependencies:
     - key: lost_brother
@@ -71,7 +100,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: discovery'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -79,13 +111,20 @@
   status: extracted
   confidence: high
   source_text:
-    Once you enter the room, roll 1d100, adding the number of dungeons you have entered. If
-    the result is 60 or higher, you are too late. If the result is lower than 60, your brother is
-    alive, but badly wounded.
+    For this quest, you need to keep track of how many dungeons you have entered. ... Once
+    you enter the room, roll 1d100, adding the number of dungeons you have entered.
   type: scenario_rule
   scope: quest
   entity_id: background.the_lost_brother
   fields:
+    brother_on_next_tile:
+      type: boolean
+      role: input
+      description: The quest-start roll placed the brother on the next tile entered.
+    entered_brother_room:
+      type: boolean
+      role: input
+      description: The hero has entered the room that contains the brother.
     roll:
       type: number
       role: input
@@ -99,15 +138,13 @@
     dungeons_entered:
       type: number
       role: input
-      description: dungeons entered
+      description: Number of dungeons the hero has entered, tracked for this quest.
+      integer: true
+      minimum: 0
     result:
       type: number
       role: output
       description: result
-    brother_alive:
-      type: boolean
-      role: output
-      description: brother alive
   effects:
     - type: set
       target: result
@@ -118,11 +155,112 @@
             name: roll
           - type: field
             name: dungeons_entered
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: brother_on_next_tile
+        right:
+          type: literal
+          value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: entered_brother_room
+        right:
+          type: literal
+          value: true
+  quest_id: quest.background.the_lost_brother
+  dependencies:
+    - key: lost_brother
+      label: The hero’s lost brother
+      object_id: quest_actor.background.lost_brother
+- id: character.background.the_lost_brother.remains_found
+  name: 'The Lost Brother: remains found'
+  section_id: section.backgrounds.6_the_lost_brother
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: If the result is 60 or higher, you are too late and you find the remains of your dear
+    brother on the floor, dead. It seems that he has been dead for some time. Devastated, you must
+    decide if you will leave him where he is, or bring him out of the dungeon and bury him.
+  type: scenario_rule
+  scope: quest
+  entity_id: background.the_lost_brother
+  fields:
+    result:
+      type: number
+      role: input
+      description: Discovery total (1d100 plus dungeons entered).
+    brother_dead:
+      type: boolean
+      role: output
+      description: The brother is found dead.
+    brother_alive:
+      type: boolean
+      role: output
+      description: brother alive
+    burial_choice:
+      type: string
+      role: input
+      description: The hero's decision, leave him where he is or bring him out and bury him.
+    burying_brother:
+      type: boolean
+      role: output
+      description: The hero chose to carry the body for burial.
+  effects:
+    - type: set
+      target: brother_dead
+      value:
+        type: literal
+        value: true
     - type: set
       target: brother_alive
       value:
         type: literal
         value: false
+    - type: choice
+      selection: burial_choice
+      options:
+        - id: leave
+          effects:
+            - type: set
+              target: burying_brother
+              value:
+                type: literal
+                value: false
+        - id: bury
+          effects:
+            - type: set
+              target: burying_brother
+              value:
+                type: literal
+                value: true
+  when:
+    type: compare
+    operator: gte
+    left:
+      type: field
+      name: result
+    right:
+      type: literal
+      value: 60
   quest_id: quest.background.the_lost_brother
   dependencies:
     - key: lost_brother
@@ -136,7 +274,21 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: surviving brother'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 142
       extraction:
         method: text
         confidence: high
@@ -167,6 +319,11 @@
       type: boolean
       role: output
       description: movement like heroes
+    representing_monster_card:
+      type: string
+      role: output
+      description: Monster Card that represents the brother. The page prints the civilian Monster
+        Card; changelog 2.21 entry 142 changes it to the Bandit Monster Card.
   effects:
     - type: set
       target: brother_alive
@@ -183,8 +340,13 @@
       value:
         type: literal
         value: true
+    - type: set
+      target: representing_monster_card
+      value:
+        type: literal
+        value: Bandit Monster Card
     - type: invoke
-      dependency: civilian
+      dependency: monster_card
   when:
     type: compare
     operator: lt
@@ -195,13 +357,15 @@
       type: literal
       value: 60
   dependencies:
-    - key: civilian
-      label: civilian Monster Card
+    - key: monster_card
+      label: Bandit Monster Card (printed as the civilian Monster Card; changelog 2.21 entry 142)
       external_document: bestiary
     - key: lost_brother
       label: The hero’s lost brother
       object_id: quest_actor.background.lost_brother
   quest_id: quest.background.the_lost_brother
+  issues:
+    - issue.backgrounds.lost_brother_monster_card
 - id: character.background.the_lost_brother.death_consequences
   name: 'The Lost Brother: death consequences'
   section_id: section.backgrounds.6_the_lost_brother
@@ -210,7 +374,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: death consequences'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -278,12 +445,15 @@
 - id: character.background.the_lost_brother.carrying_restrictions
   name: 'The Lost Brother: carrying restrictions'
   section_id: section.backgrounds.6_the_lost_brother
-  source: &a1
+  source:
     - document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: carrying restrictions'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -292,8 +462,8 @@
   confidence: high
   source_text:
     If you choose to bury him, you must carry him through the dungeon (of course letting go
-    of him when danger approaches). You cannot carry anything else you find (you may not search for
-    treasures, or carry anything your comrades find).
+    of him when danger approaches). The downside of this is that you cannot carry anything else you
+    find (you may not search for treasures, or carry anything your comrades find).
   type: scenario_rule
   scope: quest
   entity_id: background.the_lost_brother
@@ -366,7 +536,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: bury outside'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -374,7 +547,7 @@
   status: extracted
   confidence: high
   source_text: Once outside, you have a short ceremony and lay him to rest in a nearby meadow. You
-    gain +10 RES permanently.
+    gain + 10 RES permanently.
   type: scenario_rule
   scope: quest
   entity_id: background.the_lost_brother
@@ -430,7 +603,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: rescue reward'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -507,7 +683,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: death after rescue'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -533,31 +712,59 @@
       type: boolean
       role: output
       description: apply death result
+    brother_alive:
+      type: boolean
+      role: state
+      description: The rescued brother was alive before he died.
+    brother_dead:
+      type: boolean
+      role: output
+      description: Reverting to the dead-brother result.
   effects:
     - type: set
       target: apply_death_result
       value:
         type: literal
         value: true
+    - type: set
+      target: brother_alive
+      value:
+        type: literal
+        value: false
+    - type: set
+      target: brother_dead
+      value:
+        type: literal
+        value: true
   when:
-    type: any
+    type: all
     conditions:
       - type: compare
         operator: eq
         left:
           type: field
-          name: died_in_dungeon
+          name: brother_alive
         right:
           type: literal
           value: true
-      - type: compare
-        operator: eq
-        left:
-          type: field
-          name: died_in_skirmish
-        right:
-          type: literal
-          value: true
+      - type: any
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: died_in_dungeon
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: died_in_skirmish
+            right:
+              type: literal
+              value: true
   quest_id: quest.background.the_lost_brother
   dependencies:
     - key: lost_brother
@@ -571,7 +778,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 44
       printed_page: 42
-      heading: 'The Lost Brother: skirmish body exception'
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -614,7 +824,19 @@
 - id: character.background.the_lost_brother.release_body_at_danger
   name: 'The Lost Brother: release the body when danger approaches'
   section_id: section.backgrounds.6_the_lost_brother
-  source: *a1
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 44
+      printed_page: 42
+      section: Backgrounds
+      heading: 6. The Lost Brother
+      locator:
+        paragraph: Personal Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
   status: extracted
   confidence: high
   source_text:

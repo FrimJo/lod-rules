@@ -6,20 +6,32 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 222
       printed_page: 220
-      heading: Reading the Quests; Triggering Wandering Monsters
+      heading: Reading the Quests
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 222
+      printed_page: 220
+      heading: Triggering Wandering Monsters
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'Actual owned quest occurrence controls reading permission: objective room reached
-    permits text to second border and actual task completion permits aftermath. Actual aftermath
-    finding is distinct from tile-drawn treasure and may be looted off table without traps/locks;
-    findings/collection and resource accounting are separately supplied. Consume each actual
-    chronological Threat change once and apply the printed exact-threshold/upward rule, including
-    falling below and reaching it again. Special placement does not reduce Threat. General
-    individual repeatability is a handoff to acceptance eligibility for a distinct occurrence.'
+  source_text:
+    Within each quest there are border lines dividing the information. Do not read further
+    than the first border line, or you will encounter spoilers. Once you reach the Quest Room, you
+    may read until the second line and, once the quest is complete, you can read the last part. In
+    some cases, the aftermath includes some findings, such as treasure chests found by the party.
+    These may be in excess of those drawn on the tiles, and everything found in the aftermath can be
+    looted ‘off table’, with no traps or locks. Individual quests can generally be played several
+    times with the same party. ... Some quests will say that when the Threat Level reaches ‘XX’, a
+    Wandering Monster appears. This happens every time the Threat Level is increased to XX and the
+    Threat Level is not decreased when the Wandering Monster is placed.
   fields:
     quest_room_reached:
       type: boolean
@@ -132,8 +144,8 @@
     - id: reading
       source: *a1
       source_text:
-        Read only the currently permitted source boundaries; completion is supplied from the
-        actual quest.
+        Once you reach the Quest Room, you may read until the second line and, once the quest
+        is complete, you can read the last part.
       when:
         type: all
         conditions:
@@ -159,8 +171,9 @@
     - id: aftermath
       source: *a1
       source_text:
-        Actual completed-quest aftermath finding has separate once-only off-table handoff;
-        request never credits purse or consumes another finding.
+        In some cases, the aftermath includes some findings, such as treasure chests found by
+        the party. These may be in excess of those drawn on the tiles, and everything found in the
+        aftermath can be looted ‘off table’, with no traps or locks.
       when:
         type: all
         conditions:
@@ -224,9 +237,7 @@
             value: true
     - id: threshold
       source: *a1
-      source_text:
-        Each actual chronological source Threat change consumes once; upward arrival at exactXX
-        can trigger again after falling below.
+      source_text: This happens every time the Threat Level is increased to XX
       when:
         type: all
         conditions:
@@ -275,8 +286,8 @@
         - id: monster
           source: *a1
           source_text:
-            Actual triggered special placement requests a monster without reducing Threat or
-            fabricating encounter outcome.
+            Some quests will say that when the Threat Level reaches ‘XX’, a Wandering Monster
+            appears. ... the Threat Level is not decreased when the Wandering Monster is placed.
           when:
             type: compare
             operator: eq
@@ -291,3 +302,12 @@
               dependency: monster
   entry_step: reading
   exit_step: threshold
+  unresolved_references:
+    - 'Reading permission follows the actual quest occurrence: reaching the Quest Room permits text
+      to the second border, completing the quest permits the aftermath.'
+    - An aftermath finding is handed off once and is distinct from tile-drawn treasure; its
+      collection and any resource accounting are supplied by the caller, not credited here.
+    - Each actual Threat change is consumed once in chronological order; falling below XX and
+      increasing back to XX triggers again, as the printed example shows.
+    - General individual repeatability is handed to acceptance eligibility for a distinct quest
+      occurrence (procedure.quest_acceptance).

@@ -6,7 +6,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 47
       printed_page: 45
-      heading: 'Revenge: hate'
+      section: Backgrounds
+      heading: 16. Revenge
+      locator:
+        paragraph: Talent
       extraction:
         method: text
         confidence: high
@@ -42,7 +45,10 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 47
       printed_page: 45
-      heading: 'Revenge: recognition'
+      section: Backgrounds
+      heading: 16. Revenge
+      locator:
+        paragraph: Personal Quest
       extraction:
         method: text
         confidence: high
@@ -68,6 +74,10 @@
       dice:
         count: 1
         sides: 6
+    reward_already_received:
+      type: boolean
+      role: input
+      description: The scarred Minotaur has already been defeated and its reward received; there is no scar left to recognise.
     recognize_scar:
       type: boolean
       role: output
@@ -97,6 +107,14 @@
         right:
           type: literal
           value: 1
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
   quest_id: quest.background.revenge_minotaur
   dependencies:
     - key: quest_enemy
@@ -110,7 +128,21 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 47
       printed_page: 45
-      heading: 'Revenge: reward'
+      section: Backgrounds
+      heading: 16. Revenge
+      locator:
+        paragraph: Personal Quest
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: vonbraus.changelog_2_2x
+      file: source/vonbraus-changelog-2.2x.pdf
+      pdf_page: 23
+      printed_page: null
+      heading: '2.21'
+      locator:
+        row: 143
       extraction:
         method: text
         confidence: high
@@ -130,9 +162,22 @@
       type: boolean
       role: input
       description: beast defeated
+    reward_already_received:
+      type: boolean
+      role: input
+      description: The reward for defeating the scarred Minotaur has already been received.
+    xp:
+      type: number
+      role: state
+      description: Hero XP. The printed amount is blank ("an additional +."); changelog 2.21
+        entry 143 adds 1500XP.
   effects:
-    - type: unresolved
-      issue_id: issue.phase5.minotaur_reward_missing
+    - type: add
+      target: xp
+      value:
+        type: literal
+        value: 1500
+      duration: immediate
   when:
     type: all
     conditions:
@@ -152,7 +197,17 @@
         right:
           type: literal
           value: true
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: reward_already_received
+        right:
+          type: literal
+          value: false
   quest_id: quest.background.revenge_minotaur
+  issues:
+    - issue.phase5.minotaur_reward_missing
   dependencies:
     - key: quest_enemy
       label: The scarred Minotaur

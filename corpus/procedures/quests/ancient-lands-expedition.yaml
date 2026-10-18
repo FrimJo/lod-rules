@@ -7,7 +7,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 263
       printed_page: 261
-      heading: Quests into the Ancient Lands
+      heading: Travelling in the Ancient lands
       extraction:
         method: text
         confidence: high
@@ -18,19 +18,37 @@
       pdf_page: 138
       printed_page: 136
       heading: The Outpost
+      locator:
+        paragraph: Special
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a5
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 138
+      printed_page: 136
+      heading: The Outpost
+      locator:
+        paragraph: Opening description beside the map inset
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+    - &a4
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 263
+      printed_page: 261
+      heading: Reading these quests
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: To enter the Ancient Lands via the Outpost the party must be members of the League of
-    Dungeoneers (play the first campaign to become this). All expeditions into these lands must
-    start from the Outpost, where a toll of 100 c per hero is paid first. Travel there costs 2
-    Movement Points per hex and 2 Rations per day, and a Travel Event roll of 10–12 draws a Desert
-    Event Card. Each of the five quests has two objective rooms, depending on access to the Ancient
-    Lands tiles; read the correct one. Which of the five quests is offered is not printed and stays
-    a supplied choice.
+  source_text: 'To enter these lands via the Outpost, you must be a member of the League of Dungeoneers (Play the first campaign to become this). As described in the main rules, travelling in the Ancient Lands is difficult. Not only does each hex require 2 Movement Points, but each day also requires 2 Rations to accommodate the extra water supplies needed. Using a camel is preferred when traversing these deserts as it reduces the travel time. Furthermore, a Travel Event die roll of 10-12 results in an Event. Use the Desert Event Cards. ... These 5 quests each have 2 different objective rooms, depending on if you have access to the Ancient lands tiles or not. Make sure to read the correct one. ... All expeditions into these lands must start from the outpost by law. ... Toll. If you are to head out to a Quest Site in the Ancient Lands (yellow 1-12), you will have to pay a toll to the King of 100 c per hero first. You must be a member of the league to be allowed to pass.'
   issues:
     - issue.quest.ancient_lands_quest_selection
   fields:
@@ -129,12 +147,12 @@
   steps:
     - id: check_owner
       source: &a2
-        - *a1
-      source_text: Bind a fresh expedition to its expedition; another one cannot change it.
+        - *a5
+      source_text: 'All expeditions into these lands must start from the outpost by law.'
       substeps:
         - id: bind
           source: *a2
-          source_text: A fresh expedition takes the expedition of its first call.
+          source_text: 'All expeditions into these lands must start from the outpost by law.'
           when:
             type: compare
             operator: eq
@@ -152,7 +170,7 @@
                 name: expedition_id
         - id: owner
           source: *a2
-          source_text: Only the bound one continues.
+          source_text: 'All expeditions into these lands must start from the outpost by law.'
           when:
             type: compare
             operator: eq
@@ -176,10 +194,8 @@
             value: false
     - id: quest_choice_unresolved
       source:
-        - *a1
-      source_text:
-        The Quest Book prints no table for which Ancient Lands quest is offered; without a
-        supplied choice the expedition stays open.
+        - *a4
+      source_text: 'These 5 quests each have 2 different objective rooms, depending on if you have access to the Ancient lands tiles or not. Make sure to read the correct one.'
       when:
         type: all
         conditions:
@@ -213,10 +229,9 @@
     - id: depart_from_outpost
       source:
         - *a1
+        - *a5
         - *a3
-      source_text:
-        All expeditions start from The Outpost, and only League members may pass. Pay the toll
-        of 100 c per hero once, then travel under the Ancient Lands costs.
+      source_text: 'To enter these lands via the Outpost, you must be a member of the League of Dungeoneers (Play the first campaign to become this). ... All expeditions into these lands must start from the outpost by law. ... Toll. If you are to head out to a Quest Site in the Ancient Lands (yellow 1-12), you will have to pay a toll to the King of 100 c per hero first. You must be a member of the league to be allowed to pass.'
       when:
         type: all
         conditions:
@@ -255,8 +270,8 @@
       substeps:
         - id: at_outpost
           source:
-            - *a3
-          source_text: The expedition leaves from The Outpost.
+            - *a5
+          source_text: 'All expeditions into these lands must start from the outpost by law.'
           when:
             type: compare
             operator: eq
@@ -276,7 +291,7 @@
           source:
             - *a1
             - *a3
-          source_text: You must be a member of the League of Dungeoneers to be allowed to pass.
+          source_text: 'To enter these lands via the Outpost, you must be a member of the League of Dungeoneers (Play the first campaign to become this). ... You must be a member of the league to be allowed to pass.'
           when:
             type: compare
             operator: eq
@@ -293,7 +308,7 @@
           source:
             - *a3
             - *a1
-          source_text: A League member party at The Outpost pays the toll first, once, if it can.
+          source_text: 'Toll. If you are to head out to a Quest Site in the Ancient Lands (yellow 1-12), you will have to pay a toll to the King of 100 c per hero first.'
           when:
             type: all
             conditions:
@@ -317,9 +332,7 @@
             - id: ancient_travel_costs
               source:
                 - *a1
-              source_text:
-                Each hex requires 2 Movement Points and each day 2 Rations; a camel reduces travel
-                time.
+              source_text: 'As described in the main rules, travelling in the Ancient Lands is difficult. Not only does each hex require 2 Movement Points, but each day also requires 2 Rations to accommodate the extra water supplies needed. Using a camel is preferred when traversing these deserts as it reduces the travel time.'
               when:
                 type: compare
                 operator: eq
@@ -378,10 +391,8 @@
                 value: 100
     - id: read_objective
       source:
-        - *a1
-      source_text:
-        Each quest has two objective rooms, depending on access to the Ancient Lands tiles.
-        Read the correct one, once per occurrence.
+        - *a4
+      source_text: 'These 5 quests each have 2 different objective rooms, depending on if you have access to the Ancient lands tiles or not. Make sure to read the correct one.'
       when:
         type: all
         conditions:
@@ -428,3 +439,10 @@
             value: true
   entry_step: check_owner
   exit_step: read_objective
+  unresolved_references:
+    - 'Structural reading, not printed text: the procedure binds one accepted Ancient Lands quest
+      occurrence and never rebinds it. Which of the five quests is offered is not printed; without a
+      supplied choice the expedition stays open (issue.quest.ancient_lands_quest_selection). A League
+      member party departs from The Outpost, pays the toll of 100 c per hero once when it can, and
+      then travels under the Ancient Lands costs. At the objective it reads the Ancient Lands tiles
+      or the standard objective room version once per occurrence.'

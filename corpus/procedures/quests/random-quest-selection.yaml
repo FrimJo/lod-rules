@@ -13,12 +13,10 @@
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    To embark on a Random Quest, first roll on the table to determine the Objective Room (6 means
-    roll again). Once that is determined, consult the corresponding chapter and roll which quest to
-    embark upon. These quests can be played over and over. One selection belongs to one random
-    quest offer; the room, once rolled, is kept. The second-stage die is not printed, so the
-    chapter quest is a supplied outcome. Acceptance, departure and the quest itself are separate.
+  source_text: To embark on a Random Quest, you must first roll on the table below to determine the
+    Objective Room. Once that is determined, consult the corresponding chapter and roll which quest
+    to embark upon. These quests can be played over and over as the layout of the dungeons shifts
+    and the difficulty increases as the heroes gain levels.
   issues:
     - issue.quest.random_quest_second_stage
   fields:
@@ -26,8 +24,8 @@
       type: string
       role: input
       description:
-        Actual random quest offer from the settlement visit (procedure.settlement_arrival). A new
-        offer, including a later repeat of the same quest, starts a fresh selection.
+        Actual random quest offer from the settlement visit (procedure.settlement_arrival). A
+        new offer, including a later repeat of the same quest, starts a fresh selection.
     selection_offer_id:
       type: string
       role: state
@@ -99,8 +97,8 @@
     - id: check_owner
       source: *a1
       source_text:
-        Bind a fresh selection to its offer. A call for another offer cannot roll, select or hand
-        off this one.
+        To embark on a Random Quest, you must first roll on the table below to determine the
+        Objective Room.
       effects:
         - type: set
           target: owner_matches
@@ -115,7 +113,9 @@
       substeps:
         - id: bind_offer
           source: *a1
-          source_text: A fresh selection takes the offer of its first call.
+          source_text:
+            To embark on a Random Quest, you must first roll on the table below to determine the
+            Objective Room.
           when:
             type: compare
             operator: eq
@@ -133,7 +133,9 @@
                 name: offer_id
         - id: owner
           source: *a1
-          source_text: Only the bound offer continues.
+          source_text:
+            To embark on a Random Quest, you must first roll on the table below to determine the
+            Objective Room.
           when:
             type: compare
             operator: eq
@@ -152,8 +154,8 @@
     - id: roll_objective_room
       source: *a1
       source_text:
-        First roll on the table to determine the Objective Room. A 6 means roll again; only the
-        first 1–5 result selects the room.
+        To embark on a Random Quest, you must first roll on the table below to determine the
+        Objective Room. ... 6 Roll Again
       when:
         type: all
         conditions:
@@ -184,7 +186,9 @@
       substeps:
         - id: keep_room
           source: *a1
-          source_text: Once the Objective Room is determined, it is kept for this offer.
+          source_text:
+            Once that is determined, consult the corresponding chapter and roll which quest to
+            embark upon.
           when:
             type: compare
             operator: lte
@@ -202,9 +206,7 @@
                 value: true
     - id: second_stage_unresolved
       source: *a1
-      source_text:
-        Consult the corresponding chapter and roll which quest to embark upon. No die or mapping is
-        printed, so without a supplied result the chapter quest stays open.
+      source_text: consult the corresponding chapter and roll which quest to embark upon.
       when:
         type: all
         conditions:
@@ -245,9 +247,7 @@
           issue_id: issue.quest.random_quest_second_stage
     - id: select_chapter_quest
       source: *a1
-      source_text:
-        Keep the supplied chapter quest once, only if it belongs to the selected Objective Room
-        chapter.
+      source_text: consult the corresponding chapter and roll which quest to embark upon.
       when:
         type: all
         conditions:
@@ -311,9 +311,7 @@
             value: false
     - id: acceptance_handoff
       source: *a1
-      source_text:
-        Hand the selected quest to the party's acceptance once. The handoff does not accept,
-        depart or start the quest.
+      source_text: roll which quest to embark upon.
       when:
         type: all
         conditions:
@@ -351,3 +349,12 @@
           dependency: acceptance
   entry_step: check_owner
   exit_step: acceptance_handoff
+  unresolved_references:
+    - One selection belongs to one random quest offer; a later offer, including a repeat of the same
+      quest, starts a fresh selection.
+    - A result of 6 (Roll Again) rolls the table again; the first 1–5 result selects the Objective
+      Room and is kept for the offer.
+    - The page prints no die or result mapping for the second-stage chapter quest roll, so the
+      chapter quest is a supplied outcome (issue.quest.random_quest_second_stage).
+    - Acceptance, departure and the quest itself are separate procedures; the handoff does not
+      accept or start the quest.

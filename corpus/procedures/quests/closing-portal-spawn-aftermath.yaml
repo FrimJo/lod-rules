@@ -6,21 +6,30 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 257
       printed_page: 255
-      heading: Closing the Portal — every-other-turn spawning
+      section: 'Quest 3: Closing the Portal'
+      heading: Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      section: 'Quest 3: Closing the Portal'
+      heading: 'Special Rules:'
+      locator:
+        table: 'Uncaptioned 1d6 Demons table under the Special Rules: entry'
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Every other turn one demon emerges while the portal is open.
-    Require actual supplied schedule and chronological event ordering; no first
-    phase/modulo convention or same-turn closure priority is invented. Consume
-    an actual new spawn event once, then resolve its type d6 only. Group
-    quantities never apply. A type handoff is not a roll; a pending
-    already-emerged demon may receive its type after closure without spawning
-    another. Never overwrite a pending earlier event with a later spawn.
-    Statistics, placement and battle are separately owned.
+  source_text:
+    'Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+    what kind it is. ... Special Rules: All encounter results of even 10s (10, 20, 30…) result in an
+    encounter with random demons. ... 1d6 | Demons'
   fields:
     instance_quest_id:
       type: string
@@ -29,8 +38,9 @@
     portal_owner_matches:
       type: boolean
       role: input
-      description: Actual party/quest occurrence and event ownership confirmed; never
-        reassign another occurrence state.
+      description:
+        Actual party/quest occurrence and event ownership confirmed; never reassign another
+        occurrence state.
     portal_open:
       type: boolean
       role: input
@@ -38,8 +48,9 @@
     spawn_turn_supplied:
       type: boolean
       role: input
-      description: Supplied every-other-turn schedule; the source gives no first spawn
-        phase or ordering within the turn.
+      description:
+        Supplied every-other-turn schedule; the source gives no first spawn phase or ordering
+        within the turn.
     demons_spawned:
       type: number
       role: output
@@ -53,42 +64,45 @@
     spawn_schedule_context_resolved:
       type: boolean
       role: input
-      description: Actual schedule/ordering context or actual selected type available;
-        no first phase or closure priority inferred.
+      description:
+        Actual schedule/ordering context or actual selected type available; no first phase or
+        closure priority inferred.
     spawn_type_supplied:
       type: boolean
       role: input
-      description: Actual schedule/ordering context or actual selected type available;
-        no first phase or closure priority inferred.
+      description:
+        Actual schedule/ordering context or actual selected type available; no first phase or
+        closure priority inferred.
     spawn_pending:
       type: boolean
       role: state
-      description: Owned chronological spawn marker; reset only when an actual new
-        event is accepted.
+      description: Owned chronological spawn marker; reset only when an actual new event is accepted.
     spawn_type_request_processed:
       type: boolean
       role: state
-      description: Owned chronological spawn marker; reset only when an actual new
-        event is accepted.
+      description: Owned chronological spawn marker; reset only when an actual new event is accepted.
     actual_spawn_turn:
       type: number
       role: input
-      description: Actual chronological event index for this occurrence; last starts0
-        and persists across replay/closure.
+      description:
+        Actual chronological event index for this occurrence; last starts at 0 and persists across
+        replay/closure.
       integer: true
       minimum: 1
     last_spawn_turn:
       type: number
       role: state
-      description: Actual chronological event index for this occurrence; last starts0
-        and persists across replay/closure.
+      description:
+        Actual chronological event index for this occurrence; last starts at 0 and persists across
+        replay/closure.
       integer: true
       minimum: 0
     pending_spawn_turn:
       type: number
       role: state
-      description: Actual chronological event index for this occurrence; last starts0
-        and persists across replay/closure.
+      description:
+        Actual chronological event index for this occurrence; last starts at 0 and persists across
+        replay/closure.
       integer: true
       minimum: 0
     actual_spawn_type_roll:
@@ -127,7 +141,9 @@
   steps:
     - id: unresolved_schedule
       source: *a1
-      source_text: Unresolved schedule/within-turn ordering cannot create a spawn.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is.
       when:
         type: all
         conditions:
@@ -198,8 +214,9 @@
           issue_id: issue.quest.portal_ritual_boundaries
     - id: single_spawn
       source: *a1
-      source_text: Every other turn, 1 more demon pops out of the bubble. Use the same
-        table to randomise what kind it is.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is.
       when:
         type: all
         conditions:
@@ -237,7 +254,9 @@
             value: false
     - id: request_type
       source: *a1
-      source_text: Request the missing type once for this already-emerged single demon.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is.
       when:
         type: all
         conditions:
@@ -287,8 +306,9 @@
           dependency: type
     - id: actual_type
       source: *a1
-      source_text: Resolve supplied type-only d6 to owned state, without reading group
-        quantity.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is. ... 1d6 | Demons
       when:
         type: all
         conditions:
@@ -309,7 +329,9 @@
             name: actual_spawn_type_roll
     - id: type_1
       source: *a1
-      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is. ... 1d6 | Demons ... 1-4 | 1d6 Lesser Plague Demons, no weapon, Armour 0.
       when:
         type: all
         conditions:
@@ -350,7 +372,9 @@
             value: false
     - id: type_2
       source: *a1
-      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is. ... 1d6 | Demons ... 5 | 1d3 Blood Demons with Cursed Weapons, Armour 0.
       when:
         type: all
         conditions:
@@ -381,7 +405,9 @@
             value: false
     - id: type_3
       source: *a1
-      source_text: Apply selected source type/equipment/Armour0 only; one demon remains one.
+      source_text:
+        Every other turn, 1 more demon pops out of the bubble. Use the same table to randomise
+        what kind it is. ... 1d6 | Demons ... 6 | 1d3 Plague Demons with Cursed Weapons, Armour 0.
       when:
         type: all
         conditions:
@@ -414,6 +440,20 @@
     - issue.quest.portal_ritual_boundaries
   entry_step: unresolved_schedule
   exit_step: type_3
+  unresolved_references:
+    - 'Structural reading, not printed text: Every other turn one demon emerges while the portal is
+      open. Require actual supplied schedule and chronological event ordering; no first phase/modulo
+      convention or same-turn closure priority is invented. Consume an actual new spawn event once,
+      then resolve its type d6 only. Group quantities never apply. A type handoff is not a roll; a
+      pending already-emerged demon may receive its type after closure without spawning another.
+      Never overwrite a pending earlier event with a later spawn. Statistics, placement and battle
+      are separately owned. Step unresolved_schedule: Unresolved schedule/within-turn ordering
+      cannot create a spawn. Step request_type: Request the missing type once for this
+      already-emerged single demon. Step actual_type: Resolve supplied type-only d6 to owned state,
+      without reading group quantity. Step type_1: Apply selected source type/equipment/Armour 0
+      only; one demon remains one. Step type_2: Apply selected source type/equipment/Armour 0 only;
+      one demon remains one. Step type_3: Apply selected source type/equipment/Armour 0 only; one
+      demon remains one.'
 - id: procedure.closing_portal_aftermath
   name: Closing the Portal final-demon treasure and outside hero reward
   section_id: section.quest_book_i.the_chamber_of_reverence.quest_3_closing_the_portal
@@ -422,7 +462,8 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 257
       printed_page: 255
-      heading: Once the portal is closed, all demons must be killed.
+      section: 'Quest 3: Closing the Portal'
+      heading: Special Rules
       extraction:
         method: text
         confidence: high
@@ -431,20 +472,19 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 258
       printed_page: 256
-      heading: Closing the Portal — objective loot
+      section: 'Quest 3: Closing the Portal'
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: After actual closure and the final demon slain, reveal two
-    unlocked/untrapped objective chests and request their Treasure Table
-    outcomes once. The request does not fabricate contents or collect them. Back
-    outside after success, credit the promised300c once to each actually owned
-    hero; party treasure markers and per-hero reward markers are distinct. No
-    generic quest completion/abandonment, dead/missing hero entitlement, XP or
-    additional loot amount is inferred.
+  source_text: 'Once the portal is closed, all demons must be killed. ... As the final demon is
+    slayed, the party can finally take a short breather. Looking around the chamber they notice 2
+    objective chests that they loot (unlocked, not trapped, just roll on the Treasure Tables). ...
+    Reward: 300 c per hero. ... Once back in the fresh air again, they are greeted by the wizard and
+    the Jarl, both thankful for their effort, and receive the promised reward.'
   fields:
     instance_quest_id:
       type: string
@@ -453,8 +493,9 @@
     portal_owner_matches:
       type: boolean
       role: input
-      description: Actual party/quest occurrence and event ownership confirmed; never
-        reassign another occurrence state.
+      description:
+        Actual party/quest occurrence and event ownership confirmed; never reassign another
+        occurrence state.
     portal_closed:
       type: boolean
       role: input
@@ -496,38 +537,37 @@
     portal_loot_processed:
       type: boolean
       role: state
-      description: Persist once per actual party/quest occurrence; hero rewards do not
-        reset party loot.
+      description: Persist once per actual party/quest occurrence; hero rewards do not reset party loot.
     portal_treasure_request_processed:
       type: boolean
       role: state
-      description: Persist once per actual party/quest occurrence; hero rewards do not
-        reset party loot.
+      description: Persist once per actual party/quest occurrence; hero rewards do not reset party loot.
     portal_reward_processed:
       type: boolean
       role: state
-      description: Persist once per actual hero/quest occurrence; every hero has
-        independently owned reward state.
+      description: Persist once per actual hero/quest occurrence; every hero has independently owned
+        reward state.
     portal_reward_owner_matches:
       type: boolean
       role: input
-      description: Actual rewarded hero and quest occurrence confirmed;
-        missing/dead/replacement entitlement is not inferred.
+      description: Actual rewarded hero and quest occurrence confirmed; missing/dead/replacement
+        entitlement is not inferred.
     coins:
       type: number
       role: state
-      description: Actual owned rewarded hero coins; add300 once, no party multiplication.
+      description: Actual owned rewarded hero coins; add 300 once, no party multiplication.
       integer: true
       minimum: 0
   dependencies:
     - key: treasure
-      label: Actual two objective-chest Treasure Table outcomes; handoff is not
-        contents/collection
+      label: Actual two objective-chest Treasure Table outcomes; handoff is not contents/collection
   steps:
     - id: loot
       source: *a5
-      source_text: As the final demon is slayed, heroes loot 2 objective chests
-        (unlocked, not trapped, just roll on the Treasure Tables).
+      source_text:
+        Once the portal is closed, all demons must be killed. ... As the final demon is slayed,
+        the party can finally take a short breather. Looking around the chamber they notice 2
+        objective chests that they loot (unlocked, not trapped, just roll on the Treasure Tables).
       when:
         type: all
         conditions:
@@ -594,8 +634,9 @@
             value: true
     - id: treasure_handoff
       source: *a5
-      source_text: Request two actual unlocked/untrapped objective-chest outcomes once
-        without inventing contents.
+      source_text:
+        Looking around the chamber they notice 2 objective chests that they loot (unlocked, not
+        trapped, just roll on the Treasure Tables).
       when:
         type: all
         conditions:
@@ -638,7 +679,8 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 257
           printed_page: 255
-          heading: 'Reward: 300 c per hero'
+          section: 'Quest 3: Closing the Portal'
+          heading: 'Reward:'
           extraction:
             method: text
             confidence: high
@@ -647,13 +689,15 @@
           file: source/Rulebook-2nd-printing-ENGa.pdf
           pdf_page: 258
           printed_page: 256
-          heading: Closing the Portal — outside reward
+          section: 'Quest 3: Closing the Portal'
+          heading: Aftermath
           extraction:
             method: text
             confidence: high
             visually_verified: true
-      source_text: Once back in the fresh air again, the wizard and Jarl give the
-        promised reward (300 c per hero).
+      source_text:
+        'Reward: 300 c per hero. ... Once back in the fresh air again, they are greeted by the
+        wizard and the Jarl, both thankful for their effort, and receive the promised reward.'
       when:
         type: all
         conditions:
@@ -711,3 +755,14 @@
     - issue.quest.portal_aftermath_scope
   entry_step: loot
   exit_step: hero_reward
+  unresolved_references:
+    - 'Structural reading, not printed text: After actual closure and the final demon slain, reveal
+      two unlocked/untrapped objective chests and request their Treasure Table outcomes once. The
+      request does not fabricate contents or collect them. Back outside after success, credit the
+      promised 300 c once to each actually owned hero; party treasure markers and per-hero reward
+      markers are distinct. No generic quest completion/abandonment, dead/missing hero entitlement,
+      XP or additional loot amount is inferred. Step loot: As the final demon is slayed, heroes loot
+      2 objective chests (unlocked, not trapped, just roll on the Treasure Tables). Step
+      treasure_handoff: Request two actual unlocked/untrapped objective-chest outcomes once without
+      inventing contents. Step hero_reward: Once back in the fresh air again, the wizard and Jarl
+      give the promised reward (300 c per hero).'

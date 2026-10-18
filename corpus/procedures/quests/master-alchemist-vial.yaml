@@ -1,0 +1,152 @@
+- id: procedure.master_alchemist_vial_filling
+  name: The Master Alchemist — filling the vial
+  section_id: section.quest_book_i.the_lava_river.quest_2_the_master_alchemist
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: Special Rules
+      locator:
+        paragraph: The Objective Room, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - &a2
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 246
+      printed_page: 244
+      heading: Special Rules
+      locator:
+        table: Uncaptioned DEX Test table (Roll | Result) under The Objective Room, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'To fill the vial, the hero carrying it must spend 2 actions next to the river trying to reach down. Make a DEX Test and consult the table below:'
+  see_also:
+    - section.quest_book_i.the_lava_river.quest_2_the_master_alchemist.table_3
+  issues:
+    - issue.quest.alchemist_vial_results
+  fields:
+    hero_carries_vial:
+      type: boolean
+      role: input
+      description: The hero carries the vial.
+    hero_next_to_river:
+      type: boolean
+      role: input
+      description: The hero is next to the river.
+    filling_cost_actions:
+      type: number
+      role: output
+      description: Two actions, not silently converted into AP.
+      integer: true
+      minimum: 0
+    dex_test_required:
+      type: boolean
+      role: output
+      description: DEX test.
+    selected_vial_result:
+      type: string
+      role: input
+      description: Supplied table result resolving the overlapping printed bounds.
+    dex:
+      type: number
+      role: input
+      description: Hero DEX.
+      integer: true
+      minimum: 0
+    dex_roll:
+      type: number
+      role: input
+      description: Supplied DEX Test result.
+      integer: true
+      minimum: 1
+      maximum: 100
+    vial_filled:
+      type: boolean
+      role: output
+      description: Filled vial.
+    cork_back_in_place:
+      type: boolean
+      role: output
+      description: Cork replaced.
+    valid_filling_attempt_completed:
+      type: boolean
+      role: input
+      description: The vial carrier spent two actions next to the river and made the DEX Test.
+    vial_state_after_burn_unspecified:
+      type: boolean
+      role: output
+      description: Filled/retry status not stated.
+    fire_damage_roll:
+      type: number
+      role: input
+      description: The 1d4 roll for the Fire Damage to the hero’s hand.
+      integer: true
+      minimum: 1
+      maximum: 4
+      dice:
+        count: 1
+        sides: 4
+    fire_damage:
+      type: number
+      role: output
+      description: Points of Fire Damage the hero takes.
+      integer: true
+      minimum: 1
+      maximum: 4
+    vial_dropped:
+      type: boolean
+      role: output
+      description: Dropped vial.
+    vial_sinks_into_lava:
+      type: boolean
+      role: output
+      description: Vial sinks.
+  dependencies: []
+  steps:
+    - id: reach_down
+      source:
+        - *a1
+      source_text: To fill the vial, the hero carrying it must spend 2 actions next to the river trying to reach down. Make a DEX Test
+      effects: []
+      rule_refs:
+        - core.quest.master_alchemist.filling_attempt
+    - id: consult_table
+      source:
+        - *a1
+        - *a2
+      source_text: 'and consult the table below:'
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hero_carries_vial
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hero_next_to_river
+            right:
+              type: literal
+              value: true
+      effects: []
+      rule_refs:
+        - core.quest.master_alchemist.filled
+        - core.quest.master_alchemist.burned
+        - core.quest.master_alchemist.dropped
+  entry_step: reach_down
+  exit_step: consult_table

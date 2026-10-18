@@ -6,18 +6,20 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 224
       printed_page: 222
-      heading: Spring Cleaning — quest setup
+      heading: 'Quest 1: Spring Cleaning'
+      locator:
+        paragraph: Quest Location; Number of Tiles; Encounters; Objective Room
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    'Clear the basement of the Town Hall. Quest Location: in any town. Four corridors (not
-    C16), four rooms (not R17). Quest-specific encounters. Objective Room: R5B. The heroes are free
-    to take anything they find. The Dead Rising campaign starts wherever the heroes are, but the
-    second quest must be started in Silver City.'
+  source_text: 'You have been tasked by the local Town Elder to clear out the basement of the
+    Town Hall. ... The Town elder says that there is nothing of value down there, but that you are
+    free to take anything you find. ... Quest Location: In any town. ... Number of Tiles: 4
+    corridors (not C16), 4 rooms (Not R17). ... Encounters: Quest Specific. ... Objective Room:
+    R5B.'
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -62,14 +64,6 @@
       type: string
       role: output
       description: Printed task; no invented numerical completion condition.
-    campaign_start:
-      type: string
-      role: output
-      description: Campaign opening location statement, distinct from this quest location.
-    second_quest_start:
-      type: string
-      role: output
-      description: Mandatory starting location for the second campaign quest.
   effects:
     - type: set
       target: location
@@ -116,16 +110,6 @@
       value:
         type: literal
         value: clear out the basement of the Town Hall
-    - type: set
-      target: campaign_start
-      value:
-        type: literal
-        value: wherever the heroes are
-    - type: set
-      target: second_quest_start
-      value:
-        type: literal
-        value: Silver City
 - id: core.quest.spring_cleaning.threshold
   name: Spring Cleaning — Threat 12
   section_id: section.quest_book_i.the_dead_rising.quest_1_spring_cleaning
@@ -134,7 +118,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 224
       printed_page: 222
-      heading: Spring Cleaning — Threat 12
+      heading: Special Rules
       extraction:
         method: text
         confidence: high
@@ -147,12 +131,11 @@
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: When Threat reaches 12 a Wandering Monster appears regardless of the Scenario die
-    result. The introduction specifies that such triggers occur on increases to the stated value,
-    not decreases.
+  source_text: 'Special Rules: When the Threat Level reaches 12, a Wandering Monster appears
+    regardless of the Scenario die result.'
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -233,6 +216,9 @@
     - key: threshold_convention
       label: Quest Book I directional Threat convention
       object_id: core.quest_book.threat_threshold_monster
+  unresolved_references:
+    - Upward-only triggering and no Threat reduction on placement follow the Quest Book I Triggering
+      Wandering Monsters rule (PDF 222), applied through core.quest_book.threat_threshold_monster.
 - id: core.quest.spring_cleaning.rest_exception
   name: Spring Cleaning — ration-free rest
   section_id: section.quest_book_i.the_dead_rising.quest_1_spring_cleaning
@@ -241,18 +227,24 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 224
       printed_page: 222
-      heading: Spring Cleaning — ration-free rest
+      heading: Special Rules
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: For this quest only, the party may gain the benefits of Rest without consuming any food rations.
+  source_text: For this quest only, the party may gain the benefits of the ‘Rest’ rule (page 98)
+    without consuming any food rations. But learn from your experience and remember to bring
+    rations, because the gods will not be so friendly next time!
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
   fields:
+    current_quest:
+      type: string
+      role: input
+      description: Quest the party is currently playing; the exception is printed "For this quest only".
     rest_ration_cost:
       type: number
       role: output
@@ -280,6 +272,15 @@
     - key: rest
       label: Ordinary Rest requirements and benefits, subject to the quest ration exception
       object_id: procedure.rest
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: current_quest
+    right:
+      type: literal
+      value: quest.dead_rising.spring_cleaning
 - id: core.quest.spring_cleaning.johann_first_encounter
   name: Spring Cleaning — Johann first encounter
   section_id: section.quest_book_i.the_dead_rising.quest_1_spring_cleaning
@@ -288,14 +289,28 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — Johann first encounter
+      heading: Quest-Specific Encounter Table
+      locator:
+        table: Quest-Specific Encounter Table
+        row: 31-45
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 225
+      printed_page: 223
+      heading: Johann, the Gardener
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Johann can only appear once. Johann uses standard Zombie stats and is unarmed.
+  source_text:
+    31-45 Johann the gardener ... Johann can only appear once. ... Johann uses the standard
+    Zombie stats, and is unarmed.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -377,14 +392,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — replacement encounter
+      heading: Quest-Specific Encounter Table
+      locator:
+        table: Quest-Specific Encounter Table
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: If 31–45 is rolled after Johann has appeared, place 1d4 Giant Rats and 1 Bat swarm instead.
+  source_text: Johann can only appear once. If you end up with 31-45 again then place 1d4 Giant Rats
+    and 1 Batswarm.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -478,15 +496,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — Objective Room setup
+      heading: Setup
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Place 1d10 Rats randomly in the room. Place the Brood Mother as far away as possible
-    from the player. If Johann has not yet been encountered, he is also at the far end of the room.
+  source_text:
+    There are 1d10 Rats in the room (placed randomly), and as far away as possible from the
+    player is the Brood Mother.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -531,6 +550,8 @@
       value:
         type: literal
         value: as far away as possible from the player
+  issues:
+    - issue.quest.spring_cleaning_objective_rats
 - id: core.quest.spring_cleaning.objective_johann
   name: Spring Cleaning — Johann in Objective Room
   section_id: section.quest_book_i.the_dead_rising.quest_1_spring_cleaning
@@ -539,7 +560,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — Johann in Objective Room
+      heading: Setup
       extraction:
         method: text
         confidence: high
@@ -601,14 +622,26 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — previously encountered Johann
+      heading: Quest-Specific Encounter Table
+      locator:
+        table: Quest-Specific Encounter Table
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 225
+      printed_page: 223
+      heading: Setup
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Johann can only appear once; Objective Room includes Johann only if he has not been encountered.
+  source_text: Johann can only appear once. ... If the party has not encountered Johann yet, he is
+    also at the far end of the room.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -645,15 +678,16 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 225
       printed_page: 223
-      heading: Spring Cleaning — Brood Mother abilities
+      heading: The Brood Mother
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: 'XP: 115. The Brood Mother causes Fear. When her bite causes a wound, it may also
-    infect the bitten with a disease.'
+  source_text:
+    'XP: 115 ... The Brood Mother is such an abomination that she causes Fear. Furthermore,
+    when her bite causes a wound, it may also infect the bitten with a disease.'
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning
@@ -703,7 +737,7 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 224
       printed_page: 222
-      heading: Spring Cleaning — reward schedule
+      heading: Reward
       extraction:
         method: text
         confidence: high
@@ -735,15 +769,17 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 226
       printed_page: 224
-      heading: Spring Cleaning — aftermath gifts and destination
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
-        visually_verified: false
+        visually_verified: true
   status: extracted
   confidence: high
-  source_text: The party is offered 50 c extra per hero as gratitude for finding Johann, and 10
-    rations to use on the road. Head to Silver City to continue the campaign.
+  source_text: Before parting, the party is offered 50 c extra per hero as gratitude for finding
+    Johann. The Town Elder recommends that the party heads to Silver City. ... To further help the
+    party on their journey, he offers them 10 rations to use on the road. Head to Silver City to
+    continue the campaign.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.spring_cleaning

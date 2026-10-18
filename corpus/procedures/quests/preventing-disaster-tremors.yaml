@@ -1,0 +1,168 @@
+- id: procedure.preventing_disaster_tremors
+  name: Preventing a Disaster — tremors in the Objective Room
+  section_id: section.quest_book_i.the_lava_river.quest_3_preventing_a_disaster
+  source:
+    - &a1
+      document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 247
+      printed_page: 245
+      heading: Special Rules
+      locator:
+        paragraph: The Objective Room, Special Rules
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'The tremors are very noticeable in this room. If the Scenario die ends up 1-2 do the following: Each character must make a test for DEX. Any hero that fails the test is toppled by the shaking ground. That hero must spend their next action standing up, which also requires a DEX Test. The hero may try once per action (that is twice per turn). If still lying down when the Undead attack, the Undead receive the Standard Bonus for attacking someone lying down. The Undead are so used to the tremors that they are unaffected.'
+  fields:
+    tremors_active:
+      type: boolean
+      role: input
+      description: Tremors still active.
+    in_objective_room:
+      type: boolean
+      role: input
+      description: In the stated Objective Room.
+    scenario_roll:
+      type: number
+      role: input
+      description: Supplied Scenario die result.
+      integer: true
+      minimum: 1
+      maximum: 10
+    each_character_dex_test_required:
+      type: boolean
+      role: output
+      description: Each character tests, subject to explicit Undead exemption.
+    undead_unaffected:
+      type: boolean
+      role: output
+      description: Undead exempt.
+    hero_failed_tremor_dex_test:
+      type: boolean
+      role: input
+      description: Hero failed the required tremor DEX test.
+    hero_toppled:
+      type: boolean
+      role: output
+      description: Hero is toppled.
+    next_action_required:
+      type: string
+      role: output
+      description: Next action standing DEX test.
+    hero_still_lying:
+      type: boolean
+      role: input
+      description: Hero is still lying down.
+    standing_attempts_per_action:
+      type: number
+      role: output
+      description: Once per action.
+      integer: true
+      minimum: 0
+    standing_attempts_per_turn:
+      type: number
+      role: output
+      description: Twice per turn.
+      integer: true
+      minimum: 0
+    standing_requires_dex_test:
+      type: boolean
+      role: output
+      description: DEX required.
+    undead_attack_bonus_against_lying_hero:
+      type: string
+      role: output
+      description: Printed Standard Bonus pointer, no invented value.
+  dependencies: []
+  steps:
+    - id: scenario_die
+      source:
+        - *a1
+      source_text: 'If the Scenario die ends up 1-2 do the following: Each character must make a test for DEX. ... The Undead are so used to the tremors that they are unaffected.'
+      effects: []
+      rule_refs:
+        - core.quest.preventing_disaster.tremor_event
+    - id: toppled
+      source:
+        - *a1
+      source_text: Any hero that fails the test is toppled by the shaking ground. That hero must spend their next action standing up, which also requires a DEX Test.
+      when:
+        type: all
+        conditions:
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: tremors_active
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: in_objective_room
+            right:
+              type: literal
+              value: true
+          - type: compare
+            operator: lte
+            left:
+              type: field
+              name: scenario_roll
+            right:
+              type: literal
+              value: 2
+      effects: []
+      rule_refs:
+        - core.quest.preventing_disaster.toppled
+    - id: standing_up
+      source:
+        - *a1
+      source_text: The hero may try once per action (that is twice per turn). If still lying down when the Undead attack, the Undead receive the Standard Bonus for attacking someone lying down.
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: tremors_active
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: in_objective_room
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: lte
+                left:
+                  type: field
+                  name: scenario_roll
+                right:
+                  type: literal
+                  value: 2
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: hero_failed_tremor_dex_test
+            right:
+              type: literal
+              value: true
+      effects: []
+      rule_refs:
+        - core.quest.preventing_disaster.standing_attempt
+  entry_step: scenario_die
+  exit_step: standing_up

@@ -6,18 +6,21 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 236
       printed_page: 234
-      heading: The Dead Rising — campaign aftermath
+      section: The Dead Rising
+      heading: Campaign aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text:
-    In Silver City the High Wizard recognises Ancient Lands symbols on the dagger and takes
-    it away for investigation. At dinner the Jarl presents each hero with a box containing 1000 c.
-    High King Logan III requests enlistment into the League of Dungeoneers and Royal expeditions
-    into the Ancient Lands.
+  source_text: The Jarl greets the heroes in the city, commending their actions and invites them to
+    dine with him. The High Wizard of the city recognises the engravings on the dagger as symbols
+    from the Ancient Lands and takes it away for further investigation. ... During the dinner, the
+    Jarl presents each of them with a small box containing 1000 c. He also informs them that their
+    exploits have been noticed and that High King Logan III has requested him to enlist them into
+    the League of Dungeoneers. They are to head into the Ancient Lands on some of the first Royal
+    expeditions south in 500 years.
   type: scenario_rule
   scope: quest
   quest_id: quest.dead_rising.campaign
@@ -91,3 +94,148 @@
     - key: engraved_dagger
       label: Master’s engraved dagger
       object_id: equipment.quest.master_engraved_dagger
+- id: core.quest.dead_rising_campaign.start
+  name: The Dead Rising — campaign start
+  section_id: section.quest_book_i.the_dead_rising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 224
+      printed_page: 222
+      heading: The Dead Rising
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This campaign starts wherever the heroes are, but the second quest must be started in Silver City.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.campaign
+  fields:
+    campaign_quest_number:
+      type: number
+      role: input
+      description: Position in the campaign of the quest about to be started (1 for Quest 1, 2 for Quest 2).
+      integer: true
+      minimum: 1
+    current_settlement:
+      type: string
+      role: input
+      description: Settlement where the party is when starting that quest; silver_city for Silver City, the same encoding procedure.dead_rising_campaign uses.
+    campaign_start_location:
+      type: string
+      role: output
+      description: Where the campaign may start.
+    required_start_settlement:
+      type: string
+      role: output
+      description: Settlement where the second quest must be started.
+    quest_start_allowed:
+      type: boolean
+      role: output
+      description: Whether this quest may be started here under the campaign start rule.
+  effects:
+    - type: set
+      target: campaign_start_location
+      value:
+        type: literal
+        value: wherever the heroes are
+    - type: set
+      target: required_start_settlement
+      value:
+        type: literal
+        value: Silver City
+    - type: set
+      target: quest_start_allowed
+      value:
+        type: literal
+        value: true
+  when:
+    type: any
+    conditions:
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: campaign_quest_number
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: current_settlement
+        right:
+          type: literal
+          value: silver_city
+- id: core.quest.dead_rising_campaign.start_elsewhere
+  name: The Dead Rising — second quest outside Silver City
+  section_id: section.quest_book_i.the_dead_rising
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 224
+      printed_page: 222
+      heading: The Dead Rising
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: This campaign starts wherever the heroes are, but the second quest must be started in Silver City.
+  type: scenario_rule
+  scope: quest
+  quest_id: quest.dead_rising.campaign
+  fields:
+    campaign_quest_number:
+      type: number
+      role: input
+      description: Position in the campaign of the quest about to be started.
+      integer: true
+      minimum: 1
+    current_settlement:
+      type: string
+      role: input
+      description: Settlement where the party is when starting that quest; silver_city for Silver City, the same encoding procedure.dead_rising_campaign uses.
+    required_start_settlement:
+      type: string
+      role: output
+      description: Settlement where the second quest must be started.
+    quest_start_allowed:
+      type: boolean
+      role: output
+      description: The second quest cannot be started outside Silver City.
+  effects:
+    - type: set
+      target: required_start_settlement
+      value:
+        type: literal
+        value: Silver City
+    - type: set
+      target: quest_start_allowed
+      value:
+        type: literal
+        value: false
+  when:
+    type: all
+    conditions:
+      - type: compare
+        operator: eq
+        left:
+          type: field
+          name: campaign_quest_number
+        right:
+          type: literal
+          value: 2
+      - type: compare
+        operator: ne
+        left:
+          type: field
+          name: current_settlement
+        right:
+          type: literal
+          value: silver_city

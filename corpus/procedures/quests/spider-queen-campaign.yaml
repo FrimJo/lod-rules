@@ -12,44 +12,47 @@
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: Campaign start; Reward; boxed instruction
     - &a3
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 239
       printed_page: 237
-      heading: 'Level 1: The Entrance — aftermath'
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: 'Level 1: The Entrance, Aftermath; Level 2: The Basement, opening sentence and Objective Room'
     - &a4
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 240
       printed_page: 238
-      heading: 'Level 2: The Basement — objective room'
+      heading: The Objective Room
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: 'Level 2: The Basement, The Objective Room'
     - &a5
       document: rulebook.second_printing.eng
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 242
       printed_page: 240
-      heading: 'Level 3: The Tomb of the Spider Queen — aftermath'
+      heading: Aftermath
       extraction:
         method: text
         confidence: high
         visually_verified: true
+      locator:
+        paragraph: 'Level 3: The Tomb of the Spider Queen, Aftermath'
   status: extracted
   confidence: high
-  source_text: 'Campaign start: Whiteport. Travel to White 40 to accept the quest and continue the
-    campaign. The three levels follow each other without a return to the surface: the Entrance
-    statue reveals a stair down to the Basement, whose objective room (the stairs, C16) takes the
-    heroes to the Tomb. After the Tomb the heroes may leave without walking back through the
-    dungeon, but Overland Travel must be done. Once back in Whiteport they receive the reward, 1200
-    c per hero. This procedure owns only the campaign order and the once-only reward.'
+  source_text: 'Campaign start: Whiteport ... Reward: 1200 c per hero. ... Travel to White 40 to accept the quest and continue the campaign. ... the statue slowly slides away with a horrendous screeching sound, revealing a dusty stair leading down into the darkness. ... The adventurers continue their journey down the stairs. ... Objective Room: The stairs, C16. This takes the heroes down to the next level. ... Instead, they carefully start their descent further into the bowels of the temple. ... Once done, the heroes may leave the dungeon and head back. There is no need to walk all the way through the dungeon as their trek back to the surface is eventless. The Overland Travel must of course be done. Once back in Whiteport, the heroes receive their reward.'
   issues:
     - issue.quest.campaign_progression_boundaries
   fields:
@@ -68,9 +71,7 @@
     phase:
       type: string
       role: input
-      description:
-        start, start_quest, complete, choose or return (Dead Rising) / start, accept, complete
-        or return (Spider Queen).
+      description: 'Call phase: start, accept, complete or return.'
     stage:
       type: string
       role: state
@@ -90,15 +91,11 @@
     quest_outcome:
       type: string
       role: input
-      description:
-        'Actual outcome of that quest: completed, fled (where the quest allows it), failed or
-        abandoned.'
+      description: 'Actual outcome of that quest: completed, fled (where the quest allows it), failed or abandoned.'
     completion_accepted:
       type: boolean
       role: output
-      description:
-        This call reports a completion that advances the campaign. Cleared by the transition it
-        triggers.
+      description: This call reports a completion that advances the campaign. Cleared by the transition it triggers.
     location:
       type: string
       role: input
@@ -156,11 +153,11 @@
     - id: check_owner
       source: &a2
         - *a1
-      source_text: Bind a fresh campaign progression to its instance; another instance cannot advance it.
+      source_text: 'Corpus bookkeeping; no printed wording: a fresh progression binds to its campaign instance, and no other instance can advance it.'
       substeps:
         - id: bind_campaign
           source: *a2
-          source_text: A fresh progression takes the campaign instance of its first call.
+          source_text: 'Corpus bookkeeping; no printed wording: a fresh progression takes the campaign instance of its first call.'
           when:
             type: compare
             operator: eq
@@ -178,7 +175,7 @@
                 name: campaign_id
         - id: owner
           source: *a2
-          source_text: Only the bound campaign instance continues.
+          source_text: 'Corpus bookkeeping; no printed wording: only the bound campaign instance continues.'
           when:
             type: compare
             operator: eq
@@ -208,7 +205,7 @@
     - id: start_campaign
       source:
         - *a1
-      source_text: 'Campaign start: Whiteport.'
+      source_text: 'Campaign start: Whiteport'
       when:
         type: all
         conditions:
@@ -273,7 +270,7 @@
     - id: accept_at_site
       source:
         - *a1
-      source_text: Travel to White 40 to accept the quest and continue the campaign; Level 1 starts there.
+      source_text: Travel to White 40 to accept the quest and continue the campaign.
       when:
         type: all
         conditions:
@@ -323,7 +320,7 @@
     - id: accept_completion
       source:
         - *a1
-      source_text: Only the actual completion of the current level advances the campaign.
+      source_text: 'Corpus bookkeeping; no printed wording: only the actual completion of the current level advances the campaign.'
       when:
         type: all
         conditions:
@@ -376,10 +373,7 @@
     - id: unhandled_outcome
       source:
         - *a1
-      source_text:
-        The campaign text gives the order of its quests and where to go next, but not what
-        happens to the campaign when one of them is failed or abandoned. Such an outcome changes
-        nothing here.
+      source_text: 'Corpus bookkeeping; no printed wording: the campaign does not say what a failed or abandoned level does to it, so such an outcome returns the issue and changes nothing.'
       when:
         type: all
         conditions:
@@ -439,7 +433,7 @@
     - id: entrance_to_basement
       source:
         - *a3
-      source_text: The statue slides away, revealing a stair down; the heroes continue straight into Level 2.
+      source_text: the statue slowly slides away with a horrendous screeching sound, revealing a dusty stair leading down into the darkness. ... The adventurers continue their journey down the stairs.
       when:
         type: all
         conditions:
@@ -483,7 +477,7 @@
     - id: basement_to_tomb
       source:
         - *a4
-      source_text: The objective room is the stairs (C16), which take the heroes down to Level 3.
+      source_text: Finally, the heroes locate the stairs. ... Instead, they carefully start their descent further into the bowels of the temple.
       when:
         type: all
         conditions:
@@ -527,9 +521,7 @@
     - id: leave_tomb
       source:
         - *a5
-      source_text:
-        Once done, the heroes may leave without walking back through the dungeon; Overland
-        Travel to Whiteport must still be done.
+      source_text: Once done, the heroes may leave the dungeon and head back. There is no need to walk all the way through the dungeon as their trek back to the surface is eventless. The Overland Travel must of course be done.
       when:
         type: all
         conditions:
@@ -583,7 +575,7 @@
       source:
         - *a5
         - *a1
-      source_text: Once back in Whiteport, the heroes receive their reward of 1200 c per hero, once.
+      source_text: 'Once back in Whiteport, the heroes receive their reward. ... Reward: 1200 c per hero.'
       when:
         type: all
         conditions:
@@ -648,7 +640,7 @@
           source:
             - *a5
             - *a1
-          source_text: Apply the printed reward once the return to Whiteport is recorded.
+          source_text: Once back in Whiteport, the heroes receive their reward.
           when:
             type: compare
             operator: eq

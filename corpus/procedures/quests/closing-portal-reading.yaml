@@ -6,24 +6,34 @@
       file: source/Rulebook-2nd-printing-ENGa.pdf
       pdf_page: 257
       printed_page: 255
-      heading: Closing the Portal — reading the scroll
+      section: 'Quest 3: Closing the Portal'
+      heading: 'Quest 3: Closing the Portal'
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 257
+      printed_page: 255
+      section: 'Quest 3: Closing the Portal'
+      heading: Special Rules
       extraction:
         method: text
         confidence: high
         visually_verified: true
   status: extracted
   confidence: high
-  source_text: Initial actual eligible stationary objective-room reading lasts
-    1d6+1. Persist duration once. Any interruption or movement resets progress
-    and requires starting over. Restart only on an actual new start-over event
-    with supplied unresolved duration context. Count each actual complete
-    chronological reading turn once, inspect its interruptions before progress,
-    and seal the portal at the required uninterrupted duration. Closure stops
-    reading and still requires all demons to be killed. No first spawn phase,
-    within-turn spawn ordering, universal restart dice policy, chest collection
-    or reward is invented.
+  source_text: The wizard provides the team with a scroll, which could be cast by one with very
+    limited skills in the Arcane Arts. This should be read at the gate to seal it. The drawback is
+    that it is a very long scroll indeed and it will take time to perform the ritual. ... Reading
+    the scroll can be done from anywhere in the room, but as expected, it takes time. Roll 1d6+1 to
+    see how many turns it takes. If the character is interrupted in any way (wounded, dodges, or
+    parries), they have to start over. They must hold still while reading it. ... Once the portal
+    is closed, all demons must be killed.
   issues:
     - issue.quest.portal_ritual_boundaries
+    - issue.quest.portal_reader_hold_still
   fields:
     hero_in_objective_room:
       type: boolean
@@ -32,8 +42,8 @@
     ritual_eligibility_supplied:
       type: boolean
       role: input
-      description: Supplied unresolved eligibility judgment; very limited Arcane Arts
-        skills have no printed threshold.
+      description: Supplied unresolved eligibility judgment; very limited Arcane Arts skills have no
+        printed threshold.
     reader_stationary:
       type: boolean
       role: input
@@ -97,8 +107,7 @@
     phase:
       type: string
       role: input
-      description: start, interruption, restart or reading_turn; spawn ordering and
-        aftermath remain separate.
+      description: start, interruption, restart or reading_turn; spawn ordering and aftermath remain separate.
     portal_reader_owner_matches:
       type: boolean
       role: input
@@ -110,14 +119,13 @@
     portal_attempt_started:
       type: boolean
       role: state
-      description: Persist once for this actual reading attempt; replay cannot reseed
-        its duration. A later actual restart needs separately reconciled
-        duration context.
+      description:
+        Persist once for this actual reading attempt; replay cannot reseed its duration. A
+        later actual restart needs separately reconciled duration context.
     portal_open:
       type: boolean
       role: state
-      description: Owned actual quest portal state; successful actual reading closes
-        it once.
+      description: Owned actual quest portal state; successful actual reading closes it once.
     duration_supplied:
       type: boolean
       role: input
@@ -125,69 +133,69 @@
     restart_event_supplied:
       type: boolean
       role: input
-      description: Actual start-over event supplied after interruption, not a phase
-        change alone.
+      description: Actual start-over event supplied after interruption, not a phase change alone.
     restart_duration_context_resolved:
       type: boolean
       role: input
-      description: Actual restart duration context supplied; the book does not choose
-        retain/reroll policy.
+      description: Actual restart duration context supplied; the book does not choose retain/reroll policy.
     completed_reading_turn:
       type: boolean
       role: input
-      description: An actual complete reading turn has elapsed; requesting a turn or
-        starting to read is insufficient.
+      description:
+        An actual complete reading turn has elapsed; requesting a turn or starting to read is
+        insufficient.
     reading_turn_context_resolved:
       type: boolean
       role: input
-      description: Actual reading turn boundaries and chronological ordering supplied,
-        including any interruption during this completed turn.
+      description: Actual reading turn boundaries and chronological ordering supplied, including any
+        interruption during this completed turn.
     actual_restart_event:
       type: number
       role: input
-      description: Actual chronological start-over event index for this
-        occurrence/reader; strictly newer than the consumed event.
+      description:
+        Actual chronological start-over event index for this occurrence/reader; strictly newer
+        than the consumed event.
       integer: true
       minimum: 1
     last_restart_event:
       type: number
       role: state
-      description: Persist latest consumed actual restart event; caller starts at0,
-        never resets on phase replay.
+      description:
+        Persist latest consumed actual restart event; caller starts at 0, never resets on phase
+        replay.
       integer: true
       minimum: 0
     actual_restart_duration:
       type: number
       role: input
-      description: Actual source-reconciled restart duration 2..7, without a universal
-        retained/rerolled policy.
+      description: Actual source-reconciled restart duration 2..7, without a universal retained/rerolled policy.
       integer: true
       minimum: 2
       maximum: 7
     actual_reading_turn:
       type: number
       role: input
-      description: Actual chronological reading turn index for this occurrence/reader;
-        not a fabricated global clock.
+      description:
+        Actual chronological reading turn index for this occurrence/reader; not a fabricated
+        global clock.
       integer: true
       minimum: 1
     last_reading_turn:
       type: number
       role: state
-      description: Persist latest consumed actual completed reading turn, initially0.
-        Restart does not reset it or permit same-turn double counting.
+      description:
+        Persist latest consumed actual completed reading turn, initially 0. Restart does not
+        reset it or permit same-turn double counting.
       integer: true
       minimum: 0
     valid_reading_attempt:
       type: boolean
       role: state
-      description: Owned current reading validity/interruption used by the source
-        closure rule.
+      description: Owned current reading validity/interruption used by the source closure rule.
     reading_interrupted:
       type: boolean
       role: state
-      description: Owned current reading validity/interruption used by the source
-        closure rule.
+      description: Owned current reading validity/interruption used by the source closure rule.
     portal_closed:
       type: boolean
       role: output
@@ -198,16 +206,16 @@
       description: remaining demons must be killed
   dependencies:
     - key: duration
-      label: Actual initial reading duration d6; request does not roll or start
-        reading.
+      label: Actual initial reading duration d6; request does not roll or start reading.
     - key: quest
       label: Canonical quest occurrence
       object_id: quest.chamber_of_reverence.closing_portal
   steps:
     - id: missing_duration
       source: *a1
-      source_text: An actual first-attempt d6 is required; no duration or restart
-        policy is inferred.
+      source_text:
+        Reading the scroll can be done from anywhere in the room, but as expected, it takes
+        time. Roll 1d6+1 to see how many turns it takes. ... They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -294,8 +302,9 @@
           dependency: duration
     - id: start
       source: *a1
-      source_text: Reading can be done from anywhere in the room. Roll 1d6+1 for
-        duration. They must hold still while reading it.
+      source_text:
+        Reading the scroll can be done from anywhere in the room, but as expected, it takes
+        time. Roll 1d6+1 to see how many turns it takes. ... They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -343,9 +352,9 @@
             value: false
     - id: consume_interrupted_turn
       source: *a1
-      source_text: An actually completed interrupted reading turn cannot be counted
-        again after start-over; preserve its supplied chronological identity
-        without granting reading progress.
+      source_text:
+        If the character is interrupted in any way (wounded, dodges, or parries), they have to
+        start over. They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -471,8 +480,9 @@
             name: actual_reading_turn
     - id: interruption
       source: *a1
-      source_text: If the character is interrupted in any way (wounded, dodges, or
-        parries), they have to start over. They must hold still while reading.
+      source_text:
+        If the character is interrupted in any way (wounded, dodges, or parries), they have to
+        start over. They must hold still while reading it.
       when: *a4
       rule_refs:
         - core.quest.closing_portal.ritual_interruption
@@ -499,8 +509,9 @@
             value: true
     - id: unresolved_restart
       source: *a1
-      source_text: Start-over duration policy is absent; pending context cannot resume
-        reading or choose a roll.
+      source_text:
+        If the character is interrupted in any way (wounded, dodges, or parries), they have to
+        start over. They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -621,8 +632,9 @@
           issue_id: issue.quest.portal_ritual_boundaries
     - id: restart
       source: *a1
-      source_text: Actual source start-over resets progress only after duration
-        context is supplied, without choosing a universal dice policy.
+      source_text:
+        If the character is interrupted in any way (wounded, dodges, or parries), they have to
+        start over. They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -678,8 +690,9 @@
             value: false
     - id: unresolved_turn_context
       source: *a1
-      source_text: The source does not define within-turn boundaries; unresolved
-        actual context cannot advance or close reading.
+      source_text:
+        Reading the scroll can be done from anywhere in the room, but as expected, it takes
+        time. Roll 1d6+1 to see how many turns it takes. ... They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -782,9 +795,9 @@
           issue_id: issue.quest.portal_ritual_boundaries
     - id: reading_turn
       source: *a1
-      source_text: Count one actually completed uninterrupted stationary turn once,
-        after interruption checks. Preserve chronological consumption across
-        restarts.
+      source_text:
+        Reading the scroll can be done from anywhere in the room, but as expected, it takes
+        time. Roll 1d6+1 to see how many turns it takes. ... They must hold still while reading it.
       when:
         type: all
         conditions:
@@ -827,8 +840,10 @@
             value: false
     - id: closure
       source: *a1
-      source_text: Seal only at the actual completed uninterrupted reading duration;
-        all remaining demons still must be killed.
+      source_text:
+        This should be read at the gate to seal it. ... Reading the scroll can be done from
+        anywhere in the room, but as expected, it takes time. Roll 1d6+1 to see how many turns it
+        takes. ... Once the portal is closed, all demons must be killed.
       when:
         type: all
         conditions:
@@ -882,3 +897,25 @@
             value: false
   entry_step: missing_duration
   exit_step: closure
+  unresolved_references:
+    - 'Structural reading, not printed text: Initial actual eligible stationary objective-room
+      reading lasts 1d6+1. Persist duration once. Any interruption or movement resets progress and
+      requires starting over. Restart only on an actual new start-over event with supplied
+      unresolved duration context. Count each actual complete chronological reading turn once,
+      inspect its interruptions before progress, and seal the portal at the required uninterrupted
+      duration. Closure stops reading and still requires all demons to be killed. No first spawn
+      phase, within-turn spawn ordering, universal restart dice policy, chest collection or reward
+      is invented. Step missing_duration: An actual first-attempt d6 is required; no duration or
+      restart policy is inferred. Step start: Reading can be done from anywhere in the room. Roll
+      1d6+1 for duration. They must hold still while reading it. Step consume_interrupted_turn: An
+      actually completed interrupted reading turn cannot be counted again after start-over; preserve
+      its supplied chronological identity without granting reading progress. Step interruption: If
+      the character is interrupted in any way (wounded, dodges, or parries), they have to start
+      over. They must hold still while reading. Step unresolved_restart: Start-over duration policy
+      is absent; pending context cannot resume reading or choose a roll. Step restart: Actual source
+      start-over resets progress only after duration context is supplied, without choosing a
+      universal dice policy. Step unresolved_turn_context: The source does not define within-turn
+      boundaries; unresolved actual context cannot advance or close reading. Step reading_turn:
+      Count one actually completed uninterrupted stationary turn once, after interruption checks.
+      Preserve chronological consumption across restarts. Step closure: Seal only at the actual
+      completed uninterrupted reading duration; all remaining demons still must be killed.'
