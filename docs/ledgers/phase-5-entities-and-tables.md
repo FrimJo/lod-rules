@@ -772,3 +772,23 @@ until each one is converted through the corrector path or logged under `review/`
 | `table.dungeon.threat_in_battle` `disarmed`                    | "The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so." Retries cost one AP each. ("cannot fight" is logged.)                                                                                                                                                           | `review.into_the_dungeons_setup.8`     |
 | `table.equipment.armour` `cloak` (`covers`)                    | "Torso (only back)": no hit zone or rule defines "back".                                                                                                                                                                                                                                              | `review.appendix_iii_weapons_armour.2` |
 | `table.travel.obstacles` `row_2`, `row_11`, `row_12`, `row_15` | Boulder and Large log: "50% or more of the square must be covered to count"; Huge boulder: "If more than 50% … it cannot be entered"; Pyramid: "Can only be climbed along the stairs." No row `rule_refs`; the dungeon Obstacles rows link `core.obstacle.half_square` and `core.movement.furniture`. | `review.travelling_and_skirmishes.2`   |
+
+## Typed-dice guard (`phase_5.criterion_3`) — 18 October 2026
+
+Corpus-wide evidence for "Dice expressions are typed" (issue #3, unit 3). `textCellDiceErrors`
+(`scripts/validate/dice.ts`), asserted in `tests/schema/phase-five.test.ts`, scans every table
+row's text cells for a printed die (`/\b\d*d(2|3|4|6|8|10|12|20|100)\b/i`). A row passes with a
+`dice` cell (whose notation the pilot integrity check already matches to its printed text), a
+non-empty row `rule_refs`, or an entry in `tests/fixtures/text-cell-dice-exemptions.json`.
+Stale exemptions fail, and every failure names the table and row id. Synthetic copies prove the
+check: an untyped row fails; typed, linked and exempted rows pass; stale exemptions fail.
+
+**Exemptions (5).** `table.settlement.activity_schedule_example` `row_3`/`row_5`/`row_7` print
+the day labels D2, D3 and D4, not dice. Its `row_2` quotes the Inn's 2d6 HP from
+`character.settlement.rest` (PDF 147) as a worked example (PDF 133).
+`table.dungeon.red_levers` `defence_system` moves the threshold of the existing door-trap d6
+(PDF 101) rather than asking for a roll (PDF 104).
+
+**Review records.** The typed rows were re-reviewed fresh and passing: `review.settlements_core.4`,
+`review.magic.4`, `review.inner_sanctum_and_estate.5`, `review.alchemy_preparations.2`,
+`review.guilds.4`, `review.into_the_dungeons_actions.4` and `review.into_the_dungeons_setup.9`.
