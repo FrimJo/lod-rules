@@ -3270,3 +3270,67 @@ Pushed back, blocked by frozen objects (follow-ups for a later review of their u
 - `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should also
   relate `combat.action.pick_up_weapon` and `procedure.enemy_attack`; linking them makes
   `review.combat_actions.4` and `review.combat_damage.2` stale.
+
+## Book-wide table inventory confirmation (Phase 0–6 exit, `phase_1.criterion_3`) — 18 October 2026
+
+Evidence for the exit row "Every known table has an inventory entry", taken after Step 3 closed.
+Every count is computed from `corpus/source-map/sections.yaml`, `corpus/source-map/coverage.yaml`,
+`corpus/tables/**` and `review/independent/` at that point.
+
+- Source map: 715 section nodes and 715 coverage rows, one for one (the bijection
+  `npm run validate` enforces).
+- `kind: table` nodes: 216. Of these, 38 are compatibility redirects; they are also the only
+  redirects in the book. Each points at a non-redirect table node on the same PDF page, and each
+  keeps coverage `mapped`. By part: Appendices 29, Travel and Settlements 7, Academic Skills 1,
+  Dungeoneering and Combat 1.
+- The PDF 186 duplicate is now one of these redirects:
+  `section.appendix_iii_equipment.general_equipment.table` → `.sell_and_repair_table`, because
+  the rendered page prints a single Sell and Repair Table.
+- The other 178 table nodes are all `reviewed` with `components.tables: extracted`. The 224 table
+  records all cite a non-redirect node as `section_id`; none cites a redirect. Three nodes own
+  more than one record, and each split follows the printed page. Settlement Events
+  (`table.settlement.events`, `table.settlement.trinket_results`) and Hero Attacking
+  (`table.combat.melee_modifiers`, `table.combat.ranged_modifiers`) print two tables under one
+  heading. Treasure Found in Furniture prints 37 furniture tables under one subsection.
+- Every one of the 178 nodes has a governing independent review record that is fresh, has no
+  open finding, did not fail, and inspected every PDF page of the node. Records by part:
+  - Front matter: `review.front_matter.2`.
+  - Party Management: `review.creating_your_character.2`, `review.equipment.2`,
+    `review.psychology_tables.4`, `review.levelling_up.2`.
+  - Academic Skills: `review.magic.3`, `review.alchemy_core.2`.
+  - Dungeoneering and Combat: `review.into_the_dungeons_setup.8`,
+    `review.into_the_dungeons_movement.2`, `review.into_the_dungeons_actions.3`,
+    `review.combat_actions.4`, `review.combat_enemies.3`, `review.combat_damage.2`.
+  - Travel and Settlements: `review.travelling_and_skirmishes.2`, `review.settlements_core.3`,
+    `review.settlements_arena_banking.2`, `review.settlements_services.2`, `review.guilds.3`,
+    `review.inner_sanctum_and_estate.4`.
+  - Appendices: `review.appendix_i_perks.2`, `review.appendix_ii_talents.2`,
+    `review.appendix_iii_weapons_armour.2`, `review.appendix_iii_general_equipment_a.5`,
+    `review.appendix_iii_general_equipment_b.3`, `review.appendix_iv_spells.2`,
+    `review.appendix_v_findings.1`, `review.appendix_v_tables.4`,
+    `review.appendix_v_legendary_b.2`.
+  - Quest Book I: `review.quest_book_introduction.2`, `review.the_dead_rising.2`,
+    `review.spider_queen_and_lava_river.3`, `review.bandits_hideout_and_fountain_room.2`,
+    `review.chamber_of_reverence_and_great_crypt.2`, `review.quests_into_the_ancient_lands.3`,
+    `review.side_quests.2`.
+
+  Each reviewer rendered the pages and compared the printed tables with the nodes and records in
+  its scope. Unit 1 therefore needed no new node and no new redirect.
+
+### The PDF 29 node with no table record of its own
+
+`section.creating_your_character.choosing_your_species.table` (PDF 29) is the only non-redirect
+table node that no table record names as its `section_id`. The table there reprints the PDF 51
+Class / 2H STR req / 1H STR req table: same six rows, same headings. One record,
+`table.equipment.weapon_class_strength` (section `section.equipment.coins.table`), holds both
+printings. Its `source` lists PDF 51 and PDF 29, each visually verified.
+`character.creation.strength_weapon_class` links the table from the PDF 29 heading. The coverage
+row's notes say the same.
+
+Decision: this single-record representation is acceptable, and it is not a zero-node or two-node
+gap. The criterion counts nodes. The book prints the table twice, on two pages and under two
+headings, so it has two nodes, one for each printing. The data is identical, so it belongs in one
+record; a second record would duplicate the rows and let them drift apart. Finding
+`ok_with_note` in `review.creating_your_character.1` confirmed the two printings agree cell for
+cell and approved the shared record. `review.creating_your_character.2`, which is fresh, governs
+the node. No frozen record needed an edit.
