@@ -197,7 +197,7 @@ describe('text-cell dice guard', () => {
   });
   it('names the table and row of an untyped text-cell die', () => {
     expect(textCellDiceErrors(withRow(untyped()), exemptions)).toEqual([
-      'table.settlement.events/synthetic: die printed in a text cell without a dice cell, rule_refs or exemption',
+      'table.settlement.events/synthetic: die 1d2 printed in a text cell is not typed by a dice cell, rule_refs or exemption',
     ]);
   });
   it('accepts a row with a typed dice cell', () => {
@@ -207,6 +207,46 @@ describe('text-cell dice guard', () => {
       printed: '1d2',
       dice: { count: 1, sides: 2 },
       meaning: 'loss',
+    };
+    expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([]);
+  });
+  it('rejects a second die that no dice cell types', () => {
+    const row = untyped('The party loses 1d2 rations and 1d4 HP.');
+    row.cells.event_dice = {
+      type: 'dice',
+      printed: '1d2',
+      dice: { count: 1, sides: 2 },
+      meaning: 'loss',
+    };
+    expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([
+      'table.settlement.events/synthetic: die 1d4 printed in a text cell is not typed by a dice cell, rule_refs or exemption',
+    ]);
+  });
+  it('rejects an unrelated dice column', () => {
+    const row = untyped();
+    row.cells.event_dice = {
+      type: 'dice',
+      printed: '1d6',
+      dice: { count: 1, sides: 6 },
+      meaning: 'roll',
+    };
+    expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([
+      'table.settlement.events/synthetic: die 1d2 printed in a text cell is not typed by a dice cell, rule_refs or exemption',
+    ]);
+  });
+  it('matches a die followed by prose or a modifier by count and sides', () => {
+    const row = untyped('Gain 1d8+the number of spent days and +1D6 + 2 more.');
+    row.cells.rations = {
+      type: 'dice',
+      printed: '1d8',
+      dice: { count: 1, sides: 8 },
+      meaning: 'value',
+    };
+    row.cells.more = {
+      type: 'dice',
+      printed: '+1d6+2',
+      dice: { count: 1, sides: 6, modifier: 2 },
+      meaning: 'increase',
     };
     expect(textCellDiceErrors(withRow(row), exemptions)).toEqual([]);
   });
