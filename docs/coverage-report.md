@@ -81,7 +81,7 @@ None. Every node in the structural map has been mapped.
 | Component | Extracted | Remaining | Not applicable |
 | --- | --- | --- | --- |
 | glossary | 69 | 0 | 608 |
-| rules | 435 | 0 | 242 |
+| rules | 436 | 0 | 241 |
 | tables | 194 | 0 | 483 |
 | examples | 30 | 0 | 647 |
 | procedures | 133 | 0 | 544 |
