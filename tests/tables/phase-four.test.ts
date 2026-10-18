@@ -104,7 +104,8 @@ describe('Phase 4 independent printed-table matrices', () => {
       .map((line) => line.split(' ').map(Number));
     expect(numbers('table.equipment.sell_and_repair')).toEqual(expected);
     expect(table('table.equipment.sell_and_repair').columns.at(-1)?.label).toBe('5+/Repair');
-    expect(table('table.equipment.sell_and_repair').footnotes).toHaveLength(5);
+    // The four printed passages beside the table, quoted as printed.
+    expect(table('table.equipment.sell_and_repair').footnotes).toHaveLength(4);
   });
   it('preserves sanity loss amounts, the die, and the unresolved card reference', () => {
     const rows = table('table.psychology.sanity_losses').rows;

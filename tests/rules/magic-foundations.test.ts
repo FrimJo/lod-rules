@@ -127,7 +127,10 @@ describe('specific spell exceptions and miscast outcomes', () => {
     });
   });
   it('Open Lock uses HP as CV and Shield caps absorption and number of casts', () => {
-    expect(spell('open_lock', { lock_hp: 25, can_touch_lock: true }).state.casting_value).toBe(25);
+    expect(
+      spell('open_lock', { lock_hp: 25, can_touch_lock: true, target_locked_door_or_chest: true })
+        .state.casting_value,
+    ).toBe(25);
     expect(
       spell('protective_shield', { caster_level: 6, casts_on_target: 1, in_los_or_self: true })
         .state.damage_absorbed,
@@ -139,10 +142,10 @@ describe('specific spell exceptions and miscast outcomes', () => {
   });
   it('Time Freeze has a once-per-battle limit while Second Sight only adds tokens', () => {
     expect(
-      spell('time_freeze', { cast_before_this_battle: false }).state.additional_activation,
+      spell('time_freeze', { already_cast_this_battle: false }).state.additional_activation,
     ).toBe(true);
     expect(
-      spell('time_freeze', { cast_before_this_battle: true }).state.additional_activation,
+      spell('time_freeze', { already_cast_this_battle: true }).state.additional_activation,
     ).toBeUndefined();
     expect(spell('second_sight', {}).state).toMatchObject({ hero_tokens_if_encounter: 2 });
     expect(spell('second_sight', {}).state.additional_activation).toBeUndefined();
@@ -150,15 +153,22 @@ describe('specific spell exceptions and miscast outcomes', () => {
   it('summons preserve different readiness and control timing without invented stats', () => {
     expect(spell('summon_lesser_demon', {}).state).toMatchObject({
       hero_tokens_added: 1,
-      activation_timing: 'hero next turn',
-      upkeep_timing: 'start of each turn',
+      acts_as_part_of_heroes_next_turn: true,
     });
+    expect(
+      spell('summon_lesser_demon.upkeep_and_control', {
+        start_of_turn: true,
+        caster_resolve_failed: true,
+      }).state,
+    ).toMatchObject({ mana_upkeep: 4, demon_breaks_free: true });
     expect(spell('summon_demon', {}).state).toMatchObject({
       hero_tokens_added: 1,
       token_timing: 'immediate',
       upkeep: 0,
     });
     expect(spell('summon_earth_elemental', {}).state.printed_duration).toBe('ML number of turns');
-    expect(spell('healing', { in_los: true, distance: 4 }).state.printed_healing).toBe('1d/+2');
+    expect(
+      spell('healing', { in_los: true, distance: 4, healing_roll: 3 }).state.printed_healing,
+    ).toBe('1d/+2');
   });
 });

@@ -68,7 +68,10 @@ describe('issue resolutions', () => {
       'issue.phase6.failed_threat_roll_increase',
       'issue.phase6.door_open_threat_source',
       'issue.phase6.trap_headings_unmapped',
+      'issue.spell.healing',
       'issue.combat.enemy_fumble',
+      'issue.treasure.necklace_of_flight_slot',
+      'issue.treasure.horn_ready_slot',
       'issue.settlement.ohlnir_temple_name',
       'issue.quest.spider_queen_cobweb_mapping',
       'issue.sanity.miscast_loss',
@@ -87,6 +90,14 @@ describe('issue resolutions', () => {
       'issue.guild.human_body_parts',
       'issue.guild.barbed_ammunition_encumbrance',
       'issue.guild.rangers_health_column',
+      'issue.equipment.bandage_uses',
+      'issue.equipment.fishing_gear_trap_stacking',
+      'issue.spell.ice_tomb_cv_mana',
+      'issue.equipment.fishing_gear_forage_value',
+      'issue.equipment.ration_quick_slot',
+      'issue.equipment.torch_quick_slot_stack',
+      'issue.equipment.large_backpack_dex',
+      'issue.equipment.dwarven_pickaxe_rubble',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

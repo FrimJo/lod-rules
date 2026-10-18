@@ -148,11 +148,15 @@ describe('complete source table cells', () => {
     expect(pilot.tables.find((t) => t.id === 'table.alchemy.habitats')!.footnotes[0]).toBe(
       'Roll 1d00 and check the result in the column that matches the area you are searching in. Looking for a specific ingredient? The green squares shows where it is most likely to be found!',
     );
-    expect(pilot.tables.find((t) => t.id === 'table.alchemy.weak_supreme')!.footnotes).toEqual([
-      'The cost should be read as Weak/Supreme.',
-    ]);
+    const weakSupreme = pilot.tables.find((t) => t.id === 'table.alchemy.weak_supreme')!;
+    expect(weakSupreme.footnotes).toEqual([]);
+    expect(weakSupreme.source_text).toBe(
+      'The cost should be read as Weak/Supreme. 1d12 Cost Potion',
+    );
     expect(pilot.tables.find((t) => t.id === 'table.alchemy.standard')!.issues).toEqual([
       'issue.alchemy.standard_selector',
+      'issue.alchemy.preparation_names',
+      'issue.treasure.potion_table_divergences',
     ]);
     const scribbles = pilot.tables
       .find((t) => t.id === 'table.spells.level_2')!

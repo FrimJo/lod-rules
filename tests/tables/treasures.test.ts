@@ -112,7 +112,7 @@ describe('treasure source cell regression matrices', () => {
       if (!text.trim()) return;
       const expected = [
         ...text.matchAll(/(?:^|\s)(\d+(?:-\d+)?):\s*([\s\S]*?)(?=\s\d+(?:-\d+)?:|$)/g),
-      ].map((m) => [m[1], m[2]]);
+      ].map((m) => [m[1], m[2]!.trim()]);
       expect(
         matrix('furniture.' + slug(name!) + (index ? '_drink' : ''), ['roll', 'result']),
       ).toEqual(expected);

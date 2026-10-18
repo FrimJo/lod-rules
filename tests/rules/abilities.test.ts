@@ -66,11 +66,17 @@ describe('source-bounded talent and perk mechanics', () => {
       run('talent.trapfinder.detection', { detecting_trap: true, perception_modifier: 10 }).state,
     ).toMatchObject({ perception_modifier: 20, stacks_with_sharp_eyed: true });
   });
-  it.each([0, 4, 5])('Keep Calm caps morale at its starting value: %i', (party_morale) => {
+  it.each([0, 4, 5, 7])('Keep Calm caps the increase at starting morale: %i', (party_morale) => {
     expect(
       run('perk.keep_calm_and_carry_on.morale', { party_morale, starting_morale: 5 }).state
         .party_morale,
-    ).toBe(Math.min(party_morale + 2, 5));
+    ).toBe(Math.max(party_morale, Math.min(party_morale + 2, 5)));
+  });
+  it('Keep Calm never lowers morale that is already above starting morale', () => {
+    expect(
+      run('perk.keep_calm_and_carry_on.morale', { party_morale: 7, starting_morale: 5 }).state
+        .party_morale,
+    ).toBe(7);
   });
   it('activation costs Energy but no AP', () => {
     expect(
@@ -84,6 +90,7 @@ describe('source-bounded talent and perk mechanics', () => {
         mana: 5,
         energy_spent: 3,
         perks_used_this_action: 0,
+        profession: 'wizard',
       }).state,
     ).toMatchObject({ energy: 1, mana: 65, action_point_cost: 0 });
   });

@@ -150,8 +150,7 @@ describe('Phase 5 independently transcribed Weapons table, PDF 179', () => {
     openings.forEach((opening, index) => {
       expect(table.footnotes[index]!.startsWith(opening)).toBe(true);
     });
-    expect(table.footnotes).toHaveLength(openings.length + 1);
-    expect(table.footnotes.at(-1)).toContain('unlabelled blank band');
+    expect(table.footnotes).toHaveLength(openings.length);
   });
 
   it('records the Specials the book never defines as an open issue', () => {
@@ -246,7 +245,9 @@ describe('Phase 5 independently transcribed Armour table, PDF 180', () => {
         expect(row.cells[column]!.printed).toBe(armour[index]![position]);
       });
     });
-    expect(table.rows.filter((r) => /^Tier \d:$/.test(r.source_row))).toHaveLength(4);
+    const tiers = table.rows.filter((r) => /^Tier \d:$/.test(r.source_row));
+    expect(tiers).toHaveLength(4);
+    expect(tiers.every((r) => r.row_kind === 'structural')).toBe(true);
   });
 
   it('keeps tier band rows valueless and armour values typed', () => {
@@ -261,12 +262,23 @@ describe('Phase 5 independently transcribed Armour table, PDF 180', () => {
     );
   });
 
-  it('carries the printed Stackable and Clunky definitions and the unlabelled bands', () => {
+  it('carries only the printed Stackable and Clunky definitions', () => {
+    expect(table.footnotes).toHaveLength(2);
     expect(table.footnotes[0]!.startsWith('Stackable:')).toBe(true);
     expect(table.footnotes[0]).toContain('highest tier is always the outer layer');
     expect(table.footnotes[1]!.startsWith('Clunky:')).toBe(true);
-    expect(table.footnotes[2]).toContain('Tier 1:');
-    expect(table.footnotes[3]).toContain('Padded Dog Armour');
+  });
+
+  it('binds the Stackable rule to every row whose Special prints Stackable', () => {
+    for (const row of table.rows) {
+      const special = row.cells.special!.printed;
+      expect(row.rule_refs?.includes('character.equipment.armour.stackable') ?? false).toBe(
+        special.includes('Stackable'),
+      );
+      expect(row.rule_refs?.includes('character.equipment.armour.clunky') ?? false).toBe(
+        special.includes('Clunky'),
+      );
+    }
   });
 });
 
@@ -403,16 +415,23 @@ describe('Phase 5 independently transcribed General Equipment tables, PDF 181', 
     expect(animals.rows.find((r) => r.source_row === 'Camel')!.cells.special!.printed).toContain(
       'not changed by the Outpost modifiers',
     );
-    expect(animals.unresolved_references!.join(' ')).toContain('Travelling and Skirmishes');
+    expect(animals.unresolved_references ?? []).toEqual([]);
+    expect(animals.see_also).toEqual([
+      'section.travelling_and_skirmishes',
+      'section.travelling_and_skirmishes.moving_on_the_map',
+    ]);
   });
 
-  it('extracts the printed Enc quick-slot note as a rule bound to both tables', () => {
+  it('extracts the printed Enc quick-slot note as a rule bound to every table with /X cells', () => {
     const rule = corpus.rules.find((r) => r.id === 'character.equipment.quick_slot_stack')!;
     expect(rule.section_id).toBe('section.appendix_iii_equipment.general_equipment');
     expect(rule.source_text).toContain('/X in the ENC column');
     expect(rule.uses_tables).toEqual([
       'table.equipment.alchemy',
-      'table.equipment.animals_and_transportation',
+      'table.equipment.consumables',
+      'table.equipment.light_sources',
+      'table.equipment.miscellaneous',
+      'table.equipment.tools',
     ]);
     expect(rule.effects).toEqual([
       {

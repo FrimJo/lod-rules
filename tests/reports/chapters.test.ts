@@ -227,7 +227,8 @@ describe('real corpus', () => {
 
   it('excludes quests and redirects, and orders Introduction first', () => {
     // +1: section.into_the_dungeons.table_3 (tier 5); +1: section.travelling_and_skirmishes.table_2 (tier 6)
-    expect(worklist.redirectsExcluded).toBe(37);
+    // +1: section.appendix_iii_equipment.general_equipment.table (tier 7, the PDF 186 duplicate)
+    expect(worklist.redirectsExcluded).toBe(38);
     expect(worklist.chapters[0]?.chapter).toBe('introduction');
     const chapterNames = worklist.chapters.map((chapter) => chapter.chapter);
     expect(chapterNames).not.toContain('quest_book_i');
@@ -235,12 +236,12 @@ describe('real corpus', () => {
     expect(chapterNames.indexOf('game_basics')).toBeLessThan(chapterNames.indexOf('combat'));
   });
 
-  it('drops reconciled Difficulty, Basic Stats, Coins, Levers and Kredelia and flags Metheia as having no records', () => {
+  it('drops reconciled Difficulty, Basic Stats, Coins, Levers, Kredelia and Metheia', () => {
     // Difficulty had no records until the Step 2 pilot extracted it, Basic Stats was cited only
     // by glossary terms until tier 2, and Coins was reconciled with zero records in tier 3. None
     // is unfinished any more. Levers gained records in tier 5. Kredelia, the Goddess of Travellers
     // was reconciled in tier 6 with zero records (a setting-fiction sidebar). Metheia, the God of
-    // Life (Appendix I, Perks) is a later tier and still has no record.
+    // Life (Appendix I, Perks) was reconciled in tier 7 the same way.
     expect(byId.has('section.game_basics.difficulty')).toBe(false);
     expect(byId.has('section.character_basics.the_character.basic_stats')).toBe(false);
     expect(byId.has('section.equipment.coins')).toBe(false);
@@ -248,11 +249,6 @@ describe('real corpus', () => {
     expect(byId.has('section.travelling_and_skirmishes.kredelia_the_goddess_of_travellers')).toBe(
       false,
     );
-    expect(byId.get('section.appendix_i_perks.metheia_the_god_of_life')).toMatchObject({
-      noRecords: true,
-      termsOnly: false,
-      pdfPages: '169',
-      printedPages: '167',
-    });
+    expect(byId.has('section.appendix_i_perks.metheia_the_god_of_life')).toBe(false);
   });
 });

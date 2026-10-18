@@ -14,62 +14,76 @@ const roomIds = corpus.rules
   .map((r) => r.id.replace('character.treasure.', ''));
 
 describe('treasure catalogue effects and supplied handoffs', () => {
+  const ps = (n: number, extra: State = {}) =>
+    one(`powerstone.${n}`, { powerstone_roll: n, ...extra });
   it.each([
     [1, 2],
     [2, 3],
-  ])('Powerstone %i has +%i damage', (n, damage) =>
-    expect(one(`powerstone.${n}`).state.damage_modifier).toBe(damage),
-  );
+  ])('Powerstone %i has +%i damage on a weapon only', (n, damage) => {
+    expect(ps(n, { item_kind: 'weapon' }).state.damage_modifier).toBe(damage);
+    expect(ps(n, { item_kind: 'ring' }).state.damage_modifier).toBeUndefined();
+  });
   it('preserves Powerstone poison, reload exception and first-turn timing', () => {
-    expect(one('powerstone.3').state).toMatchObject({
-      poisonous: true,
-      monster_hp_loss_each_turn: 1,
-      duration: 'until end of battle',
-      trigger: 'monster wounded',
-    });
-    expect(one('powerstone.11').state).toMatchObject({
+    expect(ps(3, { item_kind: 'weapon' }).state).toMatchObject({ poisonous: true });
+    expect(
+      one('powerstone.3.wounded', {
+        powerstone_roll: 3,
+        item_kind: 'weapon',
+        monster_wounded_by_weapon: true,
+      }).state,
+    ).toMatchObject({ monster_hp_loss_each_turn: 1, duration: 'until end of battle' });
+    expect(ps(11).state.reload_action_reduction).toBe(1);
+    expect(ps(11).state.with_fast_reload_first_action_shots).toBeUndefined();
+    expect(
+      run(['powerstone.11', 'powerstone.11.fast_reload'], {
+        powerstone_roll: 11,
+        has_fast_reload: true,
+      }).state,
+    ).toMatchObject({
       reload_action_reduction: 1,
       with_fast_reload_first_action_shots: 2,
       with_fast_reload_second_action_shots: 1,
     });
-    expect(one('powerstone.16').state.duration).toBe('first turn of combat');
-    expect(one('magic_items.9').state.hero_initiative_tokens).toBe(1);
-    expect(one('magic_items.9').state.duration).toBeUndefined();
+    expect(ps(16, { item_kind: 'ring', combat_turn: 1 }).state.initiative_tokens).toBe(1);
+    expect(ps(16, { item_kind: 'ring', combat_turn: 2 }).state.initiative_tokens).toBeUndefined();
+    expect(one('magic_items.9', { power_roll: 9 }).state.hero_initiative_tokens).toBe(1);
+    expect(one('magic_items.9', { power_roll: 9 }).state.duration).toBeUndefined();
   });
   it.each([
-    ['6', 'strength'],
-    ['7', 'constitution'],
-    ['8', 'wisdom'],
-    ['9', 'resolve'],
-    ['10', 'dexterity'],
-  ])('Powerstone %s preserves +5 %s and jewellery restriction', (id, stat) => {
-    expect(one('powerstone.' + id).state).toMatchObject({
-      [stat + '_modifier']: 5,
-      applicable_to: 'ring or amulet',
-    });
+    [6, 'strength'],
+    [7, 'constitution'],
+    [8, 'wisdom'],
+    [9, 'resolve'],
+    [10, 'dexterity'],
+  ] as const)('Powerstone %s gives +5 %s on a ring or amulet only', (n, stat) => {
+    expect(ps(n, { item_kind: 'amulet', borne_by_hero: true }).state[stat + '_modifier']).toBe(5);
+    expect(ps(n, { item_kind: 'ring', borne_by_hero: true }).state[stat + '_modifier']).toBe(5);
+    expect(
+      ps(n, { item_kind: 'weapon', borne_by_hero: true }).state[stat + '_modifier'],
+    ).toBeUndefined();
   });
   it.each([
-    ['12', 'defence_modifier', 2],
-    ['13', 'energy_modifier', 1],
-    ['14', 'luck_modifier', 1],
-    ['15', 'detect_traps_modifier', 10],
-    ['18', 'starting_hit_points_modifier', 2],
-    ['19', 'starting_party_morale_modifier', 2],
-    ['20', 'sanity_modifier', 2],
-  ] as const)('Powerstone %s numerical effect', (id, key, value) =>
-    expect(one('powerstone.' + id).state[key]).toBe(value),
+    [12, 'defence_modifier', 2, { item_kind: 'shield' }],
+    [13, 'energy_modifier', 1, { item_kind: 'ring' }],
+    [14, 'luck_modifier', 1, { item_kind: 'ring', worn_by_hero: true }],
+    [15, 'detect_traps_modifier', 10, { item_kind: 'amulet', checking_trap_detection: true }],
+    [18, 'starting_hit_points_modifier', 2, { item_kind: 'ring' }],
+    [19, 'starting_party_morale_modifier', 2, { item_kind: 'ring', heroes_carrying_power: 1 }],
+    [20, 'sanity_modifier', 2, { item_kind: 'amulet' }],
+  ] as const)('Powerstone %s numerical effect', (n, key, value, inputs) =>
+    expect(ps(n, inputs).state[key]).toBe(value),
   );
   it('magic effects preserve floors, rounding, armour-wide immunity and identification boundary', () => {
-    expect(one('magic_weapons.6').state).toMatchObject({
+    expect(one('magic_weapons.6', { power_roll: 6 }).state).toMatchObject({
       enc_modifier: -5,
       class_modifier: -1,
       minimum_class: 1,
     });
-    expect(one('magic_armours_shields.3').state).toMatchObject({
+    expect(one('magic_armours_shields.3', { power_roll: 3 }).state).toMatchObject({
       enc_multiplier: 0.5,
       rounding: 'up',
     });
-    expect(one('magic_armours_shields.5').state).toMatchObject({
+    expect(one('magic_armours_shields.5', { power_roll: 5 }).state).toMatchObject({
       ignore_fire_effects: true,
       all_hit_locations: true,
     });
@@ -79,28 +93,36 @@ describe('treasure catalogue effects and supplied handoffs', () => {
     ).toBeUndefined();
     expect(one('legendary.general', { identified: false }).state.can_use).toBe(false);
   });
-  it.each(['magic_weapons', 'magic_armours_shields', 'magic_items'])(
-    '%s curse result rerolls positive power and hands off curse exactly once',
-    (id) => {
-      const result = one(id + '.10');
-      expect(result.state).toMatchObject({ cursed: true, reroll_positive_effect: true });
-      expect(result.events).toEqual([{ type: 'invoke', dependency: 'table.treasure.curses' }]);
-    },
-  );
   it.each([
-    ['1', 'hit_points_modifier', -2],
-    ['2', 'wisdom_modifier', -5],
-    ['3', 'constitution_modifier', -5],
-    ['4', 'strength_modifier', -5],
-    ['5', 'dexterity_modifier', -5],
-    ['6', 'hit_points_modifier', -3],
-    ['7', 'resolve_modifier', -10],
-    ['8', 'random_skill_modifier', -5],
-    ['9', 'luck_modifier', -1],
-    ['10', 'energy_modifier', -1],
+    ['magic_weapons', 'wielding'],
+    ['magic_armours_shields', 'wearing'],
+    ['magic_items', 'wielding'],
+  ])('%s curse result rerolls positive power and hands off curse exactly once', (id, verb) => {
+    const result = one(id + '.10', { power_roll: 10, [verb]: true });
+    expect(result.state).toMatchObject({
+      cursed: true,
+      reroll_positive_effect: true,
+      curse_effects_apply: true,
+    });
+    expect(result.events).toEqual([
+      { type: 'invoke', dependency: 'table.treasure.' + id },
+      { type: 'invoke', dependency: 'table.treasure.curses' },
+    ]);
+  });
+  it.each([
+    [1, 'hit_points_modifier', -2],
+    [2, 'wisdom_modifier', -5],
+    [3, 'constitution_modifier', -5],
+    [4, 'strength_modifier', -5],
+    [5, 'dexterity_modifier', -5],
+    [6, 'hit_points_modifier', -3],
+    [7, 'resolve_modifier', -10],
+    [8, 'random_skill_modifier', -5],
+    [9, 'luck_modifier', -1],
+    [10, 'energy_modifier', -1],
   ] as const)('curse %s applies only when not matching benefit', (n, key, value) => {
-    expect(one('curses.' + n, { selected: true, same_benefit: false }).state[key]).toBe(value);
-    expect(one('curses.' + n, { selected: true, same_benefit: true }).state[key]).toBeUndefined();
+    expect(one('curses.' + n, { curse_roll: n, same_benefit: false }).state[key]).toBe(value);
+    expect(one('curses.' + n, { curse_roll: n, same_benefit: true }).state[key]).toBeUndefined();
     expect(one('curse_reroll', { same_benefit: true }).state.reroll).toBe(true);
   });
   it('relic restrictions, healing die and per-quest Luck remain distinct', () => {
@@ -232,7 +254,10 @@ describe('treasure catalogue effects and supplied handoffs', () => {
     );
     expect(descriptions).toHaveLength(31);
     for (const e of descriptions) {
-      expect(e.rules).toHaveLength(2);
+      expect(e.rules![0]).toBe('character.treasure.legendary.general');
+      expect(e.rules![1]).toBe(
+        e.id.replace('equipment.legendary.', 'character.treasure.legendary.'),
+      );
       expect(corpus.rules.find((r) => r.id === e.rules![1])!.source.length).toBeGreaterThan(0);
     }
     expect(one('legendary.general', { identified: true }).state).toMatchObject({
@@ -293,7 +318,10 @@ describe('treasure catalogue effects and supplied handoffs', () => {
     });
   });
   it('Stone of Valheir preserves storage checks, risk and focus combination', () => {
-    expect(one('legendary.stone_of_valheir').state).toMatchObject({
+    expect(
+      one('legendary.stone_of_valheir', { selected: true, identified: true, user_is_wizard: true })
+        .state,
+    ).toMatchObject({
       maximum_focus_bonuses: 3,
       bonus_per_focus: 10,
       maximum_stored_focus_modifier: 30,
