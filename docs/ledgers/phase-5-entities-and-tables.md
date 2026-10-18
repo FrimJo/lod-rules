@@ -699,3 +699,76 @@ optional provider integrations skipped; coverage regenerated (695 rows / 695 IDs
 lint and `git diff --check` passed. The full suite used two workers. The sandbox
 blocks tsx's IPC socket, so validation and coverage ran the same entry points via
 `node --import tsx`; the full test suite ran with the approved sandbox escalation.
+
+## Embedded-restriction audit (`phase_5.criterion_5`) — 18 October 2026
+
+Corpus-wide evidence for "Embedded restrictions are converted into rules where appropriate"
+(issue #3, unit 4). Each Step 2–3 unit already checked its own catalogues against rendered pages
+(the "Typed dice and restrictions" notes in the
+[quest-book ledger](quest-book-reconciliation.md) and the tier records in the
+[core-chapter ledger](core-chapter-reconciliation.md)). This entry records the book-wide
+cross-check. It is evidence, not independent review, and changes no canonical object.
+
+**Scan.** A one-off script (not committed, as the issue's implementation decisions ask) loads the
+pilot corpus with `readPilot()` and searches every table `text` cell and every entity string field
+(source text, notes, qualifiers; not ids, names or `source`) for `only`, `cannot`, `can not`,
+`may not`, `must`, `require(s)`, `not cumulative` and `once per`. Command, from the repository root:
+`npx tsx /tmp/lod-issue3/restriction-scan.ts > restriction-audit.tsv`. A hit is matched against
+the string content of every rule, procedure and state machine by a word window around the hit
+word (two-sided windows of 5–9 words; one-sided 6-word windows only against objects linked to the
+hit). Links are row `rule_refs`, the rules of row `entity_refs`, entity `rules`, and rule
+`entity_id`, `quest_id`, `uses_tables` and `dependencies`. Hits with no match were read against
+the canonical object and the linked rules and given a manual disposition (39 hits; 285 matched automatically).
+
+**Classes.**
+
+- _converted_: a rule or procedure linked to the object carries the restriction (it quotes the
+  sentence, or the row's `rule_refs` name the rule that applies it).
+- _already a rule_: the catalogue repeats a restriction that a chapter rule or procedure already
+  holds without a direct link, such as the inn requirement on Activities rows (the
+  `activity_requires_inn` guard of `procedure.settlement_activities_and_overnight`), Dwarf and
+  Halfling bows in the Ranger starting-equipment qualifier (`character.species.*.bow_restriction`)
+  and the Silver City guild location (`character.settlement.guild_access`).
+- _logged_: an open `review/` issue holds it (`issue.travel.natural_swimmer_pier_and_water`,
+  `issue.threat.changelog_disarmed_cannot_fight`).
+- _non-mechanical_: lore or narrative inference ("must have been magical", "there must be a
+  hidden passageway", "the only place he knows", "only been two alchemists"), or the ritual lore
+  that motivates the Baptising fetch objective, which itself is `core.quest.baptising.water_return`.
+- _unconverted_: a mechanical restriction with no rule, link or issue.
+
+**Counts.** 324 hits in 187 objects: 139 table cells and 185 entity fields.
+
+| Class          | Table cells | Entity fields | Total |
+| -------------- | ----------: | ------------: | ----: |
+| Converted      |         119 |           169 |   288 |
+| Already a rule |           9 |             3 |    12 |
+| Logged         |           2 |             0 |     2 |
+| Non-mechanical |           1 |            13 |    14 |
+| Unconverted    |           8 |             0 |     8 |
+
+The classification is textual. Whether each linked rule's typed effects match the printed
+restriction is the per-unit review's evidence, not this scan's.
+
+**Review records.** The governing record of every object with a hit is fresh and passing (29
+records): `review.alchemy_preparations.1`, `review.appendix_i_perks.2`,
+`review.appendix_ii_talents.2`, `review.appendix_iii_general_equipment_a.5`,
+`review.appendix_iii_general_equipment_b.3`, `review.appendix_iii_weapons_armour.2`,
+`review.appendix_iv_spells.2`, `review.appendix_v_findings.1`, `review.appendix_v_legendary_a.3`,
+`review.appendix_v_legendary_b.2`, `review.appendix_v_tables.4`, `review.backgrounds.2`,
+`review.bandits_hideout_and_fountain_room.2`, `review.creating_your_character.2`,
+`review.guilds.3`, `review.inner_sanctum_and_estate.4`, `review.into_the_dungeons_actions.3`,
+`review.into_the_dungeons_movement.2`, `review.into_the_dungeons_setup.8`, `review.magic.3`,
+`review.prayers.3`, `review.psychology_tables.4`, `review.quests_into_the_ancient_lands.3`,
+`review.settlements_catalogue.1`, `review.settlements_core.3`, `review.side_quests.2`,
+`review.spider_queen_and_lava_river.3`, `review.the_dead_rising.2` and
+`review.travelling_and_skirmishes.2`.
+
+**Unconverted (8 hits, 4 objects).** These stay open, and `phase_5.criterion_5` stays `pending`
+until each one is converted through the corrector path or logged under `review/`:
+
+| Object / row                                                   | Printed restriction                                                                                                                                                                                                                                                                                   | Freezing record                        |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `table.dungeon.red_levers` `floor_gives_way`                   | "They must make a DEX Test or fall into a pit trap." … "To get up, the hero must use a rope or succeed with a DEX Test. Both alternatives take 1 AP." The general pit rules print DEX Test and 2 AP, or rope and 1 Action.                                                                            | `review.into_the_dungeons_actions.3`   |
+| `table.dungeon.threat_in_battle` `disarmed`                    | "The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so." Retries cost one AP each. ("cannot fight" is logged.)                                                                                                                                                           | `review.into_the_dungeons_setup.8`     |
+| `table.equipment.armour` `cloak` (`covers`)                    | "Torso (only back)": no hit zone or rule defines "back".                                                                                                                                                                                                                                              | `review.appendix_iii_weapons_armour.2` |
+| `table.travel.obstacles` `row_2`, `row_11`, `row_12`, `row_15` | Boulder and Large log: "50% or more of the square must be covered to count"; Huge boulder: "If more than 50% … it cannot be entered"; Pyramid: "Can only be climbed along the stairs." No row `rule_refs`; the dungeon Obstacles rows link `core.obstacle.half_square` and `core.movement.furniture`. | `review.travelling_and_skirmishes.2`   |
