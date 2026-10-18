@@ -223,8 +223,12 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
           if (
             output.cell_types.some(
               (t) =>
-                (t === 'number' ? 'number' : t === 'text' ? 'string' : 'unsupported') !==
-                targetType,
+                // A dice cell yields its printed notation, not a rolled number.
+                (t === 'number'
+                  ? 'number'
+                  : t === 'text' || t === 'dice'
+                    ? 'string'
+                    : 'unsupported') !== targetType,
             )
           )
             errors.push(`${owner}: lookup output type mismatch`);

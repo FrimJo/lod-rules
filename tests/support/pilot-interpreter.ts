@@ -134,7 +134,7 @@ function apply(effects: Effect[], dependencies: Dependency[], result: Result, pi
         }
         if (rows.length !== 1) throw new Error('Ambiguous table lookup');
         const value = rows[0]!.cells[effect.value_column];
-        if (value?.type !== 'number' && value?.type !== 'text')
+        if (value?.type !== 'number' && value?.type !== 'text' && value?.type !== 'dice')
           throw new Error('Unsupported lookup value');
         result.state[effect.target] = value.type === 'number' ? value.value : value.printed;
         break;

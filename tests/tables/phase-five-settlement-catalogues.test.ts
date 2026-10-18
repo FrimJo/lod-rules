@@ -25,6 +25,56 @@ describe('settlement and estate source catalogue regressions', () => {
       ['Whiteport', '1d6', 'Black'],
     ]);
   });
+  it('types every settlement Quest dice cell as the die rolled for the Quest Site', () => {
+    // PDF 132: "The Quest Site is determined by rolling a dice"; each Quest dice cell is that die.
+    const table = byId('table.settlement.quest_sites');
+    expect(table.columns.find((column) => column.id === 'quest_die')?.cell_types).toEqual(['dice']);
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.quest_die;
+        return cell?.type === 'dice' ? [cell.printed, cell.dice, cell.meaning] : cell?.type;
+      }),
+    ).toEqual([
+      ['1d4', { count: 1, sides: 4 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['2d20', { count: 2, sides: 20 }, 'roll'],
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+      ['1d6', { count: 1, sides: 6 }, 'roll'],
+    ]);
+  });
+  it('types the die printed inside each Settlement Event cell beside the verbatim event', () => {
+    // PDF 135 (printed 133): events 4 and 7 roll 1d12, event 10 steals 1d100 c, event 11 sends
+    // 1d4 bandits; the other events print no die.
+    const table = byId('table.settlement.events');
+    expect(table.columns.find((column) => column.id === 'event_dice')).toEqual({
+      id: 'event_dice',
+      label: 'Printed dice within Event cell',
+      cell_types: ['dice', 'blank'],
+    });
+    expect(
+      table.rows.map((row) => {
+        const cell = row.cells.event_dice;
+        return cell?.type === 'dice' ? [cell.printed, cell.dice, cell.meaning] : cell?.type;
+      }),
+    ).toEqual([
+      'blank',
+      'blank',
+      'blank',
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      'blank',
+      'blank',
+      ['1d12', { count: 1, sides: 12 }, 'roll'],
+      'blank',
+      'blank',
+      ['1d100', { count: 1, sides: 100 }, 'value'],
+      ['1d4', { count: 1, sides: 4 }, 'value'],
+      'blank',
+    ]);
+  });
   it('preserves the activity catalogue including zero and multi-day costs', () => {
     expect(matrix('table.settlement.activities')).toHaveLength(29);
     expect(matrix('table.settlement.activities').filter((row) => row[2]?.startsWith('0'))).toEqual([
