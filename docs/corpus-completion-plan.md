@@ -29,13 +29,13 @@ current position and next unit are in [extraction-checkpoint.md](extraction-chec
 
 | Measure                              | Value                                                                                                   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Canonical files (`npm run validate`) | 524, passing                                                                                            |
-| Tests (`npm test`)                   | 4,298 passing, 2 optional provider tests skipped                                                        |
-| Sections extracted / reviewed        | 580 / 678 extracted (86%), 408 independently reviewed (60%); 37 compatibility redirects excluded        |
-| Unfinished non-quest sections        | 38, of which 29 have no citing record (`npm run report:chapters`); tiers 1–6 are closed                 |
-| Procedures / state machines          | 119 / 2                                                                                                 |
-| Review records                       | 261: 230 unresolved, 31 resolved (most by published designer rulings)                                   |
-| Independent review records           | 32 fresh passing records under `review/independent/` (`npm run review -- check`)                        |
+| Canonical files (`npm run validate`) | 555, passing                                                                                            |
+| Tests (`npm test`)                   | 4,723 passing, 2 optional provider tests skipped                                                        |
+| Sections extracted / reviewed        | 677 / 677 independently reviewed (100%); 38 compatibility redirects excluded                            |
+| Unfinished non-quest sections        | 0 (`npm run report:chapters -- --include-quests`); Steps 2 and 3 are closed                             |
+| Procedures / state machines          | 125 / 2                                                                                                 |
+| Review records                       | 327: 280 unresolved, 47 resolved (most by published designer rulings)                                   |
+| Independent review records           | 53 fresh passing records under `review/independent/` (`npm run review -- check`)                        |
 | Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope            |
 | Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` is empty                                                      |
 | Phase 12 retrieval                   | Lexical retrieval, agent tools, MCP server and `ask` pipeline exist ([§5](#phase-12--retrieval-corpus)) |
@@ -46,8 +46,9 @@ when a step below closes, not after every unit.
 
 **Done within documented scope:** Phases 0–3; Phase 4 core mechanics; Phase 5 Batches 1–7
 (catalogues, including all quest, personal-quest and estate catalogue records); Phase 6
-Batches 1–7 (Packages A–F); Step 2 tiers 1–6 (Introduction through Buying an Estate, reconciled and
-independently reviewed; the estate side quest is Step 3). Published designer rulings are applied per the
+Batches 1–7 (Packages A–F); Step 2 (every core chapter, appendices, front and back matter, reconciled
+and independently reviewed); Step 3 (Quest Book I, Backgrounds and the Grieving Mother side quest at
+catalogue scope, reconciled and independently reviewed, 18 October). Published designer rulings are applied per the
 [extraction guide](extraction-guide.md).
 
 ### Why the order changed
@@ -158,7 +159,7 @@ Character Basics.
 **Exit:** every non-quest section is `extracted` or has justified exclusions, and has
 independent-review evidence.
 
-### Step 3 — Quest Book I and personal quests: reconcile and review
+### Step 3 — Quest Book I and personal quests: reconcile and review (done 18 October)
 
 Apply the Step 2 loop to Quest Book I, backgrounds and the estate side quest at catalogue scope.
 Their catalogue inventory is already accepted (Package E), so this step is mainly component

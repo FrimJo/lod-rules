@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 17 October 2026
+## Current position — 18 October 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -57,21 +57,41 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   re-reviewed (`review.combat_enemies.3`, `review.into_the_dungeons_setup.8`,
   `review.appendix_v_legendary_b.2`). Step 2 is complete: every non-quest section except
   Backgrounds is `reviewed` or a `mapped` redirect.
+- Step 3 is reconciled and independently reviewed (18 October): Quest Book I, Backgrounds and the
+  Grieving Mother side quest at catalogue scope, as eight units (`review.quest_book_i.1`,
+  `review.quest_book_introduction.2`, `review.backgrounds.2`, `review.the_dead_rising.2`,
+  `review.spider_queen_and_lava_river.3`, `review.bandits_hideout_and_fountain_room.2`,
+  `review.chamber_of_reverence_and_great_crypt.2`, `review.quests_into_the_ancient_lands.3`,
+  `review.side_quests.2`); 132 sections promoted. A quest whose page prints no procedure of its own
+  marks `procedures: not_applicable` and names the shared procedures it runs through. Changelog
+  2.21 entries 103/194, 111, 142, 143 and 195 are applied; 104, 105, 107–110 and 112 are recorded,
+  not applied. Every non-redirect section of the book is now `reviewed` (677); the 38 compatibility
+  redirects stay `mapped`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
-- Coverage: see the generated [coverage report](coverage-report.md); 545 sections reviewed.
+- Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
   Phases 7–12 are unfinished.
 
 ## Next unit
 
-Step 3: Quest Book I (66 sections still `extracted`), Backgrounds (5) and the Grieving Mother
-side quest, at catalogue scope. Apply the Step 2 loop: reconcile with `npm run report:chapters`,
-one fresh `corpus-reviewer` per unit of at most about 12 pages or 150 objects, a separate
-corrector, fresh re-reviewers, and promote only sections whose latest review passed and is fresh.
-Quest rules stay scenario-scoped. The 6 open Phase 0–6 exit rows (table inventory, typed dice in
-text cells, embedded restrictions as rules, procedure/rule duplication, Phase 5 Batch 7, the
-"embarking on a quest" candidate) are still `pending`; they close in Phase 10 and Step 4 as the
-plan assigns. Open carry-overs:
+Close the Phase 0–6 exit rows that Phase 10 owns, then start Step 4 (Phase 7). Phase 10's
+coverage exit holds (every section reviewed or a redirect), but these rows in
+`tests/fixtures/acceptance/phases-0-6.json` are still `pending`:
+
+- `phase_1.criterion_3` (every printed table has exactly one node): confirm from the review records
+  and `sections.yaml`, and turn `section.appendix_iii_equipment.general_equipment.table` into a
+  redirect if it still duplicates the PDF 186 Sell and Repair table.
+- `phase_5.criterion_3` (typed dice): a corpus-wide scan of table text cells still finds about 35
+  rows printing a die with neither a dice/composite cell nor a row `rule_refs` (mostly
+  `table.settlement.quest_sites`, `table.settlement.events`, `table.magic.miscast`,
+  `table.estate.furnishings`, `table.magic.demons`); some may be typed through rules linked
+  elsewhere. Most sit in frozen records, so fixes need a re-review of the record that freezes them.
+- `phase_5.criterion_5` (embedded restrictions as rules): Steps 2–3 audited each unit; record the
+  corpus-wide evidence.
+- `phase_6.criterion_2` (procedure/rule duplication) and the Phase 5 Batch 7 and "embarking on a
+  quest" rows close with Step 4 as the plan assigns.
+
+Open carry-overs:
 
 - `issue.0004` still lacks `related` links to the Acute Stress rule and procedure (frozen by
   `review.introduction.2`).
@@ -93,6 +113,11 @@ plan assigns. Open carry-overs:
 - `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should
   relate `combat.action.pick_up_weapon` and `procedure.enemy_attack` (frozen by
   `review.combat_actions.4` and `review.combat_damage.2`).
+- Glued words in the summaries of the frozen issues `issue.quest.side_quest_availability`,
+  `issue.quest.tomb_raiders_threat_boundary`, `issue.quest.spider_queen_cobweb_mapping` and
+  `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
+- `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
+  "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
 - The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
   hungry character (not dogs), once, until the party eats.
 
@@ -114,6 +139,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Package E: quest and scenario catalogues       | [quest-scenario-inventory.md](ledgers/quest-scenario-inventory.md)                           |
 | Package F: lifecycle models                    | [lifecycle-procedures.md](ledgers/lifecycle-procedures.md)                                   |
 | Step 2: core-chapter reconciliation            | [core-chapter-reconciliation.md](ledgers/core-chapter-reconciliation.md)                     |
+| Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
