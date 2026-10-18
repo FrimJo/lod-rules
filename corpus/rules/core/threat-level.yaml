@@ -521,3 +521,115 @@
     - key: locked_door
       label: Locked doors and chests
       object_id: procedure.locked_door_and_close
+- id: core.threat.in_battle.disarmed.retrieve_weapon
+  name: Threat in battle 7 — Disarmed, retrieving the weapon
+  section_id: section.into_the_dungeons.table_2
+  source: &disarmed
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 89
+      pdf_page: 91
+      section: The Threat Level
+      heading: 'If the party is in battle:'
+      locator:
+        table: Uncaptioned 1d10 / Result / Threat decrease table
+        row: '7'
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The hero must manage a DEX Test to retrieve his weapon, spending 1 Action doing so.
+  issues:
+    - issue.threat.changelog_disarmed_cannot_fight
+    - issue.threat.disarmed_retry
+  type: procedure_rule
+  scope: battle
+  fields:
+    retry:
+      type: boolean
+      role: input
+      description: This is a further try after a failed first DEX Test.
+    dex_test_passed:
+      type: boolean
+      role: input
+      description: The disarmed hero passed the DEX Test.
+    dex_test_required:
+      type: boolean
+      role: output
+      description: A DEX Test is needed to retrieve the weapon.
+    actions_spent:
+      type: number
+      role: output
+      description: Actions spent on the try, as printed ("1 Action").
+      integer: true
+    weapon_retrieved:
+      type: boolean
+      role: output
+      description: The hero has his weapon back.
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: retry
+    right:
+      type: literal
+      value: false
+  effects:
+    - type: set
+      target: dex_test_required
+      value:
+        type: literal
+        value: true
+    - type: set
+      target: actions_spent
+      value:
+        type: literal
+        value: 1
+    - type: set
+      target: weapon_retrieved
+      value:
+        type: field
+        name: dex_test_passed
+  uses_tables:
+    - table.dungeon.threat_in_battle
+- id: core.threat.in_battle.disarmed.retry
+  name: Threat in battle 7 — Disarmed, further tries
+  section_id: section.into_the_dungeons.table_2
+  source: *disarmed
+  status: extracted
+  confidence: high
+  source_text: They may continue to try to pick it up, spending one AP per try.
+  issues:
+    - issue.threat.disarmed_retry
+  type: procedure_rule
+  scope: battle
+  fields:
+    retry:
+      type: boolean
+      role: input
+      description: This is a further try after a failed first DEX Test.
+    ap_spent:
+      type: number
+      role: output
+      description: AP spent on this further try.
+      integer: true
+  when:
+    type: compare
+    operator: eq
+    left:
+      type: field
+      name: retry
+    right:
+      type: literal
+      value: true
+  effects:
+    - type: set
+      target: ap_spent
+      value:
+        type: literal
+        value: 1
+  uses_tables:
+    - table.dungeon.threat_in_battle
