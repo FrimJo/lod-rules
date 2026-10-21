@@ -304,7 +304,7 @@ export class Retrieval {
   }
 
   /** A section or manifest document: a graph node that has no retrieval document. */
-  private node(id: string): { id: string; title: string } | null {
+  node(id: string): { id: string; title: string } | null {
     const row = this.db.prepare('SELECT title FROM nodes WHERE id = ?').get(id);
     return row ? { id, title: text(row, 'title') } : null;
   }

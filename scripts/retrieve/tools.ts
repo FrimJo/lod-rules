@@ -219,9 +219,11 @@ function rulebookRecord(retrieval: Retrieval, recordId: string): unknown {
     typeof record === 'object' && record !== null
       ? Object.fromEntries(Object.entries(record).filter(([key]) => !REPEATED_KEYS.has(key)))
       : {};
-  const links = document.relations.filter((relation) => {
-    const target = retrieval.document(relation.target);
-    return target !== null && target.kind !== 'issue';
+  // Like `lod_expand`: a target is a retrieval document or a section or manifest document node.
+  const links = document.relations.flatMap((relation) => {
+    const target = retrieval.document(relation.target) ?? retrieval.node(relation.target);
+    if (target === null || ('kind' in target && target.kind === 'issue')) return [];
+    return [{ ...relation, target_title: target.title }];
   });
   return {
     ...summary(document),

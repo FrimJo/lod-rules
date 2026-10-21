@@ -155,6 +155,15 @@ describe('runRetrievalTool', () => {
       }),
     );
 
+    // lod_get resolves section and manifest-document targets the way lod_expand does.
+    expect(
+      (run('lod_get', { id: 'character.alchemy.components' }) as { links: ToolEdge[] }).links,
+    ).toContainEqual({
+      relation: 'see_also',
+      target: 'section.alchemists_guild',
+      target_title: 'Alchemists’ Guild',
+    });
+
     const excluded = ['cites_section', 'redirects_to', 'tests', 'concerns', 'issue'];
     for (const id of [
       'core.quest.pyramid_xanthu.setup',

@@ -25,10 +25,13 @@ export interface SourceManifest {
   external_sources?: Array<{ id: string; title: string; status: string }>;
 }
 
-/** Canonical inputs for retrieval. Examples under tests/ are not retrieval content. */
+/** Canonical inputs for retrieval. Test cases under tests/examples/ are never retrieval content. */
 export interface RetrievalCorpus {
   pilot: Omit<Pilot, 'testCases'>;
-  /** Examples under tests/examples/, only when asked for (the graph reads them; search does not). */
+  /**
+   * Test cases under tests/examples/, loaded only on request (`{ testCases: true }`) so the graph
+   * can derive `tests` edges. Never indexed, searched or returned by the tools.
+   */
   testCases?: TestCase[];
   terms: GlossaryTerm[];
   aliases: Alias[];
