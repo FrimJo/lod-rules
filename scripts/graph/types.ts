@@ -70,3 +70,21 @@ export interface Graph {
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
+
+/** An edge whose target is not a graph node. */
+export interface DanglingId {
+  source: string;
+  relation: Relation;
+  target: string;
+  field: string;
+}
+
+/** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
+export interface Anomalies {
+  dangling: DanglingId[];
+}
+
+/** What `buildGraph` returns: the derived graph plus its anomalies. */
+export interface AnalysedGraph extends Graph {
+  anomalies: Anomalies;
+}
