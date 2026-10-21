@@ -79,9 +79,17 @@ export interface DanglingId {
   field: string;
 }
 
+/** A free-text `unresolved_references` entry. Never an edge; never resolved here. */
+export interface UnresolvedPointer {
+  /** Id of the record or section whose `unresolved_references` holds the entry. */
+  owner: string;
+  wording: string;
+}
+
 /** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
 export interface Anomalies {
   dangling: DanglingId[];
+  unresolved: UnresolvedPointer[];
 }
 
 /** What `buildGraph` returns: the derived graph plus its anomalies. */

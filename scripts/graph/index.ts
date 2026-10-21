@@ -11,5 +11,5 @@ export * from './types.ts';
 export function buildGraph(root = repoRoot): AnalysedGraph {
   const corpus = loadRetrievalCorpus(root);
   const graph = deriveGraph(corpus);
-  return { ...graph, anomalies: findAnomalies(graph) };
+  return { ...graph, anomalies: findAnomalies(graph, corpus) };
 }
