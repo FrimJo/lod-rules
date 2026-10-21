@@ -181,6 +181,11 @@ above (`phase_6.criterion_2`) and the "embarking on a quest" candidate, whose st
 randomisation (`core.quest.start_settlement`, PDF 59) is extracted and reviewed but not yet bound
 as the source of the first quest acceptance's settlement.
 
+Step 4 runs as four units (issue #5): graph derivation and traversal, the embarking binding,
+duplicate/summary detection, and anomaly dispositions. Unit 1 is done (21 October 2026):
+`scripts/graph/` derives the typed graph that retrieval and `lod_expand` read, and
+`npm run graph -- report` regenerates [graph-report.md](graph-report.md).
+
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 
 See [§5](#5-compile-and-make-the-corpus-retrievable).

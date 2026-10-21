@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 18 October 2026
+## Current position — 21 October 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -80,6 +80,12 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `review.travelling_and_skirmishes.4` and `review.appendix_iii_weapons_armour.3`.
   `governingRecord` now orders same-date records by numeric suffix, so `review.x.10` governs over
   `review.x.9`.
+- Step 4 (Phase 7) unit 1 is done (21 October, issues #5–#9): `scripts/graph/` derives the typed
+  dependency graph (4861 nodes, 15492 edges, six categories) that retrieval and `lod_expand` now
+  read. `npm run graph -- report` regenerates the committed [graph report](graph-report.md): 0
+  dangling ids, 41 cycles (`depends_on` 28, `related` 13), 222 unresolved pointers, none with a
+  disposition yet. No canonical change; evidence in
+  [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -87,15 +93,19 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7): the dependency graph and precedence in
-[corpus-completion-plan.md](corpus-completion-plan.md). Two Phase 0–6 exit rows in
-`tests/fixtures/acceptance/phases-0-6.json` close with it:
+Step 4 (Phase 7) unit 2, the embarking binding: bind `core.quest.start_settlement` (PDF 59) as
+the source of the first `procedure.quest_acceptance`'s settlement. It is the first canonical edge
+in `corpus/graph/` and defines that directory's schema; the edge joins the derived graph and
+needs `corpus-reviewer` independent review. It closes the "embarking on a quest" candidate in
+`tests/fixtures/acceptance/phases-0-6.json`. Evidence goes in
+[phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
 
-- `phase_6.criterion_2` (procedure steps reference atomic rules rather than duplicate them): the
-  duplicate/summary detection.
-- The "embarking on a quest" candidate: `table.settlement.start_settlement` and
-  `core.quest.start_settlement` are extracted and reviewed; bind them as the source of the first
-  `procedure.quest_acceptance`'s settlement.
+Then, in order (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):
+
+- Unit 3, duplicate/summary detection: `summary_of`/`expanded_by` edges; closes
+  `phase_6.criterion_2` (procedure steps reference atomic rules rather than duplicate them).
+- Unit 4, anomaly dispositions: a disposition for every dangling id, cycle and unresolved pointer
+  in the [graph report](graph-report.md), absorbing the carry-overs below where they fit.
 
 Open carry-overs:
 
@@ -144,6 +154,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Package F: lifecycle models                    | [lifecycle-procedures.md](ledgers/lifecycle-procedures.md)                                   |
 | Step 2: core-chapter reconciliation            | [core-chapter-reconciliation.md](ledgers/core-chapter-reconciliation.md)                     |
 | Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
+| Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
