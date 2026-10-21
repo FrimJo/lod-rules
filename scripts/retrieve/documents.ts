@@ -1,6 +1,7 @@
+import { deriveGraph } from '../graph/derive.ts';
+import type { Graph } from '../graph/types.ts';
 import type {
   Cell,
-  Effect,
   Entity,
   PilotSource,
   Procedure,
@@ -85,17 +86,6 @@ function citations(sources: SourceReference[]): Citation[] {
   return out;
 }
 
-function lookupTables(effects: Effect[] | undefined): string[] {
-  const ids: string[] = [];
-  for (const effect of effects ?? []) {
-    if (effect.type === 'lookup') ids.push(effect.table_id);
-    else if (effect.type === 'choice') {
-      for (const option of effect.options) ids.push(...lookupTables(option.effects));
-    }
-  }
-  return ids;
-}
-
 function flattenSteps(steps: Step[]): Step[] {
   return steps.flatMap((step) => [step, ...flattenSteps(step.substeps ?? [])]);
 }
@@ -125,21 +115,32 @@ function tableText(table: Table): string {
   return [table.source_text, printedTableText(table)].join('\n');
 }
 
-class Builder {
-  private relations: Relation[] = [];
-  add(relation: string, targets: Array<string | undefined> | undefined): void {
-    for (const target of targets ?? []) if (target) this.relations.push({ relation, target });
+/** One relation per (relation, target), however many fields record it. */
+function relationsBySource(graph: Graph): Map<string, Relation[]> {
+  const unique = new Map<string, Map<string, Relation>>();
+  for (const { source, relation, target } of graph.edges) {
+    const relations = unique.get(source) ?? new Map<string, Relation>();
+    relations.set(`${relation}\0${target}`, { relation, target });
+    unique.set(source, relations);
   }
-  done(): Relation[] {
-    const unique = new Map(this.relations.map((r) => [`${r.relation}\0${r.target}`, r]));
-    return [...unique.values()].sort(
-      (a, b) =>
-        a.relation.localeCompare(b.relation, 'en') || a.target.localeCompare(b.target, 'en'),
-    );
-  }
+  return new Map(
+    [...unique].map(([source, relations]) => [
+      source,
+      [...relations.values()].sort(
+        (a, b) =>
+          a.relation.localeCompare(b.relation, 'en') || a.target.localeCompare(b.target, 'en'),
+      ),
+    ]),
+  );
 }
 
-export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] {
+/** Relations come from the graph module; pass a prebuilt graph to avoid deriving it twice. */
+export function buildSearchDocuments(
+  corpus: RetrievalCorpus,
+  graph: Graph = deriveGraph(corpus),
+): SearchDocument[] {
+  const relationsFor = relationsBySource(graph);
+  const relations = (id: string): Relation[] => relationsFor.get(id) ?? [];
   const sections = new Map(corpus.sections.map((section) => [section.id, section]));
   const quests = corpus.pilot.entities.filter((entity) => entity.type === 'quest');
   const questBySection = new Map(quests.map((quest) => [quest.section_id, quest.id]));
@@ -205,12 +206,8 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
     scope: string,
     questId: string | undefined,
     text: string,
-    relations: Builder,
     external: ExternalDependency[] = [],
   ): SearchDocument => {
-    relations.add('see_also', record.see_also);
-    relations.add('issue', record.issues);
-    relations.add('quest', [questId === record.id ? undefined : questId]);
     const issueIds = [
       ...new Set([...(record.issues ?? []), ...(issuesFor.get(record.id) ?? [])]),
     ].sort();
@@ -225,7 +222,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       scope,
       section_id: record.section_id,
       citations: citations(record.source),
-      relations: relations.done(),
+      relations: relations(record.id),
       issue_ids: issueIds,
       unresolved_references: record.unresolved_references ?? [],
       external_dependencies: external,
@@ -236,13 +233,11 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
     return doc;
   };
 
-  const dependencyRelations = (
-    builder: Builder,
+  const externalDependencies = (
     dependencies: Rule['dependencies'] | Procedure['dependencies'],
   ): ExternalDependency[] => {
     const external: ExternalDependency[] = [];
     for (const dependency of dependencies ?? []) {
-      builder.add('depends_on', [dependency.object_id ?? dependency.section_id]);
       if (dependency.external_document) {
         external.push({ label: dependency.label, document: dependency.external_document });
       }
@@ -251,13 +246,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
   };
 
   const rule = (r: Rule): SearchDocument => {
-    const b = new Builder();
-    b.add('uses_table', [...(r.uses_tables ?? []), ...lookupTables(r.effects)]);
-    b.add('overrides', r.overrides);
-    b.add('term', r.term_refs);
-    b.add('timing', r.timing_refs);
-    b.add('entity', [r.entity_id]);
-    const external = dependencyRelations(b, r.dependencies);
+    const external = externalDependencies(r.dependencies);
     const questId = questFor(r.section_id, r.quest_id);
     return base(
       r,
@@ -266,45 +255,20 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       r.scope,
       r.scope === 'quest' ? questId : r.quest_id,
       r.source_text,
-      b,
       external,
     );
   };
 
   const entity = (e: Entity): SearchDocument => {
-    const b = new Builder();
-    b.add('rule', e.rules);
-    b.add('table', [...e.tables, ...(e.table_rows ?? []).map((row) => row.table_id)]);
-    b.add('component', [...(e.components ?? []).map((c) => c.entity_id), e.result?.entity_id]);
-    b.add('grants', [
-      ...(e.grants ?? []).map((g) => g.object_id),
-      ...(e.grant_choices ?? []).flatMap((choice) => choice.options.map((g) => g.object_id)),
-    ]);
-    b.add(
-      'starting_equipment',
-      (e.starting_equipment ?? []).flatMap((item) => [
-        item.object_id,
-        ...(item.options ?? []).map((option) => option.object_id),
-      ]),
-    );
     const questId = e.type === 'quest' ? e.id : questFor(e.section_id, e.quest_id);
     // A background links to its personal quest but is chosen at character creation.
     const questBound = e.quest_id !== undefined && e.type !== 'background';
     const scope = e.type === 'quest' || e.type === 'quest_actor' || questBound ? 'quest' : 'global';
     const text = [e.category, e.school, e.source_text].filter(Boolean).join('\n');
-    return base(e, 'entity', e.type, scope, questId, text, b);
+    return base(e, 'entity', e.type, scope, questId, text);
   };
 
   const table = (t: Table): SearchDocument => {
-    const b = new Builder();
-    b.add(
-      'row_rule',
-      t.rows.flatMap((row) => row.rule_refs ?? []),
-    );
-    b.add(
-      'row_entity',
-      t.rows.flatMap((row) => row.entity_refs ?? []),
-    );
     const quest = isQuestSection(t.section_id);
     const doc = base(
       t,
@@ -313,24 +277,14 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       quest ? 'quest' : 'global',
       quest ? questFor(t.section_id) : undefined,
       tableText(t),
-      b,
     );
     doc.citations = citations([...t.source, ...t.rows.flatMap((row) => row.source ?? [])]);
     return doc;
   };
 
   const procedure = (p: Procedure): SearchDocument => {
-    const b = new Builder();
     const steps = flattenSteps(p.steps);
-    b.add(
-      'step_rule',
-      steps.flatMap((step) => step.rule_refs ?? []),
-    );
-    b.add(
-      'uses_table',
-      steps.flatMap((step) => lookupTables(step.effects)),
-    );
-    const external = dependencyRelations(b, p.dependencies);
+    const external = externalDependencies(p.dependencies);
     const quest = isQuestSection(p.section_id);
     const text = distinctLines([p.source_text, ...steps.map((step) => step.source_text)]);
     const doc = base(
@@ -340,7 +294,6 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       quest ? 'quest' : 'global',
       quest ? questFor(p.section_id) : undefined,
       text,
-      b,
       external,
     );
     doc.citations = citations([...p.source, ...steps.flatMap((step) => step.source ?? [])]);
@@ -348,11 +301,6 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
   };
 
   const stateMachine = (m: StateMachine): SearchDocument => {
-    const b = new Builder();
-    b.add(
-      'enters',
-      m.states.flatMap((state) => (state.enter ?? []).map((e) => e.object_id)),
-    );
     const text = distinctLines([
       m.source_text,
       ...m.states.flatMap((state) => [
@@ -360,14 +308,11 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
         ...(state.transitions ?? []).map((t) => `${t.event}: ${t.source_text}`),
       ]),
     ]);
-    return base(m, 'state_machine', 'state_machine', 'global', undefined, text, b);
+    return base(m, 'state_machine', 'state_machine', 'global', undefined, text);
   };
 
   const term = (t: GlossaryTerm): SearchDocument => {
-    const b = new Builder();
-    b.add('related', t.related);
     const issueIds = [...new Set(issuesFor.get(t.id) ?? [])].sort();
-    b.add('issue', issueIds);
     return {
       id: t.id,
       kind: 'term',
@@ -387,7 +332,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       scope: 'global',
       section_id: t.section_id,
       citations: citations(t.source),
-      relations: b.done(),
+      relations: relations(t.id),
       issue_ids: issueIds,
       unresolved_references: [],
       external_dependencies: [],
@@ -397,8 +342,6 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
   };
 
   const issue = (i: ReviewIssue): SearchDocument => {
-    const b = new Builder();
-    b.add('concerns', i.related);
     const resolution = i.status === 'resolved' ? i.resolution.summary : '';
     return {
       id: i.id,
@@ -412,7 +355,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus): SearchDocument[] 
       citations: citations(
         i.status === 'resolved' ? [...i.source, ...i.resolution.source] : i.source,
       ),
-      relations: b.done(),
+      relations: relations(i.id),
       issue_ids: [],
       unresolved_references: [],
       external_dependencies: [],
