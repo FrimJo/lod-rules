@@ -1,5 +1,12 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-import { buildSearchDocuments, type DocumentKind, type SearchDocument } from './documents.ts';
+import { deriveGraph } from '../graph/derive.ts';
+import {
+  buildSearchDocuments,
+  graphLinks,
+  type DocumentKind,
+  type GraphLinks,
+  type SearchDocument,
+} from './documents.ts';
 import { loadRetrievalCorpus, type RetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
@@ -37,7 +44,7 @@ export interface Edge {
   relation: string;
   target: string;
   direction: 'out' | 'in';
-  /** False when the target is a section or other id without a retrieval document. */
+  /** False when the target is neither a record nor a section or manifest document. */
   found: boolean;
   target_title?: string;
 }
@@ -99,6 +106,7 @@ export function createRetrievalDatabase(
   documents: SearchDocument[],
   records: Map<string, unknown>,
   path = ':memory:',
+  links: GraphLinks = { relations: [], nodes: [] },
 ): DatabaseSync {
   const db = new DatabaseSync(path);
   db.exec(`
@@ -110,6 +118,7 @@ export function createRetrievalDatabase(
     CREATE TABLE relations (source TEXT NOT NULL, relation TEXT NOT NULL, target TEXT NOT NULL,
       PRIMARY KEY (source, relation, target));
     CREATE INDEX relations_target ON relations (target);
+    CREATE TABLE nodes (id TEXT PRIMARY KEY, title TEXT NOT NULL);
     CREATE VIRTUAL TABLE fts USING fts5(id UNINDEXED, title, aliases, context, text,
       tokenize = 'porter unicode61 remove_diacritics 2');
   `);
@@ -119,6 +128,7 @@ export function createRetrievalDatabase(
     alias: db.prepare('INSERT OR IGNORE INTO aliases VALUES (?, ?)'),
     relation: db.prepare('INSERT OR IGNORE INTO relations VALUES (?, ?, ?)'),
     fts: db.prepare('INSERT INTO fts VALUES (?, ?, ?, ?, ?)'),
+    node: db.prepare('INSERT OR IGNORE INTO nodes VALUES (?, ?)'),
   };
   db.exec('BEGIN');
   for (const doc of documents) {
@@ -150,6 +160,10 @@ export function createRetrievalDatabase(
       doc.text,
     );
   }
+  // Graph links whose source or target is a section or manifest document, not a record.
+  for (const { source, relation, target } of links.relations)
+    insert.relation.run(source, relation, target);
+  for (const node of links.nodes) insert.node.run(node.id, node.title);
   db.exec('COMMIT');
   return db;
 }
@@ -174,8 +188,14 @@ export class Retrieval {
   /** Builds an in-memory index from the canonical YAML. */
   static fromCorpus(root?: string): Retrieval {
     const corpus = loadRetrievalCorpus(root);
+    const graph = deriveGraph(corpus);
     return new Retrieval(
-      createRetrievalDatabase(buildSearchDocuments(corpus), canonicalRecords(corpus)),
+      createRetrievalDatabase(
+        buildSearchDocuments(corpus, graph),
+        canonicalRecords(corpus),
+        ':memory:',
+        graphLinks(graph),
+      ),
     );
   }
 
@@ -283,6 +303,12 @@ export class Retrieval {
     );
   }
 
+  /** A section or manifest document: a graph node that has no retrieval document. */
+  private node(id: string): { id: string; title: string } | null {
+    const row = this.db.prepare('SELECT title FROM nodes WHERE id = ?').get(id);
+    return row ? { id, title: text(row, 'title') } : null;
+  }
+
   /** Typed relation traversal. `in` edges answer "what points at this record?". */
   expand(id: string, options: ExpandOptions = {}): Edge[] {
     const direction = options.direction ?? 'both';
@@ -321,8 +347,9 @@ export class Retrieval {
         }
         for (const edge of found) {
           if (wanted && !wanted.has(edge.relation)) continue;
-          const target = this.document(edge.target);
-          if (target && options.skipKinds?.includes(target.kind)) continue;
+          const document = this.document(edge.target);
+          if (document && options.skipKinds?.includes(document.kind)) continue;
+          const target = document ?? this.node(edge.target);
           edges.push({
             ...edge,
             found: target !== null,

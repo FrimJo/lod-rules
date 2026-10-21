@@ -129,6 +129,50 @@ describe('runRetrievalTool', () => {
     );
   });
 
+  it('expand follows quest, external and part_of links but no bookkeeping or evidence', () => {
+    type ToolEdge = { relation: string; target: string; target_title?: string };
+    const expand = (input: unknown): ToolEdge[] => run('lod_expand', input) as ToolEdge[];
+
+    expect(expand({ id: 'core.quest.pyramid_xanthu.setup', direction: 'out' })).toContainEqual(
+      expect.objectContaining({
+        relation: 'quest',
+        target: 'quest.ancient_lands.pyramid_xanthu',
+        target_title: 'The Pyramid of Xánthu',
+      }),
+    );
+    expect(expand({ id: 'section.introduction', direction: 'out' })).toContainEqual({
+      source: 'section.introduction',
+      relation: 'external',
+      target: 'bestiary',
+      direction: 'out',
+      target_title: 'Bestiary',
+    });
+    expect(expand({ id: 'section.combat.who_can_fight', direction: 'out' })).toContainEqual(
+      expect.objectContaining({
+        relation: 'part_of',
+        target: 'section.combat',
+        target_title: 'Combat',
+      }),
+    );
+
+    const excluded = ['cites_section', 'redirects_to', 'tests', 'concerns', 'issue'];
+    for (const id of [
+      'core.quest.pyramid_xanthu.setup',
+      'character.alchemy.drink',
+      'section.magic.casting_spells.table_3',
+      'section.alchemy.drinking_potions',
+      'term.battle',
+    ]) {
+      const edges = expand({ id, depth: 2 });
+      expectRulebookOnly(edges, id);
+      for (const edge of edges)
+        expect(excluded, `${id} ${edge.relation}`).not.toContain(edge.relation);
+      const links = (run('lod_get', { id }) as { links?: ToolEdge[] }).links ?? [];
+      for (const link of links)
+        expect(excluded, `${id} ${link.relation}`).not.toContain(link.relation);
+    }
+  });
+
   it('treat review issue ids as unknown', () => {
     const issueId = retrieval.document('term.battle')?.issue_ids[0];
     expect(issueId).toBeDefined();

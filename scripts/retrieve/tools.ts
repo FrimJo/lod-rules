@@ -136,7 +136,8 @@ export const RETRIEVAL_TOOLS: ToolDefinition[] = [
     name: 'lod_expand',
     description:
       'Follow links from a record. "out" edges are what it uses or refers to (uses_table, ' +
-      'depends_on, see_also, table, rule, entity, quest, …); "in" edges are what refers to it.',
+      'depends_on, see_also, table, rule, entity, quest, external, part_of, …); "in" edges are ' +
+      'what refers to it.',
     input_schema: {
       type: 'object',
       properties: {

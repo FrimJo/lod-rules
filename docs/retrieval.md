@@ -38,19 +38,19 @@ This is not `build:corpus`. Phase 11 still owns the full compiled bundle.
 Each document covers a rule, entity, table, procedure, state machine, glossary term or
 review issue. Code lives in `scripts/retrieve/`.
 
-| Field                                   | Meaning                                                                        |
-| --------------------------------------- | ------------------------------------------------------------------------------ |
-| `id`, `kind`, `type`, `title`           | Stable canonical id and record classification                                  |
-| `aliases`                               | Glossary aliases and abbreviations (`AP`)                                      |
-| `context`                               | Section and parent titles, which are often clearer than generated rule names   |
-| `text`                                  | Source text; tables include every printed cell and footnote                    |
-| `scope`, `quest_id`                     | `global`, `quest` or a rulebook scope; quest-local mechanics name their quest  |
-| `citations`                             | PDF and printed pages with headings                                            |
-| `relations`                             | Typed outgoing references (`see_also`, `uses_table`, `depends_on`, `concerns`) |
-| `issue_ids`                             | Review issues that concern the record                                          |
-| `unresolved_references`                 | Original wording of pointers the corpus cannot bind                            |
-| `external_dependencies`                 | Material in books that are not present (Bestiary and others)                   |
-| `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                                |
+| Field                                   | Meaning                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------- |
+| `id`, `kind`, `type`, `title`           | Stable canonical id and record classification                                 |
+| `aliases`                               | Glossary aliases and abbreviations (`AP`)                                     |
+| `context`                               | Section and parent titles, which are often clearer than generated rule names  |
+| `text`                                  | Source text; tables include every printed cell and footnote                   |
+| `scope`, `quest_id`                     | `global`, `quest` or a rulebook scope; quest-local mechanics name their quest |
+| `citations`                             | PDF and printed pages with headings                                           |
+| `relations`                             | Edges agents may follow, from the graph (`see_also`, `uses_table`, `part_of`) |
+| `issue_ids`                             | Review issues that concern the record                                         |
+| `unresolved_references`                 | Original wording of pointers the corpus cannot bind                           |
+| `external_dependencies`                 | Material in books that are not present (Bestiary and others)                  |
+| `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                               |
 
 Search ranks with BM25 over title, aliases, context and text. Results matching more
 of the query words get a boost. Quest-local records are demoted unless the query names

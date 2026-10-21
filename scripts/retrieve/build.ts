@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { repoRoot } from '../validate/schemas.ts';
-import { buildSearchDocuments, SEARCH_DOCUMENT_VERSION } from './documents.ts';
+import { deriveGraph } from '../graph/derive.ts';
+import { buildSearchDocuments, graphLinks, SEARCH_DOCUMENT_VERSION } from './documents.ts';
 import { canonicalRecords, createRetrievalDatabase } from './index.ts';
 import { fingerprintInputs, loadRetrievalCorpus } from './load.ts';
 
@@ -21,7 +22,8 @@ export interface RetrievalManifest {
  */
 export function buildRetrievalArtifacts(root = repoRoot): RetrievalManifest {
   const corpus = loadRetrievalCorpus(root);
-  const documents = buildSearchDocuments(corpus);
+  const graph = deriveGraph(corpus);
+  const documents = buildSearchDocuments(corpus, graph);
   const target = join(root, RETRIEVAL_DIR);
   const staging = `${target}.staging`;
   rmSync(staging, { recursive: true, force: true });
@@ -33,6 +35,7 @@ export function buildRetrievalArtifacts(root = repoRoot): RetrievalManifest {
     documents,
     canonicalRecords(corpus),
     join(staging, 'retrieval.sqlite'),
+    graphLinks(graph),
   ).close();
 
   const manifest: RetrievalManifest = {
