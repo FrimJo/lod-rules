@@ -1,5 +1,5 @@
 import { deriveGraph } from '../graph/derive.ts';
-import type { Graph } from '../graph/types.ts';
+import type { Category, Graph, GraphEdge } from '../graph/types.ts';
 import type {
   Cell,
   Entity,
@@ -14,7 +14,7 @@ import type { SourceReference } from '../validate/integrity.ts';
 import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './load.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
-export const SEARCH_DOCUMENT_VERSION = 4;
+export const SEARCH_DOCUMENT_VERSION = 5;
 
 export type DocumentKind =
   'rule' | 'entity' | 'table' | 'procedure' | 'state_machine' | 'term' | 'issue';
@@ -115,10 +115,43 @@ function tableText(table: Table): string {
   return [table.source_text, printedTableText(table)].join('\n');
 }
 
+/**
+ * Graph edges retrieval may hold. Structural bookkeeping and evidence never reach the tools,
+ * except `part_of`, which places a section in the book.
+ */
+const TOOL_CATEGORIES: ReadonlySet<Category> = new Set([
+  'dependency',
+  'precedence',
+  'reference',
+  'external',
+]);
+const toolEdges = (graph: Graph): GraphEdge[] =>
+  graph.edges.filter((edge) => TOOL_CATEGORIES.has(edge.category) || edge.relation === 'part_of');
+
+/** Sections and manifest documents: graph nodes that tools may link to without a document. */
+export interface GraphLinks {
+  relations: Array<Relation & { source: string }>;
+  nodes: Array<{ id: string; title: string }>;
+}
+
+/** Tool-visible edges for every source, and titles for link targets that are not records. */
+export function graphLinks(graph: Graph): GraphLinks {
+  return {
+    relations: toolEdges(graph).map(({ source, relation, target }) => ({
+      source,
+      relation,
+      target,
+    })),
+    nodes: graph.nodes
+      .filter((node) => node.kind === 'section' || node.kind === 'document')
+      .map(({ id, title }) => ({ id, title })),
+  };
+}
+
 /** One relation per (relation, target), however many fields record it. */
 function relationsBySource(graph: Graph): Map<string, Relation[]> {
   const unique = new Map<string, Map<string, Relation>>();
-  for (const { source, relation, target } of graph.edges) {
+  for (const { source, relation, target } of toolEdges(graph)) {
     const relations = unique.get(source) ?? new Map<string, Relation>();
     relations.set(`${relation}\0${target}`, { relation, target });
     unique.set(source, relations);

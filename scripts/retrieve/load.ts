@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { discoverPilotFiles, emptyPilot } from '../validate/pilot-files.ts';
-import type { Pilot } from '../validate/pilot-types.ts';
+import type { Pilot, TestCase } from '../validate/pilot-types.ts';
 import type { Alias, Issue, Section, Term } from '../validate/integrity.ts';
 import {
   createAjv,
@@ -21,13 +21,15 @@ export type ReviewIssue = Issue & { type: string; summary: string };
 
 /** `source/manifest.yaml`: documents in this repository and books that are not. */
 export interface SourceManifest {
-  documents: Array<{ id: string; title: string }>;
+  documents: Array<{ id: string; title: string; canonical?: boolean }>;
   external_sources?: Array<{ id: string; title: string; status: string }>;
 }
 
 /** Canonical inputs for retrieval. Examples under tests/ are not retrieval content. */
 export interface RetrievalCorpus {
   pilot: Omit<Pilot, 'testCases'>;
+  /** Examples under tests/examples/, only when asked for (the graph reads them; search does not). */
+  testCases?: TestCase[];
   terms: GlossaryTerm[];
   aliases: Alias[];
   issues: ReviewIssue[];
@@ -64,19 +66,29 @@ export function fingerprintInputs(root = repoRoot): string {
   return hash.digest('hex');
 }
 
-export function loadRetrievalCorpus(root = repoRoot): RetrievalCorpus {
+export function loadRetrievalCorpus(
+  root = repoRoot,
+  options: { testCases?: boolean } = {},
+): RetrievalCorpus {
   const ajv = createAjv();
   const pilot = emptyPilot();
   const files = new Map<string, string>();
   const single = new Map<SchemaName, unknown>();
   const hash = createHash('sha256');
+  const examples = options.testCases
+    ? discoverPilotFiles(root).filter((file) => file.schema === 'testCases')
+    : [];
 
-  for (const { path, schema } of retrievalInputs(root)) {
+  for (const { path, schema } of [...retrievalInputs(root), ...examples]) {
     const bytes = readFileSync(join(root, path));
-    hash.update(path).update('\0').update(bytes).update('\0');
     const data: unknown = parse(bytes.toString('utf8'));
     const validate = getValidator(ajv, schema);
     if (!validate(data)) throw new Error(`${path}: ${formatErrors(validate).join('; ')}`);
+    if (schema === 'testCases') {
+      pilot.testCases.push(...(data as TestCase[]));
+      continue;
+    }
+    hash.update(path).update('\0').update(bytes).update('\0');
 
     if (schema in pilot) {
       const entries = data as Array<{ id: string }>;
@@ -90,9 +102,10 @@ export function loadRetrievalCorpus(root = repoRoot): RetrievalCorpus {
     }
   }
 
-  const { testCases: _testCases, ...canonical } = pilot;
+  const { testCases, ...canonical } = pilot;
   return {
     pilot: canonical,
+    ...(options.testCases ? { testCases } : {}),
     terms: single.get('terms') as GlossaryTerm[],
     aliases: single.get('aliases') as Alias[],
     issues: single.get('issues') as ReviewIssue[],

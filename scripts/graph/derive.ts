@@ -1,5 +1,5 @@
 import type { RetrievalCorpus } from '../retrieve/load.ts';
-import type { SourceReference } from '../validate/integrity.ts';
+import type { Section, SourceReference } from '../validate/integrity.ts';
 import type {
   Dependency,
   Effect,
@@ -255,6 +255,57 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
     }
   }
 
+  const testCases = corpus.testCases ?? [];
+  for (const test of testCases) {
+    add(
+      test.id,
+      'tests',
+      [
+        ...many(test.rule_ids, 'rule_ids'),
+        { target: test.procedure_id, field: 'procedure_id' },
+        ...many(test.expected.trace, 'expected.trace'),
+      ],
+      test.source,
+    );
+  }
+  for (const record of [
+    ...pilot.rules,
+    ...pilot.entities,
+    ...pilot.tables,
+    ...pilot.procedures,
+    ...pilot.stateMachines,
+    ...corpus.terms,
+    ...testCases,
+  ]) {
+    const target = { target: record.section_id, field: 'section_id' };
+    add(record.id, 'cites_section', [target], record.source);
+  }
+
+  // Sections carry page spans, not source references; cite the canonical rulebook's pages.
+  const rulebook = corpus.manifest.documents.find((d) => d.canonical)?.id ?? 'unknown';
+  const sectionSource = (section: Section): SourceReference[] => {
+    const pages = [
+      { pdf_page: section.pdf_start_page, printed_page: section.printed_start_page },
+      { pdf_page: section.pdf_end_page, printed_page: section.printed_end_page },
+    ].filter((page, i) => i === 0 || page.pdf_page !== section.pdf_start_page);
+    return pages.map((page) => ({
+      document: rulebook,
+      ...(page.pdf_page != null ? { pdf_page: page.pdf_page } : {}),
+      ...(page.printed_page != null ? { printed_page: page.printed_page } : {}),
+    }));
+  };
+  for (const section of corpus.sections) {
+    const source = sectionSource(section);
+    add(section.id, 'part_of', [{ target: section.parent, field: 'parent' }], source);
+    add(
+      section.id,
+      'redirects_to',
+      [{ target: section.redirect_to, field: 'redirect_to' }],
+      source,
+    );
+    add(section.id, 'external', many(section.external_references, 'external_references'), source);
+  }
+
   const nodes: GraphNode[] = [
     ...pilot.rules.map((r) => ({ id: r.id, kind: 'rule' as const, title: r.name })),
     ...pilot.entities.map((e) => ({ id: e.id, kind: 'entity' as const, title: e.name })),
@@ -266,6 +317,7 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
       title: m.name,
     })),
     ...corpus.terms.map((t) => ({ id: t.id, kind: 'term' as const, title: t.name })),
+    ...testCases.map((t) => ({ id: t.id, kind: 'test_case' as const, title: t.name })),
     ...corpus.issues.map((i) => ({ id: i.id, kind: 'issue' as const, title: i.summary })),
     ...corpus.sections.map((s) => ({ id: s.id, kind: 'section' as const, title: s.title })),
     ...corpus.manifest.documents.map((d) => ({

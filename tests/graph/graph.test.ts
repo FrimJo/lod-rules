@@ -24,6 +24,84 @@ describe('graph', () => {
     ).toBe(true);
   });
 
+  it('places each section in its parent as a structural part_of edge', () => {
+    expect(graph.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'section.combat.who_can_fight',
+        relation: 'part_of',
+        target: 'section.combat',
+        category: 'structural',
+        field: 'parent',
+      }),
+    );
+  });
+
+  it('links a quest-scoped rule to its quest through quest_id', () => {
+    expect(graph.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'core.quest.pyramid_xanthu.setup',
+        relation: 'quest',
+        target: 'quest.ancient_lands.pyramid_xanthu',
+        category: 'reference',
+        field: 'quest_id',
+      }),
+    );
+    const quests = graph.edges.filter((edge) => edge.relation === 'quest');
+    expect(new Set(quests.map((edge) => edge.source)).size).toBe(quests.length);
+  });
+
+  it('marks a not_present book cited by a section as an external edge', () => {
+    expect(graph.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'section.introduction',
+        relation: 'external',
+        target: 'bestiary',
+        category: 'external',
+        field: 'external_references',
+      }),
+    );
+    expect(graph.nodes).toContainEqual(
+      expect.objectContaining({ id: 'bestiary', kind: 'document', not_present: true }),
+    );
+  });
+
+  it('records redirects and record sections as structural edges', () => {
+    expect(graph.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'section.magic.casting_spells.table_3',
+        relation: 'redirects_to',
+        target: 'section.magic.casting_spells.table_2',
+        category: 'structural',
+        field: 'redirect_to',
+      }),
+    );
+    expect(graph.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'core.quest.pyramid_xanthu.setup',
+        relation: 'cites_section',
+        category: 'structural',
+        field: 'section_id',
+      }),
+    );
+  });
+
+  it('links test cases to the rules they exercise as evidence', () => {
+    expect(graph.nodes).toContainEqual(
+      expect.objectContaining({
+        id: 'test.character.alchemy.drink.two_dexterity',
+        kind: 'test_case',
+      }),
+    );
+    const tests = graph.edges.filter(
+      (edge) =>
+        edge.source === 'test.character.alchemy.drink.two_dexterity' && edge.relation === 'tests',
+    );
+    expect(tests.map((edge) => [edge.target, edge.field, edge.category])).toEqual([
+      ['character.alchemy.drink', 'expected.trace', 'evidence'],
+      ['character.alchemy.drink', 'rule_ids', 'evidence'],
+    ]);
+  });
+
   it('emits every relation retrieval used before the graph existed', () => {
     const names = new Set(graph.edges.map((edge) => edge.relation));
     for (const name of [
@@ -69,9 +147,11 @@ describe('graph', () => {
     );
   });
 
-  it('is where retrieval documents get their relations', () => {
+  it('is where retrieval documents get their tool-visible relations', () => {
+    const hidden = new Set(['structural', 'evidence']);
     const fromGraph = new Map<string, Set<string>>();
     for (const edge of graph.edges) {
+      if (hidden.has(edge.category) && edge.relation !== 'part_of') continue;
       const set = fromGraph.get(edge.source) ?? new Set<string>();
       set.add(`${edge.relation} ${edge.target}`);
       fromGraph.set(edge.source, set);

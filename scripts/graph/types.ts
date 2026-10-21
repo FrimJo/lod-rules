@@ -33,6 +33,11 @@ export const RELATION_CATEGORY = {
   quest: 'reference',
   concerns: 'evidence',
   issue: 'evidence',
+  part_of: 'structural',
+  external: 'external',
+  redirects_to: 'structural',
+  cites_section: 'structural',
+  tests: 'evidence',
 } as const satisfies Record<string, Category>;
 export type Relation = keyof typeof RELATION_CATEGORY;
 
@@ -45,7 +50,8 @@ export type NodeKind =
   | 'term'
   | 'issue'
   | 'section'
-  | 'document';
+  | 'document'
+  | 'test_case';
 
 export interface GraphNode {
   id: string;

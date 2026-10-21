@@ -8,5 +8,5 @@ export * from './types.ts';
 
 /** Loads the canonical corpus and derives its dependency graph. */
 export function buildGraph(root = repoRoot): Graph {
-  return deriveGraph(loadRetrievalCorpus(root));
+  return deriveGraph(loadRetrievalCorpus(root, { testCases: true }));
 }
