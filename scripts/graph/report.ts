@@ -1,8 +1,8 @@
 import { CATEGORIES, RELATION_CATEGORY, type AnalysedGraph, type Relation } from './types.ts';
+import { compare } from './compare.ts';
 
 export const GRAPH_REPORT = 'docs/graph-report.md';
 
-const compare = (a: string, b: string): number => a.localeCompare(b, 'en');
 const code = (text: string): string => `\`${text}\``;
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`;
 

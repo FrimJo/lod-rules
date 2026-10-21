@@ -7,9 +7,10 @@ import type {
   Procedure,
   Rule,
   StateMachine,
-  Step,
   Table,
 } from '../validate/pilot-types.ts';
+import { compare } from './compare.ts';
+import { flattenSteps, questResolver } from './records.ts';
 import {
   RELATION_CATEGORY,
   type Graph,
@@ -19,8 +20,6 @@ import {
 } from './types.ts';
 
 type Target = { target: string | undefined; field: string };
-
-const compare = (a: string, b: string): number => a.localeCompare(b, 'en');
 
 /** Table lookups in `effects`, recursing into choice options. */
 function lookupTables(effects: Effect[] | undefined, path: string): Target[] {
@@ -37,14 +36,6 @@ function lookupTables(effects: Effect[] | undefined, path: string): Target[] {
   return out;
 }
 
-/** Steps with their schema path, depth-first in source order. */
-function flattenSteps(steps: Step[], path = 'steps'): Array<{ step: Step; path: string }> {
-  return steps.flatMap((step) => [
-    { step, path: `${path}[]` },
-    ...flattenSteps(step.substeps ?? [], `${path}[].substeps`),
-  ]);
-}
-
 const many = (targets: Array<string | undefined> | undefined, field: string): Target[] =>
   (targets ?? []).map((target) => ({ target, field }));
 
@@ -58,21 +49,7 @@ function dependencyTargets(dependencies: Dependency[] | undefined): Target[] {
 
 /** Derives nodes and edges from the canonical corpus. Pure; output is sorted. */
 export function deriveGraph(corpus: RetrievalCorpus): Graph {
-  const sections = new Map(corpus.sections.map((section) => [section.id, section]));
-  const quests = corpus.pilot.entities.filter((entity) => entity.type === 'quest');
-  const questBySection = new Map(quests.map((quest) => [quest.section_id, quest.id]));
-
-  // A record's quest: its own `quest_id`, else the quest whose section contains it.
-  const questFor = (sectionId: string, explicit?: string): string | undefined => {
-    if (explicit) return explicit;
-    for (let id: string | undefined = sectionId; id; id = sections.get(id)?.parent) {
-      const quest = questBySection.get(id);
-      if (quest) return quest;
-    }
-    return undefined;
-  };
-  const isQuestSection = (sectionId: string): boolean =>
-    sectionId.startsWith('section.quest_book_i') || questFor(sectionId) !== undefined;
+  const { questFor, isQuestSection } = questResolver(corpus);
 
   const edges: GraphEdge[] = [];
   const add = (

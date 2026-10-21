@@ -7,8 +7,7 @@ import type {
   RelationCycles,
   UnresolvedPointer,
 } from './types.ts';
-
-const compare = (a: string, b: string): number => a.localeCompare(b, 'en');
+import { compare } from './compare.ts';
 
 /** Edges whose target is not a node. The edge list is already sorted, so this is too. */
 function danglingIds(graph: Graph): DanglingId[] {

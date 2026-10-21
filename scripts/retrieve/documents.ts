@@ -1,5 +1,6 @@
-import { deriveGraph } from '../graph/derive.ts';
-import type { Category, Graph, GraphEdge } from '../graph/types.ts';
+import { compare } from '../graph/compare.ts';
+import { flattenSteps, questResolver } from '../graph/records.ts';
+import { isToolVisible, type Graph, type GraphEdge } from '../graph/types.ts';
 import type {
   Cell,
   Entity,
@@ -7,7 +8,6 @@ import type {
   Procedure,
   Rule,
   StateMachine,
-  Step,
   Table,
 } from '../validate/pilot-types.ts';
 import type { SourceReference } from '../validate/integrity.ts';
@@ -86,10 +86,6 @@ function citations(sources: SourceReference[]): Citation[] {
   return out;
 }
 
-function flattenSteps(steps: Step[]): Step[] {
-  return steps.flatMap((step) => [step, ...flattenSteps(step.substeps ?? [])]);
-}
-
 // Steps and substeps often cite the same sentence as their procedure, so join each
 // distinct passage once, in source order.
 function distinctLines(lines: string[]): string {
@@ -115,18 +111,9 @@ function tableText(table: Table): string {
   return [table.source_text, printedTableText(table)].join('\n');
 }
 
-/**
- * Graph edges retrieval may hold. Structural bookkeeping and evidence never reach the tools,
- * except `part_of`, which places a section in the book.
- */
-const TOOL_CATEGORIES: ReadonlySet<Category> = new Set([
-  'dependency',
-  'precedence',
-  'reference',
-  'external',
-]);
+/** Graph edges retrieval may hold; `isToolVisible` decides which. */
 const toolEdges = (graph: Graph): GraphEdge[] =>
-  graph.edges.filter((edge) => TOOL_CATEGORIES.has(edge.category) || edge.relation === 'part_of');
+  graph.edges.filter((edge) => isToolVisible(edge.relation));
 
 /** Sections and manifest documents: graph nodes that tools may link to without a document. */
 export interface GraphLinks {
@@ -160,23 +147,18 @@ function relationsBySource(graph: Graph): Map<string, Relation[]> {
     [...unique].map(([source, relations]) => [
       source,
       [...relations.values()].sort(
-        (a, b) =>
-          a.relation.localeCompare(b.relation, 'en') || a.target.localeCompare(b.target, 'en'),
+        (a, b) => compare(a.relation, b.relation) || compare(a.target, b.target),
       ),
     ]),
   );
 }
 
-/** Relations come from the graph module; pass a prebuilt graph to avoid deriving it twice. */
-export function buildSearchDocuments(
-  corpus: RetrievalCorpus,
-  graph: Graph = deriveGraph(corpus),
-): SearchDocument[] {
+/** Relations come from the graph module: pass the graph `deriveGraph` built from `corpus`. */
+export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): SearchDocument[] {
   const relationsFor = relationsBySource(graph);
   const relations = (id: string): Relation[] => relationsFor.get(id) ?? [];
   const sections = new Map(corpus.sections.map((section) => [section.id, section]));
-  const quests = corpus.pilot.entities.filter((entity) => entity.type === 'quest');
-  const questBySection = new Map(quests.map((quest) => [quest.section_id, quest.id]));
+  const { questFor, isQuestSection } = questResolver(corpus);
   const issuesFor = new Map<string, string[]>();
   for (const issue of corpus.issues) {
     for (const id of issue.related) issuesFor.set(id, [...(issuesFor.get(id) ?? []), issue.id]);
@@ -210,18 +192,6 @@ export function buildSearchDocuments(
     const chapter = chapterOf(doc.section_id);
     return chapter ? { ...doc, chapter } : doc;
   };
-
-  const questFor = (sectionId: string, explicit?: string): string | undefined => {
-    if (explicit) return explicit;
-    for (let id: string | undefined = sectionId; id; id = sections.get(id)?.parent) {
-      const quest = questBySection.get(id);
-      if (quest) return quest;
-    }
-    return undefined;
-  };
-
-  const isQuestSection = (sectionId: string): boolean =>
-    sectionId.startsWith('section.quest_book_i') || questFor(sectionId) !== undefined;
 
   const base = (
     record: {
@@ -316,7 +286,7 @@ export function buildSearchDocuments(
   };
 
   const procedure = (p: Procedure): SearchDocument => {
-    const steps = flattenSteps(p.steps);
+    const steps = flattenSteps(p.steps).map(({ step }) => step);
     const external = externalDependencies(p.dependencies);
     const quest = isQuestSection(p.section_id);
     const text = distinctLines([p.source_text, ...steps.map((step) => step.source_text)]);
@@ -418,5 +388,5 @@ export function buildSearchDocuments(
     ...corpus.issues.map(issue),
   ]
     .map(withChapter)
-    .sort((a, b) => a.id.localeCompare(b.id, 'en'));
+    .sort((a, b) => compare(a.id, b.id));
 }

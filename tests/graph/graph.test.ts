@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { writeGraphArtifacts } from '../../scripts/graph/build.ts';
-import { buildGraph, CATEGORIES, type Graph } from '../../scripts/graph/index.ts';
+import { buildGraph, CATEGORIES, deriveGraph, type Graph } from '../../scripts/graph/index.ts';
 import { buildSearchDocuments } from '../../scripts/retrieve/documents.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 
@@ -156,7 +156,8 @@ describe('graph', () => {
       set.add(`${edge.relation} ${edge.target}`);
       fromGraph.set(edge.source, set);
     }
-    for (const doc of buildSearchDocuments(loadRetrievalCorpus())) {
+    const corpus = loadRetrievalCorpus();
+    for (const doc of buildSearchDocuments(corpus, deriveGraph(corpus))) {
       const relations = doc.relations.map((r) => `${r.relation} ${r.target}`);
       expect(new Set(relations), doc.id).toEqual(fromGraph.get(doc.id) ?? new Set());
       expect(relations.length, doc.id).toBe(new Set(relations).size);

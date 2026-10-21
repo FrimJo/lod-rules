@@ -41,6 +41,27 @@ export const RELATION_CATEGORY = {
 } as const satisfies Record<string, Category>;
 export type Relation = keyof typeof RELATION_CATEGORY;
 
+/** Categories the agent tools (`lod_get`, `lod_expand`) may show. */
+const TOOL_VISIBLE_CATEGORIES: ReadonlySet<Category> = new Set([
+  'dependency',
+  'precedence',
+  'reference',
+  'external',
+]);
+/** Relations visible despite their category: `part_of` places a section in the book. */
+const TOOL_VISIBLE_EXCEPTIONS: ReadonlySet<Relation> = new Set(['part_of']);
+
+/**
+ * The single definition of which graph relations reach the agent tools. Structural bookkeeping
+ * and evidence stay in the graph.
+ */
+export function isToolVisible(relation: Relation): boolean {
+  return (
+    TOOL_VISIBLE_CATEGORIES.has(RELATION_CATEGORY[relation]) ||
+    TOOL_VISIBLE_EXCEPTIONS.has(relation)
+  );
+}
+
 export type NodeKind =
   | 'rule'
   | 'entity'

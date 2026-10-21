@@ -105,8 +105,8 @@ function decode(json: string): SearchDocument {
 export function createRetrievalDatabase(
   documents: SearchDocument[],
   records: Map<string, unknown>,
-  path = ':memory:',
-  links: GraphLinks = { relations: [], nodes: [] },
+  path: string,
+  links: GraphLinks,
 ): DatabaseSync {
   const db = new DatabaseSync(path);
   db.exec(`

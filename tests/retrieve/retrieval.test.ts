@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { deriveGraph } from '../../scripts/graph/derive.ts';
 import { buildSearchDocuments } from '../../scripts/retrieve/documents.ts';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
@@ -16,8 +17,10 @@ const top = (query: string, limit = 10, options = {}): string[] =>
 describe('search documents', () => {
   it('are deterministic and cover every canonical record with provenance', () => {
     const corpus = loadRetrievalCorpus();
-    const first = buildSearchDocuments(corpus);
-    expect(JSON.stringify(buildSearchDocuments(corpus))).toBe(JSON.stringify(first));
+    const first = buildSearchDocuments(corpus, deriveGraph(corpus));
+    expect(JSON.stringify(buildSearchDocuments(corpus, deriveGraph(corpus)))).toBe(
+      JSON.stringify(first),
+    );
     expect(new Set(first.map((doc) => doc.id)).size).toBe(first.length);
     expect(first.length).toBe(
       corpus.pilot.rules.length +
@@ -36,7 +39,9 @@ describe('search documents', () => {
 
   it('state each cited passage of a procedure or state machine once', () => {
     const corpus = loadRetrievalCorpus();
-    const texts = new Map(buildSearchDocuments(corpus).map((doc) => [doc.id, doc.text]));
+    const texts = new Map(
+      buildSearchDocuments(corpus, deriveGraph(corpus)).map((doc) => [doc.id, doc.text]),
+    );
     const passages = (steps: Step[]): string[] =>
       steps.flatMap((step) => [step.source_text, ...passages(step.substeps ?? [])]);
     for (const procedure of corpus.pilot.procedures) {
