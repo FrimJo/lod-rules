@@ -53,32 +53,20 @@ Optional semantic decisions never change canonical rules — see
 
 ```bash
 npm install
-npm run validate          # schema + cross-file integrity of canonical YAML
-npm test                  # vitest (schema, integrity, report)
-npm run report:coverage   # regenerates docs/coverage-report.md
-npm run report:chapters -- --chapter combat # per-chapter worklist of unfinished sections
-npm run review -- digest section.combat --descendants # review scope, pages and digest
-npm run review -- check   # list independent review records as fresh or stale
-npm run lint              # eslint + prettier --check + tsc --noEmit
-npm run lint:fix
-npx tsx scripts/extract/inspect-pdf.ts   # dumps PDF text to generated/extract/
-npm run decisions -- evaluate --provider structural
-npm run retrieve -- search "query" # early Phase 12 retrieval; see docs/retrieval.md
-npm run retrieve -- build # generated/retrieval/ (not build:corpus)
-npm run retrieve -- tools # agent tool definitions (lod_search, …) as JSON
-npm run retrieve -- call lod_search '{"query":"locked door"}' # run one tool call
-npm run ask -- "question" --analyzer laya # analysis → evidence → grounded prompt; LLM injected
-npm run ask:evaluate # labelled questions: lexical vs Laya vs Jev vs Laya→Jev cascade
+npm run validate   # schema + cross-file integrity of canonical YAML
+npm test           # vitest; `npx vitest run tests/<area>` for the inner loop
+npm run lint       # eslint + prettier --check + tsc --noEmit
 ```
 
-`npm run ask` uses Laya/Jev only to choose what to retrieve, as the union with a lexical
-baseline while they are uncalibrated. The baseline's records are gathered first, so a model can add
-records but never displace them. `tests/ask/evaluate.test.ts` enforces this on every labelled
-question. `--filter` (opt-in, experimental) then lets Jev drop records it judges irrelevant from
-that pool, lexical ones included; `tests/ask/ranking.test.ts` covers it and
-[docs/ask-quality-evaluation.md](docs/ask-quality-evaluation.md) records its calibration.
-It never writes judgments into the corpus. The only
-LLM client is the consumer in `clients/web/`; `scripts/` stays LLM-client-free.
+Every other script is listed in `package.json`; the `retrieve`, `review`, `graph`, `ask` and
+`decisions` CLIs print usage when run without arguments. Generated reports
+(`docs/coverage-report.md`, `docs/graph-report.md`) are rebuilt by their script, never edited;
+a test fails when a committed report is stale.
+
+`npm run ask` uses Laya/Jev only to choose what to retrieve and never writes judgments into
+the corpus; [docs/ask-quality-evaluation.md](docs/ask-quality-evaluation.md) holds the
+baseline-first rule, `--filter` and calibration. The only LLM client is the consumer in
+`clients/web/`; `scripts/` stays LLM-client-free.
 
 Agent tool definitions live in `scripts/retrieve/tools.ts`: names, descriptions, JSON Schema
 inputs, validation and the output projection. The MCP server, the CLI and direct API clients
@@ -87,11 +75,14 @@ consume the rules, such as those building the helper app. Their descriptions and
 carry rulebook content only, never corpus bookkeeping (review issues, extraction status,
 confidence, file paths, coverage). `tests/retrieve/tools.test.ts` checks every record.
 
+Relations between records come from the dependency graph (`scripts/graph/`); retrieval imports
+them and never re-derives them. See [docs/retrieval.md](docs/retrieval.md).
+
 `npm run build:corpus` is a stub until Phase 11. Do not invent its outputs.
 
 After any change that touches `corpus/`, `source/`, `schemas/`, `scripts/`, or `review/`, run
-`validate`, `test`, and `lint`. If coverage or sections changed, also run
-`report:coverage` and commit the regenerated report.
+`validate`, `test`, and `lint`; CI runs the same three. If coverage or sections changed, also
+run `report:coverage` and commit the regenerated report.
 
 ## Source of truth
 
@@ -205,6 +196,7 @@ Flag any of the following. Do not nitpick formatting; `npm run lint` owns that.
 - A generated file that was hand-edited, or `coverage-report.md` edited directly.
 - An interpretation that "fixes" the book rather than recording the uncertainty.
 - A table reduced to prose.
+- Relation or quest-scope logic re-derived outside `scripts/graph/`.
 
 ## Pointers
 

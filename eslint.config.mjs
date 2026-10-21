@@ -7,6 +7,7 @@ export default tseslint.config(
       'node_modules/',
       'generated/',
       'dist/',
+      '.claude/',
       'clients/',
       '.intent/hooks/intent-claude-gate.mjs',
       '.intent/hooks/intent-codex-gate.mjs',
