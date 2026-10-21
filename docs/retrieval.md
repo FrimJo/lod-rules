@@ -52,11 +52,11 @@ review issue. Code lives in `scripts/retrieve/`.
 | `external_dependencies`                 | Material in books that are not present (Bestiary and others)                  |
 | `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                               |
 
-Relations come from the dependency graph in `scripts/graph/` (`buildGraph`), not from a
-separate derivation here, so retrieval and the graph cannot drift. Retrieval keeps only the
-tool-visible categories (`dependency`, `precedence`, `reference`, `external`, plus `part_of`
-from `structural`); `cites_section`, `redirects_to` and `evidence` edges (`tests`, `concerns`,
-`issue`) stay in the graph. `npm run graph -- build` writes the full graph to
+Relations come from the dependency graph's edge derivation (`deriveGraph` in
+`scripts/graph/derive.ts`), not from a separate derivation here, so retrieval and the graph
+cannot drift. Retrieval keeps only the tool-visible relations; `isToolVisible` in
+`scripts/graph/types.ts`, beside `RELATION_CATEGORY`, is the single definition of which those
+are. The other edges stay in the graph. `npm run graph -- build` writes the full graph to
 `generated/graph/`, and `npm run graph -- report` regenerates the committed
 [graph report](graph-report.md).
 

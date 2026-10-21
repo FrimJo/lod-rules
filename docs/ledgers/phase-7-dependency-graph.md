@@ -49,12 +49,31 @@ and returns `buildGraph(): AnalysedGraph`, `{ nodes, edges, anomalies }`.
 
 Every relation name retrieval emitted before unit 1 is kept, with its derivation. `quest` comes
 from an explicit `quest_id` when present, otherwise from the section-ancestor derivation, never
-both.
+both. Decision: an ancestor-derived `quest` edge carries `field: section_id`; only an explicit
+`quest_id` gives `field: quest_id`.
 
 Decision: only `dependency`, `precedence`, `reference` and `external` edges, plus `part_of` as
 the single `structural` exception, reach retrieval's relations table and therefore `lod_expand`
 and `lod_get` links. `cites_section`, `redirects_to` and every `evidence` edge stay in the graph
 and never reach the tools.
+
+### Behaviour preservation
+
+Evidence: before/after dumps of `SELECT source,relation,target FROM relations` from the
+retrieval index.
+
+- #6 (graph module, retrieval refactor): identical, 8377 rows.
+- #7 (new relations, tool projection): removed only 929 `concerns` and 658 `issue` rows
+  (evidence); added only 705 `part_of` and 41 `external` rows.
+
+### Behaviour changes
+
+- `npm run retrieve -- expand` (corpus-work CLI) no longer shows `issue` or `concerns` edges.
+  Use `npm run retrieve -- issues <id>`.
+- `lod_expand` at depth ≥ 2 can walk through section nodes via `part_of` and `external`.
+- `lod_get` links resolve section and manifest-document targets the way `lod_expand` does and
+  carry `target_title`. Record links to sections (305 tool-visible edges, mostly `see_also`)
+  were dropped before. Issue records still never appear.
 
 ### Counts
 
