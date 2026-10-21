@@ -1,11 +1,16 @@
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseArgs } from 'node:util';
+import { repoRoot } from '../validate/schemas.ts';
 import { GRAPH_DIR, writeGraphArtifacts } from './build.ts';
 import { buildGraph } from './index.ts';
+import { GRAPH_REPORT, renderGraphReport } from './report.ts';
 
 const usage = `Usage: npm run graph -- <command>
 
 Commands:
-  build   Write ${GRAPH_DIR}/ (nodes.json, edges.json), sorted and deterministic`;
+  build   Write ${GRAPH_DIR}/ (nodes.json, edges.json), sorted and deterministic
+  report  Write the committed ${GRAPH_REPORT} (edge counts and anomaly lists)`;
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -25,6 +30,21 @@ switch (command) {
     writeGraphArtifacts(graph);
     console.log(
       JSON.stringify({ dir: GRAPH_DIR, nodes: graph.nodes.length, edges: graph.edges.length }),
+    );
+    break;
+  }
+  case 'report': {
+    const graph = buildGraph();
+    writeFileSync(join(repoRoot, GRAPH_REPORT), renderGraphReport(graph), 'utf8');
+    const { dangling, cycles, unresolved } = graph.anomalies;
+    console.log(
+      JSON.stringify({
+        report: GRAPH_REPORT,
+        edges: graph.edges.length,
+        dangling: dangling.length,
+        cycles: cycles.reduce((sum, group) => sum + group.cycles.length, 0),
+        unresolved: unresolved.length,
+      }),
     );
     break;
   }
