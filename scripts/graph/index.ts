@@ -1,12 +1,16 @@
 import { loadRetrievalCorpus } from '../retrieve/load.ts';
 import { repoRoot } from '../validate/schemas.ts';
+import { findAnomalies } from './anomalies.ts';
 import { deriveGraph } from './derive.ts';
-import type { Graph } from './types.ts';
+import type { AnalysedGraph } from './types.ts';
 
 export { deriveGraph } from './derive.ts';
 export * from './types.ts';
+export * from './traverse.ts';
 
-/** Loads the canonical corpus and derives its dependency graph. */
-export function buildGraph(root = repoRoot): Graph {
-  return deriveGraph(loadRetrievalCorpus(root, { testCases: true }));
+/** Loads the canonical corpus and derives its dependency graph and anomalies. */
+export function buildGraph(root = repoRoot): AnalysedGraph {
+  const corpus = loadRetrievalCorpus(root, { testCases: true });
+  const graph = deriveGraph(corpus);
+  return { ...graph, anomalies: findAnomalies(graph, corpus) };
 }

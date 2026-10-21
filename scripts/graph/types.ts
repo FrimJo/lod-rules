@@ -76,3 +76,40 @@ export interface Graph {
   nodes: GraphNode[];
   edges: GraphEdge[];
 }
+
+/** An edge whose target is not a graph node. */
+export interface DanglingId {
+  source: string;
+  relation: Relation;
+  target: string;
+  field: string;
+}
+
+/** A free-text `unresolved_references` entry. Never an edge; never resolved here. */
+export interface UnresolvedPointer {
+  /** Id of the record or section whose `unresolved_references` holds the entry. */
+  owner: string;
+  wording: string;
+}
+
+/**
+ * Elementary cycles over one relation. Each cycle lists its nodes in edge order, starting at its
+ * smallest id; the last node points back to the first. A self-reference is a one-node cycle.
+ */
+export interface RelationCycles {
+  relation: Relation;
+  cycles: string[][];
+}
+
+/** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
+export interface Anomalies {
+  dangling: DanglingId[];
+  unresolved: UnresolvedPointer[];
+  /** Relations with at least one cycle, sorted by relation. Reported, never failing. */
+  cycles: RelationCycles[];
+}
+
+/** What `buildGraph` returns: the derived graph plus its anomalies. */
+export interface AnalysedGraph extends Graph {
+  anomalies: Anomalies;
+}
