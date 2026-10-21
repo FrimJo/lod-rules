@@ -86,10 +86,21 @@ export interface UnresolvedPointer {
   wording: string;
 }
 
+/**
+ * Elementary cycles over one relation. Each cycle lists its nodes in edge order, starting at its
+ * smallest id; the last node points back to the first. A self-reference is a one-node cycle.
+ */
+export interface RelationCycles {
+  relation: Relation;
+  cycles: string[][];
+}
+
 /** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
 export interface Anomalies {
   dangling: DanglingId[];
   unresolved: UnresolvedPointer[];
+  /** Relations with at least one cycle, sorted by relation. Reported, never failing. */
+  cycles: RelationCycles[];
 }
 
 /** What `buildGraph` returns: the derived graph plus its anomalies. */
