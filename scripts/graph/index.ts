@@ -6,6 +6,7 @@ import type { AnalysedGraph } from './types.ts';
 
 export { deriveGraph } from './derive.ts';
 export * from './types.ts';
+export * from './traverse.ts';
 
 /** Loads the canonical corpus and derives its dependency graph and anomalies. */
 export function buildGraph(root = repoRoot): AnalysedGraph {
