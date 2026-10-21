@@ -27,3 +27,6 @@ lod-rules.sqlite
 `npm run retrieve -- build` already writes an early retrieval slice to `retrieval/`
 (`search-documents.jsonl`, `retrieval.sqlite`, `manifest.json`). See
 [docs/retrieval.md](../docs/retrieval.md).
+
+`npm run graph -- build` writes the derived dependency graph to `graph/` (`nodes.json`,
+`edges.json`). Retrieval reads its relations from the same graph module.
