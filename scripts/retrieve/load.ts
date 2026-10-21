@@ -19,6 +19,12 @@ export interface GlossaryTerm extends Term {
 
 export type ReviewIssue = Issue & { type: string; summary: string };
 
+/** `source/manifest.yaml`: documents in this repository and books that are not. */
+export interface SourceManifest {
+  documents: Array<{ id: string; title: string }>;
+  external_sources?: Array<{ id: string; title: string; status: string }>;
+}
+
 /** Canonical inputs for retrieval. Examples under tests/ are not retrieval content. */
 export interface RetrievalCorpus {
   pilot: Omit<Pilot, 'testCases'>;
@@ -26,6 +32,7 @@ export interface RetrievalCorpus {
   aliases: Alias[];
   issues: ReviewIssue[];
   sections: Section[];
+  manifest: SourceManifest;
   /** Canonical YAML path for every record id. */
   files: Map<string, string>;
   /** SHA-256 over every input path and its bytes, in sorted path order. */
@@ -90,6 +97,7 @@ export function loadRetrievalCorpus(root = repoRoot): RetrievalCorpus {
     aliases: single.get('aliases') as Alias[],
     issues: single.get('issues') as ReviewIssue[],
     sections: single.get('sections') as Section[],
+    manifest: single.get('manifest') as SourceManifest,
     files,
     fingerprint: hash.digest('hex'),
   };
