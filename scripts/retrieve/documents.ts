@@ -14,7 +14,7 @@ import type { SourceReference } from '../validate/integrity.ts';
 import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './load.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
-export const SEARCH_DOCUMENT_VERSION = 5;
+export const SEARCH_DOCUMENT_VERSION = 6;
 
 export type DocumentKind =
   'rule' | 'entity' | 'table' | 'procedure' | 'state_machine' | 'term' | 'issue';
@@ -31,6 +31,8 @@ export interface Citation {
 export interface Relation {
   relation: string;
   target: string;
+  /** Printed wording that limits when a canonical edge holds. */
+  condition?: string;
 }
 
 export interface ExternalDependency {
@@ -124,10 +126,11 @@ export interface GraphLinks {
 /** Tool-visible edges for every source, and titles for link targets that are not records. */
 export function graphLinks(graph: Graph): GraphLinks {
   return {
-    relations: toolEdges(graph).map(({ source, relation, target }) => ({
+    relations: toolEdges(graph).map(({ source, relation, target, condition }) => ({
       source,
       relation,
       target,
+      ...(condition ? { condition } : {}),
     })),
     nodes: graph.nodes
       .filter((node) => node.kind === 'section' || node.kind === 'document')
@@ -138,9 +141,12 @@ export function graphLinks(graph: Graph): GraphLinks {
 /** One relation per (relation, target), however many fields record it. */
 function relationsBySource(graph: Graph): Map<string, Relation[]> {
   const unique = new Map<string, Map<string, Relation>>();
-  for (const { source, relation, target } of toolEdges(graph)) {
+  for (const { source, relation, target, condition } of toolEdges(graph)) {
     const relations = unique.get(source) ?? new Map<string, Relation>();
-    relations.set(`${relation}\0${target}`, { relation, target });
+    const key = `${relation}\0${target}`;
+    // A canonical edge's condition survives a derived edge with the same relation and target.
+    const kept = relations.get(key)?.condition ?? condition;
+    relations.set(key, { relation, target, ...(kept ? { condition: kept } : {}) });
     unique.set(source, relations);
   }
   return new Map(

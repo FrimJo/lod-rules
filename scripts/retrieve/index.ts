@@ -47,6 +47,8 @@ export interface Edge {
   /** False when the target is neither a record nor a section or manifest document. */
   found: boolean;
   target_title?: string;
+  /** Printed wording that limits when a canonical edge holds. */
+  condition?: string;
 }
 
 export interface ExpandOptions {
@@ -116,6 +118,7 @@ export function createRetrievalDatabase(
     CREATE TABLE records (id TEXT PRIMARY KEY, json TEXT NOT NULL);
     CREATE TABLE aliases (form TEXT NOT NULL, id TEXT NOT NULL, PRIMARY KEY (form, id));
     CREATE TABLE relations (source TEXT NOT NULL, relation TEXT NOT NULL, target TEXT NOT NULL,
+      condition TEXT,
       PRIMARY KEY (source, relation, target));
     CREATE INDEX relations_target ON relations (target);
     CREATE TABLE nodes (id TEXT PRIMARY KEY, title TEXT NOT NULL);
@@ -126,7 +129,7 @@ export function createRetrievalDatabase(
     doc: db.prepare('INSERT INTO documents VALUES (?, ?, ?, ?, ?, ?)'),
     record: db.prepare('INSERT INTO records VALUES (?, ?)'),
     alias: db.prepare('INSERT OR IGNORE INTO aliases VALUES (?, ?)'),
-    relation: db.prepare('INSERT OR IGNORE INTO relations VALUES (?, ?, ?)'),
+    relation: db.prepare('INSERT OR IGNORE INTO relations VALUES (?, ?, ?, ?)'),
     fts: db.prepare('INSERT INTO fts VALUES (?, ?, ?, ?, ?)'),
     node: db.prepare('INSERT OR IGNORE INTO nodes VALUES (?, ?)'),
   };
@@ -149,7 +152,7 @@ export function createRetrievalDatabase(
       if (key) insert.alias.run(key, doc.id);
     }
     for (const relation of doc.relations)
-      insert.relation.run(doc.id, relation.relation, relation.target);
+      insert.relation.run(doc.id, relation.relation, relation.target, relation.condition ?? null);
     const headings = doc.citations.map((citation) => citation.heading ?? '');
     const idWords = doc.id.split('.').slice(1).join(' ').replace(/_/g, ' ');
     insert.fts.run(
@@ -161,8 +164,8 @@ export function createRetrievalDatabase(
     );
   }
   // Graph links whose source or target is a section or manifest document, not a record.
-  for (const { source, relation, target } of links.relations)
-    insert.relation.run(source, relation, target);
+  for (const { source, relation, target, condition } of links.relations)
+    insert.relation.run(source, relation, target, condition ?? null);
   for (const node of links.nodes) insert.node.run(node.id, node.title);
   db.exec('COMMIT');
   return db;
@@ -321,27 +324,31 @@ export class Retrieval {
       const next: string[] = [];
       for (const node of frontier) {
         const found: Array<Omit<Edge, 'found' | 'target_title'>> = [];
+        const condition = (row: Record<string, unknown>): { condition?: string } =>
+          typeof row.condition === 'string' ? { condition: row.condition } : {};
         if (direction !== 'in') {
           for (const row of this.db
-            .prepare('SELECT relation, target FROM relations WHERE source = ?')
+            .prepare('SELECT relation, target, condition FROM relations WHERE source = ?')
             .all(node)) {
             found.push({
               source: node,
               relation: text(row, 'relation'),
               target: text(row, 'target'),
               direction: 'out',
+              ...condition(row),
             });
           }
         }
         if (direction !== 'out') {
           for (const row of this.db
-            .prepare('SELECT source, relation FROM relations WHERE target = ?')
+            .prepare('SELECT source, relation, condition FROM relations WHERE target = ?')
             .all(node)) {
             found.push({
               source: node,
               relation: text(row, 'relation'),
               target: text(row, 'source'),
               direction: 'in',
+              ...condition(row),
             });
           }
         }

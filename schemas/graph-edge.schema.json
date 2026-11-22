@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/graph-edge.schema.json",
+  "title": "Canonical graph edges",
+  "description": "Hand-authored relations between two corpus records that neither record states. Derived edges are not written here; the graph module reads them from record fields.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "name",
+      "section_id",
+      "source",
+      "status",
+      "confidence",
+      "source_text",
+      "relation",
+      "from",
+      "to",
+      "binding",
+      "condition"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^edge\\.[a-z0-9_]+(\\.[a-z0-9_]+)+$"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1
+      },
+      "section_id": {
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "source": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/mechanics.schema.json#/$defs/source"
+        },
+        "minItems": 1
+      },
+      "status": {
+        "enum": ["extracted", "reviewed"]
+      },
+      "confidence": {
+        "enum": ["high", "medium", "low"]
+      },
+      "source_text": {
+        "description": "Verbatim printed text that grounds the edge.",
+        "type": "string",
+        "minLength": 1
+      },
+      "relation": {
+        "description": "input_from: a field of `from` takes its value from a field of `to` (consumer to provider).",
+        "enum": ["input_from"]
+      },
+      "from": {
+        "description": "The consuming record.",
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "to": {
+        "description": "The providing record.",
+        "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+      },
+      "binding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "from_field"],
+        "properties": {
+          "field": {
+            "description": "Input field of `from` that is supplied.",
+            "type": "string",
+            "minLength": 1
+          },
+          "from_field": {
+            "description": "Output field of `to` that supplies it.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "condition": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_text"],
+        "properties": {
+          "source_text": {
+            "description": "Verbatim printed wording that limits when the edge holds.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "unresolved_references": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
+        }
+      }
+    }
+  }
+}

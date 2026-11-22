@@ -214,6 +214,20 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
     common(m, undefined);
   };
 
+  // Canonical edges are hand-authored in corpus/graph/; `field` names the file that holds them.
+  for (const edge of corpus.pilot.edges) {
+    edges.push({
+      source: edge.from,
+      relation: edge.relation,
+      target: edge.to,
+      category: RELATION_CATEGORY[edge.relation],
+      field: corpus.files.get(edge.id) ?? 'corpus/graph',
+      provenance: edge.source,
+      condition: edge.condition.source_text,
+    });
+    add(edge.id, 'issue', many(edge.issues, 'issues'), edge.source);
+  }
+
   const { pilot } = corpus;
   pilot.rules.forEach(rule);
   pilot.entities.forEach(entity);
@@ -251,6 +265,7 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
     ...pilot.tables,
     ...pilot.procedures,
     ...pilot.stateMachines,
+    ...pilot.edges,
     ...corpus.terms,
     ...testCases,
   ]) {
@@ -293,6 +308,7 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
       kind: 'state_machine' as const,
       title: m.name,
     })),
+    ...pilot.edges.map((e) => ({ id: e.id, kind: 'edge' as const, title: e.name })),
     ...corpus.terms.map((t) => ({ id: t.id, kind: 'term' as const, title: t.name })),
     ...testCases.map((t) => ({ id: t.id, kind: 'test_case' as const, title: t.name })),
     ...corpus.issues.map((i) => ({ id: i.id, kind: 'issue' as const, title: i.summary })),

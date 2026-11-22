@@ -265,6 +265,27 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
   }
   for (const entries of Object.values(pilot))
     for (const entry of entries as Metadata[]) metadata(entry);
+  // A canonical edge binds an input field of `from` to an output field of `to`.
+  const fieldsOf = new Map<string, Fields>(
+    [...pilot.rules, ...pilot.procedures].map((record) => [record.id, record.fields]),
+  );
+  for (const edge of pilot.edges) {
+    link(edge.id, edge.from, ['rules', 'procedures']);
+    link(edge.id, edge.to, ['rules', 'procedures']);
+    if (edge.from === edge.to) errors.push(`${edge.id}: edge binds a record to itself`);
+    const input = fieldsOf.get(edge.from)?.[edge.binding.field];
+    if (fieldsOf.has(edge.from) && input?.role !== 'input')
+      errors.push(
+        `${edge.id}: binding.field ${edge.binding.field} is not an input of ${edge.from}`,
+      );
+    const output = fieldsOf.get(edge.to)?.[edge.binding.from_field];
+    if (fieldsOf.has(edge.to) && output?.role !== 'output')
+      errors.push(
+        `${edge.id}: binding.from_field ${edge.binding.from_field} is not an output of ${edge.to}`,
+      );
+    if (input && output && input.type !== output.type)
+      errors.push(`${edge.id}: binding joins a ${output.type} output to a ${input.type} input`);
+  }
   for (const rule of pilot.rules) {
     if (!/^(core|character|combat)\./.test(rule.id))
       errors.push(`${rule.id}: invalid rule namespace`);

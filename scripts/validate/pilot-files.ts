@@ -11,6 +11,7 @@ const roots = {
   procedures: 'corpus/procedures',
   stateMachines: 'corpus/state-machines',
   testCases: 'tests/examples',
+  edges: 'corpus/graph',
 } as const;
 export interface PilotFile {
   path: string;
@@ -32,7 +33,15 @@ export function discoverPilotFiles(root = repoRoot): PilotFile[] {
   return files;
 }
 export function emptyPilot(): Pilot {
-  return { rules: [], entities: [], tables: [], procedures: [], stateMachines: [], testCases: [] };
+  return {
+    rules: [],
+    entities: [],
+    tables: [],
+    procedures: [],
+    stateMachines: [],
+    testCases: [],
+    edges: [],
+  };
 }
 /** Shape-validated loader for test consumers; full joins are checked by validateCorpus. */
 export function readPilot(root = repoRoot): Pilot {

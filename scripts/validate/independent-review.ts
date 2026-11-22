@@ -42,6 +42,7 @@ export type ExaminedKind =
   | 'procedure'
   | 'state_machine'
   | 'test_case'
+  | 'edge'
   | 'issue';
 
 export interface ExaminedObject {
@@ -117,6 +118,7 @@ const pilotKinds: Record<keyof Pilot, ExaminedKind> = {
   procedures: 'procedure',
   stateMachines: 'state_machine',
   testCases: 'test_case',
+  edges: 'edge',
 };
 
 /** JSON with keys sorted by code point at every depth. `undefined` members are dropped. */

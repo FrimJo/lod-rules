@@ -307,6 +307,18 @@ export interface TestCase extends Metadata {
   inputs: State;
   expected: Result;
 }
+/** A hand-authored relation in `corpus/graph/` that neither endpoint record states. */
+export interface CanonicalEdge extends Metadata {
+  relation: 'input_from';
+  /** The consuming record. */
+  from: string;
+  /** The providing record. */
+  to: string;
+  /** `field` of `from` (an input) takes its value from `from_field` of `to` (an output). */
+  binding: { field: string; from_field: string };
+  /** Printed wording that limits when the edge holds. */
+  condition: { source_text: string };
+}
 export interface Pilot {
   rules: Rule[];
   entities: Entity[];
@@ -314,4 +326,5 @@ export interface Pilot {
   procedures: Procedure[];
   stateMachines: StateMachine[];
   testCases: TestCase[];
+  edges: CanonicalEdge[];
 }

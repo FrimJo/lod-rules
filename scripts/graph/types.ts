@@ -25,6 +25,7 @@ export const RELATION_CATEGORY = {
   rule: 'dependency',
   table: 'dependency',
   entity: 'dependency',
+  input_from: 'dependency',
   overrides: 'precedence',
   see_also: 'reference',
   term: 'reference',
@@ -72,7 +73,8 @@ export type NodeKind =
   | 'issue'
   | 'section'
   | 'document'
-  | 'test_case';
+  | 'test_case'
+  | 'edge';
 
 export interface GraphNode {
   id: string;
@@ -89,8 +91,10 @@ export interface GraphEdge {
   category: Category;
   /** Schema path of the field the edge was read from, e.g. `steps[].rule_refs`. */
   field: string;
-  /** Source references of the record that owns `field`. */
+  /** Source references of the record that owns `field`; a canonical edge's own source. */
   provenance: SourceReference[];
+  /** Printed wording that limits when a canonical edge holds. Derived edges carry none. */
+  condition?: string;
 }
 
 export interface Graph {

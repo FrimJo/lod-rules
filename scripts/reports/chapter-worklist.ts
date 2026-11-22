@@ -53,6 +53,7 @@ export const RECORD_KINDS = [
   'state_machine',
   'term',
   'example',
+  'edge',
 ] as const;
 export type RecordKind = (typeof RECORD_KINDS)[number];
 
@@ -64,6 +65,7 @@ const KIND_LABEL: Record<RecordKind, string> = {
   state_machine: 'sm',
   term: 'term',
   example: 'example',
+  edge: 'edge',
 };
 
 const PILOT_KIND: Record<keyof Pilot, RecordKind> = {
@@ -73,6 +75,7 @@ const PILOT_KIND: Record<keyof Pilot, RecordKind> = {
   procedures: 'procedure',
   stateMachines: 'state_machine',
   testCases: 'example',
+  edges: 'edge',
 };
 
 /** A section of the book map with the extra fields this report reads. */

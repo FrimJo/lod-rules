@@ -19,6 +19,7 @@ const schemaFiles = [
   'procedure.schema.json',
   'state-machine.schema.json',
   'test-case.schema.json',
+  'graph-edge.schema.json',
   'independent-review.schema.json',
 ] as const;
 
@@ -41,6 +42,7 @@ export const schemaRefs = {
   procedures: 'https://lod-rules/schemas/procedure.schema.json',
   stateMachines: 'https://lod-rules/schemas/state-machine.schema.json',
   testCases: 'https://lod-rules/schemas/test-case.schema.json',
+  edges: 'https://lod-rules/schemas/graph-edge.schema.json',
   independentReviews: 'https://lod-rules/schemas/independent-review.schema.json',
 } as const;
 
