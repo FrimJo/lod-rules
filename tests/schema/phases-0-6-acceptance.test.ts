@@ -89,7 +89,14 @@ const acceptanceErrors = (c: Checklist) => [
 ];
 const corpus = readPilot();
 const ids = new Set(
-  [corpus.rules, corpus.procedures, corpus.stateMachines, corpus.tables, corpus.entities]
+  [
+    corpus.rules,
+    corpus.procedures,
+    corpus.stateMachines,
+    corpus.tables,
+    corpus.entities,
+    corpus.edges,
+  ]
     .flat()
     .map((x) => x.id),
 );
