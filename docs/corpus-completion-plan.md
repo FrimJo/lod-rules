@@ -37,7 +37,7 @@ current position and next unit are in [extraction-checkpoint.md](extraction-chec
 | Review records                       | 327: 280 unresolved, 47 resolved (most by published designer rulings)                                   |
 | Independent review records           | 53 fresh passing records under `review/independent/` (`npm run review -- check`)                        |
 | Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope            |
-| Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` is empty                                                      |
+| Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` holds 1 edge                                                  |
 | Phase 12 retrieval                   | Lexical retrieval, agent tools, MCP server and `ask` pipeline exist ([§5](#phase-12--retrieval-corpus)) |
 
 Live progress lives in the generated [coverage report](coverage-report.md) and the
@@ -106,8 +106,8 @@ complete at the documented scope in the [Phase 6 ledger](ledgers/phase-6-procedu
 
 **Outcome:** Package F is `accepted` (41 implemented, 10 covered by another model, 1
 nonprocedural, 43 `catalogue_scope`). The estate's source-silent readings are caller-supplied
-inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 83 of 85
-rows verified; the 2 still pending close with Step 4 below.
+inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 84 of 85
+rows verified; the 1 still pending (`phase_6.criterion_2`) closes with Step 4 below.
 
 ### Step 2 — Core-chapter loop: reconcile, extract, review
 
@@ -176,15 +176,16 @@ rules rather than duplicate them", which needs a duplication check.
 The Phase 0–6 exit rows that Phase 10 owned are verified (18 October 2026): the book-wide table
 inventory (the duplicate PDF 186 node is a redirect), typed dice for every table row that prints
 a die in a text cell (guarded corpus-wide by `textCellDiceErrors`), the embedded-restriction audit
-(0 unconverted) and Phase 5 Batch 7. Two rows stay pending for this step: the duplication check
-above (`phase_6.criterion_2`) and the "embarking on a quest" candidate, whose start-settlement
-randomisation (`core.quest.start_settlement`, PDF 59) is extracted and reviewed but not yet bound
-as the source of the first quest acceptance's settlement.
+(0 unconverted) and Phase 5 Batch 7. One row stays pending for this step: the duplication check
+above (`phase_6.criterion_2`).
 
 Step 4 runs as four units (issue #5): graph derivation and traversal, the embarking binding,
 duplicate/summary detection, and anomaly dispositions. Unit 1 is done (21 October 2026):
 `scripts/graph/` derives the typed graph that retrieval and `lod_expand` read, and
-`npm run graph -- report` regenerates [graph-report.md](graph-report.md).
+`npm run graph -- report` regenerates [graph-report.md](graph-report.md). Unit 2 is done
+(21 October 2026, issue #10): the first canonical edge in `corpus/graph/` binds the start
+settlement (PDF 59) to the quest acceptance's settlement when the game starts, and closes the
+"embarking on a quest" candidate.
 
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 

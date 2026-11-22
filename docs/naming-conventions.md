@@ -33,6 +33,7 @@ Machine-checked pattern (`schemas/common.schema.json`):
 | State machine      | `state_machine.`    | `state_machine.battle`                             |
 | Structural section | `section.`          | `section.game_basics`                              |
 | Test fixture       | `test.`             | `test.check.equal`                                 |
+| Canonical edge     | `edge.`             | `edge.quest.start_settlement.first_acceptance`     |
 | Issue record       | `issue.`            | `issue.0042`                                       |
 | Independent review | `review.`           | `review.combat.1`                                  |
 | Gold decision case | `gold.`             | `gold.check.failure`                               |

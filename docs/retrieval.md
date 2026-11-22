@@ -60,6 +60,11 @@ are. The other edges stay in the graph. `npm run graph -- build` writes the full
 `generated/graph/`, and `npm run graph -- report` regenerates the committed
 [graph report](graph-report.md).
 
+Canonical edges, hand-authored in `corpus/graph/` (see
+[ADR 0001](adr/0001-canonical-edges-outside-records.md)), join the graph beside the derived
+ones. An `input_from` edge's printed `condition` reaches `lod_get` links and `lod_expand` edges;
+its id, status and issues do not.
+
 Search ranks with BM25 over title, aliases, context and text. Results matching more
 of the query words get a boost. Quest-local records are demoted unless the query names
 their quest (or a word that appears only in quest titles, such as "Molgor"), or a scope

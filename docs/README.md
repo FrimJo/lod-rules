@@ -12,6 +12,8 @@ Start with the [completion plan](corpus-completion-plan.md) for what remains, th
 | [coverage-report.md](coverage-report.md)                   | Generated section/component progress; never edit by hand            |
 | [graph-report.md](graph-report.md)                         | Generated dependency-graph counts and anomalies; never edit by hand |
 | [../LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md) | Original phase design and data model                                |
+| [adr/](adr/)                                               | Architecture decisions, e.g. canonical edges outside records        |
+| [../CONTEXT.md](../CONTEXT.md)                             | Glossary of corpus vocabulary (canonical edge, binding, …)          |
 
 ## Conventions
 

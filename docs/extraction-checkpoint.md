@@ -14,9 +14,8 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
 - Phase 6 Batches 1–7 are complete at documented scope. Package F is `accepted`: 41
   implemented, 10 covered by another model, 1 nonprocedural, 43 `catalogue_scope`.
-- Phase 0–6 exit checklist: 83 of 85 rows verified; the checklist stays `open`. The 2 pending
-  rows (`phase_6.criterion_2` and the "embarking on a quest" candidate) belong to Step 4
-  (Phase 7).
+- Phase 0–6 exit checklist: 84 of 85 rows verified; the checklist stays `open`. The pending
+  row (`phase_6.criterion_2`) belongs to Step 4 (Phase 7).
 - Step 2 tiers 1–2 are reconciled and independently reviewed: Introduction, Game Basics,
   Character Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest and
   the Party Management part node (90 sections; `review.*.2` records, all passed with
@@ -86,6 +85,14 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   dangling ids, 41 cycles (`depends_on` 28, `related` 13), 222 unresolved pointers, none with a
   disposition yet. No canonical change; evidence in
   [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
+- Step 4 (Phase 7) unit 2 is done (21 October, issue #10): `corpus/graph/dependencies.yaml`
+  holds the first canonical edge, `edge.quest.start_settlement.first_acceptance`
+  (`procedure.quest_acceptance -input_from-> core.quest.start_settlement`, binding `settlement`,
+  condition "When you start the game"), under the new `schemas/graph-edge.schema.json` and
+  [ADR 0001](adr/0001-canonical-edges-outside-records.md). The new open issue is
+  `issue.embarking.first_quest_settlement_travel`. Reviewed as `review.embarking.4`
+  (`passed_with_corrections`, after `review.embarking.3` failed on the edge's name and the issue's
+  scope). The "embarking on a quest" candidate is `verified`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -93,17 +100,15 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7) unit 2, the embarking binding: bind `core.quest.start_settlement` (PDF 59) as
-the source of the first `procedure.quest_acceptance`'s settlement. It is the first canonical edge
-in `corpus/graph/` and defines that directory's schema; the edge joins the derived graph and
-needs `corpus-reviewer` independent review. It closes the "embarking on a quest" candidate in
-`tests/fixtures/acceptance/phases-0-6.json`. Evidence goes in
+Step 4 (Phase 7) unit 3, duplicate/summary detection: `summary_of`/`expanded_by` edges (reserved
+in the `precedence` category); closes `phase_6.criterion_2` (procedure steps reference atomic
+rules rather than duplicate them). Hand-authored relations go in `corpus/graph/` under
+`schemas/graph-edge.schema.json` (extend its `relation` enum) and need `corpus-reviewer`
+independent review by the record that governs their `section_id`. Evidence goes in
 [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
 
-Then, in order (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):
+Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):
 
-- Unit 3, duplicate/summary detection: `summary_of`/`expanded_by` edges; closes
-  `phase_6.criterion_2` (procedure steps reference atomic rules rather than duplicate them).
 - Unit 4, anomaly dispositions: a disposition for every dangling id, cycle and unresolved pointer
   in the [graph report](graph-report.md), absorbing the carry-overs below where they fit.
 
@@ -132,6 +137,10 @@ Open carry-overs:
   `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
 - `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
   "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
+- `issue.embarking.first_quest_settlement_travel` (frozen by `review.embarking.4`) groups the
+  available-quests roll with Settlement Events under "enters"; only Settlement Events prints
+  "Whenever the party enters a settlement", the quest roll is "Whenever the party is in a
+  settlement" (PDF 132).
 - The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
   hungry character (not dogs), once, until the party eats.
 

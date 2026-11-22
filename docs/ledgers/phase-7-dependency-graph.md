@@ -107,5 +107,56 @@ passed, 2 skipped) and `npm run lint` pass.
 ### Next
 
 Unit 2: bind `core.quest.start_settlement` to the first `procedure.quest_acceptance` as the first
-canonical edge in `corpus/graph/`, defining its schema. See the
+canonical edge in `corpus/graph/`, defining its schema.
+
+## Unit 2 — embarking binding — 21 October 2026
+
+Issue #10 under spec #5. Decisions came from a grilling session. Vocabulary (**canonical edge**,
+**derived edge**, **binding**) is in [CONTEXT.md](../../CONTEXT.md); placement is
+[ADR 0001](../adr/0001-canonical-edges-outside-records.md).
+
+### What was added
+
+- `corpus/graph/dependencies.yaml`: `edge.quest.start_settlement.first_acceptance`,
+  `procedure.quest_acceptance -input_from-> core.quest.start_settlement`, binding input
+  `settlement` ← output `settlement`. Source PDF 59 (printed 57), "Embarking on your First
+  Quest"; condition "When you start the game", verbatim. A structural-reading note in
+  `unresolved_references` limits it to the party still being in its start settlement, and to a
+  final result (8, "Re-roll.", supplies none).
+- `schemas/graph-edge.schema.json`. Fields: `id` (`edge.` namespace), the usual metadata,
+  `relation` (enum: `input_from`), `from`, `to`, `binding`, `condition` and optional
+  `unresolved_references`/`issues`. `from`/`to` name the endpoints because `source` is the
+  source reference.
+- Edges load as the record kind `edges` (root `corpus/graph/`), so they get global ids, metadata
+  and provenance checks, and the examined kind `edge` in review digests. The validator also
+  checks that the endpoints are rules or procedures, that `binding.field` is an input of `from`,
+  that `binding.from_field` is an output of `to`, and that the two field types match.
+- Graph: `input_from` is a `dependency` relation; a canonical edge's `field` is its YAML path,
+  its `provenance` its own source, and it carries `condition`. Edge records are graph nodes
+  (kind `edge`) with `cites_section` and `issue` edges.
+- Retrieval: the relations table gains `condition`; `lod_get` links and `lod_expand` edges show
+  it. `SEARCH_DOCUMENT_VERSION` 6.
+- `review/ambiguities.yaml`: `issue.embarking.first_quest_settlement_travel` (PDF 59, 132, 133).
+  `related` is only the edge and `core.quest.start_settlement`: relating
+  `procedure.quest_acceptance` or `procedure.settlement_arrival` would have staled the
+  settlement reviews that freeze them.
+
+### Review
+
+The edge's `section_id` is `section.embarking_on_your_first_quest`, so the embarking record
+governs it. `review.embarking.3` failed with two `modelling_error` findings: the edge's name
+claimed "the first quest acceptance" although Rejecting a Quest (PDF 132) and Available quests
+(PDF 133) can move the party first, and the issue overstated the gap. After correction,
+`review.embarking.4` passed with corrections (PDF 25–62, 132, 133 inspected; nothing open). Its
+optional note on "enters" versus "is in" is a checkpoint carry-over.
+
+### Counts
+
+Graph report: 4863 nodes, 15497 edges (`input_from` 1), 0 dangling ids, 41 cycles,
+223 unresolved pointers (the edge's note is the new one). The Phase 0–6 fixture has 84 of 85
+rows verified; "embarking on a quest" is `verified`.
+
+### Next
+
+Unit 3: duplicate/summary detection. See the
 [extraction checkpoint](../extraction-checkpoint.md#next-unit).
