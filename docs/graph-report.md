@@ -8,36 +8,37 @@ not resolved: none carries a disposition.
 
 ## Summary
 
-4861 nodes, 15492 edges.
+4863 nodes, 15497 edges.
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
-- Unresolved pointers: 222
+- Unresolved pointers: 223
 
 ## Edges by category
 
 | Category   | Edges |
 | ---------- | ----- |
-| dependency | 6564  |
+| dependency | 6565  |
 | precedence | 28    |
 | reference  | 1168  |
-| structural | 4548  |
+| structural | 4549  |
 | external   | 41    |
-| evidence   | 3143  |
+| evidence   | 3146  |
 
 ## Edges by relation
 
 | Relation             | Category   | Edges |
 | -------------------- | ---------- | ----- |
-| `cites_section`      | structural | 3805  |
+| `cites_section`      | structural | 3806  |
 | `component`          | dependency | 21    |
-| `concerns`           | evidence   | 929   |
+| `concerns`           | evidence   | 931   |
 | `depends_on`         | dependency | 1171  |
 | `enters`             | dependency | 4     |
 | `entity`             | dependency | 549   |
 | `external`           | external   | 41    |
 | `grants`             | dependency | 27    |
-| `issue`              | evidence   | 658   |
+| `input_from`         | dependency | 1     |
+| `issue`              | evidence   | 659   |
 | `overrides`          | precedence | 28    |
 | `part_of`            | structural | 705   |
 | `quest`              | reference  | 558   |
@@ -191,6 +192,7 @@ No dangling ids.
 - `core.quest.stop_heretics.objective_setup`: Standard encounter entries, Magic Users and enemy statistics are unavailable; supplied encounter outcomes are required.
 - `core.quest.stopping_necromancer.ragnalf`: Three Ranged Spells and two Close-combat spells are not named and have no printed selection method. The poisonous dagger has no specified poison strength.
 - `core.spell.enchant_item`: See chapter on Crafting.
+- `edge.quest.start_settlement.first_acceptance`: Structural reading, not printed text: the binding holds only while the party is still in the start settlement it was given at game start, and only for a final result; an 8 ("Re-roll.") is rolled again and supplies no settlement. Rejecting a Quest (PDF 132) and Available quests (PDF 133) can move the party before its first acceptance; a later acceptance takes its settlement from the party's current settlement, not from this edge.
 - `equipment.quest.kraghul_antidotes`: Antidote strength is not specified; no strength-specific success rate or healing value is assigned.
 - `equipment.quest.master_grimoire`: Randomise which spell you can learn from this book: the quest prints no spell list, selection table or distribution.
 - `procedure.activation`: Summon Lesser Demon waits until hero next turn; other explicit summon tokens are immediate. Eligibility and control-test outcomes supplied by spell rules. Extra tokens alone cannot set time_freeze_granted.

@@ -164,6 +164,33 @@ describe('runRetrievalTool', () => {
       target_title: 'Alchemists’ Guild',
     });
 
+    // A canonical edge carries its printed condition, and nothing else from corpus/graph/.
+    const binding = {
+      relation: 'input_from',
+      target: 'core.quest.start_settlement',
+      condition: 'When you start the game',
+    };
+    const acceptance = run('lod_get', { id: 'procedure.quest_acceptance' }) as {
+      links: ToolEdge[];
+    };
+    expect(acceptance.links).toContainEqual({
+      ...binding,
+      target_title: 'randomise the start settlement',
+    });
+    expectRulebookOnly(acceptance, 'procedure.quest_acceptance');
+    expect(
+      expand({ id: 'core.quest.start_settlement', direction: 'in', relations: ['input_from'] }),
+    ).toEqual([
+      {
+        source: 'core.quest.start_settlement',
+        relation: 'input_from',
+        target: 'procedure.quest_acceptance',
+        direction: 'in',
+        condition: 'When you start the game',
+        target_title: 'Actual party quest acceptance and immutable instance provenance',
+      },
+    ]);
+
     const excluded = ['cites_section', 'redirects_to', 'tests', 'concerns', 'issue'];
     for (const id of [
       'core.quest.pyramid_xanthu.setup',
