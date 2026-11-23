@@ -35,7 +35,8 @@ export function renderGraphReport(graph: AnalysedGraph): string {
           .reduce((sum, relation) => sum + (byRelation.get(relation) ?? 0), 0),
       ] as const,
   );
-  const { dangling, cycles, unresolved, stepDuplicates } = graph.anomalies;
+  const { dangling, cycles, unresolved, stepDuplicates, ruleRepeats } = graph.anomalies;
+  const derived = graph.edges.filter((edge) => edge.derived).length;
 
   const lines = [
     '# Dependency graph report',
@@ -44,16 +45,17 @@ export function renderGraphReport(graph: AnalysedGraph): string {
     'Do not edit by hand. -->',
     '',
     'Derived from the canonical corpus by `scripts/graph/`. The anomaly lists below are reported,',
-    'not resolved: none carries a disposition.',
+    'not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not here.',
     '',
     '## Summary',
     '',
-    `${plural(graph.nodes.length, 'node')}, ${plural(graph.edges.length, 'edge')}.`,
+    `${plural(graph.nodes.length, 'node')}, ${plural(graph.edges.length, 'edge')} (${plural(derived, 'derived inverse')}).`,
     '',
     `- Dangling ids: ${dangling.length}`,
     `- Cycles: ${cycles.reduce((sum, group) => sum + group.cycles.length, 0)} across ${plural(cycles.length, 'relation')}`,
     `- Unresolved pointers: ${unresolved.length}`,
     `- Procedure steps restating an uncited rule: ${stepDuplicates.length}`,
+    `- Rules repeating printed text across chapters: ${ruleRepeats.length}`,
     '',
     '## Edges by category',
     '',
@@ -102,6 +104,15 @@ export function renderGraphReport(graph: AnalysedGraph): string {
       : stepDuplicates.map(
           ({ procedure, step, rule, effects }) =>
             `- ${code(`${procedure}#${step}`)} → ${code(rule)} (${effects.map(code).join(', ')})`,
+        )),
+    '',
+    '## Rules repeating printed text across chapters',
+    '',
+    ...(ruleRepeats.length === 0
+      ? ['None.']
+      : ruleRepeats.map(
+          ({ rules: [a, b], shared, effects }) =>
+            `- ${code(a)} ↔ ${code(b)} (${plural(shared, 'shared shingle')}${effects.length ? `; ${effects.map(code).join(', ')}` : ''})`,
         )),
     '',
     '## Unresolved pointers',

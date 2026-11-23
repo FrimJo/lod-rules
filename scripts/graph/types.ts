@@ -27,6 +27,9 @@ export const RELATION_CATEGORY = {
   entity: 'dependency',
   input_from: 'dependency',
   overrides: 'precedence',
+  // The detailed rule governs its summary, so "what could affect" a summary reaches it.
+  expanded_by: 'precedence',
+  summary_of: 'reference',
   see_also: 'reference',
   term: 'reference',
   timing: 'reference',
@@ -95,6 +98,8 @@ export interface GraphEdge {
   provenance: SourceReference[];
   /** Printed wording that limits when a canonical edge holds. Derived edges carry none. */
   condition?: string;
+  /** The inverse of a canonical edge (`expanded_by`), so counts can skip it. */
+  derived?: true;
 }
 
 export interface Graph {
@@ -140,6 +145,20 @@ export interface StepDuplicate {
   effects: string[];
 }
 
+/**
+ * Two rules in different chapters that quote the same printed text (issue #4 item 22). Each is
+ * dispositioned as a summary (a `summary_of` edge, which removes it from this list), a
+ * legitimate repeat or an error.
+ */
+export interface RuleRepeat {
+  /** The two rule ids, sorted. */
+  rules: [string, string];
+  /** Eight-word shingles of `source_text` the two share. */
+  shared: number;
+  /** `set`/`add` effects both rules carry, as `type:target=value`, sorted. */
+  effects: string[];
+}
+
 /** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
 export interface Anomalies {
   dangling: DanglingId[];
@@ -148,6 +167,8 @@ export interface Anomalies {
   cycles: RelationCycles[];
   /** Procedure steps restating an uncited rule, by procedure, step and rule. */
   stepDuplicates: StepDuplicate[];
+  /** Rule pairs repeating printed text across chapters with no `summary_of` between them. */
+  ruleRepeats: RuleRepeat[];
 }
 
 /** What `buildGraph` returns: the derived graph plus its anomalies. */

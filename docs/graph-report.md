@@ -4,25 +4,26 @@
 Do not edit by hand. -->
 
 Derived from the canonical corpus by `scripts/graph/`. The anomaly lists below are reported,
-not resolved: none carries a disposition.
+not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not here.
 
 ## Summary
 
-4863 nodes, 15506 edges.
+4879 nodes, 15554 edges (16 derived inverses).
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
 - Unresolved pointers: 223
 - Procedure steps restating an uncited rule: 3
+- Rules repeating printed text across chapters: 24
 
 ## Edges by category
 
 | Category   | Edges |
 | ---------- | ----- |
 | dependency | 6573  |
-| precedence | 28    |
-| reference  | 1168  |
-| structural | 4549  |
+| precedence | 44    |
+| reference  | 1184  |
+| structural | 4565  |
 | external   | 41    |
 | evidence   | 3147  |
 
@@ -30,12 +31,13 @@ not resolved: none carries a disposition.
 
 | Relation             | Category   | Edges |
 | -------------------- | ---------- | ----- |
-| `cites_section`      | structural | 3806  |
+| `cites_section`      | structural | 3822  |
 | `component`          | dependency | 21    |
 | `concerns`           | evidence   | 931   |
 | `depends_on`         | dependency | 1171  |
 | `enters`             | dependency | 4     |
 | `entity`             | dependency | 549   |
+| `expanded_by`        | precedence | 16    |
 | `external`           | external   | 41    |
 | `grants`             | dependency | 27    |
 | `input_from`         | dependency | 1     |
@@ -51,6 +53,7 @@ not resolved: none carries a disposition.
 | `see_also`           | reference  | 258   |
 | `starting_equipment` | dependency | 8     |
 | `step_rule`          | dependency | 263   |
+| `summary_of`         | reference  | 16    |
 | `table`              | dependency | 1464  |
 | `term`               | reference  | 255   |
 | `tests`              | evidence   | 1557  |
@@ -115,6 +118,33 @@ No dangling ids.
 - `procedure.combat_attack#large_power` → `combat.action.power_attack.enemy` (`set:armour_piercing=2`)
 - `procedure.hero_defence#avoid` → `combat.defence.weapon_parry` (`set:negates_damage=true`)
 - `procedure.hero_defence#success` → `combat.defence.weapon_parry` (`set:defence_succeeded=true`)
+
+## Rules repeating printed text across chapters
+
+- `character.alchemy.mix.success.random` ↔ `character.treasure.potions.identify` (17 shared shingles; `set:identification_required=false`)
+- `character.alchemy.mix.success.recipe` ↔ `character.treasure.potions.identify` (17 shared shingles; `set:identification_required=false`)
+- `character.creation.strength_weapon_class` ↔ `character.equipment.weapon_class.one_hand` (37 shared shingles)
+- `character.creation.strength_weapon_class` ↔ `character.equipment.weapon_class.two_hands` (37 shared shingles)
+- `character.durability.dissipation` ↔ `character.durability.overlap_uncertain` (27 shared shingles)
+- `character.settlement.guild.alchemists.training` ↔ `character.settlement.guild.fighters.training` (7 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.alchemists.training` ↔ `character.settlement.guild.inner_sanctum.training` (2 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.alchemists.training` ↔ `character.settlement.guild.rangers.training` (9 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.alchemists.training` ↔ `character.settlement.guild.wizards.training` (9 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.fighters.training` ↔ `character.settlement.guild.rangers.training` (11 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.fighters.training` ↔ `character.settlement.guild.wizards.training` (11 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.inner_sanctum.training` ↔ `character.settlement.guild.rangers.training` (2 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.inner_sanctum.training` ↔ `character.settlement.guild.wizards.training` (3 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.rangers.training` ↔ `character.settlement.guild.wizards.training` (13 shared shingles; `set:cost=300`, `set:sessions_per_skill_between_dungeons=1`, `set:skill_increase=3`)
+- `character.settlement.guild.wizards.learning` ↔ `character.settlement.learning` (15 shared shingles; `set:base_cost=200`)
+- `combat.action.apply_bandage.other` ↔ `core.healing.bandage_adjacent_hero` (5 shared shingles)
+- `core.quest.go_fetch.setup` ↔ `core.quest.grieving_mother.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.reading` ↔ `core.quest.missing_brother.setup` (9 shared shingles)
+- `core.quest.grieving_mother.setup` ↔ `core.quest.manhunt.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.setup` ↔ `core.quest.mapmaker.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.setup` ↔ `core.quest.missing_brother.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.setup` ↔ `core.quest.mushrooms.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.setup` ↔ `core.quest.slay_beast.setup` (2 shared shingles; `set:location="same dungeon as the next quest"`)
+- `core.quest.grieving_mother.side_quest_card` ↔ `core.quest.slay_beast.draw` (9 shared shingles)
 
 ## Unresolved pointers
 

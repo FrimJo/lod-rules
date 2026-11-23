@@ -308,17 +308,23 @@ export interface TestCase extends Metadata {
   expected: Result;
 }
 /** A hand-authored relation in `corpus/graph/` that neither endpoint record states. */
-export interface CanonicalEdge extends Metadata {
-  relation: 'input_from';
-  /** The consuming record. */
+interface CanonicalEdgeBase extends Metadata {
   from: string;
-  /** The providing record. */
   to: string;
-  /** `field` of `from` (an input) takes its value from `from_field` of `to` (an output). */
-  binding: { field: string; from_field: string };
   /** Printed wording that limits when the edge holds. */
+  condition?: { source_text: string };
+}
+/** `field` of `from` (an input) takes its value from `from_field` of `to` (an output). */
+export interface InputFromEdge extends CanonicalEdgeBase {
+  relation: 'input_from';
+  binding: { field: string; from_field: string };
   condition: { source_text: string };
 }
+/** `from` prints a summary or reminder of the rule `to` states in full; the PDF says so. */
+export interface SummaryOfEdge extends CanonicalEdgeBase {
+  relation: 'summary_of';
+}
+export type CanonicalEdge = InputFromEdge | SummaryOfEdge;
 export interface Pilot {
   rules: Rule[];
   entities: Entity[];

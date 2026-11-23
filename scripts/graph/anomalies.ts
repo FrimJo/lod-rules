@@ -8,7 +8,7 @@ import type {
   UnresolvedPointer,
 } from './types.ts';
 import { compare } from './compare.ts';
-import { stepDuplicates } from './duplicates.ts';
+import { ruleRepeats, stepDuplicates } from './duplicates.ts';
 
 /** Edges whose target is not a node. The edge list is already sorted, so this is too. */
 function danglingIds(graph: Graph): DanglingId[] {
@@ -122,5 +122,6 @@ export function findAnomalies(graph: Graph, corpus: RetrievalCorpus): Anomalies 
     unresolved: unresolvedPointers(corpus),
     cycles: cyclesByRelation(graph),
     stepDuplicates: stepDuplicates(corpus),
+    ruleRepeats: ruleRepeats(corpus),
   };
 }

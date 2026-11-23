@@ -17,9 +17,7 @@
       "source_text",
       "relation",
       "from",
-      "to",
-      "binding",
-      "condition"
+      "to"
     ],
     "properties": {
       "id": {
@@ -52,15 +50,15 @@
         "minLength": 1
       },
       "relation": {
-        "description": "input_from: a field of `from` takes its value from a field of `to` (consumer to provider).",
-        "enum": ["input_from"]
+        "description": "input_from: a field of `from` takes its value from a field of `to` (consumer to provider). summary_of: `from` prints a summary or reminder of the rule `to` states in full, and the PDF says so (\"described in detail in\", \"as described in\", \"remember that\"); never inferred from position or level of detail. The graph derives `expanded_by` as its inverse.",
+        "enum": ["input_from", "summary_of"]
       },
       "from": {
-        "description": "The consuming record.",
+        "description": "The consuming record (input_from) or the summarising record (summary_of).",
         "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
       },
       "to": {
-        "description": "The providing record.",
+        "description": "The providing record (input_from) or the detailed record (summary_of).",
         "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
       },
       "binding": {
@@ -105,6 +103,40 @@
           "$ref": "https://lod-rules/schemas/common.schema.json#/$defs/id"
         }
       }
-    }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "relation": {
+              "const": "input_from"
+            }
+          },
+          "required": ["relation"]
+        },
+        "then": {
+          "required": ["binding", "condition"],
+          "properties": {
+            "binding": {},
+            "condition": {}
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "relation": {
+              "const": "summary_of"
+            }
+          },
+          "required": ["relation"]
+        },
+        "then": {
+          "properties": {
+            "binding": false
+          }
+        }
+      }
+    ]
   }
 }
