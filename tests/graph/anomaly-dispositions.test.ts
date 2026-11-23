@@ -47,6 +47,21 @@ describe('graph anomaly dispositions (issue #11)', () => {
     expect(graph.anomalies.unresolved.map(pointerKey)).toEqual(fixture.unresolved.map(pointerKey));
   });
 
+  it('uses only the defined dispositions', () => {
+    const cycleKinds = ['reference_cycle', 'mutual_dependency', 'bounded_reentry'];
+    const pointerKinds = [
+      'modelling_note',
+      'external_book',
+      'external_component',
+      'book_undefined',
+      'now_resolvable',
+    ];
+    for (const entry of fixture.cycles)
+      expect(cycleKinds, cycleKey(entry.relation, entry.nodes)).toContain(entry.disposition);
+    for (const entry of fixture.unresolved)
+      expect(pointerKinds, pointerKey(entry)).toContain(entry.disposition);
+  });
+
   it('gives every entry a reason, and every named issue exists', () => {
     for (const entry of [...fixture.cycles, ...fixture.unresolved]) {
       const key = 'owner' in entry ? pointerKey(entry) : cycleKey(entry.relation, entry.nodes);
