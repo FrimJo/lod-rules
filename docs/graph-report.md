@@ -8,11 +8,11 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 
 ## Summary
 
-4879 nodes, 15554 edges (16 derived inverses).
+4879 nodes, 15568 edges (16 derived inverses).
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
-- Unresolved pointers: 223
+- Unresolved pointers: 218
 - Procedure steps restating an uncited rule: 3
 - Rules repeating printed text across chapters: 24
 
@@ -20,12 +20,12 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 
 | Category   | Edges |
 | ---------- | ----- |
-| dependency | 6573  |
+| dependency | 6574  |
 | precedence | 44    |
 | reference  | 1184  |
 | structural | 4565  |
 | external   | 41    |
-| evidence   | 3147  |
+| evidence   | 3160  |
 
 ## Edges by relation
 
@@ -33,7 +33,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | -------------------- | ---------- | ----- |
 | `cites_section`      | structural | 3822  |
 | `component`          | dependency | 21    |
-| `concerns`           | evidence   | 931   |
+| `concerns`           | evidence   | 942   |
 | `depends_on`         | dependency | 1171  |
 | `enters`             | dependency | 4     |
 | `entity`             | dependency | 549   |
@@ -41,7 +41,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | `external`           | external   | 41    |
 | `grants`             | dependency | 27    |
 | `input_from`         | dependency | 1     |
-| `issue`              | evidence   | 659   |
+| `issue`              | evidence   | 661   |
 | `overrides`          | precedence | 28    |
 | `part_of`            | structural | 705   |
 | `quest`              | reference  | 558   |
@@ -58,7 +58,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | `term`               | reference  | 255   |
 | `tests`              | evidence   | 1557  |
 | `timing`             | reference  | 18    |
-| `uses_table`         | dependency | 266   |
+| `uses_table`         | dependency | 267   |
 
 ## Dangling ids
 
@@ -173,10 +173,8 @@ No dangling ids.
 - `character.treasure.enemy_loot.branch_5`: The tables can be found on the Quick Reference Sheet.
 - `character.treasure.enemy_loot.branch_6`: The tables can be found on the Quick Reference Sheet.
 - `character.treasure.enemy_loot.branch_7`: The tables can be found on the Quick Reference Sheet.
-- `character.treasure.furniture_search`: the Furniture Treasure Table in Appendix III
 - `character.treasure.legendary.belt_of_copperbane`: “all goblins fighting the wearer gain the Hate Special Rule”: this book does not define the Hate Special Rule for enemies.
 - `character.treasure.legendary.ring_of_regeneration`: “the Regeneration Special Rule”: this book does not define the Regeneration Special Rule; only its 1d3 HP override is printed here.
-- `combat.principles.shooting_obstacles`: the dungeon objects table
 - `core.cobweb_opening.alert`: Giant Spider statistics are in the unavailable Bestiary. No placement die size or initiative is supplied by this heading.
 - `core.dungeon_event.resolve`: the table (a d12 table with columns chosen by 1d6) that Dungeon events refers to
 - `core.dungeon.card_contents`: A template for such a table is available at https://boardgamegeek.com/boardgame/336195/dungeoneers.
@@ -285,7 +283,6 @@ No dangling ids.
 - `procedure.irrational_fear`: Fear: actual reaction timing/eligibility/resolution is supplied separately; no canonical resolver id is invented.
 - `procedure.locked_door_and_close`: AP totals are recorded as source requirements; per-turn retry sequencing requires caller-supplied state.
 - `procedure.lost_brother_personal_quest`: Steps run in printed order; each step executes its cited rules, whose own conditions select the branch (dead at 60 or higher, alive below 60, later death reverting to the dead result). The page prints no order between the burial and the rescue branches beyond the branch conditions.
-- `procedure.open_door_or_chest`: the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III; the furniture treasure tables are printed in Appendix V)
 - `procedure.open_portcullis`: Each paid 1 AP attempt is paired with its own supplied STR Test result and helper count; a missing or mismatched result leaves that attempt pending rather than resolving another one.
 - `procedure.poison_cure`: Chapel of Metheia back in the city (PDF122): no dedicated Chapel service/location ID is bound. Do not equate Chapel with Temple or inherit Sick Ward treatment accounting.
 - `procedure.quest_acceptance`: Structural reading, not printed text: offer rolls, the Luck prohibition and the rejection limits belong to procedure.settlement_arrival. This checkpoint records one accepted choice per party and distinct quest occurrence, with separate main and side records and an immutable originating settlement and site. Request steps hand off to the supplied quest choice or site roll once; the handoff is not acceptance. Departure, progression, abandonment, completion and rewards belong to their own procedures, and a fresh record does not reset an earlier occurrence.
@@ -306,7 +303,6 @@ No dangling ids.
 - `procedure.sanity_loss`: Certain room events: See Exploration Card. Supply the actual card loss amount; no absent card effect is invented.
 - `procedure.scenario_die`: The Start of Turn sequence chart (PDF 90) shows the same branch: Roll Scenario die (1d10), 1-8 to Move heroes, 9-10 to Roll Threat (1d20).
 - `procedure.scenario_die`: The not-in-battle Threat table result 20 (Add +1 on all Scenario die roll for the remainder of the dungeon. This can only happen once.) is carried by threat_trigger: a +1 on a d10 roll reaches 9 from a roll of 8, so the caller supplies a trigger one lower.
-- `procedure.search_furniture`: the Furniture Treasure Table (cited as chapter III: 'Treasures' and as in Appendix III; the furniture treasure tables are printed in Appendix V)
 - `procedure.settlement_activities_and_overnight`: Structural reading, not printed text: each call handles one hero for one phase. A hero spends at most one Activity Point per day, so an activity costing N occupies days start to start + N - 1 and the party stays at the inn through that night. Departure needs a day after the last activity and the last occupied day. Create a Scroll and Enchant Objects counters run between quests: they reset when the hero leaves on a quest, not on arrival, and one object excludes scroll attempts and the reverse.
 - `procedure.settlement_activities_and_overnight`: Recovery modelling, not printed text: a 2d6 (inn or own home) or 1d6 (stable) HP roll that would take a hero above the recorded maximum is not applied and returns issue.phase4.recovery_bounds; it does not block the Mana, Energy and Luck restoration. The printed "only half (RDD) of each stat" settles rounding (round down) but not whether half means half of the maximum, of the missing amount or of the current value, so the stable steps apply only caller-supplied half-stat amounts (stable_outcome_supplied) that stay within each maximum, and otherwise return issue.phase4.recovery_bounds; the stable recovery applies at most once per hero and night and keeps the mandatory morning departure. Staying at the house skips only the inn charge; recovery there follows the inn branch.
 - `procedure.settlement_arrival`: Structural reading, not printed text: the event threshold, the rolls and the Quest Book results are supplied. Visit counters belong to one genuine arrival, so a repeated call in the same visit neither rerolls the event nor reopens the offer; a second quests call and a roll offering no quest return issue.settlement.quest_availability_repeat. Rejecting every offered quest forces departure under the printed "If none of the quests are interesting to the party, they must move to another settlement". The 2-quest limit applies to every settlement except Silver City and the five named in issue.settlement.quest_offer_scope (Durburim, Birnheim, The Outpost, Freyfell, Whiteport). Map geometry is supplied.
@@ -346,7 +342,6 @@ No dangling ids.
 - `section.embarking_on_your_first_quest`: the ‘Entering the Dungeon’ chapter (no chapter of that name; Into the Dungeons is the nearest title, but the book does not say so)
 - `section.psychology.sanity`: See Exploration Card
 - `section.treasure`: The tables can be found on the Quick Reference Sheet.
-- `section.treasure.searching_furniture`: the Furniture Treasure Table in Appendix III
 - `spell.enchant_item`: See chapter on Crafting.
 - `state_machine.battle`: Structural reading, not printed text: the battle lifecycle spans three chapters. Initiative rules say when the lifecycle starts and how activation order is drawn; the turn rules say what happens to the interrupted turn; the combat chapter says when the battle ends. State assignments follow the source; no transition is invented.
 - `state_machine.battle`: Battle-end other than all enemies dead (fleeing enemies, quest-fought endpoints) is not sourced in the extracted pages; only the all-enemies-dead condition is modelled.

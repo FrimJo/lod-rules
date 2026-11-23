@@ -110,6 +110,19 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   on the Parry Stance target, now `combat.defence.shield_parry`), `review.treasure.2`,
   `review.psychology_sanity.4`, `review.alchemy_core.3`, `review.into_the_dungeons_actions.8`,
   `review.quests_into_the_ancient_lands.4`.
+- Step 4 (Phase 7) unit 4 is done (23 November, issue #11): every graph anomaly has a
+  disposition in `tests/fixtures/graph-anomaly-dispositions.json`, checked by
+  `tests/graph/anomaly-dispositions.test.ts`. 41 cycles: 13 `reference_cycle`, 26
+  `mutual_dependency`, 2 `bounded_reentry`, none ill-defined. Unresolved pointers: of 223, 5
+  were bound (the Furniture Treasure Table pointers to `table.treasure.furniture` / Appendix V,
+  "the dungeon objects table" to `table.dungeon.obstacles`); the 218 left are
+  `modelling_note`, `book_undefined`, `external_book` or `external_component`. Six frozen issues
+  gained `related` links or wording fixes. Re-reviewed fresh: `review.combat_actions.8`,
+  `review.combat_damage.3`, `review.combat_enemies.5`, `review.embarking.5`, `review.equipment.4`
+  (after `.3` failed on the PDF 153 charging rule), `review.guilds.5`,
+  `review.into_the_dungeons_actions.9`, `review.introduction.3`,
+  `review.magic_items_enchantments.4`, `review.psychology_tables.5`, `review.settlements_core.6`,
+  `review.settlements_services.3`, `review.treasure.3`. Step 4 is complete.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -117,24 +130,12 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7) unit 4, anomaly dispositions: a disposition for every dangling id, cycle and
-unresolved pointer in the [graph report](graph-report.md) (41 cycles, 223 unresolved pointers),
-in a fixture under `tests/fixtures/` with a test that fails on an undispositioned or stale
-anomaly, absorbing the carry-overs below where they fit. Evidence in
-[phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
-
-Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md)): Phase 8 (worked
-examples as fixtures), Phase 9 (uncertainty audit), Phase 11 (`build:corpus`) and Phase 12
-(retrieval).
+Phase 8: worked examples as fixtures (plan in
+[corpus-completion-plan.md](corpus-completion-plan.md)). Then Phase 9 (uncertainty audit),
+Phase 11 (`build:corpus`) and Phase 12 (retrieval).
 
 Open carry-overs:
 
-- `issue.0004` still lacks `related` links to the Acute Stress rule and procedure (frozen by
-  `review.introduction.2`).
-- `issue.phase4.magic_breakage` lists only `character.durability.broken` in `related` (frozen
-  by `review.equipment.2`).
-- `issue.phase4.recovery_bounds` should say that "only half (RDD)" (PDF 147) settles rounding,
-  not the base, and relate `procedure.settlement_activities_and_overnight`.
 - `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
   limit on `character.sanity.inn_recovery` is recorded but not enforced.
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
@@ -144,18 +145,17 @@ Open carry-overs:
   an earlier tier's record).
 - `procedure.hate` cites PDF 178 as heading "Hate", column "Effect"; the page prints "Mental
   Talents", columns Talent and Description (Psychology unit).
-- `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should
-  relate `combat.action.pick_up_weapon` and `procedure.enemy_attack` (frozen by
-  `review.combat_actions.4` and `review.combat_damage.2`).
 - Glued words in the summaries of the frozen issues `issue.quest.side_quest_availability`,
   `issue.quest.tomb_raiders_threat_boundary`, `issue.quest.spider_queen_cobweb_mapping` and
   `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
 - `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
   "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
-- `issue.embarking.first_quest_settlement_travel` (frozen by `review.embarking.4`) groups the
-  available-quests roll with Settlement Events under "enters"; only Settlement Events prints
-  "Whenever the party enters a settlement", the quest roll is "Whenever the party is in a
-  settlement" (PDF 132).
+- `issue.0004` could also relate `condition.acute_stress` and
+  `character.equipment.consumable.dwarven_ale.drink` ("for the rest of the quest", PDF 182) and
+  cite the PDF 57 Acute Stress row (optional, raised by `review.introduction.3`).
+- `procedure.enemy_attack.issues` and `combat.action.pick_up_weapon` do not list
+  `issue.combat.enemy_fumble_pickup_dex` / `issue.combat.shield_parry_95_durability` back
+  (one-way links, raised by `review.combat_damage.3`).
 
 ## Evidence ledgers
 

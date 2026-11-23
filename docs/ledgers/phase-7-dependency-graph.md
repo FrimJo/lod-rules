@@ -283,3 +283,93 @@ scope: `review.game_basics.3`, `review.levelling_up.4`, `review.treasure.2`,
 bonus to parrying as described on page 118" is the shield parry (CS+15 in Parry Stance), not
 the weapon parry. The edge became `edge.summary.combat_parry_stance.shield_parry` and
 `review.combat_actions.7` passed with that correction. No new issues.
+
+### Next
+
+Unit 4: anomaly dispositions. See the
+[extraction checkpoint](../extraction-checkpoint.md#next-unit).
+
+## Unit 4 — anomaly dispositions and targeted frozen fixes — 23 November 2026
+
+Issue #11.
+
+### Dispositions
+
+`tests/fixtures/graph-anomaly-dispositions.json` gives every cycle and unresolved pointer in the
+[graph report](../graph-report.md) one disposition with a reason; `tests/graph/anomaly-dispositions.test.ts`
+fails on an undispositioned or stale anomaly, an empty reason, an `issues` id that is not a
+node, or a `now_resolvable` entry whose `target` does not resolve. The report generator does
+not read the fixture, so the report stays as it was.
+
+Cycles (41): 13 `reference_cycle` (mutual glossary `related` pairs), 26 `mutual_dependency`, 2
+`bounded_reentry`. The `mutual_dependency` cycles are a rule and the procedure that applies it
+(guild training ×5, ranger trophy ×2, learn prayer, the two searches, the Threat floor), a
+handoff plus an input (`procedure.sanity_condition` with each of its nine condition
+procedures, Hate diagnosis and Talent, mental-condition treatment and cleanup), or one passage
+split into records that name each other (Stackable, Shield Padding, Dark as the Night with
+mutually exclusive guards, staff casting and charges). `bounded_reentry`:
+`procedure.damage_follow_up` (`remaining_poison`, Package F disposition) and
+`procedure.sanity_condition` (duplicate reroll on a finite table; exhaustion is
+`issue.phase4.sanity_boundaries`). No cycle makes execution or precedence ill-defined, so no
+new issue.
+
+Unresolved pointers (223 at the start): 90 `modelling_note`, 54 `book_undefined`, 53
+`external_book`, 21 `external_component`, 5 `now_resolvable`. Every entry was read; a
+regex pass was not used to decide.
+
+### Bound pointers
+
+- "the Furniture Treasure Table in Appendix III" (and the chapter III form) on
+  `character.treasure.furniture_search`, `procedure.open_door_or_chest` and
+  `procedure.search_furniture`: dropped from `unresolved_references`, because each already
+  depends on `table.treasure.furniture`. On `section.treasure.searching_furniture` it became
+  `see_also: section.appendix_v_treasures.treasure_found_in_furniture`. The book names Appendix
+  III (Equipment), but the only furniture treasure table is Appendix V "Treasure found in
+  Furniture" (PDF 193); the name picks one target, so it is resolvable, and the wrong appendix
+  number stays in `issue.phase6.furniture_treasure_table_location`.
+- "the dungeon objects table" on `combat.principles.shooting_obstacles`: `uses_tables` gains
+  `table.dungeon.obstacles`. No table has that title, but List of Obstacles (PDF 94–98) is the
+  only dungeon table with per-object LOS/Shooting effects.
+- Not bound: "See: 'Selling Equipment'" on `table.treasure.example_card` is `book_undefined`.
+  No heading has that title and three passages could be meant (PDF 53, 144, 186).
+
+218 unresolved pointers remain, all dispositioned.
+
+### Frozen issue fixes
+
+- `issue.0004` relates `character.condition.acute_stress` and `procedure.acute_stress`.
+- `issue.phase4.magic_breakage` relates `character.durability.dissipation`,
+  `character.durability.magic_repair_uncertain`, `character.durability.broken_magic_lost`,
+  `character.magic_item.recharge` and, after `review.equipment.3` failed on it,
+  `character.settlement.guild.wizards.charging` (PDF 153 "A broken Magic Item that has been
+  repaired can be recharged for 250 coins.", now quoted and cited). The charging rule and
+  `character.durability.broken_magic_lost` list the issue back.
+- `issue.phase4.recovery_bounds` relates `procedure.settlement_activities_and_overnight` and
+  says "only half (RDD) of each stat is regained" (PDF 147) settles rounding, not the base.
+- `issue.combat.enemy_fumble_pickup_dex` relates `combat.action.pick_up_weapon` and
+  `procedure.enemy_attack`. `issue.combat.shield_parry_95_durability` relates
+  `procedure.enemy_attack` only: Picking Up a Dropped Weapon has nothing to do with shield
+  durability.
+- `issue.embarking.first_quest_settlement_travel` no longer groups the quest roll under
+  "enters": Settlement Events prints "Whenever the party enters a settlement", Taking on
+  Quests "Whenever the party is in a settlement" (both PDF 132, now cited).
+
+### Review
+
+The fixes staled twelve records (more than the 6–8 expected; the user chose to run all).
+Fresh re-reviews, same scope: `review.combat_actions.8`, `review.combat_damage.3`,
+`review.combat_enemies.5`, `review.embarking.5`, `review.into_the_dungeons_actions.9`,
+`review.introduction.3`, `review.psychology_tables.5`, `review.settlements_core.6`,
+`review.settlements_services.3` and `review.treasure.3` passed. `review.equipment.3` failed:
+`issue.phase4.magic_breakage` missed the PDF 153 Charging Magic Items rule. After that fix,
+`review.equipment.4`, `review.magic_items_enchantments.4` and `review.guilds.5` (the charging rule's record) passed. No new issues.
+
+Optional follow-ups the reviewers raised, left as carry-overs: `issue.0004` could also relate
+`condition.acute_stress` and Dwarven Ale (`character.equipment.consumable.dwarven_ale.drink`,
+PDF 182 "for the rest of the quest") and cite the PDF 57 Acute Stress row; the two combat issues
+are not listed back in `procedure.enemy_attack.issues` or `combat.action.pick_up_weapon`.
+
+### Counts
+
+Graph report: 4879 nodes, 15568 edges (16 derived inverses), 0 dangling ids, 41 cycles, 218
+unresolved pointers, 3 restating steps, 24 cross-chapter repeats; every anomaly dispositioned.
