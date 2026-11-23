@@ -215,16 +215,30 @@ export function deriveGraph(corpus: RetrievalCorpus): Graph {
   };
 
   // Canonical edges are hand-authored in corpus/graph/; `field` names the file that holds them.
+  // `summary_of` is recorded once; its inverse `expanded_by` is derived and flagged as such.
   for (const edge of corpus.pilot.edges) {
+    const field = corpus.files.get(edge.id) ?? 'corpus/graph';
+    const condition = edge.condition ? { condition: edge.condition.source_text } : {};
     edges.push({
       source: edge.from,
       relation: edge.relation,
       target: edge.to,
       category: RELATION_CATEGORY[edge.relation],
-      field: corpus.files.get(edge.id) ?? 'corpus/graph',
+      field,
       provenance: edge.source,
-      condition: edge.condition.source_text,
+      ...condition,
     });
+    if (edge.relation === 'summary_of')
+      edges.push({
+        source: edge.to,
+        relation: 'expanded_by',
+        target: edge.from,
+        category: RELATION_CATEGORY.expanded_by,
+        field,
+        provenance: edge.source,
+        ...condition,
+        derived: true,
+      });
     add(edge.id, 'issue', many(edge.issues, 'issues'), edge.source);
   }
 

@@ -265,14 +265,30 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
   }
   for (const entries of Object.values(pilot))
     for (const entry of entries as Metadata[]) metadata(entry);
-  // A canonical edge binds an input field of `from` to an output field of `to`.
+  // input_from binds an input field of `from` to an output field of `to`. summary_of links a
+  // summarising record to the record it summarises; the edge belongs to the summary's section.
   const fieldsOf = new Map<string, Fields>(
     [...pilot.rules, ...pilot.procedures].map((record) => [record.id, record.fields]),
   );
+  const sectionOf = new Map<string, string>(
+    [...pilot.rules, ...pilot.procedures].map((record) => [record.id, record.section_id]),
+  );
+  const summaryPairs = new Set<string>();
   for (const edge of pilot.edges) {
     link(edge.id, edge.from, ['rules', 'procedures']);
     link(edge.id, edge.to, ['rules', 'procedures']);
     if (edge.from === edge.to) errors.push(`${edge.id}: edge binds a record to itself`);
+    if (edge.relation === 'summary_of') {
+      const pair = `${edge.from} ${edge.to}`;
+      if (summaryPairs.has(pair)) errors.push(`${edge.id}: duplicate summary_of ${pair}`);
+      summaryPairs.add(pair);
+      const fromSection = sectionOf.get(edge.from);
+      if (fromSection && edge.section_id !== fromSection)
+        errors.push(`${edge.id}: section_id must be the summary's section ${fromSection}`);
+      if (fromSection && fromSection === sectionOf.get(edge.to))
+        errors.push(`${edge.id}: summary_of joins two records of one section`);
+      continue;
+    }
     const input = fieldsOf.get(edge.from)?.[edge.binding.field];
     if (fieldsOf.has(edge.from) && input?.role !== 'input')
       errors.push(
@@ -285,6 +301,11 @@ export function checkPilotIntegrity(pilot: Pilot, context: PilotContext): string
       );
     if (input && output && input.type !== output.type)
       errors.push(`${edge.id}: binding joins a ${output.type} output to a ${input.type} input`);
+  }
+  for (const pair of summaryPairs) {
+    const [from, to] = pair.split(' ');
+    if (summaryPairs.has(`${to} ${from}`) && (from ?? '') < (to ?? ''))
+      errors.push(`summary_of runs both ways between ${from} and ${to}`);
   }
   for (const rule of pilot.rules) {
     if (!/^(core|character|combat)\./.test(rule.id))

@@ -137,8 +137,9 @@ export const RETRIEVAL_TOOLS: ToolDefinition[] = [
     description:
       'Follow links from a record. "out" edges are what it uses or refers to (uses_table, ' +
       'depends_on, input_from, see_also, table, rule, entity, quest, external, part_of, …); ' +
-      '"in" edges are what refers to it. An edge with a "condition" holds only under that ' +
-      'printed wording.',
+      '"in" edges are what refers to it. summary_of points from a short summary or reminder ' +
+      'to the rule it summarises, and expanded_by back from that rule; the detailed rule ' +
+      'governs. An edge with a "condition" holds only under that printed wording.',
     input_schema: {
       type: 'object',
       properties: {

@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 22 November 2026
+## Current position — 23 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -100,6 +100,29 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `tests/fixtures/step-duplicate-dispositions.json`. Re-reviewed fresh and passing:
   `review.into_the_dungeons_setup.13`, `review.levelling_up.3`, `review.settlements_core.5`,
   `review.combat_actions.5`, `review.combat_enemies.4`. Closes `phase_6.criterion_2`.
+- Step 4 (Phase 7) unit 3b is done (23 November, issue #4): `summary_of` is a canonical
+  relation (`corpus/graph/summaries.yaml`, 16 edges, each where the PDF itself points from a
+  short restatement to the full rule); the graph derives `expanded_by` (`precedence`) as its
+  inverse and `lod_expand` follows both. `ruleRepeats` flags rule pairs quoting the same text
+  across chapters: of 27, 3 became summary edges and 24 are legitimate repeats in
+  `tests/fixtures/rule-repeat-dispositions.json`; none is an error. Re-reviewed fresh:
+  `review.game_basics.3`, `review.levelling_up.4`, `review.combat_actions.7` (after `.6` failed
+  on the Parry Stance target, now `combat.defence.shield_parry`), `review.treasure.2`,
+  `review.psychology_sanity.4`, `review.alchemy_core.3`, `review.into_the_dungeons_actions.8`,
+  `review.quests_into_the_ancient_lands.4`.
+- Step 4 (Phase 7) unit 4 is done (23 November, issue #11): every graph anomaly has a
+  disposition in `tests/fixtures/graph-anomaly-dispositions.json`, checked by
+  `tests/graph/anomaly-dispositions.test.ts`. 41 cycles: 13 `reference_cycle`, 26
+  `mutual_dependency`, 2 `bounded_reentry`, none ill-defined. Unresolved pointers: of 223, 5
+  were bound (the Furniture Treasure Table pointers to `table.treasure.furniture` / Appendix V,
+  "the dungeon objects table" to `table.dungeon.obstacles`); the 218 left are
+  `modelling_note`, `book_undefined`, `external_book` or `external_component`. Six frozen issues
+  gained `related` links or wording fixes. Re-reviewed fresh: `review.combat_actions.8`,
+  `review.combat_damage.3`, `review.combat_enemies.5`, `review.embarking.5`, `review.equipment.4`
+  (after `.3` failed on the PDF 153 charging rule), `review.guilds.5`,
+  `review.into_the_dungeons_actions.9`, `review.introduction.3`,
+  `review.magic_items_enchantments.4`, `review.psychology_tables.5`, `review.settlements_core.6`,
+  `review.settlements_services.3`, `review.treasure.3`. Step 4 is complete.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -107,28 +130,12 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7) unit 3b, summary detection: canonical `summary_of` edges in `corpus/graph/`
-(extend the `relation` enum in `schemas/graph-edge.schema.json`; `expanded_by` is derived as the
-inverse, `precedence` category), added only where the PDF presents one passage as a summary or
-reminder of another, never inferred from position or detail. Also report rule pairs that look
-duplicated across chapters (same effect, different sections) and disposition each as a summary,
-a legitimate repeat or an error (issue #4 items 3 and 20–23). Edges need `corpus-reviewer` review
-by the record that governs their `section_id`. Evidence goes in
-[phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
-
-Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):
-
-- Unit 4, anomaly dispositions: a disposition for every dangling id, cycle and unresolved pointer
-  in the [graph report](graph-report.md), absorbing the carry-overs below where they fit.
+Phase 8: worked examples as fixtures (plan in
+[corpus-completion-plan.md](corpus-completion-plan.md)). Then Phase 9 (uncertainty audit),
+Phase 11 (`build:corpus`) and Phase 12 (retrieval).
 
 Open carry-overs:
 
-- `issue.0004` still lacks `related` links to the Acute Stress rule and procedure (frozen by
-  `review.introduction.2`).
-- `issue.phase4.magic_breakage` lists only `character.durability.broken` in `related` (frozen
-  by `review.equipment.2`).
-- `issue.phase4.recovery_bounds` should say that "only half (RDD)" (PDF 147) settles rounding,
-  not the base, and relate `procedure.settlement_activities_and_overnight`.
 - `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
   limit on `character.sanity.inn_recovery` is recorded but not enforced.
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
@@ -138,20 +145,17 @@ Open carry-overs:
   an earlier tier's record).
 - `procedure.hate` cites PDF 178 as heading "Hate", column "Effect"; the page prints "Mental
   Talents", columns Talent and Description (Psychology unit).
-- `issue.combat.enemy_fumble_pickup_dex` and `issue.combat.shield_parry_95_durability` should
-  relate `combat.action.pick_up_weapon` and `procedure.enemy_attack` (frozen by
-  `review.combat_actions.4` and `review.combat_damage.2`).
 - Glued words in the summaries of the frozen issues `issue.quest.side_quest_availability`,
   `issue.quest.tomb_raiders_threat_boundary`, `issue.quest.spider_queen_cobweb_mapping` and
   `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
 - `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
   "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
-- `issue.embarking.first_quest_settlement_travel` (frozen by `review.embarking.4`) groups the
-  available-quests roll with Settlement Events under "enters"; only Settlement Events prints
-  "Whenever the party enters a settlement", the quest roll is "Whenever the party is in a
-  settlement" (PDF 132).
-- The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
-  hungry character (not dogs), once, until the party eats.
+- `issue.0004` could also relate `condition.acute_stress` and
+  `character.equipment.consumable.dwarven_ale.drink` ("for the rest of the quest", PDF 182) and
+  cite the PDF 57 Acute Stress row (optional, raised by `review.introduction.3`).
+- `procedure.enemy_attack.issues` and `combat.action.pick_up_weapon` do not list
+  `issue.combat.enemy_fumble_pickup_dex` / `issue.combat.shield_parry_95_durability` back
+  (one-way links, raised by `review.combat_damage.3`).
 
 ## Evidence ledgers
 

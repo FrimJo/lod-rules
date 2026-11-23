@@ -45,6 +45,7 @@ function fixture(): AnalysedGraph {
           effects: ['set:x=true'],
         },
       ],
+      ruleRepeats: [{ rules: ['rule.a', 'rule.b'], shared: 3, effects: ['set:x=true'] }],
     },
   };
 }
@@ -58,7 +59,7 @@ describe('graph report', () => {
     expect(report).toMatch(/^\| dependency +\| 2 +\|$/m);
     expect(report).toMatch(/^\| reference +\| 2 +\|$/m);
     expect(report).toMatch(/^\| precedence +\| 0 +\|$/m);
-    expect(report).toContain('3 nodes, 4 edges.');
+    expect(report).toContain('3 nodes, 4 edges (0 derived inverses).');
   });
 
   it('lists dangling ids with the edge and field that hold them', () => {
@@ -72,12 +73,19 @@ describe('graph report', () => {
   it('lists unresolved pointers by owner and wording, with no disposition', () => {
     expect(report).toContain('- `rule.a`: the Bestiary entry for trolls');
     expect(report).toContain('- `procedure.p#s` → `rule.a` (`set:x=true`)');
+    expect(report).toContain('- `rule.a` ↔ `rule.b` (3 shared shingles; `set:x=true`)');
     expect(report).not.toMatch(/disposition:/i);
   });
 
   it('says so when an anomaly list is empty', () => {
     const clean = fixture();
-    clean.anomalies = { dangling: [], cycles: [], unresolved: [], stepDuplicates: [] };
+    clean.anomalies = {
+      dangling: [],
+      cycles: [],
+      unresolved: [],
+      stepDuplicates: [],
+      ruleRepeats: [],
+    };
     const text = renderGraphReport(clean);
     expect(text).toContain('No dangling ids.');
     expect(text).toContain('No cycles.');

@@ -191,6 +191,18 @@ describe('runRetrievalTool', () => {
       },
     ]);
 
+    // A summary reaches its detailed rule, and the detailed rule finds its summaries.
+    expect(
+      expand({ id: 'combat.action.parry_stance', direction: 'out', relations: ['summary_of'] }),
+    ).toEqual([
+      expect.objectContaining({ relation: 'summary_of', target: 'combat.defence.shield_parry' }),
+    ]);
+    expect(
+      expand({ id: 'combat.defence.shield_parry', direction: 'out', relations: ['expanded_by'] }),
+    ).toEqual([
+      expect.objectContaining({ relation: 'expanded_by', target: 'combat.action.parry_stance' }),
+    ]);
+
     const excluded = ['cites_section', 'redirects_to', 'tests', 'concerns', 'issue'];
     for (const id of [
       'core.quest.pyramid_xanthu.setup',

@@ -2,7 +2,7 @@ import type { RetrievalCorpus } from '../retrieve/load.ts';
 import type { Effect, Operand, Procedure, Rule, Step } from '../validate/pilot-types.ts';
 import { compare } from './compare.ts';
 import { flattenSteps, questResolver } from './records.ts';
-import type { StepDuplicate } from './types.ts';
+import type { RuleRepeat, StepDuplicate } from './types.ts';
 
 /** Words per printed-text shingle, and shared shingles a step needs to count as quoting a rule. */
 const SHINGLE_WORDS = 8;
@@ -98,4 +98,46 @@ export function stepDuplicates(corpus: RetrievalCorpus): StepDuplicate[] {
     (a, b) =>
       compare(a.procedure, b.procedure) || compare(a.step, b.step) || compare(a.rule, b.rule),
   );
+}
+
+/** The chapter of a section: the first two segments of its id (`section.combat`). */
+const chapterOf = (sectionId: string): string => sectionId.split('.').slice(0, 2).join('.');
+
+/**
+ * Rule pairs from different chapters that quote the same printed text: at least
+ * `MIN_SHARED_SHINGLES` shared eight-word shingles of `source_text` (issue #4 item 22). A pair
+ * already linked by a canonical `summary_of` edge, either way, is explained and not reported.
+ * Each pair is reported once, its ids sorted.
+ */
+export function ruleRepeats(corpus: RetrievalCorpus): RuleRepeat[] {
+  const linked = new Set(
+    corpus.pilot.edges
+      .filter((edge) => edge.relation === 'summary_of')
+      .flatMap((edge) => [`${edge.from} ${edge.to}`, `${edge.to} ${edge.from}`]),
+  );
+  const rules = [...corpus.pilot.rules]
+    .sort((a, b) => compare(a.id, b.id))
+    .map((rule) => ({
+      rule,
+      chapter: chapterOf(rule.section_id),
+      signatures: ruleSignatures(rule),
+      shingles: shingles(rule.source_text),
+    }));
+  const found: RuleRepeat[] = [];
+  for (let i = 0; i < rules.length; i++) {
+    const a = rules[i]!;
+    for (let j = i + 1; j < rules.length; j++) {
+      const b = rules[j]!;
+      if (a.chapter === b.chapter || linked.has(`${a.rule.id} ${b.rule.id}`)) continue;
+      let shared = 0;
+      for (const shingle of a.shingles) if (b.shingles.has(shingle)) shared++;
+      if (shared < MIN_SHARED_SHINGLES) continue;
+      found.push({
+        rules: [a.rule.id, b.rule.id],
+        shared,
+        effects: [...a.signatures].filter((s) => b.signatures.has(s)).sort(compare),
+      });
+    }
+  }
+  return found;
 }
