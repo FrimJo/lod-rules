@@ -305,6 +305,10 @@ describe('hero defence: PDF 120', () => {
       shield_damage: 0,
       negates_damage: true,
     });
+    expect(run('hero_defence', defence).trace).toContain('combat.defence.shield_parry.spillover');
+    expect(run('hero_defence', { ...defence, incoming_damage: 6 }).trace).toContain(
+      'combat.defence.shield_parry.absorbed',
+    );
   });
   it('stance modifiers, usage limits, ZOC and Power restrictions', () => {
     expect(run('hero_defence', { ...defence, parry_stance: false }).state.defence_threshold).toBe(
@@ -353,6 +357,9 @@ describe('hero defence: PDF 120', () => {
     );
     expect(run('hero_defence', { ...defence, defence: 'dodge', roll: 100 }).state.hero_prone).toBe(
       true,
+    );
+    expect(run('hero_defence', { ...defence, defence: 'dodge', roll: 100 }).trace).toContain(
+      'combat.fumble.dodge_or_shove',
     );
     expect(run('hero_defence', { ...defence, roll: 60 }).unresolved).toContain(
       'issue.combat.shield_threshold',
@@ -515,6 +522,12 @@ describe('shove and typed follow-ups (PDF 111–112, 121–122)', () => {
       target_dex: 35,
     };
     expect(run('combat_shove', s).state.models_moved).toBe(1);
+    expect(run('combat_shove', s).trace).toEqual(
+      expect.arrayContaining(['combat.action.shove.attempt', 'combat.action.shove.success']),
+    );
+    expect(run('combat_shove', { ...s, roll: 25 }).trace).not.toContain(
+      'combat.action.shove.success',
+    );
     expect(run('combat_shove', { ...s, roll: 25 }).state.shove_succeeded).toBe(false);
     expect(run('combat_shove', { ...s, roll: 100 }).state.shover_prone).toBe(true);
     expect(

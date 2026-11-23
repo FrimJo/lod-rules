@@ -3211,6 +3211,18 @@
       type: number
       role: input
       description: target dex
+    target_adjacent:
+      type: boolean
+      role: output
+      description: the target is adjacent (Shove roll rule input)
+    shove_total:
+      type: number
+      role: output
+      description: the shove roll plus DBx10
+    target_dexterity:
+      type: number
+      role: output
+      description: the target’s DEX, as compared with the shove total
     shove_succeeded:
       type: boolean
       role: output
@@ -3382,6 +3394,83 @@
           value:
             type: literal
             value: 0
+    - id: shove_roll
+      source:
+        - &a1
+          document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 116
+          printed_page: 114
+          heading: Hero Attack
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text: Roll against target's DEX, adding DBx10 to the roll
+      when:
+        type: all
+        conditions:
+          - type: all
+            conditions:
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: adjacent
+                right:
+                  type: literal
+                  value: true
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: automatic_charge_shove
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+      effects:
+        - type: set
+          target: target_adjacent
+          value:
+            type: field
+            name: adjacent
+        - type: set
+          target: target_dexterity
+          value:
+            type: field
+            name: target_dex
+      substeps:
+        - id: shove_total
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              pdf_page: 111
+              printed_page: 109
+              heading: Shove
+              extraction:
+                method: image
+                confidence: high
+                visually_verified: true
+          source_text: A character with DB may add DBx10 to the roll.
+          effects: []
+          rule_refs:
+            - combat.action.shove.attempt
     - id: success
       source:
         - document: rulebook.second_printing.eng
@@ -3393,16 +3482,7 @@
             method: image
             confidence: high
             visually_verified: true
-        - &a1
-          document: rulebook.second_printing.eng
-          file: source/Rulebook-2nd-printing-ENGa.pdf
-          pdf_page: 116
-          printed_page: 114
-          heading: Hero Attack
-          extraction:
-            method: image
-            confidence: high
-            visually_verified: true
+        - *a1
       source_text:
         ... by rolling higher than the target’s DEX. A character with DB may add DBx10 to the
         roll. ... Roll against target's DEX, adding DBx10 to the roll ... Success?
@@ -3427,43 +3507,86 @@
                 right:
                   type: literal
                   value: false
-          - type: any
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: automatic_charge_shove
+            right:
+              type: literal
+              value: false
+          - type: compare
+            operator: lt
+            left:
+              type: field
+              name: roll
+            right:
+              type: literal
+              value: 100
+          - type: compare
+            operator: gt
+            left:
+              type: field
+              name: shove_total
+            right:
+              type: field
+              name: target_dexterity
+      effects:
+        - type: set
+          target: models_moved
+          value:
+            type: literal
+            value: 0
+        - type: set
+          target: destination
+          value:
+            type: literal
+            value: none
+      rule_refs:
+        - combat.action.shove.success
+    - id: charge_success
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 110
+          printed_page: 108
+          heading: Charge Attack
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      source_text:
+        A successful Charge Attack will stagger the target even if it does not lose HP (and
+        manages to parry or dodge) and it is considered to be shoved in all respects
+      when:
+        type: all
+        conditions:
+          - type: all
             conditions:
               - type: compare
                 operator: eq
                 left:
                   type: field
-                  name: automatic_charge_shove
+                  name: adjacent
                 right:
                   type: literal
                   value: true
-              - type: all
-                conditions:
-                  - type: compare
-                    operator: lt
-                    left:
-                      type: field
-                      name: roll
-                    right:
-                      type: literal
-                      value: 100
-                  - type: compare
-                    operator: gt
-                    left:
-                      type: sum
-                      values:
-                        - type: field
-                          name: roll
-                        - type: arithmetic
-                          operator: multiply
-                          values:
-                            - type: field
-                              name: damage_bonus
-                            - type: literal
-                              value: 10
-                    right:
-                      type: field
-                      name: target_dex
+              - type: compare
+                operator: eq
+                left:
+                  type: field
+                  name: target_large
+                right:
+                  type: literal
+                  value: false
+          - type: compare
+            operator: eq
+            left:
+              type: field
+              name: automatic_charge_shove
+            right:
+              type: literal
+              value: true
       effects:
         - type: set
           target: shove_succeeded

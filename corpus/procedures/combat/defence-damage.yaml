@@ -211,6 +211,18 @@
       type: boolean
       role: output
       description: the Fast special rule allows the parry
+    shield_parry_succeeded:
+      type: boolean
+      role: output
+      description: the defence roll is a successful parry with a shield
+    spill_location:
+      type: string
+      role: output
+      description: where the damage left after a successful shield parry spills (the arm)
+    dodging_or_shoving:
+      type: boolean
+      role: output
+      description: the hero is rolling to dodge (Fumble rule input)
   dependencies:
     - key: damage
       label: Apply arm protection to supplied spillover
@@ -268,6 +280,16 @@
             value: false
         - type: set
           target: using_fast_parry
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: shield_parry_succeeded
+          value:
+            type: literal
+            value: false
+        - type: set
+          target: dodging_or_shoving
           value:
             type: literal
             value: false
@@ -394,6 +416,11 @@
           value:
             type: literal
             value: 1
+        - type: set
+          target: dodging_or_shoving
+          value:
+            type: literal
+            value: true
     - id: dodge_stance
       source:
         - document: rulebook.second_printing.eng
@@ -924,6 +951,34 @@
           value:
             type: literal
             value: true
+      substeps:
+        - id: shield_success
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              pdf_page: 120
+              printed_page: 118
+              heading: Parry with a Shield
+              extraction:
+                method: text
+                confidence: high
+                visually_verified: true
+          source_text: To succeed, you must roll below CS +15.
+          when:
+            type: compare
+            operator: eq
+            left:
+              type: field
+              name: defence
+            right:
+              type: literal
+              value: shield
+          effects:
+            - type: set
+              target: shield_parry_succeeded
+              value:
+                type: literal
+                value: true
     - id: shield_equality
       source:
         - document: rulebook.second_printing.eng
@@ -1043,6 +1098,11 @@
           value:
             type: field
             name: exact_shield_success
+        - type: set
+          target: shield_parry_succeeded
+          value:
+            type: field
+            name: exact_shield_success
     - id: avoid
       source:
         - document: rulebook.second_printing.eng
@@ -1151,16 +1211,8 @@
           value:
             type: literal
             value: true
-        - type: set
-          target: remaining_damage
-          value:
-            type: literal
-            value: 0
-        - type: set
-          target: shield_damage
-          value:
-            type: literal
-            value: 0
+      rule_refs:
+        - combat.defence.shield_parry.absorbed
     - id: spillover
       source:
         - document: rulebook.second_printing.eng
@@ -1204,27 +1256,14 @@
               name: shield_def
       effects:
         - type: set
-          target: remaining_damage
-          value:
-            type: arithmetic
-            operator: subtract
-            values:
-              - type: field
-                name: incoming_damage
-              - type: field
-                name: shield_def
-        - type: set
-          target: shield_damage
-          value:
-            type: literal
-            value: 1
-        - type: set
           target: hit_location
           value:
             type: literal
             value: arms
         - type: invoke
           dependency: damage
+      rule_refs:
+        - combat.defence.shield_parry.spillover
     - id: dodge_fumble
       source:
         - document: rulebook.second_printing.eng
@@ -1264,12 +1303,9 @@
             right:
               type: literal
               value: 100
-      effects:
-        - type: set
-          target: hero_prone
-          value:
-            type: literal
-            value: true
+      effects: []
+      rule_refs:
+        - combat.fumble.dodge_or_shove
     - id: weapon_damage
       source:
         - document: rulebook.second_printing.eng

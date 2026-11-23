@@ -1338,6 +1338,12 @@
       type: boolean
       role: state
       description: must leave next morning
+    cannot_afford:
+      type: boolean
+      role: state
+      description: The party chose the inn but its coins are below the inn's price for the
+        party, so it sleeps in the inn's stable. Set only by stable_lodging; read by
+        character.recovery.unaffordable.
     luck_restored_this_visit:
       type: boolean
       role: state
@@ -2317,10 +2323,28 @@
             type: field
             name: day
         - type: set
-          target: must_leave_next_morning
+          target: cannot_afford
           value:
             type: literal
             value: true
+      substeps:
+        - id: stable_departure
+          source:
+            - document: rulebook.second_printing.eng
+              file: source/Rulebook-2nd-printing-ENGa.pdf
+              pdf_page: 147
+              printed_page: 145
+              heading: Rest and Recuperation
+              extraction:
+                method: image
+                confidence: high
+                visually_verified: true
+          source_text:
+            You will then need to leave the settlement in the morning, either on a quest or to
+            travel to another settlement.
+          rule_refs:
+            - character.recovery.unaffordable
+          effects: []
     - id: recovery_boundary
       source:
         - document: rulebook.second_printing.eng
