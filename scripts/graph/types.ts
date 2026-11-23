@@ -126,12 +126,28 @@ export interface RelationCycles {
   cycles: string[][];
 }
 
+/**
+ * A procedure step that restates a rule it does not cite: it repeats the rule's `set`/`add`
+ * effects and quotes its printed text (`phase_6.criterion_2`).
+ */
+export interface StepDuplicate {
+  procedure: string;
+  step: string;
+  /** Schema path of the step, e.g. `steps[].substeps[]`. */
+  field: string;
+  rule: string;
+  /** Shared effects as `type:target=value`, sorted. */
+  effects: string[];
+}
+
 /** Problems found while deriving the graph. Reported for later dispositions; none is fixed. */
 export interface Anomalies {
   dangling: DanglingId[];
   unresolved: UnresolvedPointer[];
   /** Relations with at least one cycle, sorted by relation. Reported, never failing. */
   cycles: RelationCycles[];
+  /** Procedure steps restating an uncited rule, by procedure, step and rule. */
+  stepDuplicates: StepDuplicate[];
 }
 
 /** What `buildGraph` returns: the derived graph plus its anomalies. */

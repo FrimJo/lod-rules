@@ -18,8 +18,8 @@ function table(header: string[], rows: string[][]): string[] {
 
 /**
  * Renders `docs/graph-report.md`: edge counts by relation and by category, then the anomaly
- * lists (dangling ids, cycles per relation, unresolved pointers). Pure and deterministic. It lists
- * anomalies without dispositions.
+ * lists (dangling ids, cycles per relation, procedure steps restating a rule, unresolved
+ * pointers). Pure and deterministic. It lists anomalies without dispositions.
  */
 export function renderGraphReport(graph: AnalysedGraph): string {
   const byRelation = new Map<Relation, number>();
@@ -35,7 +35,7 @@ export function renderGraphReport(graph: AnalysedGraph): string {
           .reduce((sum, relation) => sum + (byRelation.get(relation) ?? 0), 0),
       ] as const,
   );
-  const { dangling, cycles, unresolved } = graph.anomalies;
+  const { dangling, cycles, unresolved, stepDuplicates } = graph.anomalies;
 
   const lines = [
     '# Dependency graph report',
@@ -53,6 +53,7 @@ export function renderGraphReport(graph: AnalysedGraph): string {
     `- Dangling ids: ${dangling.length}`,
     `- Cycles: ${cycles.reduce((sum, group) => sum + group.cycles.length, 0)} across ${plural(cycles.length, 'relation')}`,
     `- Unresolved pointers: ${unresolved.length}`,
+    `- Procedure steps restating an uncited rule: ${stepDuplicates.length}`,
     '',
     '## Edges by category',
     '',
@@ -94,6 +95,15 @@ export function renderGraphReport(graph: AnalysedGraph): string {
   ];
   if (cycles.length === 0) lines.push('');
   lines.push(
+    '## Procedure steps restating an uncited rule',
+    '',
+    ...(stepDuplicates.length === 0
+      ? ['None.']
+      : stepDuplicates.map(
+          ({ procedure, step, rule, effects }) =>
+            `- ${code(`${procedure}#${step}`)} → ${code(rule)} (${effects.map(code).join(', ')})`,
+        )),
+    '',
     '## Unresolved pointers',
     '',
     ...(unresolved.length === 0

@@ -8,22 +8,23 @@ not resolved: none carries a disposition.
 
 ## Summary
 
-4863 nodes, 15497 edges.
+4863 nodes, 15506 edges.
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
 - Unresolved pointers: 223
+- Procedure steps restating an uncited rule: 3
 
 ## Edges by category
 
 | Category   | Edges |
 | ---------- | ----- |
-| dependency | 6565  |
+| dependency | 6573  |
 | precedence | 28    |
 | reference  | 1168  |
 | structural | 4549  |
 | external   | 41    |
-| evidence   | 3146  |
+| evidence   | 3147  |
 
 ## Edges by relation
 
@@ -49,10 +50,10 @@ not resolved: none carries a disposition.
 | `rule`               | dependency | 1470  |
 | `see_also`           | reference  | 258   |
 | `starting_equipment` | dependency | 8     |
-| `step_rule`          | dependency | 255   |
+| `step_rule`          | dependency | 263   |
 | `table`              | dependency | 1464  |
 | `term`               | reference  | 255   |
-| `tests`              | evidence   | 1556  |
+| `tests`              | evidence   | 1557  |
 | `timing`             | reference  | 18    |
 | `uses_table`         | dependency | 266   |
 
@@ -108,6 +109,12 @@ No dangling ids.
 - `term.scenario_die` → `term.threat_level` → `term.scenario_die`
 - `term.skill` → `term.skill_test` → `term.skill`
 - `term.skill` → `term.stat` → `term.skill`
+
+## Procedure steps restating an uncited rule
+
+- `procedure.combat_attack#large_power` → `combat.action.power_attack.enemy` (`set:armour_piercing=2`)
+- `procedure.hero_defence#avoid` → `combat.defence.weapon_parry` (`set:negates_damage=true`)
+- `procedure.hero_defence#success` → `combat.defence.weapon_parry` (`set:defence_succeeded=true`)
 
 ## Unresolved pointers
 

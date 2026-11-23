@@ -36,7 +36,7 @@ switch (command) {
   case 'report': {
     const graph = buildGraph();
     writeFileSync(join(repoRoot, GRAPH_REPORT), renderGraphReport(graph), 'utf8');
-    const { dangling, cycles, unresolved } = graph.anomalies;
+    const { dangling, cycles, unresolved, stepDuplicates } = graph.anomalies;
     console.log(
       JSON.stringify({
         report: GRAPH_REPORT,
@@ -44,6 +44,7 @@ switch (command) {
         dangling: dangling.length,
         cycles: cycles.reduce((sum, group) => sum + group.cycles.length, 0),
         unresolved: unresolved.length,
+        stepDuplicates: stepDuplicates.length,
       }),
     );
     break;

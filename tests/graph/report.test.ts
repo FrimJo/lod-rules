@@ -36,6 +36,15 @@ function fixture(): AnalysedGraph {
       ],
       cycles: [{ relation: 'see_also', cycles: [['rule.a', 'rule.b']] }],
       unresolved: [{ owner: 'rule.a', wording: 'the Bestiary entry for trolls' }],
+      stepDuplicates: [
+        {
+          procedure: 'procedure.p',
+          step: 's',
+          field: 'steps[]',
+          rule: 'rule.a',
+          effects: ['set:x=true'],
+        },
+      ],
     },
   };
 }
@@ -62,12 +71,13 @@ describe('graph report', () => {
 
   it('lists unresolved pointers by owner and wording, with no disposition', () => {
     expect(report).toContain('- `rule.a`: the Bestiary entry for trolls');
+    expect(report).toContain('- `procedure.p#s` → `rule.a` (`set:x=true`)');
     expect(report).not.toMatch(/disposition:/i);
   });
 
   it('says so when an anomaly list is empty', () => {
     const clean = fixture();
-    clean.anomalies = { dangling: [], cycles: [], unresolved: [] };
+    clean.anomalies = { dangling: [], cycles: [], unresolved: [], stepDuplicates: [] };
     const text = renderGraphReport(clean);
     expect(text).toContain('No dangling ids.');
     expect(text).toContain('No cycles.');
