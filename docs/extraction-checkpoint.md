@@ -8,14 +8,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 21 October 2026
+## Current position — 22 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
 - Phase 6 Batches 1–7 are complete at documented scope. Package F is `accepted`: 41
   implemented, 10 covered by another model, 1 nonprocedural, 43 `catalogue_scope`.
-- Phase 0–6 exit checklist: 84 of 85 rows verified; the checklist stays `open`. The pending
-  row (`phase_6.criterion_2`) belongs to Step 4 (Phase 7).
+- Phase 0–6 exit checklist: `accepted` (22 November 2026), 85 of 85 rows verified.
 - Step 2 tiers 1–2 are reconciled and independently reviewed: Introduction, Game Basics,
   Character Basics, Creating Your Character, Levelling Up, Embarking on Your First Quest and
   the Party Management part node (90 sections; `review.*.2` records, all passed with
@@ -93,6 +92,14 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `issue.embarking.first_quest_settlement_travel`. Reviewed as `review.embarking.4`
   (`passed_with_corrections`, after `review.embarking.3` failed on the edge's name and the issue's
   scope). The "embarking on a quest" candidate is `verified`.
+- Step 4 (Phase 7) unit 3a is done (22 November, issue #4): `scripts/graph/duplicates.ts` flags
+  procedure steps that repeat a rule's effect and quote its text without citing it. Of the 10
+  found, 7 now delegate through `rule_refs` (`threat_roll#missed`, `character_improve#double_cost`,
+  `settlement_activities_and_overnight#stable_lodging`, `combat_shove#success`,
+  `hero_defence#shield_absorbs`/`#spillover`/`#dodge_fumble`); 3 are legitimate repeats in
+  `tests/fixtures/step-duplicate-dispositions.json`. Re-reviewed fresh and passing:
+  `review.into_the_dungeons_setup.13`, `review.levelling_up.3`, `review.settlements_core.5`,
+  `review.combat_actions.5`, `review.combat_enemies.4`. Closes `phase_6.criterion_2`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -100,11 +107,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7) unit 3, duplicate/summary detection: `summary_of`/`expanded_by` edges (reserved
-in the `precedence` category); closes `phase_6.criterion_2` (procedure steps reference atomic
-rules rather than duplicate them). Hand-authored relations go in `corpus/graph/` under
-`schemas/graph-edge.schema.json` (extend its `relation` enum) and need `corpus-reviewer`
-independent review by the record that governs their `section_id`. Evidence goes in
+Step 4 (Phase 7) unit 3b, summary detection: canonical `summary_of` edges in `corpus/graph/`
+(extend the `relation` enum in `schemas/graph-edge.schema.json`; `expanded_by` is derived as the
+inverse, `precedence` category), added only where the PDF presents one passage as a summary or
+reminder of another, never inferred from position or detail. Also report rule pairs that look
+duplicated across chapters (same effect, different sections) and disposition each as a summary,
+a legitimate repeat or an error (issue #4 items 3 and 20–23). Edges need `corpus-reviewer` review
+by the record that governs their `section_id`. Evidence goes in
 [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
 
 Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):

@@ -142,7 +142,7 @@ describe('Original Phases 0–6 exit contract', () => {
     for (const row of [...checklist.procedure_candidates, ...checklist.state_machine_candidates])
       for (const id of row.canonical_object_ids) expect(ids.has(id), id).toBe(true);
   });
-  it('closes the Phase 10-owned rows and leaves only Step 4 work pending', () => {
+  it('closes the Phase 10-owned rows and the Step 4 rows, and accepts the checklist', () => {
     const row = (key: string) => {
       const found = [
         ...checklist.phases.flatMap((p) => p.criteria.map((c) => [c.id, c] as const)),
@@ -159,10 +159,9 @@ describe('Original Phases 0–6 exit contract', () => {
       'batch_5.7',
     ])
       expect(row(key).status, key).toBe('verified');
-    const pending = allEvidence(checklist).filter((r) => r.status === 'pending');
-    expect(pending.length).toBeGreaterThan(0);
-    for (const r of pending) expect(r.finding).toMatch(/Step 4 \(Phase 7\)/);
-    expect(checklist.status).toBe('open');
+    expect(row('phase_6.criterion_2').status).toBe('verified');
+    expect(allEvidence(checklist).filter((r) => r.status === 'pending')).toEqual([]);
+    expect(checklist.status).toBe('accepted');
   });
   it('cannot accept an open checklist or hide unfinished obligations behind verified labels', () => {
     if (checklist.status === 'accepted') expect(acceptanceErrors(checklist)).toEqual([]);

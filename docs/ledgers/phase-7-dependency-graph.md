@@ -160,3 +160,63 @@ rows verified; "embarking on a quest" is `verified`.
 
 Unit 3: duplicate/summary detection. See the
 [extraction checkpoint](../extraction-checkpoint.md#next-unit).
+
+## Unit 3a — procedure steps restating rules — 22 November 2026
+
+Closes `phase_6.criterion_2` ("Procedure steps reference atomic rules rather than duplicate
+them"); issue #4, items 4 and 24–27.
+
+### Check
+
+- `scripts/graph/duplicates.ts` (`stepDuplicates`, anomaly list `stepDuplicates`). It flags a
+  step that repeats one of a rule's `set`/`add` effects (`type:target=value`, choice options
+  included) and also shares at least 2 eight-word shingles with the rule's `source_text`.
+- A step cites a rule through its own or an ancestor step's `rule_refs`, or the procedure's
+  `dependencies`. A quest procedure is compared with global rules only (quest scope from
+  `questResolver`), so restating its own scenario rule is not a finding.
+- The effect-only signal alone gave 134 (procedure, rule) pairs, mostly generic field names
+  (`hp=0`, `ap_spent=1`); text overlap alone gave 551 steps. The conjunction gave 10 steps.
+- `tests/graph/step-duplicates.test.ts` keeps it permanent: every finding needs exactly one
+  entry in `tests/fixtures/step-duplicate-dispositions.json` and a stale entry fails. The graph
+  report lists the findings.
+
+### Conversion
+
+`rule_refs` execute: the interpreter runs the referenced rule (its `when` against procedure
+state, overrides, trace) before the step's own effects, and the validator requires every rule
+field in the procedure's `fields`. Adding `rule_refs` alone double-applied effects (Threat +2)
+and raised 13 field mismatches. So converting a step means: cite the rule, drop the step's
+copy, add the rule's fields, and set any aliased input before the rule runs.
+
+| Step                                                           | Rule                                        | Result                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `procedure.threat_roll#missed`                                 | `core.threat.increase.threat_roll_exceeded` | converted; fixture trace gains the rule                                                                                             |
+| `procedure.character_improve#double_cost`                      | `character.advancement.cost_doubling`       | converted; no new fields                                                                                                            |
+| `procedure.settlement_activities_and_overnight#stable_lodging` | `character.recovery.unaffordable`           | converted via substep `stable_departure`; new state field `cannot_afford`                                                           |
+| `procedure.combat_shove#success`                               | `combat.action.shove.success`               | converted; split into `shove_roll` (substep `shove_total` cites `combat.action.shove.attempt`), `success`, `charge_success`         |
+| `procedure.hero_defence#shield_absorbs`                        | `combat.defence.shield_parry.absorbed`      | converted; field `shield_parry_succeeded`, substep `success.shield_success`                                                         |
+| `procedure.hero_defence#spillover`                             | `combat.defence.shield_parry.spillover`     | converted; field `spill_location`                                                                                                   |
+| `procedure.hero_defence#dodge_fumble`                          | `combat.fumble.dodge_or_shove`              | converted; field `dodging_or_shoving`                                                                                               |
+| `procedure.hero_defence#avoid`, `#success`                     | `combat.defence.weapon_parry`               | legitimate repeat: rule is Parry-Stance-only against plain CS (PDF 118); steps also take Fast parry and talent thresholds (PDF 177) |
+| `procedure.combat_attack#large_power`                          | `combat.action.power_attack.enemy`          | legitimate repeat: rule also sets `to_hit_applies` (`issue.combat.power_timing`) and needs `enemy_size` (PDF 115)                   |
+
+Behaviour preservation: the combat conversions were compared old against new over 90,624 input
+combinations; the only differences are new fields, new step ids, one satisfied `require` event
+from `combat.action.shove.attempt` (which also refuses a negative or fractional `damage_bonus`)
+and the rule ids in `trace`. `tests/rules/combat-procedures.test.ts` pins the new traces.
+
+### Review
+
+Fresh, passing re-reviews of the five records the edits staled, same section scope:
+`review.into_the_dungeons_setup.13`, `review.levelling_up.3`, `review.settlements_core.5`,
+`review.combat_actions.5`, `review.combat_enemies.4`. No findings open, no new issues.
+
+### Counts
+
+Graph report: 4863 nodes, 15506 edges, 0 dangling ids, 41 cycles, 223 unresolved pointers,
+3 restating steps (all dispositioned). Phase 0–6 checklist: 85 of 85 rows verified, `accepted`.
+
+### Next
+
+Unit 3b: `summary_of`/`expanded_by`. See the
+[extraction checkpoint](../extraction-checkpoint.md#next-unit).

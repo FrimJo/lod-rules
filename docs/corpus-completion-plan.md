@@ -106,8 +106,8 @@ complete at the documented scope in the [Phase 6 ledger](ledgers/phase-6-procedu
 
 **Outcome:** Package F is `accepted` (41 implemented, 10 covered by another model, 1
 nonprocedural, 43 `catalogue_scope`). The estate's source-silent readings are caller-supplied
-inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) has 84 of 85
-rows verified; the 1 still pending (`phase_6.criterion_2`) closes with Step 4 below.
+inputs. The Phase 0–6 exit checklist (`tests/fixtures/acceptance/phases-0-6.json`) is `accepted`
+(22 November 2026): all 85 rows are verified, the last (`phase_6.criterion_2`) by Step 4 below.
 
 ### Step 2 — Core-chapter loop: reconcile, extract, review
 
@@ -176,8 +176,8 @@ rules rather than duplicate them", which needs a duplication check.
 The Phase 0–6 exit rows that Phase 10 owned are verified (18 October 2026): the book-wide table
 inventory (the duplicate PDF 186 node is a redirect), typed dice for every table row that prints
 a die in a text cell (guarded corpus-wide by `textCellDiceErrors`), the embedded-restriction audit
-(0 unconverted) and Phase 5 Batch 7. One row stays pending for this step: the duplication check
-above (`phase_6.criterion_2`).
+(0 unconverted) and Phase 5 Batch 7. The duplication check above (`phase_6.criterion_2`) is
+verified by Step 4 unit 3a, and the checklist is `accepted`.
 
 Step 4 runs as four units (issue #5): graph derivation and traversal, the embarking binding,
 duplicate/summary detection, and anomaly dispositions. Unit 1 is done (21 October 2026):
@@ -185,7 +185,10 @@ duplicate/summary detection, and anomaly dispositions. Unit 1 is done (21 Octobe
 `npm run graph -- report` regenerates [graph-report.md](graph-report.md). Unit 2 is done
 (21 October 2026, issue #10): the first canonical edge in `corpus/graph/` binds the start
 settlement (PDF 59) to the quest acceptance's settlement when the game starts, and closes the
-"embarking on a quest" candidate.
+"embarking on a quest" candidate. Unit 3a is done (22 November 2026): `scripts/graph/duplicates.ts`
+flags procedure steps that restate an uncited rule; of the 10 found, 7 now delegate through
+`rule_refs` and 3 are legitimate repeats in `tests/fixtures/step-duplicate-dispositions.json`.
+It closes `phase_6.criterion_2`. Unit 3b (`summary_of`/`expanded_by`) and unit 4 remain.
 
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 
