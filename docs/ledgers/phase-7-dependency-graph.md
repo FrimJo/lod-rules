@@ -220,3 +220,66 @@ Graph report: 4863 nodes, 15506 edges, 0 dangling ids, 41 cycles, 223 unresolved
 
 Unit 3b: `summary_of`/`expanded_by`. See the
 [extraction checkpoint](../extraction-checkpoint.md#next-unit).
+
+## Unit 3b — summary edges and cross-chapter repeats — 23 November 2026
+
+Issue #4 items 3 and 20–23.
+
+### Relation
+
+- `schemas/graph-edge.schema.json` gains `relation: summary_of`. `binding` and `condition` are
+  required for `input_from` only; `summary_of` takes no `binding`. The validator requires the
+  edge's `section_id` to be the summarising record's section, rejects a summary of a record in
+  the same section, a duplicate pair and a pair recorded both ways.
+- The graph derives `expanded_by` (detailed → summary) for every `summary_of`, flagged
+  `derived: true`. `summary_of` is `reference`; `expanded_by` is `precedence`, so "what could
+  affect" a summary reaches its detailed rule and never the reverse. `lod_expand` follows both
+  names.
+
+### Summary passages found
+
+Found by reading every PDF line with "summar", "remind", "described (in detail) in", "explained
+in detail", "more details", "as described" and "see page", then keeping a passage only where it
+restates a rule briefly and itself points at the full statement. Plain pointers with no
+restated content (Combat "Open a Door", PDF 111; Treasure intro "How searching is done…", PDF
+108, which no record owns; spell "See page 98" lines) are not summaries.
+
+| Edge (`edge.summary.…`)                                                                  | Summary → detailed                                                                                             | Printed marker (PDF)                                             |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `dungeon_turn.{scenario_die,threat_roll,activation,wandering_monster,battle_won_threat}` | `procedure.dungeon_turn` → the five procedures/rules its steps name                                            | "All of these terms are explained in detail later" (20)          |
+| `combat_break_down_door.locked_door`                                                     | `combat.action.break_down_door` → `procedure.locked_door_and_close`                                            | "More details on this are given in the ‘Into the Dungeon’" (110) |
+| `combat_cast_spell.{quick,standard}_spell`                                               | `combat.action.cast_spell` → `core.magic.quick` / `core.magic.standard`                                        | "Details for this are described in the ‘Magic’ chapter" (110)    |
+| `combat_parry_stance.shield_parry`                                                       | `combat.action.parry_stance` → `combat.defence.shield_parry`                                                   | "as described on page 118" (111)                                 |
+| `treasure_furniture_search.action_cost`                                                  | `character.treasure.furniture_search` → `core.searching.furniture_adjacent_action`                             | "as described in the ‘Into the Dungeon’ chapter" (108)           |
+| `ancient_lands_travel.{movement,rations}`                                                | `core.quest.ancient_lands.travel_costs` → `procedure.travel_daily_movement` / `procedure.travel_food_and_rest` | "As described in the main rules" (263)                           |
+| `activation.enemy_priority`                                                              | `procedure.activation` → `procedure.enemy_priority`                                                            | "as described in the combat chapter" (107)                       |
+| `alchemy_throwing.throwing_target`                                                       | `character.alchemy.throwing` → `combat.throwing.target`                                                        | "This is described in the ‘Combat’ chapter" (72)                 |
+| `sanity_asylum.asylum`                                                                   | `character.sanity.asylum_pointer` → `character.settlement.asylum`                                              | "See the ‘Settlements’ chapter for details" (55)                 |
+| `conditional_skill_value.automatic_failure`                                              | `character.skill.conditional_value` → `core.check.automatic_failure`                                           | "remember that a roll of 91-00 is always a failure" (60)         |
+
+### Cross-chapter repeats
+
+`ruleRepeats` in `scripts/graph/duplicates.ts`: rule pairs from different chapters (first two
+section-id segments) sharing at least 2 eight-word shingles of `source_text`; a pair linked by
+`summary_of` is dropped. Six-word shingles gave 73 pairs, mostly noise; eight-word gave 27,
+with or without a shared effect. Of the 27, 3 became summary edges (throwing, asylum, 91-00)
+and 24 are `legitimate_repeat` in `tests/fixtures/rule-repeat-dispositions.json`: 9 guild
+training pairs, 8 quest-local side-quest template pairs, the PDF 197 identification reminder
+(2), the PDF 29/51 weapon-class paragraph (2), the dissipation quote in
+`character.durability.overlap_uncertain`, the bandage action (PDF 100/110) and spell learning
+(PDF 146/153). None is an error. `tests/graph/rule-repeats.test.ts` keeps the check permanent.
+
+### Counts
+
+Graph report: 15554 edges (16 derived inverses), 0 dangling ids, 41 cycles, 223 unresolved
+pointers, 3 restating steps, 24 cross-chapter repeats (all dispositioned).
+
+### Review
+
+The edges sit in the summary's section, so eight records went stale. Fresh re-reviews, same
+scope: `review.game_basics.3`, `review.levelling_up.4`, `review.treasure.2`,
+`review.psychology_sanity.4`, `review.alchemy_core.3`, `review.into_the_dungeons_actions.8`,
+`review.quests_into_the_ancient_lands.4` passed; `review.combat_actions.6` failed because "a
+bonus to parrying as described on page 118" is the shield parry (CS+15 in Parry Stance), not
+the weapon parry. The edge became `edge.summary.combat_parry_stance.shield_parry` and
+`review.combat_actions.7` passed with that correction. No new issues.

@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 22 November 2026
+## Current position — 23 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -100,6 +100,16 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `tests/fixtures/step-duplicate-dispositions.json`. Re-reviewed fresh and passing:
   `review.into_the_dungeons_setup.13`, `review.levelling_up.3`, `review.settlements_core.5`,
   `review.combat_actions.5`, `review.combat_enemies.4`. Closes `phase_6.criterion_2`.
+- Step 4 (Phase 7) unit 3b is done (23 November, issue #4): `summary_of` is a canonical
+  relation (`corpus/graph/summaries.yaml`, 16 edges, each where the PDF itself points from a
+  short restatement to the full rule); the graph derives `expanded_by` (`precedence`) as its
+  inverse and `lod_expand` follows both. `ruleRepeats` flags rule pairs quoting the same text
+  across chapters: of 27, 3 became summary edges and 24 are legitimate repeats in
+  `tests/fixtures/rule-repeat-dispositions.json`; none is an error. Re-reviewed fresh:
+  `review.game_basics.3`, `review.levelling_up.4`, `review.combat_actions.7` (after `.6` failed
+  on the Parry Stance target, now `combat.defence.shield_parry`), `review.treasure.2`,
+  `review.psychology_sanity.4`, `review.alchemy_core.3`, `review.into_the_dungeons_actions.8`,
+  `review.quests_into_the_ancient_lands.4`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -107,19 +117,15 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Step 4 (Phase 7) unit 3b, summary detection: canonical `summary_of` edges in `corpus/graph/`
-(extend the `relation` enum in `schemas/graph-edge.schema.json`; `expanded_by` is derived as the
-inverse, `precedence` category), added only where the PDF presents one passage as a summary or
-reminder of another, never inferred from position or detail. Also report rule pairs that look
-duplicated across chapters (same effect, different sections) and disposition each as a summary,
-a legitimate repeat or an error (issue #4 items 3 and 20–23). Edges need `corpus-reviewer` review
-by the record that governs their `section_id`. Evidence goes in
+Step 4 (Phase 7) unit 4, anomaly dispositions: a disposition for every dangling id, cycle and
+unresolved pointer in the [graph report](graph-report.md) (41 cycles, 223 unresolved pointers),
+in a fixture under `tests/fixtures/` with a test that fails on an undispositioned or stale
+anomaly, absorbing the carry-overs below where they fit. Evidence in
 [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md).
 
-Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md), Step 4):
-
-- Unit 4, anomaly dispositions: a disposition for every dangling id, cycle and unresolved pointer
-  in the [graph report](graph-report.md), absorbing the carry-overs below where they fit.
+Then (plan in [corpus-completion-plan.md](corpus-completion-plan.md)): Phase 8 (worked
+examples as fixtures), Phase 9 (uncertainty audit), Phase 11 (`build:corpus`) and Phase 12
+(retrieval).
 
 Open carry-overs:
 
@@ -150,8 +156,6 @@ Open carry-overs:
   available-quests roll with Settlement Events under "enters"; only Settlement Events prints
   "Whenever the party enters a settlement", the quest roll is "Whenever the party is in a
   settlement" (PDF 132).
-- The GM table in `clients/web` still uses a flat −2 for going hungry; the corpus applies −1 per
-  hungry character (not dogs), once, until the party eats.
 
 ## Evidence ledgers
 
