@@ -50,7 +50,7 @@ when a step below closes, not after every unit.
 Batches 1–7 (Packages A–F); Step 2 (every core chapter, appendices, front and back matter, reconciled
 and independently reviewed); Step 3 (Quest Book I, Backgrounds and the Grieving Mother side quest at
 catalogue scope, reconciled and independently reviewed, 18 October); Step 4 (Phase 7, every graph
-anomaly dispositioned); Phase 8 (every printed example inventoried); Phase 9 (every review unit
+anomaly dispositioned); Phase 10 (closed through Steps 2–3); Phase 8 (every printed example inventoried); Phase 9 (every review unit
 backed by fresh evidence, and every informal note that states a doubt inventoried against
 `review/`, 24 November). Published designer rulings are applied per the
 [extraction guide](extraction-guide.md).
@@ -196,6 +196,8 @@ It closes `phase_6.criterion_2`. Unit 3b (`summary_of`/`expanded_by`) and unit 4
 
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 
+Phase 11 is specified in issue #24.
+
 See [§5](#5-compile-and-make-the-corpus-retrievable).
 
 ## 4. Comprehensive passes
@@ -247,7 +249,7 @@ have passing outcome-and-trace checks.
 **Exit:** every completed review unit has evidence; no known uncertainty exists only in informal
 notes. An unresolved source issue may remain after successful review.
 
-### Phase 10 — Full-book reconciliation
+### Phase 10 — Full-book reconciliation (closed 24 November)
 
 - Audit all 286 pages and every canonical section, including front matter, appendices,
   captions, optional rules and quest material.
@@ -258,7 +260,9 @@ notes. An unresolved source issue may remain after successful review.
   section/coverage bijection and compatibility redirects.
 - Extract omissions in bounded units, then repeat the affected Phase 7–9 checks.
 
-Steps 2–3 carry out this phase chapter by chapter.
+Steps 2–3 carried out this phase chapter by chapter. It is closed (24 November 2026): Step 3's
+exit is this exit, every non-redirect section (677) is `reviewed` with a fresh governing record,
+the 38 redirects stay `mapped`, and the Phase 10-owned exit rows closed under issue #3.
 
 **Exit:** no unexplained coverage gaps remain, and every applicable component has extraction
 and independent-review evidence.

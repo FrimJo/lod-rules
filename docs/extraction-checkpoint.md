@@ -171,7 +171,8 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   now lives only in `review/` ([extraction guide](extraction-guide.md#uncertainty-and-evidence-backed-resolutions)).
   Evidence in [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phases 10–12 are unfinished.
+  Phase 10 is closed: Steps 2–3 carried it out and Step 3's exit is its exit. Phases 11–12 are
+  unfinished.
 
 ## Next unit
 
