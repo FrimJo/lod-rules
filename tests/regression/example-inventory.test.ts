@@ -45,9 +45,11 @@ describe('example inventory (issues #13, #14)', () => {
     expect(claimed).toEqual(sourceExamples);
   });
 
-  it('allowlists every section until the chapter slices sweep them', () => {
-    const live = [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id);
-    expect([...fixture.unswept_sections].sort()).toEqual(live.sort());
+  it('allowlists only live sections, which the chapter slices remove as they sweep', () => {
+    const live = new Set(
+      [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
+    );
+    expect(fixture.unswept_sections.filter((id) => !live.has(id))).toEqual([]);
   });
 
   describe('fails on a minimal broken copy', () => {

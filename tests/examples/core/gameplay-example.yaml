@@ -269,6 +269,35 @@
     steps:
       - choose_approach
       - force
+- id: test.gameplay_example.wandering_monster_trigger
+  name: Threat 10 to 12 reaches the quest's Wandering Monster level and the token is placed
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+  status: extracted
+  confidence: high
+  source_text:
+    The quest also dictates that a Wandering Monster will be triggered when the Threat Level
+    reaches 12. ... The noise caused by this raises the Threat Level by +2 resulting in 12. Since
+    this is the Threat Level needed to trigger a Wandering Monster, the players place the
+    corresponding token just outside the dungeon entrance.
+  kind: source_example
+  rule_ids:
+    - core.quest_book.threat_threshold_monster
+    - core.quest_book.threat_threshold_monster_otherwise
+  inputs:
+    previous_threat: 10
+    current_threat: 12
+    quest_threshold: 12
+  expected:
+    state:
+      wandering_monster_triggered: true
+      threat_reduction_on_placement: 0
+    events: []
+    trace:
+      - core.quest_book.threat_threshold_monster
+    unresolved: []
+    steps: []
 - id: test.gameplay_example.grol_breaks_door
   name: Grol's 6 damage breaks the door and raises Threat by 2 more
   section_id: section.game_basics.gameplay_example
@@ -417,6 +446,30 @@
       - base
       - bashed
       - new_turn
+- id: test.gameplay_example.turn_3_scenario_die
+  name: Turn 3 Scenario die 10 requires a Threat Roll
+  section_id: section.game_basics.gameplay_example
+  source:
+    - *p23
+  status: extracted
+  confidence: high
+  source_text: The Scenario die ends up a 10, indicating that a Threat Roll is required.
+  kind: source_example
+  procedure_id: procedure.scenario_die
+  inputs:
+    scenario_die_roll: 10
+    threat_trigger: 9
+  expected:
+    state: {}
+    events:
+      - type: invoke
+        dependency: procedure.threat_roll
+    trace:
+      - procedure.scenario_die
+    unresolved: []
+    steps:
+      - roll
+      - trigger_check
 - id: test.gameplay_example.threat_roll_in_battle
   name: Turn 3 Threat Roll of 10 triggers the in-battle table and the Threat Level drops by 3
   section_id: section.game_basics.gameplay_example
