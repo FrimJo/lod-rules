@@ -49,13 +49,13 @@ describe('The Dead Rising second quest — rendered PDF 227–228', () => {
       skeleton_shields: true,
     });
   });
-  it('distinguishes printed and practical To Hit without silently correcting the stat block', () => {
+  it('keeps the printed To Hit and follows changelog 2.21 entry 102 for the practical value', () => {
     expect(run('ulfric').state).toEqual({
       undead: true,
       weapon: 'Warhammer',
       armour: 2,
       to_hit_printed: -10,
-      to_hit_in_practice: -5,
+      to_hit_in_practice: 0,
       frenzy: true,
       cause_fear: 3,
       xp: 140,
@@ -68,6 +68,9 @@ describe('The Dead Rising second quest — rendered PDF 227–228', () => {
       label: 'T2 Treasure Table',
       object_id: 'table.treasure.t2',
     });
+    expect(corpus.rules.find((x) => x.id === 'core.quest.dead_rising.ulfric')?.issues).toContain(
+      'issue.quest.ulfric_to_hit_in_practice',
+    );
   });
   it('permits the printed negative To Hit values in their declared output fields', () => {
     const rule = corpus.rules.find((x) => x.id === 'core.quest.dead_rising.ulfric')!;
