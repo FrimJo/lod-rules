@@ -28,8 +28,11 @@ export interface InventoryEntry {
 }
 export interface ExampleInventory {
   description: string;
-  /** Sections not yet swept for examples. The chapter slices (#15–#19) shrink it; #20 empties it. */
-  unswept_sections: string[];
+  /**
+   * Sections not yet swept for examples. The chapter slices (#15–#19) shrank it and #20 deleted
+   * it; under `closed` any listed section fails.
+   */
+  unswept_sections?: string[];
   entries: InventoryEntry[];
 }
 export interface InventoryContext {
@@ -120,7 +123,7 @@ export function checkExampleInventory(
   }
 
   const unswept = new Set<string>();
-  for (const id of inventory.unswept_sections) {
+  for (const id of inventory.unswept_sections ?? []) {
     if (unswept.has(id)) problems.push(`allowlisted section ${id} is listed twice`);
     unswept.add(id);
     const redirected = context.sections.get(id);

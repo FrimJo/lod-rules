@@ -31,9 +31,14 @@ function withEntry(id: string, change: (entry: InventoryEntry) => void): Example
 const executableId = 'example.combat.shove_dex_35';
 const descriptiveId = 'example.game_basics.check_kinds';
 
-describe('example inventory (issues #13, #14)', () => {
-  it('agrees with the pilot test cases, the source map and review/', () => {
-    expect(checkExampleInventory(fixture, context)).toEqual([]);
+describe('example inventory (issues #13, #14, #20)', () => {
+  it('agrees with the pilot test cases, the source map and review/, with Phase 8 closed (#20)', () => {
+    expect(checkExampleInventory(fixture, context, { closed: true })).toEqual([]);
+  });
+
+  it('has no unswept allowlist and no pending entry (#20)', () => {
+    expect(fixture).not.toHaveProperty('unswept_sections');
+    expect(fixture.entries.filter((entry) => entry.pending !== undefined)).toEqual([]);
   });
 
   it('claims every source_example case exactly once', () => {
@@ -43,40 +48,6 @@ describe('example inventory (issues #13, #14)', () => {
       .map(([id]) => id)
       .sort();
     expect(claimed).toEqual(sourceExamples);
-  });
-
-  it('allowlists only live sections, each once, until the chapter slices sweep them', () => {
-    const live = new Set(
-      [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
-    );
-    expect(fixture.unswept_sections.filter((id) => !live.has(id))).toEqual([]);
-    expect(new Set(fixture.unswept_sections).size).toBe(fixture.unswept_sections.length);
-  });
-
-  it('the Travel, Settlements, Guilds, Inner Sanctum, Estate and Appendices sweep (#19) leaves none of its sections allowlisted', () => {
-    const swept = [
-      'travel_and_settlements',
-      'travelling_and_skirmishes',
-      'settlements',
-      'the_dark_guild',
-      'fighters_guild',
-      'wizards_guild',
-      'alchemists_guild',
-      'rangers_guild',
-      'the_inner_sanctum',
-      'buying_an_estate',
-      'appendices',
-      'appendix_i_perks',
-      'appendix_ii_talents',
-      'appendix_iii_equipment',
-      'appendix_iv_spells',
-      'appendix_v_treasures',
-      'adding_a_third_dimension',
-      'back_matter',
-    ];
-    const inScope = (id: string): boolean =>
-      swept.some((chapter) => id === `section.${chapter}` || id.startsWith(`section.${chapter}.`));
-    expect(fixture.unswept_sections.filter(inScope)).toEqual([]);
   });
 
   describe('fails on a minimal broken copy', () => {
@@ -193,7 +164,7 @@ describe('example inventory (issues #13, #14)', () => {
 
     it('an allowlisted section that no longer exists', () => {
       const copy = structuredClone(fixture);
-      copy.unswept_sections.push('section.gone');
+      copy.unswept_sections = ['section.gone'];
       fires(copy, /allowlisted section section\.gone/);
     });
 
@@ -209,6 +180,7 @@ describe('example inventory (issues #13, #14)', () => {
         delete entry.cases;
         entry.pending = true;
       });
+      pending.unswept_sections = ['section.academic_skills'];
       const problems = checkExampleInventory(pending, context, { closed: true });
       expect(problems.some((problem) => /still pending/.test(problem))).toBe(true);
       expect(problems.some((problem) => /still unswept/.test(problem))).toBe(true);
