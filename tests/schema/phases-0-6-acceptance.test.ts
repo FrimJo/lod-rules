@@ -4,15 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { createAjv, repoRoot } from '../../scripts/validate/schemas.ts';
 import { readPilot } from '../../scripts/validate/pilot-files.ts';
 import {
-  acceptanceErrors as rowErrors,
+  acceptanceErrors,
   evidenceProblems,
   evidenceProperties,
   nonEmptyString,
   strictObject,
   stringList,
-  type ChecklistEvidence as Evidence,
+  type ChecklistEvidence,
 } from '../support/exit-checklist.ts';
-interface Candidate extends Evidence {
+interface Candidate extends ChecklistEvidence {
   candidate: string;
   canonical_object_ids: string[];
   source: unknown[];
@@ -21,8 +21,11 @@ interface Checklist {
   scope: string;
   status: 'open' | 'accepted';
   plan: string;
-  phases: { phase: number; criteria: (Evidence & { id: string; requirement: string })[] }[];
-  batches: (Evidence & { phase: number; batch: number })[];
+  phases: {
+    phase: number;
+    criteria: (ChecklistEvidence & { id: string; requirement: string })[];
+  }[];
+  batches: (ChecklistEvidence & { phase: number; batch: number })[];
   procedure_candidates: Candidate[];
   state_machine_candidates: Candidate[];
 }
@@ -68,13 +71,13 @@ const raw: unknown = JSON.parse(
 );
 if (!shape(raw)) throw new Error(JSON.stringify(shape.errors));
 const checklist = raw;
-const allEvidence = (c: Checklist): Evidence[] => [
+const allEvidence = (c: Checklist): ChecklistEvidence[] => [
   ...c.phases.flatMap((p) => p.criteria),
   ...c.batches,
   ...c.procedure_candidates,
   ...c.state_machine_candidates,
 ];
-const acceptanceErrors = (c: Checklist) => rowErrors(c.status, allEvidence(c));
+const checklistErrors = (c: Checklist) => acceptanceErrors(c.status, allEvidence(c));
 const corpus = readPilot();
 const ids = new Set(
   [
@@ -146,17 +149,17 @@ describe('Original Phases 0–6 exit contract', () => {
     expect(checklist.status).toBe('accepted');
   });
   it('cannot accept an open checklist or hide unfinished obligations behind verified labels', () => {
-    if (checklist.status === 'accepted') expect(acceptanceErrors(checklist)).toEqual([]);
-    else expect(acceptanceErrors(checklist)).toContain('Phase closure status is not accepted');
+    if (checklist.status === 'accepted') expect(checklistErrors(checklist)).toEqual([]);
+    else expect(checklistErrors(checklist)).toContain('Phase closure status is not accepted');
     const synthetic = structuredClone(checklist);
     synthetic.status = 'accepted';
     for (const row of allEvidence(synthetic)) {
       row.status = 'verified';
       row.remaining_work = [];
     }
-    expect(acceptanceErrors(synthetic)).toEqual([]);
+    expect(checklistErrors(synthetic)).toEqual([]);
     synthetic.phases[0]!.criteria[0]!.remaining_work = ['Known implementation gap'];
-    expect(acceptanceErrors(synthetic)).toContain('Unfinished phase obligation');
+    expect(checklistErrors(synthetic)).toContain('Unfinished phase obligation');
   });
   it.each([
     {},
