@@ -1,14 +1,17 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createAjv, repoRoot } from '../../scripts/validate/schemas.ts';
 import { readPilot } from '../../scripts/validate/pilot-files.ts';
-interface Evidence {
-  status: 'pending' | 'verified';
-  evidence: string[];
-  finding: string;
-  remaining_work: string[];
-}
+import {
+  acceptanceErrors as rowErrors,
+  evidenceProblems,
+  evidenceProperties,
+  nonEmptyString,
+  strictObject,
+  stringList,
+  type ChecklistEvidence as Evidence,
+} from '../support/exit-checklist.ts';
 interface Candidate extends Evidence {
   candidate: string;
   canonical_object_ids: string[];
@@ -23,45 +26,35 @@ interface Checklist {
   procedure_candidates: Candidate[];
   state_machine_candidates: Candidate[];
 }
-const string = { type: 'string', minLength: 1 };
-const strings = { type: 'array', items: string };
-const object = (properties: Record<string, unknown>) => ({
-  type: 'object',
-  additionalProperties: false,
-  required: Object.keys(properties),
-  properties,
-});
-const evidence = {
-  status: { enum: ['pending', 'verified'] },
-  evidence: { ...strings, minItems: 1 },
-  finding: string,
-  remaining_work: strings,
-};
-const candidate = object({
-  ...evidence,
-  candidate: string,
-  canonical_object_ids: { ...strings, minItems: 1 },
+const candidate = strictObject({
+  ...evidenceProperties,
+  candidate: nonEmptyString,
+  canonical_object_ids: { ...stringList, minItems: 1 },
   source: { type: 'array' },
 });
-const schema = object({
+const schema = strictObject({
   scope: { const: 'Phases 0–6 extraction' },
   status: { enum: ['open', 'accepted'] },
-  plan: string,
+  plan: nonEmptyString,
   phases: {
     type: 'array',
-    items: object({
+    items: strictObject({
       phase: { type: 'integer', minimum: 0, maximum: 6 },
       criteria: {
         type: 'array',
         minItems: 1,
-        items: object({ ...evidence, id: string, requirement: string }),
+        items: strictObject({
+          ...evidenceProperties,
+          id: nonEmptyString,
+          requirement: nonEmptyString,
+        }),
       },
     }),
   },
   batches: {
     type: 'array',
-    items: object({
-      ...evidence,
+    items: strictObject({
+      ...evidenceProperties,
       phase: { enum: [5, 6] },
       batch: { type: 'integer', minimum: 1, maximum: 7 },
     }),
@@ -81,12 +74,7 @@ const allEvidence = (c: Checklist): Evidence[] => [
   ...c.procedure_candidates,
   ...c.state_machine_candidates,
 ];
-const acceptanceErrors = (c: Checklist) => [
-  ...(c.status === 'accepted' ? [] : ['Phase closure status is not accepted']),
-  ...allEvidence(c).flatMap((row) =>
-    row.status !== 'verified' || row.remaining_work.length ? ['Unfinished phase obligation'] : [],
-  ),
-];
+const acceptanceErrors = (c: Checklist) => rowErrors(c.status, allEvidence(c));
 const corpus = readPilot();
 const ids = new Set(
   [
@@ -132,13 +120,7 @@ describe('Original Phases 0–6 exit contract', () => {
     expect(checklist.state_machine_candidates.map((x) => x.candidate)).toEqual(machines);
   });
   it('requires resolving evidence and keeps known implementation work pending', () => {
-    for (const row of allEvidence(checklist)) {
-      for (const file of row.evidence) {
-        expect(file.startsWith('/') || file.split('/').includes('..')).toBe(false);
-        expect(existsSync(join(repoRoot, file)), file).toBe(true);
-      }
-      if (row.remaining_work.length) expect(row.status).toBe('pending');
-    }
+    expect(evidenceProblems(allEvidence(checklist))).toEqual([]);
     for (const row of [...checklist.procedure_candidates, ...checklist.state_machine_candidates])
       for (const id of row.canonical_object_ids) expect(ids.has(id), id).toBe(true);
   });
