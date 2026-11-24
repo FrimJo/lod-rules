@@ -129,6 +129,11 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   4 `source_conflicted`, 1 `descriptive`. All 677 non-redirect sections are on the unswept
   allowlist. No corpus change and no re-review; evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #16 (Into the Dungeons, Treasure, Combat) is done: 9 new inventory entries
+  (6 executable, 3 descriptive), 12 new `source_example` cases, the `pending` option 3 entry
+  converted, and `test.phase6.scenario_die.trigger` filed under The Threat Level. Fresh re-reviews:
+  `review.combat_actions.10`, `review.combat_damage.4`, `review.combat_enemies.7`,
+  `review.into_the_dungeons_movement.3`, `review.into_the_dungeons_setup.14`, `review.treasure.4`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -140,7 +145,7 @@ Phase 8 chapter slices, which can run in parallel: sweep one chapter group each,
 convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
 
 - #15 Game Basics through Embarking
-- #16 Into the Dungeons, Treasure, Combat
+- #16 Into the Dungeons, Treasure, Combat (done)
 - #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
 - #18 Quest Book I, Backgrounds
