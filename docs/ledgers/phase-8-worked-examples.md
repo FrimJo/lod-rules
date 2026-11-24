@@ -68,3 +68,67 @@ and Stat Checks (PDF 20), which names a check but prints no roll or outcome.
   (comment on #14).
 - `section.game_basics.skill_and_stat_checks` has `examples: extracted` but no `source_example`
   case; its examples are descriptive.
+
+## Slice — Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices — 24 November 2026
+
+Issue #19. Swept PDF 125–220 (Travel and Settlements part, Appendices part including Adding a
+third dimension) and PDF 280–286 (back matter). Every page was rendered and read; a text search
+for "example", "e.g.", "for instance", "such as" and "for every" only seeded candidates. 229
+sections left the allowlist (the redirects were never on it).
+
+### Inventory
+
+11 entries in scope: the 3 seeded (map caption, Irondale, Silver City) and 8 new.
+
+| Entry                                                        | PDF | Form           | Disposition           | Cases |
+| ------------------------------------------------------------ | --: | -------------- | --------------------- | ----: |
+| `example.travelling_and_skirmishes.map_arrows` (seeded)      | 126 | `caption`      | `executable`          |     4 |
+| `example.settlements.irondale_quest_site` (seeded)           | 132 | `inline_prose` | `executable`          |     1 |
+| `example.settlements.silver_city_activities` (reclassified)  | 133 | `table`        | `source_conflicted`   |     1 |
+| `example.fighters_guild.shield_padding_durability`           | 152 | `inline_prose` | `executable`          |     2 |
+| `example.appendix_i_perks.frenzy_eight_attacks`              | 169 | `table`        | `executable`          |     1 |
+| `example.appendix_ii_talents.hate_goblins`                   | 178 | `table`        | `descriptive`         |     0 |
+| `example.appendix_iii_equipment.cloak_over_stacked_armour`   | 180 | `inline_prose` | `executable`          |     1 |
+| `example.appendix_iii_equipment.torch_fire_fear`             | 183 | `inline_prose` | `missing_information` |     0 |
+| `example.appendix_v_treasures.magic_weapon_durability_total` | 200 | `table`        | `executable`          |     1 |
+| `example.appendix_v_treasures.magic_armour_durability_total` | 201 | `table`        | `executable`          |     1 |
+| `example.appendix_v_treasures.stone_of_valheir_focus`        | 204 | `inline_prose` | `executable`          |     1 |
+
+- Reclassified: the Silver City schedule is `source_conflicted` with the existing
+  `issue.settlement.prayer_schedule_duration` (the Priest learns one prayer over D1 and D2
+  against a cost of 1 Activity Point). Its Wizard case is unchanged; no case asserts either
+  Priest reading. No new issue.
+- 7 new `source_example` cases (`tests/examples/settlements/guild-examples.yaml`,
+  `tests/examples/appendices/printed-examples.yaml`). To keep the printed totals from being
+  restated literals, four rules now compute them: `character.settlement.equipment.shield_padding`
+  adds its +1 to `maximum_durability`; `character.treasure.magic_weapons.7` and
+  `character.treasure.magic_armours_shields.4` add +2 / +1 to it after
+  `character.durability.magic`; `character.perk.frenzy.limits` derives 8 from two turns, 2 AP,
+  1-AP Standard Attacks and one free attack per damaging attack.
+- Examples coverage flipped to `extracted` on 8 sections; coverage report regenerated.
+- Considered and not inventoried (rule statements, restatements or category lists, no instance):
+  Outdoor Setup scatter list and "(1d6, 1d8, 1d10, etc.)" (PDF 128), the Obstacles table's
+  "Example" art column (PDF 128–130), the Arena bracket (PDF 141), Pain Killer "meaning you can
+  move or attack" (PDF 152), staff charges "cast three times" (PDF 153), the Warrior Priest
+  trophy rate (PDF 159), Blood Magic's rate (PDF 176), In Tune with the Magic's threshold
+  (PDF 171), Enchant Item "such as a weapon" (PDF 189), the Standard Potions 1d3 column choice
+  (PDF 197), the Headsman's Axe (PDF 208) and Ohlnir's Hammer (PDF 208). Adding a third
+  dimension (PDF 216–220) is photos with captions; back matter is backers, index and art.
+
+### Re-reviews
+
+Eight runs, one fresh Opus 5.5 `corpus-reviewer` per stale record, each with the previous
+record's scope:
+
+- `review.guilds.6`, `review.appendix_i_perks.3`, `review.appendix_ii_talents.3`,
+  `review.appendix_iii_general_equipment_b.4`, `review.appendix_v_legendary_a.4` and
+  `review.appendix_v_tables.5`: passed.
+- `review.appendix_iii_weapons_armour.4` failed on one `coverage_error`: the parent
+  `section.appendix_iii_equipment.armour_and_shields` note still said no example is printed. The
+  note now points the Stackable example to `.table`; `review.appendix_iii_weapons_armour.5`
+  passed with that correction.
+
+No reviewer proposed a new issue. Notes left as `no_change_needed`: the shield-padding
+`maximum_durability` description says "before padding" although the field holds the padded total
+after the add; the Stone of Valheir case does not assert the 10-30 amount, because the draw rule
+outputs no bonus value.

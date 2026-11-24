@@ -129,6 +129,14 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   4 `source_conflicted`, 1 `descriptive`. All 677 non-redirect sections are on the unswept
   allowlist. No corpus change and no re-review; evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #19 is done (24 November): Travel, Settlements, the guilds, Inner Sanctum, Estate,
+  Appendices and back matter (PDF 125-220, 280-286) swept; 229 sections off the allowlist. 8 new
+  entries (6 `executable` with 7 cases, 1 `descriptive`, 1 `missing_information`); the Silver City
+  schedule is now `source_conflicted` (`issue.settlement.prayer_schedule_duration`). Re-reviewed
+  fresh: `review.guilds.6`, `review.appendix_i_perks.3`, `review.appendix_ii_talents.3`,
+  `review.appendix_iii_general_equipment_b.4`, `review.appendix_iii_weapons_armour.5`,
+  `review.appendix_v_legendary_a.4`, `review.appendix_v_tables.5`. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -142,7 +150,7 @@ convert its examples, shrink `unswept_sections`, update coverage and re-review w
 - #15 Game Basics through Embarking
 - #16 Into the Dungeons, Treasure, Combat
 - #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
-- #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
+- #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices (done)
 - #18 Quest Book I, Backgrounds
 
 Then #20 closes Phase 8 (no `pending`, empty allowlist) and moves this checkpoint to Phase 9
