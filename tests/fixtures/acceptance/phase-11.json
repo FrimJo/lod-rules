@@ -1,0 +1,141 @@
+{
+  "scope": "Phase 11 deterministic compilation",
+  "status": "accepted",
+  "plan": "docs/corpus-completion-plan.md",
+  "criteria": [
+    {
+      "id": "phase_11.build_validates",
+      "requirement": "build:corpus runs every check npm run validate runs, on any root, and compiles nothing when one fails.",
+      "status": "verified",
+      "evidence": [
+        "scripts/build/index.ts",
+        "scripts/build/corpus.ts",
+        "scripts/validate/corpus.ts",
+        "scripts/validate/canonical-files.ts",
+        "tests/schema/validate-root.test.ts",
+        "tests/build/corpus.test.ts"
+      ],
+      "finding": "24 November 2026: compileCorpus calls validateCorpus(root) and throws CorpusBuildError with every message; a schema violation, duplicate id, dangling see_also, coverage row without a section and YAML parse error are each rejected naming the file, and a build with two errors reports both and creates no output.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.class_bundles",
+      "requirement": "One JSON bundle per record class plus the derived graph; evidence not compiled is listed in the manifest.",
+      "status": "verified",
+      "evidence": [
+        "scripts/build/index.ts",
+        "tests/build/corpus.test.ts",
+        "docs/corpus-bundles.md",
+        "docs/ledgers/phase-11-deterministic-compilation.md"
+      ],
+      "finding": "24 November 2026: 16 class bundles (source documents, external sources, terms, aliases, sections, pages, coverage, rules, entities, tables, procedures, state machines, canonical edges, issues, independent reviews, test cases) and graph.json; the acceptance checklists and the example inventory are listed under excluded with reasons, and the test checks each path exists.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.manifest_contract",
+      "requirement": "A versioned manifest with input fingerprint, per-input hashes, source documents, per-bundle record counts and checksums, and no timestamps or absolute paths.",
+      "status": "verified",
+      "evidence": [
+        "schemas/corpus-bundle-manifest.schema.json",
+        "scripts/build/index.ts",
+        "tests/build/corpus.test.ts"
+      ],
+      "finding": "24 November 2026: the published manifest matches its JSON Schema; counts equal bundle lengths, checksums equal the file bytes, every input and source document is hashed by repo-relative path, and the test finds no absolute path, backslash or timestamp-shaped value.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.preserves_provenance",
+      "requirement": "Canonical ids, source order, source references, unresolved issues and external markers survive compilation, with each record mapped to its YAML file.",
+      "status": "verified",
+      "evidence": ["tests/build/corpus.test.ts", "docs/corpus-bundles.md"],
+      "finding": "24 November 2026: for every class bundle the records equal the YAML records in path then file order, and files maps each key to its YAML path; unresolved_references, external_references, not_present sources and both carry-over issues appear in the bundles.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.graph_bundle",
+      "requirement": "The derived dependency graph is a bundle, and traversal over it equals traversal over a freshly derived graph.",
+      "status": "verified",
+      "evidence": ["scripts/build/graph-bundle.ts", "tests/build/corpus.test.ts"],
+      "finding": "24 November 2026: graph.json holds the nodes and edges deriveGraph returns (4938 nodes, 15772 edges); traversal from five sample ids matches the fresh graph and reaches input_from, summary_of, expanded_by and step_rule edges.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.staged_publish",
+      "requirement": "Output is staged and verified before it is published; a failed build keeps the previous output.",
+      "status": "verified",
+      "evidence": [
+        "scripts/build/index.ts",
+        "tests/build/corpus.test.ts",
+        "tests/retrieve/bundles.test.ts"
+      ],
+      "finding": "24 November 2026: verifyStaged re-reads the staged file set, manifest, checksums and counts before the swap; after each invalid-input case the previous output is byte-identical and no staging directory remains; concurrent loaders of the same stale corpus both succeed.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.repeat_build_in_ci",
+      "requirement": "A repeat-build checksum test runs in CI's pinned environment.",
+      "status": "verified",
+      "evidence": [".github/workflows/gate.yml", "tests/build/corpus.test.ts", "package-lock.json"],
+      "finding": "24 November 2026: the gate job installs with npm ci from the lockfile on Node 24 and runs npm test, which includes the build test that builds twice into two directories and compares every file byte for byte.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.consumers_read_bundles",
+      "requirement": "The retrieval index and the web client's data bundle read the compiled bundles; agent tool results are unchanged.",
+      "status": "verified",
+      "evidence": [
+        "scripts/build/load.ts",
+        "scripts/retrieve/load.ts",
+        "clients/web/build/bundle-data.ts",
+        "clients/mcp/src/corpus.ts",
+        "tests/retrieve/bundles.test.ts",
+        "tests/retrieve/retrieval.test.ts",
+        "tests/retrieve/tools.test.ts",
+        "clients/mcp/tests/corpus.test.ts"
+      ],
+      "finding": "24 November 2026: retrieval loads through loadCorpusBundles, which builds missing or stale bundles first (read-only consumers compile in memory); the retrieval manifest records the corpus fingerprint; retrieval.test.ts and tools.test.ts pass unchanged.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.layout_documented",
+      "requirement": "The bundle layout, record order, provenance maps, manifest and format_version policy are documented for external consumers.",
+      "status": "verified",
+      "evidence": [
+        "docs/corpus-bundles.md",
+        "docs/README.md",
+        "generated/README.md",
+        "docs/retrieval.md"
+      ],
+      "finding": "24 November 2026: docs/corpus-bundles.md documents every file the build writes (the build test checks each name), the manifest fields, the fingerprint scheme and when format_version is bumped; docs/README.md links it.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.carry_overs_open",
+      "requirement": "issue.sanity.inn_recovery_stay_limit and issue.guild.alchemist_availability_merged_tables stay unresolved in the bundles and are named in the Phase 11 ledger.",
+      "status": "verified",
+      "evidence": [
+        "review/ambiguities.yaml",
+        "tests/build/corpus.test.ts",
+        "docs/ledgers/phase-11-deterministic-compilation.md",
+        "docs/extraction-checkpoint.md"
+      ],
+      "finding": "24 November 2026: both issues have status unresolved in review/ambiguities.yaml and in issues.json; the ledger and the checkpoint list them as carried into Phase 12.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_11.checkpoint_advanced",
+      "requirement": "The checkpoint's next unit is Phase 12, the plan's status table records Phase 11, and no doc calls build:corpus a stub.",
+      "status": "verified",
+      "evidence": [
+        "docs/extraction-checkpoint.md",
+        "docs/corpus-completion-plan.md",
+        "LOD_RULES_CORPUS_PLAN.md",
+        "README.md",
+        "AGENTS.md",
+        "docs/extraction-guide.md"
+      ],
+      "finding": "24 November 2026, on 8fd121d plus this ticket: the checkpoint names Phase 12 as the next unit and links the Phase 11 ledger; the plan's status table and exit-checklist row include Phase 11.",
+      "remaining_work": []
+    }
+  ]
+}
