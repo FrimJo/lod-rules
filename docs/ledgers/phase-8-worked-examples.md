@@ -68,3 +68,78 @@ and Stat Checks (PDF 20), which names a check but prints no roll or outcome.
   (comment on #14).
 - `section.game_basics.skill_and_stat_checks` has `examples: extracted` but no `source_example`
   case; its examples are descriptive.
+
+## Slice — Equipment, Psychology, Magic, Magic Items, Enchantments, Alchemy, Prayers — 24 November 2026
+
+Issue #17. Swept PDF 51–58 and 64–84 (printed 49–56 and 62–82), every page rendered and read.
+135 sections left `unswept_sections` (542 remain). `such as` lists that only name members of a
+category (rations and lock picks, Quick Slot items) are not counted as examples; the Hands
+sentence is, because the book labels it "Examples".
+
+### Examples found
+
+| Entry                                              | Section                                         | PDF | Form           | Disposition         |
+| -------------------------------------------------- | ----------------------------------------------- | --: | -------------- | ------------------- |
+| `example.equipment.weapon_class` (seed)            | `equipment.weapon_class`                        |  51 | `inline_prose` | `executable`        |
+| `example.equipment.hands_items`                    | `equipment.hands`                               |  52 | `inline_prose` | `descriptive`       |
+| `example.equipment.jacket_hit_odds`                | `equipment.what_equipment_to_bring`             |  54 | `inline_prose` | `descriptive`       |
+| `example.psychology.sanity_two_conditions` (seed)  | `psychology.sanity.conditions`                  |  55 | `inline_prose` | `executable`        |
+| `example.psychology.morale_starting_range`         | `psychology.party_morale`                       |  58 | `inline_prose` | `descriptive`       |
+| `example.psychology.morale_two_poisoned` (seed)    | `psychology.party_morale`                       |  58 | `inline_prose` | `executable`        |
+| `example.magic.increased_power_miscast`            | `magic.increased_power`                         |  66 | `inline_prose` | `executable`        |
+| `example.magic.increased_power_level_cap`          | `magic.increased_power`                         |  66 | `inline_prose` | `executable`        |
+| `example.magic.focus_ozmor` (seed)                 | `magic.focus`                                   |  66 | `inline_prose` | `source_conflicted` |
+| `example.magic.scroll_magic_bolt` (seed, extended) | `magic.magic_scrolls`                           |  67 | `inline_prose` | `executable`        |
+| `example.enchantments.damage_magic_necklace`       | `enchantments.requirements_for_magic_items`     |  71 | `inline_prose` | `descriptive`       |
+| `example.alchemy.stat_potions_do_not_stack` (seed) | `alchemy.drinking_potions`                      |  72 | `inline_prose` | `executable`        |
+| `example.alchemy.dragons_breath_caption`           | `alchemy.preparations.potion_of_dragons_breath` |  80 | `caption`      | `source_conflicted` |
+| `example.prayers.stay_thy_hand_wounded`            | `prayers.stay_thy_hand`                         |  83 | `inline_prose` | `executable`        |
+
+14 examples in scope: 6 seeded, 8 new. The flowcharts (Hero Spell Casting, PDF 68; Making a
+potion, PDF 77) and the Common recipes (PDF 78) are rule diagrams and catalogue data, not
+examples. Magic Items (PDF 70) prints none.
+
+### Cases added
+
+7 `source_example` cases, 2 `derived_case`:
+
+- `test.core.magic.power_example.miscast_threshold_94`, `.level_4_adds_4`, `.level_6_adds_5`;
+  derived `test.core.magic.power.level_4_cannot_add_5`, `.level_6_cannot_add_6`. The level cases
+  pin Magic Bolt (Destruction, 14 Mana, PDF 189) because the example names no spell.
+- `test.core.magic.scroll_example.magic_bolt_without_scroll` (Arcane Arts 50 − CV 10 = 40),
+  now first in `example.magic.scroll_magic_bolt`. Mana is pinned to the listed cost 14, as casting
+  presupposes enough Mana.
+- `test.alchemy.dragons_breath_caption.spot_and_line` (caption ways 2 and 4).
+- `test.character.prayer.stay_thy_hand_example.wounded_enemy`.
+
+No interpreter change was needed.
+
+### Reclassifications and issues
+
+- `example.alchemy.dragons_breath_caption` is `source_conflicted` on the existing
+  `issue.alchemy.dragons_breath_geometry` (ways 1 and 3, "2dx1d4"); no case asserts those ways.
+  No new issue.
+- `examples` coverage flipped to `extracted` on 6 rows: `equipment.hands`,
+  `equipment.what_equipment_to_bring`, `magic.increased_power`,
+  `enchantments.requirements_for_magic_items`, `alchemy.preparations.potion_of_dragons_breath`,
+  `prayers.stay_thy_hand`. Notes updated on those and on `magic.magic_scrolls`.
+- The inventory test's allowlist assertion now checks that `unswept_sections` lists only live
+  sections, once each, instead of all of them.
+
+### Re-reviews
+
+Five records went stale; one fresh Opus 5.5 `corpus-reviewer` each, all passed with no open
+findings and no proposed issues: `review.equipment.5`, `review.magic.5`,
+`review.magic_items_enchantments.5`, `review.alchemy_preparations.3`, `review.prayers.4`.
+Psychology records stayed fresh (no case or coverage change there).
+
+### Counts after this slice
+
+43 entries claim 100 `source_example` cases.
+
+| Disposition           | Entries |
+| --------------------- | ------: |
+| `executable`          |      33 |
+| `source_conflicted`   |       5 |
+| `descriptive`         |       5 |
+| `missing_information` |       0 |

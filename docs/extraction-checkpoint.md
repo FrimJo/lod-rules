@@ -141,7 +141,10 @@ convert its examples, shrink `unswept_sections`, update coverage and re-review w
 
 - #15 Game Basics through Embarking
 - #16 Into the Dungeons, Treasure, Combat
-- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
+- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers — done (24 November): 8 new
+  entries, 7 `source_example` cases, re-reviews `review.equipment.5`, `review.magic.5`,
+  `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`, `review.prayers.4`;
+  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
 - #18 Quest Book I, Backgrounds
 
