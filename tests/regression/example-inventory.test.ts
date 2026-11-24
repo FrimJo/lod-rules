@@ -45,9 +45,13 @@ describe('example inventory (issues #13, #14)', () => {
     expect(claimed).toEqual(sourceExamples);
   });
 
-  it('allowlists every section until the chapter slices sweep them', () => {
-    const live = [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id);
-    expect([...fixture.unswept_sections].sort()).toEqual(live.sort());
+  it('allowlists only live sections, and none of the chapters already swept', () => {
+    const live = new Set(
+      [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
+    );
+    expect(fixture.unswept_sections.filter((id) => !live.has(id))).toEqual([]);
+    const swept = /^section\.(into_the_dungeons|treasure|combat)(\.|$)/;
+    expect(fixture.unswept_sections.filter((id) => swept.test(id))).toEqual([]);
   });
 
   describe('fails on a minimal broken copy', () => {
@@ -176,7 +180,11 @@ describe('example inventory (issues #13, #14)', () => {
     });
 
     it('a pending entry or allowlisted section once Phase 8 is closed', () => {
-      const problems = checkExampleInventory(fixture, context, { closed: true });
+      const pending = withEntry(executableId, (entry) => {
+        delete entry.cases;
+        entry.pending = true;
+      });
+      const problems = checkExampleInventory(pending, context, { closed: true });
       expect(problems.some((problem) => /still pending/.test(problem))).toBe(true);
       expect(problems.some((problem) => /still unswept/.test(problem))).toBe(true);
     });
