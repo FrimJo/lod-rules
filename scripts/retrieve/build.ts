@@ -5,7 +5,8 @@ import { repoRoot } from '../validate/schemas.ts';
 import { deriveGraph } from '../graph/derive.ts';
 import { buildSearchDocuments, graphLinks, SEARCH_DOCUMENT_VERSION } from './documents.ts';
 import { canonicalRecords, createRetrievalDatabase } from './index.ts';
-import { fingerprintInputs, loadRetrievalCorpus } from './load.ts';
+import { fingerprintInputs } from '../validate/canonical-files.ts';
+import { loadRetrievalCorpus } from './load.ts';
 
 export const RETRIEVAL_DIR = 'generated/retrieval';
 
@@ -53,7 +54,7 @@ export function buildRetrievalArtifacts(root = repoRoot): RetrievalManifest {
   return manifest;
 }
 
-/** The built database, if it exists and matches the current canonical inputs. */
+/** The built database, if it exists and was built from the current canonical inputs. */
 export function freshDatabasePath(root = repoRoot): string | null {
   const manifestPath = join(root, RETRIEVAL_DIR, 'manifest.json');
   const databasePath = join(root, RETRIEVAL_DIR, 'retrieval.sqlite');

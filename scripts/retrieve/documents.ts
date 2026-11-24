@@ -11,7 +11,7 @@ import type {
   Table,
 } from '../validate/pilot-types.ts';
 import type { SourceReference } from '../validate/integrity.ts';
-import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './load.ts';
+import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './corpus.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
 export const SEARCH_DOCUMENT_VERSION = 6;

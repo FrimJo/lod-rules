@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lod-rules/schemas/corpus-bundle-manifest.schema.json",
+  "title": "Compiled corpus manifest",
+  "description": "generated/corpus/manifest.json, written by npm run build:corpus. Paths are repo-relative POSIX paths; the manifest holds no timestamps, so identical inputs give identical bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "input_fingerprint", "inputs", "sources", "bundles", "excluded"],
+  "properties": {
+    "format_version": {
+      "description": "Bumped on any breaking change to the bundle layout or this manifest.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "input_fingerprint": {
+      "description": "SHA-256 over every input path and its bytes, in path order.",
+      "$ref": "#/$defs/sha256"
+    },
+    "inputs": {
+      "description": "Canonical YAML input path to the SHA-256 of its bytes.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/path" },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "sources": {
+      "description": "Source documents from source/manifest.yaml, by id and file hash.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "file", "sha256"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "file": { "$ref": "#/$defs/path" },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "bundles": {
+      "description": "Bundle file name to its record count and the SHA-256 of its bytes. Each record-class bundle is {records, files}: the records as authored, and record key (id; form for aliases; pdf_page for pages) to source YAML path. graph.json is the derived dependency graph {categories, nodes, edges}; its record count is nodes plus edges.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9-]+\\.json$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["records", "sha256"],
+        "properties": {
+          "records": { "type": "integer", "minimum": 0 },
+          "sha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "excluded": {
+      "description": "Checked-in review evidence that is deliberately not compiled.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "reason"],
+        "properties": {
+          "path": { "$ref": "#/$defs/path" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "path": {
+      "description": "Repo-relative POSIX path.",
+      "type": "string",
+      "pattern": "^(?![/.])[^\\\\:]+$"
+    }
+  }
+}

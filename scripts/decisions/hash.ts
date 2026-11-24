@@ -1,9 +1,3 @@
-import { createHash } from 'node:crypto';
-
-export function sha256(text: string): string {
-  return createHash('sha256').update(text, 'utf8').digest('hex');
-}
-
 /** Stable encoding for cache keys. Key order does not affect the digest. */
 export function canonicalJson(value: unknown): string {
   return JSON.stringify(order(value));

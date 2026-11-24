@@ -12,7 +12,7 @@ import {
   type FilterPolicy,
   type RecordJudgment,
 } from '../../../../scripts/ask/ranking.ts';
-import { fingerprintInputs } from '../../../../scripts/retrieve/load.ts';
+import { fingerprintInputs } from '../../../../scripts/validate/canonical-files.ts';
 
 export type Label = 'direct' | 'supporting' | 'irrelevant' | 'uncertain' | 'unlabelled';
 

@@ -60,14 +60,17 @@ let ranker: SystemOneModel | null | undefined;
 
 /**
  * A data bundle ships the database built from the deployed commit and no corpus, so it is
- * opened as is. In the repo checkout, a stale or missing database is rebuilt in memory.
+ * opened as is. In the repo checkout, a stale or missing database is rebuilt in memory, and a
+ * stale corpus is compiled in memory too: serving a request never writes to `generated/`.
  */
 export function openRetrieval(): Retrieval {
   if (!retrieval) {
     if (bundled) retrieval = Retrieval.open(join(dataRoot, RETRIEVAL_DIR, 'retrieval.sqlite'));
     else {
       const database = freshDatabasePath();
-      retrieval = database ? Retrieval.open(database) : Retrieval.fromCorpus();
+      retrieval = database
+        ? Retrieval.open(database)
+        : Retrieval.fromCorpus(undefined, { readOnly: true });
     }
   }
   return retrieval;

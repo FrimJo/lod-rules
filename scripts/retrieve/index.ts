@@ -7,7 +7,8 @@ import {
   type GraphLinks,
   type SearchDocument,
 } from './documents.ts';
-import { loadRetrievalCorpus, type RetrievalCorpus } from './load.ts';
+import type { RetrievalCorpus } from './corpus.ts';
+import { loadRetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
 
@@ -188,9 +189,12 @@ export function canonicalRecords(corpus: RetrievalCorpus): Map<string, unknown> 
 export class Retrieval {
   constructor(private readonly db: DatabaseSync) {}
 
-  /** Builds an in-memory index from the canonical YAML. */
-  static fromCorpus(root?: string): Retrieval {
-    const corpus = loadRetrievalCorpus(root);
+  /**
+   * Builds an in-memory index from the compiled corpus, compiling it first when stale.
+   * `readOnly` keeps that compilation in memory instead of publishing it to `generated/`.
+   */
+  static fromCorpus(root?: string, { readOnly = false }: { readOnly?: boolean } = {}): Retrieval {
+    const corpus = loadRetrievalCorpus(root, { readOnly });
     const graph = deriveGraph(corpus);
     return new Retrieval(
       createRetrievalDatabase(

@@ -8,11 +8,11 @@ import {
   checkIndependentReviews,
   computeDigest,
   describeStaleness,
-  discoverReviewFiles,
   expandDescendants,
   loadReviewSnapshot,
   type ReviewRecord,
 } from '../validate/independent-review.ts';
+import { discoverReviewFiles } from '../validate/canonical-files.ts';
 import { createAjv, formatErrors, getValidator, repoRoot } from '../validate/schemas.ts';
 
 const usage = `Usage: npm run review -- <command> [options]

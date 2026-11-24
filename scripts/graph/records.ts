@@ -1,4 +1,4 @@
-import type { RetrievalCorpus } from '../retrieve/load.ts';
+import type { RetrievalCorpus } from '../retrieve/corpus.ts';
 import type { Step } from '../validate/pilot-types.ts';
 
 /** Steps with their schema path, depth-first in source order. */

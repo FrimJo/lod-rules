@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { stepDuplicates } from '../../scripts/graph/duplicates.ts';
-import { loadRetrievalCorpus, type RetrievalCorpus } from '../../scripts/retrieve/load.ts';
+import type { RetrievalCorpus } from '../../scripts/retrieve/corpus.ts';
+import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 
 interface Disposition {

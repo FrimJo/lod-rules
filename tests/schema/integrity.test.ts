@@ -54,7 +54,7 @@ describe('reference checks', () => {
     const sections = [section('section.combat', { parent: 'section.nowhere' })];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
     expect(errors).toContain(
-      'sections.yaml: "section.combat" has unknown parent "section.nowhere"',
+      'corpus/source-map/sections.yaml: "section.combat" has unknown parent "section.nowhere"',
     );
   });
 
@@ -62,21 +62,23 @@ describe('reference checks', () => {
     const sections = [section('section.combat', { see_also: ['section.nowhere'] })];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
     expect(errors).toContain(
-      'sections.yaml: "section.combat" see_also references unknown "section.nowhere"',
+      'corpus/source-map/sections.yaml: "section.combat" see_also references unknown "section.nowhere"',
     );
   });
 
   it('reports a section that points at itself', () => {
     const sections = [section('section.combat', { see_also: ['section.combat'] })];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
-    expect(errors).toContain('sections.yaml: "section.combat" see_also references itself');
+    expect(errors).toContain(
+      'corpus/source-map/sections.yaml: "section.combat" see_also references itself',
+    );
   });
 
   it('reports an external source missing from the manifest', () => {
     const sections = [section('section.combat', { external_references: ['grimoire'] })];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
     expect(errors).toEqual([
-      'sections.yaml: "section.combat" references external source "grimoire" that is not declared in source/manifest.yaml',
+      'corpus/source-map/sections.yaml: "section.combat" references external source "grimoire" that is not declared in source/manifest.yaml',
     ]);
   });
 
@@ -84,7 +86,9 @@ describe('reference checks', () => {
     const errors = checkIntegrity(
       sourceMap({ pages: [{ pdf_page: 1, section_id: 'section.gone' }] }),
     );
-    expect(errors).toEqual(['pages.yaml: pdf page 1 references unknown section "section.gone"']);
+    expect(errors).toEqual([
+      'corpus/source-map/pages.yaml: pdf page 1 references unknown section "section.gone"',
+    ]);
   });
 
   // An unresolved reference is free text by design, so it must never be treated as an id.
@@ -101,7 +105,9 @@ describe('parent cycles', () => {
       section('section.b', { parent: 'section.a' }),
     ];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
-    expect(errors.some((error) => error.startsWith('sections.yaml: parent cycle'))).toBe(true);
+    expect(
+      errors.some((error) => error.startsWith('corpus/source-map/sections.yaml: parent cycle')),
+    ).toBe(true);
   });
 
   it('accepts a deep chain', () => {
@@ -120,7 +126,9 @@ describe('coverage bijection', () => {
     const errors = checkIntegrity(
       sourceMap({ sections, coverage: [{ id: 'section.combat', status: 'mapped' }] }),
     );
-    expect(errors).toEqual(['coverage.yaml: no entry for section "section.equipment"']);
+    expect(errors).toEqual([
+      'corpus/source-map/coverage.yaml: no entry for section "section.equipment"',
+    ]);
   });
 
   it('reports a coverage row with no section', () => {
@@ -131,7 +139,9 @@ describe('coverage bijection', () => {
         coverage: [...coverageFor(sections), { id: 'section.ghost', status: 'mapped' }],
       }),
     );
-    expect(errors).toEqual(['coverage.yaml: entry "section.ghost" has no matching section']);
+    expect(errors).toEqual([
+      'corpus/source-map/coverage.yaml: entry "section.ghost" has no matching section',
+    ]);
   });
 });
 
@@ -140,21 +150,23 @@ describe('page map', () => {
     const errors = checkIntegrity(
       sourceMap({ pages: [{ pdf_page: 1 }, { pdf_page: 3 }], documentPageCount: 3 }),
     );
-    expect(errors).toEqual(['pages.yaml: missing entry for pdf page 2']);
+    expect(errors).toEqual(['corpus/source-map/pages.yaml: missing entry for pdf page 2']);
   });
 
   it('reports a duplicate pdf page', () => {
     const errors = checkIntegrity(
       sourceMap({ pages: [{ pdf_page: 1 }, { pdf_page: 1 }], documentPageCount: 1 }),
     );
-    expect(errors).toEqual(['pages.yaml: duplicate entry for pdf page 1']);
+    expect(errors).toEqual(['corpus/source-map/pages.yaml: duplicate entry for pdf page 1']);
   });
 
   it('reports a page past the end of the document', () => {
     const errors = checkIntegrity(
       sourceMap({ pages: [{ pdf_page: 1 }, { pdf_page: 2 }], documentPageCount: 1 }),
     );
-    expect(errors).toEqual(["pages.yaml: pdf page 2 is beyond the document's 1 pages"]);
+    expect(errors).toEqual([
+      "corpus/source-map/pages.yaml: pdf page 2 is beyond the document's 1 pages",
+    ]);
   });
 });
 
@@ -165,7 +177,7 @@ describe('page ranges', () => {
     ];
     const errors = checkIntegrity(sourceMap({ sections, coverage: coverageFor(sections) }));
     expect(errors).toEqual([
-      'sections.yaml: "section.combat" has printed pages ending (107) before starting (120)',
+      'corpus/source-map/sections.yaml: "section.combat" has printed pages ending (107) before starting (120)',
     ]);
   });
 

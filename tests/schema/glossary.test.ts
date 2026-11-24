@@ -89,9 +89,12 @@ describe('glossary cross-file integrity', () => {
     expect(checkGlossaryIntegrity(fixture(), map)).toEqual([]);
   });
   it.each([
-    ['duplicate form', (g: Glossary) => g.aliases.push({ form: 'ap', term_id: term.id })],
     [
-      'conflicting alias',
+      'corpus/glossary/aliases.yaml: duplicate form',
+      (g: Glossary) => g.aliases.push({ form: 'ap', term_id: term.id }),
+    ],
+    [
+      'corpus/glossary/terms.yaml: conflicting alias',
       (g: Glossary) => g.terms.push({ ...term, id: 'term.other', name: 'Other' }),
     ],
     ['unknown related', (g: Glossary) => g.terms[0]!.related.push('term.missing')],
@@ -134,8 +137,8 @@ describe('glossary cross-file integrity', () => {
         g.terms[0]!.source[0]!.printed_page = 1;
       },
     ],
-    ['duplicate id', (g: Glossary) => g.terms.push(g.terms[0]!)],
-    ['duplicate id', (g: Glossary) => g.issues.push(g.issues[0]!)],
+    ['corpus/glossary/terms.yaml: duplicate id', (g: Glossary) => g.terms.push(g.terms[0]!)],
+    ['review/ambiguities.yaml: duplicate id', (g: Glossary) => g.issues.push(g.issues[0]!)],
   ])('reports %s', (message, mutate) => {
     const glossary = fixture();
     mutate(glossary);

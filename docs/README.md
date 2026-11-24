@@ -27,6 +27,7 @@ Start with the [completion plan](corpus-completion-plan.md) for what remains, th
 
 | Doc                                                    | Purpose                                                              |
 | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| [corpus-bundles.md](corpus-bundles.md)                 | Compiled JSON bundles and manifest: layout and format contract       |
 | [retrieval.md](retrieval.md)                           | Lexical retrieval, agent tools, `ask` pipeline, labelled questions   |
 | [ask-quality-evaluation.md](ask-quality-evaluation.md) | Evidence relevance and answer-quality evaluation, filter calibration |
 | [semantic-decisions.md](semantic-decisions.md)         | Optional Laya/Jev judgment layer; never changes canonical rules      |

@@ -22,8 +22,10 @@ As of 7 October 2026:
   Batch 7 (lifecycle models) is in progress; its
   [acceptance manifest](tests/fixtures/acceptance/package-f.json) has 27 implemented and 64
   pending entries.
-- **Phases 7–12:** groundwork only. Nothing is independently reviewed, `build:corpus` is a
-  stub, and retrieval (lexical search, agent tools, MCP server, `ask`) is partial Phase 12.
+- **Phase 11 — compilation:** `npm run build:corpus` compiles the corpus into validated JSON
+  bundles ([contract](docs/corpus-bundles.md)).
+- **Phase 12:** retrieval (lexical search, agent tools, MCP server, `ask`) reads the bundles and
+  is partial.
 - **Phase 4.x — optional semantic decisions:** adapters and evaluation exist; calibration and
   production-provider selection remain pending.
 
@@ -45,7 +47,7 @@ npm run validate         # schema-check canonical YAML, verify source identity
 npm test                 # schema and tooling tests
 npm run report:coverage  # regenerate docs/coverage-report.md
 npm run lint             # eslint + prettier
-npm run build:corpus     # generated/ artifacts (not implemented until Phase 11)
+npm run build:corpus     # validate, then compile JSON bundles to generated/corpus/
 
 # Dump the PDF outline and per-page text to generated/extract/ for inspection.
 # The dump seeds YAML by hand; it is never canonical.

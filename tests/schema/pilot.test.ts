@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { parse, stringify } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { createAjv, getValidator, repoRoot } from '../../scripts/validate/schemas.ts';
-import { discoverPilotFiles, readPilot } from '../../scripts/validate/pilot-files.ts';
+import { discoverPilotFiles } from '../../scripts/validate/canonical-files.ts';
+import { readPilot } from '../../scripts/validate/pilot-files.ts';
 import { checkPilotIntegrity, type PilotContext } from '../../scripts/validate/pilot.ts';
 import type {
   Pilot,

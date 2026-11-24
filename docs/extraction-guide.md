@@ -47,8 +47,8 @@ printed sequence entirely. Each of those pages says so in its `notes`.
 | Schemas and tooling | `schemas/`, `scripts/`, `tests/` | Yes, reviewed               |
 | Build artifacts     | `generated/`                     | **Never**                   |
 
-`generated/` is gitignored. PDF dumps are reproduced with `inspect-pdf.ts`; corpus build
-outputs are deferred until Phase 11 (`npm run build:corpus` is currently a stub).
+`generated/` is gitignored. PDF dumps are reproduced with `inspect-pdf.ts`; corpus bundles
+with `npm run build:corpus` ([contract](corpus-bundles.md)).
 If a generated file is wrong, fix the canonical input and rebuild. Documentation generated
 from canonical data — currently `docs/coverage-report.md` — follows the same rule.
 

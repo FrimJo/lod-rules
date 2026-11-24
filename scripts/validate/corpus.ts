@@ -1,16 +1,15 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse } from 'yaml';
-import { discoverPilotFiles, emptyPilot } from './pilot-files.ts';
+import { canonicalInputs, readCanonicalFile, type CanonicalFile } from './canonical-files.ts';
+import { emptyPilot } from './pilot-files.ts';
 import { checkPilotIntegrity } from './pilot.ts';
 import {
   checkIndependentReviews,
-  discoverReviewFiles,
   sourceClassesOf,
   sourceFingerprint,
   type ReviewRecord,
 } from './independent-review.ts';
-import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
+import { createAjv, repoRoot, type SchemaName } from './schemas.ts';
 import {
   checkIntegrity,
   checkGlossaryIntegrity,
@@ -22,20 +21,11 @@ import {
   type Issue,
 } from './integrity.ts';
 
-/** Canonical files loaded by the validator. `generated/` is never scanned. */
-const canonicalFiles: Array<{ path: string; schema: SchemaName }> = [
-  { path: 'source/manifest.yaml', schema: 'manifest' },
-  { path: 'corpus/glossary/terms.yaml', schema: 'terms' },
-  { path: 'corpus/glossary/aliases.yaml', schema: 'aliases' },
-  { path: 'review/ambiguities.yaml', schema: 'issues' },
-  { path: 'corpus/source-map/sections.yaml', schema: 'sections' },
-  { path: 'corpus/source-map/pages.yaml', schema: 'pages' },
-  { path: 'corpus/source-map/coverage.yaml', schema: 'coverage' },
-];
-
 export interface ValidationResult {
   errors: string[];
   filesChecked: number;
+  /** Every input that parsed and matched its schema, in path order. Complete when `errors` is empty. */
+  files: CanonicalFile[];
 }
 
 interface ManifestDocument {
@@ -72,57 +62,42 @@ function findDuplicateIds(entries: unknown, path: string): string[] {
 }
 
 /** The manifest records source identity, so a missing file invalidates all provenance. */
-function checkDocumentFilesExist(manifest: unknown): string[] {
+function checkDocumentFilesExist(manifest: unknown, root: string): string[] {
   const documents = (manifest as Manifest | null)?.documents;
   if (!Array.isArray(documents)) return [];
 
   return documents
-    .filter((document) => !existsSync(join(repoRoot, 'source', document.file)))
+    .filter((document) => !existsSync(join(root, 'source', document.file)))
     .map(
       (document) =>
         `source/manifest.yaml: document "${document.id}" references missing file source/${document.file}`,
     );
 }
 
-export function validateCorpus(): ValidationResult {
+/**
+ * Validates the corpus inputs under `root`. Schemas always come from this repository's
+ * `schemas/`: they are the validator's contract, not an input of the tree being checked.
+ */
+export function validateCorpus(root = repoRoot): ValidationResult {
   const ajv = createAjv();
   const errors: string[] = [];
   let filesChecked = 0;
   const loaded = new Map<SchemaName, unknown>();
   const pilot = emptyPilot();
-  const pilotFiles = discoverPilotFiles();
-  const reviewFiles = discoverReviewFiles().map((path) => ({
-    path,
-    schema: 'independentReviews' as const,
-  }));
+  const inputs = canonicalInputs(root);
+  const files: CanonicalFile[] = [];
   const reviewRecords: ReviewRecord[] = [];
-  let validFiles = 0;
 
-  for (const { path, schema } of [...canonicalFiles, ...pilotFiles, ...reviewFiles]) {
-    const absolutePath = join(repoRoot, path);
-
-    if (!existsSync(absolutePath)) {
-      errors.push(`${path}: file is missing`);
+  for (const input of inputs) {
+    const result = readCanonicalFile(ajv, input, root);
+    if (!result.missing) filesChecked += 1;
+    if (!result.file) {
+      errors.push(...result.errors);
       continue;
     }
 
-    filesChecked += 1;
-
-    let data: unknown;
-    try {
-      data = parse(readFileSync(absolutePath, 'utf8'));
-    } catch (error) {
-      errors.push(`${path}: YAML parse error: ${(error as Error).message}`);
-      continue;
-    }
-
-    const validate = getValidator(ajv, schema);
-    if (!validate(data)) {
-      errors.push(...formatErrors(validate).map((message) => `${path}: ${message}`));
-      continue;
-    }
-
-    validFiles += 1;
+    const { path, schema, data } = result.file;
+    files.push(result.file);
     if (schema === 'independentReviews') {
       // Ids are checked across all review files by checkIndependentReviews.
       reviewRecords.push(...((data as ReviewRecord[] | null) ?? []));
@@ -139,12 +114,12 @@ export function validateCorpus(): ValidationResult {
     } else {
       errors.push(...findDuplicateIds((data as Manifest).documents, path));
       errors.push(...findDuplicateIds((data as Manifest).external_sources, path));
-      errors.push(...checkDocumentFilesExist(data));
+      errors.push(...checkDocumentFilesExist(data, root));
     }
   }
 
   // Cross-file checks only make sense once every file parsed and matched its schema.
-  if (validFiles === canonicalFiles.length + pilotFiles.length + reviewFiles.length) {
+  if (files.length === inputs.length) {
     const manifest = loaded.get('manifest') as Manifest;
     const canonicalDocument = manifest.documents.find((document) => document.canonical);
 
@@ -201,7 +176,7 @@ export function validateCorpus(): ValidationResult {
           // Hashing the 40 MB PDF only matters once a record can be compared against it.
           sourceSha256:
             canonicalDocument && reviewRecords.length > 0
-              ? sourceFingerprint(join(repoRoot, 'source', canonicalDocument.file))
+              ? sourceFingerprint(join(root, 'source', canonicalDocument.file))
               : '',
         },
         reviewRecords,
@@ -209,5 +184,5 @@ export function validateCorpus(): ValidationResult {
     );
   }
 
-  return { errors, filesChecked };
+  return { errors, filesChecked, files };
 }
