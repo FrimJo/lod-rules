@@ -13,16 +13,12 @@ Files here are gitignored (this README is the only tracked file).
 
 ## Expected contents
 
-Produced by `npm run build:corpus` once Phase 11 is implemented:
-
-```text
-rules.json
-entities.json
-tables.json
-dependency-graph.json
-search-documents.jsonl
-lod-rules.sqlite
-```
+`npm run build:corpus` validates the canonical corpus and, only if it is valid, writes
+`corpus/`: one JSON bundle per record class plus `manifest.json`
+([schema](../schemas/corpus-bundle-manifest.schema.json)). Each bundle is
+`{ "records": [...], "files": { key: path } }`: the records exactly as authored, in source
+order, and each record's canonical YAML path. Output is staged and verified before it
+replaces the previous build, and identical inputs give byte-identical files.
 
 `npm run retrieve -- build` already writes an early retrieval slice to `retrieval/`
 (`search-documents.jsonl`, `retrieval.sqlite`, `manifest.json`). See
