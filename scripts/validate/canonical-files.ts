@@ -91,3 +91,13 @@ export function fingerprintFiles(files: Iterable<{ path: string; bytes: Buffer }
   for (const { path, bytes } of files) hash.update(path).update('\0').update(bytes).update('\0');
   return hash.digest('hex');
 }
+
+/**
+ * The corpus fingerprint: every canonical input under `root`, hashed without parsing. Equals the
+ * corpus manifest's `input_fingerprint` for the same bytes, so staleness checks need no build.
+ */
+export function fingerprintInputs(root = repoRoot): string {
+  return fingerprintFiles(
+    canonicalInputs(root).map(({ path }) => ({ path, bytes: readFileSync(join(root, path)) })),
+  );
+}

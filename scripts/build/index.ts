@@ -2,13 +2,14 @@ import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readdirSync,
   readFileSync,
   renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fingerprintFiles, type CanonicalFile } from '../validate/canonical-files.ts';
 import { validateCorpus } from '../validate/corpus.ts';
 import { repoRoot, type SchemaName } from '../validate/schemas.ts';
@@ -51,7 +52,7 @@ const excluded: CorpusManifest['excluded'] = [
 ];
 
 /** One JSON file per record class: the records as authored plus where each came from. */
-interface Bundle {
+export interface Bundle {
   records: unknown[];
   /** Record key (`id`; `form` for aliases; `pdf_page` for pages) to repo-relative YAML path. */
   files: Record<string, string>;
@@ -158,7 +159,7 @@ export class CorpusBuildError extends Error {
 }
 
 /** Bundle file name to its serialised bytes, plus the manifest that describes them. */
-interface Compiled {
+export interface Compiled {
   outputs: Map<string, string>;
   manifest: CorpusManifest;
 }
@@ -201,27 +202,37 @@ function verifyStaged(staging: string, { outputs, manifest }: Compiled): void {
   }
 }
 
+const isMissing = (error: unknown): boolean => (error as { code?: unknown }).code === 'ENOENT';
+
 /**
  * Writes into a sibling staging directory, verifies it, then swaps it in. On any failure the
- * staging directory is removed and the previous output stays as it was.
+ * staging directory is removed and the previous output stays as it was. Concurrent builds of
+ * the same inputs (parallel test workers, a CLI beside a server) may race: each stages under a
+ * unique name, and the loser of the swap accepts the winner's output when it is identical.
  */
 function publish(outDir: string, compiled: Compiled): void {
-  const staging = `${outDir}.staging`;
-  const previous = `${outDir}.previous`;
-  rmSync(staging, { recursive: true, force: true });
-  rmSync(previous, { recursive: true, force: true });
+  mkdirSync(dirname(outDir), { recursive: true });
+  const staging = mkdtempSync(`${outDir}.staging-`);
+  const previous = `${staging}.previous`;
   try {
-    mkdirSync(staging, { recursive: true });
     for (const [file, text] of compiled.outputs) writeFileSync(join(staging, file), text);
     writeFileSync(join(staging, MANIFEST_FILE), json(compiled.manifest));
     verifyStaged(staging, compiled);
 
-    const hadOutput = existsSync(outDir);
-    if (hadOutput) renameSync(outDir, previous);
+    let moved = false;
+    try {
+      renameSync(outDir, previous);
+      moved = true;
+    } catch (error) {
+      if (!isMissing(error)) throw error;
+    }
     try {
       renameSync(staging, outDir);
     } catch (error) {
-      if (hadOutput) renameSync(previous, outDir);
+      // Builds are deterministic: an identical manifest means identical bundles.
+      const winner = join(outDir, MANIFEST_FILE);
+      if (existsSync(winner) && readFileSync(winner, 'utf8') === json(compiled.manifest)) return;
+      if (moved && !existsSync(outDir)) renameSync(previous, outDir);
       throw error;
     }
   } finally {
@@ -231,18 +242,26 @@ function publish(outDir: string, compiled: Compiled): void {
 }
 
 /**
+ * Compiles the canonical corpus under `root` in memory, exactly as {@link buildCorpus} would
+ * publish it. Runs the full validator first: if it reports anything, throws a
+ * {@link CorpusBuildError} listing every message.
+ */
+export function compileCorpus(root = repoRoot): Compiled {
+  // The validator already parsed every input; compiling from its files reads the corpus once.
+  const { errors, files } = validateCorpus(root);
+  if (errors.length > 0) throw new CorpusBuildError(errors);
+  return compile(files, root);
+}
+
+/**
  * Compiles the canonical corpus under `root` into JSON bundles in `outDir` and returns the
- * manifest. Runs the full validator first: if it reports anything, throws a
- * {@link CorpusBuildError} listing every message and writes nothing.
+ * manifest. On a validation error it throws {@link CorpusBuildError} and writes nothing.
  */
 export function buildCorpus({
   root = repoRoot,
   outDir = join(root, CORPUS_DIR),
 }: { root?: string; outDir?: string } = {}): CorpusManifest {
-  // The validator already parsed every input; compiling from its files reads the corpus once.
-  const { errors, files } = validateCorpus(root);
-  if (errors.length > 0) throw new CorpusBuildError(errors);
-  const compiled = compile(files, root);
+  const compiled = compileCorpus(root);
   publish(outDir, compiled);
   return compiled.manifest;
 }
