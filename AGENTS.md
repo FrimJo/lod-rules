@@ -79,7 +79,8 @@ Relations between records come from the dependency graph (`scripts/graph/`); ret
 them and never re-derives them. See [docs/retrieval.md](docs/retrieval.md).
 
 `npm run build:corpus` validates the corpus and compiles it into JSON bundles under
-`generated/corpus/` (see [generated/README.md](generated/README.md)). Never edit the bundles.
+`generated/corpus/`; the layout and manifest contract is
+[docs/corpus-bundles.md](docs/corpus-bundles.md). Never edit the bundles.
 
 After any change that touches `corpus/`, `source/`, `schemas/`, `scripts/`, or `review/`, run
 `validate`, `test`, and `lint`; CI runs the same three. If coverage or sections changed, also

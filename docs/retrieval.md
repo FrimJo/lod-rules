@@ -27,7 +27,8 @@ Output is JSON. `build` writes `generated/retrieval/`:
 | `retrieval.sqlite`       | FTS5 index, documents, full canonical records, aliases and typed relations |
 | `manifest.json`          | Format version, corpus fingerprint and JSONL checksum; no timestamps       |
 
-Retrieval reads the compiled corpus bundles under `generated/corpus/`, not the YAML. When
+Retrieval reads the compiled corpus bundles under `generated/corpus/`
+([contract](corpus-bundles.md)), not the YAML. When
 they are missing or stale, loading runs `build:corpus` first, so an invalid corpus stops
 retrieval with every validation error. There is one fingerprint: the corpus manifest's
 `input_fingerprint`, a SHA-256 over every canonical YAML input. `fingerprintInputs`
@@ -307,8 +308,7 @@ drops only above its threshold, honours exact and linked protection and the budg
 keeps every record when the ranker fails, and that `ask()` filters only model analyses.
 
 Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
-semantic-provider calibration, and the full Phase 11 bundle with JSON/SQLite equivalence and
-repeat-build checksums.
+and semantic-provider calibration.
 
 ### Official ruling evidence
 

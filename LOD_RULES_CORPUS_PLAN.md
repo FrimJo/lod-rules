@@ -29,7 +29,7 @@ sections are independently reviewed.
 | 8 — Examples as executable tests | In progress, chapter by chapter | Runs inside the Step 2 core-chapter loop: every printed example in a reconciled chapter is classified and executable ones are fixtures. Chapters not yet reconciled still hold unclassified examples. |
 | 9 — Independent review | In progress, chapter by chapter | Schema-validated review records under `review/independent/` with content digests and staleness checks. Thirty-two fresh passing records back 408 reviewed sections. Issues: 261 records, 230 unresolved and 31 resolved (most by published designer rulings). |
 | 10 — Full-book coverage pass | In progress | 580 of 678 sections extracted (86%), 408 independently reviewed (60%). Step 2 tiers 1–6 are closed (Introduction through Buying an Estate). Tier 7 and the estate side quest cover 38 unfinished non-quest sections, 29 with no citing record; see `npm run report:chapters`. |
-| 11 — Build generated artifacts | Not implemented | `npm run build:corpus` remains a stub; JSON bundles, SQLite and compiled graph outputs are pending (Step 5). |
+| 11 — Build generated artifacts | Complete | `npm run build:corpus` validates the corpus and writes JSON bundles, the compiled graph and a manifest ([contract](docs/corpus-bundles.md)). SQLite output is optional. |
 | 12 — Semantic retrieval corpus | Partial groundwork | Lexical canonical-record retrieval, shared agent tools (CLI and MCP server), the `ask` pipeline and labelled question-analysis evaluation exist; comprehensive Phase 12 remains unfinished. See [retrieval evidence](docs/retrieval.md). |
 
 The additional **Phase 4.x semantic-decision layer** has provider adapters, a gold evaluation
