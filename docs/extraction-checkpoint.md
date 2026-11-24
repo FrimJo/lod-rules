@@ -137,6 +137,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `review.appendix_iii_general_equipment_b.4`, `review.appendix_iii_weapons_armour.5`,
   `review.appendix_v_legendary_a.4`, `review.appendix_v_tables.5`. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #18 is done (24 November): Backgrounds, the Grieving Mother side quest and
+  Quest Book I (PDF 42-50, 164-165, 221-279) swept; 132 sections off the allowlist. 5 new entries
+  (14 cases); `issue.quest.ulfric_to_hit_in_practice` resolved. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- After #14, #17, #18 and #19: 56 entries in 48 sections claim 121 `source_example` cases; 182
+  sections remain unswept (the #15 and #16 chapters). 39 `executable` (1 `pending`, #16), 7
+  `source_conflicted`, 8 `descriptive`, 2 `missing_information`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -155,7 +162,11 @@ convert its examples, shrink `unswept_sections`, update coverage and re-review w
   evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices — done (24 November);
   see the current position above
-- #18 Quest Book I, Backgrounds
+- #18 Quest Book I, Backgrounds — done (24 November): 5 new entries, 14 `source_example` cases,
+  3 new issues, re-reviews `review.the_dead_rising.4`, `review.backgrounds.3`,
+  `review.bandits_hideout_and_fountain_room.3`, `review.chamber_of_reverence_and_great_crypt.3`,
+  `review.spider_queen_and_lava_river.4`; evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 
 Then #20 closes Phase 8 (no `pending`, empty allowlist) and moves this checkpoint to Phase 9
 (uncertainty audit), Phase 11 (`build:corpus`) and Phase 12 (retrieval).
