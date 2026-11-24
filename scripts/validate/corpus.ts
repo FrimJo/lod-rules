@@ -72,26 +72,30 @@ function findDuplicateIds(entries: unknown, path: string): string[] {
 }
 
 /** The manifest records source identity, so a missing file invalidates all provenance. */
-function checkDocumentFilesExist(manifest: unknown): string[] {
+function checkDocumentFilesExist(manifest: unknown, root: string): string[] {
   const documents = (manifest as Manifest | null)?.documents;
   if (!Array.isArray(documents)) return [];
 
   return documents
-    .filter((document) => !existsSync(join(repoRoot, 'source', document.file)))
+    .filter((document) => !existsSync(join(root, 'source', document.file)))
     .map(
       (document) =>
         `source/manifest.yaml: document "${document.id}" references missing file source/${document.file}`,
     );
 }
 
-export function validateCorpus(): ValidationResult {
+/**
+ * Validates the corpus inputs under `root`. Schemas always come from this repository's
+ * `schemas/`: they are the validator's contract, not an input of the tree being checked.
+ */
+export function validateCorpus(root = repoRoot): ValidationResult {
   const ajv = createAjv();
   const errors: string[] = [];
   let filesChecked = 0;
   const loaded = new Map<SchemaName, unknown>();
   const pilot = emptyPilot();
-  const pilotFiles = discoverPilotFiles();
-  const reviewFiles = discoverReviewFiles().map((path) => ({
+  const pilotFiles = discoverPilotFiles(root);
+  const reviewFiles = discoverReviewFiles(root).map((path) => ({
     path,
     schema: 'independentReviews' as const,
   }));
@@ -99,7 +103,7 @@ export function validateCorpus(): ValidationResult {
   let validFiles = 0;
 
   for (const { path, schema } of [...canonicalFiles, ...pilotFiles, ...reviewFiles]) {
-    const absolutePath = join(repoRoot, path);
+    const absolutePath = join(root, path);
 
     if (!existsSync(absolutePath)) {
       errors.push(`${path}: file is missing`);
@@ -139,7 +143,7 @@ export function validateCorpus(): ValidationResult {
     } else {
       errors.push(...findDuplicateIds((data as Manifest).documents, path));
       errors.push(...findDuplicateIds((data as Manifest).external_sources, path));
-      errors.push(...checkDocumentFilesExist(data));
+      errors.push(...checkDocumentFilesExist(data, root));
     }
   }
 
@@ -201,7 +205,7 @@ export function validateCorpus(): ValidationResult {
           // Hashing the 40 MB PDF only matters once a record can be compared against it.
           sourceSha256:
             canonicalDocument && reviewRecords.length > 0
-              ? sourceFingerprint(join(repoRoot, 'source', canonicalDocument.file))
+              ? sourceFingerprint(join(root, 'source', canonicalDocument.file))
               : '',
         },
         reviewRecords,
