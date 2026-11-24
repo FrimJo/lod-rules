@@ -4,18 +4,21 @@ import { join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { parse } from 'yaml';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { type CorpusManifest } from '../../scripts/build/bundles.ts';
+import { readGraphBundle } from '../../scripts/build/graph-bundle.ts';
 import {
   buildCorpus,
+  compileCorpus,
+  compiledBundles,
   CorpusBuildError,
-  readGraphBundle,
-  type CorpusManifest,
 } from '../../scripts/build/index.ts';
 import {
-  buildGraph,
+  deriveGraph,
   traverse,
   type Graph,
   type TraverseOptions,
 } from '../../scripts/graph/index.ts';
+import { retrievalCorpusFrom } from '../../scripts/retrieve/corpus.ts';
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 import { copyCorpusInputs, type CorpusCopy } from '../support/corpus-copy.ts';
 
@@ -153,7 +156,11 @@ describe('a successful corpus build', () => {
 
     beforeAll(() => {
       bundled = readGraphBundle(outDir);
-      fresh = buildGraph(copy.root);
+      // Derived afresh from the YAML through an in-memory compile; nothing published is read.
+      fresh = deriveGraph(
+        retrievalCorpusFrom(compiledBundles(compileCorpus(copy.root)), { testCases: true }),
+      );
+      expect(existsSync(join(copy.root, 'generated'))).toBe(false);
     }, 60_000);
 
     it.each(traversals)(
@@ -313,21 +320,11 @@ describe('a successful corpus build', () => {
   // Shares the build above: the copy is broken one way per test and restored afterwards.
   describe('then a build from invalid input', () => {
     let published: Map<string, Buffer>;
-    let restore: (() => void) | undefined;
 
     beforeAll(() => {
       published = snapshot(outDir);
     });
-    afterEach(() => {
-      restore?.();
-      restore = undefined;
-    });
-
-    function breakFile(path: string, transform: (text: string) => string): void {
-      const original = readFileSync(join(copy.root, path), 'utf8');
-      copy.edit(path, transform);
-      restore = () => copy.edit(path, () => original);
-    }
+    afterEach(() => copy.reset());
 
     function expectPreviousOutputKept(): void {
       const kept = snapshot(outDir);
@@ -357,7 +354,8 @@ describe('a successful corpus build', () => {
         path: 'corpus/source-map/sections.yaml',
         transform: (text: string) =>
           text.replace('  see_also:\n', '  see_also:\n    - section.nowhere\n'),
-        error: /^sections\.yaml: ".+" see_also references unknown "section\.nowhere"$/,
+        error:
+          /^corpus\/source-map\/sections\.yaml: ".+" see_also references unknown "section\.nowhere"$/,
       },
       {
         name: 'a coverage row without a section',
@@ -367,7 +365,8 @@ describe('a successful corpus build', () => {
             'sections:\n',
             'sections:\n  - id: section.nowhere\n    status: not_started\n',
           ),
-        error: /^coverage\.yaml: entry "section\.nowhere" has no matching section$/,
+        error:
+          /^corpus\/source-map\/coverage\.yaml: entry "section\.nowhere" has no matching section$/,
       },
       {
         name: 'a YAML parse error',
@@ -378,14 +377,14 @@ describe('a successful corpus build', () => {
     ])(
       'rejects $name naming the file and keeps the previous output',
       ({ path, transform, error }) => {
-        breakFile(path, transform);
+        copy.edit(path, transform);
         expect(buildErrors(copy.root, outDir)).toContainEqual(expect.stringMatching(error));
         expectPreviousOutputKept();
       },
     );
 
     it('reports every error and creates no output where there was none', () => {
-      breakFile('corpus/glossary/terms.yaml', (text) =>
+      copy.edit('corpus/glossary/terms.yaml', (text) =>
         text.replace('  name: Adjacent\n', '').replace('  name: Action Points\n', ''),
       );
       const errors = buildErrors(copy.root, join(copy.root, 'fresh', 'corpus'));
