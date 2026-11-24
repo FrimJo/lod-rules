@@ -129,6 +129,10 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   4 `source_conflicted`, 1 `descriptive`. All 677 non-redirect sections are on the unswept
   allowlist. No corpus change and no re-review; evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #15 is done (24 November): Game Basics through Embarking swept (PDF 1–41,
+  59–62), 7 new entries, 5 new `source_example` cases, 98 sections off the allowlist. Fresh:
+  `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -139,7 +143,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 Phase 8 chapter slices, which can run in parallel: sweep one chapter group each, inventory and
 convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
 
-- #15 Game Basics through Embarking
+- ~~#15 Game Basics through Embarking~~ (done)
 - #16 Into the Dungeons, Treasure, Combat
 - #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices

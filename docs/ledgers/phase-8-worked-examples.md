@@ -68,3 +68,66 @@ and Stat Checks (PDF 20), which names a check but prints no roll or outcome.
   (comment on #14).
 - `section.game_basics.skill_and_stat_checks` has `examples: extracted` but no `source_example`
   case; its examples are descriptive.
+
+## Slice 2 — Game Basics through Embarking — 24 November 2026
+
+Issue #15. Swept front matter, Introduction, Game Basics (with the Gameplay Example), the Party
+Management part divider, Character Basics, Creating Your Character, Embarking on Your First Quest
+and Levelling Up: PDF 1–41 and 59–62, every page rendered and read. 98 sections left the unswept
+allowlist (677 → 579).
+
+### Examples found
+
+All 15 examples in scope are inventoried. Eight were already seeded by #14. Seven are new:
+
+| Entry                                         | PDF | Form           | Disposition           |
+| --------------------------------------------- | --: | -------------- | --------------------- |
+| `example.introduction.doors_rule_card`        |  14 | `inline_prose` | `descriptive`         |
+| `example.introduction.modifier_for_instance`  |  18 | `inline_prose` | `descriptive`         |
+| `example.game_basics.other_tiles_and_terrain` |  19 | `inline_prose` | `descriptive`         |
+| `example.game_basics.adjacent_wording`        |  20 | `inline_prose` | `descriptive`         |
+| `example.game_basics.res_or_notation`         |  20 | `inline_prose` | `descriptive`         |
+| `example.game_basics.large_troll`             |  20 | `inline_prose` | `missing_information` |
+| `example.levelling_up.barbarian_thief_costs`  |  61 | `inline_prose` | `descriptive`         |
+
+The Troll example needs Bestiary data (`not_present`). Not inventoried: front-matter backer lists,
+contents and art index; component pictures and captions (PDF 13–15); the species and profession
+tables; the pointer to the Character Creation Example (PDF 33), which #18 owns.
+
+### Cases added
+
+Five `source_example` cases, appended in printed order to existing entries:
+
+- Gameplay Example: `test.gameplay_example.wandering_monster_trigger` (Threat 10 → 12 meets the
+  quest's 12) and `test.gameplay_example.turn_3_scenario_die` (10 requires a Threat Roll).
+- Warrior CS 80 example: `test.skill.book_example.cs_80_cannot_increase`,
+  `test.skill.book_example.still_miss_91` and `test.skill.book_example.still_miss_00` (both ends of
+  the printed 91–00 range).
+
+No interpreter change was needed.
+
+### Reclassifications and issues
+
+No new issue. The Gameplay Example entry (`source_conflicted`) now also names
+`issue.gameplay_example.trap_sanity`, `issue.gameplay_example.legendary_roll` and
+`issue.gameplay_example.torch_after_threat_roll`. Its reason lists the steps left unexecuted:
+conflicted steps keep their printed values, and the spider's bite, remaining Hit Points and fear
+level (Bestiary), the Fear Test rolls and the 2d6 placement are missing information.
+
+Coverage: `examples` flipped to `extracted` for `section.introduction.game_components`,
+`section.introduction.dice_rolling_and_skill_checks`, `section.game_basics.the_tiles`,
+`section.game_basics.models` and `section.levelling_up.increasing_your_skills_and_basic_stats`;
+the notes of those rows and of `the_tiles.adjacent` and `skill_and_stat_checks` name their entries.
+
+The inventory test no longer asserts that the allowlist equals every live section; it asserts
+that every allowlisted section is live.
+
+### Reviews
+
+- `review.game_basics.4` failed: the Wandering Monster case cited only PDF 23, and the ‘RES or…’
+  illustration had no entry. Both were fixed. `review.game_basics.5` passed.
+- `review.introduction.4` passed.
+- `review.levelling_up.5` passed.
+
+Inventory now: 42 entries claiming 99 cases; 30 `executable` (1 `pending`, #16), 4
+`source_conflicted`, 7 `descriptive`, 1 `missing_information`.
