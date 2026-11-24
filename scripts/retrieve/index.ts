@@ -7,7 +7,8 @@ import {
   type GraphLinks,
   type SearchDocument,
 } from './documents.ts';
-import { loadRetrievalCorpus, type RetrievalCorpus } from './load.ts';
+import type { RetrievalCorpus } from './corpus.ts';
+import { loadRetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
 

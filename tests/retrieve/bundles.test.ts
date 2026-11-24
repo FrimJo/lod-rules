@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { CORPUS_DIR, type CorpusManifest } from '../../scripts/build/index.ts';
+import { CORPUS_DIR, type CorpusManifest } from '../../scripts/build/bundles.ts';
 import { buildRetrievalArtifacts, freshDatabasePath } from '../../scripts/retrieve/build.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { fingerprintInputs } from '../../scripts/validate/canonical-files.ts';

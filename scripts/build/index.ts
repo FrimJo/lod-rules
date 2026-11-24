@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdirSync,
@@ -10,34 +9,25 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { compileGraphBundle, GRAPH_BUNDLE, graphRecords } from './graph-bundle.ts';
+import {
+  CORPUS_DIR,
+  CORPUS_FORMAT_VERSION,
+  GRAPH_BUNDLE,
+  isMissing,
+  MANIFEST_FILE,
+  readPublishedBundles,
+  readPublishedManifest,
+  recordCount,
+  verifiedBundles,
+  type Bundle,
+  type CorpusBundles,
+  type CorpusManifest,
+} from './bundles.ts';
+import { compileGraphBundle } from './graph-bundle.ts';
 import { fingerprintFiles, type CanonicalFile } from '../validate/canonical-files.ts';
 import { validateCorpus } from '../validate/corpus.ts';
+import { fileSha256, sha256 } from '../validate/hash.ts';
 import { repoRoot, type SchemaName } from '../validate/schemas.ts';
-
-export { readGraphBundle, type GraphBundle } from './graph-bundle.ts';
-
-export const CORPUS_DIR = 'generated/corpus';
-export const CORPUS_FORMAT_VERSION = 1;
-
-/**
- * `manifest.json`. Paths are repo-relative POSIX paths; nothing depends on the machine or the
- * time of the build, so identical inputs give identical bytes.
- */
-export interface CorpusManifest {
-  /** Bumped on any breaking change to the bundle layout or this manifest. */
-  format_version: number;
-  /** SHA-256 over every input path and its bytes, in path order (as the retrieval loader). */
-  input_fingerprint: string;
-  /** Canonical YAML input path to the SHA-256 of its bytes, in path order. */
-  inputs: Record<string, string>;
-  /** Source documents from `source/manifest.yaml`, in manifest order. */
-  sources: Array<{ id: string; file: string; sha256: string }>;
-  /** Bundle file to its record count and the SHA-256 of its bytes. */
-  bundles: Record<string, { records: number; sha256: string }>;
-  /** Review evidence that is deliberately not compiled. */
-  excluded: Array<{ path: string; reason: string }>;
-}
 
 /**
  * Checked-in evidence that is not canonical corpus content. Listed so every input is accounted
@@ -54,13 +44,6 @@ const excluded: CorpusManifest['excluded'] = [
   },
 ];
 
-/** One JSON file per record class: the records as authored plus where each came from. */
-export interface Bundle {
-  records: unknown[];
-  /** Record key (`id`; `form` for aliases; `pdf_page` for pages) to repo-relative YAML path. */
-  files: Record<string, string>;
-}
-
 interface BundleSpec {
   file: string;
   schema: SchemaName;
@@ -69,16 +52,19 @@ interface BundleSpec {
   key(record: unknown): string;
 }
 
-const list = (data: unknown): unknown[] => (data as unknown[] | null) ?? [];
-const field =
-  (name: string) =>
+/** The file is a YAML list of records. */
+const wholeFile = (data: unknown): unknown[] => (data as unknown[] | null) ?? [];
+/** The records are the list under one top-level key of the file. */
+const listUnder =
+  (key: string) =>
   (data: unknown): unknown[] =>
-    list((data as Record<string, unknown>)[name]);
+    wholeFile((data as Record<string, unknown>)[key]);
 const byId = (record: unknown): string => (record as { id: string }).id;
-const plain = (file: string, schema: SchemaName): BundleSpec => ({
+/** The common case: files of `schema` are lists of records keyed by `id`. */
+const idListBundle = (file: string, schema: SchemaName): BundleSpec => ({
   file,
   schema,
-  records: list,
+  records: wholeFile,
   key: byId,
 });
 
@@ -89,38 +75,38 @@ const plain = (file: string, schema: SchemaName): BundleSpec => ({
  * `source/manifest.yaml` holds two record classes and yields two bundles.
  */
 const specs: BundleSpec[] = [
-  { file: 'source-documents.json', schema: 'manifest', records: field('documents'), key: byId },
+  { file: 'source-documents.json', schema: 'manifest', records: listUnder('documents'), key: byId },
   {
     file: 'external-sources.json',
     schema: 'manifest',
-    records: field('external_sources'),
+    records: listUnder('external_sources'),
     key: byId,
   },
-  plain('terms.json', 'terms'),
+  idListBundle('terms.json', 'terms'),
   // Alias forms are unique (case-insensitively) by the glossary integrity check.
   {
     file: 'aliases.json',
     schema: 'aliases',
-    records: list,
+    records: wholeFile,
     key: (record) => (record as { form: string }).form,
   },
-  plain('sections.json', 'sections'),
+  idListBundle('sections.json', 'sections'),
   {
     file: 'pages.json',
     schema: 'pages',
-    records: list,
+    records: wholeFile,
     key: (record) => String((record as { pdf_page: number }).pdf_page),
   },
-  { file: 'coverage.json', schema: 'coverage', records: field('sections'), key: byId },
-  plain('rules.json', 'rules'),
-  plain('entities.json', 'entities'),
-  plain('tables.json', 'tables'),
-  plain('procedures.json', 'procedures'),
-  plain('state-machines.json', 'stateMachines'),
-  plain('edges.json', 'edges'),
-  plain('issues.json', 'issues'),
-  plain('independent-reviews.json', 'independentReviews'),
-  plain('test-cases.json', 'testCases'),
+  { file: 'coverage.json', schema: 'coverage', records: listUnder('sections'), key: byId },
+  idListBundle('rules.json', 'rules'),
+  idListBundle('entities.json', 'entities'),
+  idListBundle('tables.json', 'tables'),
+  idListBundle('procedures.json', 'procedures'),
+  idListBundle('state-machines.json', 'stateMachines'),
+  idListBundle('edges.json', 'edges'),
+  idListBundle('issues.json', 'issues'),
+  idListBundle('independent-reviews.json', 'independentReviews'),
+  idListBundle('test-cases.json', 'testCases'),
 ];
 
 function compileBundle(spec: BundleSpec, files: CanonicalFile[]): Bundle {
@@ -137,9 +123,7 @@ function compileBundle(spec: BundleSpec, files: CanonicalFile[]): Bundle {
   return bundle;
 }
 
-const MANIFEST_FILE = 'manifest.json';
 const json = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
-const sha256 = (bytes: string | Buffer): string => createHash('sha256').update(bytes).digest('hex');
 
 function sourceDocuments(files: CanonicalFile[], root: string): CorpusManifest['sources'] {
   const manifest = files.find((file) => file.schema === 'manifest');
@@ -147,7 +131,7 @@ function sourceDocuments(files: CanonicalFile[], root: string): CorpusManifest['
     .documents;
   return documents.map(({ id, file }) => {
     const path = `source/${file}`;
-    return { id, file: path, sha256: sha256(readFileSync(join(root, path))) };
+    return { id, file: path, sha256: fileSha256(join(root, path)) };
   });
 }
 
@@ -161,37 +145,15 @@ export class CorpusBuildError extends Error {
   }
 }
 
-/** A serialised bundle and how to count the records in its parsed value. */
-interface Output {
-  text: string;
-  recordsIn(value: unknown): number;
-}
-
-/** Bundle file name to its output, plus the manifest that describes them. */
+/** Serialised bundles by file name, plus the manifest that describes them. */
 export interface Compiled {
-  outputs: Map<string, Output>;
+  outputs: Map<string, string>;
   manifest: CorpusManifest;
-}
-
-const bundleRecords = (value: unknown): number => (value as Bundle).records.length;
-
-/** The bundles of one corpus build, published or still in memory. */
-export interface CorpusBundles {
-  manifest: CorpusManifest;
-  /** Parses one bundle by file name, such as `rules.json`. */
-  bundle<T>(file: string): Bundle & { records: T[] };
 }
 
 /** Reads bundles straight from compiled output, before (or instead of) publishing it. */
 export function compiledBundles({ outputs, manifest }: Compiled): CorpusBundles {
-  return {
-    manifest,
-    bundle<T>(file: string) {
-      const output = outputs.get(file);
-      if (!output) throw new Error(`no corpus bundle named ${file}`);
-      return JSON.parse(output.text) as Bundle & { records: T[] };
-    },
-  };
+  return verifiedBundles(manifest, (file) => outputs.get(file) ?? '');
 }
 
 function compile(files: CanonicalFile[], root: string): Compiled {
@@ -203,15 +165,15 @@ function compile(files: CanonicalFile[], root: string): Compiled {
     bundles: {},
     excluded,
   };
-  const outputs = new Map<string, Output>();
-  const emit = (file: string, value: unknown, recordsIn: Output['recordsIn']): void => {
+  const outputs = new Map<string, string>();
+  const emit = (file: string, value: unknown): void => {
     const text = json(value);
-    outputs.set(file, { text, recordsIn });
-    manifest.bundles[file] = { records: recordsIn(value), sha256: sha256(text) };
+    outputs.set(file, text);
+    manifest.bundles[file] = { records: recordCount(file, value), sha256: sha256(text) };
   };
-  for (const spec of specs) emit(spec.file, compileBundle(spec, files), bundleRecords);
+  for (const spec of specs) emit(spec.file, compileBundle(spec, files));
   // Derived from the class bundles just compiled, through the model retrieval loads them into.
-  emit(GRAPH_BUNDLE, compileGraphBundle(compiledBundles({ outputs, manifest })), graphRecords);
+  emit(GRAPH_BUNDLE, compileGraphBundle(compiledBundles({ outputs, manifest })));
   return { outputs, manifest };
 }
 
@@ -225,30 +187,39 @@ function verifyStaged(staging: string, { outputs, manifest }: Compiled): void {
   if (readFileSync(join(staging, MANIFEST_FILE), 'utf8') !== json(manifest)) {
     throw new Error(`staged ${MANIFEST_FILE} differs from the manifest`);
   }
-  for (const [file, { records, sha256: checksum }] of Object.entries(manifest.bundles)) {
-    const bytes = readFileSync(join(staging, file));
-    if (sha256(bytes) !== checksum) throw new Error(`staged ${file}: checksum mismatch`);
-    const value: unknown = JSON.parse(bytes.toString('utf8'));
-    if (outputs.get(file)?.recordsIn(value) !== records) {
-      throw new Error(`staged ${file}: record count mismatch`);
-    }
-  }
+  const bundles = verifiedBundles(manifest, (file) => readFileSync(join(staging, file)));
+  // Parsing checks each record count.
+  for (const file of outputs.keys()) bundles.bundle(file);
 }
 
-const isMissing = (error: unknown): boolean => (error as { code?: unknown }).code === 'ENOENT';
+/** Whether `outDir` already holds exactly this build, every bundle intact. */
+function isPublished(outDir: string, { manifest }: Compiled): boolean {
+  const published = readPublishedManifest(outDir);
+  return (
+    published !== undefined &&
+    json(published) === json(manifest) &&
+    readPublishedBundles(outDir, manifest) !== undefined
+  );
+}
 
 /**
- * Writes into a sibling staging directory, verifies it, then swaps it in. On any failure the
- * staging directory is removed and the previous output stays as it was. Concurrent builds of
- * the same inputs (parallel test workers, a CLI beside a server) may race: each stages under a
- * unique name, and the loser of the swap accepts the winner's output when it is identical.
+ * Writes into a sibling staging directory, verifies it, then renames it into place. On any
+ * failure the staging directory is removed and the previous output stays as it was.
+ *
+ * A directory cannot be renamed over a non-empty one, so the swap is two renames and `outDir`
+ * is absent between them. Readers cope: they read every bundle up front and check it against
+ * the manifest, retrying or compiling in memory when a file is missing or from another build.
+ * To keep that window rare, a build that is already published intact is left in place.
+ * Concurrent builds each stage under a unique name; the loser of the swap accepts the winner's
+ * output when it is identical.
  */
-function publish(outDir: string, compiled: Compiled): void {
+export function publishCorpus(outDir: string, compiled: Compiled): void {
+  if (isPublished(outDir, compiled)) return;
   mkdirSync(dirname(outDir), { recursive: true });
   const staging = mkdtempSync(`${outDir}.staging-`);
   const previous = `${staging}.previous`;
   try {
-    for (const [file, { text }] of compiled.outputs) writeFileSync(join(staging, file), text);
+    for (const [file, text] of compiled.outputs) writeFileSync(join(staging, file), text);
     writeFileSync(join(staging, MANIFEST_FILE), json(compiled.manifest));
     verifyStaged(staging, compiled);
 
@@ -263,8 +234,7 @@ function publish(outDir: string, compiled: Compiled): void {
       renameSync(staging, outDir);
     } catch (error) {
       // Builds are deterministic: an identical manifest means identical bundles.
-      const winner = join(outDir, MANIFEST_FILE);
-      if (existsSync(winner) && readFileSync(winner, 'utf8') === json(compiled.manifest)) return;
+      if (isPublished(outDir, compiled)) return;
       if (moved && !existsSync(outDir)) renameSync(previous, outDir);
       throw error;
     }
@@ -295,6 +265,6 @@ export function buildCorpus({
   outDir = join(root, CORPUS_DIR),
 }: { root?: string; outDir?: string } = {}): CorpusManifest {
   const compiled = compileCorpus(root);
-  publish(outDir, compiled);
+  publishCorpus(outDir, compiled);
   return compiled.manifest;
 }

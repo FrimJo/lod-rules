@@ -5,8 +5,9 @@ page is the contract for consumers, such as the helper app, that read the corpus
 parsing YAML or repeating the integrity checks. The bundles are build output: gitignored,
 never edited, and rebuilt from `corpus/`, `review/`, `tests/examples/` and `source/`.
 
-Code: `scripts/build/` (`buildCorpus`, `compileCorpus`, `loadCorpusBundles`,
-`readGraphBundle`). Manifest schema:
+Code: `scripts/build/`: `bundles.ts` (layout, manifest type and the verified reader),
+`index.ts` (`buildCorpus`, `compileCorpus`), `load.ts` (`loadCorpusBundles`) and
+`graph-bundle.ts` (`readGraphBundle`). Manifest schema:
 [corpus-bundle-manifest.schema.json](../schemas/corpus-bundle-manifest.schema.json).
 
 ## Guarantees
@@ -15,8 +16,15 @@ Code: `scripts/build/` (`buildCorpus`, `compileCorpus`, `loadCorpusBundles`,
   cross-file integrity, independent-review evidence, dice). If any fails, it exits non-zero,
   prints every error and writes nothing.
 - Output is staged in a sibling directory, re-read and checked against the manifest (file
-  set, counts, checksums), then swapped in. A failed build leaves the previous output as it
-  was.
+  set, counts, checksums), then renamed into place. A failed build leaves the previous output
+  as it was, and a build whose output is already published intact leaves it in place.
+- The swap is not atomic. A directory cannot be renamed over a non-empty one, so publishing
+  is two renames (the old output aside, the staged output in), and for that instant
+  `generated/corpus/` is absent. Concurrent builds can also replace each other's output.
+  `loadCorpusBundles` therefore reads every bundle up front and checks each against the
+  manifest's checksums (and record counts on parse). If a file is missing or from another
+  build, it reads again, then compiles in memory. It never serves a mix of two builds. Other
+  readers should do the same; see [Checking a copy](#checking-a-copy).
 - Identical inputs give byte-identical files. Nothing depends on the clock or the machine:
   no timestamps, no absolute paths, POSIX separators only.
 - Records are copied exactly as authored. Canonical ids, `source` references,
@@ -103,6 +111,9 @@ A consumer that copies the bundles can check them without the build:
    `records` length (nodes plus edges for `graph.json`) equals `records`.
 3. To tell whether the copy matches a checkout, compare `input_fingerprint` with
    `fingerprintInputs` over that checkout.
+
+When reading `generated/corpus/` in place while a build may run, read the manifest and every
+bundle first and check them before using any. On a missing file or a mismatch, read again.
 
 Retrieval (`npm run retrieve -- build`) reads these bundles and records the same fingerprint
 in its own manifest; see [retrieval.md](retrieval.md).

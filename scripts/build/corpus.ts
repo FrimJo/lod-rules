@@ -1,4 +1,5 @@
-import { buildCorpus, CORPUS_DIR, CorpusBuildError } from './index.ts';
+import { CORPUS_DIR } from './bundles.ts';
+import { buildCorpus, CorpusBuildError } from './index.ts';
 
 try {
   const manifest = buildCorpus();

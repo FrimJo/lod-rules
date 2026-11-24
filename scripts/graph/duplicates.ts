@@ -1,4 +1,4 @@
-import type { RetrievalCorpus } from '../retrieve/load.ts';
+import type { RetrievalCorpus } from '../retrieve/corpus.ts';
 import type { Effect, Operand, Procedure, Rule, Step } from '../validate/pilot-types.ts';
 import { compare } from './compare.ts';
 import { flattenSteps, questResolver } from './records.ts';

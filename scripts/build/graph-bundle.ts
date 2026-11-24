@@ -1,11 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { deriveGraph } from '../graph/derive.ts';
 import { CATEGORIES, type Category, type Graph } from '../graph/types.ts';
-import { retrievalCorpusFrom } from '../retrieve/load.ts';
-import type { CorpusBundles } from './index.ts';
-
-export const GRAPH_BUNDLE = 'graph.json';
+import { retrievalCorpusFrom } from '../retrieve/corpus.ts';
+import {
+  GRAPH_BUNDLE,
+  readPublishedBundles,
+  readPublishedManifest,
+  type CorpusBundles,
+} from './bundles.ts';
 
 /**
  * `graph.json`: the dependency graph exactly as `deriveGraph` returns it (nodes, then canonical
@@ -21,18 +22,14 @@ export function compileGraphBundle(corpus: CorpusBundles): GraphBundle {
   return { categories: CATEGORIES, nodes, edges };
 }
 
-/** The manifest counts a graph's nodes and edges as its records. */
-export function graphRecords(value: unknown): number {
-  const { nodes, edges } = value as Graph;
-  return nodes.length + edges.length;
-}
-
-/** Loads the graph bundle from a `build:corpus` output directory for `scripts/graph/traverse.ts`. */
+/**
+ * Loads the graph bundle from a `build:corpus` output directory, checked against its manifest,
+ * for traversal with `scripts/graph/traverse.ts`.
+ */
 export function readGraphBundle(corpusDir: string): Graph {
-  const path = join(corpusDir, GRAPH_BUNDLE);
-  const { nodes, edges } = JSON.parse(readFileSync(path, 'utf8')) as Partial<GraphBundle>;
-  if (!Array.isArray(nodes) || !Array.isArray(edges)) {
-    throw new Error(`${path}: not a graph bundle (expected nodes and edges arrays)`);
-  }
+  const manifest = readPublishedManifest(corpusDir);
+  const bundles = manifest && readPublishedBundles(corpusDir, manifest, [GRAPH_BUNDLE]);
+  if (!bundles) throw new Error(`${corpusDir}: no ${GRAPH_BUNDLE} that matches its manifest`);
+  const { nodes, edges } = bundles.bundle(GRAPH_BUNDLE) as unknown as GraphBundle;
   return { nodes, edges };
 }

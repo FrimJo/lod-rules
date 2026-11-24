@@ -1,4 +1,4 @@
-import type { RetrievalCorpus } from '../retrieve/load.ts';
+import type { RetrievalCorpus } from '../retrieve/corpus.ts';
 import type { Section, SourceReference } from '../validate/integrity.ts';
 import type {
   Dependency,
