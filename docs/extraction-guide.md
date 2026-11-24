@@ -65,6 +65,14 @@ When the source is unclear:
 The corpus must be able to state that the rulebook does not define something. That is a
 valid answer, and it is better than an invented one.
 
+**Uncertainty lives in `review/`.** Ledgers, the checkpoint, other docs, corpus `notes` and
+`reason` fields, and `no_change_needed` review findings may point at an `issue.*` id, but they
+must not be the only place a doubt is written down. Raise the issue first, then cite its id in
+the note. `tests/regression/informal-uncertainty.test.ts` scans those sources for doubt wording
+(the anchors and keywords are named constants in `tests/support/informal-uncertainty.ts`) and
+fails on any note that neither cites an existing issue nor appears in its family's inventory
+under `tests/fixtures/informal-uncertainty/` as `recorded`, `resolved` or `not_uncertainty`.
+
 ### Official rulings
 
 Published designer rulings can settle an issue. Their sources are archived under `source/`

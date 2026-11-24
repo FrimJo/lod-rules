@@ -25,19 +25,20 @@ This file holds the plan and a single dated status snapshot; it is not a session
 Per-unit evidence and historical gate counts live in the [evidence ledgers](ledgers/); the
 current position and next unit are in [extraction-checkpoint.md](extraction-checkpoint.md).
 
-## 2. Status — 15 October 2026
+## 2. Status — 24 November 2026
 
 | Measure                              | Value                                                                                                   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Canonical files (`npm run validate`) | 555, passing                                                                                            |
-| Tests (`npm test`)                   | 4,723 passing, 2 optional provider tests skipped                                                        |
+| Canonical files (`npm run validate`) | 563, passing                                                                                            |
+| Tests (`npm test`)                   | 4,942 passing, 2 optional provider tests skipped                                                        |
 | Sections extracted / reviewed        | 677 / 677 independently reviewed (100%); 38 compatibility redirects excluded                            |
 | Unfinished non-quest sections        | 0 (`npm run report:chapters -- --include-quests`); Steps 2 and 3 are closed                             |
 | Procedures / state machines          | 125 / 2                                                                                                 |
-| Review records                       | 327: 280 unresolved, 47 resolved (most by published designer rulings)                                   |
-| Independent review records           | 53 fresh passing records under `review/independent/` (`npm run review -- check`)                        |
+| Review records                       | 342: 294 unresolved, 48 resolved (most by published designer rulings)                                   |
+| Independent review records           | 237 under `review/independent/`; each of the 53 units' governing record is fresh and passing            |
 | Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope            |
-| Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` holds 1 edge                                                  |
+| Exit checklists                      | Phases 0–6 and Phase 9 `accepted` (`tests/fixtures/acceptance/`)                                        |
+| Phase 11 build                       | `build:corpus` is a stub; `corpus/graph/` holds 17 edges (1 dependency, 16 summaries)                   |
 | Phase 12 retrieval                   | Lexical retrieval, agent tools, MCP server and `ask` pipeline exist ([§5](#phase-12--retrieval-corpus)) |
 
 Live progress lives in the generated [coverage report](coverage-report.md) and the
@@ -48,7 +49,10 @@ when a step below closes, not after every unit.
 (catalogues, including all quest, personal-quest and estate catalogue records); Phase 6
 Batches 1–7 (Packages A–F); Step 2 (every core chapter, appendices, front and back matter, reconciled
 and independently reviewed); Step 3 (Quest Book I, Backgrounds and the Grieving Mother side quest at
-catalogue scope, reconciled and independently reviewed, 18 October). Published designer rulings are applied per the
+catalogue scope, reconciled and independently reviewed, 18 October); Step 4 (Phase 7, every graph
+anomaly dispositioned); Phase 8 (every printed example inventoried); Phase 9 (every review unit
+backed by fresh evidence, and every informal note that states a doubt inventoried against
+`review/`, 24 November). Published designer rulings are applied per the
 [extraction guide](extraction-guide.md).
 
 ### Why the order changed

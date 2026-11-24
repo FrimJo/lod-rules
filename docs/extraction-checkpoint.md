@@ -163,15 +163,21 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
+- Phase 9 is complete (24 November, issue #22): the informal-uncertainty inventory
+  (`tests/fixtures/informal-uncertainty/`, eight mandatory families, checked by
+  `tests/regression/informal-uncertainty.test.ts`) dispositions every note that states a doubt
+  outside `review/`; 7 new issues; 20 fresh re-review records; the
+  [Phase 9 exit checklist](../tests/fixtures/acceptance/phase-9.json) is `accepted`. Uncertainty
+  now lives only in `review/` ([extraction guide](extraction-guide.md#uncertainty-and-evidence-backed-resolutions)).
+  Evidence in [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phases 9–12 are unfinished.
+  Phases 10–12 are unfinished.
 
 ## Next unit
 
-Phase 9, the uncertainty audit ([plan](corpus-completion-plan.md#phase-9--independent-review-and-uncertainty-audit)):
-confirm every completed review unit has evidence and that no known uncertainty lives only in
-informal notes (ledgers, checkpoint carry-overs, comments) rather than in `review/`. Phase 11
-(`build:corpus`) and Phase 12 (retrieval) follow.
+Phase 11, deterministic compilation ([plan](corpus-completion-plan.md#phase-11--deterministic-compilation)):
+replace the `build:corpus` stub with validated, reproducible JSON bundles and a manifest. Phase 12
+(retrieval over the bundles) follows.
 
 Open carry-overs:
 
@@ -181,11 +187,6 @@ Open carry-overs:
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
   46 frozen `part.*` / `ingredient.*` entities cite its rows; split it when those are next
   reviewed (`issue.guild.alchemist_availability_merged_tables`).
-
-The Phase 9 audit (#22) closed the other six carry-overs: it corrected the citations of
-`issue.spell.activation_details`, `issue.sanity.claustrophobia_stat_scope` and `procedure.hate`
-and the glued words in four quest issues, and dismissed the `issue.0004` enrichment and the
-one-way combat links. Those frozen edits await fresh re-review in the audit.
 
 ## Evidence ledgers
 
@@ -208,6 +209,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
 | Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
 | Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
+| Phase 9: uncertainty audit                     | [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md)                         |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
