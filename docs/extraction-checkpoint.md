@@ -141,6 +141,11 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   Quest Book I (PDF 42-50, 164-165, 221-279) swept; 132 sections off the allowlist. 5 new entries
   (14 cases); `issue.quest.ulfric_to_hit_in_practice` resolved. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #17 is done (24 November): Equipment, Psychology, Magic, Magic Items,
+  Enchantments, Alchemy and Prayers (PDF 51–58, 64–84) swept; 135 sections off the allowlist.
+  8 new entries, 7 `source_example` cases. Re-reviewed fresh: `review.equipment.5`,
+  `review.magic.5`, `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`,
+  `review.prayers.4`. Evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - Phase 8 slice #16 is done (24 November): Into the Dungeons, Treasure and Combat (PDF 86-125)
   swept; 9 new entries, 12 new cases, option 3 converted. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
@@ -148,11 +153,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   59–62), 7 new entries, 5 new `source_example` cases, 98 sections off the allowlist. Fresh:
   `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
-- Phase 8 is complete (24 November, issue #20): every section is swept, the `unswept_sections`
-  allowlist is deleted and the inventory test runs closed, so a `pending` entry or allowlisted
-  section fails it. 72 entries in 59 sections claim 139 `source_example` cases: 45 `executable`,
-  7 `source_conflicted`, 17 `descriptive`, 3 `missing_information`. The last two part dividers
-  (PDF 63, 85) hold no example. No re-review was needed. Final counts by form and disposition in
+- Phase 8 is complete (24 November, issue #20): every section is swept and the `unswept_sections`
+  allowlist is deleted; the inventory checker rejects that field or a `pending` flag if either
+  comes back. After the review fixes, 73 entries in 60 sections claim 141 `source_example` cases:
+  45 `executable`, 7 `source_conflicted`, 18 `descriptive`, 3 `missing_information`. The last two
+  part dividers (PDF 63, 85) hold no example. The review fixes re-reviewed
+  `review.appendix_i_perks.4`, `review.appendix_v_tables.6`, `review.guilds.7`,
+  `review.travelling_and_skirmishes.6` and `review.combat_enemies.9`. Counts by form and disposition in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).

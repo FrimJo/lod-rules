@@ -182,8 +182,7 @@ sections left the allowlist (the redirects were never on it); 313 remain after #
   1-AP Standard Attacks and one free attack per damaging attack.
 - Examples coverage flipped to `extracted` on 8 sections; coverage report regenerated.
 - Considered and not inventoried (rule statements, restatements or category lists, no instance):
-  Outdoor Setup scatter list and "(1d6, 1d8, 1d10, etc.)" (PDF 128), the Obstacles table's
-  "Example" art column (PDF 128–130), the Arena bracket (PDF 141), Pain Killer "meaning you can
+  Outdoor Setup scatter list and "(1d6, 1d8, 1d10, etc.)" (PDF 128), the Arena bracket (PDF 141), Pain Killer "meaning you can
   move or attack" (PDF 152), staff charges "cast three times" (PDF 153), the Warrior Priest
   trophy rate (PDF 159), Blood Magic's rate (PDF 176), In Tune with the Magic's threshold
   (PDF 171), Enchant Item "such as a weapon" (PDF 189), the Standard Potions 1d3 column choice
@@ -425,3 +424,46 @@ sections, 139 `source_example` cases (the same 139 the pilot loads), no `pending
 Phase 8 exit holds: every identified example has provenance and a disposition, every executable
 entry names passing outcome-and-trace cases, and every `source_conflicted` entry cites a resolving
 issue.
+
+## Review fixes — 24 November 2026
+
+Code-review findings on spec #13, branch `slice/review-fixes`.
+
+- Inventory: `example.travelling_and_skirmishes.obstacle_pictures` (`table`, `descriptive`,
+  PDF 128, section `travelling_and_skirmishes.table`) inventories the Outdoor Obstacles table's
+  Example art column the same way as `example.into_the_dungeons.obstacle_pictures`; that
+  section's `examples` coverage is now `extracted`.
+- Humanoid option 2 and option 3 explanations print no roll, only the 1-2 Parry result range.
+  `test.combat.humanoid_behaviour.approach_parry` and `.parry_first_action_two_ap` keep roll 1;
+  `.approach_parry_roll_2` and `.parry_first_action_two_ap_roll_2` assert the same printed outcome
+  for roll 2, so no value is chosen. Both entries now claim both cases.
+- Magic Weapons 7, Magic Armours and Shields 4 and Shield Padding no longer add their bonus to
+  `maximum_durability` as well as outputting it: the modifier output is the one bonus, and the
+  total (`max_durability_total`, `durability_total`) is read as `maximum_durability` plus the
+  modifier. Each rule depends on `character.durability.magic` (Shield Padding also on
+  `character.durability.standard`) instead of naming them in prose.
+- `character.perk.frenzy.limits` cites PDF 89 (The Turn) and PDF 109 (Different Combat Actions)
+  as source references and depends on `character.perk.frenzy.bonus_attack`,
+  `core.action_points.spend` and `combat.action.cost.one`.
+- The inventory checker drops the `unswept_sections`, `pending` and `closed` logic; it rejects
+  either field if it comes back.
+- The `detailed_acting_with_enemies` coverage notes name the roll-2 cases.
+- Modelling notes stay in `unresolved_references` with the `modelling_note` disposition: the
+  test-case schema has no notes field, and 91 such notes predate the #16 ones.
+
+### Re-reviews
+
+Five records went stale; one fresh Opus 5.5 `corpus-reviewer` each: `review.appendix_i_perks.4`
+(passed), `review.appendix_v_tables.6` (passed), `review.guilds.7` (passed),
+`review.travelling_and_skirmishes.6` (passed) and `review.combat_enemies.8` (failed: the
+`detailed_acting_with_enemies` coverage notes still said the option 3 case pins roll 1). After the
+notes were corrected, `review.combat_enemies.9` passed with corrections. No new issue. Reviewer
+notes left for later: Shield Padding's `durability_modifier` is also output by
+`character.settlement.guild.fighters.shield_padding`, and the repair step restores to
+`maximum_durability`, which excludes modifier-style bonuses; a consumer must add the modifiers.
+
+### Counts after the fixes
+
+73 entries in 60 sections claim 141 `source_example` cases: 45 `executable`, 18 `descriptive`,
+7 `source_conflicted`, 3 `missing_information`. By form, `table` is now 3 `executable`,
+3 `descriptive`, 1 `source_conflicted` (7); the other rows are unchanged.
