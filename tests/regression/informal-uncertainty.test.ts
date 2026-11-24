@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -325,28 +325,25 @@ describe('informal-uncertainty inventory against the repository (#22)', () => {
     context = informalUncertaintyContext(loadReviewSnapshot(), readReviewRecords());
   }, 60_000);
 
-  it('holds only family fixtures and the schema', () => {
-    const known = new Set([...Object.keys(families).map((f) => `${f}.json`), 'family.schema.json']);
-    const stray = readdirSync(join(repoRoot, fixtureDirectory)).filter((name) => !known.has(name));
-    expect(stray).toEqual([]);
+  it('holds exactly one fixture per family and the schema', () => {
+    const expected = [...Object.keys(families).map((f) => `${f}.json`), 'family.schema.json'];
+    expect(readdirSync(join(repoRoot, fixtureDirectory)).sort()).toEqual(expected.sort());
   });
 
   it('cites changelog rulings the corpus already records', () => {
     expect(context.citedRulings.has(rulingKey('vonbraus.changelog_2_2x', '2.21', 83))).toBe(true);
   });
 
-  const audited = (Object.keys(families) as Family[]).filter((family) =>
-    existsSync(join(repoRoot, fixtureDirectory, `${family}.json`)),
-  );
-  // A family is audited once its fixture exists; until then its notes are not checked. To list a
-  // family's work, add `<family>.json` with no entries: the failure lists every candidate.
-  for (const family of audited)
+  // Every family is mandatory. To list a family's work, give it no entries: the failure lists
+  // every candidate.
+  const allFamilies = Object.keys(families) as Family[];
+  for (const family of allFamilies)
     it(`family ${family}: every candidate is inventoried and every entry resolves`, () => {
       expect(checkInformalUncertainty(family, readFixture(family), context)).toEqual([]);
     });
 
   it('uses each entry id once across families', () => {
-    const ids = audited.flatMap((family) =>
+    const ids = allFamilies.flatMap((family) =>
       (readFixture(family) as InformalUncertaintyInventory).entries.map((entry) => entry.id),
     );
     expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);
