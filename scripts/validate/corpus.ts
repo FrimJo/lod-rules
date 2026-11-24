@@ -6,6 +6,7 @@ import { checkPilotIntegrity } from './pilot.ts';
 import {
   checkIndependentReviews,
   discoverReviewFiles,
+  sourceClassesOf,
   sourceFingerprint,
   type ReviewRecord,
 } from './independent-review.ts';
@@ -41,6 +42,7 @@ interface ManifestDocument {
   id: string;
   file: string;
   canonical: boolean;
+  source_class?: string;
   pages?: number;
 }
 
@@ -194,6 +196,7 @@ export function validateCorpus(): ValidationResult {
             ...manifest.documents.map((document) => document.id),
             ...sourceMap.externalSourceIds,
           ],
+          documentSourceClasses: sourceClassesOf(manifest.documents),
           canonicalDocumentId: canonicalDocument?.id ?? '',
           // Hashing the 40 MB PDF only matters once a record can be compared against it.
           sourceSha256:
