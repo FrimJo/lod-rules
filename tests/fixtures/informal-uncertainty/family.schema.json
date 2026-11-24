@@ -1,0 +1,120 @@
+{
+  "description": "One informal-uncertainty inventory family (tests/fixtures/informal-uncertainty/<family>.json). Checked by tests/regression/informal-uncertainty.test.ts through tests/support/informal-uncertainty.ts, which also defines the families, candidate discovery and matching.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["description", "entries"],
+  "properties": {
+    "description": { "type": "string", "minLength": 1 },
+    "entries": { "type": "array", "items": { "$ref": "#/$defs/entry" } }
+  },
+  "$defs": {
+    "text": { "type": "string", "pattern": "\\S" },
+    "headingLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "heading"],
+      "properties": {
+        "file": { "$ref": "#/$defs/text" },
+        "heading": { "type": "string" }
+      }
+    },
+    "fieldLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "record", "field"],
+      "properties": {
+        "file": { "$ref": "#/$defs/text" },
+        "record": { "$ref": "#/$defs/text" },
+        "field": { "$ref": "#/$defs/text" }
+      }
+    },
+    "findingLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record", "finding"],
+      "properties": {
+        "record": { "type": "string", "pattern": "^review\\." },
+        "finding": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["review"],
+          "properties": { "review": { "type": "string", "pattern": "^review\\." } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["document", "heading"],
+          "properties": {
+            "document": { "$ref": "#/$defs/text" },
+            "heading": { "$ref": "#/$defs/text" },
+            "row": { "type": ["integer", "string"] }
+          }
+        }
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "source_kind", "locator", "excerpt", "disposition"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^informal(\\.[a-z0-9_]+)+$" },
+        "source_kind": { "enum": ["ledger", "checkpoint", "corpus_note", "review_finding", "doc"] },
+        "locator": { "type": "object" },
+        "excerpt": { "$ref": "#/$defs/text" },
+        "disposition": { "enum": ["recorded", "resolved", "not_uncertainty"] },
+        "issues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^issue\\." }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "reason": { "$ref": "#/$defs/text" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "source_kind": { "enum": ["ledger", "checkpoint", "doc"] } } },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/headingLocator" } } }
+        },
+        {
+          "if": { "properties": { "source_kind": { "const": "corpus_note" } } },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/fieldLocator" } } }
+        },
+        {
+          "if": { "properties": { "source_kind": { "const": "review_finding" } } },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/findingLocator" } } }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "recorded" } } },
+          "then": {
+            "required": ["issues"],
+            "properties": { "issues": {}, "evidence": false, "reason": false }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "resolved" } } },
+          "then": {
+            "required": ["evidence"],
+            "properties": { "evidence": {}, "issues": false, "reason": false }
+          }
+        },
+        {
+          "if": { "properties": { "disposition": { "const": "not_uncertainty" } } },
+          "then": {
+            "required": ["reason"],
+            "properties": { "reason": {}, "issues": false, "evidence": false }
+          }
+        }
+      ]
+    }
+  }
+}
