@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   assessFreshness,
   canonicalJson,
@@ -6,12 +6,14 @@ import {
   computeDigest,
   DIGEST_ALGORITHM,
   governingRecord,
+  loadReviewSnapshot,
+  readReviewRecords,
   type ReviewRecord,
   type ReviewSnapshot,
 } from '../../scripts/validate/independent-review.ts';
 import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';
 import { emptyPilot } from '../../scripts/validate/pilot-files.ts';
-import type { Rule } from '../../scripts/validate/pilot-types.ts';
+import type { Rule, SummaryOfEdge } from '../../scripts/validate/pilot-types.ts';
 
 const doc = 'rulebook.second_printing.eng';
 const source = { document: doc, pdf_page: 10, printed_page: 8 };
@@ -401,5 +403,91 @@ describe('reviewed status requires evidence', () => {
     ).toEqual([
       'review.alpha.1: outcome passed_with_corrections requires at least one corrected finding',
     ]);
+  });
+});
+
+/**
+ * Canonical edges and summaries (`corpus/graph/`) that no fresh, passing review examined: each
+ * must lie in a `reviewed` section whose governing record could back `reviewed` for it. Reuses
+ * the validator's promotion rule by claiming every edge `reviewed` (the digest hashes that as
+ * `extracted`, so freshness is unchanged) and keeping only the edge messages.
+ */
+function edgeEvidenceGaps(snap: ReviewSnapshot, records: ReviewRecord[]): string[] {
+  const edges = snap.pilot.edges;
+  const reviewedSections = new Set(
+    snap.coverage.filter((entry) => entry.status === 'reviewed').map((entry) => entry.id),
+  );
+  const claimed: ReviewSnapshot = {
+    ...snap,
+    pilot: { ...snap.pilot, edges: edges.map((edge) => ({ ...edge, status: 'reviewed' })) },
+  };
+  const blockers = checkIndependentReviews(claimed, records);
+  return edges.flatMap((edge) => [
+    ...(reviewedSections.has(edge.section_id)
+      ? []
+      : [`${edge.id}: section "${edge.section_id}" is not reviewed`]),
+    ...blockers.filter((message) => message.startsWith(`${edge.id}: `)),
+  ]);
+}
+
+function summaryEdge(sectionId: string): SummaryOfEdge {
+  return {
+    id: 'edge.summary.synthetic',
+    name: 'Alpha summarises the rule',
+    section_id: sectionId,
+    source: [{ document: doc, file: 'x.pdf', pdf_page: 11, heading: 'Sub' }],
+    status: 'extracted',
+    confidence: 'high',
+    source_text: 'See the rule.',
+    relation: 'summary_of',
+    from: 'section.alpha',
+    to: 'synthetic.rule.one',
+  } as unknown as SummaryOfEdge;
+}
+
+describe('canonical edges need review evidence', () => {
+  it('accepts an edge examined by the fresh passing record of its reviewed section', () => {
+    const snap = snapshot();
+    snap.pilot.edges.push(summaryEdge('section.alpha.sub'));
+    const reviewed = record(snap);
+    markReviewed(snap);
+    expect(edgeEvidenceGaps(snap, [reviewed])).toEqual([]);
+  });
+
+  it('rejects an edge added after its section was reviewed', () => {
+    const snap = snapshot();
+    const reviewed = record(snap);
+    markReviewed(snap);
+    snap.pilot.edges.push(summaryEdge('section.alpha.sub'));
+    expect(edgeEvidenceGaps(snap, [reviewed])).toEqual([
+      'edge.summary.synthetic: edge is reviewed but section "section.alpha.sub" latest review "review.alpha.1" is stale (added: edge.summary.synthetic); re-review required',
+    ]);
+  });
+
+  it('rejects an edge whose section no record covers or is not reviewed', () => {
+    const snap = snapshot();
+    snap.pilot.edges.push(summaryEdge('section.beta'));
+    expect(edgeEvidenceGaps(snap, [record(snap)])).toEqual([
+      'edge.summary.synthetic: section "section.beta" is not reviewed',
+      'edge.summary.synthetic: edge is reviewed but section "section.beta" no independent review record covers it',
+    ]);
+  });
+});
+
+/**
+ * Edges T11 (Phase 9) must have re-reviewed. Empty: the 2026-11-24 audit found every canonical
+ * edge and summary examined by a fresh passing record.
+ */
+const PENDING_EDGE_REVIEWS: string[] = [];
+
+describe('committed canonical edges', () => {
+  let gaps: string[];
+  beforeAll(() => {
+    gaps = edgeEvidenceGaps(loadReviewSnapshot(), readReviewRecords());
+  }, 60_000);
+
+  it('are each examined by a fresh passing review, apart from the pending list', () => {
+    const uncovered = [...new Set(gaps.map((gap) => gap.slice(0, gap.indexOf(':'))))];
+    expect(uncovered).toEqual(PENDING_EDGE_REVIEWS);
   });
 });
