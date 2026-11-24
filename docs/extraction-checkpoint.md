@@ -163,38 +163,30 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
+- Phase 9 is complete (24 November, issue #22): the informal-uncertainty inventory
+  (`tests/fixtures/informal-uncertainty/`, eight mandatory families, checked by
+  `tests/regression/informal-uncertainty.test.ts`) dispositions every note that states a doubt
+  outside `review/`; 7 new issues; 20 fresh re-review records; the
+  [Phase 9 exit checklist](../tests/fixtures/acceptance/phase-9.json) is `accepted`. Uncertainty
+  now lives only in `review/` ([extraction guide](extraction-guide.md#uncertainty-and-evidence-backed-resolutions)).
+  Evidence in [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phases 9–12 are unfinished.
+  Phases 10–12 are unfinished.
 
 ## Next unit
 
-Phase 9, the uncertainty audit ([plan](corpus-completion-plan.md#phase-9--independent-review-and-uncertainty-audit)):
-confirm every completed review unit has evidence and that no known uncertainty lives only in
-informal notes (ledgers, checkpoint carry-overs, comments) rather than in `review/`. Phase 11
-(`build:corpus`) and Phase 12 (retrieval) follow.
+Phase 11, deterministic compilation ([plan](corpus-completion-plan.md#phase-11--deterministic-compilation)):
+replace the `build:corpus` stub with validated, reproducible JSON bundles and a manifest. Phase 12
+(retrieval over the bundles) follows.
 
 Open carry-overs:
 
 - `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
-  limit on `character.sanity.inn_recovery` is recorded but not enforced.
+  limit on `character.sanity.inn_recovery` is recorded but not enforced
+  (`issue.sanity.inn_recovery_stay_limit`).
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
   46 frozen `part.*` / `ingredient.*` entities cite its rows; split it when those are next
-  reviewed.
-- `issue.spell.activation_details` needs heading "Summon Demon" and a PDF 190 source (frozen by
-  an earlier tier's record).
-- `procedure.hate` cites PDF 178 as heading "Hate", column "Effect"; the page prints "Mental
-  Talents", columns Talent and Description (Psychology unit).
-- Glued words in the summaries of the frozen issues `issue.quest.side_quest_availability`,
-  `issue.quest.tomb_raiders_threat_boundary`, `issue.quest.spider_queen_cobweb_mapping` and
-  `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
-- `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
-  "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
-- `issue.0004` could also relate `condition.acute_stress` and
-  `character.equipment.consumable.dwarven_ale.drink` ("for the rest of the quest", PDF 182) and
-  cite the PDF 57 Acute Stress row (optional, raised by `review.introduction.3`).
-- `procedure.enemy_attack.issues` and `combat.action.pick_up_weapon` do not list
-  `issue.combat.enemy_fumble_pickup_dex` / `issue.combat.shield_parry_95_durability` back
-  (one-way links, raised by `review.combat_damage.3`).
+  reviewed (`issue.guild.alchemist_availability_merged_tables`).
 
 ## Evidence ledgers
 
@@ -217,6 +209,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
 | Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
 | Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
+| Phase 9: uncertainty audit                     | [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md)                         |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`

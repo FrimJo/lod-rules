@@ -5,13 +5,16 @@ import {
   checkIndependentReviews,
   computeDigest,
   DIGEST_ALGORITHM,
+  edgeEvidenceGaps,
   governingRecord,
+  loadReviewSnapshot,
+  readReviewRecords,
   type ReviewRecord,
   type ReviewSnapshot,
 } from '../../scripts/validate/independent-review.ts';
 import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';
 import { emptyPilot } from '../../scripts/validate/pilot-files.ts';
-import type { Rule } from '../../scripts/validate/pilot-types.ts';
+import type { Rule, SummaryOfEdge } from '../../scripts/validate/pilot-types.ts';
 
 const doc = 'rulebook.second_printing.eng';
 const source = { document: doc, pdf_page: 10, printed_page: 8 };
@@ -80,6 +83,7 @@ function snapshot(): ReviewSnapshot {
     ],
     pilot,
     documentIds: [doc],
+    documentSourceClasses: { [doc]: 'rulebook' },
     canonicalDocumentId: doc,
     sourceSha256: `sha256:${'a'.repeat(64)}`,
   };
@@ -402,4 +406,74 @@ describe('reviewed status requires evidence', () => {
       'review.alpha.1: outcome passed_with_corrections requires at least one corrected finding',
     ]);
   });
+});
+
+function summaryEdge(sectionId: string): SummaryOfEdge {
+  return {
+    id: 'edge.summary.synthetic',
+    name: 'Alpha summarises the rule',
+    section_id: sectionId,
+    source: [{ document: doc, file: 'x.pdf', pdf_page: 11, heading: 'Sub' }],
+    status: 'extracted',
+    confidence: 'high',
+    source_text: 'See the rule.',
+    relation: 'summary_of',
+    from: 'section.alpha',
+    to: 'synthetic.rule.one',
+  } as unknown as SummaryOfEdge;
+}
+
+describe('canonical edges need review evidence', () => {
+  it('accepts an edge examined by the fresh passing record of its reviewed section', () => {
+    const snap = snapshot();
+    snap.pilot.edges.push(summaryEdge('section.alpha.sub'));
+    const reviewed = record(snap);
+    markReviewed(snap);
+    expect(edgeEvidenceGaps(snap, [reviewed])).toEqual([]);
+  });
+
+  it('rejects an edge added after its section was reviewed', () => {
+    const snap = snapshot();
+    const reviewed = record(snap);
+    markReviewed(snap);
+    snap.pilot.edges.push(summaryEdge('section.alpha.sub'));
+    expect(edgeEvidenceGaps(snap, [reviewed])).toEqual([
+      {
+        edge: 'edge.summary.synthetic',
+        reason:
+          'section "section.alpha.sub" latest review "review.alpha.1" is stale (added: edge.summary.synthetic); re-review required',
+      },
+    ]);
+  });
+
+  it('rejects an edge whose section no record covers or is not reviewed', () => {
+    const snap = snapshot();
+    snap.pilot.edges.push(summaryEdge('section.beta'));
+    expect(edgeEvidenceGaps(snap, [record(snap)])).toEqual([
+      { edge: 'edge.summary.synthetic', reason: 'section "section.beta" is not reviewed' },
+      {
+        edge: 'edge.summary.synthetic',
+        reason: 'section "section.beta" no independent review record covers it',
+      },
+    ]);
+  });
+
+  it("rejects an edge its section's governing record did not examine", () => {
+    const snap = snapshot();
+    snap.pilot.edges.push(summaryEdge('section.alpha.sub'));
+    const reviewed = record(snap);
+    reviewed.examined_objects = reviewed.examined_objects.filter(
+      (object) => object.id !== 'edge.summary.synthetic',
+    );
+    markReviewed(snap);
+    expect(edgeEvidenceGaps(snap, [reviewed])).toEqual([
+      { edge: 'edge.summary.synthetic', reason: '"review.alpha.1" did not examine it' },
+    ]);
+  });
+});
+
+describe('committed canonical edges', () => {
+  it('are each examined by a fresh passing review of their reviewed section', () => {
+    expect(edgeEvidenceGaps(loadReviewSnapshot(), readReviewRecords())).toEqual([]);
+  }, 60_000);
 });

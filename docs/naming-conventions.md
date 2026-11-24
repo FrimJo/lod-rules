@@ -37,6 +37,8 @@ Machine-checked pattern (`schemas/common.schema.json`):
 | Issue record       | `issue.`            | `issue.0042`                                       |
 | Independent review | `review.`           | `review.combat.1`                                  |
 | Gold decision case | `gold.`             | `gold.check.failure`                               |
+| Informal note      | `informal.`         | `informal.ledger_core.arachnophobia_non_spider`    |
+| Phase 9 acceptance | `phase_9.`          | `phase_9.review_check_clean`                       |
 
 Source documents use their own namespace in `source/manifest.yaml`, for example
 `rulebook.second_printing.eng` and `bestiary`.
@@ -44,7 +46,10 @@ Source documents use their own namespace in `source/manifest.yaml`, for example
 `gold.` ids live in `tests/fixtures/semantic-decisions-gold/` and are not corpus
 objects. They are not registered in the global id table. `review.<unit>.<n>` ids name
 independent review records in `review/independent/`; they are evidence about the corpus,
-not corpus objects, and are not registered either.
+not corpus objects, and are not registered either. Likewise `informal.` ids name
+informal-uncertainty inventory entries in `tests/fixtures/informal-uncertainty/`, and
+`phase_9.` ids name exit-checklist rows in `tests/fixtures/acceptance/phase-9.json`; neither
+is registered.
 
 ## File naming
 
