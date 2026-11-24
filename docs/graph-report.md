@@ -8,11 +8,11 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 
 ## Summary
 
-4879 nodes, 15568 edges (16 derived inverses).
+4930 nodes, 15752 edges (16 derived inverses).
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
-- Unresolved pointers: 218
+- Unresolved pointers: 230
 - Procedure steps restating an uncited rule: 3
 - Rules repeating printed text across chapters: 24
 
@@ -20,28 +20,28 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 
 | Category   | Edges |
 | ---------- | ----- |
-| dependency | 6574  |
+| dependency | 6581  |
 | precedence | 44    |
 | reference  | 1184  |
-| structural | 4565  |
+| structural | 4613  |
 | external   | 41    |
-| evidence   | 3160  |
+| evidence   | 3289  |
 
 ## Edges by relation
 
 | Relation             | Category   | Edges |
 | -------------------- | ---------- | ----- |
-| `cites_section`      | structural | 3822  |
+| `cites_section`      | structural | 3870  |
 | `component`          | dependency | 21    |
-| `concerns`           | evidence   | 942   |
-| `depends_on`         | dependency | 1171  |
+| `concerns`           | evidence   | 947   |
+| `depends_on`         | dependency | 1178  |
 | `enters`             | dependency | 4     |
 | `entity`             | dependency | 549   |
 | `expanded_by`        | precedence | 16    |
 | `external`           | external   | 41    |
 | `grants`             | dependency | 27    |
 | `input_from`         | dependency | 1     |
-| `issue`              | evidence   | 661   |
+| `issue`              | evidence   | 663   |
 | `overrides`          | precedence | 28    |
 | `part_of`            | structural | 705   |
 | `quest`              | reference  | 558   |
@@ -56,7 +56,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | `summary_of`         | reference  | 16    |
 | `table`              | dependency | 1464  |
 | `term`               | reference  | 255   |
-| `tests`              | evidence   | 1557  |
+| `tests`              | evidence   | 1679  |
 | `timing`             | reference  | 18    |
 | `uses_table`         | dependency | 267   |
 
@@ -357,12 +357,24 @@ No dangling ids.
 - `table.magic.demons`: Demon statistics, weapon cards and enemy spell selections require unavailable Bestiary/card content.
 - `table.quest.highwaymen.plunder_ledger`: The illustrated entries are a past record of plunder with approximate values; they are not item prices or present reward contents.
 - `table.treasure.example_card`: See: ‘Selling Equipment’.
+- `test.combat.charge_example.square_b`: The example prints no distances. The charge is taken as passing at least 1 empty square, within the charger’s M, past no obstacle, and ending in front of an enemy.
+- `test.combat.charge_example.square_c`: The example prints no distances. The charge is taken as passing at least 1 empty square, within the charger’s M, past no obstacle, and ending in front of an enemy; only the line differs.
 - `test.combat.gnoll_power_attack_dodged`: Variya’s Dodge Skill Level is not printed; the successful dodge the example states is supplied as defence_succeeded.
 - `test.combat.gnoll_power_behaviour`: Adjacency and room to make are not printed; the Gnoll is taken as adjacent with no room to make, and not wounded, as the printed Power Attack implies.
 - `test.combat.gnoll_second_roll_parry`: The 54 miss is not asserted: this Gnoll’s CS is not printed.
 - `test.combat.gnoll_standard_then_parry`: Adjacency is not printed; the Gnoll is taken as adjacent with no room to make and 2 AP left at the start of its activation.
-- `test.combat.humanoid_behaviour.parry_first_action_two_ap`: The explanation gives no roll; 1 is one of the printed 1-2 Parry Stance* results. The enemy is taken as adjacent with no room to make, not wounded, and with both AP left on its first action.
+- `test.combat.humanoid_behaviour.approach_parry`: The explanation gives no roll, so each roll of the printed 1-2 Parry stance range is a case (this one 1). The enemy is taken as within M of a hero but not adjacent, on its first action.
+- `test.combat.humanoid_behaviour.approach_parry_roll_2`: The explanation gives no roll, so each roll of the printed 1-2 Parry stance range is a case (this one 2). The enemy is taken as within M of a hero but not adjacent, on its first action.
+- `test.combat.humanoid_behaviour.parry_first_action_two_ap`: The explanation gives no roll, so each roll of the printed 1-2 Parry Stance* range is a case (this one 1). The enemy is taken as adjacent with no room to make, not wounded, and with both AP left on its first action.
+- `test.combat.humanoid_behaviour.parry_first_action_two_ap_roll_2`: The explanation gives no roll, so each roll of the printed 1-2 Parry Stance* range is a case (this one 2). The enemy is taken as adjacent with no room to make, not wounded, and with both AP left on its first action.
+- `test.combat.quick_slot_example.roll_1`: The example prints no slot count or durability. The hero is taken to have 3 Quick Slots with an ordinary (not magic) item in the struck slot at durability 6.
+- `test.combat.quick_slot_example.roll_2`: The example prints no slot count or durability. The hero is taken to have 3 Quick Slots with an ordinary (not magic) item in the struck slot at durability 6.
 - `test.combat.shield_parry_example.berthram`: The padded jacket absorbing the 2 points needs its DEF from the armour table; the example does not print it, so the arm step is not asserted.
+- `test.combat.throwing_example.failed_through_door`: The photograph shows the thrower several squares from the door, so the thrower is taken as not adjacent to it.
 - `test.combat.variya_damage`: The printed arithmetic subtracts only Armour 2; no Natural Armour is stated, so it is supplied as 0.
 - `test.combat.variya_frenzy_damage`: The Gnoll’s Armour 2 is stated in Round 1. Seven damage takes the six-HP Gnoll to -1; "reduced to 0 Hit Points" covers that, as the example says it dies.
 - `test.combat.variya_second_target`: The example ends before a result for this attack.
+- `test.combat.zoc_diagram.behind`: The figure marks no facing. The model is taken as facing the row of three shaded squares, the only facing the shaded shape fits.
+- `test.combat.zoc_diagram.front`: The figure marks no facing. The model is taken as facing the row of three shaded squares, the only facing the shaded shape fits.
+- `test.combat.zoc_diagram.front_diagonal`: The figure marks no facing. The model is taken as facing the row of three shaded squares, the only facing the shaded shape fits.
+- `test.combat.zoc_diagram.side`: The figure marks no facing. The model is taken as facing the row of three shaded squares, the only facing the shaded shape fits.

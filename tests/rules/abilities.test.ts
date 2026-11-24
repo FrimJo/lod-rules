@@ -110,7 +110,14 @@ describe('source-bounded talent and perk mechanics', () => {
     },
   );
   it('Frenzy keeps two turns, eight attacks and cumulative armour penetration', () => {
-    expect(run('perk.frenzy.limits', { armour_penetration: 2 }).state).toMatchObject({
+    expect(
+      run('perk.frenzy.limits', {
+        armour_penetration: 2,
+        hero_action_points: 2,
+        standard_attack_action_point_cost: 1,
+        free_standard_attacks: 1,
+      }).state,
+    ).toMatchObject({
       armour_penetration: 3,
       duration_turns: 2,
       maximum_attacks: 8,

@@ -103,6 +103,7 @@ describe('issue resolutions', () => {
       'issue.quest.manhunt_bandit_xp_loot',
       'issue.backgrounds.lost_brother_monster_card',
       'issue.quest.highwaymen_objective_room_name',
+      'issue.quest.ulfric_to_hit_in_practice',
     ]);
     expect(validate(context.issues)).toBe(true);
   });

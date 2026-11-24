@@ -2605,10 +2605,16 @@
       type: number
       role: output
       description: max Durability modifier
+    maximum_durability:
+      type: number
+      role: state
+      description: max Durability of the magic item before this power (character.durability.magic);
+        this rule does not change it
     max_durability_total:
       type: number
       role: output
-      description: total max Durability
+      description: total max Durability, read from maximum_durability plus max_durability_modifier;
+        the modifier is the only bonus to apply
   when:
     type: compare
     operator: eq
@@ -2627,10 +2633,18 @@
     - type: set
       target: max_durability_total
       value:
-        type: literal
-        value: 10
+        type: sum
+        values:
+          - type: field
+            name: maximum_durability
+          - type: field
+            name: max_durability_modifier
   term_refs:
     - term.durability
+  dependencies:
+    - key: magic_durability
+      label: character.durability.magic
+      object_id: character.durability.magic
 - id: character.treasure.magic_weapons.8
   name: Magic Weapons 8
   section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
@@ -3048,10 +3062,16 @@
       type: number
       role: output
       description: item max Durability modifier
+    maximum_durability:
+      type: number
+      role: state
+      description: max Durability of the magic item before this power (character.durability.magic);
+        this rule does not change it
     max_durability_total:
       type: number
       role: output
-      description: total max Durability
+      description: total max Durability, read from maximum_durability plus max_durability_modifier;
+        the modifier is the only bonus to apply
   when:
     type: compare
     operator: eq
@@ -3070,10 +3090,18 @@
     - type: set
       target: max_durability_total
       value:
-        type: literal
-        value: 9
+        type: sum
+        values:
+          - type: field
+            name: maximum_durability
+          - type: field
+            name: max_durability_modifier
   term_refs:
     - term.durability
+  dependencies:
+    - key: magic_durability
+      label: character.durability.magic
+      object_id: character.durability.magic
 - id: character.treasure.magic_armours_shields.5
   name: Magic Armours and Shields 5
   section_id: section.appendix_v_treasures.table_magic_armours_and_shields

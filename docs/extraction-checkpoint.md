@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 23 November 2026
+## Current position — 24 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -123,16 +123,55 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `review.into_the_dungeons_actions.9`, `review.introduction.3`,
   `review.magic_items_enchantments.4`, `review.psychology_tables.5`, `review.settlements_core.6`,
   `review.settlements_services.3`, `review.treasure.3`. Step 4 is complete.
+- Phase 8 slice 1 is done (24 November, issue #14, spec #13): the example inventory
+  `tests/fixtures/example-inventory.json`, checked by `tests/regression/example-inventory.test.ts`.
+  35 entries in 29 sections claim all 94 `source_example` cases: 30 `executable` (1 `pending`),
+  4 `source_conflicted`, 1 `descriptive`. All 677 non-redirect sections are on the unswept
+  allowlist. No corpus change and no re-review; evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #19 is done (24 November): Travel, Settlements, the guilds, Inner Sanctum, Estate,
+  Appendices and back matter (PDF 125-220, 280-286) swept; 229 sections off the allowlist. 8 new
+  entries (6 `executable` with 7 cases, 1 `descriptive`, 1 `missing_information`); the Silver City
+  schedule is now `source_conflicted` (`issue.settlement.prayer_schedule_duration`). Re-reviewed
+  fresh: `review.guilds.6`, `review.appendix_i_perks.3`, `review.appendix_ii_talents.3`,
+  `review.appendix_iii_general_equipment_b.4`, `review.appendix_iii_weapons_armour.5`,
+  `review.appendix_v_legendary_a.4`, `review.appendix_v_tables.5`. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #18 is done (24 November): Backgrounds, the Grieving Mother side quest and
+  Quest Book I (PDF 42-50, 164-165, 221-279) swept; 132 sections off the allowlist. 5 new entries
+  (14 cases); `issue.quest.ulfric_to_hit_in_practice` resolved. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #17 is done (24 November): Equipment, Psychology, Magic, Magic Items,
+  Enchantments, Alchemy and Prayers (PDF 51–58, 64–84) swept; 135 sections off the allowlist.
+  8 new entries, 7 `source_example` cases. Re-reviewed fresh: `review.equipment.5`,
+  `review.magic.5`, `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`,
+  `review.prayers.4`. Evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #16 is done (24 November): Into the Dungeons, Treasure and Combat (PDF 86-125)
+  swept; 9 new entries, 12 new cases, option 3 converted. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 slice #15 is done (24 November): Game Basics through Embarking swept (PDF 1–41,
+  59–62), 7 new entries, 5 new `source_example` cases, 98 sections off the allowlist. Fresh:
+  `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- Phase 8 is complete (24 November, issue #20): every section is swept and the `unswept_sections`
+  allowlist is deleted; the inventory checker rejects that field or a `pending` flag if either
+  comes back. After the review fixes, 73 entries in 60 sections claim 141 `source_example` cases:
+  45 `executable`, 7 `source_conflicted`, 18 `descriptive`, 3 `missing_information`. The last two
+  part dividers (PDF 63, 85) hold no example. The review fixes re-reviewed
+  `review.appendix_i_perks.4`, `review.appendix_v_tables.6`, `review.guilds.7`,
+  `review.travelling_and_skirmishes.6` and `review.combat_enemies.9`. Counts by form and disposition in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phases 7–12 are unfinished.
+  Phases 9–12 are unfinished.
 
 ## Next unit
 
-Phase 8: worked examples as fixtures (plan in
-[corpus-completion-plan.md](corpus-completion-plan.md)). Then Phase 9 (uncertainty audit),
-Phase 11 (`build:corpus`) and Phase 12 (retrieval).
+Phase 9, the uncertainty audit ([plan](corpus-completion-plan.md#phase-9--independent-review-and-uncertainty-audit)):
+confirm every completed review unit has evidence and that no known uncertainty lives only in
+informal notes (ledgers, checkpoint carry-overs, comments) rather than in `review/`. Phase 11
+(`build:corpus`) and Phase 12 (retrieval) follow.
 
 Open carry-overs:
 
@@ -177,6 +216,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Step 2: core-chapter reconciliation            | [core-chapter-reconciliation.md](ledgers/core-chapter-reconciliation.md)                     |
 | Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
 | Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
+| Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
