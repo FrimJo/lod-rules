@@ -1,0 +1,208 @@
+- id: test.perk.frenzy_example.eight_attacks
+  name: 'printed Frenzy comment: at most 8 attacks over the two Frenzied turns'
+  section_id: section.appendix_i_perks.combat_perks
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 169
+      printed_page: 167
+      heading: Combat Perks
+      locator:
+        table: Combat Perks
+        row: Frenzy
+        column: Comment
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    For each standard attack that damages the enemy, the hero may make one more standard attack for
+    free. ... Barbarians only. Lasts for two turns. That means a maximum of 8 attacks can be done
+    over the two Frenzied turns.
+  kind: source_example
+  rule_ids:
+    - character.perk.frenzy.bonus_attack
+    - character.perk.frenzy.limits
+  inputs:
+    standard_attack_damaged_enemy: true
+    armour_penetration: 0
+    hero_action_points: 2
+    standard_attack_action_point_cost: 1
+  expected:
+    state:
+      free_standard_attacks: 1
+      same_target_required: false
+      armour_penetration: 1
+      duration_turns: 2
+      maximum_attacks: 8
+      only_move_or_attack: true
+    events: []
+    trace:
+      - character.perk.frenzy.bonus_attack
+      - character.perk.frenzy.limits
+    unresolved: []
+    steps: []
+- id: test.equipment.stackable_example.cloak_over_mail_and_padded
+  name: 'printed Stackable example: a cloak over a Mail Shirt stacked on a Padded Jacket'
+  section_id: section.appendix_iii_equipment.armour_and_shields.table
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 180
+      printed_page: 178
+      heading: Armour and Shields
+      locator:
+        table: Armour
+        region: Stackable special-rule note below the Armour table
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    'Stackable: This armour can be combined with ONE armour of a different tier that also have the
+    stackable special rule. However, this impedes your Dexterity (-10 DEX). ... Cloaks can be worn
+    even if the hero is already using stacked armour (for example a mail shirt on top of a padded
+    jacket).'
+  kind: source_example
+  rule_ids:
+    - character.equipment.armour.stackable
+  inputs:
+    both_pieces_stackable: true
+    inner_tier: 1
+    outer_tier: 3
+    non_cloak_layers: 2
+  expected:
+    state:
+      stacking_dex_modifier: -10
+      cloak_additionally_allowed: true
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - character.equipment.armour.stackable
+    unresolved: []
+    steps: []
+- id: test.treasure.magic_weapons_example.durability_total_10
+  name: 'printed Magic Weapons row 7: +2 max Durability on a magic weapon (DUR 8), total 10'
+  section_id: section.appendix_v_treasures.tables_of_magic_powers_for_items.table_magic_weapons
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 200
+      printed_page: 198
+      heading: Magic Weapons
+      locator:
+        table: Magic Weapons
+        row: '7'
+        column: Effect
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    7 It is as if the magic in this weapon is unusually strong, binding it together in a way that
+    your hero has never experienced before. Item has +2 max Durability (total 10).
+  kind: source_example
+  rule_ids:
+    - character.durability.magic
+    - character.treasure.magic_weapons.7
+  inputs:
+    magical: true
+    weapon_armour_or_shield: true
+    power_roll: 7
+  expected:
+    state:
+      maximum_durability: 10
+      max_durability_modifier: 2
+      max_durability_total: 10
+    events: []
+    trace:
+      - character.durability.magic
+      - character.treasure.magic_weapons.7
+    unresolved: []
+    steps: []
+- id: test.treasure.magic_armours_example.durability_total_9
+  name: 'printed Magic Armours and Shields row 4: +1 max Durability on a magic armour (DUR 8), total 9'
+  section_id: section.appendix_v_treasures.table_magic_armours_and_shields
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 201
+      printed_page: 199
+      heading: Magic Armours and Shields
+      locator:
+        table: Magic Armours and Shields
+        row: '4'
+        column: Effect
+      extraction:
+        method: table
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    4 Enchanted by a Master Enchanter, it will take tremendous effort to break this armour. +1 item
+    max Durability (Total 9).
+  kind: source_example
+  rule_ids:
+    - character.durability.magic
+    - character.treasure.magic_armours_shields.4
+  inputs:
+    magical: true
+    weapon_armour_or_shield: true
+    power_roll: 4
+  expected:
+    state:
+      maximum_durability: 9
+      max_durability_modifier: 1
+      max_durability_total: 9
+    events: []
+    trace:
+      - character.durability.magic
+      - character.treasure.magic_armours_shields.4
+    unresolved: []
+    steps: []
+- id: test.treasure.stone_of_valheir_example.draw_without_focus
+  name: 'printed Stone of Valheir consequence: a stored Focus bonus is drawn without focusing or added miscast risk'
+  section_id: section.appendix_v_treasures.legendary_items.stone_of_valheir
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      pdf_page: 204
+      printed_page: 202
+      heading: Stone of Valheir
+      extraction:
+        method: image
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text:
+    A wizard may store up to 3 Focus bonuses in the stone which can then be drawn upon at any time.
+    That means the wizard may cast a spell and get the 10-30 Focus bonus without actually needing to
+    focus. This bonus does not increase the risk of miscast.
+  kind: source_example
+  rule_ids:
+    - character.treasure.legendary.stone_of_valheir.draw
+  inputs:
+    identified: true
+    user_is_wizard: true
+    stored_focus_bonuses: 3
+  expected:
+    state:
+      stored_focus_bonuses_after: 2
+      needs_to_focus: false
+      increases_miscast_risk: false
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - character.treasure.legendary.stone_of_valheir.draw
+    unresolved: []
+    steps: []

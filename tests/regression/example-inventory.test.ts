@@ -45,9 +45,37 @@ describe('example inventory (issues #13, #14)', () => {
     expect(claimed).toEqual(sourceExamples);
   });
 
-  it('allowlists every section until the chapter slices sweep them', () => {
-    const live = [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id);
-    expect([...fixture.unswept_sections].sort()).toEqual(live.sort());
+  it('allowlists only live sections', () => {
+    const live = new Set(
+      [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
+    );
+    expect(fixture.unswept_sections.filter((id) => !live.has(id))).toEqual([]);
+  });
+
+  it('the Travel, Settlements, Guilds, Inner Sanctum, Estate and Appendices sweep (#19) leaves none of its sections allowlisted', () => {
+    const swept = [
+      'travel_and_settlements',
+      'travelling_and_skirmishes',
+      'settlements',
+      'the_dark_guild',
+      'fighters_guild',
+      'wizards_guild',
+      'alchemists_guild',
+      'rangers_guild',
+      'the_inner_sanctum',
+      'buying_an_estate',
+      'appendices',
+      'appendix_i_perks',
+      'appendix_ii_talents',
+      'appendix_iii_equipment',
+      'appendix_iv_spells',
+      'appendix_v_treasures',
+      'adding_a_third_dimension',
+      'back_matter',
+    ];
+    const inScope = (id: string): boolean =>
+      swept.some((chapter) => id === `section.${chapter}` || id.startsWith(`section.${chapter}.`));
+    expect(fixture.unswept_sections.filter(inScope)).toEqual([]);
   });
 
   describe('fails on a minimal broken copy', () => {
