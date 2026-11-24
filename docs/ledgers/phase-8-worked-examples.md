@@ -317,14 +317,78 @@ Eight fresh `corpus-reviewer` runs (Claude Opus 5.5), six records left fresh and
 
 No reviewer proposed a new issue.
 
-## Combined totals after #14, #16, #17, #18 and #19
+## Slice — Game Basics through Embarking — 24 November 2026
 
-65 entries in 54 sections claim 134 `source_example` cases; 100 sections remain unswept (the #15
-chapters). No entry is `pending`.
+Issue #15. Swept front matter, Introduction, Game Basics (with the Gameplay Example), the Party
+Management part divider, Character Basics, Creating Your Character, Embarking on Your First Quest
+and Levelling Up: PDF 1–41 and 59–62, every page rendered and read. 98 sections left the unswept
+allowlist.
+
+### Examples found
+
+All 15 examples in scope are inventoried. Eight were already seeded by #14. Seven are new:
+
+| Entry                                         | PDF | Form           | Disposition           |
+| --------------------------------------------- | --: | -------------- | --------------------- |
+| `example.introduction.doors_rule_card`        |  14 | `inline_prose` | `descriptive`         |
+| `example.introduction.modifier_for_instance`  |  18 | `inline_prose` | `descriptive`         |
+| `example.game_basics.other_tiles_and_terrain` |  19 | `inline_prose` | `descriptive`         |
+| `example.game_basics.adjacent_wording`        |  20 | `inline_prose` | `descriptive`         |
+| `example.game_basics.res_or_notation`         |  20 | `inline_prose` | `descriptive`         |
+| `example.game_basics.large_troll`             |  20 | `inline_prose` | `missing_information` |
+| `example.levelling_up.barbarian_thief_costs`  |  61 | `inline_prose` | `descriptive`         |
+
+The Troll example needs Bestiary data (`not_present`). Not inventoried: front-matter backer lists,
+contents and art index; component pictures and captions (PDF 13–15); the species and profession
+tables; the pointer to the Character Creation Example (PDF 33), which #18 owns.
+
+### Cases added
+
+Five `source_example` cases, appended in printed order to existing entries:
+
+- Gameplay Example: `test.gameplay_example.wandering_monster_trigger` (Threat 10 → 12 meets the
+  quest's 12) and `test.gameplay_example.turn_3_scenario_die` (10 requires a Threat Roll).
+- Warrior CS 80 example: `test.skill.book_example.cs_80_cannot_increase`,
+  `test.skill.book_example.still_miss_91` and `test.skill.book_example.still_miss_00` (both ends of
+  the printed 91–00 range).
+
+No interpreter change was needed.
+
+### Reclassifications and issues
+
+No new issue. The Gameplay Example entry (`source_conflicted`) now also names
+`issue.gameplay_example.trap_sanity`, `issue.gameplay_example.legendary_roll` and
+`issue.gameplay_example.torch_after_threat_roll`. Its reason lists the steps left unexecuted:
+conflicted steps keep their printed values, and the spider's bite, remaining Hit Points and fear
+level (Bestiary), the Fear Test rolls and the 2d6 placement are missing information.
+
+Coverage: `examples` flipped to `extracted` for `section.introduction.game_components`,
+`section.introduction.dice_rolling_and_skill_checks`, `section.game_basics.the_tiles`,
+`section.game_basics.models` and `section.levelling_up.increasing_your_skills_and_basic_stats`;
+the notes of those rows and of `the_tiles.adjacent` and `skill_and_stat_checks` name their entries.
+
+The inventory test change (allowlist lists only live sections) is the same one #17 made; the
+merge keeps #17's version.
+
+### Reviews
+
+- `review.game_basics.4` failed: the Wandering Monster case cited only PDF 23, and the ‘RES or…’
+  illustration had no entry. Both were fixed. `review.game_basics.5` passed.
+- `review.introduction.4` passed.
+- `review.levelling_up.5` passed.
+
+Counts after merging with #17: 50 entries claim 105 `source_example` cases; 33 `executable`
+(1 `pending`, #16), 5 `source_conflicted`, 11 `descriptive`, 1 `missing_information`; 444
+sections remain on the allowlist.
+
+## Combined totals after #14-#19
+
+72 entries in 59 sections claim 139 `source_example` cases; 2 sections remain unswept, left for #20.
+No entry is `pending`.
 
 | Disposition           | Entries |
 | --------------------- | ------: |
 | `executable`          |      45 |
 | `source_conflicted`   |       7 |
-| `descriptive`         |      11 |
-| `missing_information` |       2 |
+| `descriptive`         |      17 |
+| `missing_information` |       3 |

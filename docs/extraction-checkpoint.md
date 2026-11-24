@@ -144,9 +144,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Phase 8 slice #16 is done (24 November): Into the Dungeons, Treasure and Combat (PDF 86-125)
   swept; 9 new entries, 12 new cases, option 3 converted. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
-- After #14, #16, #17, #18 and #19: 65 entries in 54 sections claim 134 `source_example` cases;
-  100 sections remain unswept (the #15 chapters). 45 `executable` (none `pending`), 7
-  `source_conflicted`, 11 `descriptive`, 2 `missing_information`.
+- Phase 8 slice #15 is done (24 November): Game Basics through Embarking swept (PDF 1–41,
+  59–62), 7 new entries, 5 new `source_example` cases, 98 sections off the allowlist. Fresh:
+  `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- After #14-#19: 72 entries in 59 sections claim 139 `source_example` cases; 2 sections remain
+  unswept (#20 closes them). 45 `executable` (none `pending`), 7 `source_conflicted`, 17
+  `descriptive`, 3 `missing_information`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -154,10 +158,13 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Phase 8 chapter slices, which can run in parallel: sweep one chapter group each, inventory and
-convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
+The next unit is #20, the Phase 8 close-out. All five chapter slices (#15-#19) are merged; each
+swept one chapter group, inventoried and converted its examples, shrank `unswept_sections`,
+updated coverage and re-reviewed what went stale.
 
-- #15 Game Basics through Embarking
+- #15 Game Basics through Embarking — done (24 November): 7 new entries, 5 `source_example`
+  cases, re-reviews `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`;
+  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #16 Into the Dungeons, Treasure, Combat — done (24 November): 9 new entries, 12 new
   `source_example` cases, the `pending` option 3 entry converted, re-reviews
   `review.combat_actions.10`, `review.combat_damage.4`, `review.combat_enemies.7`,
