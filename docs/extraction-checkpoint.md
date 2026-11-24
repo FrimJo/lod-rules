@@ -176,25 +176,16 @@ informal notes (ledgers, checkpoint carry-overs, comments) rather than in `revie
 Open carry-overs:
 
 - `procedure.sanity_recovery` (frozen) has no per-stay field, so the changelog #83 once-per-stay
-  limit on `character.sanity.inn_recovery` is recorded but not enforced.
+  limit on `character.sanity.inn_recovery` is recorded but not enforced
+  (`issue.sanity.inn_recovery_stay_limit`).
 - `table.guild.alchemist_availability` merges the Alchemists' Guild's two printed tables because
   46 frozen `part.*` / `ingredient.*` entities cite its rows; split it when those are next
-  reviewed.
-- `issue.spell.activation_details` needs heading "Summon Demon" and a PDF 190 source (frozen by
-  an earlier tier's record).
-- `procedure.hate` cites PDF 178 as heading "Hate", column "Effect"; the page prints "Mental
-  Talents", columns Talent and Description (Psychology unit).
-- Glued words in the summaries of the frozen issues `issue.quest.side_quest_availability`,
-  `issue.quest.tomb_raiders_threat_boundary`, `issue.quest.spider_queen_cobweb_mapping` and
-  `issue.quest.cleansing_healing_potion_strength`; none misstates the book.
-- `issue.sanity.claustrophobia_stat_scope` (frozen) could cite the Character Creation Example's
-  "Claustrophobic (-10 CS in corridors)" (PDF 49–50).
-- `issue.0004` could also relate `condition.acute_stress` and
-  `character.equipment.consumable.dwarven_ale.drink` ("for the rest of the quest", PDF 182) and
-  cite the PDF 57 Acute Stress row (optional, raised by `review.introduction.3`).
-- `procedure.enemy_attack.issues` and `combat.action.pick_up_weapon` do not list
-  `issue.combat.enemy_fumble_pickup_dex` / `issue.combat.shield_parry_95_durability` back
-  (one-way links, raised by `review.combat_damage.3`).
+  reviewed (`issue.guild.alchemist_availability_merged_tables`).
+
+The Phase 9 audit (#22) closed the other six carry-overs: it corrected the citations of
+`issue.spell.activation_details`, `issue.sanity.claustrophobia_stat_scope` and `procedure.hate`
+and the glued words in four quest issues, and dismissed the `issue.0004` enrichment and the
+one-way combat links. Those frozen edits await fresh re-review in the audit.
 
 ## Evidence ledgers
 
