@@ -1,17 +1,16 @@
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse } from 'yaml';
-import { discoverPilotFiles, emptyPilot } from '../validate/pilot-files.ts';
+import {
+  canonicalInputs,
+  fingerprintFiles,
+  readCanonicalFiles,
+  type CanonicalFile,
+  type CanonicalInput,
+} from '../validate/canonical-files.ts';
+import { emptyPilot } from '../validate/pilot-files.ts';
 import type { Pilot, TestCase } from '../validate/pilot-types.ts';
 import type { Alias, Issue, Section, Term } from '../validate/integrity.ts';
-import {
-  createAjv,
-  formatErrors,
-  getValidator,
-  repoRoot,
-  type SchemaName,
-} from '../validate/schemas.ts';
+import { repoRoot, type SchemaName } from '../validate/schemas.ts';
 
 export interface GlossaryTerm extends Term {
   definition?: string;
@@ -44,54 +43,62 @@ export interface RetrievalCorpus {
   fingerprint: string;
 }
 
-const singleFiles: Array<{ path: string; schema: SchemaName }> = [
-  { path: 'source/manifest.yaml', schema: 'manifest' },
-  { path: 'corpus/glossary/terms.yaml', schema: 'terms' },
-  { path: 'corpus/glossary/aliases.yaml', schema: 'aliases' },
-  { path: 'review/ambiguities.yaml', schema: 'issues' },
-  { path: 'corpus/source-map/sections.yaml', schema: 'sections' },
-];
+/** Classes retrieval reads. Test cases join only on request and never enter the fingerprint. */
+const retrievalSchemas = new Set<SchemaName>([
+  'manifest',
+  'terms',
+  'aliases',
+  'issues',
+  'sections',
+  'rules',
+  'entities',
+  'tables',
+  'procedures',
+  'stateMachines',
+  'edges',
+]);
 
-export function retrievalInputs(root = repoRoot): Array<{ path: string; schema: SchemaName }> {
-  const pilotFiles = discoverPilotFiles(root).filter((file) => file.schema !== 'testCases');
-  return [...singleFiles, ...pilotFiles].sort((a, b) => a.path.localeCompare(b.path, 'en'));
+export function retrievalInputs(root = repoRoot): CanonicalInput[] {
+  return canonicalInputs(root).filter((input) => retrievalSchemas.has(input.schema));
 }
 
 export function fingerprintInputs(root = repoRoot): string {
-  const hash = createHash('sha256');
-  for (const { path } of retrievalInputs(root)) {
-    hash
-      .update(path)
-      .update('\0')
-      .update(readFileSync(join(root, path)))
-      .update('\0');
-  }
-  return hash.digest('hex');
+  return fingerprintFiles(
+    retrievalInputs(root).map(({ path }) => ({ path, bytes: readFileSync(join(root, path)) })),
+  );
 }
 
 export function loadRetrievalCorpus(
   root = repoRoot,
   options: { testCases?: boolean } = {},
 ): RetrievalCorpus {
-  const ajv = createAjv();
+  const inputs = canonicalInputs(root).filter(
+    (input) =>
+      retrievalSchemas.has(input.schema) || (options.testCases && input.schema === 'testCases'),
+  );
+  return retrievalCorpusFrom(readCanonicalFiles(inputs, root), options);
+}
+
+/**
+ * Assembles the retrieval model from already-validated canonical files (in path order). Files
+ * of classes retrieval does not read are ignored, so a caller holding the whole corpus can
+ * pass it as is.
+ */
+export function retrievalCorpusFrom(
+  canonical: CanonicalFile[],
+  options: { testCases?: boolean } = {},
+): RetrievalCorpus {
   const pilot = emptyPilot();
   const files = new Map<string, string>();
   const single = new Map<SchemaName, unknown>();
-  const hash = createHash('sha256');
-  const examples = options.testCases
-    ? discoverPilotFiles(root).filter((file) => file.schema === 'testCases')
-    : [];
+  const inputs = canonical.filter((file) => retrievalSchemas.has(file.schema));
 
-  for (const { path, schema } of [...retrievalInputs(root), ...examples]) {
-    const bytes = readFileSync(join(root, path));
-    const data: unknown = parse(bytes.toString('utf8'));
-    const validate = getValidator(ajv, schema);
-    if (!validate(data)) throw new Error(`${path}: ${formatErrors(validate).join('; ')}`);
+  for (const { path, schema, data } of canonical) {
     if (schema === 'testCases') {
-      pilot.testCases.push(...(data as TestCase[]));
+      if (options.testCases) pilot.testCases.push(...(data as TestCase[]));
       continue;
     }
-    hash.update(path).update('\0').update(bytes).update('\0');
+    if (!retrievalSchemas.has(schema)) continue;
 
     if (schema in pilot) {
       const entries = data as Array<{ id: string }>;
@@ -105,9 +112,9 @@ export function loadRetrievalCorpus(
     }
   }
 
-  const { testCases, ...canonical } = pilot;
+  const { testCases, ...rest } = pilot;
   return {
-    pilot: canonical,
+    pilot: rest,
     ...(options.testCases ? { testCases } : {}),
     terms: single.get('terms') as GlossaryTerm[],
     aliases: single.get('aliases') as Alias[],
@@ -115,6 +122,6 @@ export function loadRetrievalCorpus(
     sections: single.get('sections') as Section[],
     manifest: single.get('manifest') as SourceManifest,
     files,
-    fingerprint: hash.digest('hex'),
+    fingerprint: fingerprintFiles(inputs),
   };
 }

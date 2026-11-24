@@ -1,16 +1,15 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse } from 'yaml';
-import { discoverPilotFiles, emptyPilot } from './pilot-files.ts';
+import { canonicalInputs, readCanonicalFile, type CanonicalFile } from './canonical-files.ts';
+import { emptyPilot } from './pilot-files.ts';
 import { checkPilotIntegrity } from './pilot.ts';
 import {
   checkIndependentReviews,
-  discoverReviewFiles,
   sourceClassesOf,
   sourceFingerprint,
   type ReviewRecord,
 } from './independent-review.ts';
-import { createAjv, formatErrors, getValidator, repoRoot, type SchemaName } from './schemas.ts';
+import { createAjv, repoRoot, type SchemaName } from './schemas.ts';
 import {
   checkIntegrity,
   checkGlossaryIntegrity,
@@ -22,20 +21,11 @@ import {
   type Issue,
 } from './integrity.ts';
 
-/** Canonical files loaded by the validator. `generated/` is never scanned. */
-const canonicalFiles: Array<{ path: string; schema: SchemaName }> = [
-  { path: 'source/manifest.yaml', schema: 'manifest' },
-  { path: 'corpus/glossary/terms.yaml', schema: 'terms' },
-  { path: 'corpus/glossary/aliases.yaml', schema: 'aliases' },
-  { path: 'review/ambiguities.yaml', schema: 'issues' },
-  { path: 'corpus/source-map/sections.yaml', schema: 'sections' },
-  { path: 'corpus/source-map/pages.yaml', schema: 'pages' },
-  { path: 'corpus/source-map/coverage.yaml', schema: 'coverage' },
-];
-
 export interface ValidationResult {
   errors: string[];
   filesChecked: number;
+  /** Every input that parsed and matched its schema, in path order. Complete when `errors` is empty. */
+  files: CanonicalFile[];
 }
 
 interface ManifestDocument {
@@ -94,39 +84,20 @@ export function validateCorpus(root = repoRoot): ValidationResult {
   let filesChecked = 0;
   const loaded = new Map<SchemaName, unknown>();
   const pilot = emptyPilot();
-  const pilotFiles = discoverPilotFiles(root);
-  const reviewFiles = discoverReviewFiles(root).map((path) => ({
-    path,
-    schema: 'independentReviews' as const,
-  }));
+  const inputs = canonicalInputs(root);
+  const files: CanonicalFile[] = [];
   const reviewRecords: ReviewRecord[] = [];
-  let validFiles = 0;
 
-  for (const { path, schema } of [...canonicalFiles, ...pilotFiles, ...reviewFiles]) {
-    const absolutePath = join(root, path);
-
-    if (!existsSync(absolutePath)) {
-      errors.push(`${path}: file is missing`);
+  for (const input of inputs) {
+    const result = readCanonicalFile(ajv, input, root);
+    if (!result.missing) filesChecked += 1;
+    if (!result.file) {
+      errors.push(...result.errors);
       continue;
     }
 
-    filesChecked += 1;
-
-    let data: unknown;
-    try {
-      data = parse(readFileSync(absolutePath, 'utf8'));
-    } catch (error) {
-      errors.push(`${path}: YAML parse error: ${(error as Error).message}`);
-      continue;
-    }
-
-    const validate = getValidator(ajv, schema);
-    if (!validate(data)) {
-      errors.push(...formatErrors(validate).map((message) => `${path}: ${message}`));
-      continue;
-    }
-
-    validFiles += 1;
+    const { path, schema, data } = result.file;
+    files.push(result.file);
     if (schema === 'independentReviews') {
       // Ids are checked across all review files by checkIndependentReviews.
       reviewRecords.push(...((data as ReviewRecord[] | null) ?? []));
@@ -148,7 +119,7 @@ export function validateCorpus(root = repoRoot): ValidationResult {
   }
 
   // Cross-file checks only make sense once every file parsed and matched its schema.
-  if (validFiles === canonicalFiles.length + pilotFiles.length + reviewFiles.length) {
+  if (files.length === inputs.length) {
     const manifest = loaded.get('manifest') as Manifest;
     const canonicalDocument = manifest.documents.find((document) => document.canonical);
 
@@ -213,5 +184,5 @@ export function validateCorpus(root = repoRoot): ValidationResult {
     );
   }
 
-  return { errors, filesChecked };
+  return { errors, filesChecked, files };
 }
