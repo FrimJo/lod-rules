@@ -143,9 +143,14 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 Phase 8 chapter slices, which can run in parallel: sweep one chapter group each, inventory and
 convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
 
-- ~~#15 Game Basics through Embarking~~ (done)
+- #15 Game Basics through Embarking — done (24 November): 7 new entries, 5 `source_example`
+  cases, re-reviews `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`;
+  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #16 Into the Dungeons, Treasure, Combat
-- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
+- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers — done (24 November): 8 new
+  entries, 7 `source_example` cases, re-reviews `review.equipment.5`, `review.magic.5`,
+  `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`, `review.prayers.4`;
+  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
 - #18 Quest Book I, Backgrounds
 
