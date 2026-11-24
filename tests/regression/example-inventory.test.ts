@@ -205,7 +205,11 @@ describe('example inventory (issues #13, #14)', () => {
     });
 
     it('a pending entry or allowlisted section once Phase 8 is closed', () => {
-      const problems = checkExampleInventory(fixture, context, { closed: true });
+      const pending = withEntry(executableId, (entry) => {
+        delete entry.cases;
+        entry.pending = true;
+      });
+      const problems = checkExampleInventory(pending, context, { closed: true });
       expect(problems.some((problem) => /still pending/.test(problem))).toBe(true);
       expect(problems.some((problem) => /still unswept/.test(problem))).toBe(true);
     });

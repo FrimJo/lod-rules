@@ -141,9 +141,12 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   Quest Book I (PDF 42-50, 164-165, 221-279) swept; 132 sections off the allowlist. 5 new entries
   (14 cases); `issue.quest.ulfric_to_hit_in_practice` resolved. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
-- After #14, #17, #18 and #19: 56 entries in 48 sections claim 121 `source_example` cases; 182
-  sections remain unswept (the #15 and #16 chapters). 39 `executable` (1 `pending`, #16), 7
-  `source_conflicted`, 8 `descriptive`, 2 `missing_information`.
+- Phase 8 slice #16 is done (24 November): Into the Dungeons, Treasure and Combat (PDF 86-125)
+  swept; 9 new entries, 12 new cases, option 3 converted. Evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
+- After #14, #16, #17, #18 and #19: 65 entries in 54 sections claim 134 `source_example` cases;
+  100 sections remain unswept (the #15 chapters). 45 `executable` (none `pending`), 7
+  `source_conflicted`, 11 `descriptive`, 2 `missing_information`.
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -155,7 +158,11 @@ Phase 8 chapter slices, which can run in parallel: sweep one chapter group each,
 convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
 
 - #15 Game Basics through Embarking
-- #16 Into the Dungeons, Treasure, Combat
+- #16 Into the Dungeons, Treasure, Combat — done (24 November): 9 new entries, 12 new
+  `source_example` cases, the `pending` option 3 entry converted, re-reviews
+  `review.combat_actions.10`, `review.combat_damage.4`, `review.combat_enemies.7`,
+  `review.into_the_dungeons_movement.3`, `review.into_the_dungeons_setup.14`, `review.treasure.4`;
+  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
 - #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers — done (24 November): 8 new
   entries, 7 `source_example` cases, re-reviews `review.equipment.5`, `review.magic.5`,
   `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`, `review.prayers.4`;
