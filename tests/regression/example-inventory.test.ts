@@ -45,11 +45,12 @@ describe('example inventory (issues #13, #14)', () => {
     expect(claimed).toEqual(sourceExamples);
   });
 
-  it('allowlists only live sections', () => {
+  it('allowlists only live sections, each once, until the chapter slices sweep them', () => {
     const live = new Set(
       [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
     );
     expect(fixture.unswept_sections.filter((id) => !live.has(id))).toEqual([]);
+    expect(new Set(fixture.unswept_sections).size).toBe(fixture.unswept_sections.length);
   });
 
   it('the Travel, Settlements, Guilds, Inner Sanctum, Estate and Appendices sweep (#19) leaves none of its sections allowlisted', () => {

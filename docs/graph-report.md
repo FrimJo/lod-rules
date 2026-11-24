@@ -8,7 +8,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 
 ## Summary
 
-4886 nodes, 15601 edges (16 derived inverses).
+4894 nodes, 15625 edges (16 derived inverses).
 
 - Dangling ids: 0
 - Cycles: 41 across 2 relations
@@ -23,15 +23,15 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | dependency | 6574  |
 | precedence | 44    |
 | reference  | 1184  |
-| structural | 4572  |
+| structural | 4580  |
 | external   | 41    |
-| evidence   | 3186  |
+| evidence   | 3202  |
 
 ## Edges by relation
 
 | Relation             | Category   | Edges |
 | -------------------- | ---------- | ----- |
-| `cites_section`      | structural | 3829  |
+| `cites_section`      | structural | 3837  |
 | `component`          | dependency | 21    |
 | `concerns`           | evidence   | 942   |
 | `depends_on`         | dependency | 1171  |
@@ -56,7 +56,7 @@ not resolved. Dispositions live in test fixtures under `tests/fixtures/`, not he
 | `summary_of`         | reference  | 16    |
 | `table`              | dependency | 1464  |
 | `term`               | reference  | 255   |
-| `tests`              | evidence   | 1583  |
+| `tests`              | evidence   | 1599  |
 | `timing`             | reference  | 18    |
 | `uses_table`         | dependency | 267   |
 
