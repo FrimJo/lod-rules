@@ -68,3 +68,57 @@ and Stat Checks (PDF 20), which names a check but prints no roll or outcome.
   (comment on #14).
 - `section.game_basics.skill_and_stat_checks` has `examples: extracted` but no `source_example`
   case; its examples are descriptive.
+
+## Slice #18 — Quest Book I and Backgrounds — 24 November 2026
+
+Issue #18. Swept PDF 42–50 (Backgrounds), 164–165 (Side Quest: The Grieving Mother) and 221–279
+(Quest Book I), rendering every page. 132 sections left `unswept_sections`. The allowlist test
+now checks only that listed sections are live and unique, so parallel slices can each remove
+theirs.
+
+### Examples found
+
+| Entry                                                | Section (PDF)                          | Form               | Disposition           | Cases |
+| ---------------------------------------------------- | -------------------------------------- | ------------------ | --------------------- | ----: |
+| `example.backgrounds.character_creation_example`     | `character_creation_example` (49–50)   | `labelled_example` | `source_conflicted`   |    19 |
+| `example.quest_book_i.wandering_monster_threshold`   | `reading_the_quests` (222)             | `inline_prose`     | `executable`          |     3 |
+| `example.quest_book_i.ulfric_to_hit_in_practice`     | `quest_2_the_dead_rising` (228)        | `inline_prose`     | `source_conflicted`   |     0 |
+| `example.quest_book_i.secondary_quest_card_anywhere` | `level_2_the_basement` (239)           | `inline_prose`     | `descriptive`         |     0 |
+| `example.quest_book_i.prisoner_reward_none`          | `quest_1_rescuing_the_prisoners` (250) | `inline_prose`     | `descriptive`         |     0 |
+| `example.quest_book_i.gaul_fountain_damage`          | `quest_2_baptising` (254)              | `inline_prose`     | `missing_information` |     0 |
+| `example.quest_book_i.closing_portal_even_tens`      | `quest_3_closing_the_portal` (257)     | `inline_prose`     | `executable`          |     3 |
+
+- Cases added: 14. Eleven extend the Character Creation Example in printed order (Sanity 8,
+  Movement 4, Warrior Priest Energy 2, and the eight sheet skills that match the Warrior Priest
+  table); three run Closing the Portal's "(10, 20, 30…)".
+- Reclassification: Sanity, Movement and Energy were "restated starting values, not executable"
+  in the coverage notes; they are now cases. The skill values were checked only in
+  `tests/rules/backgrounds.test.ts`; they are now also `source_example` cases.
+- Considered, not inventoried: "(A total of 11)" settlements in 1. Wanderlust (a count, not an
+  example), the Highwaymen plunder ledger (a quest handout), card-deck compositions (setup, not
+  examples). The Grieving Mother pages print no example.
+- Coverage: `examples` → `extracted` on the five quest sections above.
+
+### Issues
+
+- `issue.quest.ulfric_to_hit_in_practice` (resolved): the printed "in practice is -5" against
+  the Slow and BFO rows (+5 each) gives 0; changelog 2.21 entry 102 rules 0.
+  `core.quest.dead_rising.ulfric` now sets `to_hit_in_practice` 0 and keeps the quotation and
+  `to_hit_printed` -10; row added to `review/designer-published-rulings.md`.
+- `issue.backgrounds.creation_example_relic_of_ramos` (unresolved): the example's Relic of Ramos
+  +5 CS against the Table of Relics +5 STR.
+- `issue.quest.brood_mother_card_res_loot` (unresolved): raised by `review.the_dead_rising.3`;
+  changelog entry 100 gives the card's RES 40 and Loot Part. No executable object carries them.
+
+### Re-reviews (Opus 5.5, one fresh agent each)
+
+`review.the_dead_rising.3` failed (Brood Mother, pre-existing); after the issue was added,
+`review.the_dead_rising.4` passed with corrections. Also fresh: `review.backgrounds.3`,
+`review.bandits_hideout_and_fountain_room.3`, `review.chamber_of_reverence_and_great_crypt.3`,
+`review.spider_queen_and_lava_river.4`. Six reviews in all.
+
+### Inventory after this slice
+
+40 entries in 34 sections claim 108 `source_example` cases; 545 sections remain unswept.
+Dispositions: 31 `executable` (1 `pending`, #16), 5 `source_conflicted`, 3 `descriptive`,
+1 `missing_information`.

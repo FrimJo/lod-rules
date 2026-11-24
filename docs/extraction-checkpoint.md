@@ -143,7 +143,7 @@ convert its examples, shrink `unswept_sections`, update coverage and re-review w
 - #16 Into the Dungeons, Treasure, Combat
 - #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
 - #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
-- #18 Quest Book I, Backgrounds
+- #18 Quest Book I, Backgrounds — done (7 entries, 14 new cases; see the ledger)
 
 Then #20 closes Phase 8 (no `pending`, empty allowlist) and moves this checkpoint to Phase 9
 (uncertainty audit), Phase 11 (`build:corpus`) and Phase 12 (retrieval).
