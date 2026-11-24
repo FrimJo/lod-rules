@@ -9,12 +9,14 @@ import {
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 import {
   checkInformalUncertainty,
+  dispositions,
   families,
   familyCoverageProblems,
   findingCandidates,
   informalUncertaintyContext,
   markdownCandidates,
   rulingKey,
+  sourceKinds,
   uninventoriedCandidates,
   yamlNoteCandidates,
   type Family,
@@ -242,6 +244,14 @@ describe('informal-uncertainty checker rules (#22)', () => {
       withEntry(1, (entry) => (entry.excerpt = 'roll order')),
       /informal\.a\.order, informal\.a\.cost: claim the same note/,
     );
+  });
+
+  it('types source kinds and dispositions exactly as the fixture schema enumerates them', () => {
+    const { properties } = JSON.parse(
+      readFileSync(join(repoRoot, fixtureDirectory, 'family.schema.json'), 'utf8'),
+    ).$defs.entry as Record<'properties', Record<string, { enum: string[] }>>;
+    expect([...sourceKinds]).toEqual(properties.source_kind!.enum);
+    expect([...dispositions]).toEqual(properties.disposition!.enum);
   });
 
   it('a duplicate id', () => {

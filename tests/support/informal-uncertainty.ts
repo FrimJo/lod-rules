@@ -1,43 +1,37 @@
 /**
  * The Phase 9 informal-uncertainty inventory (issue #22). Every informal note that states a doubt
  * about the rulebook is listed once in a per-family fixture under
- * tests/fixtures/informal-uncertainty/, with a disposition: `recorded` (names the `issue.*` ids
- * that hold it), `resolved` (cites the review record or published ruling that settled it) or
- * `not_uncertainty` (says why it is not one). `checkInformalUncertainty` returns one message per
- * problem, so a test can show each rule firing on a minimal broken copy.
+ * tests/fixtures/informal-uncertainty/, with a disposition: `recorded` (the `issue.*` ids that hold
+ * it), `resolved` (the review record or published ruling that settled it) or `not_uncertainty`
+ * (why it is not one). `checkInformalUncertainty` returns one message per problem.
  *
- * Candidate discovery (what must be inventoried) is deterministic:
+ * Candidates (what must be inventoried):
  *
- * - Markdown (`ledger`, `checkpoint`, `doc`). A note is one block: a list item with its wrapped
- *   lines, a table row, or a paragraph. Fenced code is skipped. A block is a candidate when it sits
- *   under an anchor (a heading, or a one-line `…:` lead-in paragraph before a list, matching
- *   `anchorPattern`) or its prose matches a `keywordPatterns` entry. Prose is the block with inline
- *   code spans removed: backticked text is identifiers and values (`status: unresolved`), not
- *   statements.
- * - Corpus YAML (`corpus_note`). Every string under a `noteFields` key whose prose matches a
- *   keyword. Other keys are never scanned: `source_text`, `footnotes` and `definition` are the
- *   book's own wording, and `id`, `name`, `type`, `target`, `issue_id` and other identifier or
- *   structured-data keys hold values, not commentary. Field descriptions and dependency labels are
- *   scanned: most of their keyword hits state a real doubt ("the book does not say …", "its cost
- *   is unresolved, not zero"), and the few state-word hits ("an eligible unresolved cure attempt")
- *   are cheaper to dismiss with a reason than to hide behind a rule that would also hide the
- *   doubts. `unresolved_references` is scanned too: besides unbound pointer wording, it holds
- *   statements such as "The book does not say where the tutor fee is paid".
- * - Review findings (`review_finding`). Each finding closed `no_change_needed` whose description
- *   matches a keyword: a reviewer's raised-but-dropped doubt. A finding whose `object_id` is an
- *   existing issue is about that issue (typically confirming it on the page), so it is a pointer
- *   like a description that cites the id.
+ * - Markdown (`ledger`, `checkpoint`, `doc`): one block (a list item with its wrapped lines, a
+ *   table row, or a paragraph; fenced code skipped) under an `anchorPattern` heading or one-line
+ *   `…:` lead-in, or whose prose matches a keyword. Prose drops inline code: backticked text is
+ *   identifiers and values (`status: unresolved`), not statements.
+ * - Corpus YAML (`corpus_note`): strings under a `noteFields` key that match a keyword.
+ *   `source_text`, `definition` and `footnotes` are the book's wording; identifier and data keys
+ *   hold values. Descriptions, labels and `unresolved_references` are scanned because most of
+ *   their hits are real doubts ("the book does not say where the tutor fee is paid"); the few
+ *   state-word hits are cheaper to dismiss with a reason than to hide behind a narrower rule.
+ * - Review findings (`review_finding`): `no_change_needed` findings that match a keyword.
  *
- * Pointer exemption: a note whose own text cites an `issue.*` id that exists in
- * review/ambiguities.yaml already points at the formal record (the extraction guide allows
- * ledgers and checkpoints to point at issues), so it is not a candidate. A cited id that does not
- * exist exempts nothing. The one exception is the checkpoint's carry-over list: every bullet under
- * a carry-over anchor in the checkpoint is a candidate, pointer or not, so the list itself always
- * has a checked disposition (spec #22, "Checkpoint rule").
+ * Pointer exemption: a note citing an `issue.*` id that exists already points at the formal record,
+ * so it is no candidate (a nonexistent id exempts nothing). Every checkpoint carry-over bullet is a
+ * candidate anyway, so that list always has a checked disposition (spec "Checkpoint rule").
  *
- * Matching: an entry matches a candidate when the source kind and locator are equal and the
- * candidate's text contains the excerpt (both whitespace-collapsed). An entry must match exactly
- * one candidate, and a candidate may be claimed by only one entry.
+ * Deliberate deviations from spec #22:
+ *
+ * - Locators are heading-level (or field- and finding-level), not per note, so several notes
+ *   share one. A note's identity is locator + excerpt: an entry must match exactly one candidate,
+ *   and the spec's "two entries claim the same locator" is enforced as "no note claimed twice".
+ * - Corpus notes and findings need a keyword hit. Only headings, lead-ins and checkpoint
+ *   carry-overs act as structural anchors; taking every note field or finding would flood the
+ *   inventory with plain commentary.
+ * - A finding whose `object_id` is an existing issue is about that issue (typically confirming it
+ *   on the page), so it is a pointer.
  */
 import { globSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -361,11 +355,7 @@ export function familyCoverageProblems(root = repoRoot): string[] {
   return problems;
 }
 
-interface ManifestShape {
-  documents: { id: string; source_class: string }[];
-}
-
-/** Context for the real repository. Reuses the review snapshot's issues and the review records. */
+/** Context for the real repository. Reuses the review snapshot's issues and manifest, and the review records. */
 export function informalUncertaintyContext(
   snapshot: ReviewSnapshot,
   records: ReviewRecord[],
@@ -373,11 +363,10 @@ export function informalUncertaintyContext(
 ): InformalUncertaintyContext {
   const issueIds = new Set(snapshot.issues.map((issue) => issue.id));
   const read = (file: string): string => readFileSync(join(root, file), 'utf8');
-  const manifest = parse(read('source/manifest.yaml')) as ManifestShape;
   const rulingDocuments = new Map(
-    manifest.documents.flatMap((document) =>
-      document.source_class === 'official_errata' || document.source_class === 'official_faq'
-        ? [[document.id, document.source_class] as const]
+    Object.entries(snapshot.documentSourceClasses).flatMap(([id, sourceClass]) =>
+      sourceClass === 'official_errata' || sourceClass === 'official_faq'
+        ? [[id, sourceClass] as const]
         : [],
     ),
   );
