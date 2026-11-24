@@ -148,42 +148,23 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   59–62), 7 new entries, 5 new `source_example` cases, 98 sections off the allowlist. Fresh:
   `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`. Evidence in
   [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
-- After #14-#19: 72 entries in 59 sections claim 139 `source_example` cases; 2 sections remain
-  unswept (#20 closes them). 45 `executable` (none `pending`), 7 `source_conflicted`, 17
-  `descriptive`, 3 `missing_information`.
+- Phase 8 is complete (24 November, issue #20): every section is swept, the `unswept_sections`
+  allowlist is deleted and the inventory test runs closed, so a `pending` entry or allowlisted
+  section fails it. 72 entries in 59 sections claim 139 `source_example` cases: 45 `executable`,
+  7 `source_conflicted`, 17 `descriptive`, 3 `missing_information`. The last two part dividers
+  (PDF 63, 85) hold no example. No re-review was needed. Final counts by form and disposition in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phases 7–12 are unfinished.
+  Phases 9–12 are unfinished.
 
 ## Next unit
 
-The next unit is #20, the Phase 8 close-out. All five chapter slices (#15-#19) are merged; each
-swept one chapter group, inventoried and converted its examples, shrank `unswept_sections`,
-updated coverage and re-reviewed what went stale.
-
-- #15 Game Basics through Embarking — done (24 November): 7 new entries, 5 `source_example`
-  cases, re-reviews `review.game_basics.5`, `review.introduction.4`, `review.levelling_up.5`;
-  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
-- #16 Into the Dungeons, Treasure, Combat — done (24 November): 9 new entries, 12 new
-  `source_example` cases, the `pending` option 3 entry converted, re-reviews
-  `review.combat_actions.10`, `review.combat_damage.4`, `review.combat_enemies.7`,
-  `review.into_the_dungeons_movement.3`, `review.into_the_dungeons_setup.14`, `review.treasure.4`;
-  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
-- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers — done (24 November): 8 new
-  entries, 7 `source_example` cases, re-reviews `review.equipment.5`, `review.magic.5`,
-  `review.magic_items_enchantments.5`, `review.alchemy_preparations.3`, `review.prayers.4`;
-  evidence in [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
-- #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices — done (24 November);
-  see the current position above
-- #18 Quest Book I, Backgrounds — done (24 November): 5 new entries, 14 `source_example` cases,
-  3 new issues, re-reviews `review.the_dead_rising.4`, `review.backgrounds.3`,
-  `review.bandits_hideout_and_fountain_room.3`, `review.chamber_of_reverence_and_great_crypt.3`,
-  `review.spider_queen_and_lava_river.4`; evidence in
-  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)
-
-Then #20 closes Phase 8 (no `pending`, empty allowlist) and moves this checkpoint to Phase 9
-(uncertainty audit), Phase 11 (`build:corpus`) and Phase 12 (retrieval).
+Phase 9, the uncertainty audit ([plan](corpus-completion-plan.md#phase-9--independent-review-and-uncertainty-audit)):
+confirm every completed review unit has evidence and that no known uncertainty lives only in
+informal notes (ledgers, checkpoint carry-overs, comments) rather than in `review/`. Phase 11
+(`build:corpus`) and Phase 12 (retrieval) follow.
 
 Open carry-overs:
 

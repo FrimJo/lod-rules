@@ -392,3 +392,36 @@ No entry is `pending`.
 | `source_conflicted`   |       7 |
 | `descriptive`         |      17 |
 | `missing_information` |       3 |
+
+## Close-out — 24 November 2026
+
+Issue #20. The combined totals above were checked against the fixture and hold: 72 entries, 59
+sections, 139 `source_example` cases (the same 139 the pilot loads), no `pending` entry.
+
+- The last two allowlisted sections, the Academic Skills and Dungeoneering and Combat part
+  dividers (PDF 63 and 85, no printed folio), were rendered and read. Each prints only the part
+  title over art and one line naming the chapters that follow; neither holds an example. Their
+  `examples` coverage stays `not_applicable`.
+- `unswept_sections` is deleted from the fixture. The main inventory assertion now runs with
+  `{ closed: true }`, so any `pending` entry or allowlisted section fails it; a second test asserts
+  the fixture has no allowlist and no `pending` flag. The two #19-era allowlist tests were removed.
+- No case, coverage row or review record changed, so no digest moved and no re-review ran.
+  `npm run review -- check`: every governing record fresh and passing.
+- No acceptance manifest or plan row tracks the Phase 8 exit; none was edited.
+
+### Final counts
+
+72 entries in 59 sections; 139 `source_example` cases, each claimed exactly once.
+
+| Form               | `executable` | `descriptive` | `source_conflicted` | `missing_information` | Total |
+| ------------------ | -----------: | ------------: | ------------------: | --------------------: | ----: |
+| `inline_prose`     |           29 |            13 |                   2 |                     3 |    47 |
+| `diagram`          |            7 |             2 |                   0 |                     0 |     9 |
+| `caption`          |            6 |             0 |                   1 |                     0 |     7 |
+| `table`            |            3 |             2 |                   1 |                     0 |     6 |
+| `labelled_example` |            0 |             0 |                   3 |                     0 |     3 |
+| Total              |           45 |            17 |                   7 |                     3 |    72 |
+
+Phase 8 exit holds: every identified example has provenance and a disposition, every executable
+entry names passing outcome-and-trace cases, and every `source_conflicted` entry cites a resolving
+issue.
