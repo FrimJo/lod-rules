@@ -170,15 +170,21 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   [Phase 9 exit checklist](../tests/fixtures/acceptance/phase-9.json) is `accepted`. Uncertainty
   now lives only in `review/` ([extraction guide](extraction-guide.md#uncertainty-and-evidence-backed-resolutions)).
   Evidence in [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md).
+- Phase 11 is complete (24 November, issue #24): `npm run build:corpus` validates the corpus and
+  compiles it into JSON bundles, a graph bundle and a manifest under `generated/corpus/`
+  ([contract](corpus-bundles.md)); retrieval and the web client read them. The
+  [Phase 11 exit checklist](../tests/fixtures/acceptance/phase-11.json) is `accepted`. No
+  canonical change; evidence in
+  [phase-11-deterministic-compilation.md](ledgers/phase-11-deterministic-compilation.md).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phase 10 is closed: Steps 2–3 carried it out and Step 3's exit is its exit. Phases 11–12 are
+  Phase 10 is closed: Steps 2–3 carried it out and Step 3's exit is its exit. Phase 12 is
   unfinished.
 
 ## Next unit
 
-Phase 11, deterministic compilation ([plan](corpus-completion-plan.md#phase-11--deterministic-compilation)):
-replace the `build:corpus` stub with validated, reproducible JSON bundles and a manifest. Phase 12
-(retrieval over the bundles) follows.
+Phase 12, retrieval corpus ([plan](corpus-completion-plan.md#phase-12--retrieval-corpus)): the
+fixed acceptance query suite, review status in the corpus-work CLI, and review of the labelled
+questions.
 
 Open carry-overs:
 
@@ -211,6 +217,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
 | Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
 | Phase 9: uncertainty audit                     | [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md)                         |
+| Phase 11: deterministic compilation            | [phase-11-deterministic-compilation.md](ledgers/phase-11-deterministic-compilation.md)       |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
