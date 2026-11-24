@@ -4,7 +4,18 @@ import { join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { parse } from 'yaml';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { buildCorpus, CorpusBuildError, type CorpusManifest } from '../../scripts/build/index.ts';
+import {
+  buildCorpus,
+  CorpusBuildError,
+  readGraphBundle,
+  type CorpusManifest,
+} from '../../scripts/build/index.ts';
+import {
+  buildGraph,
+  traverse,
+  type Graph,
+  type TraverseOptions,
+} from '../../scripts/graph/index.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 import { copyCorpusInputs, type CorpusCopy } from '../support/corpus-copy.ts';
@@ -81,6 +92,21 @@ const expectedBundles: Record<string, Expected> = {
   'test-cases.json': { paths: tree('tests/examples'), records: asList, key: id },
 };
 
+/** Bundles derived from the canonical records rather than copied from YAML. */
+const derivedBundles = ['graph.json'];
+
+/**
+ * Traversal samples: a canonical binding edge (`input_from`), a summary and the rule that
+ * expands it, and a rule reached by procedure steps, overrides and issues.
+ */
+const traversals: Array<{ id: string; options: TraverseOptions }> = [
+  { id: 'core.quest.start_settlement', options: { direction: 'both' } },
+  { id: 'procedure.quest_acceptance', options: { depth: 2 } },
+  { id: 'combat.action.parry_stance', options: { direction: 'both', depth: 2 } },
+  { id: 'combat.defence.shield_parry', options: { direction: 'reverse' } },
+  { id: 'core.check.standard', options: { direction: 'reverse', categories: ['dependency'] } },
+];
+
 /** Every file under `dir` by name, with its bytes. */
 function snapshot(dir: string): Map<string, Buffer> {
   return new Map(readdirSync(dir).map((name) => [name, readFileSync(join(dir, name))]));
@@ -112,10 +138,45 @@ describe('a successful corpus build', () => {
   afterAll(() => copy.dispose());
 
   it('writes exactly the documented bundles', () => {
-    expect(Object.keys(manifest.bundles).sort()).toEqual(Object.keys(expectedBundles).sort());
-    expect(readdirSync(outDir).sort()).toEqual(
-      [...Object.keys(expectedBundles), 'manifest.json'].sort(),
+    const bundles = [...Object.keys(expectedBundles), ...derivedBundles];
+    expect(Object.keys(manifest.bundles).sort()).toEqual(bundles.sort());
+    expect(readdirSync(outDir).sort()).toEqual([...bundles, 'manifest.json'].sort());
+  });
+
+  describe('the graph bundle', () => {
+    let bundled: Graph;
+    let fresh: Graph;
+
+    beforeAll(() => {
+      bundled = readGraphBundle(outDir);
+      fresh = buildGraph(copy.root);
+    }, 60_000);
+
+    it.each(traversals)(
+      'traverses from $id as the freshly derived graph does',
+      ({ id, options }) => {
+        const edges = traverse(bundled, id, options);
+        expect(edges.length).toBeGreaterThan(0);
+        expect(edges).toEqual(traverse(fresh, id, options));
+      },
     );
+
+    it('samples canonical, summary and derived expansion edges', () => {
+      const relations = new Set(
+        traversals
+          .flatMap(({ id, options }) => traverse(bundled, id, options))
+          .map((e) => e.relation),
+      );
+      expect([...relations]).toEqual(
+        expect.arrayContaining(['input_from', 'summary_of', 'expanded_by', 'step_rule']),
+      );
+    });
+
+    it('holds the nodes and edges of the derived graph, counted in the manifest', () => {
+      expect(bundled.nodes).toEqual(fresh.nodes);
+      expect(bundled.edges).toEqual(fresh.edges);
+      expect(manifest.bundles['graph.json']?.records).toBe(fresh.nodes.length + fresh.edges.length);
+    });
   });
 
   it.each(Object.entries(expectedBundles))(
@@ -173,8 +234,11 @@ describe('a successful corpus build', () => {
   it('records each bundle with its record count and the SHA-256 of its bytes', () => {
     for (const [name, entry] of Object.entries(manifest.bundles)) {
       const bytes = readFileSync(join(outDir, name));
-      expect(entry.records, name).toBe(readBundle(outDir, name).records.length);
       expect(entry.sha256, name).toBe(createHash('sha256').update(bytes).digest('hex'));
+      // The graph bundle's count is checked with the graph.
+      if (name in expectedBundles) {
+        expect(entry.records, name).toBe(readBundle(outDir, name).records.length);
+      }
     }
   });
 
