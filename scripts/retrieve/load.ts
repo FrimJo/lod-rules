@@ -1,16 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import {
-  canonicalInputs,
-  fingerprintFiles,
-  readCanonicalFiles,
-  type CanonicalFile,
-  type CanonicalInput,
-} from '../validate/canonical-files.ts';
-import { emptyPilot } from '../validate/pilot-files.ts';
+import { loadCorpusBundles, type CorpusBundles } from '../build/load.ts';
 import type { Pilot, TestCase } from '../validate/pilot-types.ts';
 import type { Alias, Issue, Section, Term } from '../validate/integrity.ts';
-import { repoRoot, type SchemaName } from '../validate/schemas.ts';
+import { repoRoot } from '../validate/schemas.ts';
 
 export interface GlossaryTerm extends Term {
   definition?: string;
@@ -39,89 +30,61 @@ export interface RetrievalCorpus {
   manifest: SourceManifest;
   /** Canonical YAML path for every record id. */
   files: Map<string, string>;
-  /** SHA-256 over every input path and its bytes, in sorted path order. */
+  /** The corpus manifest's `input_fingerprint`: the canonical inputs this corpus came from. */
   fingerprint: string;
 }
 
-/** Classes retrieval reads. Test cases join only on request and never enter the fingerprint. */
-const retrievalSchemas = new Set<SchemaName>([
-  'manifest',
-  'terms',
-  'aliases',
-  'issues',
-  'sections',
-  'rules',
-  'entities',
-  'tables',
-  'procedures',
-  'stateMachines',
-  'edges',
-]);
+const pilotBundles = {
+  rules: 'rules.json',
+  entities: 'entities.json',
+  tables: 'tables.json',
+  procedures: 'procedures.json',
+  stateMachines: 'state-machines.json',
+  edges: 'edges.json',
+} as const satisfies Record<keyof RetrievalCorpus['pilot'], string>;
 
-export function retrievalInputs(root = repoRoot): CanonicalInput[] {
-  return canonicalInputs(root).filter((input) => retrievalSchemas.has(input.schema));
-}
-
-export function fingerprintInputs(root = repoRoot): string {
-  return fingerprintFiles(
-    retrievalInputs(root).map(({ path }) => ({ path, bytes: readFileSync(join(root, path)) })),
-  );
-}
-
-export function loadRetrievalCorpus(
-  root = repoRoot,
-  options: { testCases?: boolean } = {},
-): RetrievalCorpus {
-  const inputs = canonicalInputs(root).filter(
-    (input) =>
-      retrievalSchemas.has(input.schema) || (options.testCases && input.schema === 'testCases'),
-  );
-  return retrievalCorpusFrom(readCanonicalFiles(inputs, root), options);
+export interface LoadOptions {
+  testCases?: boolean;
+  /** Compile a missing or stale corpus in memory instead of publishing it to `generated/`. */
+  readOnly?: boolean;
 }
 
 /**
- * Assembles the retrieval model from already-validated canonical files (in path order). Files
- * of classes retrieval does not read are ignored, so a caller holding the whole corpus can
- * pass it as is.
+ * Reads the compiled corpus of `root`, building it first when it is missing or stale, so
+ * retrieval always sees the corpus version `npm run build:corpus` would publish.
  */
-export function retrievalCorpusFrom(
-  canonical: CanonicalFile[],
-  options: { testCases?: boolean } = {},
+export function loadRetrievalCorpus(root = repoRoot, options: LoadOptions = {}): RetrievalCorpus {
+  return retrievalCorpusFrom(loadCorpusBundles(root, options), options);
+}
+
+function retrievalCorpusFrom(
+  corpus: CorpusBundles,
+  options: { testCases?: boolean },
 ): RetrievalCorpus {
-  const pilot = emptyPilot();
   const files = new Map<string, string>();
-  const single = new Map<SchemaName, unknown>();
-  const inputs = canonical.filter((file) => retrievalSchemas.has(file.schema));
+  /** Records of one bundle; `traced` ones also map their ids to their YAML files. */
+  const read = <T>(file: string, traced = false): T[] => {
+    const bundle = corpus.bundle<T>(file);
+    if (traced) for (const [id, path] of Object.entries(bundle.files)) files.set(id, path);
+    return bundle.records;
+  };
 
-  for (const { path, schema, data } of canonical) {
-    if (schema === 'testCases') {
-      if (options.testCases) pilot.testCases.push(...(data as TestCase[]));
-      continue;
-    }
-    if (!retrievalSchemas.has(schema)) continue;
-
-    if (schema in pilot) {
-      const entries = data as Array<{ id: string }>;
-      (pilot[schema as keyof Pilot] as unknown[]).push(...entries);
-      for (const entry of entries) files.set(entry.id, path);
-    } else {
-      single.set(schema, data);
-      if (schema === 'terms' || schema === 'issues') {
-        for (const entry of data as Array<{ id: string }>) files.set(entry.id, path);
-      }
-    }
-  }
-
-  const { testCases, ...rest } = pilot;
+  const pilot = Object.fromEntries(
+    Object.entries(pilotBundles).map(([key, file]) => [key, read(file, true)]),
+  ) as RetrievalCorpus['pilot'];
   return {
-    pilot: rest,
-    ...(options.testCases ? { testCases } : {}),
-    terms: single.get('terms') as GlossaryTerm[],
-    aliases: single.get('aliases') as Alias[],
-    issues: single.get('issues') as ReviewIssue[],
-    sections: single.get('sections') as Section[],
-    manifest: single.get('manifest') as SourceManifest,
+    pilot,
+    ...(options.testCases ? { testCases: read<TestCase>('test-cases.json') } : {}),
+    terms: read<GlossaryTerm>('terms.json', true),
+    aliases: read<Alias>('aliases.json'),
+    issues: read<ReviewIssue>('issues.json', true),
+    sections: read<Section>('sections.json'),
+    manifest: {
+      documents: read<SourceManifest['documents'][number]>('source-documents.json'),
+      external_sources:
+        read<NonNullable<SourceManifest['external_sources']>[number]>('external-sources.json'),
+    },
     files,
-    fingerprint: fingerprintFiles(inputs),
+    fingerprint: corpus.manifest.input_fingerprint,
   };
 }

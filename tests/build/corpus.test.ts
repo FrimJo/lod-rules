@@ -5,7 +5,6 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { parse } from 'yaml';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildCorpus, CorpusBuildError, type CorpusManifest } from '../../scripts/build/index.ts';
-import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 import { copyCorpusInputs, type CorpusCopy } from '../support/corpus-copy.ts';
 
@@ -135,14 +134,6 @@ describe('a successful corpus build', () => {
       expect(bundle.files).toEqual(files);
     },
   );
-
-  it("maps ids to the same files as the retrieval loader's map", () => {
-    const loaded = loadRetrievalCorpus(copy.root);
-    const compiled = Object.keys(expectedBundles).flatMap((name) =>
-      Object.entries(readBundle(outDir, name).files).filter(([key]) => loaded.files.has(key)),
-    );
-    expect(new Map(compiled)).toEqual(loaded.files);
-  });
 
   it('keeps uncertainty and missing-book markers', () => {
     const text = readFileSync(join(outDir, 'issues.json'), 'utf8');
