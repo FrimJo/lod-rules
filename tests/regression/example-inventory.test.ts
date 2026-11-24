@@ -45,7 +45,7 @@ describe('example inventory (issues #13, #14)', () => {
     expect(claimed).toEqual(sourceExamples);
   });
 
-  it('allowlists only live sections, which the chapter slices remove as they sweep them', () => {
+  it('allowlists only live sections, each once, until the chapter slices sweep them', () => {
     const live = new Set(
       [...context.sections].filter(([, redirected]) => !redirected).map(([id]) => id),
     );
