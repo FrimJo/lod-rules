@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { CORPUS_DIR, type CorpusManifest } from '../../scripts/build/index.ts';
 import { buildRetrievalArtifacts, freshDatabasePath } from '../../scripts/retrieve/build.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
@@ -58,22 +58,6 @@ describe('retrieval over the compiled corpus', () => {
     expect(corpus.pilot.rules.length).toBeGreaterThan(0);
   }, 60_000);
 
-  it('rebuilds stale bundles and invalidates the retrieval index when an input changes', () => {
-    const before = buildRetrievalArtifacts(copy.root);
-    expect(before.input_fingerprint).toBe(corpusManifest(copy.root).input_fingerprint);
-    expect(freshDatabasePath(copy.root)).not.toBeNull();
-
-    copy.edit('review/ambiguities.yaml', (text) => text + addedIssue);
-    expect(freshDatabasePath(copy.root)).toBeNull();
-    expect(hasIssue(copy.root, 'issue.test.bundle_freshness')).toBe(true);
-    expect(corpusManifest(copy.root).input_fingerprint).toBe(fingerprintInputs(copy.root));
-    expect(corpusManifest(copy.root).input_fingerprint).not.toBe(before.input_fingerprint);
-
-    const after = buildRetrievalArtifacts(copy.root);
-    expect(after.input_fingerprint).toBe(fingerprintInputs(copy.root));
-    expect(freshDatabasePath(copy.root)).not.toBeNull();
-  }, 120_000);
-
   it('survives concurrent loaders building the same stale corpus', async () => {
     const tsx = join(repoRoot, 'node_modules/.bin/tsx');
     const loader = join(repoRoot, 'scripts/retrieve/load.ts');
@@ -84,4 +68,38 @@ describe('retrieval over the compiled corpus', () => {
     expect(corpusManifest(copy.root).input_fingerprint).toBe(fingerprintInputs(copy.root));
     expect(readdirSync(join(copy.root, 'generated'))).toEqual(['corpus']);
   }, 120_000);
+});
+
+// One copy through a build, an edit and a rebuild. Separate steps keep each synchronous build
+// short enough for the vitest worker to stay responsive.
+describe('an input change', () => {
+  let copy: CorpusCopy;
+  let built: string;
+
+  beforeAll(() => {
+    copy = copyCorpusInputs();
+  });
+  afterAll(() => copy.dispose());
+
+  it('starts from a fresh retrieval index built from the corpus bundles', () => {
+    built = buildRetrievalArtifacts(copy.root).input_fingerprint;
+    expect(built).toBe(corpusManifest(copy.root).input_fingerprint);
+    expect(freshDatabasePath(copy.root)).not.toBeNull();
+  }, 60_000);
+
+  it('makes the retrieval index stale', () => {
+    copy.edit('review/ambiguities.yaml', (text) => text + addedIssue);
+    expect(freshDatabasePath(copy.root)).toBeNull();
+  });
+
+  it('rebuilds the stale bundles when retrieval loads', () => {
+    expect(hasIssue(copy.root, 'issue.test.bundle_freshness')).toBe(true);
+    expect(corpusManifest(copy.root).input_fingerprint).toBe(fingerprintInputs(copy.root));
+    expect(corpusManifest(copy.root).input_fingerprint).not.toBe(built);
+  }, 60_000);
+
+  it('gives a fresh retrieval index again once rebuilt', () => {
+    expect(buildRetrievalArtifacts(copy.root).input_fingerprint).toBe(fingerprintInputs(copy.root));
+    expect(freshDatabasePath(copy.root)).not.toBeNull();
+  }, 60_000);
 });

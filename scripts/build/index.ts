@@ -10,9 +10,12 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { compileGraphBundle, GRAPH_BUNDLE, graphRecords } from './graph-bundle.ts';
 import { fingerprintFiles, type CanonicalFile } from '../validate/canonical-files.ts';
 import { validateCorpus } from '../validate/corpus.ts';
 import { repoRoot, type SchemaName } from '../validate/schemas.ts';
+
+export { readGraphBundle, type GraphBundle } from './graph-bundle.ts';
 
 export const CORPUS_DIR = 'generated/corpus';
 export const CORPUS_FORMAT_VERSION = 1;
@@ -158,10 +161,37 @@ export class CorpusBuildError extends Error {
   }
 }
 
-/** Bundle file name to its serialised bytes, plus the manifest that describes them. */
+/** A serialised bundle and how to count the records in its parsed value. */
+interface Output {
+  text: string;
+  recordsIn(value: unknown): number;
+}
+
+/** Bundle file name to its output, plus the manifest that describes them. */
 export interface Compiled {
-  outputs: Map<string, string>;
+  outputs: Map<string, Output>;
   manifest: CorpusManifest;
+}
+
+const bundleRecords = (value: unknown): number => (value as Bundle).records.length;
+
+/** The bundles of one corpus build, published or still in memory. */
+export interface CorpusBundles {
+  manifest: CorpusManifest;
+  /** Parses one bundle by file name, such as `rules.json`. */
+  bundle<T>(file: string): Bundle & { records: T[] };
+}
+
+/** Reads bundles straight from compiled output, before (or instead of) publishing it. */
+export function compiledBundles({ outputs, manifest }: Compiled): CorpusBundles {
+  return {
+    manifest,
+    bundle<T>(file: string) {
+      const output = outputs.get(file);
+      if (!output) throw new Error(`no corpus bundle named ${file}`);
+      return JSON.parse(output.text) as Bundle & { records: T[] };
+    },
+  };
 }
 
 function compile(files: CanonicalFile[], root: string): Compiled {
@@ -173,14 +203,15 @@ function compile(files: CanonicalFile[], root: string): Compiled {
     bundles: {},
     excluded,
   };
-  const outputs = new Map<string, string>();
-  // Derived bundles (the dependency graph) join here as further entries of `outputs`.
-  for (const spec of specs) {
-    const bundle = compileBundle(spec, files);
-    const text = json(bundle);
-    outputs.set(spec.file, text);
-    manifest.bundles[spec.file] = { records: bundle.records.length, sha256: sha256(text) };
-  }
+  const outputs = new Map<string, Output>();
+  const emit = (file: string, value: unknown, recordsIn: Output['recordsIn']): void => {
+    const text = json(value);
+    outputs.set(file, { text, recordsIn });
+    manifest.bundles[file] = { records: recordsIn(value), sha256: sha256(text) };
+  };
+  for (const spec of specs) emit(spec.file, compileBundle(spec, files), bundleRecords);
+  // Derived from the class bundles just compiled, through the model retrieval loads them into.
+  emit(GRAPH_BUNDLE, compileGraphBundle(compiledBundles({ outputs, manifest })), graphRecords);
   return { outputs, manifest };
 }
 
@@ -197,8 +228,10 @@ function verifyStaged(staging: string, { outputs, manifest }: Compiled): void {
   for (const [file, { records, sha256: checksum }] of Object.entries(manifest.bundles)) {
     const bytes = readFileSync(join(staging, file));
     if (sha256(bytes) !== checksum) throw new Error(`staged ${file}: checksum mismatch`);
-    const bundle = JSON.parse(bytes.toString('utf8')) as Bundle;
-    if (bundle.records.length !== records) throw new Error(`staged ${file}: record count mismatch`);
+    const value: unknown = JSON.parse(bytes.toString('utf8'));
+    if (outputs.get(file)?.recordsIn(value) !== records) {
+      throw new Error(`staged ${file}: record count mismatch`);
+    }
   }
 }
 
@@ -215,7 +248,7 @@ function publish(outDir: string, compiled: Compiled): void {
   const staging = mkdtempSync(`${outDir}.staging-`);
   const previous = `${staging}.previous`;
   try {
-    for (const [file, text] of compiled.outputs) writeFileSync(join(staging, file), text);
+    for (const [file, { text }] of compiled.outputs) writeFileSync(join(staging, file), text);
     writeFileSync(join(staging, MANIFEST_FILE), json(compiled.manifest));
     verifyStaged(staging, compiled);
 

@@ -1,4 +1,5 @@
-import { loadCorpusBundles, type CorpusBundles } from '../build/load.ts';
+import type { CorpusBundles } from '../build/index.ts';
+import { loadCorpusBundles } from '../build/load.ts';
 import type { Pilot, TestCase } from '../validate/pilot-types.ts';
 import type { Alias, Issue, Section, Term } from '../validate/integrity.ts';
 import { repoRoot } from '../validate/schemas.ts';
@@ -57,9 +58,10 @@ export function loadRetrievalCorpus(root = repoRoot, options: LoadOptions = {}):
   return retrievalCorpusFrom(loadCorpusBundles(root, options), options);
 }
 
-function retrievalCorpusFrom(
+/** Assembles the retrieval model from compiled bundles, published or still in memory. */
+export function retrievalCorpusFrom(
   corpus: CorpusBundles,
-  options: { testCases?: boolean },
+  options: { testCases?: boolean } = {},
 ): RetrievalCorpus {
   const files = new Map<string, string>();
   /** Records of one bundle; `traced` ones also map their ids to their YAML files. */
