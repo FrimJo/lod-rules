@@ -1,3 +1,197 @@
+- id: test.core.magic.power_example.miscast_threshold_94
+  name: printed Increased Power example, one added power level lowers the miscast threshold to 94
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Increased Power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: The miscast threshold decreases by -1 for each increase in power level, meaning that
+    a miscast would occur on 94-100 for a power level increase of 1.
+  kind: source_example
+  rule_ids:
+    - core.magic.miscast.threshold.normal
+  inputs:
+    wounded: false
+    power_levels: 1
+    focus_actions: 0
+  expected:
+    state:
+      miscast_threshold: 94
+    events: []
+    trace:
+      - core.magic.miscast.threshold.normal
+    unresolved: []
+    steps: []
+- id: test.core.magic.power_example.level_4_adds_4
+  name: printed Increased Power example, a Level 4 Wizard could add 4 levels (spell pinned to Magic
+    Bolt, Destruction, 14 Mana, as the example names none)
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Increased Power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A maximum of 5 levels, or up to the wizard’s level may be added. This means a Level 4
+    Wizard could add 4 levels, whereas a Level 6 Wizard could add 5 levels.
+  kind: source_example
+  rule_ids:
+    - core.magic.power
+  see_also:
+    - section.appendix_iv_spells.level_3
+  inputs:
+    school: Destruction
+    power_levels: 4
+    caster_level: 4
+    base_mana: 14
+  expected:
+    state:
+      mana_cost: 22
+      effect_bonus: 4
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - core.magic.power
+    unresolved: []
+    steps: []
+- id: test.core.magic.power_example.level_6_adds_5
+  name: printed Increased Power example, a Level 6 Wizard could add 5 levels (spell pinned to Magic
+    Bolt, Destruction, 14 Mana, as the example names none)
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Increased Power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A maximum of 5 levels, or up to the wizard’s level may be added. This means a Level 4
+    Wizard could add 4 levels, whereas a Level 6 Wizard could add 5 levels.
+  kind: source_example
+  rule_ids:
+    - core.magic.power
+  see_also:
+    - section.appendix_iv_spells.level_3
+  inputs:
+    school: Destruction
+    power_levels: 5
+    caster_level: 6
+    base_mana: 14
+  expected:
+    state:
+      mana_cost: 24
+      effect_bonus: 5
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+    trace:
+      - core.magic.power
+    unresolved: []
+    steps: []
+- id: test.core.magic.power.level_4_cannot_add_5
+  name: a Level 4 Wizard cannot add a fifth power level (the cap is the wizard's level)
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Increased Power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A maximum of 5 levels, or up to the wizard’s level may be added. This means a Level 4
+    Wizard could add 4 levels, whereas a Level 6 Wizard could add 5 levels.
+  kind: derived_case
+  rule_ids:
+    - core.magic.power
+  inputs:
+    school: Destruction
+    power_levels: 5
+    caster_level: 4
+    base_mana: 14
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: false
+    trace:
+      - core.magic.power
+    unresolved: []
+    steps: []
+- id: test.core.magic.power.level_6_cannot_add_6
+  name: a Level 6 Wizard cannot add a sixth power level (the cap is 5)
+  section_id: section.magic.increased_power
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 64
+      pdf_page: 66
+      heading: Increased Power
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: A maximum of 5 levels, or up to the wizard’s level may be added. This means a Level 4
+    Wizard could add 4 levels, whereas a Level 6 Wizard could add 5 levels.
+  kind: derived_case
+  rule_ids:
+    - core.magic.power
+  inputs:
+    school: Destruction
+    power_levels: 6
+    caster_level: 6
+    base_mana: 14
+  expected:
+    state: {}
+    events:
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: true
+      - type: require
+        satisfied: false
+    trace:
+      - core.magic.power
+    unresolved: []
+    steps: []
 - id: test.core.magic.focus_example.ozmor
   name: printed Focus example, Ozmor focuses for 2 actions (Arcane Arts 73, miscast threshold 85)
   section_id: section.magic.focus
@@ -47,6 +241,46 @@
     trace:
       - core.magic.focus
       - core.magic.miscast.threshold.normal
+    unresolved: []
+    steps: []
+- id: test.core.magic.scroll_example.magic_bolt_without_scroll
+  name: printed Magic Scrolls example, Magic Bolt cast normally (Arcane Arts 50 - CV 10, roll 40;
+    Mana pinned to the listed cost 14, as the example prints no Mana pool)
+  section_id: section.magic.magic_scrolls
+  source:
+    - document: rulebook.second_printing.eng
+      file: source/Rulebook-2nd-printing-ENGa.pdf
+      printed_page: 65
+      pdf_page: 67
+      heading: Magic Scrolls
+      locator:
+        paragraph: Example
+      extraction:
+        method: text
+        confidence: high
+        visually_verified: true
+  status: extracted
+  confidence: high
+  source_text: 'Example: A Magic Bolt Spell requires the caster to be Level 3, and the CV of the
+    spell is 10. A wizard with an Arcane Arts skill of 50 would then need to roll 40 to succeed.'
+  kind: source_example
+  rule_ids:
+    - core.magic.casting.threshold
+  see_also:
+    - section.appendix_iv_spells.level_3
+  inputs:
+    arcane_arts: 50
+    casting_value: 10
+    mana: 14
+    mana_cost: 14
+  expected:
+    state:
+      casting_threshold: 40
+    events:
+      - type: require
+        satisfied: true
+    trace:
+      - core.magic.casting.threshold
     unresolved: []
     steps: []
 - id: test.core.magic.scroll_example.magic_bolt_scroll
