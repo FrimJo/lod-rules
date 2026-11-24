@@ -25,7 +25,8 @@ rule is shown firing on a minimal broken copy. T12 made all eight families manda
 
 `tests/schema/independent-review.test.ts` ("committed canonical edges") requires every edge and
 summary in `corpus/graph/` to sit in a reviewed section whose governing record is fresh, passing
-and examined it. All 17 were covered; the pending list is empty.
+and examined it. All 17 were covered. The check is `edgeEvidenceGaps` in
+`scripts/validate/independent-review.ts`.
 
 ## Checkpoint list triage — T2, T3
 
@@ -53,11 +54,11 @@ The checkpoint list now holds two bullets, each citing its issue.
 | `ledger-lifecycle` | T5     | lifecycle, character-guild, travel-settlement ledgers |      52 |       20 |        0 |              32 |
 | `ledger-phases`    | T6     | phase-\* ledgers, package-a-completion-inventory      |      85 |       41 |        1 |              43 |
 | `ledger-quest`     | T7     | quest-book-reconciliation, quest-scenario-inventory   |      22 |        3 |        2 |              17 |
-| `corpus_note`      | T8     | corpus/\*\*/\*.yaml, tests/examples/\*\*/\*.yaml      |      83 |       65 |        0 |              18 |
-| `review_finding`   | T9     | review/independent/\*.yaml                            |      36 |       11 |        0 |              25 |
+| `corpus_note`      | T8     | corpus/\*\*/\*.yaml, tests/examples/\*\*/\*.yaml      |      81 |       65 |        0 |              16 |
+| `review_finding`   | T9     | review/independent/\*.yaml                            |      36 |       13 |        0 |              23 |
 | `doc`              | T10    | other docs, plans, README, CONTEXT                    |      48 |        3 |        0 |              45 |
 
-Total 369 entries. `review_finding` fell from 62 to 36 when the checker began treating a finding
+Total 367 entries. `review_finding` fell from 62 to 36 when the checker began treating a finding
 whose `object_id` is an existing issue as a pointer (T11).
 
 Recurring `not_uncertainty` reasons: point-in-time review-inventory counts; state words for input
@@ -72,8 +73,9 @@ New issues raised by the inventories, each with rendered-page source references:
 - `issue.embarking.entering_the_dungeon_pointer` (T8, PDF 59)
 - `issue.alchemy.same_stat_potion_second_drink` (T9, PDF 72)
 - `issue.equipment.tobacco_addiction_test_scope` (T9, PDF 182)
+- `issue.settlement.arena_fee_unaffordable` (review fixes, PDF 141)
 
-With the two from T2, Phase 9 added 7 issues: `review/ambiguities.yaml` holds 342 (48 resolved).
+With the two from T2, Phase 9 added 8 issues: `review/ambiguities.yaml` holds 343 (48 resolved).
 
 ## Re-reviews — T11
 
@@ -107,3 +109,23 @@ Optional follow-ups the reviewers suggested, not applied because they would stal
 - `npm run review -- check` on 24 November 2026 at `c2e1899`: 237 records, 0 invalid; each of
   the 53 review units' governing record is fresh and passing; no stale record backs `reviewed`.
 - The exit checklist is `accepted` with six rows verified. The checkpoint moves to Phase 11.
+
+## Review fixes
+
+Code review of the integration branch changed these:
+
+- Code: the edge-evidence check moved into the validator module and returns structured gaps.
+  The inventory reads manifest source classes from the review snapshot instead of parsing the
+  manifest again. A test keeps the TS source-kind and disposition lists equal to the fixture
+  schema. The checker header records where it deviates from the spec.
+- `docs/naming-conventions.md` lists the `informal.` and `phase_9.` prefixes.
+- Re-judged against the rendered PDF: the Embarking "Entering the Dungeon" finding is now
+  `recorded` (`issue.embarking.entering_the_dungeon_pointer`). The Arena "cannot pay" finding is
+  `recorded` against the new `issue.settlement.arena_fee_unaffordable`. The Psychology
+  "inferences" finding stays `not_uncertainty`: the page prints both readings.
+- `procedure.rest_energy_point_recovery` and `procedure.rest_mana_recovery` had processed-marker
+  descriptions copied from the HP helper. They are corrected, so their two inventory entries are
+  gone. The HP helper also loses its stray "(and Energy point …)" phrase.
+- These edits staled `review.into_the_dungeons_actions.11` and
+  `review.settlements_arena_banking.2`, which need re-review. The `review_check_clean` row of the
+  exit checklist must then be refreshed to the new revision.
