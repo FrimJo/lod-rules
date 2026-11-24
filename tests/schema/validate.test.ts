@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { discoverPilotFiles } from '../../scripts/validate/pilot-files.ts';
-import { discoverReviewFiles } from '../../scripts/validate/independent-review.ts';
+import { discoverPilotFiles, discoverReviewFiles } from '../../scripts/validate/canonical-files.ts';
 import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { renderCoverageReport } from '../../scripts/reports/render-coverage.ts';
 import { createAjv, getValidator } from '../../scripts/validate/schemas.ts';

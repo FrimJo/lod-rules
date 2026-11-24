@@ -5,6 +5,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  readlinkSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -25,6 +26,8 @@ export interface CorpusCopy {
   edit(path: string, transform: (text: string) => string): void;
   /** Removes a copied file or the link to a source document; never the linked document itself. */
   remove(path: string): void;
+  /** Undoes every edit and removal, so tests can share one copy instead of copying per test. */
+  reset(): void;
   dispose(): void;
 }
 
@@ -50,6 +53,24 @@ export function copyCorpusInputs(from = repoRoot): CorpusCopy {
     return absolute;
   };
 
+  /** How to put back each changed path, recorded on its first change. */
+  const undo = new Map<string, () => void>();
+  const remember = (path: string): void => {
+    if (undo.has(path)) return;
+    const absolute = join(root, path);
+    const stat = lstatSync(absolute);
+    if (stat.isSymbolicLink()) {
+      const target = readlinkSync(absolute);
+      undo.set(path, () => {
+        rmSync(absolute, { force: true });
+        symlinkSync(target, absolute);
+      });
+    } else if (stat.isFile()) {
+      const bytes = readFileSync(absolute);
+      undo.set(path, () => writeFileSync(absolute, bytes));
+    } else throw new Error(`${path}: only files and links can be changed`);
+  };
+
   return {
     root,
     edit(path, transform) {
@@ -57,11 +78,17 @@ export function copyCorpusInputs(from = repoRoot): CorpusCopy {
       const before = readFileSync(absolute, 'utf8');
       const after = transform(before);
       if (after === before) throw new Error(`${path}: edit changed nothing`);
+      remember(path);
       writeFileSync(absolute, after);
     },
     remove(path) {
+      remember(path);
       // rmSync on a symlink unlinks it and leaves the target alone.
-      rmSync(join(root, path), { recursive: true });
+      rmSync(join(root, path));
+    },
+    reset() {
+      for (const restore of undo.values()) restore();
+      undo.clear();
     },
     dispose() {
       rmSync(root, { recursive: true, force: true });

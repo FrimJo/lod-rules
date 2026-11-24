@@ -6,6 +6,8 @@
  * tracks exactly the sections that exist, and that the page map covers the whole document.
  */
 
+import { canonicalPaths } from './canonical-files.ts';
+
 export interface Section {
   id: string;
   title: string;
@@ -52,22 +54,26 @@ function checkReferences(sections: Section[], pages: Page[], externalIds: string
 
   for (const section of sections) {
     if (section.parent !== undefined && !ids.has(section.parent)) {
-      errors.push(`sections.yaml: "${section.id}" has unknown parent "${section.parent}"`);
+      errors.push(
+        `${canonicalPaths.sections}: "${section.id}" has unknown parent "${section.parent}"`,
+      );
     }
 
     for (const target of section.see_also ?? []) {
       if (!ids.has(target)) {
-        errors.push(`sections.yaml: "${section.id}" see_also references unknown "${target}"`);
+        errors.push(
+          `${canonicalPaths.sections}: "${section.id}" see_also references unknown "${target}"`,
+        );
       }
       if (target === section.id) {
-        errors.push(`sections.yaml: "${section.id}" see_also references itself`);
+        errors.push(`${canonicalPaths.sections}: "${section.id}" see_also references itself`);
       }
     }
 
     for (const external of section.external_references ?? []) {
       if (!externals.has(external)) {
         errors.push(
-          `sections.yaml: "${section.id}" references external source "${external}" that is not declared in source/manifest.yaml`,
+          `${canonicalPaths.sections}: "${section.id}" references external source "${external}" that is not declared in ${canonicalPaths.manifest}`,
         );
       }
     }
@@ -76,7 +82,7 @@ function checkReferences(sections: Section[], pages: Page[], externalIds: string
   for (const page of pages) {
     if (page.section_id !== undefined && !ids.has(page.section_id)) {
       errors.push(
-        `pages.yaml: pdf page ${page.pdf_page} references unknown section "${page.section_id}"`,
+        `${canonicalPaths.pages}: pdf page ${page.pdf_page} references unknown section "${page.section_id}"`,
       );
     }
   }
@@ -96,7 +102,9 @@ function checkParentCycles(sections: Section[]): string[] {
 
     while (current && !settled.has(current.id)) {
       if (seen.has(current.id)) {
-        errors.push(`sections.yaml: parent cycle ${[...path, current.id].join(' -> ')}`);
+        errors.push(
+          `${canonicalPaths.sections}: parent cycle ${[...path, current.id].join(' -> ')}`,
+        );
         break;
       }
       seen.add(current.id);
@@ -120,10 +128,12 @@ function checkCoverageMatchesSections(sections: Section[], coverage: CoverageEnt
   const errors: string[] = [];
 
   for (const id of sectionIds) {
-    if (!coverageIds.has(id)) errors.push(`coverage.yaml: no entry for section "${id}"`);
+    if (!coverageIds.has(id))
+      errors.push(`${canonicalPaths.coverage}: no entry for section "${id}"`);
   }
   for (const id of coverageIds) {
-    if (!sectionIds.has(id)) errors.push(`coverage.yaml: entry "${id}" has no matching section`);
+    if (!sectionIds.has(id))
+      errors.push(`${canonicalPaths.coverage}: entry "${id}" has no matching section`);
   }
 
   return errors;
@@ -136,18 +146,21 @@ function checkPageMap(pages: Page[], documentPageCount?: number | null): string[
   const seen = new Set<number>();
   for (const page of pages) {
     if (seen.has(page.pdf_page)) {
-      errors.push(`pages.yaml: duplicate entry for pdf page ${page.pdf_page}`);
+      errors.push(`${canonicalPaths.pages}: duplicate entry for pdf page ${page.pdf_page}`);
     }
     seen.add(page.pdf_page);
   }
 
   const expected = documentPageCount ?? Math.max(...pages.map((page) => page.pdf_page));
   for (let pdfPage = 1; pdfPage <= expected; pdfPage += 1) {
-    if (!seen.has(pdfPage)) errors.push(`pages.yaml: missing entry for pdf page ${pdfPage}`);
+    if (!seen.has(pdfPage))
+      errors.push(`${canonicalPaths.pages}: missing entry for pdf page ${pdfPage}`);
   }
   for (const pdfPage of seen) {
     if (pdfPage > expected) {
-      errors.push(`pages.yaml: pdf page ${pdfPage} is beyond the document's ${expected} pages`);
+      errors.push(
+        `${canonicalPaths.pages}: pdf page ${pdfPage} is beyond the document's ${expected} pages`,
+      );
     }
   }
 
@@ -166,7 +179,7 @@ function checkPageRanges(sections: Section[]): string[] {
     for (const [label, start, end] of pairs) {
       if (typeof start === 'number' && typeof end === 'number' && end < start) {
         errors.push(
-          `sections.yaml: "${section.id}" has ${label} pages ending (${end}) before starting (${start})`,
+          `${canonicalPaths.sections}: "${section.id}" has ${label} pages ending (${end}) before starting (${start})`,
         );
       }
     }
@@ -291,9 +304,10 @@ export function checkGlossaryIntegrity(glossary: Glossary, map: SourceMap): stri
     ['terms', glossary.terms],
     ['issues', glossary.issues],
   ] as const) {
+    const path = canonicalPaths[label];
     const seen = new Set<string>();
     for (const entry of entries) {
-      if (seen.has(entry.id)) errors.push(`${label}: duplicate id "${entry.id}"`);
+      if (seen.has(entry.id)) errors.push(`${path}: duplicate id "${entry.id}"`);
       seen.add(entry.id);
       for (const target of entry.related) {
         if (!(label === 'terms' ? terms.has(target) : relatedIds.has(target))) {
@@ -332,20 +346,23 @@ export function checkGlossaryIntegrity(glossary: Glossary, map: SourceMap): stri
     for (const form of forms) {
       const key = form.toLowerCase();
       const owner = expected.get(key);
-      if (owner && owner !== term.id) errors.push(`terms: conflicting alias "${form}"`);
+      if (owner && owner !== term.id)
+        errors.push(`${canonicalPaths.terms}: conflicting alias "${form}"`);
       expected.set(key, term.id);
     }
   }
   for (const alias of glossary.aliases) {
     const key = alias.form.toLowerCase();
-    if (actual.has(key)) errors.push(`aliases: duplicate form "${alias.form}"`);
+    if (actual.has(key)) errors.push(`${canonicalPaths.aliases}: duplicate form "${alias.form}"`);
     actual.set(key, alias.term_id);
-    if (!terms.has(alias.term_id)) errors.push(`aliases: unknown term "${alias.term_id}"`);
+    if (!terms.has(alias.term_id))
+      errors.push(`${canonicalPaths.aliases}: unknown term "${alias.term_id}"`);
     if (expected.get(key) !== alias.term_id)
-      errors.push(`aliases: term mismatch for "${alias.form}"`);
+      errors.push(`${canonicalPaths.aliases}: term mismatch for "${alias.form}"`);
   }
   for (const [form, owner] of expected) {
-    if (actual.get(form) !== owner) errors.push(`aliases: missing form "${form}" for ${owner}`);
+    if (actual.get(form) !== owner)
+      errors.push(`${canonicalPaths.aliases}: missing form "${form}" for ${owner}`);
   }
   return errors;
 }

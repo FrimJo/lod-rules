@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { canonicalJson, sha256 } from '../decisions/hash.ts';
+import { canonicalJson } from '../decisions/hash.ts';
+import { sha256 } from '../validate/hash.ts';
 import type { Retrieval } from '../retrieve/index.ts';
 import {
   selectedSystems,

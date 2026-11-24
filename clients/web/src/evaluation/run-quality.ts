@@ -20,7 +20,8 @@ import {
   type FilterPolicy,
 } from '../../../../scripts/ask/ranking.ts';
 import { loadLocalEnv } from '../../../../scripts/decisions/env.ts';
-import { canonicalJson, sha256 } from '../../../../scripts/decisions/hash.ts';
+import { canonicalJson } from '../../../../scripts/decisions/hash.ts';
+import { sha256 } from '../../../../scripts/validate/hash.ts';
 import { Retrieval } from '../../../../scripts/retrieve/index.ts';
 import { fingerprintInputs } from '../../../../scripts/validate/canonical-files.ts';
 import { createAjv, repoRoot } from '../../../../scripts/validate/schemas.ts';

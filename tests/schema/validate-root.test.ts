@@ -1,13 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { validateCorpus } from '../../scripts/validate/corpus.ts';
 import { copyCorpusInputs, type CorpusCopy } from '../support/corpus-copy.ts';
 
 describe('validateCorpus on an injected root', () => {
+  // One copy for the file; each test breaks it one way and the break is undone afterwards.
   let copy: CorpusCopy;
-  beforeEach(() => {
+  beforeAll(() => {
     copy = copyCorpusInputs();
   });
-  afterEach(() => copy.dispose());
+  afterEach(() => copy.reset());
+  afterAll(() => copy.dispose());
 
   it('passes on an unmodified copy of the corpus inputs', () => {
     expect(validateCorpus(copy.root).errors).toEqual([]);
@@ -29,14 +31,14 @@ describe('validateCorpus on an injected root', () => {
     );
   });
 
-  // Cross-file errors keep the validator's existing file labels (`sections.yaml`, `coverage.yaml`).
+  // Cross-file errors name the file by its repo-relative path, as schema errors do.
   it('names the section map when a see_also target does not exist', () => {
     copy.edit('corpus/source-map/sections.yaml', (text) =>
       text.replace('  see_also:\n', '  see_also:\n    - section.nowhere\n'),
     );
     expect(validateCorpus(copy.root).errors).toContainEqual(
       expect.stringMatching(
-        /^sections\.yaml: ".+" see_also references unknown "section\.nowhere"$/,
+        /^corpus\/source-map\/sections\.yaml: ".+" see_also references unknown "section\.nowhere"$/,
       ),
     );
   });
@@ -46,7 +48,7 @@ describe('validateCorpus on an injected root', () => {
       text.replace('sections:\n', 'sections:\n  - id: section.nowhere\n    status: not_started\n'),
     );
     expect(validateCorpus(copy.root).errors).toContain(
-      'coverage.yaml: entry "section.nowhere" has no matching section',
+      'corpus/source-map/coverage.yaml: entry "section.nowhere" has no matching section',
     );
   });
 

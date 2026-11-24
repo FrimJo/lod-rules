@@ -4,7 +4,7 @@ import { parse } from 'yaml';
 import { readPilot } from '../validate/pilot-files.ts';
 import { createAjv, formatErrors, repoRoot } from '../validate/schemas.ts';
 import type { Rule } from '../validate/pilot-types.ts';
-import { sha256 } from './hash.ts';
+import { sha256 } from '../validate/hash.ts';
 import { buildQuestions } from './questions.ts';
 import { JUDGMENT_IDS, type DecisionRequest, type JudgmentId } from './types.ts';
 

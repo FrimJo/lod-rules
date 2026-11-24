@@ -259,7 +259,7 @@ describe('reviewed status requires evidence', () => {
     const snap = snapshot();
     markReviewed(snap);
     expect(checkIndependentReviews(snap, [])).toContain(
-      'coverage.yaml: "section.alpha" is reviewed but no independent review record covers it',
+      'corpus/source-map/coverage.yaml: "section.alpha" is reviewed but no independent review record covers it',
     );
   });
 
@@ -269,7 +269,7 @@ describe('reviewed status requires evidence', () => {
     snap.pilot.rules[0]!.status = 'reviewed';
     const errors = checkIndependentReviews(snap, []);
     expect(errors).toContain(
-      'coverage.yaml: "section.beta" has reviewed component(s) rules but no independent review record covers it',
+      'corpus/source-map/coverage.yaml: "section.beta" has reviewed component(s) rules but no independent review record covers it',
     );
     expect(errors.some((error) => error.startsWith('synthetic.rule.one: rule is reviewed'))).toBe(
       true,
@@ -286,7 +286,7 @@ describe('reviewed status requires evidence', () => {
       'review.alpha.1: outcome passed requires no open or corrected findings',
     );
     expect(errors).toContain(
-      'coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.1" has 1 open finding(s)',
+      'corpus/source-map/coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.1" has 1 open finding(s)',
     );
   });
 
@@ -296,7 +296,7 @@ describe('reviewed status requires evidence', () => {
     const failed = record(snap, { id: 'review.alpha.2', outcome: 'failed' });
     markReviewed(snap);
     expect(checkIndependentReviews(snap, [passed, failed])).toContain(
-      'coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.2" failed',
+      'corpus/source-map/coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.2" failed',
     );
   });
 
@@ -308,7 +308,7 @@ describe('reviewed status requires evidence', () => {
     expect(governingRecord([older, latest], 'section.alpha')?.id).toBe('review.alpha.10');
     expect(governingRecord([latest, older], 'section.alpha')?.id).toBe('review.alpha.10');
     expect(checkIndependentReviews(snap, [older, latest])).toContain(
-      'coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.10" failed',
+      'corpus/source-map/coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.10" failed',
     );
   });
 
@@ -327,7 +327,7 @@ describe('reviewed status requires evidence', () => {
     markReviewed(snap);
     snap.pilot.rules[0]!.source_text = 'Roll 2d20.';
     expect(checkIndependentReviews(snap, [reviewed])).toContain(
-      'coverage.yaml: "section.alpha.sub" is reviewed but latest review "review.alpha.1" is stale (changed: synthetic.rule.one); re-review required',
+      'corpus/source-map/coverage.yaml: "section.alpha.sub" is reviewed but latest review "review.alpha.1" is stale (changed: synthetic.rule.one); re-review required',
     );
   });
 
@@ -339,8 +339,8 @@ describe('reviewed status requires evidence', () => {
     const hint =
       'is stale (changed: section.alpha; a scoped section or coverage row differs from the reviewed one, and only rows reviewed as extracted may be promoted); re-review required';
     expect(checkIndependentReviews(snap, [reviewed])).toEqual([
-      `coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.1" ${hint}`,
-      `coverage.yaml: "section.alpha.sub" is reviewed but latest review "review.alpha.1" ${hint}`,
+      `corpus/source-map/coverage.yaml: "section.alpha" is reviewed but latest review "review.alpha.1" ${hint}`,
+      `corpus/source-map/coverage.yaml: "section.alpha.sub" is reviewed but latest review "review.alpha.1" ${hint}`,
     ]);
   });
 

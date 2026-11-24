@@ -21,17 +21,20 @@
  *    where `sections` is the sorted scoped section ids, `objects` is `[id, kind, digest]` sorted
  *    by id, and `source_sha256` is the SHA-256 of the canonical PDF bytes.
  */
-import { createHash } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parse } from 'yaml';
+import {
+  canonicalPaths,
+  discoverReviewFiles,
+  readCanonicalFiles,
+  type CanonicalInput,
+} from './canonical-files.ts';
+import { fileSha256, sha256 } from './hash.ts';
 import type { CoverageEntry, Issue, Page, Section, SourceReference, Term } from './integrity.ts';
 import { readPilot } from './pilot-files.ts';
 import type { Metadata, Pilot } from './pilot-types.ts';
 import { repoRoot } from './schemas.ts';
 
 export const DIGEST_ALGORITHM = 'lod-review-digest/v1';
-export const reviewRoot = 'review/independent';
 
 export type ExaminedKind =
   | 'section'
@@ -133,8 +136,9 @@ export function canonicalJson(value: unknown): string {
   return `{${entries.map(([key, member]) => `${JSON.stringify(key)}:${canonicalJson(member)}`).join(',')}}`;
 }
 
-export function sha256(text: string | Buffer): string {
-  return `sha256:${createHash('sha256').update(text).digest('hex')}`;
+/** `sha256:<hex>`, the form review records store digests in. */
+function digest(text: string): string {
+  return `sha256:${sha256(text)}`;
 }
 
 const unreviewed = (status: string | undefined): string | undefined =>
@@ -154,7 +158,7 @@ function normaliseCoverage(entry: CoverageEntry | undefined): unknown {
 }
 
 export function objectDigest(kind: ExaminedKind, id: string, content: unknown): string {
-  return sha256(canonicalJson({ kind, id, content }));
+  return digest(canonicalJson({ kind, id, content }));
 }
 
 /** Combines per-object digests; also used to check a record against its own object list. */
@@ -166,7 +170,7 @@ export function combineDigest(
   const sortedObjects = [...objects]
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
     .map((object) => [object.id, object.kind, object.digest]);
-  return sha256(
+  return digest(
     canonicalJson({
       algorithm: DIGEST_ALGORITHM,
       source_sha256: sourceSha256,
@@ -301,25 +305,36 @@ export function governingRecord(
 }
 
 /** Why a record cannot back `reviewed` for a section, or undefined when it can. */
-function reviewBlocker(
+/**
+ * Why `reviewed` cannot be claimed for a section, or `undefined` when it can. Every reviewed
+ * row and object asks about its section, and a record governs many sections, so each record's
+ * freshness (a digest over its whole scope) is assessed once per checker.
+ */
+function reviewBlockers(
   snapshot: ReviewSnapshot,
   records: ReviewRecord[],
-  sectionId: string,
-): string | undefined {
-  const record = governingRecord(records, sectionId);
-  if (!record) return 'no independent review record covers it';
-  if (record.outcome === 'failed') return `latest review "${record.id}" failed`;
-  const open = record.findings.filter((finding) => finding.disposition.status === 'open');
-  if (open.length) return `latest review "${record.id}" has ${open.length} open finding(s)`;
-  const staleness = assessFreshness(snapshot, record);
-  if (!staleness.fresh) {
-    // Promotion hashes as `extracted`, so a row reviewed while mapped/extracting differs here.
-    const hint = staleness.changed.some((id) => record.scope.section_ids.includes(id))
-      ? '; a scoped section or coverage row differs from the reviewed one, and only rows reviewed as extracted may be promoted'
-      : '';
-    return `latest review "${record.id}" is stale (${describeStaleness(staleness)}${hint}); re-review required`;
-  }
-  return undefined;
+): (sectionId: string) => string | undefined {
+  const freshness = new Map<ReviewRecord, Staleness>();
+  return (sectionId) => {
+    const record = governingRecord(records, sectionId);
+    if (!record) return 'no independent review record covers it';
+    if (record.outcome === 'failed') return `latest review "${record.id}" failed`;
+    const open = record.findings.filter((finding) => finding.disposition.status === 'open');
+    if (open.length) return `latest review "${record.id}" has ${open.length} open finding(s)`;
+    let staleness = freshness.get(record);
+    if (!staleness) {
+      staleness = assessFreshness(snapshot, record);
+      freshness.set(record, staleness);
+    }
+    if (!staleness.fresh) {
+      // Promotion hashes as `extracted`, so a row reviewed while mapped/extracting differs here.
+      const hint = staleness.changed.some((id) => record.scope.section_ids.includes(id))
+        ? '; a scoped section or coverage row differs from the reviewed one, and only rows reviewed as extracted may be promoted'
+        : '';
+      return `latest review "${record.id}" is stale (${describeStaleness(staleness)}${hint}); re-review required`;
+    }
+    return undefined;
+  };
 }
 
 function checkRecord(snapshot: ReviewSnapshot, record: ReviewRecord): string[] {
@@ -413,6 +428,7 @@ export function checkIndependentReviews(
   records: ReviewRecord[],
 ): string[] {
   const errors: string[] = [];
+  const reviewBlocker = reviewBlockers(snapshot, records);
   const seen = new Set<string>();
   for (const record of records) {
     if (seen.has(record.id)) errors.push(`review/independent: duplicate id "${record.id}"`);
@@ -429,14 +445,14 @@ export function checkIndependentReviews(
       entry.status === 'reviewed'
         ? 'is reviewed'
         : `has reviewed component(s) ${components.map(([key]) => key).join(', ')}`;
-    const blocker = reviewBlocker(snapshot, records, entry.id);
-    if (blocker) errors.push(`coverage.yaml: "${entry.id}" ${claim} but ${blocker}`);
+    const blocker = reviewBlocker(entry.id);
+    if (blocker) errors.push(`${canonicalPaths.coverage}: "${entry.id}" ${claim} but ${blocker}`);
   }
 
   for (const [key, kind] of Object.entries(pilotKinds) as Array<[keyof Pilot, ExaminedKind]>) {
     for (const entry of snapshot.pilot[key] as Metadata[]) {
       if (entry.status !== 'reviewed') continue;
-      const blocker = reviewBlocker(snapshot, records, entry.section_id);
+      const blocker = reviewBlocker(entry.section_id);
       if (blocker) {
         errors.push(
           `${entry.id}: ${kind} is reviewed but section "${entry.section_id}" ${blocker}`,
@@ -469,12 +485,13 @@ export function edgeEvidenceGaps(
   const reviewedSections = new Set(
     snapshot.coverage.filter((entry) => entry.status === 'reviewed').map((entry) => entry.id),
   );
+  const reviewBlocker = reviewBlockers(snapshot, records);
   return snapshot.pilot.edges.flatMap((edge) => {
     const section = `section "${edge.section_id}"`;
     const gaps: EdgeEvidenceGap[] = reviewedSections.has(edge.section_id)
       ? []
       : [{ edge: edge.id, reason: `${section} is not reviewed` }];
-    const blocker = reviewBlocker(snapshot, records, edge.section_id);
+    const blocker = reviewBlocker(edge.section_id);
     const record = governingRecord(records, edge.section_id);
     if (blocker) gaps.push({ edge: edge.id, reason: `${section} ${blocker}` });
     else if (!record?.examined_objects.some((object) => object.id === edge.id))
@@ -483,18 +500,9 @@ export function edgeEvidenceGaps(
   });
 }
 
+/** `sha256:<hex>` of a source document's bytes. */
 export function sourceFingerprint(path: string): string {
-  return sha256(readFileSync(path));
-}
-
-/** Review record files, sorted. The directory may not exist before the first review. */
-export function discoverReviewFiles(root = repoRoot): string[] {
-  const directory = join(root, reviewRoot);
-  if (!existsSync(directory)) return [];
-  return readdirSync(directory, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name))
-    .map((entry) => `${reviewRoot}/${entry.name}`)
-    .sort();
+  return `sha256:${fileSha256(path)}`;
 }
 
 interface ManifestShape {
@@ -511,18 +519,22 @@ export function sourceClassesOf(
   );
 }
 
-/** Snapshot for the CLI. Pilot collections are schema-validated by readPilot. */
+const snapshotFiles = ['manifest', 'sections', 'pages', 'coverage', 'terms', 'issues'] as const;
+
+/** Snapshot for the CLI. Every file is schema-validated on the way in. */
 export function loadReviewSnapshot(root = repoRoot): ReviewSnapshot {
-  const read = (path: string): unknown => parse(readFileSync(join(root, path), 'utf8'));
-  const manifest = read('source/manifest.yaml') as ManifestShape;
+  const inputs = snapshotFiles.map((schema) => ({ path: canonicalPaths[schema], schema }));
+  const [manifest, sections, pages, coverage, terms, issues] = readCanonicalFiles(inputs, root).map(
+    (file) => file.data,
+  ) as [ManifestShape, Section[], Page[], { sections: CoverageEntry[] }, Term[], Issue[]];
   const canonical = manifest.documents.find((document) => document.canonical);
-  if (!canonical) throw new Error('source/manifest.yaml declares no canonical document');
+  if (!canonical) throw new Error(`${canonicalPaths.manifest} declares no canonical document`);
   return {
-    sections: read('corpus/source-map/sections.yaml') as Section[],
-    pages: read('corpus/source-map/pages.yaml') as Page[],
-    coverage: (read('corpus/source-map/coverage.yaml') as { sections: CoverageEntry[] }).sections,
-    terms: read('corpus/glossary/terms.yaml') as Term[],
-    issues: read('review/ambiguities.yaml') as Issue[],
+    sections,
+    pages,
+    coverage: coverage.sections,
+    terms,
+    issues,
     pilot: readPilot(root),
     documentIds: [
       ...manifest.documents.map((document) => document.id),
@@ -534,8 +546,13 @@ export function loadReviewSnapshot(root = repoRoot): ReviewSnapshot {
   };
 }
 
+/** Every independent review record, schema-validated, in file then record order. */
 export function readReviewRecords(root = repoRoot): ReviewRecord[] {
-  return discoverReviewFiles(root).flatMap(
-    (path) => (parse(readFileSync(join(root, path), 'utf8')) as ReviewRecord[] | null) ?? [],
+  const inputs = discoverReviewFiles(root).map((path): CanonicalInput => ({
+    path,
+    schema: 'independentReviews',
+  }));
+  return readCanonicalFiles(inputs, root).flatMap(
+    (file) => (file.data as ReviewRecord[] | null) ?? [],
   );
 }

@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
-import { discoverPilotFiles } from '../validate/pilot-files.ts';
+import { discoverPilotFiles } from '../validate/canonical-files.ts';
 import type { Pilot } from '../validate/pilot-types.ts';
 import { repoRoot } from '../validate/schemas.ts';
 import type {

@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { canonicalJson, sha256 } from './hash.ts';
+import { sha256 } from '../validate/hash.ts';
+import { canonicalJson } from './hash.ts';
 import { CALIBRATION_VERSION, DECISION_SCHEMA_VERSION, JUDGMENT_SET_VERSION } from './pins.ts';
 import type { DecisionReport, DecisionRequest, SemanticDecisionProvider } from './types.ts';
 import { isRecord } from './report.ts';
