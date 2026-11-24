@@ -10,7 +10,7 @@ const { version } = JSON.parse(
 
 const live = new LiveRetrieval();
 console.error(
-  `lod-rules MCP: ${live.source === 'built' ? 'built index' : 'indexed YAML in memory'}`,
+  `lod-rules MCP: ${live.source === 'built' ? 'built index' : 'corpus compiled in memory'}`,
 );
 
 const server = createLodServer(live, version);

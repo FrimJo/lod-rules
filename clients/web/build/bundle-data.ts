@@ -2,13 +2,15 @@
  * Writes the data a production server reads into one directory, laid out like the repo so
  * server code only swaps `repoRoot` for `dataRoot` (src/server/data-root.ts):
  *
- * - generated/retrieval/  the SQLite index, rebuilt first if the corpus changed
+ * - generated/retrieval/  the SQLite index, rebuilt first if the corpus changed (which also
+ *                         rebuilds the corpus bundles under generated/corpus/)
  * - source/               manifest.yaml and the documents it lists (rulebook, rulings)
  * - corpus/source-map/    pages.yaml and sections.yaml for the rulebook viewer
  * - pdf-fonts/            pdf.js standard fonts
  * - bundle.json           the marker data-root.ts looks for
  *
- * It reads `corpus/` and `source/` and never writes to them. The Nitro build calls it for the
+ * It reads `corpus/` and `source/` and never writes to them; it writes only under `generated/`
+ * and `outDir`. The Nitro build calls it for the
  * server output (vite.config.ts); `npm run bundle [dir]` runs it on its own.
  */
 import { copyFileSync, cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
