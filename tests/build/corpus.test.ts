@@ -142,6 +142,11 @@ describe('a successful corpus build', () => {
     expect(readdirSync(outDir).sort()).toEqual([...bundles, 'manifest.json'].sort());
   });
 
+  it('documents every file it writes for consumers', () => {
+    const doc = readFileSync(join(repoRoot, 'docs/corpus-bundles.md'), 'utf8');
+    for (const name of readdirSync(outDir)) expect(doc, name).toContain(`\`${name}\``);
+  });
+
   describe('the graph bundle', () => {
     let bundled: Graph;
     let fresh: Graph;
@@ -197,9 +202,14 @@ describe('a successful corpus build', () => {
   );
 
   it('keeps uncertainty and missing-book markers', () => {
-    const text = readFileSync(join(outDir, 'issues.json'), 'utf8');
-    expect(text).toContain('"id": "issue.sanity.inn_recovery_stay_limit"');
-    expect(text).toContain('"id": "issue.guild.alchemist_availability_merged_tables"');
+    const issues = readBundle(outDir, 'issues.json').records as Array<{
+      id: string;
+      status: string;
+    }>;
+    const status = (id: string) => issues.find((issue) => issue.id === id)?.status;
+    // The Phase 11 carry-overs into Phase 12 (spec #24) are compiled as they are, still open.
+    expect(status('issue.sanity.inn_recovery_stay_limit')).toBe('unresolved');
+    expect(status('issue.guild.alchemist_availability_merged_tables')).toBe('unresolved');
     const corpusText = Object.keys(expectedBundles)
       .map((name) => readFileSync(join(outDir, name), 'utf8'))
       .join('');
