@@ -866,10 +866,25 @@
       type: number
       role: output
       description: duration turns
+    hero_action_points:
+      type: number
+      role: input
+      description: Action Points the hero has each turn (two, PDF 89)
+    standard_attack_action_point_cost:
+      type: number
+      role: input
+      description: Action Points a Standard Attack costs (1, PDF 109)
+    free_standard_attacks:
+      type: number
+      role: state
+      description: free Standard Attacks earned by each Standard Attack that damages the enemy
+        (character.perk.frenzy.bonus_attack)
     maximum_attacks:
       type: number
       role: output
-      description: maximum attacks
+      description:
+        maximum attacks over the Frenzied turns, every paid Standard Attack damaging and earning
+        its free attack
     only_move_or_attack:
       type: boolean
       role: output
@@ -889,8 +904,27 @@
     - type: set
       target: maximum_attacks
       value:
-        type: literal
-        value: 8
+        type: arithmetic
+        operator: multiply
+        values:
+          - type: field
+            name: duration_turns
+          - type: arithmetic
+            operator: floor
+            values:
+              - type: arithmetic
+                operator: divide
+                values:
+                  - type: field
+                    name: hero_action_points
+                  - type: field
+                    name: standard_attack_action_point_cost
+          - type: sum
+            values:
+              - type: literal
+                value: 1
+              - type: field
+                name: free_standard_attacks
     - type: set
       target: only_move_or_attack
       value:
