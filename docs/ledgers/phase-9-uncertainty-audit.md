@@ -55,11 +55,12 @@ The checkpoint list now holds two bullets, each citing its issue.
 | `ledger-phases`    | T6     | phase-\* ledgers, package-a-completion-inventory      |      85 |       41 |        1 |              43 |
 | `ledger-quest`     | T7     | quest-book-reconciliation, quest-scenario-inventory   |      22 |        3 |        2 |              17 |
 | `corpus_note`      | T8     | corpus/\*\*/\*.yaml, tests/examples/\*\*/\*.yaml      |      81 |       65 |        0 |              16 |
-| `review_finding`   | T9     | review/independent/\*.yaml                            |      36 |       13 |        0 |              23 |
+| `review_finding`   | T9     | review/independent/\*.yaml                            |      38 |       13 |        0 |              25 |
 | `doc`              | T10    | other docs, plans, README, CONTEXT                    |      48 |        3 |        0 |              45 |
 
-Total 367 entries. `review_finding` fell from 62 to 36 when the checker began treating a finding
-whose `object_id` is an existing issue as a pointer (T11).
+Total 369 entries. `review_finding` fell from 62 to 36 when the checker began treating a finding
+whose `object_id` is an existing issue as a pointer (T11), then gained two dismissals from
+`review.into_the_dungeons_actions.12`, which quote wording removed from two rest procedures.
 
 Recurring `not_uncertainty` reasons: point-in-time review-inventory counts; state words for input
 not yet supplied or a cure attempt still pending; applied review corrections listed under
@@ -106,7 +107,7 @@ Optional follow-ups the reviewers suggested, not applied because they would stal
 - Every family fixture is mandatory; a missing one fails the inventory test.
 - The extraction guide states the rule: uncertainty lives in `review/`; other notes may point at
   issue ids and the inventory test enforces it.
-- `npm run review -- check` on 24 November 2026 at `c2e1899`: 237 records, 0 invalid; each of
+- `npm run review -- check` on 24 November 2026 at `1571164`: 239 records, 0 invalid; each of
   the 53 review units' governing record is fresh and passing; no stale record backs `reviewed`.
 - The exit checklist is `accepted` with six rows verified. The checkpoint moves to Phase 11.
 
