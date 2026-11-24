@@ -32,13 +32,8 @@ const executableId = 'example.combat.shove_dex_35';
 const descriptiveId = 'example.game_basics.check_kinds';
 
 describe('example inventory (issues #13, #14, #20)', () => {
-  it('agrees with the pilot test cases, the source map and review/, with Phase 8 closed (#20)', () => {
-    expect(checkExampleInventory(fixture, context, { closed: true })).toEqual([]);
-  });
-
-  it('has no unswept allowlist and no pending entry (#20)', () => {
-    expect(fixture).not.toHaveProperty('unswept_sections');
-    expect(fixture.entries.filter((entry) => entry.pending !== undefined)).toEqual([]);
+  it('agrees with the pilot test cases, the source map and review/', () => {
+    expect(checkExampleInventory(fixture, context)).toEqual([]);
   });
 
   it('claims every source_example case exactly once', () => {
@@ -112,7 +107,7 @@ describe('example inventory (issues #13, #14, #20)', () => {
       );
     });
 
-    it('an executable entry, not pending, with no cases', () => {
+    it('an executable entry with no cases', () => {
       fires(
         withEntry(executableId, (entry) => (entry.cases = [])),
         /no cases/,
@@ -162,28 +157,11 @@ describe('example inventory (issues #13, #14, #20)', () => {
       );
     });
 
-    it('an allowlisted section that no longer exists', () => {
-      const copy = structuredClone(fixture);
-      copy.unswept_sections = ['section.gone'];
-      fires(copy, /allowlisted section section\.gone/);
-    });
-
-    it('a pending flag on an entry that is not executable', () => {
-      fires(
-        withEntry(descriptiveId, (entry) => (entry.pending = true)),
-        /pending/,
-      );
-    });
-
-    it('a pending entry or allowlisted section once Phase 8 is closed', () => {
-      const pending = withEntry(executableId, (entry) => {
-        delete entry.cases;
-        entry.pending = true;
-      });
-      pending.unswept_sections = ['section.academic_skills'];
-      const problems = checkExampleInventory(pending, context, { closed: true });
-      expect(problems.some((problem) => /still pending/.test(problem))).toBe(true);
-      expect(problems.some((problem) => /still unswept/.test(problem))).toBe(true);
+    it('a retired unswept_sections allowlist or pending flag (#20)', () => {
+      const copy = withEntry(executableId, (entry) => Object.assign(entry, { pending: true }));
+      Object.assign(copy, { unswept_sections: [] });
+      fires(copy, /inventory has retired field unswept_sections/);
+      fires(copy, /has retired field pending/);
     });
   });
 });

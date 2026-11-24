@@ -24,17 +24,15 @@ export interface InventoryEntry {
   reason: string;
   cases?: string[];
   issues?: string[];
-  pending?: boolean;
 }
 export interface ExampleInventory {
   description: string;
-  /**
-   * Sections not yet swept for examples. The chapter slices (#15–#19) shrank it and #20 deleted
-   * it; under `closed` any listed section fails.
-   */
-  unswept_sections?: string[];
   entries: InventoryEntry[];
 }
+
+/** Phase 8 bookkeeping retired at its close-out (#20); either field coming back is a problem. */
+const retiredInventoryFields = ['unswept_sections'] as const;
+const retiredEntryFields = ['pending'] as const;
 export interface InventoryContext {
   /** Section id → true when the section only redirects to another. */
   sections: Map<string, boolean>;
@@ -56,18 +54,19 @@ export function inventoryContext(snapshot: ReviewSnapshot): InventoryContext {
   };
 }
 
-/** `closed` is the Phase 8 exit (#20): no pending entry and no unswept section. */
 export function checkExampleInventory(
   inventory: ExampleInventory,
   context: InventoryContext,
-  { closed = false }: { closed?: boolean } = {},
 ): string[] {
   const problems: string[] = [];
+  for (const field of retiredInventoryFields)
+    if (field in inventory) problems.push(`inventory has retired field ${field}`);
   const seen = new Set<string>();
   const claims = new Map<string, number>();
 
   for (const entry of inventory.entries) {
     const at = (message: string): void => void problems.push(`${entry.id}: ${message}`);
+    for (const field of retiredEntryFields) if (field in entry) at(`has retired field ${field}`);
     if (seen.has(entry.id)) at('duplicate id');
     seen.add(entry.id);
     if (/\.p\d+(\.|$)/.test(entry.id)) at('id encodes a page number');
@@ -103,13 +102,7 @@ export function checkExampleInventory(
     for (const id of entry.issues ?? [])
       if (!context.issueIds.has(id)) at(`issue ${id} is not in review/ambiguities.yaml`);
 
-    if (entry.pending !== undefined) {
-      if (entry.disposition !== 'executable') at('pending is only for executable entries');
-      else if (entry.pending !== true) at('pending must be true or absent');
-      else if (entry.cases?.length) at('pending entry already names cases');
-      if (closed) at('still pending after the Phase 8 close-out');
-    }
-    if (entry.disposition === 'executable' && !entry.pending && !entry.cases?.length)
+    if (entry.disposition === 'executable' && !entry.cases?.length)
       at('executable entry has no cases');
     if (entry.disposition === 'source_conflicted' && !entry.issues?.length)
       at('source_conflicted entry names no issue');
@@ -122,15 +115,5 @@ export function checkExampleInventory(
     else if (count > 1) problems.push(`${id}: source_example claimed by ${count} entries`);
   }
 
-  const unswept = new Set<string>();
-  for (const id of inventory.unswept_sections ?? []) {
-    if (unswept.has(id)) problems.push(`allowlisted section ${id} is listed twice`);
-    unswept.add(id);
-    const redirected = context.sections.get(id);
-    if (redirected === undefined) problems.push(`allowlisted section ${id} does not exist`);
-    else if (redirected) problems.push(`allowlisted section ${id} is a redirect`);
-    if (closed)
-      problems.push(`allowlisted section ${id} still unswept after the Phase 8 close-out`);
-  }
   return problems;
 }
