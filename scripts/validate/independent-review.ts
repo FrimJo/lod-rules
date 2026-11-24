@@ -99,6 +99,8 @@ export interface ReviewSnapshot {
   issues: Issue[];
   pilot: Pilot;
   documentIds: string[];
+  /** Manifest document id → its `source_class` (`rulebook`, `official_errata`, …). */
+  documentSourceClasses: Record<string, string>;
   canonicalDocumentId: string;
   /** `sha256:<hex>` of the canonical PDF bytes. */
   sourceSha256: string;
@@ -449,6 +451,38 @@ export function checkIndependentReviews(
   return errors;
 }
 
+export interface EdgeEvidenceGap {
+  edge: string;
+  reason: string;
+}
+
+/**
+ * Canonical edges and summaries (`corpus/graph/`) that no fresh, passing review examined, whatever
+ * their status: each must lie in a `reviewed` section whose governing record could back `reviewed`
+ * for it and examined it. Not part of `npm run validate`, which only checks objects that claim
+ * `reviewed`; tests hold the committed graph to it.
+ */
+export function edgeEvidenceGaps(
+  snapshot: ReviewSnapshot,
+  records: ReviewRecord[],
+): EdgeEvidenceGap[] {
+  const reviewedSections = new Set(
+    snapshot.coverage.filter((entry) => entry.status === 'reviewed').map((entry) => entry.id),
+  );
+  return snapshot.pilot.edges.flatMap((edge) => {
+    const section = `section "${edge.section_id}"`;
+    const gaps: EdgeEvidenceGap[] = reviewedSections.has(edge.section_id)
+      ? []
+      : [{ edge: edge.id, reason: `${section} is not reviewed` }];
+    const blocker = reviewBlocker(snapshot, records, edge.section_id);
+    const record = governingRecord(records, edge.section_id);
+    if (blocker) gaps.push({ edge: edge.id, reason: `${section} ${blocker}` });
+    else if (!record?.examined_objects.some((object) => object.id === edge.id))
+      gaps.push({ edge: edge.id, reason: `"${record?.id}" did not examine it` });
+    return gaps;
+  });
+}
+
 export function sourceFingerprint(path: string): string {
   return sha256(readFileSync(path));
 }
@@ -464,8 +498,17 @@ export function discoverReviewFiles(root = repoRoot): string[] {
 }
 
 interface ManifestShape {
-  documents: Array<{ id: string; file: string; canonical: boolean }>;
+  documents: Array<{ id: string; file: string; canonical: boolean; source_class?: string }>;
   external_sources?: Array<{ id: string }>;
+}
+
+/** `ReviewSnapshot.documentSourceClasses` from manifest documents; unclassed ones are left out. */
+export function sourceClassesOf(
+  documents: Array<{ id: string; source_class?: string }>,
+): Record<string, string> {
+  return Object.fromEntries(
+    documents.flatMap(({ id, source_class }) => (source_class ? [[id, source_class]] : [])),
+  );
 }
 
 /** Snapshot for the CLI. Pilot collections are schema-validated by readPilot. */
@@ -485,6 +528,7 @@ export function loadReviewSnapshot(root = repoRoot): ReviewSnapshot {
       ...manifest.documents.map((document) => document.id),
       ...(manifest.external_sources ?? []).map((source) => source.id),
     ],
+    documentSourceClasses: sourceClassesOf(manifest.documents),
     canonicalDocumentId: canonical.id,
     sourceSha256: sourceFingerprint(join(root, 'source', canonical.file)),
   };
