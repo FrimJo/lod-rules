@@ -529,7 +529,12 @@
       type: number
       role: state
       description: Durability of the shield before padding (character.durability.standard or
-        character.durability.magic)
+        character.durability.magic); this rule does not change it
+    durability_total:
+      type: number
+      role: output
+      description: Durability of the padded shield, read from maximum_durability plus
+        durability_modifier; the modifier is the only bonus to apply
     selected:
       type: boolean
       role: input
@@ -542,16 +547,25 @@
       value:
         type: literal
         value: 1
-    - type: add
-      target: maximum_durability
+    - type: set
+      target: durability_total
       value:
-        type: field
-        name: durability_modifier
-      duration: permanent
+        type: sum
+        values:
+          - type: field
+            name: maximum_durability
+          - type: field
+            name: durability_modifier
   dependencies:
     - key: related_0
       label: character.settlement.guild.fighters.shield_padding
       object_id: character.settlement.guild.fighters.shield_padding
+    - key: standard_durability
+      label: character.durability.standard
+      object_id: character.durability.standard
+    - key: magic_durability
+      label: character.durability.magic
+      object_id: character.durability.magic
   when:
     type: compare
     operator: eq
