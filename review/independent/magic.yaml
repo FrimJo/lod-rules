@@ -2336,3 +2336,545 @@
     algorithm: lod-review-digest/v1
     source_sha256: sha256:c7a9ff414443d002ad59164f237b5a214feacea7928f22e8d1b1f1abde8b8776
     content_digest: sha256:ba51c6c457588627b1884f0a4b368fd541cd41bdd62763e145ac69cf67c97ca5
+- id: review.magic.5
+  reviewer:
+    kind: agent
+    model: claude-opus-5-5
+    run_id: C16B2856-5B71-449A-ACA7-3C79640B5F04
+    independence:
+      authored_extraction: false
+      used_extraction_ledgers: false
+      statement: I did not author this extraction or the new example cases and compared the canonical YAML and test cases only against rulebook PDF pages 64-69 (plus PDF 189 to check the pinned Magic Bolt values), which I rendered and read myself; I did not read docs/ledgers/, the extraction checkpoint or any other extraction narrative.
+  date: 2026-11-24
+  scope:
+    section_ids:
+      - section.magic
+      - section.magic.adjacent_enemies
+      - section.magic.casting_spells
+      - section.magic.casting_spells.table
+      - section.magic.casting_spells.table_2
+      - section.magic.casting_spells.table_3
+      - section.magic.different_types_of_spells
+      - section.magic.difficulty_of_spells
+      - section.magic.dispelling_magic
+      - section.magic.focus
+      - section.magic.hero_spell_casting
+      - section.magic.increased_power
+      - section.magic.learning_new_spells
+      - section.magic.magic_scrolls
+      - section.magic.mana
+      - section.magic.miscast
+      - section.magic.perfect_cast
+      - section.magic.spell_characteristics
+      - section.magic.upkeep
+    pages_inspected:
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 64
+        printed_page: 62
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 65
+        printed_page: 63
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 66
+        printed_page: 64
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 67
+        printed_page: 65
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 68
+        printed_page: 66
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 69
+        printed_page: 67
+      - document: rulebook.second_printing.eng
+        file: source/Rulebook-2nd-printing-ENGa.pdf
+        pdf_page: 189
+        printed_page: 187
+  findings:
+    - kind: ok_with_note
+      section_id: section.magic.increased_power
+      object_id: test.core.magic.power_example.miscast_threshold_94
+      description: 'New source_example. PDF 66 Increased Power prints "The miscast threshold decreases by -1 for each increase in power level, meaning that a miscast would occur on 94-100 for a power level increase of 1." source_text quotes it verbatim. Inputs wounded false, power_levels 1, focus_actions 0 through core.magic.miscast.threshold.normal (95 - power_levels - 5 x focus_actions) give 94, matching "94-100" (miscast at 94 or more, consistent with the base "95 or more" on PDF 65 and the PDF 68 footnote "-1 per point of increased power"). wounded false and focus 0 are the neutral values the sentence implies, not invented content.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 66
+          printed_page: 64
+          heading: Increased Power
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.increased_power
+      object_id: test.core.magic.power_example.level_4_adds_4
+      description: 'New source_examples level_4_adds_4 and level_6_adds_5. PDF 66 prints "A maximum of 5 levels, or up to the wizard’s level may be added. This means a Level 4 Wizard could add 4 levels, whereas a Level 6 Wizard could add 5 levels." (quoted verbatim, curly apostrophe kept). The printed claim is only the cap; the cases assert it as the third require (power_levels <= min(5, caster_level)) satisfied for 4 levels at Level 4 and 5 levels at Level 6. The sentence names no spell, so the cases pin school Destruction and base_mana 14 (Magic Bolt). I rendered PDF 189 (printed 187, Level 3 Magic table): Magic Bolt is CV 10, Mana 14, Upkeep 0, Special "Q, MM", School Destruction, so the pinned values are real book values, not invented; they only satisfy the Restoration/Destruction precondition and seed the derived outputs. mana_cost 22 / 24 (14 + 2 per level) and effect_bonus 4 / 5 are not printed by the example but follow arithmetically from the printed "2 more Mana" and "+1" per level; acceptable for a source_example whose printed claim is the cap. A Level 4 or 6 Wizard may know a Level 3 spell (Difficulty of Spells, PDF 64), so the pin is coherent, and the case names disclose it.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 66
+          printed_page: 64
+          heading: Increased Power
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 189
+          printed_page: 187
+          heading: Level 3 Magic
+          locator:
+            table: Level 3 Magic
+            row: Magic Bolt
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.increased_power
+      object_id: test.core.magic.power.level_4_cannot_add_5
+      description: 'New derived cases level_4_cannot_add_5 (5 levels, caster level 4) and level_6_cannot_add_6 (6 levels, caster level 6) both expect the cap require unsatisfied and no outputs. Both follow from "A maximum of 5 levels, or up to the wizard’s level" on PDF 66 read as min(5, level), the reading the printed Level 4 / Level 6 illustration confirms. Correctly typed derived_case, not source_example.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 66
+          printed_page: 64
+          heading: Increased Power
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.magic_scrolls
+      object_id: test.core.magic.scroll_example.magic_bolt_without_scroll
+      description: 'New source_example. PDF 67 Example: "A Magic Bolt Spell requires the caster to be Level 3, and the CV of the spell is 10. A wizard with an Arcane Arts skill of 50 would then need to roll 40 to succeed." source_text quotes these two sentences verbatim (a prefix of the paragraph quoted in full by magic_bolt_scroll). arcane_arts 50 and casting_value 10 give casting_threshold 40 through core.magic.casting.threshold, matching "roll 40". The example prints no Mana pool; the case pins mana 14 = mana_cost 14 only to satisfy the printed precondition "the caster must have enough Mana" (PDF 65). 14 is Magic Bolt''s listed Mana on PDF 189; the pin is the minimal satisfying value, does not affect the asserted threshold and is disclosed in the case name, so it is not invented content. The "Level 3" requirement is not asserted, which is fine (it governs learning, not this threshold).'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 67
+          printed_page: 65
+          heading: Magic Scrolls
+          locator:
+            paragraph: Example
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 189
+          printed_page: 187
+          heading: Level 3 Magic
+          locator:
+            table: Level 3 Magic
+            row: Magic Bolt
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.increased_power
+      description: 'Coverage rows. section.magic.increased_power now has examples extracted; its note names the three source_examples and two derived cases accurately and says the spell is pinned. The Increased Power illustrations carry no "Example:" label on PDF 66, but they state checkable values (94-100; Level 4 adds 4, Level 6 adds 5), so treating them as executable examples is sound. section.magic.magic_scrolls examples stay extracted; the note now lists both Magic Bolt halves and the Mana pin accurately, and correctly leaves the non-wizard WIS case unasserted (no value printed); "even if the caster was Level 1" is covered by level_restricted false in magic_bolt_scroll. Completeness on PDF 64-69: the only examples printed are Increased Power (PDF 66), the Focus example with Ozmor (PDF 66, test.core.magic.focus_example.ozmor, unchanged) and the Magic Scrolls example (PDF 67); PDF 64, 65 and 68 print no example and PDF 69 is the non-mechanical Magic in the Kingdom box. No in-scope example is missing.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 66
+          printed_page: 64
+          heading: Increased Power
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 67
+          printed_page: 65
+          heading: Magic Scrolls
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.casting_spells.table
+      object_id: table.magic.miscast
+      description: 'Carried forward from review.magic.4 (object digests unchanged; re-checked on rendered PDF 65). The corrections verified in review.magic.4 are still in place: miscast rows 4, 7, 8 and 10 link core.magic.miscast.outcome_4, _7, _8, _10 with dice typed as printed (1d3; 1d6; 1d8 and 1d3; 1D10), and table.magic.demons keeps the derived quantity column (1d3 rows 1-3, number 1 for "1 Bloated Demon") with the printed text cells ("Plauge" misspelling kept). Optional note from review.magic.4 still applies: rows 1, 2, 3, 5, 6 and 9 have no row rule_refs although their outcome rules bind them from the rule side.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 65
+          printed_page: 63
+          section: Casting Spells
+          heading: Miscast
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic.dispelling_magic
+      object_id: core.magic.dispel.cost.sanity
+      description: 'Carried forward from review.magic.4 (unchanged). core.magic.dispel.cost.sanity ("loses 15 Mana, or 1d3 Sanity", PDF 66) and core.magic.scroll.duration ("last for 1d6 turns", PDF 67) still have untyped roll inputs; effects and quotations are correct against the page. Optional follow-up, not a defect.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 66
+          printed_page: 64
+          heading: Dispelling Magic
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 67
+          printed_page: 65
+          heading: Magic Scrolls
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+    - kind: ok_with_note
+      section_id: section.magic
+      description: 'Whole-scope check. I rendered and read PDF 64-69 (printed 62-67 per pages.yaml) and PDF 189 (printed 187). Comparing examined-object digests with review.magic.4, the only differences are six added test cases (power_example.miscast_threshold_94, .level_4_adds_4, .level_6_adds_5; power.level_4_cannot_add_5, .level_6_cannot_add_6; scroll_example.magic_bolt_without_scroll) and the section objects of section.magic.increased_power and section.magic.magic_scrolls (coverage examples flag and notes); every rule, table, term, procedure, other fixture and the nine related issues hash the same. Spot-checked on the page: Mana "WISx1,5 (RDU)", Touch "CS+20 (ignore for allies)", miscast 95 / wounded 90, Focus "adds 10" and "increases by 5", dispel "Arcane Arts/2 (RDD)" / "Ranged Skills/2 (RDD)", scroll "reduced by 10, to a minimum of 0" and "1 AP", and the PDF 68 chart footnotes; all still match.'
+      source:
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 68
+          printed_page: 66
+          heading: Hero Spell Casting
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+        - document: rulebook.second_printing.eng
+          file: source/Rulebook-2nd-printing-ENGa.pdf
+          pdf_page: 69
+          printed_page: 67
+          heading: Magic in the Kingdom
+          extraction:
+            method: image
+            confidence: high
+            visually_verified: true
+      disposition:
+        status: no_change_needed
+  outcome: passed
+  summary: "Fifth review of the Magic chapter (PDF 64-69, printed 62-67), superseding the stale review.magic.4 after Phase 8 example work. Verified on PDF 66 and 67 the six new test cases (three Increased Power source_examples, two derived cap cases, the non-scroll half of the Magic Scrolls example) and the two updated coverage rows. Values the examples do not print (school Destruction and base Mana 14 for Increased Power; Mana 14 for the non-scroll cast) are Magic Bolt's real catalogue values checked on PDF 189, only satisfy preconditions or seed derived outputs, and are disclosed in the case names; not invented content. No in-scope example is missing. Earlier corrections and optional notes carried forward unchanged. No finding is open and no new issue was needed."
+  supporting_evidence:
+    - tests/examples (passes; supporting only)
+    - tests/regression/example-inventory.test.ts (passes; supporting only)
+  examined_objects:
+    - id: core.magic.adjacent
+      kind: rule
+      digest: sha256:45d84b31aa0ac2608b54866df7c82180333fe462fb7988e7691366fdf1bbb0c7
+    - id: core.magic.casting.failure
+      kind: rule
+      digest: sha256:ed712cc8614536ed8dd8ee6826e2479f5e8acb272a4b7b66e47a5d5e0e1c2d96
+    - id: core.magic.casting.success
+      kind: rule
+      digest: sha256:09dbbaa544dc1a0f6f7bd8779099ebc998645744a84b8ffb98fa1d07fecc65ef
+    - id: core.magic.casting.threshold
+      kind: rule
+      digest: sha256:a82ff0c7ffae7a13b2bb0c65b980a96b2cad8c724fc3a457d6ac15c9fc730eb1
+    - id: core.magic.dispel
+      kind: rule
+      digest: sha256:4be6386fd15be1355b6961d979c4648faf0be9818e06f0a5fdf658d690e384dc
+    - id: core.magic.dispel.cost.mana
+      kind: rule
+      digest: sha256:f4659aad38be590196bd2f65cfe6bd95785535520c582be7cded48670d3aa308
+    - id: core.magic.dispel.cost.sanity
+      kind: rule
+      digest: sha256:bb7237f543c8d9209edadd781bea8a7b70c7aeaea7edff831f8460ff610ccbb1
+    - id: core.magic.dispel.enemy_conditions
+      kind: rule
+      digest: sha256:235b7c5dbec2c577834805142b700a348efe02614e52b79f21d5ae40d49a61c0
+    - id: core.magic.dispel.success
+      kind: rule
+      digest: sha256:9c0c3730619da41723cbd9ae05bcc2d7ebc0538914527d835604677ebf260a79
+    - id: core.magic.focus
+      kind: rule
+      digest: sha256:275e36047f108aa902968747b97477cfb6b513659f19ac5dfb85d46f4ad9facd
+    - id: core.magic.incantation
+      kind: rule
+      digest: sha256:426f3be7d6d736c105a1fb1c1b068fa3b10fe9c40883a9dd6001e2e3b023d242
+    - id: core.magic.level
+      kind: rule
+      digest: sha256:b27d02edba726b4820e634c8c31ecf7af78402591a7e3608445b0031fa30a5d5
+    - id: core.magic.mana
+      kind: rule
+      digest: sha256:bd8398bf446adf717d3e685ca4772c52a43d2cb6f5c60d3016c8210cf1198a74
+    - id: core.magic.miscast
+      kind: rule
+      digest: sha256:f7e117f3229e74739a6ba4c639dd301c57a9cf280ef7f615fd1cab7a27b16ec6
+    - id: core.magic.miscast.outcome_10
+      kind: rule
+      digest: sha256:bcf66e06a5452d7e949b709a7ea277a48b59a503daa661ae64fb1f8d1313a3cd
+    - id: core.magic.miscast.outcome_1_damage
+      kind: rule
+      digest: sha256:46a7af969487442ca7fd7cf6bf0d33197ce9669d6799d0f5fd4589499684c5a2
+    - id: core.magic.miscast.outcome_1_other
+      kind: rule
+      digest: sha256:9b46965161365458c30d3424cb22a540aeaca020682c86f2299faec40a8f898f
+    - id: core.magic.miscast.outcome_2
+      kind: rule
+      digest: sha256:a92c63350d1c92e0052f6ac81d0feaaf333cab38ab4814372fa27e339e09bf97
+    - id: core.magic.miscast.outcome_3
+      kind: rule
+      digest: sha256:ff1416a3b8f636044d77cb0007d3c06a7cb350b6e49ce629056790b8e48c817b
+    - id: core.magic.miscast.outcome_4
+      kind: rule
+      digest: sha256:6585b4b2e04491bfac98d5354bae48f3cb2f2b1f2756cad4a3cba2040df19937
+    - id: core.magic.miscast.outcome_5
+      kind: rule
+      digest: sha256:a9c0566d417ccea88f0afd3273065118c8b4b431c60ecc2b1fbee3f66f5d507d
+    - id: core.magic.miscast.outcome_6
+      kind: rule
+      digest: sha256:488327ecb53285dd16cd0864d79f9cff889f25657ee2f2b70b57c7ea81d273c0
+    - id: core.magic.miscast.outcome_7
+      kind: rule
+      digest: sha256:354269bfd7b0207c4826b3948fc18e2722d82d6823c0e49f02febcc5a925de3a
+    - id: core.magic.miscast.outcome_8
+      kind: rule
+      digest: sha256:4029a3eddf7242a14d6967650f10750255f675c32d82f796e8975dd70d1b4d56
+    - id: core.magic.miscast.outcome_9
+      kind: rule
+      digest: sha256:1f2d3bfd1e956e8e5402860cea1ca9958fa615eabd4855ecd3f00ec4d5743dd8
+    - id: core.magic.miscast.threshold.normal
+      kind: rule
+      digest: sha256:ff8581b195a253c16b17a44947625e07104acbce170bf1421882947ad92e5492
+    - id: core.magic.miscast.threshold.wounded
+      kind: rule
+      digest: sha256:f0eb396654f8e5039f644fbf3f933675829769be6406612b5330c9fa8a88d83d
+    - id: core.magic.missile
+      kind: rule
+      digest: sha256:054ac7dbf2cb4d31072706a0e2b93178d4d6029aa976fdca4a2bf33163e46b84
+    - id: core.magic.perfect
+      kind: rule
+      digest: sha256:208f95b8fa85ae5127be633724542aac8dd7bb08cca7b59a56a34cc09317c03e
+    - id: core.magic.perfect.decline
+      kind: rule
+      digest: sha256:8d7b9cf1171f594187a3dc1162ed7e5d65b28b7b9e7f7acc13cc39e2495adc6b
+    - id: core.magic.perfect.maximize
+      kind: rule
+      digest: sha256:98d74bf45c1cd0a0268b4e4fc3464829f46e77f850b99ffb21aedd06c606abc0
+    - id: core.magic.power
+      kind: rule
+      digest: sha256:7324fda3a138c3ce93c5adf9a4736c0ce497656e2e5a6acb389a80554c5187ed
+    - id: core.magic.quick
+      kind: rule
+      digest: sha256:8b87d8e8ca4ebf6dd549edd36d2be8f97ac75242a4e2fe247d306160e51294e3
+    - id: core.magic.scroll
+      kind: rule
+      digest: sha256:237d0a76d335c3d70ec0ee00114478404806bcc13625f1e72bc58c51777926f6
+    - id: core.magic.scroll.destroyed
+      kind: rule
+      digest: sha256:299a8bef4cb9a90bfafe2932f5684c80c8a69e227db950de2d6e7cc20373d83b
+    - id: core.magic.scroll.duration
+      kind: rule
+      digest: sha256:109816654b0288bd65e661894341484e117d6e9c8b939a603d60707a18646752
+    - id: core.magic.scroll.quick_slot
+      kind: rule
+      digest: sha256:f0c6873570347a2df24d64f6d3d84dca7ad04d9a6c1e01dcf51423f230b288e4
+    - id: core.magic.scroll.skill.other
+      kind: rule
+      digest: sha256:a9f0d388abfe69639155ab510de45b0bd3ccd1a1e353386779d9b9089ce3a1c0
+    - id: core.magic.scroll.skill.wizard
+      kind: rule
+      digest: sha256:b8687aa366ca2735d2547f18f1e0fb4e391a52ff929b7ca2a69b6debc4953603
+    - id: core.magic.standard
+      kind: rule
+      digest: sha256:f478ed1336374ba43f21833a26a1b10afdaf5d3661626ffcdfacba8b6d2f3c7d
+    - id: core.magic.touch
+      kind: rule
+      digest: sha256:1f74aebe07367610be7917531afdfa6358275d794b44c9a360f325ceeedca47f
+    - id: core.magic.touch.failed
+      kind: rule
+      digest: sha256:ac1fda48d5d675f57a5a36af5ca8e6638fc7aac0d298e97578fe2faa9ea0b5b0
+    - id: core.magic.upkeep
+      kind: rule
+      digest: sha256:73b18f7f5d6413a768b3ffda1c12c7dd0539cf77b9187b54bc954ed16539db3c
+    - id: core.magic.upkeep.cancel
+      kind: rule
+      digest: sha256:2403bf529b63288ca68c79d026e2f1590cf69371e8eeacae27a0bf0fabfc25ab
+    - id: issue.magic.dispel_cost_on_failure
+      kind: issue
+      digest: sha256:0df9ad013d8db2c8cee1885a7a9a066fcfa11ca37000c12ee6fa4192220c2d86
+    - id: issue.magic.enemy_caster_casting
+      kind: issue
+      digest: sha256:643096f53416c45cb6db5a7e3f5f38af09169d56550de58ea6ab1740a21eb717
+    - id: issue.magic.flowchart_prose_conflicts
+      kind: issue
+      digest: sha256:d8dee5ea346713585c9110b795300ba6fd4fba3ccc20df785a22a6d7105988fa
+    - id: issue.magic.focus_example
+      kind: issue
+      digest: sha256:349020dba94e57719550ab545b1f9fb89ad1248069819bf551b42d2ca5672323
+    - id: issue.magic.miscast_row1_mana
+      kind: issue
+      digest: sha256:653ae0164575ea4442a8ce3a8ba68b99b222d0d5f82b7810b0bd8b4b3ac259c9
+    - id: issue.magic.miscast_threshold_above_vs_at
+      kind: issue
+      digest: sha256:c07ee561b1befcb97f9d7a6e11c01230c5547368139c0972bd0d9e6918350c08
+    - id: issue.magic.scroll_wounded
+      kind: issue
+      digest: sha256:e52605d54593961fb9b39a2a6fb7789329dc971812f8ea1cbb3dda0afb689af8
+    - id: issue.phase4.mana_rounding
+      kind: issue
+      digest: sha256:5088db16cd038ac9d6f9acade3df6343276c268611f96bc0ec8dba580627fdb0
+    - id: issue.sanity.miscast_loss
+      kind: issue
+      digest: sha256:934d79b3d1b02ff31d40b8ca75441e792ac7c06af24584842d3119711bf9d787
+    - id: procedure.hero_spell_casting
+      kind: procedure
+      digest: sha256:44d362bb7455bbe9b7da7543dc2006af1677f89daa0578d1144f17bfb9e16892
+    - id: procedure.learn_spell
+      kind: procedure
+      digest: sha256:69baa3f59cdc684d61fb5cae836d0f60f3c6cb8d55bad691e53cd2ee3d6020d8
+    - id: section.magic
+      kind: section
+      digest: sha256:dfb850e78baa7d993c0c61b4e829915cca9b740176a7a5abe4f0b8a9b41eebe5
+    - id: section.magic.adjacent_enemies
+      kind: section
+      digest: sha256:60627bbadb09eb34b29d78b13836f9746c937bf42e531b7027b8f2bcf7e1b2b9
+    - id: section.magic.casting_spells
+      kind: section
+      digest: sha256:6e2749b5a2a161e9f49127eced6c9b06e23ccfceef4705251e13f5bdaa16f046
+    - id: section.magic.casting_spells.table
+      kind: section
+      digest: sha256:68ff410ece1e09e3d880a568fa172abef4ad85a6be5964dd1c32f5cd9bacda25
+    - id: section.magic.casting_spells.table_2
+      kind: section
+      digest: sha256:a1b97f52f5082018be70715e5a0c1dac276ca13fde6c869ec3ee7f69a56da1f6
+    - id: section.magic.casting_spells.table_3
+      kind: section
+      digest: sha256:e9edeaa948c5df6390d88d6c756aedbaa12556869c1491bdd0a2091497d141c8
+    - id: section.magic.different_types_of_spells
+      kind: section
+      digest: sha256:098e47145a5473efa646bbf0a4180b220faa9a7d379a4ca59f2c150e8e0736b6
+    - id: section.magic.difficulty_of_spells
+      kind: section
+      digest: sha256:5a5b1b0d7ee23cf9b1b0535ccbc6751a0019b5cd0bcc70b0f879e23256619d4f
+    - id: section.magic.dispelling_magic
+      kind: section
+      digest: sha256:01001bb4f8d8ad52da0fb0c42d85de96eb98b758b48b378cfa8e325bacaed55e
+    - id: section.magic.focus
+      kind: section
+      digest: sha256:930e2a6608aa8a81553a92e282d38a39f471d8f40b91b46c1a267a7ef00690ef
+    - id: section.magic.hero_spell_casting
+      kind: section
+      digest: sha256:61e643a914dd208b3d8fdd3825e83416dfc92cd74520439dbb283c46d1448d3a
+    - id: section.magic.increased_power
+      kind: section
+      digest: sha256:b1755a1d3cf6b9a586edbd7261cfd4e04b48c47e1699fd4832907c503d328e54
+    - id: section.magic.learning_new_spells
+      kind: section
+      digest: sha256:cdf7bd5669d3cf7dd328bb732b0258a7bc273122e2b7cf74a2a0ff05469d84bc
+    - id: section.magic.magic_scrolls
+      kind: section
+      digest: sha256:3314f7cca7b4bea8313000557eb2a5da2f4a467661e3f7b142facc9050012f19
+    - id: section.magic.mana
+      kind: section
+      digest: sha256:bcc516c1d5f575f32de444b3ab96e655aea952488a4106cc83170e9e93ff2483
+    - id: section.magic.miscast
+      kind: section
+      digest: sha256:d9099be21468328fc5b9cb8cda33f587f13135953d04ff1d354480ce71c4b7f1
+    - id: section.magic.perfect_cast
+      kind: section
+      digest: sha256:0643ef8792dd189650fbafc94b9159e22976b8c84e3dd13359ee2938f9615137
+    - id: section.magic.spell_characteristics
+      kind: section
+      digest: sha256:9e19f466b45cadeae0fee60330f16aa16047baf60bd06a61f3525f974f501727
+    - id: section.magic.upkeep
+      kind: section
+      digest: sha256:788892362d22c9394fcc13465e4bccc24e54ec56af68d3a573afefba2ba5264e
+    - id: table.magic.demons
+      kind: table
+      digest: sha256:a49fd8cf44bd740c07ab6f2713149a6f11d9602ab7a2d439ec0af8a35663c8d9
+    - id: table.magic.miscast
+      kind: table
+      digest: sha256:4c07a784d0756ac9137dad4c130987b4b11d82a40fde631c85927ecabf6ae0e1
+    - id: term.dispel
+      kind: term
+      digest: sha256:ef7eedc6112ce8ff9726821c9197c2e6eb319cfed9081e1deb1f1b40a9b3e8d7
+    - id: term.focus
+      kind: term
+      digest: sha256:b3cb50c5a6fbd9f1be1031be85709b1752397bb4f9130a23bef7aae1d1d64eba
+    - id: term.magic_scroll
+      kind: term
+      digest: sha256:a7d60a2e69e3e0b8b08fb76c07ec04ae75a337dc5fa9ec216f96cc2230c9920d
+    - id: term.miscast
+      kind: term
+      digest: sha256:5d13bcce44e37761247a9d9904df7bd8ef33a043e8ebb78ae902636867ca9759
+    - id: term.perfect_cast
+      kind: term
+      digest: sha256:156c0daf1b9127c3cc42e875c64263a8592a05f53bf0e95d04a57415051921d4
+    - id: term.power_level
+      kind: term
+      digest: sha256:c40764d212a589015488d1232c6971f293edbb605fa9abea0601583fc1aa6109
+    - id: term.standard_spell
+      kind: term
+      digest: sha256:48d372306c4b75bd9a7561bae03f9c8f471464a9dededf48e8911719c1cd44d2
+    - id: term.upkeep
+      kind: term
+      digest: sha256:11859b0f8aa79aa965c88f3eda10a738345d769f8924ecf6c1a5f528a6876936
+    - id: test.core.magic.focus_example.ozmor
+      kind: test_case
+      digest: sha256:838db65a4bac75b8c65e864314e69a30329673489a2ffe89eb916301be6b46b8
+    - id: test.core.magic.power.level_4_cannot_add_5
+      kind: test_case
+      digest: sha256:ff02cd2da8006b847057b7e4cabd9d406381c6c394a1dd9bd1a2bfe90c04ff36
+    - id: test.core.magic.power.level_6_cannot_add_6
+      kind: test_case
+      digest: sha256:1fa274ca3bc486103918edc26ff6bbcc0bb7bd8644b8b187bbea744c1e0e70bb
+    - id: test.core.magic.power_example.level_4_adds_4
+      kind: test_case
+      digest: sha256:f21169069161458ebf5ef458037f556869429fb6ce3adbc25bb269294c16108e
+    - id: test.core.magic.power_example.level_6_adds_5
+      kind: test_case
+      digest: sha256:c93c5269f4260dfbe82096356aa7758b8ae5d4500eb839658f627b0f29011f09
+    - id: test.core.magic.power_example.miscast_threshold_94
+      kind: test_case
+      digest: sha256:ea78b04930d46ea6d31fb4e31c7710570e4b69ed3c11c909250b48955fa4f261
+    - id: test.core.magic.scroll_example.magic_bolt_scroll
+      kind: test_case
+      digest: sha256:e22d3b3809ce7eb1eef51ea008bec43c13ea7f3b719e65983e0f83c8eacb0cac
+    - id: test.core.magic.scroll_example.magic_bolt_without_scroll
+      kind: test_case
+      digest: sha256:d4ff00e872a9a062700f00c703c42ccb506ddfc21498320029a07ba4191a84ae
+    - id: test.procedure.hero_spell_casting.failed_roll_no_dispel
+      kind: test_case
+      digest: sha256:f98ea42914f7d916c846582db7ee811a27ea571135691f6af8129d8e9816c5f2
+    - id: test.procedure.hero_spell_casting.miscast_ends_turn
+      kind: test_case
+      digest: sha256:ea00585ff9bc0ec69e2810fc3433c62a08afbfdcbbbb6d04affcf9c1c7cfa11e
+    - id: test.procedure.hero_spell_casting.perfect_declined_gain
+      kind: test_case
+      digest: sha256:dd126335dca3546cafaf8714a73c6b8e81fe6ce1b0ed7694ab0bcab33e7630f4
+    - id: test.procedure.hero_spell_casting.ranged_focus_success
+      kind: test_case
+      digest: sha256:6e8c2a8f25638b1f0f3c54d715d55235b1d043561c197b7750c5d636c3dcaa02
+    - id: test.procedure.hero_spell_casting.touch_spell_no_dispel
+      kind: test_case
+      digest: sha256:18b586972fd1cd7d79f75135e626c6a948e3b3b7c667193743ff23444533d9f9
+  digest:
+    algorithm: lod-review-digest/v1
+    source_sha256: sha256:c7a9ff414443d002ad59164f237b5a214feacea7928f22e8d1b1f1abde8b8776
+    content_digest: sha256:7427c5a829b028575d945c4fe23eb024ba23acbd8609711ec210a8e777dfcd66
