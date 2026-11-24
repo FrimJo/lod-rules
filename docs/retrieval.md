@@ -25,13 +25,21 @@ Output is JSON. `build` writes `generated/retrieval/`:
 | ------------------------ | -------------------------------------------------------------------------- |
 | `search-documents.jsonl` | One search document per canonical record, sorted by id                     |
 | `retrieval.sqlite`       | FTS5 index, documents, full canonical records, aliases and typed relations |
-| `manifest.json`          | Format version, input fingerprint and JSONL checksum; no timestamps        |
+| `manifest.json`          | Format version, corpus fingerprint and JSONL checksum; no timestamps       |
+
+Retrieval reads the compiled corpus bundles under `generated/corpus/`, not the YAML. When
+they are missing or stale, loading runs `build:corpus` first, so an invalid corpus stops
+retrieval with every validation error. There is one fingerprint: the corpus manifest's
+`input_fingerprint`, a SHA-256 over every canonical YAML input. `fingerprintInputs`
+(`scripts/validate/canonical-files.ts`) recomputes it by hashing the files without parsing
+them. The retrieval manifest records the corpus fingerprint it was built from in
+`input_fingerprint`, so editing any canonical input, including a worked example, makes both
+the bundles and the index stale.
 
 The CLI uses the built database when its fingerprint matches the current corpus.
-Otherwise it indexes the YAML in memory, which takes about two seconds. The build is
-staged, so a failed build keeps the previous artifacts.
-
-This is not `build:corpus`. Phase 11 still owns the full compiled bundle.
+Otherwise it indexes the compiled corpus in memory. The build is staged, so a failed build
+keeps the previous artifacts. Read-only consumers (the MCP server, the web client's request
+path) pass `readOnly`, which compiles a stale corpus in memory and writes nothing.
 
 ## Search documents
 

@@ -20,8 +20,9 @@ Files here are gitignored (this README is the only tracked file).
 order, and each record's canonical YAML path. Output is staged and verified before it
 replaces the previous build, and identical inputs give byte-identical files.
 
-`npm run retrieve -- build` already writes an early retrieval slice to `retrieval/`
-(`search-documents.jsonl`, `retrieval.sqlite`, `manifest.json`). See
+`npm run retrieve -- build` writes the retrieval index to `retrieval/`
+(`search-documents.jsonl`, `retrieval.sqlite`, `manifest.json`) from those bundles,
+building them first when they are missing or stale. See
 [docs/retrieval.md](../docs/retrieval.md).
 
 `npm run graph -- build` writes the derived dependency graph to `graph/` (`nodes.json`,
