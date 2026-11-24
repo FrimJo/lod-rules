@@ -88,36 +88,10 @@ describe('exact lookup', () => {
   it('ranks an exact id query first', () => {
     expect(top('procedure.rest', 1)).toEqual(['procedure.rest']);
   });
-
-  it.each([
-    ['AP', 'term.action_points'],
-    ['action points', 'term.action_points'],
-    ['Pyramid of Xanthu', 'quest.ancient_lands.pyramid_xanthu'],
-    ['Molgor, the Fiend of Summerhall', 'quest_actor.chamber_of_reverence.molgor'],
-  ])('resolves the alias %s', (name, id) => {
-    expect(retrieval.resolve(name).map((doc) => doc.id)).toContain(id);
-  });
 });
 
 describe('lexical search', () => {
-  it.each([
-    ['how do I open a locked door', 'procedure.locked_door_and_close'],
-    ['how do I open a locked door', 'table.dungeon.door_chest_difficulty'],
-    ['what happens when a hero is bleeding', 'procedure.bleeding_out'],
-    ['can heroes rest in a dungeon', 'procedure.rest_hp_recovery'],
-    ['poison cure', 'procedure.poison_cure'],
-    ['searching a room', 'procedure.search_room_or_corridor'],
-    ['what happens when sanity reaches zero', 'procedure.sanity_loss'],
-    ['Threat level increase', 'procedure.threat_roll'],
-    ['Molgor hit points', 'table.quest.slaying_fiend.molgor'],
-    ['Molgor prior wounds', 'table.quest.slaying_fiend.prior_wounds'],
-    ['closing the portal threat', 'table.quest.closing_portal.threat'],
-    ['closing the portal demons', 'table.quest.closing_portal.demons'],
-    ['returning the relic reward', 'core.quest.returning_relic.reward'],
-    ['what does a wizard start with', 'profession.wizard'],
-  ])('"%s" finds %s in the top ten', (query, id) => {
-    expect(top(query)).toContain(id);
-  });
+  // The "X finds Y in the top ten" queries live in tests/fixtures/retrieval-acceptance.json.
 
   it('ranks global rules above unrelated quest-local rules', () => {
     const hits = top('how do I open a locked door', 3);

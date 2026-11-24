@@ -80,6 +80,35 @@ their quest (or a word that appears only in quest titles, such as "Molgor"), or 
 or quest filter is given. Review issues are excluded by default; request them with
 `--kind issue` or `issues <id>`.
 
+## Acceptance suite
+
+`tests/fixtures/retrieval-acceptance.json` is the single source of truth for retrieval
+acceptance. Each case has an `id`, a `category`, an `operation`, its `input`, the `expect_ids`
+it must return, an optional `limit` and a `note` naming the PDF page that justifies the
+expectation (`PDF p.101`). `tests/retrieve/acceptance.test.ts` runs every case over the corpus
+compiled from the bundles, so adding a case is a data change.
+
+- **Operations.** `get`, `resolve` and `search` run through the `Retrieval` library and see
+  full documents. `lod_get`, `lod_resolve`, `lod_search` and `lod_expand` run through
+  `runRetrievalTool` and see what an agent sees. `input` always uses tool-style names
+  (`id`, `name`, `query`, `kinds`, `scope`, `quest_id`).
+- **Categories.** `exact_lookup`, `terminology`, `combat_modifiers`, `optional_rules`,
+  `service_eligibility`, `quest_local_exceptions`, `conflicting_passages` and
+  `missing_external_material`.
+- **Result limit.** The documented default is 10 (`DEFAULT_RESULT_LIMIT` in
+  `scripts/retrieve/index.ts`): an expected record must appear within the first 10 results.
+  A case may set a tighter `limit`, never a looser one.
+- **Missing ids.** A case with `expect_missing` checks the graceful miss: `get` returns null,
+  `lod_get` returns `{ found: false, hint }`.
+- **Unavailable books.** `expect_external` names manifest documents (such as `bestiary`) that
+  the first hit's `external_dependencies` must list.
+- **Universal checks.** Every hit carries a citation with a PDF page. Every full document has a
+  non-empty section and file. Agent-tool output passes the bookkeeping-free projection check
+  (`tests/support/rulebook-only.ts`).
+- **The fixture checks itself** (`tests/support/retrieval-acceptance.ts`): it rejects unknown
+  categories, duplicate case ids, expected ids that are not in the corpus, a limit above 10,
+  and a note that names no PDF page cited by an expected record.
+
 ## Wiring an LLM client
 
 `scripts/retrieve/tools.ts` turns the library into agent tools for consumers, such as agents

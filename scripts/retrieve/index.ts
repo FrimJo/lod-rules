@@ -12,6 +12,9 @@ import { loadRetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
 
+/** Results `search` returns when the caller gives no limit; acceptance cases may only tighten it. */
+export const DEFAULT_RESULT_LIMIT = 10;
+
 export interface SearchOptions {
   kinds?: DocumentKind[];
   scope?: string;
@@ -240,7 +243,7 @@ export class Retrieval {
 
   search(query: string, options: SearchOptions = {}): SearchHit[] {
     const trimmed = query.trim();
-    const limit = options.limit ?? 10;
+    const limit = options.limit ?? DEFAULT_RESULT_LIMIT;
     const exact = this.document(trimmed);
     const terms = tokens(trimmed);
     if (terms.length === 0) return exact ? [this.hit(exact, 0, exact.text.slice(0, 200))] : [];
