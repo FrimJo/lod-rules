@@ -110,9 +110,14 @@ describe('informal-uncertainty candidate discovery (#22)', () => {
   });
 
   it('takes no_change_needed findings that state a doubt and cite no existing issue', () => {
-    const finding = (description: string, status: 'no_change_needed' | 'corrected') => ({
+    const finding = (
+      description: string,
+      status: 'no_change_needed' | 'corrected',
+      object_id?: string,
+    ) => ({
       kind: 'ok_with_note',
       section_id: 'section.x',
+      object_id,
       description,
       source: [],
       disposition: status === 'corrected' ? { status, change: 'fixed' } : { status },
@@ -124,10 +129,17 @@ describe('informal-uncertainty candidate discovery (#22)', () => {
         finding('The order is ambiguous.', 'corrected'),
         finding('Ambiguous; see issue.known.', 'no_change_needed'),
         finding('Matches the page.', 'no_change_needed'),
+        finding(
+          'New issue; the doubt is unresolved in the book.',
+          'no_change_needed',
+          'issue.known',
+        ),
+        finding('The order is ambiguous.', 'no_change_needed', 'issue.missing'),
       ],
     } as unknown as ReviewRecord;
     expect(findingCandidates([record], issueIds).map((c) => c.locator)).toEqual([
       { record: 'review.x.1', finding: 0 },
+      { record: 'review.x.1', finding: 5 },
     ]);
   });
 

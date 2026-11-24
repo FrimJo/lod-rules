@@ -24,7 +24,9 @@
  *   doubts. `unresolved_references` is scanned too: besides unbound pointer wording, it holds
  *   statements such as "The book does not say where the tutor fee is paid".
  * - Review findings (`review_finding`). Each finding closed `no_change_needed` whose description
- *   matches a keyword: a reviewer's raised-but-dropped doubt.
+ *   matches a keyword: a reviewer's raised-but-dropped doubt. A finding whose `object_id` is an
+ *   existing issue is about that issue (typically confirming it on the page), so it is a pointer
+ *   like a description that cites the id.
  *
  * Pointer exemption: a note whose own text cites an `issue.*` id that exists in
  * review/ambiguities.yaml already points at the formal record (the extraction guide allows
@@ -316,7 +318,8 @@ export function findingCandidates(records: ReviewRecord[], issueIds: Set<string>
     record.findings.flatMap((finding, index) =>
       finding.disposition.status === 'no_change_needed' &&
       hasKeyword(finding.description) &&
-      !isPointer(finding.description, issueIds)
+      !isPointer(finding.description, issueIds) &&
+      !(finding.object_id !== undefined && issueIds.has(finding.object_id))
         ? [
             {
               source_kind: 'review_finding' as const,
