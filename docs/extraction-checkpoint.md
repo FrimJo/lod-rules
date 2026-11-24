@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 23 November 2026
+## Current position — 24 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -123,6 +123,12 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   `review.into_the_dungeons_actions.9`, `review.introduction.3`,
   `review.magic_items_enchantments.4`, `review.psychology_tables.5`, `review.settlements_core.6`,
   `review.settlements_services.3`, `review.treasure.3`. Step 4 is complete.
+- Phase 8 slice 1 is done (24 November, issue #14, spec #13): the example inventory
+  `tests/fixtures/example-inventory.json`, checked by `tests/regression/example-inventory.test.ts`.
+  35 entries in 29 sections claim all 94 `source_example` cases: 30 `executable` (1 `pending`),
+  4 `source_conflicted`, 1 `descriptive`. All 677 non-redirect sections are on the unswept
+  allowlist. No corpus change and no re-review; evidence in
+  [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md).
 - The 2.5 Quick Reference Sheet is archived as `source/vonbraus-qrs-2.5.pdf`
   (`official_reference`, later-edition evidence only).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
@@ -130,9 +136,17 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 
 ## Next unit
 
-Phase 8: worked examples as fixtures (plan in
-[corpus-completion-plan.md](corpus-completion-plan.md)). Then Phase 9 (uncertainty audit),
-Phase 11 (`build:corpus`) and Phase 12 (retrieval).
+Phase 8 chapter slices, which can run in parallel: sweep one chapter group each, inventory and
+convert its examples, shrink `unswept_sections`, update coverage and re-review what goes stale.
+
+- #15 Game Basics through Embarking
+- #16 Into the Dungeons, Treasure, Combat
+- #17 Equipment, Psychology, Magic, Magic Items, Alchemy, Prayers
+- #19 Travel, Settlements, Guilds, Inner Sanctum, Estate, Appendices
+- #18 Quest Book I, Backgrounds
+
+Then #20 closes Phase 8 (no `pending`, empty allowlist) and moves this checkpoint to Phase 9
+(uncertainty audit), Phase 11 (`build:corpus`) and Phase 12 (retrieval).
 
 Open carry-overs:
 
@@ -177,6 +191,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Step 2: core-chapter reconciliation            | [core-chapter-reconciliation.md](ledgers/core-chapter-reconciliation.md)                     |
 | Step 3: Quest Book I and Backgrounds           | [quest-book-reconciliation.md](ledgers/quest-book-reconciliation.md)                         |
 | Step 4 (Phase 7): dependency graph             | [phase-7-dependency-graph.md](ledgers/phase-7-dependency-graph.md)                           |
+| Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`
