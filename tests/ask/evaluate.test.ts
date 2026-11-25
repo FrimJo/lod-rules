@@ -13,7 +13,12 @@ import {
 import { cascadeModel, uncertainAnswers } from '../../scripts/ask/cascade.ts';
 import { gatherEvidence } from '../../scripts/ask/evidence.ts';
 import { memoModel, scoreCase, summarize } from '../../scripts/ask/evaluate.ts';
-import { LABEL_SPLITS, loadLabels, type LabelledQuestion } from '../../scripts/ask/labels.ts';
+import {
+  LABEL_SPLITS,
+  loadLabelReview,
+  loadLabels,
+  type LabelledQuestion,
+} from '../../scripts/ask/labels.ts';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
 import { repoRoot } from '../../scripts/validate/schemas.ts';
 
@@ -72,6 +77,29 @@ describe('labelled question set', () => {
     expect(labels.length).toBeGreaterThanOrEqual(30);
     for (const split of LABEL_SPLITS) {
       expect(labels.filter((label) => label.split === split).length).toBeGreaterThanOrEqual(10);
+    }
+  });
+
+  it('has been independently reviewed, and names the review', () => {
+    const review = loadLabelReview();
+    if (review.status !== 'reviewed') throw new Error('ask labels have not been reviewed');
+    expect(review.review).toMatch(/\S/);
+    expect(review.reviewer).toMatch(/\S/);
+  });
+
+  it('records a review outcome for every case, with a reason for each correction', () => {
+    for (const label of labels) {
+      expect(['confirmed', 'corrected'], label.id).toContain(label.review?.outcome);
+      if (label.review?.outcome === 'corrected')
+        expect(label.review.reason, label.id).toMatch(/\S/);
+    }
+  });
+
+  it('cites only required evidence that resolves to a corpus record', () => {
+    for (const label of labels) {
+      for (const id of label.requiredEvidence) {
+        expect(retrieval.document(id), `${label.id}: ${id}`).toBeTruthy();
+      }
     }
   });
 
@@ -249,7 +277,7 @@ describe('evaluation', () => {
     const lexical = lexicalAnalysis(retrieval, label.question);
     const lexicalIds = gatherEvidence(retrieval, lexical).map((item) => item.id);
     expect(scoreCase(retrieval, label, lexical, lexicalIds)).toMatchObject({
-      required: 3,
+      required: 4,
       alone: { missing: [], dropped: [] },
       union: null,
       intent: true,
