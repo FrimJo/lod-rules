@@ -104,6 +104,17 @@ function tokens(text: string): string[] {
   return [...new Set(normalize(text).split(' '))].filter((t) => t.length > 1 && !STOPWORDS.has(t));
 }
 
+/**
+ * A global record uses the word, or a stem of it: like heading matches, an inflection adds at
+ * most three letters to a stem of four or more ("fleeing" is global because of "flee").
+ */
+function isGlobalWord(vocabulary: ReadonlySet<string>, word: string): boolean {
+  if (vocabulary.has(word)) return true;
+  for (let length = Math.max(4, word.length - 3); length < word.length; length += 1)
+    if (vocabulary.has(word.slice(0, length))) return true;
+  return false;
+}
+
 function text(row: Record<string, unknown>, key: string): string {
   const value = row[key];
   if (typeof value !== 'string') throw new Error(`retrieval: column ${key} is not text`);
@@ -293,7 +304,7 @@ export class Retrieval {
 
     // Words that never name a global record (Molgor, Xanthu, portal) signal quest intent.
     const global = this.globalVocabulary();
-    const distinctive = terms.filter((t) => !global.has(t));
+    const distinctive = terms.filter((t) => !isGlobalWord(global, t));
     const scoped = options.scope !== undefined || options.questId !== undefined;
     const questIntent = (doc: SearchDocument): boolean => {
       const named = tokens(
