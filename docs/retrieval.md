@@ -57,9 +57,12 @@ review issue. Code lives in `scripts/retrieve/`.
 | `citations`                             | PDF and printed pages with headings                                           |
 | `relations`                             | Edges agents may follow, from the graph (`see_also`, `uses_table`, `part_of`) |
 | `issue_ids`                             | Review issues that concern the record                                         |
+| `issue_members`                         | On an issue: the records it names, from the graph's issue edges               |
 | `unresolved_references`                 | Original wording of pointers the corpus cannot bind                           |
 | `external_dependencies`                 | Material in books that are not present (Bestiary and others)                  |
-| `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                               |
+| `review_status`, `issue_status`, `file` | The record's own status and canonical YAML path (see maintainer notes)        |
+| `section_status`, `governing_review`    | Section coverage status and the independent review record that governs it     |
+| `open_issues`                           | Ids of review issues still awaiting resolution, grouped by issue type         |
 
 Relations come from the dependency graph's edge derivation (`deriveGraph` in
 `scripts/graph/derive.ts`), not from a separate derivation here, so retrieval and the graph
@@ -77,8 +80,60 @@ its id, status and issues do not.
 Search ranks with BM25 over title, aliases, context and text. Results matching more
 of the query words get a boost. Quest-local records are demoted unless the query names
 their quest (or a word that appears only in quest titles, such as "Molgor"), or a scope
-or quest filter is given. Review issues are excluded by default; request them with
+or quest filter is given. An inflected form of a global word is not quest-only: "fleeing"
+counts as global because of "flee". Review issues are excluded by default; request them with
 `--kind issue` or `issues <id>`.
+
+## Acceptance suite
+
+`tests/fixtures/retrieval-acceptance.json` is the single source of truth for retrieval
+acceptance. Each case has an `id`, a `category`, an `operation`, its `input`, the `expect_ids`
+it must return, an optional `limit` and a `note` naming the PDF page that justifies the
+expectation (`PDF p.101`). `tests/retrieve/acceptance.test.ts` runs every case over the corpus
+compiled from the bundles, so adding a case is a data change.
+
+- **Operations.** `get`, `resolve` and `search` run through the `Retrieval` library and see
+  full documents. `lod_get`, `lod_resolve`, `lod_search` and `lod_expand` run through
+  `runRetrievalTool` and see what an agent sees. `input` always uses tool-style names
+  (`id`, `name`, `query`, `kinds`, `scope`, `quest_id`).
+- **Categories.** `exact_lookup`, `terminology`, `combat_modifiers`, `optional_rules`,
+  `service_eligibility`, `quest_local_exceptions`, `conflicting_passages` and
+  `missing_external_material`.
+- **Result limit.** The documented default is 10 (`DEFAULT_RESULT_LIMIT` in
+  `scripts/retrieve/index.ts`): an expected record must appear within the first 10 results.
+  A case may set a tighter `limit`, never a looser one.
+- **Missing ids.** A case with `expect_missing` checks the graceful miss: `get` returns null,
+  `lod_get` returns `{ found: false, hint }`.
+- **Unavailable books.** `expect_external` names manifest documents (such as `bestiary`) that
+  the first hit's `external_dependencies` must list. Each must be a `not_present` book, and every
+  `missing_external_material` case names one.
+- **Quest scope.** Every `quest_local_exceptions` case sets `expect_quest_id` (each expected
+  record's `lod_get` keeps `scope: quest` and that `quest_id`) or `expect_outranks_quest` (for a
+  search that names no quest, each expected global record ranks above every quest-only hit).
+- **Optional rules.** Every `optional_rules` case sets `expect_optional`: each expected record's
+  `lod_get` names its `optional_system`, or its title or section says "optional".
+  The Simplified Alchemy rules (PDF p. 76) and the Bleeding-out Advanced Rule (PDF p. 122)
+  are not covered: the book calls them "simplified rules" you "can instead use" and an
+  "Advanced Rule", never "optional", and `lod_get` already shows that wording in `context`.
+  Retrieval does not relabel them, since that would collapse the book's terms; see the
+  [Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md#known-caveats).
+- **Tables.** For every table record, `lod_get` returns the bundled table's columns, rows (id,
+  source row, kind, cells) and footnotes unchanged, and every table search hit carries that
+  table's id with a snippet cut from its printed cells.
+- **Conflicting passages.** On a `lod_get` case, `expect_conflicts` names records its
+  `conflicts_with` must list, `expect_rulings` names manifest documents its `rulings` must
+  cite, and `expect_no_conflict` asserts neither appears. The checker requires at least five
+  `conflicting_passages` cases (`CATEGORY_MINIMUMS`).
+- **Universal checks.** Every hit carries a citation with a PDF page. Every full document has a
+  non-empty section and file. Agent-tool output passes the bookkeeping-free projection check
+  (`tests/support/rulebook-only.ts`).
+- **The fixture checks itself** (`tests/support/retrieval-acceptance.ts`): it rejects unknown
+  categories, duplicate case ids, expected ids that are not in the corpus, a limit above 10,
+  a note that names no PDF page cited by an expected record, a category case that skips its
+  category check, and a category below its minimum. `CATEGORY_MINIMUMS` requires at least 5
+  cases each for `exact_lookup`, `terminology`, `combat_modifiers`, `optional_rules`,
+  `service_eligibility`, `quest_local_exceptions`, `missing_external_material` and
+  `conflicting_passages`.
 
 ## Wiring an LLM client
 
@@ -132,12 +187,57 @@ records inside their quest. A consumer that adds its own system prompt should ke
 rulebook use. Typical additions are citing PDF/printed pages, and saying when the rulebook
 does not define something or defers to a book that is not available.
 
+### Conflicting passages
+
+When the rulebook contradicts itself, the tools say so without naming the review issue.
+Membership comes from the dependency graph's issue edges (`issueMembers` in
+`scripts/graph/issues.ts`: an issue's `concerns` edges plus records whose `issues` list it);
+each issue search document stores it as `issue_members`, and the projection in
+`scripts/retrieve/tools.ts` reads only that.
+
+- **`conflicts_with`** (`lod_get`): for every open `conflicting` issue that names the
+  record, the other records it names, each `{ id, title, citations }` as a summary cites them,
+  deduplicated and sorted by id. Sections, test cases and other issues are left out. When the
+  issue names no other record, the record lists itself: the contradiction is inside it.
+- **`rulings`** (`lod_get`): for a resolved `conflicting` issue whose resolution cites an
+  `official_errata` or `official_faq` document, those citations (`document`, `heading`,
+  pages, and the changelog `row`) replace the open conflict. A conflict the corpus settled
+  from the rulebook alone (such as the Skill Test term against the standard check) shows
+  nothing.
+- **`conflicting_passages: true`** (`lod_search` summaries): the hit has a non-empty
+  `conflicts_with`, that is, an open conflict. A conflict settled by a published ruling
+  carries no search marker; `lod_get` shows its `rulings`.
+
+Neither carries an issue id, status, summary or resolution text. The `lod_search` and
+`lod_get` descriptions tell the agent to read both passages and present the conflict.
+
 ### Maintainer notes
 
-Full search documents carry `issue_ids` and `review_status`. `review_status: extracted`
-means unreviewed; no section is independently reviewed yet. Coverage is partial (see the
-[coverage report](coverage-report.md)), so a missing result can mean the section has not been
-extracted yet.
+Full search documents (`search`, `get`, `issues`) report where each record stands in review:
+
+- `review_status` is the record's own status as its YAML states it, and means something
+  different per kind:
+  - rules, procedures, tables, entities and state machines: their `status` field. Every one
+    is `extracted` today; independent review is recorded per section, not per record;
+  - review issues: `unresolved` or `resolved`, the same value as `issue_status`;
+  - glossary terms, which have no status field: their section's `glossary` coverage
+    component, also `extracted` for every term today.
+
+  It is not the section's review state. Read `section_status` and `governing_review` to see
+  whether a record's passage has been independently reviewed.
+
+- `section_status` is the coverage status of the record's section: `reviewed`, or `mapped`
+  for one of the compatibility redirects. Every non-redirect section is independently
+  reviewed; see the [coverage report](coverage-report.md).
+- `governing_review` is `{ id, outcome, date }` of the independent review record that governs
+  that section, or null. It is chosen by `governingRecord` in
+  `scripts/validate/independent-review.ts`, the rule the validator uses, so the CLI and the
+  validator cannot disagree.
+- `open_issues` lists the ids of issues still awaiting resolution, by type (`conflicting`,
+  `ambiguity`, …). Search hits carry `open_issue_counts` instead. `issue_ids` still lists every issue, resolved or not.
+
+`npm run retrieve -- search <query> --kind issue --issue-type conflicting` restricts issue
+results to the given types. The agent tools show none of these fields.
 
 ## Ask pipeline
 
@@ -186,15 +286,17 @@ model whose answer was kept.
 
 ### Labelled questions
 
-`tests/fixtures/ask-questions/cases.yaml` holds 102 rules questions in three splits:
-development (34), validation (35) and held-out (33). The first 37 (12 / 13 / 12) date from
+`tests/fixtures/ask-questions/cases.yaml` holds 103 rules questions in three splits:
+development (35), validation (35) and held-out (33). The first 37 (12 / 13 / 12) date from
 1 October; the other 65 were added on 5 October across combat, dungeon, treasure,
 character building, psychology, settlements, travel, alchemy, magic and quests. The results
 below cover the original 37 only. Each question is labelled with its
 intent, its complexity, the one entity record it is about (or `null`), and the
 `required_evidence` records a correct answer must be able to cite. Labels were drafted from
-the canonical records they name and have not been independently reviewed
-(`label_review: unreviewed`). Game systems are not labelled. Instead, "chapter coverage"
+the canonical records they name. On 25 November 2026 an independent reviewer checked every
+case (`label_review.status: reviewed`): 92 confirmed and 11 corrected, each correction with
+its reason on the case. See "Label review" in
+[ask-quality-evaluation.md](ask-quality-evaluation.md) for the old and new baselines. Game systems are not labelled. Instead, "chapter coverage"
 is measured mechanically: the share of required records whose chapter falls inside the
 selected systems.
 
@@ -307,8 +409,8 @@ labels each record's sources, that the filter asks one relevance question per re
 drops only above its threshold, honours exact and linked protection and the budget cap,
 keeps every record when the ranker fails, and that `ask()` filters only model analyses.
 
-Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
-and semantic-provider calibration.
+Not yet done: a labelled set large enough to calibrate Laya and Jev, vector search, and
+semantic-provider calibration. The labels themselves were independently reviewed in Phase 12.
 
 ### Official ruling evidence
 

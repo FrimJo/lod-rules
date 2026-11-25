@@ -2,17 +2,27 @@
 
 import type { CorpusBundles } from '../build/bundles.ts';
 import type { Pilot, TestCase } from '../validate/pilot-types.ts';
-import type { Alias, Issue, Section, Term } from '../validate/integrity.ts';
+import type { ReviewRecord } from '../validate/independent-review.ts';
+import type { Alias, CoverageEntry, Issue, Section, Term } from '../validate/integrity.ts';
 
 export interface GlossaryTerm extends Term {
   definition?: string;
 }
 
-export type ReviewIssue = Issue & { type: string; summary: string };
+/** The review-issue types `schemas/issue.schema.json` allows. */
+export const ISSUE_TYPES = [
+  'ambiguity',
+  'conflicting',
+  'possible_typo',
+  'rulebook_undefined',
+] as const;
+export type IssueType = (typeof ISSUE_TYPES)[number];
+
+export type ReviewIssue = Issue & { type: IssueType; summary: string };
 
 /** `source/manifest.yaml`: documents in this repository and books that are not. */
 export interface SourceManifest {
-  documents: Array<{ id: string; title: string; canonical?: boolean }>;
+  documents: Array<{ id: string; title: string; canonical?: boolean; source_class?: string }>;
   external_sources?: Array<{ id: string; title: string; status: string }>;
 }
 
@@ -28,6 +38,10 @@ export interface RetrievalCorpus {
   aliases: Alias[];
   issues: ReviewIssue[];
   sections: Section[];
+  /** Section coverage rows: `reviewed`, or `mapped` for a compatibility redirect. */
+  coverage: CoverageEntry[];
+  /** Independent review records (`review.*.N`); the validator's rule picks a section's governing one. */
+  reviews: ReviewRecord[];
   manifest: SourceManifest;
   /** Canonical YAML path for every record id. */
   files: Map<string, string>;
@@ -68,6 +82,8 @@ export function retrievalCorpusFrom(
     aliases: read<Alias>('aliases.json'),
     issues: read<ReviewIssue>('issues.json', true),
     sections: read<Section>('sections.json'),
+    coverage: read<CoverageEntry>('coverage.json'),
+    reviews: read<ReviewRecord>('independent-reviews.json'),
     manifest: {
       documents: read<SourceManifest['documents'][number]>('source-documents.json'),
       external_sources:

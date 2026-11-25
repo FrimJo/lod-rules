@@ -7,10 +7,13 @@ import {
   type GraphLinks,
   type SearchDocument,
 } from './documents.ts';
-import type { RetrievalCorpus } from './corpus.ts';
+import type { IssueType, RetrievalCorpus } from './corpus.ts';
 import { loadRetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
+
+/** Results `search` returns when the caller gives no limit; acceptance cases may only tighten it. */
+export const DEFAULT_RESULT_LIMIT = 10;
 
 export interface SearchOptions {
   kinds?: DocumentKind[];
@@ -20,6 +23,8 @@ export interface SearchOptions {
   chapters?: string[];
   /** Exact section ids; a document matches when it sits directly under one of them. */
   sections?: string[];
+  /** Issue types (`conflicting`, `ambiguity`, …); issue documents of other types are dropped. */
+  issueTypes?: IssueType[];
   limit?: number;
 }
 
@@ -36,6 +41,10 @@ export interface SearchHit {
   citations: SearchDocument['citations'];
   issue_ids: string[];
   review_status: SearchDocument['review_status'];
+  section_status: SearchDocument['section_status'];
+  governing_review: SearchDocument['governing_review'];
+  /** Unresolved issues that name the record, counted by issue type. */
+  open_issue_counts: Partial<Record<IssueType, number>>;
   file: string;
 }
 
@@ -93,6 +102,17 @@ function aliasKey(text: string): string {
 
 function tokens(text: string): string[] {
   return [...new Set(normalize(text).split(' '))].filter((t) => t.length > 1 && !STOPWORDS.has(t));
+}
+
+/**
+ * A global record uses the word, or a stem of it: like heading matches, an inflection adds at
+ * most three letters to a stem of four or more ("fleeing" is global because of "flee").
+ */
+function isGlobalWord(vocabulary: ReadonlySet<string>, word: string): boolean {
+  if (vocabulary.has(word)) return true;
+  for (let length = Math.max(4, word.length - 3); length < word.length; length += 1)
+    if (vocabulary.has(word.slice(0, length))) return true;
+  return false;
 }
 
 function text(row: Record<string, unknown>, key: string): string {
@@ -194,7 +214,11 @@ export class Retrieval {
    * `readOnly` keeps that compilation in memory instead of publishing it to `generated/`.
    */
   static fromCorpus(root?: string, { readOnly = false }: { readOnly?: boolean } = {}): Retrieval {
-    const corpus = loadRetrievalCorpus(root, { readOnly });
+    return Retrieval.fromLoadedCorpus(loadRetrievalCorpus(root, { readOnly }));
+  }
+
+  /** Indexes an already loaded corpus in memory. */
+  static fromLoadedCorpus(corpus: RetrievalCorpus): Retrieval {
     const graph = deriveGraph(corpus);
     return new Retrieval(
       createRetrievalDatabase(
@@ -240,7 +264,7 @@ export class Retrieval {
 
   search(query: string, options: SearchOptions = {}): SearchHit[] {
     const trimmed = query.trim();
-    const limit = options.limit ?? 10;
+    const limit = options.limit ?? DEFAULT_RESULT_LIMIT;
     const exact = this.document(trimmed);
     const terms = tokens(trimmed);
     if (terms.length === 0) return exact ? [this.hit(exact, 0, exact.text.slice(0, 200))] : [];
@@ -262,6 +286,12 @@ export class Retrieval {
       );
       params.push(...options.sections);
     }
+    if (options.issueTypes && options.issueTypes.length > 0) {
+      where.push(
+        `(d.kind <> 'issue' OR json_extract(d.json, '$.type') IN (${options.issueTypes.map(() => '?').join(', ')}))`,
+      );
+      params.push(...options.issueTypes);
+    }
     if (options.questId) {
       where.push('d.quest_id = ?');
       params.push(options.questId);
@@ -278,7 +308,7 @@ export class Retrieval {
 
     // Words that never name a global record (Molgor, Xanthu, portal) signal quest intent.
     const global = this.globalVocabulary();
-    const distinctive = terms.filter((t) => !global.has(t));
+    const distinctive = terms.filter((t) => !isGlobalWord(global, t));
     const scoped = options.scope !== undefined || options.questId !== undefined;
     const questIntent = (doc: SearchDocument): boolean => {
       const named = tokens(
@@ -458,6 +488,11 @@ export class Retrieval {
       citations: doc.citations,
       issue_ids: doc.issue_ids,
       review_status: doc.review_status,
+      section_status: doc.section_status,
+      governing_review: doc.governing_review,
+      open_issue_counts: Object.fromEntries(
+        Object.entries(doc.open_issues).map(([type, ids]) => [type, ids.length]),
+      ),
       file: doc.file,
     };
     if (doc.quest_id) hit.quest_id = doc.quest_id;

@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { RETRIEVAL_TOOLS, ToolInputError, runRetrievalTool } from '../../scripts/retrieve/tools.ts';
+import { expectRulebookOnly } from '../support/rulebook-only.ts';
 
 let retrieval: Retrieval;
 beforeAll(() => {
@@ -10,42 +11,6 @@ beforeAll(() => {
 afterAll(() => retrieval.close());
 
 const run = (name: string, input: unknown): unknown => runRetrievalTool(retrieval, name, input);
-
-/** Corpus bookkeeping that must never reach a consumer agent's context. */
-const BOOKKEEPING_KEYS = [
-  'status',
-  'confidence',
-  'completeness',
-  'extraction',
-  'locator',
-  'file',
-  'issues',
-  'issue_id',
-  'issue_ids',
-  'issue_status',
-  'unresolved_references',
-  'review_status',
-  'score',
-  'found',
-];
-
-function keysOf(value: unknown, into = new Set<string>()): Set<string> {
-  if (Array.isArray(value)) for (const item of value) keysOf(item, into);
-  else if (typeof value === 'object' && value !== null)
-    for (const [key, child] of Object.entries(value)) {
-      into.add(key);
-      keysOf(child, into);
-    }
-  return into;
-}
-
-function expectRulebookOnly(value: unknown, label: string): void {
-  const keys = keysOf(value);
-  for (const key of BOOKKEEPING_KEYS) expect(keys.has(key), `${label}: ${key}`).toBe(false);
-  const json = JSON.stringify(value);
-  expect(json, label).not.toMatch(/"(corpus|review|source)\/[^"]*\.(yaml|pdf|html)"/);
-  expect(json, label).not.toMatch(/"issue\./);
-}
 
 describe('rulebook tool definitions', () => {
   it('name four read tools with object schemas', () => {
@@ -85,6 +50,13 @@ describe('runRetrievalTool', () => {
       expect(result.id, id).toBe(id);
       expect(result.text, id).toBeTruthy();
       expectRulebookOnly(result, id);
+      // No review issue's summary or resolution text reaches the agent, conflict notices included.
+      const json = JSON.stringify(result);
+      for (const issueId of retrieval.document(id)?.issue_ids ?? []) {
+        const issue = retrieval.document(issueId);
+        for (const text of [issue?.issue_summary, issue?.resolution?.summary])
+          if (text) expect(json.includes(JSON.stringify(text).slice(1, -1)), issueId).toBe(false);
+      }
     }
   }, 120_000);
 
@@ -219,6 +191,81 @@ describe('runRetrievalTool', () => {
       for (const link of links)
         expect(excluded, `${id} ${link.relation}`).not.toContain(link.relation);
     }
+  });
+
+  describe('conflicting passages', () => {
+    interface Passage {
+      id: string;
+      title: string;
+      citations: Array<{ document: string; pdf_page: number | null }>;
+    }
+    interface WithConflicts {
+      conflicts_with?: Passage[];
+      rulings?: Array<{ document: string; heading?: string }>;
+    }
+    const get = (id: string): WithConflicts => run('lod_get', { id }) as WithConflicts;
+
+    it('names the other passages of an unresolved conflict, with title and citations', () => {
+      const result = get('core.quest.spider_queen_entrance.amburr');
+      expect(result.conflicts_with).toEqual([
+        {
+          id: 'quest_actor.spider_queen.amburr',
+          title: 'Amburr, The Ettin',
+          citations: expect.arrayContaining([
+            expect.objectContaining({ document: 'rulebook.second_printing.eng', pdf_page: 238 }),
+          ]) as unknown,
+        },
+      ]);
+      expect(result.rulings).toBeUndefined();
+      expectRulebookOnly(result, 'amburr');
+    });
+
+    it('lists a conflict inside one record as that record', () => {
+      const id = 'character.alchemy.preparation.potion_of_dragons_breath';
+      expect(get(id).conflicts_with?.map((passage) => passage.id)).toEqual([id]);
+    });
+
+    it('cites the official ruling instead of a conflict it settles', () => {
+      const result = get('core.movement.pit.down');
+      expect(result.conflicts_with).toBeUndefined();
+      expect(result.rulings).toEqual([
+        expect.objectContaining({
+          document: 'vonbraus.faq_gamefound',
+          heading:
+            'Does a hero have to make a DEX test to climb DOWN into a pit? The text in the rulebook contradicts itself.',
+        }),
+      ]);
+      expectRulebookOnly(result, 'pit down');
+    });
+
+    it('shows nothing for a conflict the rulebook itself settles', () => {
+      const result = get('term.skill_test');
+      expect(result.conflicts_with).toBeUndefined();
+      expect(result.rulings).toBeUndefined();
+    });
+
+    it('marks search hits that have a conflicting passage, and only those', () => {
+      const hits = run('lod_search', { query: 'Amburr Ettin' }) as Array<{
+        id: string;
+        conflicting_passages?: true;
+      }>;
+      const marked = (id: string): boolean | undefined =>
+        hits.find((hit) => hit.id === id)?.conflicting_passages;
+      expect(marked('core.quest.spider_queen_entrance.amburr')).toBe(true);
+      const skill = run('lod_search', { query: 'term.skill_test' }) as Array<{
+        id: string;
+        conflicting_passages?: true;
+      }>;
+      expect(skill[0]).toMatchObject({ id: 'term.skill_test' });
+      expect(skill[0]).not.toHaveProperty('conflicting_passages');
+    });
+
+    it('tell the agent to read both passages and present the conflict', () => {
+      for (const name of ['lod_search', 'lod_get'])
+        expect(RETRIEVAL_TOOLS.find((tool) => tool.name === name)?.description).toMatch(
+          /read both passages/,
+        );
+    });
   });
 
   it('treat review issue ids as unknown', () => {

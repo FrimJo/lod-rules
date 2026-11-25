@@ -3,10 +3,17 @@
 # Each label is drafted from the canonical corpus records it names, not from what any
 # analyzer retrieves. `required_evidence` lists the records a correct answer must be able
 # to cite. `expected.entity` is the one named entity record the question is about, or null.
+# Each case records the independent review's outcome: confirmed, or corrected with a reason.
 # Pick floors and wording on `development`, check on `validation`, and read `held_out` only
 # to report a finished configuration.
 schema_version: 1
-label_review: unreviewed
+label_review:
+  status: reviewed
+  review: >-
+    Phase 12 label review (issue #33): every case checked against the canonical records and,
+    where a correction was in doubt, the rendered PDF page. See docs/ask-quality-evaluation.md.
+  reviewer: independent agent review (claude-opus-5-5); did not draft the labels
+  date: '2026-11-25'
 cases:
   # --- development ---------------------------------------------------------------------
   - id: askq.poison_bleeding_rest
@@ -17,9 +24,14 @@ cases:
       - procedure.bleeding_out
       - procedure.rest_bleeding_check
       - procedure.rest_poison_checks
+      - combat.poison.rest_death
     notes: >-
       Laya called this single_fact and chose the alchemy item Poison; on its own that would
       have dropped both rest checks.
+    review:
+      outcome: corrected
+      reason: >-
+        Added combat.poison.rest_death: a hero who reaches 0 HP from poison during a rest dies (printed p. 120), which decides a poisoned, bleeding-out hero at rest.
 
   - id: askq.molgor_hit_points
     split: development
@@ -31,36 +43,42 @@ cases:
         entity: quest_actor.chamber_of_reverence.molgor,
       }
     required_evidence: [table.quest.slaying_fiend.molgor]
+    review: { outcome: confirmed }
 
   - id: askq.locked_chest
     split: development
     question: How do I open a locked chest?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.locked_door_and_close, table.dungeon.door_chest_difficulty]
+    review: { outcome: confirmed }
 
   - id: askq.miscast
     split: development
     question: What happens when a wizard miscasts a spell?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [core.magic.miscast, table.magic.miscast]
+    review: { outcome: confirmed }
 
   - id: askq.longsword_cost
     split: development
     question: How much does a longsword cost?
     expected: { intent: value_lookup, complexity: single_fact, entity: equipment.weapon.longsword }
     required_evidence: [table.equipment.weapons]
+    review: { outcome: confirmed }
 
   - id: askq.wounded_action_points
     split: development
     question: What does being wounded do to a hero's action points?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.wounded_status]
+    review: { outcome: confirmed }
 
   - id: askq.dwarf_stats
     split: development
     question: What are the starting stats of a Dwarf?
     expected: { intent: value_lookup, complexity: single_fact, entity: species.dwarf }
     required_evidence: [table.character.dwarf_stats]
+    review: { outcome: confirmed }
 
   - id: askq.travel_day
     split: development
@@ -70,6 +88,7 @@ cases:
       - procedure.travel_event_check
       - procedure.travel_daily_movement
       - procedure.travel_food_and_rest
+    review: { outcome: confirmed }
 
   - id: askq.zone_of_control
     split: development
@@ -77,112 +96,145 @@ cases:
     expected: { intent: definition, complexity: single_fact, entity: null }
     required_evidence: [core.movement.zone_of_control]
     notes: The term record only repeats the name; the movement rule holds the definition.
+    review: { outcome: confirmed }
 
   - id: askq.sanity_zero
     split: development
     question: What happens when a hero's Sanity drops to zero?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [procedure.sanity_condition, table.psychology.mental_conditions]
+    review: { outcome: confirmed }
 
   - id: askq.wounded_wizard_miscast
     split: development
     question: Can a wounded wizard still cast spells, and is a miscast more likely?
     expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
-    required_evidence: [character.hit_points.wounded, core.magic.miscast.threshold.wounded]
+    required_evidence:
+      - character.hit_points.wounded
+      - combat.action.cast_spell
+      - core.magic.miscast.threshold.wounded
+    review:
+      outcome: corrected
+      reason: >-
+        Added combat.action.cast_spell: casting costs 1 or 2 AP, which the 1-AP wounded limit has to be weighed against to answer "can still cast".
 
   - id: askq.miscast_failed_spell
     split: development
     question: For a wizard, how does miscast and failing a spell relate?
-    expected: { intent: rule_explanation, complexity: multi_rule, entity: profession.wizard }
-    required_evidence: [core.magic.miscast, core.magic.miscast.threshold.wounded]
+    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
+    required_evidence: [core.magic.miscast, core.magic.casting.failure]
     notes: >-
-      The wounded threshold shares a heading with the miscast rule but no word with the question
-      beyond "miscast"; section-sibling expansion is what brings it in.
+      A miscast uses Mana "as though the spell had failed", and a failed casting consumes half
+      the Mana cost (RDU); the answer needs both rules.
+    review:
+      outcome: corrected
+      reason: >-
+        Entity set to null: the question is about the miscast rule, as in askq.miscast. Replaced the wounded miscast threshold, which the question does not ask about, with core.magic.casting.failure: a miscast spends Mana as a failed spell, and a failure spends half.
 
   - id: askq.fighters_bounty
     split: development
     question: How do bounties from the Fighters' Guild work?
     expected: { intent: rule_explanation, complexity: single_rule, entity: guild.fighters }
     required_evidence: [procedure.fighters_bounty, table.guild.fighters_bounty]
+    review: { outcome: confirmed }
 
   - id: askq.aim_bonus
     split: development
     question: What do I get for aiming before a shot, and what cancels the bonus?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.combat_aim]
+    review: { outcome: confirmed }
 
   - id: askq.damage_calculation
     split: development
     question: How do I work out how much damage a hit does to an enemy?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.combat_damage]
+    review: { outcome: confirmed }
 
   - id: askq.enemy_activation_order
     split: development
     question: When an enemy token is drawn, which enemy acts?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [procedure.activation, procedure.enemy_priority]
+    review: { outcome: confirmed }
 
   - id: askq.line_of_sight
     split: development
     question: How do I check line of sight, and what blocks it?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [core.los.trace, core.los.blocked]
+    review: { outcome: confirmed }
 
   - id: askq.wandering_monster
     split: development
     question: How does a wandering monster move each turn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.wandering_monster]
+    review: { outcome: confirmed }
 
   - id: askq.torch
     split: development
     question: What does a lit torch do for the party, and when does it go out?
     expected:
       { intent: rule_explanation, complexity: single_rule, entity: equipment.light_source.torch }
-    required_evidence: [character.equipment.light_source.torch.light]
+    required_evidence:
+      - character.equipment.light_source.torch.light
+      - character.equipment.light_source.torch.spent
+      - character.equipment.light_source.torch.swing_out
+    review:
+      outcome: corrected
+      reason: >-
+        Added torch.spent and torch.swing_out: the question asks when the torch goes out, which is the Threat Roll and the >=90 swing (printed p. 181).
 
   - id: askq.curses
     split: development
     question: What curses can a cursed magic item give?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.treasure.curses]
+    review: { outcome: confirmed }
 
   - id: askq.identify_magic_item
     split: development
     question: How do we identify a magic item we found, and what does it cost in town?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.magic_item.identify, character.settlement.identification]
+    review: { outcome: confirmed }
 
   - id: askq.sell_damaged_item
     split: development
     question: How much do I get for selling a 40 c item that has 2 points of damage?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.equipment.sell_and_repair]
+    review: { outcome: confirmed }
 
   - id: askq.elf_stats
     split: development
     question: What are an Elf's starting stats and Hit Points?
     expected: { intent: value_lookup, complexity: single_rule, entity: species.elf }
     required_evidence: [table.character.elf_stats, species.elf]
+    review: { outcome: confirmed }
 
   - id: askq.talent_or_perk
     split: development
     question: Does a hero gain a talent or a perk every time they level up?
     expected: { intent: character_building, complexity: single_rule, entity: null }
     required_evidence: [procedure.character_level_ability]
+    review: { outcome: confirmed }
 
   - id: askq.luck_points
     split: development
     question: How do Luck Points work?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [character.luck.reroll]
+    review: { outcome: confirmed }
 
   - id: askq.prayer_use
     split: development
     question: How does a Warrior Priest use a prayer, and does it cost an action?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.prayer.activation, character.prayer.success]
+    review: { outcome: confirmed }
 
   - id: askq.arachnophobia
     split: development
@@ -190,55 +242,73 @@ cases:
     expected: { intent: situation_ruling, complexity: single_rule, entity: condition.arachnophobia }
     required_evidence: [procedure.arachnophobia]
     notes: Arachnophobia is also a background with a different effect; the question names the condition.
+    review: { outcome: confirmed }
 
   - id: askq.morale_wavering
     split: development
     question: What happens when Party Morale drops below half?
     expected: { intent: rule_explanation, complexity: single_fact, entity: null }
     required_evidence: [character.morale.wavering]
+    review: { outcome: confirmed }
 
   - id: askq.zero_hp_lasting
     split: development
     question: Does being reduced to 0 Hit Points have any lasting effect on a hero?
     expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
     required_evidence: [character.hit_points.permanent_injury, character.sanity.loss.zero_hp]
+    review: { outcome: confirmed }
 
   - id: askq.guild_access
     split: development
     question: Can my warrior use the services of the Wizards' Guild?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.guild_access]
+    review: { outcome: confirmed }
 
   - id: askq.gambling
     split: development
     question: How does gambling in a settlement work, and what can I win?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.settlement.gambling, table.settlement.gambling]
+    review: { outcome: confirmed }
 
   - id: askq.silver_city_quests
     split: development
     question: How many quests are available in Silver City?
     expected: { intent: value_lookup, complexity: single_fact, entity: settlement.silver_city }
     required_evidence: [table.settlement.quest_availability]
+    review: { outcome: confirmed }
 
   - id: askq.horse
     split: development
     question: How much does a horse cost, and what does it do for travel?
-    expected: { intent: value_lookup, complexity: single_fact, entity: equipment.transport.horse }
-    required_evidence: [table.equipment.animals_and_transportation]
+    expected: { intent: value_lookup, complexity: single_rule, entity: equipment.transport.horse }
+    required_evidence: [table.equipment.animals_and_transportation, procedure.travel_daily_movement]
+    review:
+      outcome: corrected
+      reason: >-
+        Added procedure.travel_daily_movement and complexity single_rule: the equipment table only says a horse increases speed and refers to Travelling; the 6 versus 3 Movement Points are in the travel rule.
 
   - id: askq.brew_potion
     split: development
     question: How does an alchemist brew a potion?
-    expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
-    required_evidence: [character.alchemy.mix, character.alchemy.recipe]
+    expected: { intent: rule_explanation, complexity: single_rule, entity: null }
+    required_evidence: [character.alchemy.mix, procedure.alchemy_making_a_potion]
+    review:
+      outcome: corrected
+      reason: >-
+        Replaced character.alchemy.recipe with procedure.alchemy_making_a_potion and complexity single_rule: the book says making a recipe "is different to the usual mixing of potions"; mixing and its flowchart are one procedure.
 
   - id: askq.tomb_raiders_tomb
     split: development
     question: In Tomb Raiders, what does it take to open one of the tombs?
     expected:
       { intent: quest_running, complexity: single_rule, entity: quest.great_crypt.tomb_raiders }
-    required_evidence: [procedure.tomb_raiders]
+    required_evidence: [core.quest.tomb_raiders.open_tomb]
+    review:
+      outcome: corrected
+      reason: >-
+        Replaced procedure.tomb_raiders with core.quest.tomb_raiders.open_tomb, the scenario rule that states opening a tomb takes a complete turn for 2 heroes.
 
   # --- validation ----------------------------------------------------------------------
   - id: askq.poison_cure
@@ -246,18 +316,21 @@ cases:
     question: How can I cure a poisoned hero?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.poison_cure]
+    review: { outcome: confirmed }
 
   - id: askq.shove
     split: validation
     question: Can my warrior shove an enemy out of the way?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.combat_shove]
+    review: { outcome: confirmed }
 
   - id: askq.threat_roll
     split: validation
     question: How does a roll against the Threat Level work?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.threat_roll]
+    review: { outcome: confirmed }
 
   - id: askq.short_rest_recovery
     split: validation
@@ -268,6 +341,7 @@ cases:
       - procedure.rest_hp_recovery
       - procedure.rest_mana_recovery
       - procedure.rest_energy_point_recovery
+    review: { outcome: confirmed }
 
   - id: askq.lantern
     split: validation
@@ -279,18 +353,21 @@ cases:
         entity: equipment.light_source.lantern_filled_with_oil,
       }
     required_evidence: [character.equipment.light_source.lantern_filled_with_oil.light]
+    review: { outcome: confirmed }
 
   - id: askq.level_up
     split: validation
     question: What does a hero gain when levelling up?
     expected: { intent: character_building, complexity: multi_rule, entity: null }
     required_evidence: [procedure.character_level_up, table.character.level_progression]
+    review: { outcome: confirmed }
 
   - id: askq.learn_spell_cost
     split: validation
     question: How much does it cost for a wizard to learn a new spell, and how long does it take?
     expected: { intent: value_lookup, complexity: single_rule, entity: null }
     required_evidence: [procedure.learn_spell]
+    review: { outcome: confirmed }
 
   - id: askq.closing_portal_interrupted
     split: validation
@@ -302,97 +379,121 @@ cases:
         entity: quest.chamber_of_reverence.closing_portal,
       }
     required_evidence: [procedure.closing_portal_reading_attempt]
+    review: { outcome: confirmed }
 
   - id: askq.fire_next_turn
     split: validation
     question: Does fire damage keep burning on the next turn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.elemental_continuation]
+    review: { outcome: confirmed }
 
   - id: askq.encumbrance
     split: validation
     question: How much can my hero carry before getting a penalty?
     expected: { intent: value_lookup, complexity: single_rule, entity: null }
     required_evidence: [character.encumbrance.penalty, character.encumbrance.limit]
+    review: { outcome: confirmed }
 
   - id: askq.wizard_armour
     split: validation
     question: Can a wizard wear plate armour?
-    expected: { intent: situation_ruling, complexity: single_fact, entity: profession.wizard }
-    required_evidence: [profession.wizard]
-    notes: The limitation sits in the Wizard profession record, not in an armour rule.
+    expected: { intent: situation_ruling, complexity: single_rule, entity: profession.wizard }
+    required_evidence: [profession.wizard, table.equipment.armour]
+    notes: >-
+      The limitation (no armour heavier than Tier 2) sits in the Wizard profession record; the
+      Armour table is what places plate in Tier 4.
+    review:
+      outcome: corrected
+      reason: >-
+        Added table.equipment.armour and complexity single_rule: the Wizard limit is "no armour heavier than Tier 2"; only the Armour table shows plate is Tier 4.
 
   - id: askq.estate_cost
     split: validation
     question: How much does the Bergmeister Estate cost?
     expected: { intent: value_lookup, complexity: single_fact, entity: estate.bergmeister }
     required_evidence: [character.settlement.estate.purchase]
+    review: { outcome: confirmed }
 
   - id: askq.zero_hp_after_battle
     split: validation
     question: One hero is at 0 HP when the battle ends. Can a companion bandage him, and how does it affect morale?
     expected: { intent: situation_ruling, complexity: multi_rule, entity: null }
     required_evidence: [character.hit_points.after_battle_bandage, character.morale.event.zero_hp]
+    review: { outcome: confirmed }
 
   - id: askq.overwatch
     split: validation
     question: When can a hero go into Overwatch, and what does reacting cost?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.overwatch]
+    review: { outcome: confirmed }
 
   - id: askq.acid_fire_armour
     split: validation
     question: Does armour protect against acid or fire damage?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.damage_follow_up]
+    review: { outcome: confirmed }
 
   - id: askq.attack_from_behind
     split: validation
     question: What bonus do I get for attacking an enemy from behind in close combat?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.combat.melee_modifiers]
+    review: { outcome: confirmed }
 
   - id: askq.fireball_damage
     split: validation
     question: How much damage does Fireball do?
     expected: { intent: value_lookup, complexity: single_fact, entity: spell.fireball }
     required_evidence: [spell.fireball]
+    review: { outcome: confirmed }
 
   - id: askq.dungeon_turn_steps
     split: validation
     question: What are the steps of a dungeon turn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.dungeon_turn]
+    review: { outcome: confirmed }
 
   - id: askq.pit_climb
     split: validation
     question: How does a hero climb out of a pit, and does a rope help?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
-    required_evidence: [core.movement.pit.up_with_rope]
+    required_evidence: [core.movement.pit.up_without_rope, core.movement.pit.up_with_rope]
+    review:
+      outcome: corrected
+      reason: >-
+        Added core.movement.pit.up_without_rope: climbing out takes a DEX test and 2 AP without a rope, which the question asks first.
 
   - id: askq.legendary_sell
     split: validation
     question: Can a legendary item be sold or damaged?
     expected: { intent: situation_ruling, complexity: single_fact, entity: null }
     required_evidence: [character.treasure.legendary.general]
+    review: { outcome: confirmed }
 
   - id: askq.thief_treasure
     split: validation
     question: Does a thief get any advantage when drawing Treasure Cards?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.thief_treasure_choice]
+    review: { outcome: confirmed }
 
   - id: askq.creation_steps
     split: validation
     question: What are the steps for creating a new hero?
     expected: { intent: character_building, complexity: single_rule, entity: null }
     required_evidence: [procedure.character_creation]
+    review: { outcome: confirmed }
 
   - id: askq.natural_armour
     split: validation
     question: How much Natural Armour does a hero with 62 Constitution get?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.character.natural_armour]
+    review: { outcome: confirmed }
 
   - id: askq.dual_wield
     split: validation
@@ -400,18 +501,21 @@ cases:
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [talent.dual_wield]
     notes: The question avoids the talent name.
+    review: { outcome: confirmed }
 
   - id: askq.shared_experience
     split: validation
     question: Does only the hero who lands the killing blow get the experience?
     expected: { intent: situation_ruling, complexity: single_fact, entity: null }
     required_evidence: [character.level.eligibility]
+    review: { outcome: confirmed }
 
   - id: askq.sanity_loss_sources
     split: validation
     question: What makes a hero lose Sanity?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [table.psychology.sanity_losses]
+    review: { outcome: confirmed }
 
   - id: askq.fear_of_the_dark
     split: validation
@@ -419,57 +523,73 @@ cases:
     expected:
       { intent: rule_explanation, complexity: single_fact, entity: condition.fear_of_the_dark }
     required_evidence: [condition.fear_of_the_dark]
+    review: { outcome: confirmed }
 
   - id: askq.hungry_morale
     split: validation
     question: Does going hungry affect Party Morale?
     expected: { intent: situation_ruling, complexity: single_fact, entity: null }
     required_evidence: [character.morale.event.hungry]
+    review: { outcome: confirmed }
 
   - id: askq.buying_availability
     split: validation
     question: How does buying an item in a settlement work, and what if the availability roll fails?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.settlement_buy_sell_and_service]
+    review: { outcome: confirmed }
 
   - id: askq.arena
     split: validation
     question: How does fighting in the arena work?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
-    required_evidence: [character.settlement.arena_entry, table.settlement.arena_modifiers]
+    required_evidence: [character.settlement.arena_entry, character.settlement.arena_results]
+    review:
+      outcome: corrected
+      reason: >-
+        Replaced table.settlement.arena_modifiers (one of three modifier tables) with character.settlement.arena_results: a general "how does it work" answer needs winnings, XP and losses, not the HP modifier table alone.
 
   - id: askq.settlement_arrival_event
     split: validation
     question: Does anything happen when the party arrives in a settlement?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.settlement.arrival, table.settlement.event_thresholds]
+    review: { outcome: confirmed }
 
   - id: askq.departure_day
     split: validation
     question: Can we do settlement activities on the day we leave on a quest?
     expected: { intent: situation_ruling, complexity: single_fact, entity: null }
     required_evidence: [procedure.quest_departure]
+    review: { outcome: confirmed }
 
   - id: askq.ancient_lands_rations
     split: validation
     question: How many rations does the party need per day in the Ancient Lands?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [procedure.travel_food_and_rest]
+    review: { outcome: confirmed }
 
   - id: askq.cave_bear_parts
     split: validation
     question: What do I get from harvesting a Cave Bear?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.alchemy.harvesting]
+    review: { outcome: confirmed }
 
   - id: askq.claustrophobic_wizard_corridor
     split: validation
     question: My wizard has Claustrophobia and Fear of the Dark. What penalties apply when she casts a spell in a corridor?
     expected: { intent: situation_ruling, complexity: judgment, entity: null }
-    required_evidence: [procedure.claustrophobia, condition.fear_of_the_dark]
+    required_evidence:
+      [procedure.claustrophobia, condition.fear_of_the_dark, procedure.hero_spell_casting]
     notes: >-
       Claustrophobia gives -10 to all skills in corridors, Arcane Arts included. Fear of the Dark
       only affects Resolve Tests, so a correct answer says it does not change the casting roll.
+    review:
+      outcome: corrected
+      reason: >-
+        Added procedure.hero_spell_casting: the -10 to all skills applies only because casting is an Arcane Arts skill check, which the casting procedure states.
 
   # --- held out ------------------------------------------------------------------------
   - id: askq.disease_cure
@@ -477,6 +597,7 @@ cases:
     question: My hero caught a disease. How do I get rid of it?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.disease_cure]
+    review: { outcome: confirmed }
 
   - id: askq.cure_poison_on_disease
     split: held_out
@@ -488,12 +609,14 @@ cases:
         entity: equipment.alchemy.potion_of_cure_poison,
       }
     required_evidence: [equipment.alchemy.potion_of_cure_poison, procedure.disease_cure]
+    review: { outcome: confirmed }
 
   - id: askq.search_room
     split: held_out
     question: How does searching a room for hidden treasure work?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.search_room_or_corridor]
+    review: { outcome: confirmed }
 
   - id: askq.sarcophagus
     split: held_out
@@ -501,12 +624,14 @@ cases:
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [table.treasure.furniture.sarcophagus, procedure.search_furniture]
     notes: Sarcophagus is a furniture table and rule, not an entity record.
+    review: { outcome: confirmed }
 
   - id: askq.trap_disarm
     split: held_out
     question: How do heroes disarm a trap?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.trap_resolution]
+    review: { outcome: confirmed }
 
   - id: askq.turn_order
     split: held_out
@@ -514,24 +639,28 @@ cases:
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.initiative]
     notes: The question avoids the word "initiative".
+    review: { outcome: confirmed }
 
   - id: askq.hit_location
     split: held_out
     question: Where does a hit land on a hero?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.combat.hit_location]
+    review: { outcome: confirmed }
 
   - id: askq.wizard_strength_cost
     split: held_out
     question: How many Improvement Points does a Wizard pay to raise Strength?
     expected: { intent: value_lookup, complexity: single_fact, entity: profession.wizard }
     required_evidence: [table.character.improvement_costs]
+    review: { outcome: confirmed }
 
   - id: askq.hero_replacement
     split: held_out
     question: My hero died. Can I bring in a replacement?
     expected: { intent: situation_ruling, complexity: single_rule, entity: null }
     required_evidence: [procedure.hero_death]
+    review: { outcome: confirmed }
 
   - id: askq.claustrophobia
     split: held_out
@@ -539,6 +668,7 @@ cases:
     expected:
       { intent: situation_ruling, complexity: single_rule, entity: condition.claustrophobia }
     required_evidence: [procedure.claustrophobia]
+    review: { outcome: confirmed }
 
   - id: askq.relic_reward
     split: held_out
@@ -550,132 +680,154 @@ cases:
         entity: quest.chamber_of_reverence.returning_relic,
       }
     required_evidence: [core.quest.returning_relic.reward]
+    review: { outcome: confirmed }
 
   - id: askq.settlement_day
     split: held_out
     question: How many activities can a hero do per day in a settlement, and must they stay at the inn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.settlement_activities_and_overnight]
+    review: { outcome: confirmed }
 
   - id: askq.dodge_parry_limits
     split: held_out
     question: How often can a hero dodge and parry?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.hero_defence]
+    review: { outcome: confirmed }
 
   - id: askq.stunned
     split: held_out
     question: What does being stunned do to a hero?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.stun_next_turn]
+    review: { outcome: confirmed }
 
   - id: askq.shooting_past_cover
     split: held_out
     question: What modifier applies when I shoot at an enemy past a half-height object?
     expected: { intent: value_lookup, complexity: single_fact, entity: null }
     required_evidence: [table.combat.ranged_modifiers]
+    review: { outcome: confirmed }
 
   - id: askq.encounter_chance
     split: held_out
     question: What is the chance of an encounter when the party enters a new room or corridor?
     expected: { intent: value_lookup, complexity: single_rule, entity: null }
     required_evidence: [procedure.encounters]
+    review: { outcome: confirmed }
 
   - id: askq.open_door_trap
     split: held_out
     question: What happens when a hero opens a door? Can it be trapped?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.open_door_or_chest]
+    review: { outcome: confirmed }
 
   - id: askq.room_treasure
     split: held_out
     question: What can a hero find when rolling for treasure in a room or corridor?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [table.treasure.rooms_corridors]
+    review: { outcome: confirmed }
 
   - id: askq.fountain_drink
     split: held_out
     question: What happens if a hero drinks from a fountain in the dungeon?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [table.treasure.furniture.fountain_drink]
+    review: { outcome: confirmed }
 
   - id: askq.broken_weapon_repair
     split: held_out
     question: What happens when a weapon reaches 0 Durability, and where can damaged gear be repaired?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.durability.broken, character.durability.repair_location]
+    review: { outcome: confirmed }
 
   - id: askq.specialisation
     split: held_out
     question: How do I spend the 15 specialisation points when creating a hero?
     expected: { intent: character_building, complexity: single_rule, entity: null }
     required_evidence: [procedure.character_creation_specialisation]
+    review: { outcome: confirmed }
 
   - id: askq.wizard_level_two_talent
     split: held_out
     question: Which talent category does a Wizard choose from at level 2?
     expected: { intent: character_building, complexity: single_fact, entity: profession.wizard }
     required_evidence: [table.character.talent_progression]
+    review: { outcome: confirmed }
 
   - id: askq.halfling_longbow
     split: held_out
     question: Can a Halfling use a longbow?
     expected: { intent: situation_ruling, complexity: single_fact, entity: species.halfling }
     required_evidence: [species.halfling]
+    review: { outcome: confirmed }
 
   - id: askq.learn_prayer_cost
     split: held_out
     question: How much does it cost a Warrior Priest to learn a new prayer?
     expected: { intent: value_lookup, complexity: single_rule, entity: null }
     required_evidence: [procedure.learn_prayer]
+    review: { outcome: confirmed }
 
   - id: askq.sanity_recovery
     split: held_out
     question: How can a hero recover lost Sanity?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.sanity_recovery]
+    review: { outcome: confirmed }
 
   - id: askq.asylum_treatment
     split: held_out
     question: How do I get a hero's mental condition treated, and what does it cost?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.mental_condition_treatment]
+    review: { outcome: confirmed }
 
   - id: askq.failed_fear_retry
     split: held_out
     question: A hero failed a Fear Test. Can another hero help them try again?
     expected: { intent: situation_ruling, complexity: single_fact, entity: null }
     required_evidence: [perk.rally]
+    review: { outcome: confirmed }
 
   - id: askq.guild_skill_training
     split: held_out
     question: How does skill training at a guild work?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [procedure.guild_skill_training]
+    review: { outcome: confirmed }
 
   - id: askq.banking
     split: held_out
     question: How does keeping money in a bank work?
     expected: { intent: rule_explanation, complexity: multi_rule, entity: null }
     required_evidence: [character.settlement.banking, table.settlement.bank_returns]
+    review: { outcome: confirmed }
 
   - id: askq.inn_recovery
     split: held_out
     question: What do heroes recover by staying a night at the inn?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [character.recovery.inn_resources]
+    review: { outcome: confirmed }
 
   - id: askq.outdoor_obstacles
     split: held_out
     question: How do boulders and barrels affect movement and shooting in an outdoor skirmish?
     expected: { intent: value_lookup, complexity: single_rule, entity: null }
     required_evidence: [table.travel.obstacles]
+    review: { outcome: confirmed }
 
   - id: askq.alchemy_harvest
     split: held_out
     question: How does an alchemist harvest parts from dead enemies?
     expected: { intent: rule_explanation, complexity: single_rule, entity: null }
     required_evidence: [character.alchemy.harvest]
+    review: { outcome: confirmed }
 
   - id: askq.ragnalf_stats
     split: held_out
@@ -683,3 +835,4 @@ cases:
     expected:
       { intent: value_lookup, complexity: single_fact, entity: quest_actor.great_crypt.ragnalf }
     required_evidence: [table.quest.stopping_necromancer.ragnalf]
+    review: { outcome: confirmed }

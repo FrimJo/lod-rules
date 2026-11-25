@@ -8,7 +8,7 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
 - Section and component progress (generated): [coverage-report.md](coverage-report.md)
 - Phase structure and data model: [LOD_RULES_CORPUS_PLAN.md](../LOD_RULES_CORPUS_PLAN.md)
 
-## Current position — 24 November 2026
+## Current position — 25 November 2026
 
 - Phases 0–3 are complete. Phase 4 core mechanics are extracted and tested.
 - Phase 5 Batches 1–7 are extracted within catalogue scope (Package E).
@@ -176,15 +176,22 @@ agent context; do not copy it into [AGENTS.md](../AGENTS.md).
   [Phase 11 exit checklist](../tests/fixtures/acceptance/phase-11.json) is `accepted`. No
   canonical change; evidence in
   [phase-11-deterministic-compilation.md](ledgers/phase-11-deterministic-compilation.md).
+- Phase 12 is complete (25 November, issue #31): the corpus-work CLI reports review status and
+  open issues by type, agent tools show conflicting passages and unavailable sources, tables
+  survive retrieval whole, a 62-case acceptance suite runs over the bundles, and the 103 ask
+  labels are reviewed (92 confirmed, 11 corrected). The
+  [Phase 12 exit checklist](../tests/fixtures/acceptance/phase-12.json) is `accepted`. No
+  canonical change; evidence and known caveats in
+  [phase-12-retrieval-corpus.md](ledgers/phase-12-retrieval-corpus.md).
 - Coverage: see the generated [coverage report](coverage-report.md); 677 sections reviewed.
-  Phase 10 is closed: Steps 2–3 carried it out and Step 3's exit is its exit. Phase 12 is
-  unfinished.
+  Phase 10 is closed: Steps 2–3 carried it out and Step 3's exit is its exit. Core Phases 0–12
+  are done.
 
 ## Next unit
 
-Phase 12, retrieval corpus ([plan](corpus-completion-plan.md#phase-12--retrieval-corpus)): the
-fixed acceptance query suite, review status in the corpus-work CLI, and review of the labelled
-questions.
+No unit of core work remains: core Phases 0–12 are complete. Optional and deferred work is
+listed in [plan §6](corpus-completion-plan.md#6-optional-and-deferred-work); take it on only
+when a consumer needs it.
 
 Open carry-overs:
 
@@ -218,6 +225,7 @@ the "Current position" and "Next unit" sections above. Do not keep a running log
 | Phase 8: worked examples                       | [phase-8-worked-examples.md](ledgers/phase-8-worked-examples.md)                             |
 | Phase 9: uncertainty audit                     | [phase-9-uncertainty-audit.md](ledgers/phase-9-uncertainty-audit.md)                         |
 | Phase 11: deterministic compilation            | [phase-11-deterministic-compilation.md](ledgers/phase-11-deterministic-compilation.md)       |
+| Phase 12: retrieval corpus                     | [phase-12-retrieval-corpus.md](ledgers/phase-12-retrieval-corpus.md)                         |
 
 The ledgers record extraction, not independent review. Their historical gate counts are
 point-in-time and are not updated. Acceptance fixtures and `corpus/source-map/coverage.yaml`

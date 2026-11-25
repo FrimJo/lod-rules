@@ -1,4 +1,5 @@
 import { parseArgs } from 'node:util';
+import { ISSUE_TYPES, type IssueType } from './corpus.ts';
 import type { DocumentKind } from './documents.ts';
 import { buildRetrievalArtifacts, freshDatabasePath } from './build.ts';
 import { Retrieval } from './index.ts';
@@ -8,6 +9,7 @@ const usage = `Usage: npm run retrieve -- <command> [options]
 
 Commands:
   search <query...>   Lexical search. --kind rule,table  --scope global|quest  --quest <id>  --limit N
+                      --issue-type conflicting,ambiguity (with --kind issue)
   get <id>            Exact id: search document plus canonical record
   resolve <name>      Exact title or alias match (e.g. AP, "Molgor")
   expand <id>         Related records. --direction out|in|both  --relation see_also,uses_table  --depth N
@@ -25,6 +27,7 @@ const { values, positionals } = parseArgs({
     kind: { type: 'string' },
     scope: { type: 'string' },
     quest: { type: 'string' },
+    'issue-type': { type: 'string' },
     limit: { type: 'string' },
     direction: { type: 'string' },
     relation: { type: 'string' },
@@ -38,6 +41,14 @@ const argument = rest.join(' ');
 const print = (value: unknown): void => console.log(JSON.stringify(value, null, 2));
 const list = (value: string | undefined): string[] | undefined =>
   value?.split(',').map((v) => v.trim());
+const issueTypes = (values: string[] | undefined): IssueType[] | undefined => {
+  const unknown = values?.filter((value) => !(ISSUE_TYPES as readonly string[]).includes(value));
+  if (unknown?.length) {
+    console.error(`Unknown issue type: ${unknown.join(', ')}. Use ${ISSUE_TYPES.join(', ')}.`);
+    process.exit(1);
+  }
+  return values as IssueType[] | undefined;
+};
 const int = (value: string | undefined): number | undefined =>
   value ? Number.parseInt(value, 10) : undefined;
 
@@ -71,6 +82,7 @@ switch (command) {
         kinds: list(values.kind) as DocumentKind[] | undefined,
         scope: values.scope,
         questId: values.quest,
+        issueTypes: issueTypes(list(values['issue-type'])),
         limit: int(values.limit),
       }),
     );

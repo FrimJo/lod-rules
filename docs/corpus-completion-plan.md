@@ -27,19 +27,19 @@ current position and next unit are in [extraction-checkpoint.md](extraction-chec
 
 ## 2. Status — 24 November 2026
 
-| Measure                              | Value                                                                                                     |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Canonical files (`npm run validate`) | 563, passing                                                                                              |
-| Tests (`npm test`)                   | 5,010 passing, 2 optional provider tests skipped                                                          |
-| Sections extracted / reviewed        | 677 / 677 independently reviewed (100%); 38 compatibility redirects excluded                              |
-| Unfinished non-quest sections        | 0 (`npm run report:chapters -- --include-quests`); Steps 2 and 3 are closed                               |
-| Procedures / state machines          | 125 / 2                                                                                                   |
-| Review records                       | 343: 295 unresolved, 48 resolved (most by published designer rulings)                                     |
-| Independent review records           | 239 under `review/independent/`; each of the 53 units' governing record is fresh and passing              |
-| Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope              |
-| Exit checklists                      | Phases 0–6, Phase 9 and Phase 11 `accepted` (`tests/fixtures/acceptance/`)                                |
-| Phase 11 build                       | Done: `build:corpus` writes 17 JSON bundles and a manifest ([contract](corpus-bundles.md))                |
-| Phase 12 retrieval                   | Lexical retrieval over the bundles, agent tools, MCP server and `ask` ([§5](#phase-12--retrieval-corpus)) |
+| Measure                              | Value                                                                                               |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Canonical files (`npm run validate`) | 563, passing                                                                                        |
+| Tests (`npm test`)                   | 5,010 passing, 2 optional provider tests skipped                                                    |
+| Sections extracted / reviewed        | 677 / 677 independently reviewed (100%); 38 compatibility redirects excluded                        |
+| Unfinished non-quest sections        | 0 (`npm run report:chapters -- --include-quests`); Steps 2 and 3 are closed                         |
+| Procedures / state machines          | 125 / 2                                                                                             |
+| Review records                       | 343: 295 unresolved, 48 resolved (most by published designer rulings)                               |
+| Independent review records           | 239 under `review/independent/`; each of the 53 units' governing record is fresh and passing        |
+| Package F manifest                   | `accepted`: 41 implemented, 10 covered by another model, 1 nonprocedural, 43 catalogue scope        |
+| Exit checklists                      | Phases 0–6, Phase 9, Phase 11 and Phase 12 `accepted` (`tests/fixtures/acceptance/`)                |
+| Phase 11 build                       | Done: `build:corpus` writes 17 JSON bundles and a manifest ([contract](corpus-bundles.md))          |
+| Phase 12 retrieval                   | Done: 62-case acceptance suite, review status, conflict notices ([§5](#phase-12--retrieval-corpus)) |
 
 Live progress lives in the generated [coverage report](coverage-report.md) and the
 [Package F acceptance manifest](../tests/fixtures/acceptance/package-f.json). Update this table
@@ -53,7 +53,10 @@ catalogue scope, reconciled and independently reviewed, 18 October); Step 4 (Pha
 anomaly dispositioned); Phase 10 (closed through Steps 2–3); Phase 8 (every printed example inventoried); Phase 9 (every review unit
 backed by fresh evidence, and every informal note that states a doubt inventoried against
 `review/`, 24 November); Phase 11 (validated, reproducible JSON bundles that retrieval reads,
-24 November). Published designer rulings are applied per the
+24 November); Phase 12 (retrieval corpus: acceptance suite, review status, conflict and
+unavailable-source notices, reviewed labels, 25 November; known caveats in the
+[Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md#known-caveats)). Core Phases 0–12 are
+done; the open carry-overs stay named in the [checkpoint](extraction-checkpoint.md#next-unit). Published designer rulings are applied per the
 [extraction guide](extraction-guide.md).
 
 ### Why the order changed
@@ -198,7 +201,8 @@ It closes `phase_6.criterion_2`. Unit 3b (`summary_of`/`expanded_by`) and unit 4
 ### Step 5 — Compile (Phase 11), then complete retrieval (Phase 12)
 
 Phase 11 is done (issue #24); evidence in the
-[Phase 11 ledger](ledgers/phase-11-deterministic-compilation.md). Phase 12 remains.
+[Phase 11 ledger](ledgers/phase-11-deterministic-compilation.md). Phase 12 is done too
+(issue #31); evidence in the [Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md).
 
 See [§5](#5-compile-and-make-the-corpus-retrievable).
 
@@ -297,6 +301,10 @@ SQLite output is optional ([§6](#6-optional-and-deferred-work)).
 
 ### Phase 12 — Retrieval corpus
 
+Done 25 November 2026 (issue #31). Evidence, counts and known caveats in the
+[Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md); the exit checklist is
+`tests/fixtures/acceptance/phase-12.json`. The lists below are the original scope.
+
 **Already built** (see [retrieval.md](retrieval.md)):
 
 - `scripts/retrieve/`: lexical retrieval over all canonical records with provenance, quest
@@ -309,7 +317,7 @@ SQLite output is optional ([§6](#6-optional-and-deferred-work)).
 - `clients/web/`: a consumer that answers rules questions. It is not a Phase 12 deliverable.
 - Retrieval documents are generated from the Phase 11 bundles, not directly from YAML.
 
-**Remaining:**
+**Remaining at the start of the phase (all done):**
 
 - Expose review status and uncertainty in the corpus-work CLI (`retrieve search|get|issues`).
   Agent tools keep hiding bookkeeping, but must keep conflicting rules and unavailable-source

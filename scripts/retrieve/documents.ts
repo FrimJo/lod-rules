@@ -1,4 +1,5 @@
 import { compare } from '../graph/compare.ts';
+import { issueMembers, recordIssues } from '../graph/issues.ts';
 import { flattenSteps, questResolver } from '../graph/records.ts';
 import { isToolVisible, type Graph, type GraphEdge } from '../graph/types.ts';
 import type {
@@ -11,10 +12,11 @@ import type {
   Table,
 } from '../validate/pilot-types.ts';
 import type { SourceReference } from '../validate/integrity.ts';
-import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './corpus.ts';
+import { governingRecord, type ReviewRecord } from '../validate/independent-review.ts';
+import type { GlossaryTerm, IssueType, RetrievalCorpus, ReviewIssue } from './corpus.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
-export const SEARCH_DOCUMENT_VERSION = 6;
+export const SEARCH_DOCUMENT_VERSION = 8;
 
 export type DocumentKind =
   'rule' | 'entity' | 'table' | 'procedure' | 'state_machine' | 'term' | 'issue';
@@ -33,6 +35,13 @@ export interface Relation {
   target: string;
   /** Printed wording that limits when a canonical edge holds. */
   condition?: string;
+}
+
+/** The independent review record that governs a section, by the validator's rule. */
+export interface GoverningReview {
+  id: string;
+  outcome: ReviewRecord['outcome'];
+  date: string;
 }
 
 export interface ExternalDependency {
@@ -61,12 +70,33 @@ export interface SearchDocument {
   issue_ids: string[];
   unresolved_references: string[];
   external_dependencies: ExternalDependency[];
-  review_status: 'extracted' | 'reviewed';
+  /**
+   * The record's own status as the YAML states it: `extracted`/`reviewed` for records,
+   * `unresolved`/`resolved` for issues. Terms carry no status field, so a term reports its
+   * section's `glossary` coverage component.
+   */
+  review_status: 'extracted' | 'reviewed' | 'unresolved' | 'resolved';
+  /** Coverage status of `section_id` (`reviewed`, or `mapped` for a redirect); null without one. */
+  section_status: string | null;
+  /** Latest independent review whose scope names `section_id` (validator rule); null if none. */
+  governing_review: GoverningReview | null;
+  /** Unresolved review issues that name the record, ids grouped by issue type. */
+  open_issues: Partial<Record<IssueType, string[]>>;
   issue_status?: 'unresolved' | 'resolved';
   issue_summary?: string;
-  resolution?: { summary: string; citations: Citation[] };
+  /** Records the issue names, from the graph's issue edges (issues only). */
+  issue_members?: string[];
+  resolution?: {
+    summary: string;
+    citations: Citation[];
+    /** Resolution citations of published designer rulings (`official_errata`, `official_faq`). */
+    rulings: Citation[];
+  };
   file: string;
 }
+
+/** Manifest source classes whose citations are published designer rulings. */
+const RULING_CLASSES = new Set(['official_errata', 'official_faq']);
 
 function citations(sources: SourceReference[]): Citation[] {
   const seen = new Set<string>();
@@ -165,10 +195,30 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
   const relations = (id: string): Relation[] => relationsFor.get(id) ?? [];
   const sections = new Map(corpus.sections.map((section) => [section.id, section]));
   const { questFor, isQuestSection } = questResolver(corpus);
-  const issuesFor = new Map<string, string[]>();
-  for (const issue of corpus.issues) {
-    for (const id of issue.related) issuesFor.set(id, [...(issuesFor.get(id) ?? []), issue.id]);
-  }
+  // Issue membership comes from the graph's issue edges, never from `related` directly.
+  const membersOf = issueMembers(graph);
+  const issuesFor = recordIssues(graph);
+  const coverage = new Map(corpus.coverage.map((entry) => [entry.id, entry]));
+  const issueById = new Map(corpus.issues.map((issue) => [issue.id, issue]));
+  /** Section coverage, governing review and open issues: where a record stands in review. */
+  const reviewState = (
+    sectionId: string | undefined,
+    issueIds: string[],
+  ): Pick<SearchDocument, 'section_status' | 'governing_review' | 'open_issues'> => {
+    const record = sectionId ? governingRecord(corpus.reviews, sectionId) : undefined;
+    const open: Partial<Record<IssueType, string[]>> = {};
+    for (const id of issueIds) {
+      const issue = issueById.get(id);
+      if (issue?.status === 'unresolved') open[issue.type] = [...(open[issue.type] ?? []), id];
+    }
+    return {
+      section_status: (sectionId && coverage.get(sectionId)?.status) || null,
+      governing_review: record
+        ? { id: record.id, outcome: record.outcome, date: record.date }
+        : null,
+      open_issues: Object.fromEntries(Object.entries(open).sort(([a], [b]) => compare(a, b))),
+    };
+  };
   const aliasesFor = new Map<string, string[]>();
   for (const alias of corpus.aliases) {
     aliasesFor.set(alias.term_id, [...(aliasesFor.get(alias.term_id) ?? []), alias.form]);
@@ -217,9 +267,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
     text: string,
     external: ExternalDependency[] = [],
   ): SearchDocument => {
-    const issueIds = [
-      ...new Set([...(record.issues ?? []), ...(issuesFor.get(record.id) ?? [])]),
-    ].sort();
+    const issueIds = issuesFor.get(record.id) ?? [];
     const doc: SearchDocument = {
       id: record.id,
       kind,
@@ -236,6 +284,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
       unresolved_references: record.unresolved_references ?? [],
       external_dependencies: external,
       review_status: record.status,
+      ...reviewState(record.section_id, issueIds),
       file: corpus.files.get(record.id) ?? '',
     };
     if (questId) doc.quest_id = questId;
@@ -321,7 +370,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
   };
 
   const term = (t: GlossaryTerm): SearchDocument => {
-    const issueIds = [...new Set(issuesFor.get(t.id) ?? [])].sort();
+    const issueIds = issuesFor.get(t.id) ?? [];
     return {
       id: t.id,
       kind: 'term',
@@ -345,11 +394,18 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
       issue_ids: issueIds,
       unresolved_references: [],
       external_dependencies: [],
-      review_status: 'extracted',
+      review_status:
+        coverage.get(t.section_id)?.components?.glossary === 'reviewed' ? 'reviewed' : 'extracted',
+      ...reviewState(t.section_id, issueIds),
       file: corpus.files.get(t.id) ?? '',
     };
   };
 
+  const rulingDocuments = new Set(
+    corpus.manifest.documents
+      .filter((document) => RULING_CLASSES.has(document.source_class ?? ''))
+      .map((document) => document.id),
+  );
   const issue = (i: ReviewIssue): SearchDocument => {
     const resolution = i.status === 'resolved' ? i.resolution.summary : '';
     return {
@@ -368,14 +424,19 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
       issue_ids: [],
       unresolved_references: [],
       external_dependencies: [],
-      review_status: 'extracted',
+      review_status: i.status,
+      ...reviewState(undefined, []),
       issue_status: i.status,
       issue_summary: i.summary,
+      issue_members: membersOf.get(i.id) ?? [],
       ...(i.status === 'resolved'
         ? {
             resolution: {
               summary: i.resolution.summary,
               citations: citations(i.resolution.source),
+              rulings: citations(
+                i.resolution.source.filter((source) => rulingDocuments.has(source.document)),
+              ),
             },
           }
         : {}),

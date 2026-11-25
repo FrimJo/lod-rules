@@ -1,4 +1,6 @@
+import { compare } from '../graph/compare.ts';
 import type { Table } from '../validate/pilot-types.ts';
+import type { IssueType } from './corpus.ts';
 import {
   printedTableText,
   type Citation,
@@ -73,7 +75,9 @@ export const RETRIEVAL_TOOLS: ToolDefinition[] = [
       'machines and glossary terms. Matching is by words, not meaning; if a search misses, ' +
       'retry with rulebook vocabulary ("poison cure" rather than "recover from poison"). Hits ' +
       'are summaries with page citations; call lod_get before relying on a rule or table. ' +
-      'Quest-only records rank lower unless the query names the quest or quest_id is set.',
+      'Quest-only records rank lower unless the query names the quest or quest_id is set. ' +
+      'conflicting_passages: true marks a record the rulebook contradicts elsewhere; call ' +
+      'lod_get, read both passages and present the conflict.',
     input_schema: {
       type: 'object',
       properties: {
@@ -110,7 +114,10 @@ export const RETRIEVAL_TOOLS: ToolDefinition[] = [
       'Read one record by id: the verbatim rulebook text, PDF and printed page citations, ' +
       'scope (a "quest" record applies only inside quest_id), links to related records, books ' +
       'it depends on that are not available (external_dependencies), and structured data ' +
-      '(table columns and rows, effects, conditions, steps, stats).',
+      '(table columns and rows, effects, conditions, steps, stats). conflicts_with lists ' +
+      'passages that contradict this one (the record itself when it contradicts itself): read ' +
+      'both passages and present the conflict instead of choosing one. rulings cites a ' +
+      'published designer ruling that settles such a contradiction; follow the ruling.',
     input_schema: {
       type: 'object',
       properties: { id },
@@ -158,6 +165,16 @@ export const RETRIEVAL_TOOLS: ToolDefinition[] = [
   },
 ];
 
+/** A passage in a conflict: the record that holds it, as `lod_get` would cite it. */
+interface Passage {
+  id: string;
+  title: string;
+  citations: Summary['citations'];
+}
+
+/** A published designer ruling; `row` is the changelog entry number. */
+type RulingCitation = Summary['citations'][number] & { row?: number | string };
+
 interface Summary {
   id: string;
   kind: DocumentKind;
@@ -183,6 +200,65 @@ function summary(doc: SearchDocument | SearchHit): Summary {
     scope: doc.scope,
     ...(doc.quest_id ? { quest_id: doc.quest_id } : {}),
     citations: citations(doc.citations),
+  };
+}
+
+function rulingCitation({ file: _file, locator, ...citation }: Citation): RulingCitation {
+  const row = locator?.row;
+  return { ...citation, ...(row !== undefined && row !== null ? { row } : {}) };
+}
+
+/**
+ * Conflict notices for one record, from the review issues of type `conflicting` whose graph
+ * members include it. An unresolved one names the other passages (the record itself when it
+ * names no other); one resolved by a published ruling cites the ruling instead. A conflict the
+ * rulebook itself settles shows nothing. Issue ids, status and summaries never leave here.
+ */
+const CONFLICTING: IssueType = 'conflicting';
+
+/** The `conflicting` review issues whose graph members include this record. */
+function conflictIssues(retrieval: Retrieval, document: SearchDocument): SearchDocument[] {
+  return document.issue_ids
+    .flatMap((issueId) => retrieval.document(issueId) ?? [])
+    .filter(
+      (issue) => issue.type === CONFLICTING && (issue.issue_members ?? []).includes(document.id),
+    );
+}
+
+/** True when the record is named by an unresolved conflict: the `lod_search` marker. */
+function hasOpenConflict(retrieval: Retrieval, document: SearchDocument): boolean {
+  return conflictIssues(retrieval, document).some((issue) => issue.issue_status === 'unresolved');
+}
+
+function conflictsOf(
+  retrieval: Retrieval,
+  document: SearchDocument,
+): { passages: Passage[]; rulings: RulingCitation[] } {
+  const passages = new Map<string, Passage>();
+  const rulings = new Map<string, RulingCitation>();
+  for (const issue of conflictIssues(retrieval, document)) {
+    const members = issue.issue_members ?? [];
+    if (issue.issue_status === 'unresolved') {
+      const others = members
+        .filter((id) => id !== document.id)
+        .flatMap((id) => retrieval.document(id) ?? [])
+        .filter((other) => other.kind !== 'issue');
+      for (const passage of others.length > 0 ? others : [document])
+        passages.set(passage.id, {
+          id: passage.id,
+          title: passage.title,
+          citations: citations(passage.citations),
+        });
+    } else {
+      for (const ruling of issue.resolution?.rulings ?? []) {
+        const projected = rulingCitation(ruling);
+        rulings.set(JSON.stringify(projected), projected);
+      }
+    }
+  }
+  return {
+    passages: [...passages.values()].sort((a, b) => compare(a.id, b.id)),
+    rulings: [...rulings.values()],
   };
 }
 
@@ -227,6 +303,7 @@ function rulebookRecord(retrieval: Retrieval, recordId: string): unknown {
     if (target === null || ('kind' in target && target.kind === 'issue')) return [];
     return [{ ...relation, target_title: target.title }];
   });
+  const conflicts = conflictsOf(retrieval, document);
   return {
     ...summary(document),
     ...(document.aliases.length > 0 ? { aliases: document.aliases } : {}),
@@ -236,6 +313,8 @@ function rulebookRecord(retrieval: Retrieval, recordId: string): unknown {
     ...(document.external_dependencies.length > 0
       ? { external_dependencies: document.external_dependencies }
       : {}),
+    ...(conflicts.passages.length > 0 ? { conflicts_with: conflicts.passages } : {}),
+    ...(conflicts.rulings.length > 0 ? { rulings: conflicts.rulings } : {}),
     data: withoutBookkeeping(data),
   };
 }
@@ -323,7 +402,15 @@ export function runRetrievalTool(retrieval: Retrieval, name: string, rawInput: u
           limit: integer(input, 'limit', 1, 50),
         })
         .filter((hit) => hit.kind !== 'issue')
-        .map((hit) => ({ ...summary(hit), snippet: snippet(retrieval, hit) }));
+        .map((hit) => {
+          const doc = retrieval.document(hit.id);
+          const conflicting = doc !== null && hasOpenConflict(retrieval, doc);
+          return {
+            ...summary(hit),
+            ...(conflicting ? { conflicting_passages: true as const } : {}),
+            snippet: snippet(retrieval, hit),
+          };
+        });
     }
     case 'lod_get':
       return rulebookRecord(retrieval, string(input, 'id', true));

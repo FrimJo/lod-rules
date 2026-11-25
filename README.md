@@ -24,8 +24,8 @@ As of 7 October 2026:
   pending entries.
 - **Phase 11 — compilation:** `npm run build:corpus` compiles the corpus into validated JSON
   bundles ([contract](docs/corpus-bundles.md)).
-- **Phase 12:** retrieval (lexical search, agent tools, MCP server, `ask`) reads the bundles and
-  is partial.
+- **Phase 12:** retrieval (lexical search, agent tools, MCP server, `ask`) reads the bundles;
+  exit checklist accepted ([ledger](docs/ledgers/phase-12-retrieval-corpus.md)).
 - **Phase 4.x — optional semantic decisions:** adapters and evaluation exist; calibration and
   production-provider selection remain pending.
 
@@ -56,7 +56,7 @@ npx tsx scripts/extract/inspect-pdf.ts
 # Score the gold set against fields already stored on each rule.
 npm run decisions -- evaluate --provider structural
 
-# Early Phase 12 retrieval: search, exact ids, aliases, relations, review issues.
+# Phase 12 retrieval: search, exact ids, aliases, relations, review issues.
 npm run retrieve -- search "how do I open a locked door"
 npm run retrieve -- build   # generated/retrieval/ (JSONL, SQLite, manifest)
 

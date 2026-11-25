@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { deriveGraph } from '../../scripts/graph/derive.ts';
 import { buildSearchDocuments } from '../../scripts/retrieve/documents.ts';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
+import { ISSUE_TYPES } from '../../scripts/retrieve/corpus.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import type { Step } from '../../scripts/validate/pilot-types.ts';
 
@@ -88,36 +90,10 @@ describe('exact lookup', () => {
   it('ranks an exact id query first', () => {
     expect(top('procedure.rest', 1)).toEqual(['procedure.rest']);
   });
-
-  it.each([
-    ['AP', 'term.action_points'],
-    ['action points', 'term.action_points'],
-    ['Pyramid of Xanthu', 'quest.ancient_lands.pyramid_xanthu'],
-    ['Molgor, the Fiend of Summerhall', 'quest_actor.chamber_of_reverence.molgor'],
-  ])('resolves the alias %s', (name, id) => {
-    expect(retrieval.resolve(name).map((doc) => doc.id)).toContain(id);
-  });
 });
 
 describe('lexical search', () => {
-  it.each([
-    ['how do I open a locked door', 'procedure.locked_door_and_close'],
-    ['how do I open a locked door', 'table.dungeon.door_chest_difficulty'],
-    ['what happens when a hero is bleeding', 'procedure.bleeding_out'],
-    ['can heroes rest in a dungeon', 'procedure.rest_hp_recovery'],
-    ['poison cure', 'procedure.poison_cure'],
-    ['searching a room', 'procedure.search_room_or_corridor'],
-    ['what happens when sanity reaches zero', 'procedure.sanity_loss'],
-    ['Threat level increase', 'procedure.threat_roll'],
-    ['Molgor hit points', 'table.quest.slaying_fiend.molgor'],
-    ['Molgor prior wounds', 'table.quest.slaying_fiend.prior_wounds'],
-    ['closing the portal threat', 'table.quest.closing_portal.threat'],
-    ['closing the portal demons', 'table.quest.closing_portal.demons'],
-    ['returning the relic reward', 'core.quest.returning_relic.reward'],
-    ['what does a wizard start with', 'profession.wizard'],
-  ])('"%s" finds %s in the top ten', (query, id) => {
-    expect(top(query)).toContain(id);
-  });
+  // The "X finds Y in the top ten" queries live in tests/fixtures/retrieval-acceptance.json.
 
   it('ranks global rules above unrelated quest-local rules', () => {
     const hits = top('how do I open a locked door', 3);
@@ -190,6 +166,51 @@ describe('relations and uncertainty', () => {
     const issues = retrieval.issues('term.battle');
     expect(issues.map((doc) => doc.id)).toContain('issue.0001');
     expect(issues[0]?.issue_status).toBe('unresolved');
+  });
+
+  it('knows exactly the issue types the review-issue schema allows', () => {
+    const schema = JSON.parse(readFileSync('schemas/issue.schema.json', 'utf8')) as {
+      items: { properties: { type: { enum: string[] } } };
+    };
+    const allowed = schema.items.properties.type.enum;
+    expect([...ISSUE_TYPES].sort()).toEqual([...allowed].sort());
+  });
+
+  it('reports an issue by its own status and type, and filters issue search by type', () => {
+    expect(retrieval.document('issue.0004')).toMatchObject({
+      type: 'conflicting',
+      review_status: 'unresolved',
+      issue_status: 'unresolved',
+    });
+    expect(retrieval.document('issue.0005')?.review_status).toBe('resolved');
+    const hits = retrieval.search('end of the quest reward', {
+      kinds: ['issue'],
+      issueTypes: ['conflicting'],
+    });
+    expect(hits.map((hit) => hit.id)).toContain('issue.0004');
+    expect(hits.every((hit) => hit.type === 'conflicting')).toBe(true);
+    const all = retrieval.search('end of the quest reward', { kinds: ['issue'], limit: 50 });
+    expect(all.some((hit) => hit.type !== 'conflicting')).toBe(true);
+  });
+
+  it('carries review state and open-issue counts by type on search hits', () => {
+    const hit = retrieval.search('procedure.acute_stress', { limit: 1 })[0];
+    expect(hit).toMatchObject({
+      id: 'procedure.acute_stress',
+      section_status: 'reviewed',
+      governing_review: { id: 'review.psychology_tables.6', outcome: 'passed' },
+      open_issue_counts: { ambiguity: 3, conflicting: 1 },
+    });
+  });
+
+  it('reports mapped for a record whose section is a compatibility redirect', () => {
+    // No canonical record sits in one of the 38 redirect sections today, so move one there.
+    const corpus = loadRetrievalCorpus();
+    const term = corpus.terms.find((candidate) => candidate.id === 'term.skill_test')!;
+    term.section_id = 'section.magic.casting_spells.table_3';
+    const moved = Retrieval.fromLoadedCorpus(corpus);
+    expect(moved.get('term.skill_test')?.document.section_status).toBe('mapped');
+    moved.close();
   });
 
   it('surfaces unavailable external material instead of content', () => {
