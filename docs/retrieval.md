@@ -186,15 +186,17 @@ model whose answer was kept.
 
 ### Labelled questions
 
-`tests/fixtures/ask-questions/cases.yaml` holds 102 rules questions in three splits:
-development (34), validation (35) and held-out (33). The first 37 (12 / 13 / 12) date from
+`tests/fixtures/ask-questions/cases.yaml` holds 103 rules questions in three splits:
+development (35), validation (35) and held-out (33). The first 37 (12 / 13 / 12) date from
 1 October; the other 65 were added on 5 October across combat, dungeon, treasure,
 character building, psychology, settlements, travel, alchemy, magic and quests. The results
 below cover the original 37 only. Each question is labelled with its
 intent, its complexity, the one entity record it is about (or `null`), and the
 `required_evidence` records a correct answer must be able to cite. Labels were drafted from
-the canonical records they name and have not been independently reviewed
-(`label_review: unreviewed`). Game systems are not labelled. Instead, "chapter coverage"
+the canonical records they name. On 25 November 2026 an independent reviewer checked every
+case (`label_review.status: reviewed`): 92 confirmed and 11 corrected, each correction with
+its reason on the case. See "Label review" in
+[ask-quality-evaluation.md](ask-quality-evaluation.md) for the old and new baselines. Game systems are not labelled. Instead, "chapter coverage"
 is measured mechanically: the share of required records whose chapter falls inside the
 selected systems.
 
