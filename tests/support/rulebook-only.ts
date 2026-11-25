@@ -14,6 +14,10 @@ const BOOKKEEPING_KEYS = [
   'issue_status',
   'unresolved_references',
   'review_status',
+  'section_status',
+  'governing_review',
+  'open_issues',
+  'open_issue_counts',
   'score',
   'found',
 ];
