@@ -9,7 +9,16 @@ export interface GlossaryTerm extends Term {
   definition?: string;
 }
 
-export type ReviewIssue = Issue & { type: string; summary: string };
+/** The review-issue types `schemas/issue.schema.json` allows. */
+export const ISSUE_TYPES = [
+  'ambiguity',
+  'conflicting',
+  'possible_typo',
+  'rulebook_undefined',
+] as const;
+export type IssueType = (typeof ISSUE_TYPES)[number];
+
+export type ReviewIssue = Issue & { type: IssueType; summary: string };
 
 /** `source/manifest.yaml`: documents in this repository and books that are not. */
 export interface SourceManifest {

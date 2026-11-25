@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { deriveGraph } from '../../scripts/graph/derive.ts';
 import { buildSearchDocuments } from '../../scripts/retrieve/documents.ts';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
+import { ISSUE_TYPES } from '../../scripts/retrieve/corpus.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import type { Step } from '../../scripts/validate/pilot-types.ts';
 
@@ -166,6 +168,14 @@ describe('relations and uncertainty', () => {
     expect(issues[0]?.issue_status).toBe('unresolved');
   });
 
+  it('knows exactly the issue types the review-issue schema allows', () => {
+    const schema = JSON.parse(readFileSync('schemas/issue.schema.json', 'utf8')) as {
+      items: { properties: { type: { enum: string[] } } };
+    };
+    const allowed = schema.items.properties.type.enum;
+    expect([...ISSUE_TYPES].sort()).toEqual([...allowed].sort());
+  });
+
   it('reports an issue by its own status and type, and filters issue search by type', () => {
     expect(retrieval.document('issue.0004')).toMatchObject({
       type: 'conflicting',
@@ -198,10 +208,9 @@ describe('relations and uncertainty', () => {
     const corpus = loadRetrievalCorpus();
     const term = corpus.terms.find((candidate) => candidate.id === 'term.skill_test')!;
     term.section_id = 'section.magic.casting_spells.table_3';
-    const doc = buildSearchDocuments(corpus, deriveGraph(corpus)).find(
-      (candidate) => candidate.id === 'term.skill_test',
-    );
-    expect(doc?.section_status).toBe('mapped');
+    const moved = Retrieval.fromLoadedCorpus(corpus);
+    expect(moved.get('term.skill_test')?.document.section_status).toBe('mapped');
+    moved.close();
   });
 
   it('surfaces unavailable external material instead of content', () => {

@@ -27,8 +27,15 @@ export interface CaseReview {
 }
 
 /** The file-level review status: `unreviewed`, or the review that checked every case. */
-export type LabelReview =
-  { status: 'unreviewed' } | { status: 'reviewed'; review: string; reviewer: string; date: string };
+/** The file-level record of an independent label review. */
+export interface ReviewedLabels {
+  status: 'reviewed';
+  review: string;
+  reviewer: string;
+  date: string;
+}
+
+export type LabelReview = { status: 'unreviewed' } | ReviewedLabels;
 
 interface RawCase {
   id: string;
@@ -41,8 +48,7 @@ interface RawCase {
 }
 
 interface RawLabels {
-  label_review:
-    'unreviewed' | { status: 'reviewed'; review: string; reviewer: string; date: string };
+  label_review: 'unreviewed' | ReviewedLabels;
   cases: RawCase[];
 }
 

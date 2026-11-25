@@ -1,4 +1,6 @@
+import { compare } from '../graph/compare.ts';
 import type { Table } from '../validate/pilot-types.ts';
+import type { IssueType } from './corpus.ts';
 import {
   printedTableText,
   type Citation,
@@ -212,16 +214,30 @@ function rulingCitation({ file: _file, locator, ...citation }: Citation): Ruling
  * names no other); one resolved by a published ruling cites the ruling instead. A conflict the
  * rulebook itself settles shows nothing. Issue ids, status and summaries never leave here.
  */
+const CONFLICTING: IssueType = 'conflicting';
+
+/** The `conflicting` review issues whose graph members include this record. */
+function conflictIssues(retrieval: Retrieval, document: SearchDocument): SearchDocument[] {
+  return document.issue_ids
+    .flatMap((issueId) => retrieval.document(issueId) ?? [])
+    .filter(
+      (issue) => issue.type === CONFLICTING && (issue.issue_members ?? []).includes(document.id),
+    );
+}
+
+/** True when the record is named by an unresolved conflict: the `lod_search` marker. */
+function hasOpenConflict(retrieval: Retrieval, document: SearchDocument): boolean {
+  return conflictIssues(retrieval, document).some((issue) => issue.issue_status === 'unresolved');
+}
+
 function conflictsOf(
   retrieval: Retrieval,
   document: SearchDocument,
 ): { passages: Passage[]; rulings: RulingCitation[] } {
   const passages = new Map<string, Passage>();
   const rulings = new Map<string, RulingCitation>();
-  for (const issueId of document.issue_ids) {
-    const issue = retrieval.document(issueId);
-    const members = issue?.issue_members ?? [];
-    if (issue?.type !== 'conflicting' || !members.includes(document.id)) continue;
+  for (const issue of conflictIssues(retrieval, document)) {
+    const members = issue.issue_members ?? [];
     if (issue.issue_status === 'unresolved') {
       const others = members
         .filter((id) => id !== document.id)
@@ -241,7 +257,7 @@ function conflictsOf(
     }
   }
   return {
-    passages: [...passages.values()].sort((a, b) => a.id.localeCompare(b.id, 'en')),
+    passages: [...passages.values()].sort((a, b) => compare(a.id, b.id)),
     rulings: [...rulings.values()],
   };
 }
@@ -388,7 +404,7 @@ export function runRetrievalTool(retrieval: Retrieval, name: string, rawInput: u
         .filter((hit) => hit.kind !== 'issue')
         .map((hit) => {
           const doc = retrieval.document(hit.id);
-          const conflicting = doc !== null && conflictsOf(retrieval, doc).passages.length > 0;
+          const conflicting = doc !== null && hasOpenConflict(retrieval, doc);
           return {
             ...summary(hit),
             ...(conflicting ? { conflicting_passages: true as const } : {}),

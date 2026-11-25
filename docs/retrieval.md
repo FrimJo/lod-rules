@@ -112,8 +112,10 @@ compiled from the bundles, so adding a case is a data change.
   search that names no quest, each expected global record ranks above every quest-only hit).
 - **Optional rules.** Every `optional_rules` case sets `expect_optional`: each expected record's
   `lod_get` names its `optional_system`, or its title or section says "optional".
-  Known gap: the optional Simplified Alchemy rules (PDF p. 76) and the Bleeding-out Advanced
-  Rule (PDF p. 122) carry no such marker, so no case covers them; see the
+  The Simplified Alchemy rules (PDF p. 76) and the Bleeding-out Advanced Rule (PDF p. 122)
+  are not covered: the book calls them "simplified rules" you "can instead use" and an
+  "Advanced Rule", never "optional", and `lod_get` already shows that wording in `context`.
+  Retrieval does not relabel them, since that would collapse the book's terms; see the
   [Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md#known-caveats).
 - **Tables.** For every table record, `lod_get` returns the bundled table's columns, rows (id,
   source row, kind, cells) and footnotes unchanged, and every table search hit carries that
@@ -203,7 +205,8 @@ each issue search document stores it as `issue_members`, and the projection in
   from the rulebook alone (such as the Skill Test term against the standard check) shows
   nothing.
 - **`conflicting_passages: true`** (`lod_search` summaries): the hit has a non-empty
-  `conflicts_with`.
+  `conflicts_with`, that is, an open conflict. A conflict settled by a published ruling
+  carries no search marker; `lod_get` shows its `rulings`.
 
 Neither carries an issue id, status, summary or resolution text. The `lod_search` and
 `lod_get` descriptions tell the agent to read both passages and present the conflict.
@@ -212,9 +215,17 @@ Neither carries an issue id, status, summary or resolution text. The `lod_search
 
 Full search documents (`search`, `get`, `issues`) report where each record stands in review:
 
-- `review_status` is the record's own status as its YAML states it: `extracted` or `reviewed`
-  for records, `unresolved` or `resolved` for issues. Glossary terms have no status field and
-  report their section's `glossary` coverage component. It is not the section's review state.
+- `review_status` is the record's own status as its YAML states it, and means something
+  different per kind:
+  - rules, procedures, tables, entities and state machines: their `status` field. Every one
+    is `extracted` today; independent review is recorded per section, not per record;
+  - review issues: `unresolved` or `resolved`, the same value as `issue_status`;
+  - glossary terms, which have no status field: their section's `glossary` coverage
+    component, also `extracted` for every term today.
+
+  It is not the section's review state. Read `section_status` and `governing_review` to see
+  whether a record's passage has been independently reviewed.
+
 - `section_status` is the coverage status of the record's section: `reviewed`, or `mapped`
   for one of the compatibility redirects. Every non-redirect section is independently
   reviewed; see the [coverage report](coverage-report.md).

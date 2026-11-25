@@ -1,5 +1,5 @@
 import { compare } from '../graph/compare.ts';
-import { issueMembers } from '../graph/issues.ts';
+import { issueMembers, recordIssues } from '../graph/issues.ts';
 import { flattenSteps, questResolver } from '../graph/records.ts';
 import { isToolVisible, type Graph, type GraphEdge } from '../graph/types.ts';
 import type {
@@ -13,7 +13,7 @@ import type {
 } from '../validate/pilot-types.ts';
 import type { SourceReference } from '../validate/integrity.ts';
 import { governingRecord, type ReviewRecord } from '../validate/independent-review.ts';
-import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './corpus.ts';
+import type { GlossaryTerm, IssueType, RetrievalCorpus, ReviewIssue } from './corpus.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
 export const SEARCH_DOCUMENT_VERSION = 8;
@@ -81,7 +81,7 @@ export interface SearchDocument {
   /** Latest independent review whose scope names `section_id` (validator rule); null if none. */
   governing_review: GoverningReview | null;
   /** Unresolved review issues that name the record, ids grouped by issue type. */
-  open_issues: Record<string, string[]>;
+  open_issues: Partial<Record<IssueType, string[]>>;
   issue_status?: 'unresolved' | 'resolved';
   issue_summary?: string;
   /** Records the issue names, from the graph's issue edges (issues only). */
@@ -195,10 +195,9 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
   const relations = (id: string): Relation[] => relationsFor.get(id) ?? [];
   const sections = new Map(corpus.sections.map((section) => [section.id, section]));
   const { questFor, isQuestSection } = questResolver(corpus);
-  const issuesFor = new Map<string, string[]>();
-  for (const issue of corpus.issues) {
-    for (const id of issue.related) issuesFor.set(id, [...(issuesFor.get(id) ?? []), issue.id]);
-  }
+  // Issue membership comes from the graph's issue edges, never from `related` directly.
+  const membersOf = issueMembers(graph);
+  const issuesFor = recordIssues(graph);
   const coverage = new Map(corpus.coverage.map((entry) => [entry.id, entry]));
   const issueById = new Map(corpus.issues.map((issue) => [issue.id, issue]));
   /** Section coverage, governing review and open issues: where a record stands in review. */
@@ -207,7 +206,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
     issueIds: string[],
   ): Pick<SearchDocument, 'section_status' | 'governing_review' | 'open_issues'> => {
     const record = sectionId ? governingRecord(corpus.reviews, sectionId) : undefined;
-    const open: Record<string, string[]> = {};
+    const open: Partial<Record<IssueType, string[]>> = {};
     for (const id of issueIds) {
       const issue = issueById.get(id);
       if (issue?.status === 'unresolved') open[issue.type] = [...(open[issue.type] ?? []), id];
@@ -268,9 +267,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
     text: string,
     external: ExternalDependency[] = [],
   ): SearchDocument => {
-    const issueIds = [
-      ...new Set([...(record.issues ?? []), ...(issuesFor.get(record.id) ?? [])]),
-    ].sort();
+    const issueIds = issuesFor.get(record.id) ?? [];
     const doc: SearchDocument = {
       id: record.id,
       kind,
@@ -373,7 +370,7 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
   };
 
   const term = (t: GlossaryTerm): SearchDocument => {
-    const issueIds = [...new Set(issuesFor.get(t.id) ?? [])].sort();
+    const issueIds = issuesFor.get(t.id) ?? [];
     return {
       id: t.id,
       kind: 'term',
@@ -404,7 +401,6 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
     };
   };
 
-  const membersOf = issueMembers(graph);
   const rulingDocuments = new Set(
     corpus.manifest.documents
       .filter((document) => RULING_CLASSES.has(document.source_class ?? ''))

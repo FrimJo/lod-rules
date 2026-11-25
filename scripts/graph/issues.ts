@@ -21,3 +21,15 @@ export function issueMembers(graph: Graph): Map<string, string[]> {
     [...members].map(([issue, records]) => [issue, [...records].sort(compare)] as const),
   );
 }
+
+/**
+ * The review issues that name each record, the inverse of `issueMembers`: the record's own
+ * `issues` list and every issue whose `related` names it. Retrieval reads issue↔record
+ * membership only from here and `issueMembers`.
+ */
+export function recordIssues(graph: Graph): Map<string, string[]> {
+  const issues = new Map<string, string[]>();
+  for (const [issue, records] of issueMembers(graph))
+    for (const record of records) issues.set(record, [...(issues.get(record) ?? []), issue]);
+  return new Map([...issues].map(([record, ids]) => [record, ids.sort(compare)] as const));
+}

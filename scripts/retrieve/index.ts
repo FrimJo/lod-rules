@@ -7,7 +7,7 @@ import {
   type GraphLinks,
   type SearchDocument,
 } from './documents.ts';
-import type { RetrievalCorpus } from './corpus.ts';
+import type { IssueType, RetrievalCorpus } from './corpus.ts';
 import { loadRetrievalCorpus } from './load.ts';
 
 export type { SearchDocument } from './documents.ts';
@@ -24,7 +24,7 @@ export interface SearchOptions {
   /** Exact section ids; a document matches when it sits directly under one of them. */
   sections?: string[];
   /** Issue types (`conflicting`, `ambiguity`, …); issue documents of other types are dropped. */
-  issueTypes?: string[];
+  issueTypes?: IssueType[];
   limit?: number;
 }
 
@@ -44,7 +44,7 @@ export interface SearchHit {
   section_status: SearchDocument['section_status'];
   governing_review: SearchDocument['governing_review'];
   /** Unresolved issues that name the record, counted by issue type. */
-  open_issue_counts: Record<string, number>;
+  open_issue_counts: Partial<Record<IssueType, number>>;
   file: string;
 }
 
@@ -214,7 +214,11 @@ export class Retrieval {
    * `readOnly` keeps that compilation in memory instead of publishing it to `generated/`.
    */
   static fromCorpus(root?: string, { readOnly = false }: { readOnly?: boolean } = {}): Retrieval {
-    const corpus = loadRetrievalCorpus(root, { readOnly });
+    return Retrieval.fromLoadedCorpus(loadRetrievalCorpus(root, { readOnly }));
+  }
+
+  /** Indexes an already loaded corpus in memory. */
+  static fromLoadedCorpus(corpus: RetrievalCorpus): Retrieval {
     const graph = deriveGraph(corpus);
     return new Retrieval(
       createRetrievalDatabase(

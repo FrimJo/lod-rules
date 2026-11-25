@@ -87,9 +87,11 @@ method and the corrections are in [ask-quality-evaluation.md](../ask-quality-eva
   `optional_system` or an "optional" title or section (`identifiesAsOptional`). The
   Simplified Alchemy rules (`character.alchemy.simplified.*`, PDF p. 76, printed 74) and the
   Bleeding-out Advanced Rule (`character.hit_points.bleeding_time`, PDF p. 122, printed 120)
-  carry neither, so `lod_get` gives no sign they are optional. The
-  `optional_rules` cases do not exercise them. Fixing it needs a canonical change
-  (`optional_system` on those records), not a retrieval change.
+  carry neither. The book calls them "simplified rules" you "can instead use" and an
+  "Advanced Rule", never "optional", and `lod_get` shows that wording in `context`. The
+  `optional_rules` cases do not exercise them. Retrieval does not relabel them "optional",
+  because that would collapse the book's terms. Marking them would need a canonical
+  `optional_system` decision through the extraction workflow.
 - **Labels still missed.** Three corrected ask cases are missed by every configuration
   because the record a correct answer needs is not retrieved: when a torch goes out
   (`torch`), the failed-casting Mana rule (`miscast_failed_spell`) and the casting procedure
