@@ -9,6 +9,7 @@ import {
   type Retrieval,
   type SearchDocument,
 } from '../../scripts/retrieve/index.ts';
+import type { SourceManifest } from '../../scripts/retrieve/corpus.ts';
 import { runRetrievalTool } from '../../scripts/retrieve/tools.ts';
 
 export const ACCEPTANCE_CATEGORIES = [
@@ -22,6 +23,20 @@ export const ACCEPTANCE_CATEGORIES = [
   'missing_external_material',
 ] as const;
 export type AcceptanceCategory = (typeof ACCEPTANCE_CATEGORIES)[number];
+
+/**
+ * Fewest cases each category must hold (issue #34). `conflicting_passages` sets its own
+ * minimum when its cases land (issue #36).
+ */
+export const CATEGORY_MINIMUMS: Partial<Record<AcceptanceCategory, number>> = {
+  exact_lookup: 5,
+  terminology: 5,
+  combat_modifiers: 5,
+  optional_rules: 5,
+  service_eligibility: 5,
+  quest_local_exceptions: 5,
+  missing_external_material: 5,
+};
 
 /** Library operations return full documents; `lod_*` operations return agent-tool output. */
 export const LIBRARY_OPERATIONS = ['get', 'resolve', 'search'] as const;
@@ -44,6 +59,15 @@ export interface AcceptanceCase {
   expect_missing?: boolean;
   /** Manifest documents (e.g. `bestiary`) the first hit's `external_dependencies` must name. */
   expect_external?: string[];
+  /** Every expected record is quest-local to this quest (`lod_get` scope and quest_id). */
+  expect_quest_id?: string;
+  /**
+   * A query that names no quest: each expected global record ranks above every quest-only hit.
+   * Search operations only.
+   */
+  expect_outranks_quest?: boolean;
+  /** Every expected record's `lod_get` output identifies it as an optional rule. */
+  expect_optional?: boolean;
   /** Tighter than the default of 10, never looser. Applies to `search` and `lod_search`. */
   limit?: number;
   /** Names the PDF page that justifies the expectation: `PDF p.101`. */
@@ -57,9 +81,26 @@ export interface AcceptanceFixture {
   cases: AcceptanceCase[];
 }
 
-/** The slice of `Retrieval` the checker needs. */
+/** The slice of `Retrieval` the checker needs, plus the manifest's unavailable books. */
 export interface AcceptanceContext {
   document(id: string): SearchDocument | null;
+  /** Manifest `external_sources` with `status: not_present`. */
+  unavailableBooks: ReadonlySet<string>;
+}
+
+/** Builds the checker's context from a `Retrieval` and the retrieval corpus manifest. */
+export function acceptanceContext(
+  retrieval: Pick<Retrieval, 'document'>,
+  manifest: SourceManifest,
+): AcceptanceContext {
+  return {
+    document: (id) => retrieval.document(id),
+    unavailableBooks: new Set(
+      (manifest.external_sources ?? [])
+        .filter((source) => source.status === 'not_present')
+        .map((source) => source.id),
+    ),
+  };
 }
 
 const NOTE_PAGE = /PDF p\.\s?(\d+)/g;
@@ -98,6 +139,25 @@ export function checkAcceptanceFixture(
       continue;
     }
     if (entry.expect_ids.length === 0) at('expect_ids is empty');
+    if (
+      entry.category === 'quest_local_exceptions' &&
+      !entry.expect_quest_id &&
+      !entry.expect_outranks_quest
+    )
+      at('a quest_local_exceptions case must set expect_quest_id or expect_outranks_quest');
+    if (
+      entry.expect_outranks_quest &&
+      entry.operation !== 'search' &&
+      entry.operation !== 'lod_search'
+    )
+      at('expect_outranks_quest needs a search or lod_search operation');
+    if (entry.category === 'optional_rules' && !entry.expect_optional)
+      at('an optional_rules case must set expect_optional');
+    if (entry.category === 'missing_external_material' && !entry.expect_external?.length)
+      at('a missing_external_material case must name the unavailable book in expect_external');
+    for (const book of entry.expect_external ?? [])
+      if (!context.unavailableBooks.has(book))
+        at(`expect_external ${book} is not a not_present book`);
 
     const cited = new Set(
       entry.expect_ids.flatMap(
@@ -110,7 +170,25 @@ export function checkAcceptanceFixture(
         `note must name a PDF page that an expected record cites ("PDF p.N"); got "${entry.note}"`,
       );
   }
+  for (const [category, minimum] of Object.entries(CATEGORY_MINIMUMS)) {
+    const count = fixture.cases.filter((entry) => entry.category === category).length;
+    if (count < minimum) problems.push(`${category} has ${count} cases; needs at least ${minimum}`);
+  }
   return problems;
+}
+
+/**
+ * True when a `lod_get` result tells an agent the rule is optional: its data names the
+ * optional system it belongs to (`optional_system`), or its title or section says "optional".
+ */
+export function identifiesAsOptional(output: unknown): boolean {
+  if (typeof output !== 'object' || output === null) return false;
+  const record = output as { title?: unknown; context?: unknown; data?: unknown };
+  const data = record.data as { optional_system?: unknown } | undefined;
+  if (typeof data?.optional_system === 'string') return true;
+  return [record.title, record.context].some(
+    (field) => typeof field === 'string' && /\boptional\b/i.test(field),
+  );
 }
 
 export interface AcceptanceHit {

@@ -77,7 +77,8 @@ its id, status and issues do not.
 Search ranks with BM25 over title, aliases, context and text. Results matching more
 of the query words get a boost. Quest-local records are demoted unless the query names
 their quest (or a word that appears only in quest titles, such as "Molgor"), or a scope
-or quest filter is given. Review issues are excluded by default; request them with
+or quest filter is given. An inflected form of a global word is not quest-only: "fleeing"
+counts as global because of "flee". Review issues are excluded by default; request them with
 `--kind issue` or `issues <id>`.
 
 ## Acceptance suite
@@ -101,13 +102,25 @@ compiled from the bundles, so adding a case is a data change.
 - **Missing ids.** A case with `expect_missing` checks the graceful miss: `get` returns null,
   `lod_get` returns `{ found: false, hint }`.
 - **Unavailable books.** `expect_external` names manifest documents (such as `bestiary`) that
-  the first hit's `external_dependencies` must list.
+  the first hit's `external_dependencies` must list. Each must be a `not_present` book, and every
+  `missing_external_material` case names one.
+- **Quest scope.** Every `quest_local_exceptions` case sets `expect_quest_id` (each expected
+  record's `lod_get` keeps `scope: quest` and that `quest_id`) or `expect_outranks_quest` (for a
+  search that names no quest, each expected global record ranks above every quest-only hit).
+- **Optional rules.** Every `optional_rules` case sets `expect_optional`: each expected record's
+  `lod_get` names its `optional_system`, or its title or section says "optional".
+- **Tables.** For every table record, `lod_get` returns the bundled table's columns, rows (id,
+  source row, kind, cells) and footnotes unchanged, and every table search hit carries that
+  table's id with a snippet cut from its printed cells.
 - **Universal checks.** Every hit carries a citation with a PDF page. Every full document has a
   non-empty section and file. Agent-tool output passes the bookkeeping-free projection check
   (`tests/support/rulebook-only.ts`).
 - **The fixture checks itself** (`tests/support/retrieval-acceptance.ts`): it rejects unknown
   categories, duplicate case ids, expected ids that are not in the corpus, a limit above 10,
-  and a note that names no PDF page cited by an expected record.
+  a note that names no PDF page cited by an expected record, a category case that skips its
+  category check, and a category below its minimum. `CATEGORY_MINIMUMS` requires at least 5
+  cases each for `exact_lookup`, `terminology`, `combat_modifiers`, `optional_rules`,
+  `service_eligibility`, `quest_local_exceptions` and `missing_external_material`.
 
 ## Wiring an LLM client
 
