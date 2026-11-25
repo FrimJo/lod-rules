@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Retrieval } from '../../scripts/retrieve/index.ts';
 import { loadRetrievalCorpus } from '../../scripts/retrieve/load.ts';
 import { RETRIEVAL_TOOLS, ToolInputError, runRetrievalTool } from '../../scripts/retrieve/tools.ts';
+import { expectRulebookOnly } from '../support/rulebook-only.ts';
 
 let retrieval: Retrieval;
 beforeAll(() => {
@@ -10,42 +11,6 @@ beforeAll(() => {
 afterAll(() => retrieval.close());
 
 const run = (name: string, input: unknown): unknown => runRetrievalTool(retrieval, name, input);
-
-/** Corpus bookkeeping that must never reach a consumer agent's context. */
-const BOOKKEEPING_KEYS = [
-  'status',
-  'confidence',
-  'completeness',
-  'extraction',
-  'locator',
-  'file',
-  'issues',
-  'issue_id',
-  'issue_ids',
-  'issue_status',
-  'unresolved_references',
-  'review_status',
-  'score',
-  'found',
-];
-
-function keysOf(value: unknown, into = new Set<string>()): Set<string> {
-  if (Array.isArray(value)) for (const item of value) keysOf(item, into);
-  else if (typeof value === 'object' && value !== null)
-    for (const [key, child] of Object.entries(value)) {
-      into.add(key);
-      keysOf(child, into);
-    }
-  return into;
-}
-
-function expectRulebookOnly(value: unknown, label: string): void {
-  const keys = keysOf(value);
-  for (const key of BOOKKEEPING_KEYS) expect(keys.has(key), `${label}: ${key}`).toBe(false);
-  const json = JSON.stringify(value);
-  expect(json, label).not.toMatch(/"(corpus|review|source)\/[^"]*\.(yaml|pdf|html)"/);
-  expect(json, label).not.toMatch(/"issue\./);
-}
 
 describe('rulebook tool definitions', () => {
   it('name four read tools with object schemas', () => {
