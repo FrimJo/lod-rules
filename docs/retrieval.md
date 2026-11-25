@@ -112,6 +112,9 @@ compiled from the bundles, so adding a case is a data change.
   search that names no quest, each expected global record ranks above every quest-only hit).
 - **Optional rules.** Every `optional_rules` case sets `expect_optional`: each expected record's
   `lod_get` names its `optional_system`, or its title or section says "optional".
+  Known gap: the optional Simplified Alchemy rules (PDF p. 76) and the Bleeding-out Advanced
+  Rule (PDF p. 122) carry no such marker, so no case covers them; see the
+  [Phase 12 ledger](ledgers/phase-12-retrieval-corpus.md#known-caveats).
 - **Tables.** For every table record, `lod_get` returns the bundled table's columns, rows (id,
   source row, kind, cells) and footnotes unchanged, and every table search hit carries that
   table's id with a snippet cut from its printed cells.
@@ -395,8 +398,8 @@ labels each record's sources, that the filter asks one relevance question per re
 drops only above its threshold, honours exact and linked protection and the budget cap,
 keeps every record when the ranker fails, and that `ask()` filters only model analyses.
 
-Not yet done: independent review of the question labels, a labelled set large enough to calibrate Laya and Jev, vector search,
-and semantic-provider calibration.
+Not yet done: a labelled set large enough to calibrate Laya and Jev, vector search, and
+semantic-provider calibration. The labels themselves were independently reviewed in Phase 12.
 
 ### Official ruling evidence
 

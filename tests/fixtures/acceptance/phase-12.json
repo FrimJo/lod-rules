@@ -1,0 +1,165 @@
+{
+  "scope": "Phase 12 retrieval corpus",
+  "status": "accepted",
+  "plan": "docs/corpus-completion-plan.md",
+  "criteria": [
+    {
+      "id": "phase_12.review_status_in_cli",
+      "requirement": "The corpus-work CLI (retrieve search|get|issues) shows each record's review status and uncertainty: its own status, its section's coverage status, the governing independent review and the open issues by type.",
+      "status": "verified",
+      "evidence": [
+        "scripts/retrieve/documents.ts",
+        "scripts/retrieve/cli.ts",
+        "scripts/retrieve/index.ts",
+        "scripts/graph/issues.ts",
+        "scripts/validate/independent-review.ts",
+        "tests/retrieve/retrieval.test.ts",
+        "docs/retrieval.md"
+      ],
+      "finding": "25 November 2026, on the integration head 38a8362: search documents carry review_status, section_status, governing_review ({ id, outcome, date }, chosen by the validator's governingRecord) and open_issues by type; search hits carry open_issue_counts; search accepts --issue-type. procedure.acute_stress reports section_status reviewed, governing review.psychology_tables.6 passed and open issues { ambiguity: 3, conflicting: 1 }. SEARCH_DOCUMENT_VERSION is 8. docs/retrieval.md (Maintainer notes) documents each field. The mapped value is covered by a synthetic test only; see phase_12.known_caveats.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.conflict_notices",
+      "requirement": "Agent tools keep conflicting rules visible: a record in an open conflict names the other passage, a conflict settled by a published ruling cites it, and no review bookkeeping reaches the agent.",
+      "status": "verified",
+      "evidence": [
+        "scripts/retrieve/tools.ts",
+        "scripts/graph/issues.ts",
+        "tests/retrieve/tools.test.ts",
+        "tests/retrieve/acceptance.test.ts",
+        "tests/graph/issues.test.ts",
+        "tests/fixtures/retrieval-acceptance.json",
+        "docs/retrieval.md"
+      ],
+      "finding": "25 November 2026: lod_get returns conflicts_with (other passages of an open conflicting issue: id, title, citations; a conflict inside one record lists the record itself) and rulings (official errata or FAQ citations that replace the open conflict); lod_search summaries carry conflicting_passages: true. The acceptance suite holds 7 conflicting_passages cases covering a cross-record conflict, an in-record conflict, an FAQ-settled conflict and a conflict the rulebook settles itself; the checker requires at least 5.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.unavailable_source_notices",
+      "requirement": "Material from books that are not present surfaces as an unavailable-source notice, never as invented content.",
+      "status": "verified",
+      "evidence": [
+        "scripts/retrieve/tools.ts",
+        "scripts/retrieve/documents.ts",
+        "source/manifest.yaml",
+        "tests/retrieve/acceptance.test.ts",
+        "tests/retrieve/retrieval.test.ts",
+        "tests/fixtures/retrieval-acceptance.json",
+        "tests/support/retrieval-acceptance.ts"
+      ],
+      "finding": "25 November 2026: the acceptance suite holds 6 missing_external_material cases; each names a manifest document (such as bestiary) that the first hit's external_dependencies must list, and the checker rejects a case whose book is not a not_present manifest entry. character.background.sworn_enemy.bandit_encounter lists bestiary as an external dependency.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.agent_tools_rulebook_only",
+      "requirement": "Agent tool results carry rulebook content only: no review issue, extraction status, confidence, file path or coverage.",
+      "status": "verified",
+      "evidence": [
+        "scripts/retrieve/tools.ts",
+        "tests/support/rulebook-only.ts",
+        "tests/retrieve/tools.test.ts",
+        "tests/retrieve/acceptance.test.ts",
+        "AGENTS.md"
+      ],
+      "finding": "25 November 2026: expectRulebookOnly runs on the output of every lod_* acceptance case and on the tools test records, including the conflict notices; the projection in scripts/retrieve/tools.ts reads review state only to derive conflicts_with and rulings, and the new maintainer fields (review_status, section_status, governing_review, open_issues) appear in no tool output.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.complete_tables",
+      "requirement": "Complete tables stay in structured artifacts; retrieval summaries point back to those records.",
+      "status": "verified",
+      "evidence": [
+        "tests/retrieve/acceptance.test.ts",
+        "scripts/retrieve/documents.ts",
+        "scripts/retrieve/tools.ts",
+        "generated/README.md",
+        "docs/corpus-bundles.md"
+      ],
+      "finding": "25 November 2026: for every one of the 224 table records, lod_get returns the bundled table's columns, rows (id, source row, kind, cells) and footnotes unchanged, and every table search hit carries that table's id with a snippet cut from its printed cells (tests/retrieve/acceptance.test.ts, 'tables survive retrieval whole'); the search document text includes every printed cell and footnote.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.acceptance_suite",
+      "requirement": "A fixed acceptance query suite covers terminology, combat modifiers, optional rules, service eligibility, quest-local exceptions, conflicting passages and missing external material, with a documented result limit.",
+      "status": "verified",
+      "evidence": [
+        "tests/fixtures/retrieval-acceptance.json",
+        "tests/support/retrieval-acceptance.ts",
+        "tests/retrieve/acceptance.test.ts",
+        "docs/retrieval.md",
+        "docs/ledgers/phase-12-retrieval-corpus.md"
+      ],
+      "finding": "25 November 2026: 62 cases across the eight categories (exact_lookup 12, terminology 9, combat_modifiers 6, quest_local_exceptions 10, missing_external_material 6, service_eligibility 6, optional_rules 6, conflicting_passages 7); each category has at least the 5 cases CATEGORY_MINIMUMS requires. The default result limit is 10 (DEFAULT_RESULT_LIMIT); a case may tighten it, never loosen it. The fixture checks itself: unknown category, duplicate id, unknown expected id, loose limit, a note naming no cited PDF page and each category-specific check are rejected by a broken-copy test.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.ids_aliases_provenance",
+      "requirement": "Exact ids and aliases resolve reliably, lexical cases return their expected records within the limit, and every hit keeps provenance.",
+      "status": "verified",
+      "evidence": [
+        "tests/fixtures/retrieval-acceptance.json",
+        "tests/support/retrieval-acceptance.ts",
+        "tests/retrieve/acceptance.test.ts",
+        "tests/retrieve/retrieval.test.ts",
+        "scripts/retrieve/citations.ts"
+      ],
+      "finding": "25 November 2026: 12 exact_lookup cases run through get, resolve, search, lod_get and lod_resolve, with expect_missing cases checking the graceful miss (null, or found: false with a hint); the 14 older top-ten queries and alias lookups moved into the same fixture. The universal checks fail any case whose hit lacks a citation with a PDF page, or whose full document lacks a section and file.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.labels_reviewed",
+      "requirement": "The existing labelled ask questions are reviewed and reused, with the effect of the review measured against an unchanged baseline.",
+      "status": "verified",
+      "evidence": [
+        "tests/fixtures/ask-questions/cases.yaml",
+        "schemas/ask-question-labels.schema.json",
+        "scripts/ask/labels.ts",
+        "tests/ask/evaluate.test.ts",
+        "docs/ask-quality-evaluation.md",
+        "docs/retrieval.md"
+      ],
+      "finding": "25 November 2026: 103 cases reviewed independently of their author against the canonical records and the rendered PDF pages: 92 confirmed, 11 corrected, each correction with a reason. Splits and question text did not change; no canonical record changed and no review issue was added. Baseline first on the same code, corpus and cached Jev answers: required-record recall (development / validation / held-out) lexical 81 / 86 / 78 % to 78 / 85 / 78 %, Jev 79 / 82 / 76 % to 78 / 83 / 76 %, Jev plus lexical 91 / 93 / 84 % to 86 / 91 / 84 %. The old labels overstated recall by up to 5 points; Jev plus lexical still beats lexical on every split.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.known_caveats",
+      "requirement": "Gaps found while closing the phase are recorded, not hidden.",
+      "status": "verified",
+      "evidence": [
+        "docs/ledgers/phase-12-retrieval-corpus.md",
+        "tests/retrieve/retrieval.test.ts",
+        "tests/support/retrieval-acceptance.ts",
+        "corpus/source-map/coverage.yaml"
+      ],
+      "finding": "25 November 2026: (1) no record sits in a mapped redirect section, so the mapped value of section_status is proved on a synthetic move of term.skill_test and the exit test asserts no real document reports it; (2) the optional-rule marker check (identifiesAsOptional) reads optional_system or an 'optional' title or section, so the optional Simplified Alchemy (PDF p. 76) and Bleeding-out Advanced Rule (PDF p. 122) records carry no marker an agent can read, and the optional_rules cases avoid them; (3) three labelled questions (torch, miscast_failed_spell, claustrophobic_wizard_corridor) are still missed by every ask configuration. The ledger's Known caveats section states each.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.carry_overs_open",
+      "requirement": "issue.sanity.inn_recovery_stay_limit and issue.guild.alchemist_availability_merged_tables stay unresolved and are named in the Phase 12 ledger and the checkpoint.",
+      "status": "verified",
+      "evidence": [
+        "review/ambiguities.yaml",
+        "docs/ledgers/phase-12-retrieval-corpus.md",
+        "docs/extraction-checkpoint.md",
+        "tests/schema/phase-12-acceptance.test.ts"
+      ],
+      "finding": "25 November 2026: both issues keep status unresolved in review/ambiguities.yaml; Phase 12 changed no canonical record, so neither moved. The ledger and the checkpoint's Next unit name both.",
+      "remaining_work": []
+    },
+    {
+      "id": "phase_12.checkpoint_advanced",
+      "requirement": "The checkpoint's current position and next unit, and the plan's status, read core Phases 0–12 as done.",
+      "status": "verified",
+      "evidence": [
+        "docs/extraction-checkpoint.md",
+        "docs/corpus-completion-plan.md",
+        "docs/README.md",
+        "docs/ledgers/phase-12-retrieval-corpus.md"
+      ],
+      "finding": "25 November 2026, on 38a8362 plus this ticket: the checkpoint records Phase 12 complete, links the Phase 12 ledger and checklist, and names the open carry-overs under Next unit; the plan's status table lists Phases 0–6, 9, 11 and 12 as accepted and its Phase 12 section is marked done. Optional work (plan section 6) remains deferred.",
+      "remaining_work": []
+    }
+  ]
+}

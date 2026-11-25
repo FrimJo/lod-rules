@@ -112,9 +112,10 @@ describe('Phase 11 exit checklist (#24)', () => {
     for (const id of carryOvers) expect(read(ledger)).toContain(id);
   });
 
-  it('advances the checkpoint to Phase 12 and drops the stub wording', () => {
+  it('keeps the carry-overs in the checkpoint and drops the stub wording', () => {
+    // Phase 11 handed these to Phase 12; Phase 12 closed with them still open, so the
+    // checkpoint's next unit still names them (tests/schema/phase-12-acceptance.test.ts).
     const next = sectionOf(read('docs/extraction-checkpoint.md'), 'Next unit');
-    expect(next).toMatch(/^\s*Phase 12\b/);
     for (const id of carryOvers) expect(next).toContain(id);
     for (const file of buildDocs) {
       const stubLines = read(file)
