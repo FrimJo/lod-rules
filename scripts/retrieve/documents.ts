@@ -1,4 +1,5 @@
 import { compare } from '../graph/compare.ts';
+import { issueMembers } from '../graph/issues.ts';
 import { flattenSteps, questResolver } from '../graph/records.ts';
 import { isToolVisible, type Graph, type GraphEdge } from '../graph/types.ts';
 import type {
@@ -14,7 +15,7 @@ import type { SourceReference } from '../validate/integrity.ts';
 import type { GlossaryTerm, RetrievalCorpus, ReviewIssue } from './corpus.ts';
 
 /** Bump whenever the document shape or indexing changes; stale builds are then ignored. */
-export const SEARCH_DOCUMENT_VERSION = 6;
+export const SEARCH_DOCUMENT_VERSION = 7;
 
 export type DocumentKind =
   'rule' | 'entity' | 'table' | 'procedure' | 'state_machine' | 'term' | 'issue';
@@ -64,9 +65,19 @@ export interface SearchDocument {
   review_status: 'extracted' | 'reviewed';
   issue_status?: 'unresolved' | 'resolved';
   issue_summary?: string;
-  resolution?: { summary: string; citations: Citation[] };
+  /** Records the issue names, from the graph's issue edges (issues only). */
+  issue_members?: string[];
+  resolution?: {
+    summary: string;
+    citations: Citation[];
+    /** Resolution citations of published designer rulings (`official_errata`, `official_faq`). */
+    rulings: Citation[];
+  };
   file: string;
 }
+
+/** Manifest source classes whose citations are published designer rulings. */
+const RULING_CLASSES = new Set(['official_errata', 'official_faq']);
 
 function citations(sources: SourceReference[]): Citation[] {
   const seen = new Set<string>();
@@ -350,6 +361,12 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
     };
   };
 
+  const membersOf = issueMembers(graph);
+  const rulingDocuments = new Set(
+    corpus.manifest.documents
+      .filter((document) => RULING_CLASSES.has(document.source_class ?? ''))
+      .map((document) => document.id),
+  );
   const issue = (i: ReviewIssue): SearchDocument => {
     const resolution = i.status === 'resolved' ? i.resolution.summary : '';
     return {
@@ -371,11 +388,15 @@ export function buildSearchDocuments(corpus: RetrievalCorpus, graph: Graph): Sea
       review_status: 'extracted',
       issue_status: i.status,
       issue_summary: i.summary,
+      issue_members: membersOf.get(i.id) ?? [],
       ...(i.status === 'resolved'
         ? {
             resolution: {
               summary: i.resolution.summary,
               citations: citations(i.resolution.source),
+              rulings: citations(
+                i.resolution.source.filter((source) => rulingDocuments.has(source.document)),
+              ),
             },
           }
         : {}),

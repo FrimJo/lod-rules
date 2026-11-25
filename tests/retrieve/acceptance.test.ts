@@ -49,7 +49,7 @@ describe('retrieval acceptance fixture (issue #32)', () => {
     expect(checkAcceptanceFixture(fixture, context)).toEqual([]);
   });
 
-  it('requires at least 5 cases in each category issue #34 fills', () => {
+  it('requires at least 5 cases in every category', () => {
     expect(CATEGORY_MINIMUMS).toEqual({
       exact_lookup: 5,
       terminology: 5,
@@ -58,6 +58,7 @@ describe('retrieval acceptance fixture (issue #32)', () => {
       service_eligibility: 5,
       quest_local_exceptions: 5,
       missing_external_material: 5,
+      conflicting_passages: 5,
     });
   });
 
@@ -210,6 +211,25 @@ describe('retrieval acceptance fixture (issue #32)', () => {
       );
     });
 
+    it('fewer than five conflicting_passages cases', () => {
+      const copy = structuredClone(fixture);
+      let kept = 0;
+      copy.cases = copy.cases.filter(
+        (entry) => entry.category !== 'conflicting_passages' || ++kept <= 4,
+      );
+      fires(copy, /conflicting_passages has 4 cases; needs at least 5/);
+    });
+
+    it('a conflict expectation outside lod_get', () => {
+      const search = fixture.cases.find((entry) => entry.operation === 'search')!;
+      fires(
+        withCase(search.id, (entry) => {
+          entry.expect_conflicts = ['term.battle'];
+        }),
+        /expect_conflicts and expect_rulings need lod_get/,
+      );
+    });
+
     it('a missing-id case whose id exists', () => {
       const missing = fixture.cases.find((entry) => entry.expect_missing)!;
       fires(
@@ -265,6 +285,14 @@ describe('retrieval acceptance suite (issue #32)', () => {
         ).toBe(true);
     for (const documentName of entry.expect_external ?? [])
       expect(outcome.externalDocuments, entry.id).toContain(documentName);
+    if (entry.expect_conflicts)
+      expect(outcome.conflicts, entry.id).toEqual(expect.arrayContaining(entry.expect_conflicts));
+    if (entry.expect_rulings)
+      expect(outcome.rulings, entry.id).toEqual(expect.arrayContaining(entry.expect_rulings));
+    if (entry.expect_no_conflict) {
+      expect(outcome.conflicts, entry.id).toEqual([]);
+      expect(outcome.rulings, entry.id).toEqual([]);
+    }
 
     // Universal checks on every hit.
     for (const hit of outcome.hits) {
