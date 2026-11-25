@@ -97,7 +97,7 @@ method and the corrections are in [ask-quality-evaluation.md](../ask-quality-eva
 
 ## Carry-overs
 
-Phase 12 changed no canonical record, so both issues stay `status: unresolved`:
+Phase 12 changed no canonical record, so neither issue moved. Both remain open:
 
 - `issue.sanity.inn_recovery_stay_limit`: the frozen `procedure.sanity_recovery` has no
   per-stay field, so the changelog #83 once-per-stay inn recovery limit is recorded, not
@@ -107,5 +107,9 @@ Phase 12 changed no canonical record, so both issues stay `status: unresolved`:
 
 ## Gate
 
-25 November 2026: see the commit that closes this ticket for the gate counts (`npm run
-validate`, `npm test`, `npm run lint`).
+25 November 2026: `npm run validate` passes (563 canonical files); `npm test` passes (5,108, 2
+optional provider tests skipped); `npm run lint` passes. `npm run report:coverage` and `npm run
+graph -- report` regenerate the committed reports unchanged: no canonical input changed. The
+exit checklist test also moved the informal-uncertainty checkpoint fixture's heading to the
+checkpoint's new date and made the Phase 11 checklist test stop requiring Phase 12 as the next
+unit.
