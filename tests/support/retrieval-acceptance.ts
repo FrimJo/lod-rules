@@ -44,12 +44,25 @@ export interface AcceptanceCase {
   expect_missing?: boolean;
   /** Manifest documents (e.g. `bestiary`) the first hit's `external_dependencies` must name. */
   expect_external?: string[];
+  /**
+   * Review state the first full document must report (library operations only): its own
+   * status, its section's coverage status, the governing independent review and its open
+   * issue ids by type. Every field given is compared exactly.
+   */
+  expect_review?: ExpectedReview;
   /** Tighter than the default of 10, never looser. Applies to `search` and `lod_search`. */
   limit?: number;
   /** Names the PDF page that justifies the expectation: `PDF p.101`. */
   note: string;
   /** One of the 14 queries that used to be an `it.each` list in retrieval.test.ts. */
   legacy_top_ten?: boolean;
+}
+
+export interface ExpectedReview {
+  review_status?: SearchDocument['review_status'];
+  section_status?: SearchDocument['section_status'];
+  governing_review?: SearchDocument['governing_review'];
+  open_issues?: SearchDocument['open_issues'];
 }
 
 export interface AcceptanceFixture {
@@ -98,6 +111,8 @@ export function checkAcceptanceFixture(
       continue;
     }
     if (entry.expect_ids.length === 0) at('expect_ids is empty');
+    if (entry.expect_review && !(LIBRARY_OPERATIONS as readonly string[]).includes(entry.operation))
+      at('expect_review needs a library operation; agent tools never show review state');
 
     const cited = new Set(
       entry.expect_ids.flatMap(

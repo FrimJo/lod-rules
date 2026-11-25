@@ -166,6 +166,44 @@ describe('relations and uncertainty', () => {
     expect(issues[0]?.issue_status).toBe('unresolved');
   });
 
+  it('reports an issue by its own status and type, and filters issue search by type', () => {
+    expect(retrieval.document('issue.0004')).toMatchObject({
+      type: 'conflicting',
+      review_status: 'unresolved',
+      issue_status: 'unresolved',
+    });
+    expect(retrieval.document('issue.0005')?.review_status).toBe('resolved');
+    const hits = retrieval.search('end of the quest reward', {
+      kinds: ['issue'],
+      issueTypes: ['conflicting'],
+    });
+    expect(hits.map((hit) => hit.id)).toContain('issue.0004');
+    expect(hits.every((hit) => hit.type === 'conflicting')).toBe(true);
+    const all = retrieval.search('end of the quest reward', { kinds: ['issue'], limit: 50 });
+    expect(all.some((hit) => hit.type !== 'conflicting')).toBe(true);
+  });
+
+  it('carries review state and open-issue counts by type on search hits', () => {
+    const hit = retrieval.search('procedure.acute_stress', { limit: 1 })[0];
+    expect(hit).toMatchObject({
+      id: 'procedure.acute_stress',
+      section_status: 'reviewed',
+      governing_review: { id: 'review.psychology_tables.6', outcome: 'passed' },
+      open_issue_counts: { ambiguity: 3, conflicting: 1 },
+    });
+  });
+
+  it('reports mapped for a record whose section is a compatibility redirect', () => {
+    // No canonical record sits in one of the 38 redirect sections today, so move one there.
+    const corpus = loadRetrievalCorpus();
+    const term = corpus.terms.find((candidate) => candidate.id === 'term.skill_test')!;
+    term.section_id = 'section.magic.casting_spells.table_3';
+    const doc = buildSearchDocuments(corpus, deriveGraph(corpus)).find(
+      (candidate) => candidate.id === 'term.skill_test',
+    );
+    expect(doc?.section_status).toBe('mapped');
+  });
+
   it('surfaces unavailable external material instead of content', () => {
     const doc = retrieval.document('character.background.sworn_enemy.bandit_encounter');
     expect(doc?.external_dependencies).toContainEqual(

@@ -153,6 +153,16 @@ describe('retrieval acceptance suite (issue #32)', () => {
     expect(outcome.ids, entry.id).toEqual(expect.arrayContaining(entry.expect_ids));
     if (entry.operation === 'search' || entry.operation === 'lod_search')
       expect(outcome.ids.length).toBeLessThanOrEqual(limit);
+    if (entry.expect_review) {
+      const document = outcome.documents[0];
+      const shown = Object.fromEntries(
+        Object.keys(entry.expect_review).map((key) => [
+          key,
+          document?.[key as keyof typeof entry.expect_review],
+        ]),
+      );
+      expect(shown, `${entry.id}: review state`).toEqual(entry.expect_review);
+    }
     for (const documentName of entry.expect_external ?? [])
       expect(outcome.externalDocuments, entry.id).toContain(documentName);
 

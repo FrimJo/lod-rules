@@ -8,6 +8,7 @@ const usage = `Usage: npm run retrieve -- <command> [options]
 
 Commands:
   search <query...>   Lexical search. --kind rule,table  --scope global|quest  --quest <id>  --limit N
+                      --issue-type conflicting,ambiguity (with --kind issue)
   get <id>            Exact id: search document plus canonical record
   resolve <name>      Exact title or alias match (e.g. AP, "Molgor")
   expand <id>         Related records. --direction out|in|both  --relation see_also,uses_table  --depth N
@@ -25,6 +26,7 @@ const { values, positionals } = parseArgs({
     kind: { type: 'string' },
     scope: { type: 'string' },
     quest: { type: 'string' },
+    'issue-type': { type: 'string' },
     limit: { type: 'string' },
     direction: { type: 'string' },
     relation: { type: 'string' },
@@ -71,6 +73,7 @@ switch (command) {
         kinds: list(values.kind) as DocumentKind[] | undefined,
         scope: values.scope,
         questId: values.quest,
+        issueTypes: list(values['issue-type']),
         limit: int(values.limit),
       }),
     );

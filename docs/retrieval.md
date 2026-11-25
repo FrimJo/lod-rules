@@ -59,7 +59,9 @@ review issue. Code lives in `scripts/retrieve/`.
 | `issue_ids`                             | Review issues that concern the record                                         |
 | `unresolved_references`                 | Original wording of pointers the corpus cannot bind                           |
 | `external_dependencies`                 | Material in books that are not present (Bestiary and others)                  |
-| `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                               |
+| `review_status`, `issue_status`, `file` | The record's own status and canonical YAML path (see maintainer notes)        |
+| `section_status`, `governing_review`    | Section coverage status and the independent review record that governs it     |
+| `open_issues`                           | Ids of review issues still awaiting resolution, grouped by issue type         |
 
 Relations come from the dependency graph's edge derivation (`deriveGraph` in
 `scripts/graph/derive.ts`), not from a separate derivation here, so retrieval and the graph
@@ -163,10 +165,23 @@ does not define something or defers to a book that is not available.
 
 ### Maintainer notes
 
-Full search documents carry `issue_ids` and `review_status`. `review_status: extracted`
-means unreviewed; no section is independently reviewed yet. Coverage is partial (see the
-[coverage report](coverage-report.md)), so a missing result can mean the section has not been
-extracted yet.
+Full search documents (`search`, `get`, `issues`) report where each record stands in review:
+
+- `review_status` is the record's own status as its YAML states it: `extracted` or `reviewed`
+  for records, `unresolved` or `resolved` for issues. Glossary terms have no status field and
+  report their section's `glossary` coverage component. It is not the section's review state.
+- `section_status` is the coverage status of the record's section: `reviewed`, or `mapped`
+  for one of the compatibility redirects. Every non-redirect section is independently
+  reviewed; see the [coverage report](coverage-report.md).
+- `governing_review` is `{ id, outcome, date }` of the independent review record that governs
+  that section, or null. It is chosen by `governingRecord` in
+  `scripts/validate/independent-review.ts`, the rule the validator uses, so the CLI and the
+  validator cannot disagree.
+- `open_issues` lists the ids of issues still awaiting resolution, by type (`conflicting`,
+  `ambiguity`, …). Search hits carry `open_issue_counts` instead. `issue_ids` still lists every issue, resolved or not.
+
+`npm run retrieve -- search <query> --kind issue --issue-type conflicting` restricts issue
+results to the given types. The agent tools show none of these fields.
 
 ## Ask pipeline
 

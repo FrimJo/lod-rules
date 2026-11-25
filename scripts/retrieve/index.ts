@@ -23,6 +23,8 @@ export interface SearchOptions {
   chapters?: string[];
   /** Exact section ids; a document matches when it sits directly under one of them. */
   sections?: string[];
+  /** Issue types (`conflicting`, `ambiguity`, …); issue documents of other types are dropped. */
+  issueTypes?: string[];
   limit?: number;
 }
 
@@ -39,6 +41,10 @@ export interface SearchHit {
   citations: SearchDocument['citations'];
   issue_ids: string[];
   review_status: SearchDocument['review_status'];
+  section_status: SearchDocument['section_status'];
+  governing_review: SearchDocument['governing_review'];
+  /** Unresolved issues that name the record, counted by issue type. */
+  open_issue_counts: Record<string, number>;
   file: string;
 }
 
@@ -265,6 +271,12 @@ export class Retrieval {
       );
       params.push(...options.sections);
     }
+    if (options.issueTypes && options.issueTypes.length > 0) {
+      where.push(
+        `(d.kind <> 'issue' OR json_extract(d.json, '$.type') IN (${options.issueTypes.map(() => '?').join(', ')}))`,
+      );
+      params.push(...options.issueTypes);
+    }
     if (options.questId) {
       where.push('d.quest_id = ?');
       params.push(options.questId);
@@ -461,6 +473,11 @@ export class Retrieval {
       citations: doc.citations,
       issue_ids: doc.issue_ids,
       review_status: doc.review_status,
+      section_status: doc.section_status,
+      governing_review: doc.governing_review,
+      open_issue_counts: Object.fromEntries(
+        Object.entries(doc.open_issues).map(([type, ids]) => [type, ids.length]),
+      ),
       file: doc.file,
     };
     if (doc.quest_id) hit.quest_id = doc.quest_id;
