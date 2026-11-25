@@ -12,7 +12,7 @@ export type ReviewIssue = Issue & { type: string; summary: string };
 
 /** `source/manifest.yaml`: documents in this repository and books that are not. */
 export interface SourceManifest {
-  documents: Array<{ id: string; title: string; canonical?: boolean }>;
+  documents: Array<{ id: string; title: string; canonical?: boolean; source_class?: string }>;
   external_sources?: Array<{ id: string; title: string; status: string }>;
 }
 

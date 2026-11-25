@@ -57,6 +57,7 @@ review issue. Code lives in `scripts/retrieve/`.
 | `citations`                             | PDF and printed pages with headings                                           |
 | `relations`                             | Edges agents may follow, from the graph (`see_also`, `uses_table`, `part_of`) |
 | `issue_ids`                             | Review issues that concern the record                                         |
+| `issue_members`                         | On an issue: the records it names, from the graph's issue edges               |
 | `unresolved_references`                 | Original wording of pointers the corpus cannot bind                           |
 | `external_dependencies`                 | Material in books that are not present (Bestiary and others)                  |
 | `review_status`, `issue_status`, `file` | Extraction/review state and canonical YAML path                               |
@@ -102,6 +103,10 @@ compiled from the bundles, so adding a case is a data change.
   `lod_get` returns `{ found: false, hint }`.
 - **Unavailable books.** `expect_external` names manifest documents (such as `bestiary`) that
   the first hit's `external_dependencies` must list.
+- **Conflicting passages.** On a `lod_get` case, `expect_conflicts` names records its
+  `conflicts_with` must list, `expect_rulings` names manifest documents its `rulings` must
+  cite, and `expect_no_conflict` asserts neither appears. The checker requires at least five
+  `conflicting_passages` cases (`CATEGORY_MINIMUMS`).
 - **Universal checks.** Every hit carries a citation with a PDF page. Every full document has a
   non-empty section and file. Agent-tool output passes the bookkeeping-free projection check
   (`tests/support/rulebook-only.ts`).
@@ -160,6 +165,29 @@ rephrase in rulebook vocabulary. Read a record before relying on it, and keep qu
 records inside their quest. A consumer that adds its own system prompt should keep it to
 rulebook use. Typical additions are citing PDF/printed pages, and saying when the rulebook
 does not define something or defers to a book that is not available.
+
+### Conflicting passages
+
+When the rulebook contradicts itself, the tools say so without naming the review issue.
+Membership comes from the dependency graph's issue edges (`issueMembers` in
+`scripts/graph/issues.ts`: an issue's `concerns` edges plus records whose `issues` list it);
+each issue search document stores it as `issue_members`, and the projection in
+`scripts/retrieve/tools.ts` reads only that.
+
+- **`conflicts_with`** (`lod_get`): for every open `conflicting` issue that names the
+  record, the other records it names, each `{ id, title, citations }` as a summary cites them,
+  deduplicated and sorted by id. Sections, test cases and other issues are left out. When the
+  issue names no other record, the record lists itself: the contradiction is inside it.
+- **`rulings`** (`lod_get`): for a resolved `conflicting` issue whose resolution cites an
+  `official_errata` or `official_faq` document, those citations (`document`, `heading`,
+  pages, and the changelog `row`) replace the open conflict. A conflict the corpus settled
+  from the rulebook alone (such as the Skill Test term against the standard check) shows
+  nothing.
+- **`conflicting_passages: true`** (`lod_search` summaries): the hit has a non-empty
+  `conflicts_with`.
+
+Neither carries an issue id, status, summary or resolution text. The `lod_search` and
+`lod_get` descriptions tell the agent to read both passages and present the conflict.
 
 ### Maintainer notes
 

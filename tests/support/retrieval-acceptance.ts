@@ -44,6 +44,12 @@ export interface AcceptanceCase {
   expect_missing?: boolean;
   /** Manifest documents (e.g. `bestiary`) the first hit's `external_dependencies` must name. */
   expect_external?: string[];
+  /** `lod_get` only: record ids its `conflicts_with` must name. */
+  expect_conflicts?: string[];
+  /** `lod_get` only: manifest documents its `rulings` must cite. */
+  expect_rulings?: string[];
+  /** `lod_get` only: neither `conflicts_with` nor `rulings` appears. */
+  expect_no_conflict?: boolean;
   /** Tighter than the default of 10, never looser. Applies to `search` and `lod_search`. */
   limit?: number;
   /** Names the PDF page that justifies the expectation: `PDF p.101`. */
@@ -63,6 +69,11 @@ export interface AcceptanceContext {
 }
 
 const NOTE_PAGE = /PDF p\.\s?(\d+)/g;
+
+/** Categories whose minimum case count the checker enforces (issue #36). */
+export const CATEGORY_MINIMUMS: Partial<Record<AcceptanceCategory, number>> = {
+  conflicting_passages: 5,
+};
 
 export function checkAcceptanceFixture(
   fixture: AcceptanceFixture,
@@ -98,6 +109,14 @@ export function checkAcceptanceFixture(
       continue;
     }
     if (entry.expect_ids.length === 0) at('expect_ids is empty');
+    const conflictExpectation =
+      entry.expect_conflicts !== undefined ||
+      entry.expect_rulings !== undefined ||
+      entry.expect_no_conflict === true;
+    if (conflictExpectation && entry.operation !== 'lod_get')
+      at('expect_conflicts and expect_rulings need lod_get');
+    for (const id of entry.expect_conflicts ?? [])
+      if (!context.document(id)) at(`expected conflict ${id} is not in the corpus`);
 
     const cited = new Set(
       entry.expect_ids.flatMap(
@@ -109,6 +128,10 @@ export function checkAcceptanceFixture(
       at(
         `note must name a PDF page that an expected record cites ("PDF p.N"); got "${entry.note}"`,
       );
+  }
+  for (const [category, minimum] of Object.entries(CATEGORY_MINIMUMS)) {
+    const count = fixture.cases.filter((entry) => entry.category === category).length;
+    if (count < minimum) problems.push(`${category} has ${count} cases; needs at least ${minimum}`);
   }
   return problems;
 }
@@ -131,6 +154,10 @@ export interface AcceptanceOutcome {
   /** Full search documents behind the hits (library operations only). */
   documents: SearchDocument[];
   externalDocuments: string[];
+  /** `lod_get` only: ids its `conflicts_with` names. */
+  conflicts: string[];
+  /** `lod_get` only: manifest documents its `rulings` cite. */
+  rulings: string[];
 }
 
 const stringList = (value: unknown): string[] | undefined =>
@@ -147,6 +174,8 @@ export function runAcceptanceCase(retrieval: Retrieval, entry: AcceptanceCase): 
     hits: documents,
     documents,
     externalDocuments: (documents[0]?.external_dependencies ?? []).map((dep) => dep.document),
+    conflicts: [],
+    rulings: [],
   });
 
   switch (entry.operation) {
@@ -179,6 +208,8 @@ export function runAcceptanceCase(retrieval: Retrieval, entry: AcceptanceCase): 
     hits: [],
     documents: [],
     externalDocuments: [],
+    conflicts: [],
+    rulings: [],
     ...partial,
   });
   if (entry.operation === 'lod_expand') {
@@ -190,11 +221,15 @@ export function runAcceptanceCase(retrieval: Retrieval, entry: AcceptanceCase): 
     found?: boolean;
     citations?: AcceptanceHit['citations'];
     external_dependencies?: Array<{ document: string }>;
+    conflicts_with?: Array<{ id: string }>;
+    rulings?: Array<{ document: string }>;
   }>;
   if (!Array.isArray(output) && records[0]?.found === false) return toolOutcome({ missing: true });
   return toolOutcome({
     ids: records.map((record) => record.id),
     hits: records.map((record) => ({ id: record.id, citations: record.citations ?? [] })),
     externalDocuments: (records[0]?.external_dependencies ?? []).map((dep) => dep.document),
+    conflicts: (records[0]?.conflicts_with ?? []).map((passage) => passage.id),
+    rulings: (records[0]?.rulings ?? []).map((ruling) => ruling.document),
   });
 }
