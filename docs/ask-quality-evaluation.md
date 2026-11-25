@@ -65,6 +65,41 @@ Reruns reuse these outputs; `--out generated/ask-quality-new-run` selects a fres
 answer/judge cache. Jev retains its per-question cache. A model alias can change behind
 either cache.
 
+## Label review
+
+Phase 12 (issue #33) reviewed all 103 labelled questions independently of their author. Each
+case's intent, complexity, entity and `required_evidence` was checked against the canonical
+records (`npm run retrieve -- get <id>`) and, for the corrections, the rendered PDF pages.
+Every case carries `review.outcome`; a `corrected` case states its reason. Splits and question
+text did not change, and no canonical record changed. The review found no corpus defect, so
+nothing was added to `review/`. The tests in `tests/ask/evaluate.test.ts` require
+`label_review.status: reviewed`, an outcome on every case and resolvable `required_evidence`.
+
+92 cases were confirmed and 11 corrected. The corrections add a missing required record
+(`poison_bleeding_rest`, `wounded_wizard_miscast`, `torch`, `horse`, `pit_climb`,
+`wizard_armour`, `claustrophobic_wizard_corridor`), replace a record the question does not ask
+about (`miscast_failed_spell`, `brew_potion`, `tomb_raiders_tomb`, `arena`), and in four
+cases change complexity or entity. No question was unanswerable by the book.
+
+Baseline first: both runs below used the same code, corpus and cached Jev answers
+(`jev-latest`); only the labels differ. Jev analysis depends on the question, not the labels,
+so the second run made no Jev requests. Figures are development / validation / held-out from
+`npm run ask:evaluate -- --analyzers lexical,jev`.
+
+| Configuration | Recall, old labels | Recall, reviewed labels | Complete, old  | Complete, reviewed |
+| ------------- | ------------------ | ----------------------- | -------------- | ------------------ |
+| lexical       | 81 / 86 / 78 %     | 78 / 85 / 78 %          | 74 / 86 / 76 % | 69 / 83 / 76 %     |
+| jev           | 79 / 82 / 76 %     | 78 / 83 / 76 %          | 77 / 80 / 73 % | 74 / 80 / 73 %     |
+| jev + lexical | 91 / 93 / 84 %     | 86 / 91 / 84 %          | 89 / 91 / 82 % | 83 / 89 / 82 %     |
+
+Intent and entity accuracy did not change. Complexity accuracy moved by at most 3 points
+(lexical development 49 → 51 %, Jev validation 66 → 63 %). The old labels overstated recall on development and validation by up to 5 points. Three
+corrected cases are now missed by every configuration because the record a correct answer
+needs was not being retrieved: when a torch goes out (`torch`), the failed-casting Mana rule
+(`miscast_failed_spell`) and the casting procedure (`claustrophobic_wizard_corridor`).
+Held-out labels needed no correction, so its figures are unchanged. Jev + lexical still beats
+lexical recall on every split, by 8 / 6 / 6 points (10 / 7 / 6 on the old labels).
+
 ## Metrics and limits
 
 Required-record recall is separate from relevance. A record not named in

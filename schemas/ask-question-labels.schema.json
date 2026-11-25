@@ -6,15 +6,47 @@
   "additionalProperties": false,
   "required": ["schema_version", "label_review", "cases"],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": {
+      "const": 1
+    },
     "label_review": {
-      "description": "Who checked the labels. `unreviewed` means drafted from corpus records only.",
-      "enum": ["unreviewed", "reviewed"]
+      "description": "Who checked the labels. `unreviewed` means drafted from corpus records only; `reviewed` names the independent review that checked every case against the PDF and the canonical records.",
+      "oneOf": [
+        {
+          "const": "unreviewed"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "review", "reviewer", "date"],
+          "properties": {
+            "status": {
+              "const": "reviewed"
+            },
+            "review": {
+              "description": "Name of the review and where its record lives.",
+              "type": "string",
+              "minLength": 1
+            },
+            "reviewer": {
+              "description": "Who reviewed; never the author of the labels.",
+              "type": "string",
+              "minLength": 1
+            },
+            "date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        }
+      ]
     },
     "cases": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/case" }
+      "items": {
+        "$ref": "#/$defs/case"
+      }
     }
   },
   "$defs": {
@@ -23,9 +55,17 @@
       "additionalProperties": false,
       "required": ["id", "split", "question", "expected", "required_evidence"],
       "properties": {
-        "id": { "type": "string", "pattern": "^askq(\\.[a-z0-9_]+)+$" },
-        "split": { "enum": ["development", "validation", "held_out"] },
-        "question": { "type": "string", "minLength": 8 },
+        "id": {
+          "type": "string",
+          "pattern": "^askq(\\.[a-z0-9_]+)+$"
+        },
+        "split": {
+          "enum": ["development", "validation", "held_out"]
+        },
+        "question": {
+          "type": "string",
+          "minLength": 8
+        },
         "expected": {
           "type": "object",
           "additionalProperties": false,
@@ -42,7 +82,9 @@
                 "no_match"
               ]
             },
-            "complexity": { "enum": ["single_fact", "single_rule", "multi_rule", "judgment"] },
+            "complexity": {
+              "enum": ["single_fact", "single_rule", "multi_rule", "judgment"]
+            },
             "entity": {
               "description": "The one named entity record the question is about, or null.",
               "type": ["string", "null"]
@@ -54,9 +96,47 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "notes": { "type": "string" }
+        "notes": {
+          "type": "string"
+        },
+        "review": {
+          "description": "Outcome of the independent label review for this case. A correction states its reason.",
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["outcome"],
+              "properties": {
+                "outcome": {
+                  "const": "confirmed"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["outcome", "reason"],
+              "properties": {
+                "outcome": {
+                  "const": "corrected"
+                },
+                "reason": {
+                  "description": "What changed and why.",
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        }
       }
     }
   }
